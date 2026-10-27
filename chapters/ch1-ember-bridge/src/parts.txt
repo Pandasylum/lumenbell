@@ -1,2 +1,7 @@
 # Ordre d'assemblage de la source du Chapitre I (lu par build/assemble.py).
-../legacy/ember-bridge.source.html
+# Les morceaux sont colles bout a bout, sans rien ajouter : l'ordre compte.
+page/head.html
+page/style.css
+page/body.html
+js/00-core.js
+page/end.html
