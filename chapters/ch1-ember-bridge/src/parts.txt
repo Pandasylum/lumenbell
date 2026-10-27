@@ -14,4 +14,8 @@ js/35-boss-body.js
 js/40-p1-bridge-render.js
 js/45-p2-foundry-logic.js
 js/50-p2-foundry-render.js
+js/55-p3-belfry-logic.js
+js/60-p3-belfry-poses.js
+js/65-p3-belfry-decor.js
+js/70-p3-belfry-render.js
 page/end.html
