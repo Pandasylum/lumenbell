@@ -25,3 +25,9 @@ Journal daté. Une décision validée n'est pas remise en question dans une autr
 - Trois tours perdues sur six, jamais selon la performance ; ordre : Montagne, Phare Noyé, Givre, Racines, Tour vide, La brèche (Roi Sombre), Le cœur. Les lumières ne changent que le rendu de la fin.
 - Intro, panneaux de phase et outro nouveaux et épurés ; code couleur par chapitre (braise, marée, givre).
 - Féminin de Veilleur : Veilleure.
+
+## 2026-10-27 – Chapitre II · import propre (technique)
+- `dist/index.html` du Chapitre II = la source `legacy/` à l'identique, sauf : meta de l'hébergeur d'artefacts retirée, liens Google Fonts retirés, `build/fonts.css` inliné. Aucun changement de jeu, de texte ni de rendu ; l'harmonisation (`docs/CH2-SPEC.md`) est une session suivante.
+- L'enveloppe de l'hébergeur (ligne 1 : `<head>` et style de base) est gardée telle quelle pour ne pas toucher au rendu ; la remise en ordre du `<head>` se fera avec l'harmonisation.
+- Pas de version de test ni de crochets pour le Chapitre II : le test de fumée pilote le `dist` publié par le DOM (menu, frise des phases, clavier) et débloque les phases via `db-unl`.
+- Zip itch.io du Chapitre II à date fixe (reproductible).
