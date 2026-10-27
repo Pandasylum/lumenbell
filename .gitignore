@@ -1,0 +1,17 @@
+node_modules/
+build/out/*
+!build/out/.gitkeep
+tests/shots/*
+!tests/shots/.gitkeep
+apk/www/*
+!apk/www/.gitkeep
+apk/android/
+apk/package-lock.json
+*.apk
+*.aab
+*.jks
+*.keystore
+keys/
+password*.txt
+keystore*.txt
+.DS_Store
