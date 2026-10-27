@@ -1,14 +1,16 @@
-"""Construit le jeu du Chapitre I : source -> dist/index.html (+ zip itch.io).
+"""Construit le jeu du Chapitre I : morceaux de src/ (voir src/parts.txt) -> dist/index.html (+ zip itch.io).
 Usage : python3 build/build.py
 Sortie : chapters/ch1-ember-bridge/dist/index.html, build/out/ember-bridge-itch.zip
 """
-import re, zipfile
+import re, sys, zipfile
 from pathlib import Path
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from assemble import source
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "chapters/ch1-ember-bridge/legacy/ember-bridge.source.html"
 DIST = ROOT / "chapters/ch1-ember-bridge/dist/index.html"
 OUT = ROOT / "build/out"
-s = SRC.read_text(encoding="utf-8")
+s = source()
 assert not s.lstrip().lower().startswith("<!doctype")
 # meta retiree (propre a l'hebergeur d'artefacts)
 s = s.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "")

@@ -1,12 +1,15 @@
 """Fabrique la version de TEST du jeu (crochets window.__t pour les bots, intro desactivee).
 Usage : python3 build/build_test.py  ->  build/out/test.html
 """
+import sys
 from pathlib import Path
+sys.dont_write_bytecode=True
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from assemble import source
 ROOT=Path(__file__).resolve().parent.parent
-SRC=ROOT/'chapters/ch1-ember-bridge/legacy/ember-bridge.source.html'
 OUTF=ROOT/'build/out/test.html'
 OUTF.parent.mkdir(parents=True,exist_ok=True)
-s=SRC.read_text(encoding='utf-8')
+s=source()
 tail="requestAnimationFrame(frame);\n})();"
 assert s.count(tail)==1
 s=s.replace(tail,"requestAnimationFrame(frame);\nwindow.__t={getG:()=>G,goPhase,getR:()=>R,getQ:()=>Q,start,press,rDamage,rLaunch,qLaunch,T,DIFFS,getDIFF:()=>DIFF,DG,musStep,mChoir,mtof,MLEAD3,MCH3,mVoice,mDrum,mNoise,menuStep,finaleScore,spaceStep,MUS,startFury,startFinal,startFinale,showMenu,hideMenu,FIN,RUN,applyDiff};\n})();")

@@ -1,0 +1,2 @@
+# Ordre d'assemblage de la source du Chapitre I (lu par build/assemble.py).
+../legacy/ember-bridge.source.html
