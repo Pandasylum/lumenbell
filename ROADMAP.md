@@ -13,8 +13,9 @@
 4. Test sur téléphone (ressenti, lisibilité, fluidité).
 5. D · optimisation et découpage du Chapitre II (`ch2/perf`) : mesure des images par seconde, poids, minification, source en plusieurs fichiers, build identique à chaque étape, comme pour le Chapitre I.
 6. Moteur commun (`engine/`, `shared/`) : boucle, entrées, audio, langues, sauvegarde, difficultés, **un seul Veilleur dessiné et animé pour tous les chapitres** (poses de garde, pas de côté, coup reçu, victoire ; demande à écrire dans `DEMANDES.md` par la session C1) ; migration des clés `eb-…` du Chapitre I vers `lb-…`.
-7. Menu : écran titre commun, choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres.
-8. Plus tard : modules ES, Google Play, iOS ; chapitre III (Racines).
+7. **Audit des éléments communs** (`engine/audit`, avant le menu) : inventaire de ce qui doit être identique d'un chapitre à l'autre (états du Veilleur et blocage/esquive, difficultés, HUD, polices, sons, textes de base, clés `lb-…`, dessin du Veilleur), écarts constatés entre chapitres, puis les chapitres n'appellent que ces fonctions communes. Vocabulaire unique : bloquer / esquiver (plus de « parer »).
+8. Menu : **une seule fonction de menu pour les 7 chapitres** (boutons au même endroit, mêmes polices, même position des textes — nom du jeu en grand, nom du chapitre en dessous en petit —, mêmes durées), alimentée par une table par chapitre (nom, couleur, sous-titre) ; écran titre commun, choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres.
+9. Plus tard : modules ES, Google Play, iOS ; chapitre III (Racines).
 
 ## Idées notées pour plus tard
 - **Session « sorts et équilibrage »** (après C1) : coder les nouveaux sorts du Chapitre II (vague d'eau, nuage de rouille, double vague, marée montante, tempête de cloches, voir `docs/CH2-SPEC.md`), puis régler fenêtres et durées. En tête : la phase III en Difficile (84 / 9 / 0 victoires du bot à 40 / 70 / 100 ms), le Difficile en général, la pénalité du reflet (0,6 s).
