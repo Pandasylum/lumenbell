@@ -93,3 +93,29 @@ La fin : les lumières ne changent que le rendu (image, ton), jamais le choix de
 3. Polices Google Fonts en ligne : les intégrer comme au Chapitre I (`build/fonts.css`), supprimer les `<link>` Google.
 4. Menu propre avec lien vers l'ancien artefact du Chapitre I : à remplacer par le futur menu commun.
 5. Pas de crochets de test : prévoir un test de fumée (déblocage via `localStorage` `db-unl`).
+
+## Sorts et rages (décisions du 27 octobre, pour C1 puis session équilibrage)
+
+Seul l'aspect change ; les valeurs (timings, fenêtres) restent celles du code jusqu'à la session d'équilibrage.
+
+### Phase I · La salle des reflets (la Voix Creuse) : esquive
+- Gardés : orbe, volée, cri.
+- **Rage = Échos** (trois sources, une seule vraie) ; les reflets se brisent un à un, avec un éclat qui part vers le Veilleur.
+
+### Phase II · La cale (le Roi de Rouille) : parade
+- Gardés : ancre plongeante, balayage, glas (onde de la cloche de tête).
+- **Harpon** : la seconde main du Roi est un harpon (aller, puis retour). Le crochet à chaîne disparaît (différencier du Colosse).
+- **Vague d'eau** (remplace piétinement et pierres) : il tape du pied, la vague naît sous son pied et grandit en avançant vers le Veilleur. Au mur du fond, la cale tremble et une poutre tombe du plafond (deux chutes = deux parades, comme les anciennes pierres).
+- **Rage = Nuage de rouille** : il secoue sa cloche, un nuage de poussière rouge descend et masque le décor (jamais le signal de parade ; le Roi reste repérable à la lueur de sa cloche), avance, parade au contact.
+- **Rage = Double vague** : deux vagues décalées, la seconde plus grande, la poutre tombe après la seconde.
+
+### Phase III · Les récifs (le Phare Noyé)
+- Gardés : faisceau, foudre.
+- **Pics de glace → pics de récif** : pointes de roche noire jaillissant du sol marin, un peu d'écume. Même timing, même effet.
+- **Vague du Roi reprise en forme I** (maintien).
+- **Rage forme I = Marée montante** : la vague traverse les récifs, les pics jaillissent dans son sillage au retrait (maintenir pour la vague, tap pour les pics).
+- **Rage forme II = Tempête de cloches** : anneaux tirés en alternance depuis les deux lanternes latérales, puis cloche-piège à la fin (tap, puis maintien). L'implosion reste la finale.
+- Forme II inchangée sinon : anneaux, cloche-piège, ancre, lanternes, éclatement, reformation, implosion.
+
+### Décor (C1)
+Plus de forge, de neige, de lac gelé ni d'aurore : salle des reflets (eau-miroir), cale d'épave (ancre au sol avant l'arrivée du Roi), récifs. La lanterne turquoise de la gardienne tombe à l'eau quand le miroir éclate et coule en pulsant.
