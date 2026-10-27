@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Silent Bells</title>
+<title>Lumenbell · Silent Bells</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -244,10 +244,8 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
       <div class="mem-wrap" id="mSnow" aria-hidden="true"></div>
       <div class="langs" id="langs" role="group" aria-label="Langue"><button type="button" data-lang="fr" aria-pressed="true">FR</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
       <div class="mcard">
-        <p class="eyebrow" id="mEye">Ember Bridge · Chapitre II</p>
-        <h2>Silent <span>Bells</span></h2>
-        <p class="sub" id="mSub">Le Phare Noyé</p>
-        <p class="tag" id="mTag"></p>
+        <p class="eyebrow" id="mEye">Chapitre II · Silent Bells</p>
+        <h2><span>Lumen</span>bell</h2>
         <button class="btn ghost" id="mResume" type="button" hidden>Reprendre</button>
         <div class="mph" id="mphM" role="group" aria-label="Difficulté">
           <button type="button" data-diff="easy"><b>Facile</b><span>Respirer</span></button>
@@ -256,11 +254,10 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
           <button type="button" data-diff="trial"><b>Épreuve</b><span>Sans soin</span></button>
         </div>
         <div class="mph" id="mphT" role="group" aria-label="Épreuve" hidden>
-          <button type="button" data-diff="tn"><b>Normal</b><span>6 PV au total</span></button>
-          <button type="button" data-diff="th"><b>Difficile</b><span>5 PV au total</span></button>
+          <button type="button" data-diff="tn"><b>Normal</b><span>4 PV au total</span></button>
+          <button type="button" data-diff="th"><b>Difficile</b><span>4 PV au total</span></button>
           <button type="button" id="mBackT"><b>‹ Retour</b><span>Difficultés</span></button>
         </div>
-        <p class="how" id="mHow"></p>
       </div>
     </div>
   </div>
@@ -292,17 +289,26 @@ const store={get(k,d){try{let v=localStorage.getItem(k);
 try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
   Object.keys(OLD_KEYS).concat(ks.filter(o=>o.startsWith('db-best-')).map(o=>'lb-ch2-best-'+o.slice(8))).forEach(k=>store.get(k))}catch(e){}
 const OPT_KEY={optSnd:'lb-snd',optMus:'lb-mus',optHelp:'lb-help'};
+/* UNLOCK_ALL: true = the three phases are open from the start (phase track), as in Ember Bridge; the difficulties and the
+   Trial are always open. false = progressive unlock: a phase opens once the previous one is cleared (key lb-ch2-unl, still
+   written on every clear). Disabled for testing; idea to extend to the whole series later (common screen). */
+const UNLOCK_ALL=true;
+const unlocked=()=>UNLOCK_ALL?3:+store.get('lb-ch2-unl',1);
 let LANG='fr';{const v=store.get('lb-lang',null);if(v==='fr'||v==='en')LANG=v}
 const _=(en,fr)=>LANG==='fr'?fr:en;
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
+/* Difficulty, same values as Ember Bridge for the Watcher: hp = Watcher HP (6 / 4 / 3, trial 4 for the whole run);
+   m = multiplier of the Watcher's action (parry, side step, guard: x2 / x1 / x0.6) and rm of his recovery (x1.2 in Hard),
+   as applyDiff() in Ember Bridge; sp = attack speed; boss = boss HP (kept from the import until playtests);
+   heal = HP refilled between phases. */
 const DIFFS={
-  easy:{hp:8,win:.26,perf:.11,sp:.85,boss:6,heal:true,fr:'Facile',en:'Easy'},
-  normal:{hp:6,win:.2,perf:.08,sp:1,boss:8,heal:true,fr:'Normal',en:'Normal'},
-  hard:{hp:5,win:.155,perf:.06,sp:1.18,boss:10,heal:true,fr:'Difficile',en:'Hard'},
-  tn:{hp:6,win:.2,perf:.08,sp:1,boss:8,heal:false,trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{hp:5,win:.155,perf:.06,sp:1.18,boss:10,heal:false,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  easy:{hp:6,m:2,rm:1,sp:.85,boss:6,heal:true,fr:'Facile',en:'Easy'},
+  normal:{hp:4,m:1,rm:1,sp:1,boss:8,heal:true,fr:'Normal',en:'Normal'},
+  hard:{hp:3,m:.6,rm:1.2,sp:1.18,boss:10,heal:true,fr:'Difficile',en:'Hard'},
+  tn:{hp:4,m:1,rm:1,sp:1,boss:8,heal:false,trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
+  th:{hp:4,m:.6,rm:1.2,sp:1.18,boss:10,heal:false,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const eio=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2, eout=t=>1-Math.pow(1-t,3), ein=t=>t*t*t;
@@ -316,7 +322,7 @@ let ctx=document.createElement('canvas').getContext('2d');let SC=1;const hasFilt
 let gt=0,rt=0;
 let S=fresh('normal');S.mode='menu';
 function fresh(dk){const d=DIFFS[dk];return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.boss,bossMax:d.boss,
-  threats:[],pat:null,nextAt:0,cnt:null,lock:0,guardT:-9,okT:-9,hurtT:-9,whiffT:-9,dodgeT:-9,foolT:-9,holding:false,stam:1,broken:0,
+  threats:[],pat:null,nextAt:0,cnt:null,pl:newPl(),held:false,guardT:-9,okT:-9,hurtT:-9,dodgeT:-9,foolT:-9,holding:false,stam:1,broken:0,
   hits:0,perfects:0,runT:0,full:true,parts:[],pops:[],shake:0,bossFlash:-9,koT:0,deadT:0,deadShown:false,lastK:''}}
 
 function say(t){$('live').textContent=t}
@@ -366,78 +372,80 @@ function musTick(){
 
 /* ---------- particles & pops ---------- */
 function burst(x,y,n,col,spd,life,g){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.3+Math.random())*spd;S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-(g?spd*.4:0),g:g||0,t0:gt,life:life*(.6+Math.random()*.6),c:col,r:1.5+Math.random()*2.2})}}
+/* floating text: only onomatopoeia (same words in both languages, as in Ember Bridge); no announcement words */
+const ONO={parry:'CLANG',hit:'BAM',final:'KRAKOOM',crush:'KRAAAK'};
 function pop(txt,col,x,y){S.pops.push({txt,c:col,x:x||HX+10,y:y||GY-150,t0:gt})}
 
 /* ---------- patterns ---------- */
-function P1(stage,f,b){
-  const T=[];let t=b;
-  const slam=()=>{T.push({k:'slam',t0:t,ti:t+.95*f});t+=1.4*f};
-  const sweep=()=>{T.push({k:'sweep',t0:t,ti:t+.72*f});t+=1.17*f};
-  const chain=n=>{const t0=t;for(let i=0;i<n;i++)T.push({k:'chain',t0,ti:t0+.85*f+i*.4*f,i,n});t=t0+.85*f+(n-1)*.4*f+.55*f};
-  const toll=()=>{T.push({k:'toll',t0:t,tw:t+.55*f,ti:t+1.55*f});t+=1.05*f};
-  const p0=[slam,sweep,()=>{slam();sweep()},()=>chain(3),toll,()=>{sweep();slam()}];
-  const p1=[()=>{slam();chain(3)},()=>{toll();toll()},()=>{sweep();slam();chain(3)},()=>{chain(3);toll()},()=>{toll();slam()},()=>chain(5),()=>{sweep();toll();sweep()}];
-  pick(stage?p1:p0)();return T;
-}
-function P2(stage,f,b){
-  const T=[];let t=b;
-  const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+.45*f,ti:t+1.3*f,real,src:src||0});t+=.44*f};
-  const volley=(n,ill)=>{const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i));t+=.9*f};
-  const echo=()=>{const real=Math.floor(Math.random()*3);[0,1,2].sort(()=>Math.random()-.5).forEach(s=>{orb(s===real,s);t+=.1*f});t+=.9*f};
-  const wail=()=>{T.push({k:'wail',t0:t,tl:t+.8*f,ti:t+1.9*f,real:true});t+=1.3*f};
-  const p0=[()=>volley(2,0),()=>volley(3,1),wail,()=>volley(3,0),()=>{wail();volley(2,1)}];
-  const p1=[()=>volley(4,1),()=>volley(5,2),echo,()=>{echo();wail()},()=>{volley(3,1);echo()},()=>{wail();volley(4,2)}];
-  pick(stage?p1:p0)();return T;
-}
-function P3(stage,f,b){
-  const T=[];let t=b;
-  const R=88;
-  const sweep=dir=>{const ts=t+.95*f,D=1.6*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
-    T.push({k:'beam',t0:t,ts,D,dir,ta:ts+D*s0,tb:ts+D*s1,real:true,hold:true});t=ts+D+.35*f};
-  const bolt=()=>{T.push({k:'bolt',t0:t,ti:t+.95*f,real:true,seed:Math.random()});t+=1.3*f};
-  const spike=()=>{T.push({k:'spike',t0:t,ti:t+.8*f,real:true,seed:Math.random()});t+=1.15*f};
-  const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()}];
-  const p1=[()=>{bolt();spike();bolt()},()=>{sweep(-1);sweep(1)},()=>{sweep(-1);t-=.15*f;spike()},()=>{spike();sweep(1);bolt()},()=>{bolt();bolt();sweep(-1)}];
-  pick(stage?p1:p0)();return T;
-}
 function sched(list){const pat={ths:list,ok:true,perf:0,nReal:list.filter(t=>t.real!==false&&!t.hold).length};list.forEach(th=>{if(th.real===undefined)th.real=true;th.pat=pat;S.threats.push(th)});S.pat=pat;return pat}
-function spawn(){const d=S.d,stage=S.bossHp<=S.bossMax/2?1:0,f=1/(d.sp*(1+.1*stage));const T=(S.phase===3&&S.form===2?P3b:[P1,P2,P3][S.phase-1])(stage,f,gt+.25);sched(T)}
 
-/* ---------- input ---------- */
+/* ---------- input: the Watcher's states, as in Ember Bridge ---------- */
+/* ready -> action -> recover -> ready. A press only acts in ready; during the action or the recovery it starts nothing and
+   only sets deny (the recovery bar turns red). Each attack is settled at its impact: it is stopped if the Watcher is in his
+   action then, or within `grace` of his recovery; a stopped attack sends him back to ready, so a series can be chained.
+   Durations in seconds, base values from Ember Bridge: the action lasts base x m, the recovery base x rm (DIFFS).
+   T = parry (phase II, the King, T.barrier / T.recovery), DG = side step (phase I, the Voice, DG.act / DG.rec),
+   R_T = guard (phase III, R_T.guard / R_T.rec; the guard lasts as long as the button is held, against the beams, and wears
+   the stamina out: drain / regen per second, broken = recovery when it runs out; a beam blocked to its end counts as a
+   stopped attack). hurt / down = stun after a hit, cut short so that the next attack can still be stopped (one hit per
+   mistake); fool = extra recovery after dodging a reflection; perf = a stop pressed this close before impact is perfect
+   (x m); deny = red bar after a refused press. */
+const T={barrier:.333,recovery:.7,grace:.06,hurt:.38,perf:.08,deny:.25};
+const DG={act:.333,rec:.7,grace:.05,hurt:.38,perf:.08,fool:.6,deny:.25};
+const R_T={guard:.333,rec:.7,grace:.06,down:.55,perf:.08,broken:.9,drain:.36,regen:.38,deny:.25};
+function newPl(){return{s:'ready',t:0,deny:0,at:-9,rd:0,rk:''}}
+/* durations for the current phase and difficulty */
+function PT(){const d=S.d,m=d.m,rm=d.rm||1;
+  if(S.phase===1)return{act:T.barrier*m,rec:T.recovery*rm,grace:T.grace,hurt:T.hurt,perf:T.perf*m,deny:T.deny};
+  if(S.phase===2)return{act:DG.act*m,rec:DG.rec*rm,grace:DG.grace,hurt:DG.hurt,perf:DG.perf*m,deny:DG.deny,fool:DG.fool};
+  return{act:R_T.guard*m,rec:R_T.rec*rm,grace:R_T.grace,hurt:R_T.down,perf:R_T.perf*m,deny:R_T.deny,broken:R_T.broken}}
 function down(){
   if(S.mode!=='play'||S.paused)return;
   ensureAudio();
-  $('ward').classList.add('down');
-  if(S.phase===3&&gt>=S.broken){if(!S.holding)play('shield');S.holding=true}
-  S.guardT=gt;if(S.phase===2)S.dodgeT=gt;
-  if(gt<S.lock)return;
-  let best=null,bd=1e9;
-  for(const th of S.threats){if(th.done||th.hold)continue;const w=th.win||S.d.win,dd=Math.abs(gt-th.ti);if(dd<=w){const sc=dd+(th.real===false?.06:0);if(sc<bd){bd=sc;best=th}}}
-  if(best){if(best.real===false)fooled(best);else success(best,Math.abs(gt-best.ti)<=(best.perfW||S.d.perf))}
-  else if(S.phase!==3){S.lock=gt+.25;S.whiffT=gt;play('whiff')}
+  $('ward').classList.add('down');S.held=true;
+  const p=S.pl;
+  // the animation dates (guardT, dodgeT) only move when an action starts, never on a refused press
+  if(p.s==='ready'){p.s='act';p.t=0;p.at=gt;S.guardT=gt;if(S.phase===2)S.dodgeT=gt;if(S.phase===3)play('shield')}
+  else if(p.s==='act'||p.s==='recover')p.deny=PT().deny;
 }
-function up(){S.holding=false;$('ward').classList.remove('down')}
+function up(){S.held=false;$('ward').classList.remove('down')}
+function recover(p,d,k){p.s='recover';p.t=0;p.rd=d;p.rk=k}
+/* is the attack stopped at its impact? */
+function stops(){const p=S.pl,c=PT();return(p.s==='act'&&p.t<=c.act+.002)||(p.s==='recover'&&p.rk==='act'&&p.t<c.grace)}
+/* the Watcher's state over time (phase III: the guard is held while the button is down) */
+function plStep(dt){
+  const p=S.pl,c=PT();p.t+=dt;p.deny=Math.max(0,p.deny-dt);
+  const held=S.phase===3&&S.held;
+  if(p.s==='act'){
+    if(held&&p.t>c.act){S.stam-=dt*R_T.drain;if(S.stam<=0){S.stam=0;recover(p,c.broken,'broken');S.broken=gt+c.broken;say(_('Your guard is broken.','Ta garde est brisée.'))}}
+    else if(p.t>=c.act)recover(p,c.rec,'act');
+  }else if((p.s==='recover'||p.s==='hurt')&&p.t>=p.rd){p.s='ready';p.t=0}
+  if(S.phase===3&&!(p.s==='act'&&held))S.stam=Math.min(1,S.stam+dt*R_T.regen);
+  S.holding=S.phase===3&&p.s==='act';
+}
 
 function success(th,perfect){
   th.done=true;th.res='ok';th.okT=gt;th.perfect=perfect;S.okT=gt;
   if(perfect){th.pat.perf++;S.perfects++}
-  if(th.k==='strike')return;
   const ph=S.phase;
-  if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#fff2c4':'#ffb45a',perfect?7:5,.5);play('parry',perfect);MUSIC.fx('clank');pop(perfect?_('Perfect!','Parfait !'):_('Parried','Paré'),perfect?'#fff2c4':'#ffc77a')}
-  else if(ph===2){S.dodgeOk=gt;play('dodge',perfect);pop(perfect?_('Perfect dodge','Esquive parfaite'):_('Dodged','Esquivé'),perfect?'#f2e8ff':'#cdb5ff')}
-  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('parry',perfect);pop(perfect?_('Perfect!','Parfait !'):_('Countered','Contré'),perfect?'#e8fdff':'#9ff2ff')}
+  if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#fff2c4':'#ffb45a',perfect?7:5,.5);play('parry',perfect);MUSIC.fx('clank');pop(ONO.parry,perfect?'#fff2c4':'#ffc77a')}
+  else if(ph===2){S.dodgeOk=gt;play('dodge',perfect)}
+  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('parry',perfect)}
 }
-function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;S.lock=gt+.55;S.foolT=gt;play('fool');pop(_('A reflection!','Un reflet !'),'#a49bbd');say(_('You dodged a reflection.','Tu as esquivé un reflet.'))}
-function hurt(){
+function hurt(th){
   if(S.mode!=='play')return;
-  S.hp=Math.max(0,S.hp-1);S.hits++;S.hurtT=gt;S.lock=Math.max(S.lock,gt+.3);S.shake=12;
+  S.hp=Math.max(0,S.hp-1);S.hits++;S.hurtT=gt;S.shake=12;
+  // stun, cut short so that the next attack can still be stopped (Ember Bridge: min(base, max(.14, gap - .2)))
+  {let nx=99;for(const o of S.threats)if(o!==th&&!o.done&&o.real!==false){const at=o.hold?o.ta:o.ti;if(at!=null&&at>gt)nx=Math.min(nx,at-gt)}
+   const p=S.pl;p.s='hurt';p.t=0;p.rd=Math.min(PT().hurt,Math.max(.14,nx-.2));p.rk=''}
+  if(th&&th.k==='rock')pop(ONO.crush,'#ff8a6b',HX-30,GY-190);
   burst(HX,GY-70,18,'#ff6a5a',5,.55);play('hurt');MUSIC.fx('chunk');hud();
   if(S.hp<=0){S.mode='dead';S.deadT=gt;S.holding=false;say(_('The Watcher falls. Defeat.','Le Veilleur tombe. Défaite.'))}
 }
 function damageBoss(n){
   S.bossHp=Math.max(0,S.bossHp-n);S.bossFlash=gt;S.shake=8;play('bossHit');MUSIC.fx([null,'bellHit','crackGlass','creature'][S.phase]);
   const p=bossCore();burst(p.x,p.y,26,S.phase===1?'#ffc77a':S.phase===2?'#e2d2ff':'#b8fff4',7,.7);
-  pop(n>1?_('Double hit!','Coup double !'):_('Hit','Touché'),'#fff',p.x,p.y-60);hud();
+  pop(ONO.hit,'#fff',p.x,p.y-60);hud();
   if(S.bossHp<=0){S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
     say([null,_('The Rust King collapses.','Le Roi de Rouille s\'effondre.'),_('The Hollow Voice\'s mirror shatters.','Le miroir de la Voix Creuse éclate.'),_('The lantern goes dark.','La lanterne s\'éteint.')][S.phase]);
     }
@@ -448,23 +456,20 @@ function bossCore(){return S.phase===1?{x:700,y:GY-160}:S.phase===2?{x:730,y:150
 function update(dt){
   if(S.mode==='play'&&!S.paused){
     S.runT+=dt;
-    if(S.phase===3){
-      if(S.holding){S.stam-=dt*.36;if(S.stam<=0){S.stam=0;S.holding=false;S.broken=gt+.9;pop(_('Guard broken','Garde brisée'),'#ff9a8a');say(_('Your guard is broken.','Ta garde est brisée.'))}}
-      else S.stam=Math.min(1,S.stam+dt*.38);
-    }
+    plStep(dt);
     if(!S.pat&&!S.cnt&&gt>=S.nextAt)spawn();
     for(const th of S.threats){
       if(th.done)continue;
       if(th.hold){
-        if(gt>=th.ta&&gt<=th.tb){if(!S.holding){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt()}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
-        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;pop(th.k==='beam'||th.k==='lbeam'?_('Beam blocked','Faisceau bloqué'):_('Blocked','Bloqué'),'#b8fff4')}
+        if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
+        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;if(S.pl.s==='act'){S.pl.s='ready';S.pl.t=0}}
         continue;
       }
-      if(gt>th.ti+(th.win||S.d.win)){
-        th.done=true;th.okT=gt;
-        if(th.real===false){th.res='pass';burst(HX+20,GY-70,10,'#a49bbd',3,.5);play('fool')}
-        else if(th.k==='strike'){th.res='miss';th.pat.ok=false;pop(_('Too late','Trop tard'),'#9d988f',760,GY-360)}
-        else{th.res='hit';th.pat.ok=false;hurt();if(S.mode!=='play')break}
+      if(gt>=th.ti){
+        th.done=true;th.okT=gt;const p=S.pl;
+        if(th.real===false){if(p.s==='act'&&aimedAt(th))fooled(th);else{th.res='pass';burst(HX+20,GY-70,10,'#a49bbd',3,.5);play('fool')}}
+        else if(stops()){success(th,p.s==='act'&&gt-p.at<=PT().perf);p.s='ready';p.t=0}
+        else{th.res='hit';th.pat.ok=false;hurt(th);if(S.mode!=='play')break}
       }
     }
     if(S.mode==='play'&&S.pat&&S.pat.ths.every(t=>t.done))closePat();
@@ -478,22 +483,24 @@ function update(dt){
   S.pops=S.pops.filter(p=>gt-p.t0<1);
   S.shake*=Math.pow(.02,dt);
 }
+/* riposte after a clean series, in every phase (rule of Ember Bridge): dur = length of the Watcher's counter, hitAt = moment
+   the boss is hit (s, internal phase number: 1 the King, 2 the Voice, 3 the Lighthouse); next = pause before the next series */
+const R_CNT={1:{dur:1.05,hitAt:.42},2:{dur:1.05,hitAt:.4},3:{dur:.95,hitAt:.32},next:1.45,nextFail:.95};
+/* a press dodges a reflection only if it was aimed at it: closer to it than to any real attack still to come */
+function aimedAt(f){const a=S.pl.at,d=Math.abs(a-f.ti);return!S.threats.some(o=>!o.done&&o!==f&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(a-o.ti)<d)}
 function closePat(){
   const p=S.pat;S.pat=null;
-  if(p.strike){if(p.ok){S.cnt={t:gt,dmg:p.perf?2:1,dur:.95,hitAt:.32,k:3};play('counter');counterFx()}else S.nextAt=gt+.9;if(p.ok)S.nextAt=gt+1.4;return}
   if(p.ok){
-    if(S.phase===3){sched([{k:'strike',t0:gt,ti:gt+(S.form===2?1.3:1.15),win:p.bigWin?.95:.62,perfW:.13,real:true}]).strike=true;say(_('The lantern dims: strike!','La lanterne faiblit : frappe !'));return}
-    const allPerf=p.nReal>=2&&p.perf>=p.nReal;
-    S.cnt={t:gt,dmg:allPerf?2:1,dur:1.05,hitAt:S.phase===1?.42:.4,k:S.phase};S.nextAt=gt+1.45;play('counter');counterFx();
-    say(S.phase===1?_('Series parried. The Watcher counters.','Série parée. Le Veilleur riposte.'):_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'));
-  }else S.nextAt=gt+.95;
+    const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=R_CNT[S.phase];
+    S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
+    say(S.phase===1?_('Series parried. The Watcher counters.','Série parée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
+  }else S.nextAt=gt+R_CNT.nextFail;
 }
 
 /* ---------- boss animation helpers ---------- */
 function curAct(kinds,tail){let best=null;for(const th of S.threats){if(!kinds.includes(th.k)||th.t0>gt)continue;const end=(th.k==='toll'?th.tw:th.ti)+tail;if(gt>end)continue;if(!best||th.t0>best.t0||(th.t0===best.t0&&Math.abs(gt-th.ti)<Math.abs(gt-best.ti)))best=th}return best}
 
 const ARM_REST=1.62,ARM_BACK=-1.9,BACK_DIR=2.11,TWO_PI=Math.PI*2;
-function anim1(){const r=anim1raw();const th=curAct(['slam','sweep'],.75);if(th&&th.ls)r.lunge*=th.ls;return r}
 function anim1raw(){
   const r={lunge:0,armA:ARM_REST+Math.sin(rt*1.3)*.04,clap:BACK_DIR,onBack:true,chain:null,toll:0,coil:0,larm:0};
   const th=curAct(['slam','sweep','chain','toll'],.75);
@@ -623,6 +630,9 @@ function drawHero(){
   if(dome){const flick=S.stam<.25?(Math.sin(gt*40)>0?.5:1):1;ctx.save();ctx.globalAlpha=.9*flick;
     const g=ctx.createRadialGradient(x,y-40,10,x,y-40,82);g.addColorStop(0,'rgba(127,214,255,0)');g.addColorStop(.8,'rgba(127,214,255,.14)');g.addColorStop(1,'rgba(180,240,255,.4)');
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,92,Math.PI,0);ctx.fill();ctx.strokeStyle='#bff0ff';ctx.lineWidth=2.5;ctx.stroke();ctx.restore()}
+  // recovery bar under the Watcher, red while a press is refused (Ember Bridge)
+  {const p=S.pl;if(S.mode==='play'&&!S.cine&&p&&(p.s==='recover'||p.deny>0)){const k=p.s==='recover'?p.t/p.rd:1;
+    ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y+8,62,6);ctx.fillStyle=p.deny>0?'#ff5252':'#6fd3ff';ctx.fillRect(x-30,y+9,60*clamp(k,0,1),4)}}
   // stamina bar
   if(ph===3&&S.mode==='play'&&!S.cine){const w=60;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-w/2,y-150,w,6);ctx.fillStyle=gt<S.broken?'#ff8a7a':S.stam<.3?'#ffd27a':'#7fd6ff';ctx.fillRect(x-w/2,y-150,w*S.stam,6)}
 }
@@ -863,34 +873,10 @@ function drawVoice(i,alpha,cast,ko){
   ctx.restore();
 }
 function shard(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a*1.5);const g=ctx.createLinearGradient(-s,-s,s,s);g.addColorStop(0,'rgba(235,225,255,.75)');g.addColorStop(1,'rgba(90,70,140,.4)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*.5,s*.2);ctx.lineTo(-s*.3,s*.7);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
-function drawOrbs(){
-  const stage=S.bossHp<=S.bossMax/2;
-  for(const th of S.threats){
-    if(th.k==='orb'){
-      if(gt<th.t0)continue;
-      const h=voiceHand(th.src,1),tx=HX+14,ty=HY;
-      let x,y,r=13,a=1;
-      if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);x=h.x;y=h.y;r=4+9*k}
-      else{let p=(gt-th.tl)/(th.ti-th.tl);
-        if(th.done){if(th.res==='hit'||th.res==='pass'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.45)}}
-        x=lerp(h.x,tx,p);y=lerp(h.y,ty,p)-Math.sin(Math.PI*Math.min(p,1))*46}
-      if(a<=0)continue;
-      ctx.save();ctx.globalAlpha=a;
-      if(th.real){glow(x,y,r*3,'rgba(176,124,255,.95)',.85);ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff')}
-      else{const fl=stage?.75:(.45+.35*Math.sin(gt*30));ctx.globalAlpha=a*fl;glow(x,y,r*2.4,'rgba(176,124,255,.6)',stage?.55:.35);ctx.strokeStyle='#d8c4ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ell(x,y,r*.45,r*.45,stage?'rgba(240,230,255,.55)':'rgba(240,230,255,.18)')}
-      ctx.restore();
-    }else if(th.k==='wail'&&gt>=th.tl){
-      let p=(gt-th.tl)/(th.ti-th.tl),a=1;if(th.done){if(th.res==='hit')continue;a=Math.max(0,1-(gt-th.okT)/.4)}
-      const x=lerp(650,HX,Math.min(p,1.25));ctx.save();ctx.globalAlpha=a;
-      for(let i=0;i<4;i++){ctx.strokeStyle=`rgba(200,160,255,${.75-i*.17})`;ctx.lineWidth=5-i;ctx.beginPath();ctx.ellipse(x+i*16,GY-90,22+i*4,110,0,Math.PI*.55,Math.PI*1.45);ctx.stroke()}
-      ctx.restore();
-    }
-  }
-}
 
 /* ---------- boss 3: the Drowned Beacon ---------- */
 const LX=760,LY=GY-292;
-function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0));if(th.k==='strike'&&!th.done)dim=1}
+function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0))}
   if(S.cnt&&S.cnt.k===3)dim=1;return{charge,dim}}
 const RIBS=(()=>{const R=mulberry(51);return[...Array(7)].map((_,i)=>({x:600+i*48+R()*10,h:40+R()*50,l:R()>.5?1:-1}))})();
 /* ---- the King's body parts, drawn in local coordinates ---- */
@@ -1019,7 +1005,7 @@ function drawTransform(){
   }
   const fk=gt-(S.flashT||-9);if(fk<.5){ctx.fillStyle=`rgba(220,250,255,${.55*(1-fk/.5)})`;ctx.fillRect(0,0,W,H)}
   const cap=t<2?_('The parasite wakes in his heart','Le parasite se réveille dans son cœur'):t<3.3?_('The jellyfish bursts from the King','La méduse jaillit du corps du Roi'):t<8.6?_('Its tentacles rebuild the pieces','Ses tentacules réassemblent les morceaux'):_('The Drowned Lighthouse lights up','Le Phare Noyé s\'allume');
-  ctx.font='800 24px "Big Shoulders Display",Impact,sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillText(cap.toUpperCase(),W/2+2,40);ctx.fillStyle='#e8fdff';ctx.fillText(cap.toUpperCase(),W/2,38);
+  if(S.tfCap!==cap){S.tfCap=cap;say(cap+'.')}
 }
 function drawBeacon(){
   for(const th of S.threats){
@@ -1043,8 +1029,6 @@ function drawBeacon(){
         if(th.res==='hit'){ctx.fillStyle=`rgba(200,250,255,${1-e})`;for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(HX+i*14-8,GY+4);ctx.lineTo(HX+i*14,GY-70+Math.abs(i)*16);ctx.lineTo(HX+i*14+8,GY+4);ctx.fill()}}
         else if(e<.05)burst(HX+8,GY-10,18,'#dff8ff',6,.6,.4)}
     }
-    if(th.k==='strike'&&!th.done){const k=clamp((th.ti-gt)/(th.ti-th.t0),0,1);ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(LX,LY,30+70*k,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='rgba(79,224,204,.8)';ctx.beginPath();ctx.arc(LX,LY,30,0,Math.PI*2);ctx.stroke();
-      ctx.fillStyle='#e8fdff';ctx.font='800 22px "Big Shoulders Display",Impact,sans-serif';ctx.textAlign='center';ctx.fillText(_('STRIKE!','FRAPPE !'),LX,LY-118)}
   }
 }
 function beamShape(bx,a){const g=ctx.createLinearGradient(LX,LY,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(LX-9,LY);ctx.lineTo(LX+9,LY);ctx.lineTo(bx+80,GY+16);ctx.lineTo(bx-80,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,90,12,`rgba(200,250,255,${.25*a})`)}
@@ -1063,12 +1047,12 @@ function drawHelp(){
   if(!$('optHelp').checked||S.mode!=='play')return;
   for(const th of S.threats){
     if(th.done)continue;
-    if(th.hold){if(gt>=th.t0&&gt<=th.tb){const on=gt>=th.ta;ctx.fillStyle=on?'#e8fdff':'rgba(232,253,255,.6)';ctx.font='800 20px "Big Shoulders Display",Impact,sans-serif';ctx.textAlign='center';ctx.fillText(on?_('HOLD!','TIENS !'):_('GET READY TO HOLD','PRÉPARE LA GARDE'),HX,GY-170)}continue}
-    if(th.k==='strike'||gt<th.t0)continue;
+    if(th.hold){if(gt>=th.t0&&gt<=th.tb){const on=gt>=th.ta;ctx.save();ctx.strokeStyle=on?'#e8fdff':'rgba(232,253,255,.6)';ctx.lineWidth=on?4:2;if(!on)ctx.setLineDash([5,6]);ctx.beginPath();ctx.arc(HX,GY-40,on?100:100+40*clamp((th.ta-gt)/1.2,0,1),Math.PI,0);ctx.stroke();ctx.restore()}continue}
+    if(gt<th.t0)continue;
     const span=Math.min(1,th.ti-th.t0),k=(th.ti-gt)/span;if(k>1||k<-.3)continue;
     const r=26+64*Math.max(0,k);
     ctx.save();
-    if(th.real){ctx.strokeStyle=k<=(S.d.win/span)?'#ffffff':'rgba(127,214,255,.85)';ctx.lineWidth=3}
+    if(th.real){ctx.strokeStyle=k<=(PT().act/span)&&k>=0?'#ffffff':'rgba(127,214,255,.85)';ctx.lineWidth=3}
     else{ctx.strokeStyle='rgba(170,160,190,.7)';ctx.lineWidth=2;ctx.setLineDash([5,6])}
     ctx.beginPath();ctx.arc(HX+10,HY-10,r,0,Math.PI*2);ctx.stroke();ctx.restore();
   }
@@ -1105,7 +1089,6 @@ function draw(){
   ctx.globalAlpha=1;ctx.restore();
   // vignette & hurt flash
   const vg=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
-  drawBanner();
   if(S.cine)cineOverlay();
   const hk=gt-S.hurtT;if(hk<.3){ctx.fillStyle=`rgba(255,40,30,${.25*(1-hk/.3)})`;ctx.fillRect(0,0,W,H)}
   if(S.mode==='ko'){const k=gt-S.koT;if(k<.5){ctx.fillStyle=`rgba(255,255,255,${.5*(1-k/.5)})`;ctx.fillRect(0,0,W,H)}}
@@ -1117,11 +1100,26 @@ function once(k){if(S.cineDone[k])return false;S.cineDone[k]=1;return true}
 function resetCine(s){s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.parasite=0;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
 function startCine(p,k){const s=p.s;resetCine(s);if(MUSIC.cur!==s.phase)MUSIC.bed(s.phase);s.demo=false;s.parts=[];s.pops=[];s.cine={k,t0:gt};s.tfBurst=s.tfFlash=s.tfAnch=false;s.tfId=(s.tfId||0)+1;s.flashT=-9}
 function fadeAll(a,c){if(a<=0)return;ctx.fillStyle=`rgba(${c||'0,0,0'},${clamp(a,0,1)})`;ctx.fillRect(0,0,W,H)}
-function title(t,t0,eye,name,col){if(t<t0)return;const a=clamp((t-t0)/.5,0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
+/* chapter colours (docs/CH2-SPEC.md): II tide turquoise, III roots moss green leaning yellow */
+const CH_COL={2:'#4fe0cc',3:'#b9cf5a'};
+function title(t,t0,eye,name,col,ncol){if(t<t0)return;const a=clamp((t-t0)/.5,0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
   ctx.font='700 16px "DM Sans",system-ui,sans-serif';ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,H*.42-46+(1-a)*8);
-  ctx.font='800 64px "Big Shoulders Display",Impact,sans-serif';{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px "Big Shoulders Display",Impact,sans-serif`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle='#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
+  ctx.font='800 64px "Big Shoulders Display",Impact,sans-serif';{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px "Big Shoulders Display",Impact,sans-serif`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
   ctx.fillStyle=col;ctx.fillRect(W/2-60*a,H*.42+18,120*a,3);ctx.restore()}
-function caption(txt,a){if(a<=0)return;ctx.save();ctx.globalAlpha=clamp(a,0,1);ctx.textAlign='center';ctx.font='italic 500 22px "DM Sans",system-ui,sans-serif';ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(txt,W/2+2,H*.78+2);ctx.fillStyle='#efe7ff';ctx.fillText(txt,W/2,H*.78);ctx.restore()}
+/* end of the intro: the series name large, the chapter below it, small, in the chapter colour (as in Ember Bridge).
+   Vertical layout from the measured glyph boxes, so the two lines never touch whatever the font fallback. */
+const SERIES_T={size:96,sub:17,gap:22,y:.36};   // y: baseline of the name (fraction of the height), above the Watcher's lantern
+function seriesTitle(t,t0,name,sub,col){if(t<t0)return;const a=clamp((t-t0)/.5,0,1),dy=(1-a)*8;ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
+  const N=name.toUpperCase(),U=sub.toUpperCase().split('').join(String.fromCharCode(8202));
+  ctx.font=`800 ${SERIES_T.size}px "Big Shoulders Display",Impact,sans-serif`;{const mw=ctx.measureText(N).width;if(mw>W-120)ctx.font=`800 ${Math.floor(SERIES_T.size*(W-120)/mw)}px "Big Shoulders Display",Impact,sans-serif`}
+  const mN=ctx.measureText(N),yN=H*SERIES_T.y+dy;
+  ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(N,W/2+3,yN+3);ctx.fillStyle='#f4eee4';ctx.fillText(N,W/2,yN);
+  ctx.font=`700 ${SERIES_T.sub}px "DM Sans",system-ui,sans-serif`;const mS=ctx.measureText(U),yS=yN+(mN.actualBoundingBoxDescent||0)+3+SERIES_T.gap+(mS.actualBoundingBoxAscent||SERIES_T.sub*.72);
+  ctx.fillStyle=col;ctx.fillText(U,W/2,yS);ctx.fillRect(W/2-60*a,yS+(mS.actualBoundingBoxDescent||4)+12,120*a,3);ctx.restore()}
+function caption(txt,a){if(a<=0)return;ctx.save();ctx.globalAlpha=clamp(a,0,1);ctx.textAlign='center';ctx.font='italic 500 22px "DM Sans",system-ui,sans-serif';
+  // too wide for the screen: two lines, cut at the space nearest the middle
+  let L=[txt];if(ctx.measureText(txt).width>W-120){let c=-1;for(let i=0;i<txt.length;i++)if(txt[i]===' '&&(c<0||Math.abs(i-txt.length/2)<Math.abs(c-txt.length/2)))c=i;if(c>0)L=[txt.slice(0,c),txt.slice(c+1)]}
+  L.forEach((l,i)=>{const y=H*.78+(i-(L.length-1)/2)*28;ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(l,W/2+2,y+2);ctx.fillStyle='#efe7ff';ctx.fillText(l,W/2,y)});ctx.restore()}
 const FALL=(()=>{const R=mulberry(91);let rank=0;const ids=TOWER.map((p,i)=>i).filter(i=>TOWER[i].k!=='torso'&&TOWER[i].k!=='fist').sort((a,b)=>TOWER[a].e.y-TOWER[b].e.y);
   const out={};ids.forEach(i=>{const p=TOWER[i],dir=rank%2?1:-1;let x=clamp(p.e.x+dir*(50+rank*20)+(R()-.5)*20,380,945),y=GY-13,r=(R()-.5)*.5;
     if(p.k==='sbell'){y=GY-34;r=dir*Math.PI/2}else if(p.k==='seg'){y=GY-10;r=(R()-.5)*.3}else if(p.k==='head'){x=470;y=GY-38;r=-Math.PI/2}
@@ -1205,7 +1203,7 @@ function ecFinale(tAll){
   const tentA=1-clamp((t-2)/.4,0,1);
   drawEcl(P,A,J,tentA,(S.zapT&&gt-S.zapT<.09&&t<.5)?.15:on,t>-.75&&t<.6?ecGap(T):null);
   ecFinisher(tAll,T,P);
-  if(t>=.5&&once('hit')){S.flashT=gt;S.shake=26;burst(LX,ECY,70,'#ffffff',11,1.2);burst(LX,ECY,40,'#9fe4ff',8,1);pop(_('Final blow','Coup de grâce'),'#ffffff',LX,ECY-150)}
+  if(t>=.5&&once('hit')){S.flashT=gt;S.shake=26;burst(LX,ECY,70,'#ffffff',11,1.2);burst(LX,ECY,40,'#9fe4ff',8,1);pop(ONO.final,'#ffffff',LX,ECY-150)}
   S.heroDX=lerp(0,EFALL[EHEAD].x-HX-34,eio(clamp((t-6.4)/1.6,0,1)));
   if(t>9){const pu=.5+.5*Math.sin(t*3);glow(760,GY+56,40,'rgba(90,220,255,.9)',.5*pu*clamp((t-9)/.5,0,1))}
 }
@@ -1222,7 +1220,7 @@ function ecFinisher(tAll,T,P){
   if(tAll<OFF+.6){glow(ox,oy,60+30*Math.sin(tAll*30),'rgba(200,240,255,.9)',.8);for(let k=0;k<3;k++){const a=Math.random()*Math.PI*2;bolt(ox,oy,ox+Math.cos(a)*45,oy+Math.sin(a)*45,Math.random(),'rgba(200,245,255,.8)',1.5)}}
   const rings=TOWER.map((p,i)=>p.k==='ring'?i:-1).filter(i=>i>=0);
   ZAPS.forEach((s0,i)=>{const d=tAll-s0;
-    if(d>=0&&once('zap'+i)){S.zapT=gt;S.shake=Math.max(S.shake,8+i*1.5);burst(J.x,J.y,16+i*3,'#e8fdff',6,.5);pop('×'+(i+1),'#e8fdff',J.x+(i%2?70:-70),J.y-70-i*6)}
+    if(d>=0&&once('zap'+i)){S.zapT=gt;S.shake=Math.max(S.shake,8+i*1.5);burst(J.x,J.y,16+i*3,'#e8fdff',6,.5)}
     if(d<0||d>.2)return;ctx.globalAlpha=1-d/.2;const w=3+i*.6;
     if(i%2===0){const x0=J.x+((i*97)%220-110);bolt(x0,0,J.x,J.y-20,i*.137,'rgba(235,252,255,.97)',w);bolt(lerp(x0,J.x,.5),J.y/2,lerp(x0,J.x,.5)+(i%4?60:-60),J.y*.7,i*.31,'rgba(190,240,255,.8)',w*.5)}
     else{const a=P[rings[i%6]],b=P[rings[(i+3)%6]];bolt(ox,oy,a.x,a.y,i*.11,'rgba(235,252,255,.97)',w);bolt(a.x,a.y,b.x,b.y,i*.23,'rgba(210,248,255,.9)',w*.8);bolt(b.x,b.y,J.x,J.y,i*.41,'rgba(235,252,255,.97)',w);glow(a.x,a.y,40,'rgba(200,245,255,.9)',.8);glow(b.x,b.y,40,'rgba(200,245,255,.9)',.8)}
@@ -1393,13 +1391,12 @@ function cineBoss(){
 function cineOverlay(){
   const t=gt-S.cine.t0,k=S.cine.k,ph=S.phase;
   const fk=gt-(S.flashT||-9);if(fk<.45&&!(ph===3&&k==='in'&&t>1.5&&t<11.5))fadeAll(.55*(1-fk/.45),'235,245,255');
-  if(ph===2&&k==='in')title(t,3.1,_('Phase I · The Mirror Gallery','Phase I · La galerie des miroirs'),_('The Hollow Voice','La Voix Creuse'),'#b48cff');
-  if(ph===2&&k==='out'){caption(_('“The King is no longer the King.”','« Le Roi n’est plus le Roi. »'),clamp((t-4.5)/.4,0,1)*(1-clamp((t-6)/.4,0,1)));fadeAll(clamp((t-6.5)/.7,0,1))}
-  if(ph===1&&k==='in')title(t,6.3,_('Phase II · The Foundry','Phase II · La fonderie'),_('The Rust King','Le Roi de Rouille'),'#d98a3a');
-  if(ph===1&&k==='out'){fadeAll(clamp((t-5)/.7,0,1));caption(_('The ice cracks.','La glace craque.'),clamp((t-5.6)/.4,0,1))}
-  if(ph===3&&k==='in')title(t,12.3,_('Phase III · The Frozen Lake','Phase III · Le lac gelé'),_('The Drowned Lighthouse','Le Phare Noyé'),'#4fe0cc');
-  if(ph===3&&k==='out')title(t,10.8,_('The end','Fin'),_('The stars shine again','Les étoiles se rallument'),'#4fe0cc');
-  if(ph===3&&k==='p2'){bossBar(t<5.8?_('The Drowned Lighthouse','Le Phare Noyé'):_('The Shattered','L\u2019Éclaté'),t<2.1?0:clamp((t-2.2)/3.4,0,1));title(t,5.8,_('Phase III · Form II','Phase III · Forme II'),_('The Shattered','L\u2019Éclaté'),'#4fe0cc')}
+  if(ph===2&&k==='in')title(t,3.1,PH[2].eye(),PH[2].boss(),'#b48cff');
+  if(ph===2&&k==='out')fadeAll(clamp((t-6.5)/.7,0,1));
+  if(ph===1&&k==='in')title(t,6.3,PH[1].eye(),PH[1].boss(),'#d98a3a');
+  if(ph===1&&k==='out')fadeAll(clamp((t-5)/.7,0,1));
+  if(ph===3&&k==='in')title(t,12.3,PH[3].eye(),_('The Drowned Lighthouse','Le Phare Noyé'),'#4fe0cc');
+  if(ph===3&&k==='p2'){const shat=_('The Shattered',"L'Éclaté");bossBar(t<5.8?_('The Drowned Lighthouse','Le Phare Noyé'):shat,t<2.1?0:clamp((t-2.2)/3.4,0,1));title(t,5.8,PH[3].eye(),shat,'#4fe0cc')}
 }
 /* ---------- music & ambience (procedural, Web Audio) ---------- */
 const MUSIC=(()=>{
@@ -1523,7 +1520,12 @@ const MUSIC=(()=>{
 /* ---------- Prologue: called back from the stars ---------- */
 const PRO_LEN=18.6;
 const PSTARS=(()=>{const R=mulberry(404);return[...Array(190)].map((_,i)=>({x:R()*W,y:R()*H*1.6-H*.3,r:.6+R()*1.6,o:R()*6,drain:i%4===0,gather:i%7===3,d0:5.7+R()*3,g0:8.4+R()*1.2}))})();
-const PCAPF=()=>[[.5,3,_('The Colossus fell, and the Watcher with him.','Le Colosse est tombé, et le Veilleur avec lui.')],[3.1,5.6,_('He woke among the stars. His fight seemed over.','Il s\u2019est réveillé parmi les étoiles. Son combat semblait terminé.')],[5.7,8.2,_('But far below, a cold light began to drink the sky.','Mais en bas, une lumière froide s\u2019est mise à boire le ciel.')],[8.3,10.8,_('Only his light can put it out. The stars give him back his staff\u2026','Seule sa lumière peut l\u2019éteindre. Les étoiles lui rendent son bâton\u2026')],[11,13.6,_('\u2026and send him back to earth.','\u2026et le renvoient sur terre.')],[15.2,18.2,_('At the edge of the Marsh of Bells, the night the bells fell silent.','Au bord du marais des Cloches, la nuit où les cloches se sont tues.')]];
+/* intro cartons (docs/CH2-SPEC.md) over the provisional scenes: [start, end, text] in seconds; then the title */
+const PCAPF=()=>[[.5,4.2,_('On the coast, the mist no longer lifts.','Sur la côte, la brume ne se lève plus.')],
+  [4.4,8.4,_('Out at sea, the Drowned Lighthouse stands dark. No bell answers it.','Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond.')],
+  [8.6,12.8,_('The ships no longer return. The fishermen say the sea keeps what it takes.',"Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend.")],
+  [13,15.4,_('They say its keeper still watches up there.','On dit que sa gardienne veille encore là-haut.')]];
+const PRO_TITLE=15.6;
 const PSFX=[[0,'stars'],[3.2,'glints'],[5.8,'fallWhine'],[7.1,'fallWhine'],[8.4,'charge'],[10.15,'impactLight'],[10.8,'whooshDown'],[12.1,'whooshDown'],[14.8,'land'],[15.6,'bellSoft'],[16,'sting']];
 function proHero(x,y,white,staffA,stA,lean){
   ctx.save();ctx.translate(x,y);ctx.rotate(lean||0);
@@ -1590,7 +1592,7 @@ function drawPrologue(t){
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   // text
   for(const c of PCAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0)caption(c[2],a)}
-  title(t,15.6,_('Ember Bridge · Chapter II','Ember Bridge · Chapitre II'),'Silent Bells','#7fd6ff');
+  seriesTitle(t,PRO_TITLE,'Lumenbell',_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),CH_COL[2]);
   fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-17.9)/.7,0,1));
   PSFX.forEach((c,i)=>{if(t>=c[0]&&once('pfx'+i))MUSIC.fx(c[1])});
 }
@@ -1598,22 +1600,24 @@ function lerpC(a,b,k){return`rgb(${a.map((v,i)=>Math.round(lerp(v,b[i],k))).join
 /* ================= GAME: Silent Bells (Ember Bridge, chapter II) ================= */
 const ORDER=[2,1,3];               // phase I = the Voice, II = the King, III = the Beacon
 const gpOf=id=>ORDER.indexOf(id)+1;
+/* phase texts (docs/CH2-SPEC.md): eye = phase title, boss = name (card title), desc = entry panel, end = end panel */
 const PH=[null,
- {eye:()=>_('Phase II · The Foundry','Phase II · La fonderie'),title:()=>_('Silence the toll.','Fais taire le glas.'),
-  desc:()=>_("The villages melted their bells to build a guardian. Something beats in his chest, and it is no longer his heart.","Les villages avaient fondu leurs cloches pour bâtir un gardien. Quelque chose bat dans sa poitrine, et ce n'est plus son cœur."),
-  how:()=>_("The button PARRIES. Press on impact: diving anchor, sweep, hook, toll wave. Parry a whole series to counter. All perfect: double damage.","Le bouton PARE. Appuie au moment de l'impact : ancre plongeante, balayage, crochet, onde du glas. Pare toute une série pour riposter. Parades parfaites : riposte double."),
-  head:()=>_('Phase II of III · The Foundry','Phase II sur III · La fonderie'),boss:()=>_('The Rust King','Le Roi de Rouille'),btn:()=>_('Parry','Parer'),
+ {eye:()=>_('Phase II · The Hold','Phase II · La cale'),
+  desc:()=>_("Rusted bells hang from the beams of the hold. An anchor lies there, too heavy for a man's hand.","Des cloches rouillées pendent aux poutres de la cale. Une ancre traîne, trop lourde pour une main d'homme."),
+  end:()=>_("The King sinks beneath the waves. A turquoise glow rises from his body, toward the Lighthouse.","Le Roi sombre sous les vagues. De son corps monte une lueur turquoise, vers le Phare."),
+  head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust King','Le Roi de Rouille'),btn:()=>_('Parry','Parer'),
   aria:()=>_("The Watcher facing the Rust King, a colossus of bells armed with an anchor","Le Veilleur face au Roi de Rouille, un colosse de cloches armé d'une ancre")},
- {eye:()=>_('Phase I · The Mirror Gallery','Phase I · La galerie des miroirs'),title:()=>_('Do not trust your eyes.','Ne crois pas ce que tu vois.'),
-  desc:()=>_("To reach the foundry, the Watcher must cross the mirror gallery. The keeper of the bells has no face anymore, only a mirror, and her spells lie.","Pour atteindre la fonderie, le Veilleur doit traverser la galerie des miroirs. La gardienne des cloches n'a plus de visage, seulement un miroir, et ses sorts mentent."),
-  how:()=>_("The button DODGES. Dodge solid orbs at the last moment. Hollow orbs are reflections: let them pass, or you stumble. A clean volley sends the light back.","Le bouton ESQUIVE. Esquive les orbes pleines au dernier moment. Les orbes creuses sont des reflets : laisse-les passer, sinon tu trébuches. Une volée sans faute renvoie la lumière."),
-  head:()=>_('Phase I of III · The Gallery','Phase I sur III · La galerie'),boss:()=>_('The Hollow Voice','La Voix Creuse'),btn:()=>_('Dodge','Esquiver'),
+ {eye:()=>_('Phase I · The Mirror Hall','Phase I · La salle des reflets'),
+  desc:()=>_("At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there.","Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur."),
+  end:()=>_("The mirror shatters. Beneath the hall, a hatch opens onto the hold of a wreck.","Le miroir vole en éclats. Sous la salle, une trappe s'ouvre sur la cale d'une épave."),
+  head:()=>_('Phase I of III · The Mirror Hall','Phase I sur III · La salle des reflets'),boss:()=>_('The Hollow Voice','La Voix Creuse'),btn:()=>_('Dodge','Esquiver'),
   aria:()=>_('The Watcher facing the Hollow Voice, a figure with a cracked mirror face','Le Veilleur face à la Voix Creuse, une silhouette au visage de miroir fêlé')},
- {eye:()=>_('Phase III · The Frozen Lake','Phase III · Le lac gelé'),title:()=>_('Put out the beacon.','Éteins le phare.'),
-  desc:()=>_("The Bottomless has left the King and built a tower from his body. Its lantern sweeps the lake and calls down lightning.","La Sans-Fond est sortie du Roi et a bâti une tour avec son corps. Sa lanterne balaie le lac et appelle la foudre."),
-  how:()=>_("HOLD the button to shield yourself while the beam crosses you (your guard wears out if held too long). TAP against lightning and ice spikes. When the lantern dims, tap to strike.","MAINTIENS le bouton pour faire bouclier quand le faisceau passe sur toi (la garde s'use si tu la tiens trop). TOUCHE contre la foudre et les pics de glace. Quand la lanterne faiblit, touche pour frapper."),
-  head:()=>_('Phase III of III · The Frozen Lake','Phase III sur III · Le lac gelé'),boss:()=>S.form===2?_('The Shattered',"L'Éclaté"):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Guard','Garde'),
-  aria:()=>_("The Watcher on a frozen lake facing the Drowned Lighthouse, a tower made of the King's body, crowned by an electric jellyfish","Le Veilleur sur un lac gelé face au Phare Noyé, une tour faite du corps du Roi et couronnée d'une méduse électrique")}
+ {eye:()=>_('Phase III · The Reefs','Phase III · Les récifs'),
+  desc:()=>_("From the King's body, the glow has built a tower. The Drowned Lighthouse lights again, with a flame that is not its own.","Du corps du Roi, la lueur a bâti une tour. Le Phare Noyé se rallume d'une flamme qui n'est pas la sienne."),
+  form2:()=>_("The tower bursts. Among the debris, the jellyfish, laid bare.","La tour éclate. Au milieu des débris, la méduse, à découvert."),
+  end:()=>_("In the wreckage, the Lighthouse's bell, cracked and silent.","Dans les décombres, la cloche du Phare, fêlée et muette."),
+  head:()=>_('Phase III of III · The Reefs','Phase III sur III · Les récifs'),boss:()=>S.form===2?_('The Shattered',"L'Éclaté"):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Guard','Garde'),
+  aria:()=>_("The Watcher on the reefs facing the Drowned Lighthouse, a tower made of the King's body, crowned by an electric jellyfish","Le Veilleur sur les récifs face au Phare Noyé, une tour faite du corps du Roi et couronnée d'une méduse électrique")}
 ];
 function pips(el,n,max){if(el.children.length!==max){el.innerHTML='';for(let i=0;i<max;i++)el.appendChild(document.createElement('span'))}[...el.children].forEach((s,i)=>s.classList.toggle('on',i<n))}
 function hud(){
@@ -1621,17 +1625,13 @@ function hud(){
   $('hpPn').textContent=S.hp+'/'+S.hpMax;$('hpBn').textContent=S.bossHp+'/'+S.bossMax;
   const P=PH[S.phase];$('nmB').textContent=P.boss();$('hdEye').textContent=P.head();$('ward').textContent=P.btn();
   $('c').setAttribute('aria-label',P.aria());document.body.dataset.ph=S.phase;
-  const unl=+store.get('lb-ch2-unl',1),gp=gpOf(S.phase);
+  const unl=unlocked(),gp=gpOf(S.phase);
   document.querySelectorAll('#phases li').forEach((li,i)=>{const on=i+1===gp;li.classList.toggle('on',on);if(on)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');li.firstChild.disabled=!!S.d.trial||i+1>unl});
 }
 
 /* ================= spells, anger and final assaults ================= */
-function banner(txt,sub){S.banner={txt,sub,t0:gt};MUSIC.fx('sting')}
-function drawBanner(){if(!S.banner)return;const d=gt-S.banner.t0;if(d>2.2){S.banner=null;return}
-  const a=clamp(d/.25,0,1)*(1-clamp((d-1.8)/.4,0,1));ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
-  ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H*.2-44,W,S.banner.sub?82:60);
-  ctx.font='800 40px "Big Shoulders Display",Impact,sans-serif';ctx.fillStyle='#f4eee4';ctx.fillText(S.banner.txt.toUpperCase(),W/2,H*.2);
-  if(S.banner.sub){ctx.font='500 16px "DM Sans",system-ui,sans-serif';ctx.fillStyle='#cfc8bd';ctx.fillText(S.banner.sub,W/2,H*.2+26)}ctx.restore()}
+/* rages and final assaults: nothing written on screen (the sound and the attacks tell it); the screen reader gets the name */
+function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting')}
 function angerCheck(){
   if(S.mode!=='play'||S.angerShown||S.bossHp>S.bossMax/2)return;S.angerShown=true;
   if(S.phase===2)banner(_('Broken mirror','Miroir brisé'),_('Reflections now look like real orbs. Only real orbs cast a shadow.','Les reflets ressemblent aux vraies orbes. Seules les vraies ont une ombre.'));
@@ -1645,7 +1645,7 @@ function spawn(){
   if(!S.finalDone&&S.bossHp<=FINAL_AT&&(id!==3||f2)){
     S.finalDone=true;
     banner(_('Final assault','Dernier assaut'),[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
-    const pat=sched(gen(1,f,gt+1.6,true));if(f2)pat.bigWin=true;return}
+    sched(gen(1,f,gt+1.6,true));return}
   sched(gen(stage,f,gt+.25));
 }
 /* ---- Phase I · the Hollow Voice ---- */
@@ -1661,8 +1661,8 @@ function P2(stage,f,b,final){
   const p1=[()=>volley(4,1),()=>volley(5,2),echo,()=>{echo();wail()},()=>{volley(3,1);echo()},()=>{wail();volley(4,2)},()=>rain(5),()=>{rain(3);volley(3,1)}];
   pick(stage?p1:p0)();return T;
 }
-function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;S.lock=gt+.6;S.foolT=gt;play('fool');pop(_('A reflection!','Un reflet !'),'#a49bbd');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
-  if(S.phase===2&&(S.angerShown||S.dk==='hard'||S.dk==='th')){const nt={k:'back',t0:gt,tl:gt+.1,ti:gt+1.1,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);pop(_('It comes back!','Il revient !'),'#e2d2ff',HX-10,GY-210)}}
+function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;recover(S.pl,PT().rec+DG.fool,'fool');S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
+  if(S.phase===2&&(S.angerShown||S.dk==='hard'||S.dk==='th')){const nt={k:'back',t0:gt,tl:gt+.1,ti:gt+1.1,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}}
 function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
 function drawOrbs(){
   const anger=S.angerShown;
@@ -1820,8 +1820,7 @@ function drawEclGame(){
       if(post>0&&!th.bf){th.bf=1;S.shake=22;S.flashT=gt;burst(J.x,J.y,70,'#e8fdff',11,1.1);MUSIC.fx('explosion')}
       if(post>0&&post<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,245,255,${1-post})`;ctx.lineWidth=8*(1-post)+1;ctx.beginPath();ctx.arc(J.x,J.y,post*900,0,Math.PI*2);ctx.stroke();ctx.restore()}}
   }
-  const strike=S.threats.find(t=>t.k==='strike'&&!t.done);
-  const on=strike?.5+.2*Math.sin(gt*10):1;
+  const on=1;
   const hit={x:HX+20,y:GY-80},tells=[],beams=[],fx=[];let trapQ=null;
   for(const th of S.threats){
     if(gt<th.t0)continue;
@@ -1849,7 +1848,7 @@ function drawEclGame(){
       else{const k=eio(clamp((gt-th.ts-th.D)/.8,0,1));A={x:lerp(-80,A0.x,k),y:lerp(GY-60,A0.y,k),a:A0.a,sc:lerp(.85,A0.sc,k),z:k<1?3:A0.z}}}
     else if(th.k==='lbeam')beams.push(th);
   }
-  drawEcl(P,A,J,1,on,strike?ecGap(T):null);
+  drawEcl(P,A,J,1,on,null);
   if(reBeam!=null){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*reBeam,1);ctx.restore()}
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const th of beams){const o=P[SBELLS[th.side]];
@@ -1859,8 +1858,6 @@ function drawEclGame(){
   for(const e of fx){if(e[0]==='wave'){ctx.strokeStyle=`rgba(200,245,255,${1-e[3]})`;ctx.lineWidth=6*(1-e[3])+1;ctx.beginPath();ctx.arc(e[1],e[2],e[3]*700,0,Math.PI*2);ctx.stroke()}
     else{ctx.strokeStyle=`rgba(255,200,120,${.8*(1-e[3])})`;ctx.lineWidth=3;for(let i=0;i<3;i++){const r=30+((e[3]*90+i*30)%90);ctx.beginPath();ctx.arc(e[1],e[2],r,Math.PI*.15,Math.PI*.85,true);ctx.stroke()}}}
   ctx.restore();
-  if(strike){const g=ecGap(T),k=clamp((strike.ti-gt)/(strike.ti-strike.t0),0,1);ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(g.x,g.y,24+60*k,0,Math.PI*2);ctx.stroke();
-    ctx.fillStyle='#e8fdff';ctx.font='800 22px "Big Shoulders Display",Impact,sans-serif';ctx.textAlign='center';ctx.fillText(_('STRIKE!','FRAPPE !'),g.x,g.y-74)}
   if(trapQ){const q=trapQ;S.post=()=>{ctx.save();ctx.globalAlpha=.9;tent(J.x,J.y,(J.x+q.x)/2,J.y-60,(J.x+q.x)/2,q.y-140,q.x,q.y-120,3,.8);ctx.restore();ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);ctx.scale(q.sc,q.sc);PDRAW.head(.85);ctx.restore()}}
 }
 
@@ -1883,43 +1880,39 @@ function playCine(id,k,cb){
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;S.ringT=0;S.proHand=null;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function resetPhaseState(){Object.assign(S,{angerShown:false,finalDone:false,banner:null,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,lock:0,post:null})}
+function resetPhaseState(){Object.assign(S,{angerShown:false,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,pl:newPl(),post:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
 }
-function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:P.title(),desc:P.desc(),how:P.how(),go:_('Start','Commencer'),onGo:beginPlay})}
+function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:P.boss(),desc:P.desc(),go:_('Start','Commencer'),onGo:beginPlay})}
 function beginPlay(){hideCard();S.mode='play';S.paused=false;S.nextAt=gt+1.1;setTheme(S.phase);try{$('ward').focus({preventScroll:true})}catch(e){};hud();say(PH[S.phase].head())}
 function phaseCleared(){
   MUSIC.stop();const id=S.phase;
   if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();S.mode='card';hud();
-      showCard({eye:_('Phase III · Form II','Phase III · Forme II'),title:_('It rises again.','Elle se relève.'),
-        desc:_("The tower has burst. The King's pieces orbit the jellyfish, finally exposed.","La tour a éclaté. Les morceaux du Roi tournent autour de la méduse, enfin à découvert."),
-        how:_("Same controls. TAP against the rings and the bell trap, HOLD against the anchor, the lanterns and the burst. To strike, tap when the gap in the orbit passes in front of you.","Mêmes commandes. TOUCHE contre les anneaux et la cloche-piège, MAINTIENS contre l'ancre, les lanternes et l'éclatement. Pour frapper, touche quand la fenêtre de l'orbite passe devant toi."),
+      showCard({eye:PH[3].eye(),title:PH[3].boss(),desc:PH[3].form2(),
         go:_('Continue','Continuer'),onGo:beginPlay})});return}
   store.set('lb-ch2-unl',String(Math.max(+store.get('lb-ch2-unl',1),Math.min(3,gpOf(id)+1))));
-  if(id===3){playCine(3,'out',()=>playEpilogue(victory));return}
+  if(id===3){playCine(3,'out',()=>clearedCard(3));return}
   playCine(id,'out',()=>clearedCard(id));
 }
 function clearedCard(id){S.mode='card';const next=ORDER[gpOf(id)];
-  showCard({eye:id===2?_('Phase I cleared','Phase I terminée'):_('Phase II cleared','Phase II terminée'),
-    title:id===2?_('The mirror shatters.','Le miroir vole en éclats.'):_('The toll falls silent.','Le glas se tait.'),
-    desc:(id===2?_("Beyond the gallery, an orange glow: the foundry. ","Derrière la galerie, une lueur orange : la fonderie. "):_("The floor gave way. The Watcher and the King fall toward a frozen lake. ","Le sol a cédé. Le Veilleur et le Roi tombent vers un lac gelé. "))+(S.d.heal?_('The Watcher catches his breath.','Le Veilleur reprend son souffle.'):_('Trial: no healing.','Épreuve : pas de soin.')),
-    go:_('Continue','Continuer'),onGo:()=>enterPhase(next),go2:_('Menu','Menu'),onGo2:showMenu});
+  showCard({eye:[null,_('Phase II cleared','Phase II terminée'),_('Phase I cleared','Phase I terminée'),_('Phase III cleared','Phase III terminée')][id],title:PH[id].boss(),desc:PH[id].end(),
+    go:_('Continue','Continuer'),onGo:id===3?()=>playEpilogue(victory):()=>enterPhase(next),go2:id===3?null:_('Menu','Menu'),onGo2:showMenu});
 }
 function fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0')}
 function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
   const t=S.runT,key='lb-ch2-best-'+S.dk,rec=+store.get(key,0);let isRec=false;
   if(S.full&&(!rec||t<rec)){store.set(key,String(t));isRec=true}
   const best=S.full?(isRec?t:rec):rec;
-  showCard({eye:_('Victory','Victoire')+' · '+S.d[LANG],title:_('The stars shine again.','Les étoiles se rallument.'),
+  showCard({eye:_('Victory','Victoire')+' · '+S.d[LANG],title:_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
     table:[[_('Time','Temps'),fmt(t)],[_('Hits taken','Coups reçus'),S.hits],[_('Perfects','Parfaits'),S.perfects],[_('Best','Record'),best?fmt(best):'—',true]],
-    desc:(isRec?_('New record. ','Nouveau record. '):'')+(S.full?'':_('Records only count for runs started from the beginning. ','Le record ne compte que pour une partie lancée depuis le début. '))+_('In the village, a bell rings again. Under the ice, a blue glow still pulses.','Au village, une cloche sonne de nouveau. Sous la glace, une lueur bleue pulse encore.'),
+    desc:(isRec?_('New record. ','Nouveau record. '):'')+(S.full?'':_('Records only count for runs started from the beginning.','Le record ne compte que pour une partie lancée depuis le début.')),
     go:_('Play again','Rejouer'),onGo:()=>startRun(S.dk),go2:_('Menu','Menu'),onGo2:showMenu});
 }
 function deathCard(){MUSIC.stop();const tr=S.d.trial;
   showCard({eye:_('Defeat','Défaite'),title:_('The Watcher is down.','Le Veilleur est à terre.'),
-    desc:tr?_('Trial: one fall sends you back to Phase I.','Épreuve : une chute te renvoie à la phase I.'):_('Breathe, read the tells, and try the phase again.','Respire, observe les signes, et retente la phase.'),
+    desc:tr?_('Trial: one fall sends you back to Phase I.','Épreuve : une chute te renvoie à la phase I.'):'',
     go:tr?_('Restart','Recommencer'):_('Retry phase','Réessayer la phase'),onGo:()=>tr?startRun(S.dk,true):retryPhase(),go2:_('Menu','Menu'),onGo2:showMenu});
 }
 function retryPhase(){const f=S.form||1;S.hp=S.hpMax;S.bossHp=S.bossMax;resetPhaseState();S.form=f;S.mode='card';hud();beginPlay()}
@@ -1942,11 +1935,14 @@ function setPause(p){if(S.mode!=='play')return;S.paused=p;$('pause').hidden=!p;i
 
 /* ---------- Epilogue: the bell rings again ---------- */
 const EPI_LEN=23;
-const ECAPF=()=>[[.4,4.8,_('The Watcher carries the King’s head-bell to the nearest village.','Le Veilleur rapporte la tête-cloche du Roi au village le plus proche.')],
-  [5,9.6,_('He hangs it in the old bell tower.','Il la suspend dans le vieux clocher.')],
-  [10,13.8,_('At dawn, for the first time in years, a bell rings over the marsh.','Au matin, pour la première fois depuis des années, une cloche sonne sur le marais.')],
-  [14,17.8,_('He does not return to the stars. He stays at the edge of the marsh, staff planted in the peat.','Il ne remonte pas vers les étoiles. Il reste au bord du marais, bâton planté dans la tourbe.')],
-  [18.4,21.6,_('Under the ice, far below, a small blue glow still pulses.','Sous la glace, très loin, une petite lueur bleue pulse encore.')]];
+/* outro cartons (docs/CH2-SPEC.md) over the provisional scenes: [start, end, text] in seconds; carton 6 is the title,
+   tinted with the next chapter's colour */
+const ECAPF=()=>[[.4,4.2,_('By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again.','Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus.')],
+  [4.4,8.2,_('On it, a single word is engraved: Crown.','Sur celle-ci, un seul mot est gravé : Couronne.')],
+  [8.4,12.2,_('And this time, the earth has not stopped trembling.',"Et cette fois, la terre n'a pas cessé de trembler.")],
+  [12.4,16.2,_('Beneath the waves, a turquoise glow still pulses, faintly.','Sous les vagues, une lueur turquoise pulse encore, faiblement.')],
+  [16.4,19.8,_('Deep in the forest, a faint light flickers.','Au cœur de la forêt, une faible lumière vacille.')]];
+const EPI_TITLE=20.2;
 const EFXL=[[.2,'stars'],[5.3,'charge'],[7.6,'bellSoft'],[10.4,'bellBig'],[11.9,'bellBig'],[13.3,'bellHit'],[16,'land'],[18.1,'whooshDown'],[19.8,'heart'],[20.8,'sting']];
 function hangBell(x,y,sw){ctx.save();ctx.translate(x,y);ctx.rotate(sw);ctx.translate(0,26);ctx.scale(.44,.44);PDRAW.head(.85);ctx.restore()}
 function drawEpilogue(t){
@@ -1988,7 +1984,7 @@ function drawEpilogue(t){
   // particles, text
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   for(const c of ECAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0){ctx.save();ctx.translate(0,-H*.64);caption(c[2],a);ctx.restore()}}
-  title(t,20.6,_('The end','Fin'),'Silent Bells','#7fd6ff');
+  title(t,EPI_TITLE,'',_('Chapter III. To be continued.','Chapitre III. À suivre.'),CH_COL[3],CH_COL[3]);
   fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-22.2)/.8,0,1));
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
 }
@@ -1997,7 +1993,7 @@ function endEpilogue(){if(S.mode!=='epilogue')return;const cb=S.epCb;S.epCb=null
 
 
 /* ---------- combat sound effects: wind-ups, releases and impacts ---------- */
-const SFX_START={slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload',strike:'swell'};
+const SFX_START={slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
 const SFX_MID={orb:'throw',toll:'tollLast',ring:'whoosh',trap:'whooshDown',chunk:'clank',shard:'whoosh',sweep:'whoosh',slam:'whoosh'};
 const SFX_HIT={slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank'};
 function combatSfx(){
@@ -2019,10 +2015,7 @@ function gameUpdate(dt){
   angerCheck();combatSfx();
   if(S.mode==='play'&&S.phase===1)S.parasite=S.bossHp<=S.bossMax/2?.6+.15*Math.sin(gt*3):0;
   if(S.phase===3&&S.form===2&&(S.mode==='play'||S.mode==='ko')&&!S.paused){
-    const st=S.threats.find(t=>t.k==='strike'&&!t.done);
-    if(st){if(!st.gp){const ga=S.ecPhi+12*Math.PI/7;let d=((Math.PI-ga)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);if(d<1)d+=2*Math.PI;st.gp={from:S.ecPhi,to:S.ecPhi+d,t0:gt}}
-      S.ecPhi=lerp(st.gp.from,st.gp.to,eio(clamp((gt-st.gp.t0)/(st.ti-st.gp.t0),0,1)))}
-    else S.ecPhi+=(S.bossHp<=S.bossMax/2?1.05:.7)*dt;
+    S.ecPhi+=(S.bossHp<=S.bossMax/2?1.05:.7)*dt;
   }
   if(S.mode==='ko'&&!S.koShown&&gt>S.koT+.45){S.koShown=true;phaseCleared()}
 }
@@ -2045,13 +2038,11 @@ function renderMenu(){
 function applyLang(){
   document.documentElement.lang=LANG;
   document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)));
-  $('mEye').textContent=_('Ember Bridge · Chapter II','Ember Bridge · Chapitre II');
-  $('mSub').textContent=_('The Drowned Lighthouse','Le Phare Noyé');
-  $('mTag').textContent=_("Sent back from the stars, the Watcher faces the Hollow Voice, the Rust King, then the tower the Bottomless built from his body.","Renvoyé des étoiles, le Veilleur affronte la Voix Creuse, le Roi de Rouille, puis la tour que la Sans-Fond a bâtie avec son corps.");
-  const M=[['easy','Facile','Easy','Respirer','Breathe'],['normal','Normal','Normal','Le vrai combat','The real fight'],['hard','Difficile','Hard','Sans pitié','No mercy'],['trial','Épreuve','Trial','Sans soin','No healing'],['tn','Normal','Normal','6 PV au total','6 HP total'],['th','Difficile','Hard','5 PV au total','5 HP total']];
-  for(const m of M){const b=document.querySelector(`[data-diff="${m[0]}"]`);b.querySelector('b').textContent=_(m[2],m[1]);b.querySelector('span').textContent=_(m[4],m[3])}
+  $('mEye').textContent=_('Chapter II · Silent Bells','Chapitre II · Silent Bells');
+  const M=[['easy',_('Easy','Facile'),_('Breathe','Respirer')],['normal',_('Normal','Normal'),_('The real fight','Le vrai combat')],['hard',_('Hard','Difficile'),_('No mercy','Sans pitié')],
+    ['trial',_('Trial','Épreuve'),_('No healing','Sans soin')],['tn',_('Normal','Normal'),_('4 HP total','4 PV au total')],['th',_('Hard','Difficile'),_('4 HP total','4 PV au total')]];
+  for(const m of M){const b=document.querySelector(`[data-diff="${m[0]}"]`);b.querySelector('b').textContent=m[1];b.querySelector('span').textContent=m[2]}
   $('mBackT').querySelector('b').textContent=_('‹ Back','‹ Retour');$('mBackT').querySelector('span').textContent=_('Difficulties','Difficultés');
-  $('mHow').textContent=_("One button. Phase I: dodge, without falling for reflections. Phase II: parry. Phase III: hold to guard, tap to counter. Space, up arrow or tap the screen.","Un seul bouton. Phase I : esquiver, sans mordre aux reflets. Phase II : parer. Phase III : maintenir la garde, toucher pour contrer. Espace, flèche haut ou toucher l'écran.");
   $('mResume').textContent=_('Resume','Reprendre');$('pResume').textContent=_('Resume','Reprendre');$('pTitle').textContent=_('Fight paused','Combat en pause');
   $('retryBtn').textContent=_('Retry','Réessayer');$('skip').textContent=_('Skip ›','Passer ›');
   $('hint').textContent=_("Space, up arrow or tap the screen · P pause · R retry · Enter to skip","Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer");

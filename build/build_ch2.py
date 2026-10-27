@@ -28,7 +28,7 @@ s = cut(s, '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
            '<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800'
            '&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">\n', "")
 fonts = (ROOT / "build/fonts.css").read_text(encoding="utf-8")
-s = cut(s, "<title>Silent Bells</title>\n<style>\n", "<title>Silent Bells</title>\n<style>\n" + fonts + "\n")
+s = cut(s, "<title>Lumenbell · Silent Bells</title>\n<style>\n", "<title>Lumenbell · Silent Bells</title>\n<style>\n" + fonts + "\n")
 assert "fonts.googleapis" not in s and "fonts.gstatic" not in s
 assert s.count("<script>") == 1 and s.count("</script>") == 1
 DIST.parent.mkdir(parents=True, exist_ok=True)

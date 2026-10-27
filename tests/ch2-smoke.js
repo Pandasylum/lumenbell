@@ -1,5 +1,8 @@
 // Test de fumee du Chapitre II (Silent Bells) sur chapters/ch2-silent-bells/dist/index.html.
-// Syntaxe du script final, puis Normal : prologue, phases I, II, III (deblocage via localStorage db-unl).
+// Puis, sans aucune cle de sauvegarde (UNLOCK_ALL) : phases II et III lancees directement depuis le menu et la frise,
+// en Facile, Normal et Difficile ; l'Epreuve se lance depuis le menu (frise fermee).
+// Syntaxe du script final, puis Normal et Difficile : prologue, phases I, II, III (deblocage via localStorage db-unl),
+// PV du Veilleur affiches (4 en Normal, 3 en Difficile).
 // Aucun appel reseau externe : controle statique du fichier (aucune URL http(s) ni API reseau), puis en jeu,
 // hors ligne, toute requete autre que file:/data:/blob: (page, sous-ressource, worker, WebSocket, appel d'API
 // reseau depuis le script) est interceptee et comptee comme erreur. Sortie attendue : errs []
@@ -29,7 +32,7 @@ await ctx.addInitScript(()=>{const hit=(k,u)=>{try{console.error('reseau-api '+k
  if(navigator.sendBeacon){const B=navigator.sendBeacon.bind(navigator);navigator.sendBeacon=(u,d)=>{hit('beacon',u);return B(u,d)}}
  const E=window.EventSource;if(E)window.EventSource=function(u){hit('eventsource',u);return new E(...arguments)};
  window.open=u=>{hit('window.open',u);return null}});
-const pg=await ctx.newPage();
+let pg=await ctx.newPage();
 pg.on('websocket',w=>errs.push('websocket: '+w.url()));
 pg.on('worker',w=>{if(!/^(file|data|blob):/.test(w.url()))errs.push('worker: '+w.url())});
 pg.on('popup',p=>errs.push('popup: '+p.url()));
@@ -43,22 +46,41 @@ const st=()=>pg.evaluate(()=>({ph:document.body.dataset.ph,eye:document.getEleme
  locked:[...document.querySelectorAll('#phases button')].map(x=>x.disabled?1:0).join('')}));
 // passe prologue et cinematique (Entree) jusqu'a la carte de phase
 const toCard=async lbl=>{for(let i=0;i<40;i++){const s=await st();if(s.card)return s;if(s.skip)await pg.keyboard.press('Enter');await pg.waitForTimeout(250)}errs.push(lbl+': carte de phase jamais affichee');return st()};
-const play=async(lbl,ph)=>{let s=await toCard(lbl);
+const play=async(lbl,ph,hp)=>{let s=await toCard(lbl);
  await pg.click('#go');await pg.waitForTimeout(300);
  for(let i=0;i<12;i++){await pg.keyboard.down('Space');await pg.waitForTimeout(120);await pg.keyboard.up('Space');await pg.waitForTimeout(380)}
  s=await st();console.log(lbl,JSON.stringify(s));
  if(s.ph!==String(ph))errs.push(lbl+': phase interne '+s.ph+' au lieu de '+ph);
- if(s.menu)errs.push(lbl+': menu affiche')};
+ if(s.menu)errs.push(lbl+': menu affiche');
+ if(!s.hp.endsWith('/'+hp))errs.push(lbl+': PV '+s.hp+' (max attendu '+hp+')')};
 console.log('menu',JSON.stringify(await st()));
 if(await pg.evaluate(()=>localStorage.getItem('db-unl'))!=='3')errs.push('db-unl non pose');
-await pg.click('[data-diff=normal]');await pg.waitForTimeout(300);
-await play('phase I',2);
-// frise : boutons I, II, III ; ORDER=[2,1,3]
-const s0=await st();if(s0.locked!=='000')errs.push('phases verrouillees malgre db-unl=3: '+s0.locked);
-await pg.click('#phases button[data-ph="2"]');await pg.waitForTimeout(300);
-await play('phase II',1);
-await pg.click('#phases button[data-ph="3"]');await pg.waitForTimeout(300);
-await play('phase III',3);
+for(const [dk,hp] of [['normal',4],['hard',3]]){
+ if(dk!=='normal'){await pg.click('#menuBtn');await pg.waitForTimeout(300)}
+ await pg.click('[data-diff='+dk+']');await pg.waitForTimeout(300);
+ await play(dk+' phase I',2,hp);
+ // frise : boutons I, II, III ; ORDER=[2,1,3]
+ const s0=await st();if(s0.locked!=='000')errs.push('phases verrouillees malgre db-unl=3: '+s0.locked);
+ await pg.click('#phases button[data-ph="2"]');await pg.waitForTimeout(300);
+ await play(dk+' phase II',1,hp);
+ await pg.click('#phases button[data-ph="3"]');await pg.waitForTimeout(300);
+ await play(dk+' phase III',3,hp)}
+// sans cle : tout est ouvert des le depart (UNLOCK_ALL)
+{const ctx2=await b.newContext({viewport:{width:1100,height:760},offline:true});
+ await ctx2.route(u=>!/^(file|data|blob):/.test(u.href),r=>{errs.push('reseau: '+r.request().url());return r.abort()});
+ pg=await ctx2.newPage();pg.on('pageerror',e=>errs.push('pageerror: '+e.message));
+ await pg.goto('file://'+FILE);await pg.waitForTimeout(500);
+ if(await pg.evaluate(()=>localStorage.length))errs.push('sans cle : localStorage non vide');
+ const s0=await st();console.log('sans cle, menu',JSON.stringify(s0));if(s0.locked!=='000')errs.push('sans cle : frise verrouillee '+s0.locked);
+ for(const [dk,gp,ph,hp] of [['normal',3,3,4],['hard',2,1,3],['easy',3,3,6]]){
+  await pg.click('[data-diff='+dk+']');await pg.waitForTimeout(300);           // menu -> prologue
+  await pg.click('#phases button[data-ph="'+gp+'"]');await pg.waitForTimeout(300); // frise, sans finir le niveau precedent
+  await play('sans cle '+dk+' phase '+['','I','II','III'][gp]+' directe',ph,hp);
+  await pg.click('#menuBtn');await pg.waitForTimeout(300)}
+ await pg.click('[data-diff=trial]');await pg.waitForTimeout(200);await pg.click('[data-diff=tn]');await pg.waitForTimeout(300);
+ const t=await toCard('Epreuve');console.log('sans cle, Epreuve',JSON.stringify(t));
+ if(t.ph!=='2'||!t.hp.endsWith('/4')||t.locked!=='111')errs.push('Epreuve : phase '+t.ph+', PV '+t.hp+', frise '+t.locked+' (attendu phase I, 4 PV, frise fermee)');
+ await ctx2.close()}
 // pages non file: ouvertes par la page (onglet, navigation) : aucune
 for(const p of ctx.pages())if(!p.url().startsWith('file:'))errs.push('page externe: '+p.url());
 console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)})
