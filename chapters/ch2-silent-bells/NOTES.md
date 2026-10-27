@@ -20,6 +20,10 @@ Tout le reste est octet pour octet la source (`diff legacy/silent-bells.source.h
 - l'absence de saut de ligne final et de `lang` sur `<html>` ;
 - le lien cliquable `#mLink` vers l'artefact Claude du Chapitre I (`https://claude.ai/code/artifact/…`) : ce n'est pas un appel réseau automatique (seulement au clic), mais il mène hors du jeu. À remplacer par le menu commun (point 4 de `docs/CH2-SPEC.md`).
 
+## À faire lors de l'harmonisation (pas dans l'import)
+1. **En-tête de l'hébergeur d'artefacts (ligne 1)** : le retirer proprement (`<!doctype html><html><head><meta charset=utf8>`, viewport, style de base `:root{…}body{…}[hidden]…`, `</head><body>`). Remettre `<title>` et le `<style>` du jeu dans un vrai `<head>` (doctype, `lang`, `meta charset="utf-8"`, viewport), comme le `dist` du Chapitre I. Reprendre dans les styles du jeu ce qui compte pour le rendu (zones sûres, `body{margin:0}`, règle `[hidden]`), puis comparer en image avant / après (horloge simulée).
+2. **Lien du menu vers l'artefact du Chapitre I** (`#mLink`, `https://claude.ai/code/artifact/…`, texte « ‹ Ember Bridge · Chapitre I ») : le remplacer par le menu commun (point 4 de `docs/CH2-SPEC.md`).
+
 ## Test (`node tests/ch2-smoke.js`)
 - Sur `dist/index.html` directement (pas de version de test : la source n'a pas de crochets). Contexte hors ligne ; toute requête autre que `file:`/`data:`/`blob:` est une erreur.
 - Vérifie d'abord la syntaxe du `<script>` final (`new Function`), puis : `db-unl=3` posé avant le chargement, Normal, prologue passé (Entrée), phase I → II → III via la frise `#phases` (cinématique passée, carte, Commencer, ~6 s de jeu en appuyant sur Espace). Relève `pageerror`, `console.error`, requêtes échouées ou externes. Sortie attendue : `errs []`.
