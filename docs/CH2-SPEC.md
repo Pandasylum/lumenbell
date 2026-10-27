@@ -96,17 +96,19 @@ La fin : les lumières ne changent que le rendu (image, ton), jamais le choix de
 
 ## Sorts et rages (décisions du 27 octobre, pour C1 puis session équilibrage)
 
+**Vocabulaire (28 octobre) :** le Veilleur n'a plus d'épée, donc plus de « parade ». Un seul geste, **bloquer** (EN *block*), pour les phases où l'on faisait parer, et **esquiver** ; la phase III garde le blocage tenu (barrage). Même principe, mêmes fonctions et mêmes états que le Chapitre I (`ready` → action → `recover`). Les noms dans le code et les textes (FR/EN, lecteur d'écran, aide, difficultés) suivent.
+
 Seul l'aspect change ; les valeurs (timings, fenêtres) restent celles du code jusqu'à la session d'équilibrage.
 
 ### Phase I · La salle des reflets (la Voix Creuse) : esquive
 - Gardés : orbe, volée, cri.
 - **Rage = Échos** (trois sources, une seule vraie) ; les reflets se brisent un à un, avec un éclat qui part vers le Veilleur.
 
-### Phase II · La cale (le Roi de Rouille) : parade
+### Phase II · La cale (le Roi de Rouille) : blocage
 - Gardés : ancre plongeante, balayage, glas (onde de la cloche de tête).
 - **Harpon** : la seconde main du Roi est un harpon (aller, puis retour). Le crochet à chaîne disparaît (différencier du Colosse).
-- **Vague d'eau** (remplace piétinement et pierres) : il tape du pied, la vague naît sous son pied et grandit en avançant vers le Veilleur. Au mur du fond, la cale tremble et une poutre tombe du plafond (deux chutes = deux parades, comme les anciennes pierres).
-- **Rage = Nuage de rouille** : il secoue sa cloche, un nuage de poussière rouge descend et masque le décor (jamais le signal de parade ; le Roi reste repérable à la lueur de sa cloche), avance, parade au contact.
+- **Vague d'eau** (remplace piétinement et pierres) : il tape du pied, la vague naît sous son pied et grandit en avançant vers le Veilleur. Au mur du fond, la cale tremble et une poutre tombe du plafond (deux chutes = deux blocages, comme les anciennes pierres).
+- **Rage = Nuage de rouille** : il secoue sa cloche, un nuage de poussière rouge descend et masque le décor (jamais le signal de blocage ; le Roi reste repérable à la lueur de sa cloche), avance, blocage au contact.
 - **Rage = Double vague** : deux vagues décalées, la seconde plus grande, la poutre tombe après la seconde.
 
 ### Phase III · Les récifs (le Phare Noyé)
