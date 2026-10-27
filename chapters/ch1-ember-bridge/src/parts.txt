@@ -4,4 +4,7 @@ page/head.html
 page/style.css
 page/body.html
 js/00-core.js
+js/05-audio-sfx.js
+js/10-state.js
+js/15-effects.js
 page/end.html
