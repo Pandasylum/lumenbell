@@ -394,7 +394,6 @@ function up(){S.holding=false;$('ward').classList.remove('down')}
 function success(th,perfect){
   th.done=true;th.res='ok';th.okT=gt;th.perfect=perfect;S.okT=gt;
   if(perfect){th.pat.perf++;S.perfects++}
-  if(th.k==='strike')return;
   const ph=S.phase;
   if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#fff2c4':'#ffb45a',perfect?7:5,.5);play('parry',perfect);MUSIC.fx('clank');pop(ONO.parry,perfect?'#fff2c4':'#ffc77a')}
   else if(ph===2){S.dodgeOk=gt;play('dodge',perfect)}
@@ -435,7 +434,6 @@ function update(dt){
       if(gt>th.ti+(th.win||S.d.win)){
         th.done=true;th.okT=gt;
         if(th.real===false){th.res='pass';burst(HX+20,GY-70,10,'#a49bbd',3,.5);play('fool')}
-        else if(th.k==='strike'){th.res='miss';th.pat.ok=false}
         else{th.res='hit';th.pat.ok=false;hurt();if(S.mode!=='play')break}
       }
     }
@@ -450,15 +448,16 @@ function update(dt){
   S.pops=S.pops.filter(p=>gt-p.t0<1);
   S.shake*=Math.pow(.02,dt);
 }
+/* riposte after a clean series, in every phase (rule of Ember Bridge): dur = length of the Watcher's counter, hitAt = moment
+   the boss is hit (s, internal phase number: 1 the King, 2 the Voice, 3 the Lighthouse); next = pause before the next series */
+const R_CNT={1:{dur:1.05,hitAt:.42},2:{dur:1.05,hitAt:.4},3:{dur:.95,hitAt:.32},next:1.45,nextFail:.95};
 function closePat(){
   const p=S.pat;S.pat=null;
-  if(p.strike){if(p.ok){S.cnt={t:gt,dmg:p.perf?2:1,dur:.95,hitAt:.32,k:3};play('counter');counterFx()}else S.nextAt=gt+.9;if(p.ok)S.nextAt=gt+1.4;return}
   if(p.ok){
-    if(S.phase===3){sched([{k:'strike',t0:gt,ti:gt+(S.form===2?1.3:1.15),win:p.bigWin?.95:.62,perfW:.13,real:true}]).strike=true;say(_('The lantern dims: strike!','La lanterne faiblit : frappe !'));return}
-    const allPerf=p.nReal>=2&&p.perf>=p.nReal;
-    S.cnt={t:gt,dmg:allPerf?2:1,dur:1.05,hitAt:S.phase===1?.42:.4,k:S.phase};S.nextAt=gt+1.45;play('counter');counterFx();
-    say(S.phase===1?_('Series parried. The Watcher counters.','Série parée. Le Veilleur riposte.'):_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'));
-  }else S.nextAt=gt+.95;
+    const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=R_CNT[S.phase];
+    S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
+    say(S.phase===1?_('Series parried. The Watcher counters.','Série parée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
+  }else S.nextAt=gt+R_CNT.nextFail;
 }
 
 /* ---------- boss animation helpers ---------- */
@@ -837,7 +836,7 @@ function shard(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a*1.5);const g=
 
 /* ---------- boss 3: the Drowned Beacon ---------- */
 const LX=760,LY=GY-292;
-function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0));if(th.k==='strike'&&!th.done)dim=1}
+function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0))}
   if(S.cnt&&S.cnt.k===3)dim=1;return{charge,dim}}
 const RIBS=(()=>{const R=mulberry(51);return[...Array(7)].map((_,i)=>({x:600+i*48+R()*10,h:40+R()*50,l:R()>.5?1:-1}))})();
 /* ---- the King's body parts, drawn in local coordinates ---- */
@@ -990,7 +989,6 @@ function drawBeacon(){
         if(th.res==='hit'){ctx.fillStyle=`rgba(200,250,255,${1-e})`;for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(HX+i*14-8,GY+4);ctx.lineTo(HX+i*14,GY-70+Math.abs(i)*16);ctx.lineTo(HX+i*14+8,GY+4);ctx.fill()}}
         else if(e<.05)burst(HX+8,GY-10,18,'#dff8ff',6,.6,.4)}
     }
-    if(th.k==='strike'&&!th.done){const k=clamp((th.ti-gt)/(th.ti-th.t0),0,1);ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(LX,LY,30+70*k,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='rgba(79,224,204,.8)';ctx.beginPath();ctx.arc(LX,LY,30,0,Math.PI*2);ctx.stroke()}
   }
 }
 function beamShape(bx,a){const g=ctx.createLinearGradient(LX,LY,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(LX-9,LY);ctx.lineTo(LX+9,LY);ctx.lineTo(bx+80,GY+16);ctx.lineTo(bx-80,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,90,12,`rgba(200,250,255,${.25*a})`)}
@@ -1010,7 +1008,7 @@ function drawHelp(){
   for(const th of S.threats){
     if(th.done)continue;
     if(th.hold){if(gt>=th.t0&&gt<=th.tb){const on=gt>=th.ta;ctx.save();ctx.strokeStyle=on?'#e8fdff':'rgba(232,253,255,.6)';ctx.lineWidth=on?4:2;if(!on)ctx.setLineDash([5,6]);ctx.beginPath();ctx.arc(HX,GY-40,on?100:100+40*clamp((th.ta-gt)/1.2,0,1),Math.PI,0);ctx.stroke();ctx.restore()}continue}
-    if(th.k==='strike'||gt<th.t0)continue;
+    if(gt<th.t0)continue;
     const span=Math.min(1,th.ti-th.t0),k=(th.ti-gt)/span;if(k>1||k<-.3)continue;
     const r=26+64*Math.max(0,k);
     ctx.save();
@@ -1556,7 +1554,7 @@ const PH=[null,
   aria:()=>_('The Watcher facing the Hollow Voice, a figure with a cracked mirror face','Le Veilleur face à la Voix Creuse, une silhouette au visage de miroir fêlé')},
  {eye:()=>_('Phase III · The Frozen Lake','Phase III · Le lac gelé'),title:()=>_('Put out the beacon.','Éteins le phare.'),
   desc:()=>_("The Bottomless has left the King and built a tower from his body. Its lantern sweeps the lake and calls down lightning.","La Sans-Fond est sortie du Roi et a bâti une tour avec son corps. Sa lanterne balaie le lac et appelle la foudre."),
-  how:()=>_("HOLD the button to shield yourself while the beam crosses you (your guard wears out if held too long). TAP against lightning and ice spikes. When the lantern dims, tap to strike.","MAINTIENS le bouton pour faire bouclier quand le faisceau passe sur toi (la garde s'use si tu la tiens trop). TOUCHE contre la foudre et les pics de glace. Quand la lanterne faiblit, touche pour frapper."),
+  how:()=>_("HOLD the button to shield yourself while the beam crosses you (your guard wears out if held too long). TAP against lightning and ice spikes.","MAINTIENS le bouton pour faire bouclier quand le faisceau passe sur toi (la garde s'use si tu la tiens trop). TOUCHE contre la foudre et les pics de glace."),
   head:()=>_('Phase III of III · The Frozen Lake','Phase III sur III · Le lac gelé'),boss:()=>S.form===2?_('The Shattered',"L'Éclaté"):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Guard','Garde'),
   aria:()=>_("The Watcher on a frozen lake facing the Drowned Lighthouse, a tower made of the King's body, crowned by an electric jellyfish","Le Veilleur sur un lac gelé face au Phare Noyé, une tour faite du corps du Roi et couronnée d'une méduse électrique")}
 ];
@@ -1586,7 +1584,7 @@ function spawn(){
   if(!S.finalDone&&S.bossHp<=FINAL_AT&&(id!==3||f2)){
     S.finalDone=true;
     banner(_('Final assault','Dernier assaut'),[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
-    const pat=sched(gen(1,f,gt+1.6,true));if(f2)pat.bigWin=true;return}
+    sched(gen(1,f,gt+1.6,true));return}
   sched(gen(stage,f,gt+.25));
 }
 /* ---- Phase I · the Hollow Voice ---- */
@@ -1761,8 +1759,7 @@ function drawEclGame(){
       if(post>0&&!th.bf){th.bf=1;S.shake=22;S.flashT=gt;burst(J.x,J.y,70,'#e8fdff',11,1.1);MUSIC.fx('explosion')}
       if(post>0&&post<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,245,255,${1-post})`;ctx.lineWidth=8*(1-post)+1;ctx.beginPath();ctx.arc(J.x,J.y,post*900,0,Math.PI*2);ctx.stroke();ctx.restore()}}
   }
-  const strike=S.threats.find(t=>t.k==='strike'&&!t.done);
-  const on=strike?.5+.2*Math.sin(gt*10):1;
+  const on=1;
   const hit={x:HX+20,y:GY-80},tells=[],beams=[],fx=[];let trapQ=null;
   for(const th of S.threats){
     if(gt<th.t0)continue;
@@ -1790,7 +1787,7 @@ function drawEclGame(){
       else{const k=eio(clamp((gt-th.ts-th.D)/.8,0,1));A={x:lerp(-80,A0.x,k),y:lerp(GY-60,A0.y,k),a:A0.a,sc:lerp(.85,A0.sc,k),z:k<1?3:A0.z}}}
     else if(th.k==='lbeam')beams.push(th);
   }
-  drawEcl(P,A,J,1,on,strike?ecGap(T):null);
+  drawEcl(P,A,J,1,on,null);
   if(reBeam!=null){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*reBeam,1);ctx.restore()}
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const th of beams){const o=P[SBELLS[th.side]];
@@ -1800,7 +1797,6 @@ function drawEclGame(){
   for(const e of fx){if(e[0]==='wave'){ctx.strokeStyle=`rgba(200,245,255,${1-e[3]})`;ctx.lineWidth=6*(1-e[3])+1;ctx.beginPath();ctx.arc(e[1],e[2],e[3]*700,0,Math.PI*2);ctx.stroke()}
     else{ctx.strokeStyle=`rgba(255,200,120,${.8*(1-e[3])})`;ctx.lineWidth=3;for(let i=0;i<3;i++){const r=30+((e[3]*90+i*30)%90);ctx.beginPath();ctx.arc(e[1],e[2],r,Math.PI*.15,Math.PI*.85,true);ctx.stroke()}}}
   ctx.restore();
-  if(strike){const g=ecGap(T),k=clamp((strike.ti-gt)/(strike.ti-strike.t0),0,1);ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(g.x,g.y,24+60*k,0,Math.PI*2);ctx.stroke()}
   if(trapQ){const q=trapQ;S.post=()=>{ctx.save();ctx.globalAlpha=.9;tent(J.x,J.y,(J.x+q.x)/2,J.y-60,(J.x+q.x)/2,q.y-140,q.x,q.y-120,3,.8);ctx.restore();ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);ctx.scale(q.sc,q.sc);PDRAW.head(.85);ctx.restore()}}
 }
 
@@ -1835,7 +1831,7 @@ function phaseCleared(){
   if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();S.mode='card';hud();
       showCard({eye:_('Phase III · Form II','Phase III · Forme II'),title:_('It rises again.','Elle se relève.'),
         desc:_("The tower has burst. The King's pieces orbit the jellyfish, finally exposed.","La tour a éclaté. Les morceaux du Roi tournent autour de la méduse, enfin à découvert."),
-        how:_("Same controls. TAP against the rings and the bell trap, HOLD against the anchor, the lanterns and the burst. To strike, tap when the gap in the orbit passes in front of you.","Mêmes commandes. TOUCHE contre les anneaux et la cloche-piège, MAINTIENS contre l'ancre, les lanternes et l'éclatement. Pour frapper, touche quand la fenêtre de l'orbite passe devant toi."),
+        how:_("Same controls. TAP against the rings and the bell trap, HOLD against the anchor, the lanterns and the burst.","Mêmes commandes. TOUCHE contre les anneaux et la cloche-piège, MAINTIENS contre l'ancre, les lanternes et l'éclatement."),
         go:_('Continue','Continuer'),onGo:beginPlay})});return}
   store.set('lb-ch2-unl',String(Math.max(+store.get('lb-ch2-unl',1),Math.min(3,gpOf(id)+1))));
   if(id===3){playCine(3,'out',()=>playEpilogue(victory));return}
@@ -1937,7 +1933,7 @@ function endEpilogue(){if(S.mode!=='epilogue')return;const cb=S.epCb;S.epCb=null
 
 
 /* ---------- combat sound effects: wind-ups, releases and impacts ---------- */
-const SFX_START={slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload',strike:'swell'};
+const SFX_START={slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
 const SFX_MID={orb:'throw',toll:'tollLast',ring:'whoosh',trap:'whooshDown',chunk:'clank',shard:'whoosh',sweep:'whoosh',slam:'whoosh'};
 const SFX_HIT={slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank'};
 function combatSfx(){
@@ -1959,10 +1955,7 @@ function gameUpdate(dt){
   angerCheck();combatSfx();
   if(S.mode==='play'&&S.phase===1)S.parasite=S.bossHp<=S.bossMax/2?.6+.15*Math.sin(gt*3):0;
   if(S.phase===3&&S.form===2&&(S.mode==='play'||S.mode==='ko')&&!S.paused){
-    const st=S.threats.find(t=>t.k==='strike'&&!t.done);
-    if(st){if(!st.gp){const ga=S.ecPhi+12*Math.PI/7;let d=((Math.PI-ga)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);if(d<1)d+=2*Math.PI;st.gp={from:S.ecPhi,to:S.ecPhi+d,t0:gt}}
-      S.ecPhi=lerp(st.gp.from,st.gp.to,eio(clamp((gt-st.gp.t0)/(st.ti-st.gp.t0),0,1)))}
-    else S.ecPhi+=(S.bossHp<=S.bossMax/2?1.05:.7)*dt;
+    S.ecPhi+=(S.bossHp<=S.bossMax/2?1.05:.7)*dt;
   }
   if(S.mode==='ko'&&!S.koShown&&gt>S.koT+.45){S.koShown=true;phaseCleared()}
 }

@@ -9,9 +9,9 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 3 | The Hollow Voice's mirror shatters. | Le miroir de la Voix Creuse éclate. |
 | 4 | The lantern goes dark. | La lanterne s'éteint. |
 | 5 | Your guard is broken. | Ta garde est brisée. |
-| 6 | The lantern dims: strike! | La lanterne faiblit : frappe ! |
-| 7 | Series parried. The Watcher counters. | Série parée. Le Veilleur riposte. |
-| 8 | Volley dodged. The Watcher sends the light back. | Volée esquivée. Le Veilleur renvoie la lumière. |
+| 6 | Series parried. The Watcher counters. | Série parée. Le Veilleur riposte. |
+| 7 | Volley dodged. The Watcher sends the light back. | Volée esquivée. Le Veilleur renvoie la lumière. |
+| 8 | Attacks countered. The Watcher sends the lightning back. | Attaques contrées. Le Veilleur renvoie la foudre. |
 | 9 | The parasite wakes in his heart | Le parasite se réveille dans son cœur |
 | 10 | The jellyfish bursts from the King | La méduse jaillit du corps du Roi |
 | 11 | Its tentacles rebuild the pieces | Ses tentacules réassemblent les morceaux |
@@ -56,7 +56,7 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 50 | Phase III · The Frozen Lake | Phase III · Le lac gelé |
 | 51 | Put out the beacon. | Éteins le phare. |
 | 52 | The Bottomless has left the King and built a tower from his body. Its lantern sweeps the lake and calls down lightning. | La Sans-Fond est sortie du Roi et a bâti une tour avec son corps. Sa lanterne balaie le lac et appelle la foudre. |
-| 53 | HOLD the button to shield yourself while the beam crosses you (your guard wears out if held too long). TAP against lightning and ice spikes. When the lantern dims, tap to strike. | MAINTIENS le bouton pour faire bouclier quand le faisceau passe sur toi (la garde s'use si tu la tiens trop). TOUCHE contre la foudre et les pics de glace. Quand la lanterne faiblit, touche pour frapper. |
+| 53 | HOLD the button to shield yourself while the beam crosses you (your guard wears out if held too long). TAP against lightning and ice spikes. | MAINTIENS le bouton pour faire bouclier quand le faisceau passe sur toi (la garde s'use si tu la tiens trop). TOUCHE contre la foudre et les pics de glace. |
 | 54 | Phase III of III · The Frozen Lake | Phase III sur III · Le lac gelé |
 | 55 | The Shattered | L'Éclaté |
 | 56 | The Drowned Lighthouse | Le Phare Noyé |
@@ -78,7 +78,7 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 72 | Phase III · Form II | Phase III · Forme II |
 | 73 | It rises again. | Elle se relève. |
 | 74 | The tower has burst. The King's pieces orbit the jellyfish, finally exposed. | La tour a éclaté. Les morceaux du Roi tournent autour de la méduse, enfin à découvert. |
-| 75 | Same controls. TAP against the rings and the bell trap, HOLD against the anchor, the lanterns and the burst. To strike, tap when the gap in the orbit passes in front of you. | Mêmes commandes. TOUCHE contre les anneaux et la cloche-piège, MAINTIENS contre l'ancre, les lanternes et l'éclatement. Pour frapper, touche quand la fenêtre de l'orbite passe devant toi. |
+| 75 | Same controls. TAP against the rings and the bell trap, HOLD against the anchor, the lanterns and the burst. | Mêmes commandes. TOUCHE contre les anneaux et la cloche-piège, MAINTIENS contre l'ancre, les lanternes et l'éclatement. |
 | 76 | Continue | Continuer |
 | 77 | Phase I cleared | Phase I terminée |
 | 78 | Phase II cleared | Phase II terminée |
