@@ -4,7 +4,9 @@
 // faisceaux (des `lead` secondes avant jusqu'a la fin du passage). Mode `sloppy` : appuie aussi sur les reflets,
 // tient la garde trop longtemps et rate des coups (pour declencher tous les cas : blessure, reflet, garde brisee).
 // Option miss : nombre de premieres attaques reelles laissees passer volontairement (coups recus).
-// Usage : node tests/ch2-bot.js [runs]   -> mesures de la phase III (formes I et II) en Normal et Difficile.
+// Usage : node tests/ch2-bot.js [parties] [--check]  -> mesures de la phase III (formes I et II) en Normal et Difficile.
+// --check (CI) : echoue si le bot gagne moins de 90 % des parties en Normal avec une erreur de timing de 40 ou 70 ms
+// (la phase III doit rester gagnable sans contre-attaque a frapper).
 const path=require('path');const launch=require('./launch');const {testPage}=require('./ch2-lib');
 
 // s'execute dans la page
@@ -64,5 +66,6 @@ if(require.main===module)(async()=>{
     let w=0,ts=[],hits=[],why={};
     for(let i=0;i<N;i++){const r=await run(pg,{dk,phase:3,sigma,seed:1000+i});why[r.res]=(why[r.res]||0)+1;if(r.res==='win'){w++;ts.push(r.t);hits.push(r.hits)}}
     const avg=a=>a.length?(a.reduce((x,y)=>x+y,0)/a.length).toFixed(1):'-';
+    if(process.argv.includes('--check')&&dk==='normal'&&sigma<.08&&w<.9*N)errs.push('phase III Normal, sigma '+sigma+' : '+w+'/'+N+' victoires (90 % attendus)');
     console.log(dk.padEnd(6),'sigma',sigma.toFixed(2),'victoires',w+'/'+N,'temps moyen',avg(ts)+' s','coups recus (victoires)',avg(hits),JSON.stringify(why))}
   console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',['exception: '+e.message]);process.exit(1)});
