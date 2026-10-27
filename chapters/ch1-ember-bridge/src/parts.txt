@@ -7,4 +7,9 @@ js/00-core.js
 js/05-audio-sfx.js
 js/10-state.js
 js/15-effects.js
+js/20-p1-bridge-logic.js
+js/25-p1-bridge-decor.js
+js/30-hero-draw.js
+js/35-boss-body.js
+js/40-p1-bridge-render.js
 page/end.html
