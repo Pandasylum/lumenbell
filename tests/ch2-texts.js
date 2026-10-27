@@ -1,36 +1,33 @@
-// Chapitre II : controle de l'inversion _(fr, en) -> _(en, fr).
-// Extrait les couples (fr, en) de l'import d'origine (legacy, _(fr,en)) et du dist (_(en,fr)) : la liste doit etre
-// identique, dans le meme ordre, au caractere pres, aux couples retires volontairement pres (RETIRES).
-// Verifie aussi la definition de _ dans le dist.
-// Extracteur independant de build/ch2_swap_args.py. Sortie attendue : errs []
-const fs=require('fs'),path=require('path');
-const R=p=>fs.readFileSync(path.resolve(__dirname,'..',p),'utf8');
-const LEGACY='chapters/ch2-silent-bells/legacy/silent-bells.source.html',DIST='chapters/ch2-silent-bells/dist/index.html';
+// Chapitre II : textes. Sans navigateur. Sortie attendue : errs []
+// 1. definition _(en, fr) dans le dist ;
+// 2. liste de reference : tous les appels _(en, fr) du dist, dans l'ordre, doivent redonner exactement
+//    chapters/ch2-silent-bells/TEXTES.md (tableau lisible, relu et valide). Apres un changement de texte voulu :
+//    node tests/ch2-texts.js --write, relire le diff de TEXTES.md, committer avec la source ;
+// 3. FR et EN identiques en structure (chaine vide des deux cotes ou d'aucun, meme nombre de phrases,
+//    de « · » et de « … », meme ponctuation finale).
+const fs=require('fs'),path=require('path');const {ROOT,DIST,script,calls,lit}=require('./ch2-lib');
+const REF=path.join(ROOT,'chapters/ch2-silent-bells/TEXTES.md');
 const errs=[];
-// couples (fr, en) retires volontairement depuis l'import, tels qu'ecrits dans legacy
-const RETIRES=[
- ["'‹ Ember Bridge · Chapitre I'","'‹ Ember Bridge · Chapter I'"], // lien du menu vers l'artefact du Chapitre I (27 octobre 2026)
-];
-const script=h=>{const m=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)];if(m.length!==1)errs.push('scripts: '+m.length);return m[0][1]};
-// liste des appels _(a,b) (imbriques compris, dans l'ordre d'apparition) : [arg1, arg2] bruts, sans espaces autour
-function calls(code){const out=[];const re=/(?<![\w$.])_\(/g;let m;
- const parse=i=>{const args=[];let d=0,st=i;
-  for(;;){const c=code[i];
-   if(c==="'"||c==='"'||c==='`'){const q=c;i++;while(code[i]!==q){if(code[i]==='\\')i++;i++}i++;continue}
-   if('([{'.includes(c))d++;
-   else if(')]}'.includes(c)){if(!d){args.push(code.slice(st,i).trim());return args}d--}
-   else if(c===','&&!d){args.push(code.slice(st,i).trim());st=i+1}
-   i++}};
- while((m=re.exec(code))){const a=parse(m.index+2);if(a.length!==2)errs.push('appel a '+a.length+' arguments: '+code.slice(m.index,m.index+60));out.push(a)}
- return out}
-const gone=new Set(RETIRES.map(c=>JSON.stringify(c)));
-const all=calls(script(R(LEGACY)));
-const before=all.filter(c=>!gone.has(JSON.stringify(c)));
-if(all.length-before.length!==RETIRES.length)errs.push('couples retires introuvables dans legacy: '+(RETIRES.length-(all.length-before.length)));
-const distCode=script(R(DIST));
-const after=calls(distCode).map(([en,fr])=>[fr,en]);
-if(!/const _=\(en,fr\)=>LANG==='fr'\?fr:en;/.test(distCode))errs.push('definition _(en,fr) absente du dist');
-if(before.length!==after.length)errs.push('nombre de couples: '+before.length+' avant, '+after.length+' apres');
-for(let i=0;i<Math.max(before.length,after.length);i++){const a=JSON.stringify(before[i]),b=JSON.stringify(after[i]);if(a!==b){errs.push('couple '+i+': '+a+' devenu '+b);if(errs.length>10)break}}
-console.log('couples (fr, en)',all.length,'dans legacy dont',RETIRES.length,'retire(s) ;',before.length,'attendus,',after.length,'dans le dist');
+const code=script(fs.readFileSync(DIST,'utf8'));
+if(!/const _=\(en,fr\)=>LANG==='fr'\?fr:en;/.test(code))errs.push('definition _(en,fr) absente du dist');
+const C=calls(code);
+for(const c of C)if(c.args.length!==2)errs.push('appel a '+c.args.length+' arguments: '+code.slice(c.at,c.at+60));
+const cell=a=>{const v=lit(a);return v===null?'`'+a.replace(/`/g,"'")+'`':v===''?'*(vide)*':v.replace(/\|/g,'\\|').replace(/\n/g,' ')};
+const md='# Textes du Chapitre II (EN / FR)\n\n'+
+ 'Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/dist/index.html` : tous les appels `_(en, fr)`, dans l\'ordre du script. '+
+ '`tests/ch2-texts.js` echoue si le jeu ne redonne pas exactement ce fichier. Texte en `code` : argument calcule (pas une chaine simple). '+
+ 'Les onomatopees (identiques dans les deux langues) ne passent pas par `_()`.\n\n'+
+ '| # | Anglais | Français |\n|---|---|---|\n'+C.map((c,i)=>'| '+(i+1)+' | '+cell(c.args[0])+' | '+cell(c.args[1])+' |').join('\n')+'\n';
+if(process.argv.includes('--write')){fs.writeFileSync(REF,md);console.log('ecrit',path.relative(ROOT,REF),C.length,'couples')}
+else{const ref=fs.existsSync(REF)?fs.readFileSync(REF,'utf8'):'';
+ if(ref!==md){const a=ref.split('\n'),b=md.split('\n');let n=0;
+  for(let i=0;i<Math.max(a.length,b.length)&&n<12;i++)if(a[i]!==b[i]){errs.push('TEXTES.md ligne '+(i+1)+': attendu '+JSON.stringify(a[i])+' ; dist '+JSON.stringify(b[i]));n++}}}
+// structure FR / EN
+const shape=s=>{const t=s.replace(/[\s  »”"']+$/,'');return{empty:!s.trim(),dots:(s.match(/·/g)||[]).length,ell:(s.match(/…/g)||[]).length,
+ sent:(t.match(/[.!?…](?=\s|$)/g)||[]).length,end:(t.match(/[.!?…:]$/)||[''])[0]}};
+let nLit=0;
+for(const c of C){const en=lit(c.args[0]),fr=lit(c.args[1]);if(en===null||fr===null)continue;nLit++;
+ const a=shape(en),b=shape(fr);
+ for(const k of ['empty','dots','ell','sent','end'])if(a[k]!==b[k]){errs.push('structure ('+k+'): '+JSON.stringify(en)+' / '+JSON.stringify(fr));break}}
+console.log('couples',C.length,'dont',nLit,'litteraux ; reference',path.relative(ROOT,REF));
 console.log('errs',errs);process.exitCode=errs.length?1:0;
