@@ -12,4 +12,6 @@ js/25-p1-bridge-decor.js
 js/30-hero-draw.js
 js/35-boss-body.js
 js/40-p1-bridge-render.js
+js/45-p2-foundry-logic.js
+js/50-p2-foundry-render.js
 page/end.html
