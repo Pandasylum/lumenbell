@@ -17,8 +17,11 @@ Journal daté. Une décision validée n'est pas remise en question dans une autr
 - Dépôt privé unique `lumenbell`. Découpage d'abord en fichiers assemblés par script (pas de modules JS), puis éventuellement ES modules.
 - Workflows : `tests.yml` (build reproductible + smoke) et `android.yml` (APK/AAB signés via Secrets).
 
-## 2026-10-27 – Découpage de la source du Chapitre I (branche `ch1/split`)
-- `legacy/ember-bridge.source.html` est remplacé par `chapters/ch1-ember-bridge/src/` : `page/` (head, style, body, end) et 22 morceaux `js/NN-nom.js`, numérotés de 4 en 4 pour pouvoir en intercaler.
-- Assemblage par simple concaténation (`build/assemble.py`, ordre dans `src/parts.txt`), **sans modules JS ni en-tête ajouté** : le build reste octet pour octet identique à `dist/index.html` v1.0. Les étapes intermédiaires ont toutes été vérifiées ainsi.
-- Découpage par tranches contiguës du fichier d'origine (aucun déplacement de code) : décor, Veilleur, corps du Colosse, logique et rendu de chaque phase, interface, musique, textes d'interface, cinématiques, boucle. Les textes `_()` restent là où ils sont utilisés ; `docs/TEXTES-CH1.md` donne leur `fichier:ligne`.
-- Le passage éventuel aux modules ES reste une étape ultérieure séparée (elle changera le build).
+## 2026-10-27 – Chapitre II · Silent Bells (voir `docs/CH2-SPEC.md`)
+- Boss : trois boss distincts (la Voix Creuse, le Roi de Rouille, le Phare Noyé en deux formes). La Voix Creuse est la gardienne de la tour, tombée et corrompue ; indice : une lanterne turquoise tombe dans l'eau quand son miroir explose.
+- Le Roi n'est pas rescellé (plus de gardienne pour tenir le fanal). Sa cloche de tête est la cloche du Phare ; gravure : signes anguleux + « Couronne » en clair (fausse piste : la tête du Roi).
+- Mécaniques : reflets (I), parade (II), barrage (III) ; riposte par série réussie. Contre-attaque à jauge de fatigue : réservée à un chapitre suivant.
+- Difficultés alignées sur Ember Bridge (Veilleur 6/4/3).
+- Trois tours perdues sur six, jamais selon la performance ; ordre : Montagne, Phare Noyé, Givre, Racines, Tour vide, La brèche (Roi Sombre), Le cœur. Les lumières ne changent que le rendu de la fin.
+- Intro, panneaux de phase et outro nouveaux et épurés ; code couleur par chapitre (braise, marée, givre).
+- Féminin de Veilleur : Veilleure.

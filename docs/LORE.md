@@ -172,3 +172,8 @@ Décisions validées le 26 octobre 2026, avec une modification : la révélation
 **8 · Nom des créatures** : Scellés au début (le mot des Veilleurs), Liés révélé au chapitre IV. Recommandé : ça donne un second sens à « Bound Spires » et prépare la fin.
 
 **9 · Origine des Liés** : d'anciens Veilleurs qui se sont sacrifiés pour tenir la tour, puis ont été corrompus par l'Umbryn avec le temps (ta proposition). Recommandé : le Chapitre I devient tragique, puisque le joueur a combattu l'un des siens, et la fin du chapitre prend son sens (un fanal qui veille sur lui). Contrepartie : le Colosse n'est plus un simple monstre, à respecter dans le ton.
+
+
+## Chapitre II · Silent Bells
+
+Les décisions du 27 octobre 2026 (histoire du chapitre, boss, pièces du Roi, cloche et gravure, textes, outro, code couleur, ordre des tours, mécaniques) sont dans `docs/CH2-SPEC.md` et **priment** sur les lignes provisoires du chapitre II plus haut (boss « gardien noyé », ordre des chapitres, fragments).
