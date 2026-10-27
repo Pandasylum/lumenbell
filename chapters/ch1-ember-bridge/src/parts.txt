@@ -1,0 +1,28 @@
+# Ordre d'assemblage de la source du Chapitre I (lu par build/assemble.py).
+# Les morceaux sont colles bout a bout, sans rien ajouter : l'ordre compte.
+page/head.html
+page/style.css
+page/body.html
+js/00-core.js
+js/04-audio-sfx.js
+js/08-state.js
+js/12-effects.js
+js/16-p1-bridge-logic.js
+js/20-p1-bridge-decor.js
+js/24-hero-draw.js
+js/28-boss-body.js
+js/32-p1-bridge-render.js
+js/36-p2-foundry-logic.js
+js/40-p2-foundry-render.js
+js/44-p3-belfry-logic.js
+js/48-p3-belfry-poses.js
+js/52-p3-belfry-decor.js
+js/56-p3-belfry-render.js
+js/60-ui-menu.js
+js/64-audio-music.js
+js/68-texts-ui.js
+js/72-boot.js
+js/76-cine-intro.js
+js/80-cine-outro.js
+js/84-loop.js
+page/end.html

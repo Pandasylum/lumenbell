@@ -16,3 +16,9 @@ Journal daté. Une décision validée n'est pas remise en question dans une autr
 ## 2026-10-27 – Organisation GitHub
 - Dépôt privé unique `lumenbell`. Découpage d'abord en fichiers assemblés par script (pas de modules JS), puis éventuellement ES modules.
 - Workflows : `tests.yml` (build reproductible + smoke) et `android.yml` (APK/AAB signés via Secrets).
+
+## 2026-10-27 – Découpage de la source du Chapitre I (branche `ch1/split`)
+- `legacy/ember-bridge.source.html` est remplacé par `chapters/ch1-ember-bridge/src/` : `page/` (head, style, body, end) et 22 morceaux `js/NN-nom.js`, numérotés de 4 en 4 pour pouvoir en intercaler.
+- Assemblage par simple concaténation (`build/assemble.py`, ordre dans `src/parts.txt`), **sans modules JS ni en-tête ajouté** : le build reste octet pour octet identique à `dist/index.html` v1.0. Les étapes intermédiaires ont toutes été vérifiées ainsi.
+- Découpage par tranches contiguës du fichier d'origine (aucun déplacement de code) : décor, Veilleur, corps du Colosse, logique et rendu de chaque phase, interface, musique, textes d'interface, cinématiques, boucle. Les textes `_()` restent là où ils sont utilisés ; `docs/TEXTES-CH1.md` donne leur `fichier:ligne`.
+- Le passage éventuel aux modules ES reste une étape ultérieure séparée (elle changera le build).

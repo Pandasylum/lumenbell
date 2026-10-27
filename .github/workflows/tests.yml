@@ -20,7 +20,7 @@ jobs:
       - name: Installer Playwright
         working-directory: tests
         run: |
-          npm install
+          npm ci
           npx playwright install --with-deps chromium
       - name: Test de fumee (3 phases x 3 difficultes) et polices hors ligne
         working-directory: tests

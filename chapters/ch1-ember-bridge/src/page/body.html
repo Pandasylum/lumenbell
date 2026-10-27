@@ -1,0 +1,118 @@
+</style>
+
+<main class="wrap">
+  <header class="top">
+    <div>
+      <p class="eyebrow" id="hdEye">Phase I of III · On the bridge</p>
+      <h1>Ember Bridge</h1>
+    </div>
+    <div class="hright"><ol class="phases" id="phases" aria-label="Phases du combat">
+      <li class="on" aria-current="step"><button type="button" data-ph="1" aria-label="Phase I">I</button></li><li><button type="button" data-ph="2" aria-label="Phase II">II</button></li><li><button type="button" data-ph="3" aria-label="Phase III">III</button></li>
+    </ol><button type="button" class="mbtn fsb" aria-label="Fullscreen" title="Fullscreen">⛶</button><button type="button" class="mbtn" id="menuBtn">Menu</button></div>
+  </header>
+
+  <section class="bars" aria-label="Points de vie">
+    <div class="bar"><span>The Watcher <b id="hpPn"></b></span><div class="pips" id="hpP" role="img" aria-label="Points de vie du Veilleur"></div></div>
+    <div class="bar boss"><span>Ember Colossus <b id="hpBn"></b></span><div class="pips" id="hpB" role="img" aria-label="Points de vie du Colosse"></div></div>
+  </section>
+
+  <div class="stage">
+    <canvas id="c" role="img" aria-label="Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre"></canvas>
+    <div class="ov" id="ov">
+      <div class="card">
+        <p class="eyebrow" id="ovEye">Phase I · The Bridge</p>
+        <h2 id="ovTitle">Hold the bridge.</h2>
+        <p class="stats" id="ovStats" hidden></p>
+        <div class="rtab" id="ovTable" hidden></div>
+        <p id="ovDesc">The Colossus has reached the bridge. Behind the Watcher lies nothing but the road to the valleys. A single rule: not one step back.</p>
+        <button class="btn" id="go" type="button">Start</button>
+        <button class="btn ghost" id="go2" type="button" hidden>Enable visual help</button>
+      </div>
+    </div>
+    <div class="gate" id="gate"><div class="langs" id="gateLangs" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></div><button class="btn big" id="gateBtn" type="button">Start</button></div>
+    <div class="ov menu" id="menu" hidden>
+    <svg class="mscene" viewBox="0 0 960 540" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="msky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#08060d"/><stop offset=".6" stop-color="#2a0f14"/><stop offset="1" stop-color="#7a2a10"/></linearGradient>
+        <radialGradient id="mgl" cx=".5" cy="1" r=".7"><stop offset="0" stop-color="#ff7a2b" stop-opacity=".75"/><stop offset="1" stop-color="#ff7a2b" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="960" height="540" fill="url(#msky)"/>
+      <circle cx="170" cy="110" r="34" fill="#f1e3cf" opacity=".16"/>
+      <g fill="#f1e3cf" opacity=".5"><circle cx="80" cy="60" r="1.2"/><circle cx="260" cy="40" r="1"/><circle cx="420" cy="90" r="1.2"/><circle cx="640" cy="50" r="1"/><circle cx="860" cy="80" r="1.2"/><circle cx="740" cy="130" r="1"/></g>
+      <path d="M0 400 L90 300 L160 350 L260 240 L350 340 L450 270 L560 350 L650 250 L760 340 L860 280 L960 360 L960 540 L0 540Z" fill="#1a0b10"/>
+      <path d="M0 450 L120 380 L220 430 L340 360 L470 440 L600 370 L730 440 L850 380 L960 430 L960 540 L0 540Z" fill="#120810"/>
+      <rect class="lava" y="400" width="960" height="140" fill="url(#mgl)"/>
+      <path d="M0 470 Q480 420 960 470 L960 540 L0 540Z" fill="#ff7a2b" opacity=".18" class="lava"/>
+      <g fill="#07050a">
+        <path d="M0 455 L960 455 L960 475 L900 475 Q860 475 860 505 L860 540 L760 540 L760 505 Q760 475 720 475 L560 475 Q520 475 520 505 L520 540 L420 540 L420 505 Q420 475 380 475 L200 475 Q160 475 160 505 L160 540 L60 540 L60 505 Q60 475 0 475Z"/>
+        <!-- Le Veilleur -->
+        <path class="mw" d="M205 455 L215 392 Q205 380 213 366 Q222 354 234 366 Q242 380 232 392 L242 455Z"/>
+        <path class="mw" d="M250 455 L250 332" stroke="#07050a" stroke-width="4" fill="none"/>
+        <circle class="mw" cx="250" cy="322" r="16" fill="#ffd27a" opacity=".22"/>
+        <path class="mw" d="M243 314 L250 307 L257 314Z"/>
+        <rect class="mw" x="243" y="314" width="14" height="18" fill="#ffd27a" opacity=".95"/>
+        <path class="mw" d="M248 314 L248 332 M252 314 L252 332" stroke="#07050a" stroke-width="1.2"/>
+        <!-- Le Colosse -->
+        <path d="M640 455 L650 330 L615 300 L640 270 L625 215 L660 245 L690 205 L720 245 L760 215 L750 270 L785 300 L745 335 L760 455Z"/>
+        <path d="M655 215 L630 150 L668 200Z M745 210 L772 148 L735 198Z"/>
+        <path d="M615 300 L540 360 L560 372 L630 330Z M785 300 L850 270 L860 290 L790 330Z"/>
+      </g>
+      <g class="eye" fill="#ffd27a"><circle cx="690" cy="232" r="4"/><circle cx="722" cy="232" r="4"/></g>
+      <path d="M675 330 Q705 300 735 330 Q705 360 675 330Z" fill="#ff7a2b" opacity=".35" class="lava"/>
+    </svg>
+    <div class="mem-wrap" id="mEmbers" aria-hidden="true"></div>
+      <button type="button" class="mbtn" id="introBtn">▶ Intro</button>
+      <button type="button" class="mbtn" id="outroBtn" hidden>▶ Outro</button>
+      <button type="button" class="mbtn fsb fsm" aria-label="Fullscreen" title="Fullscreen">⛶ <span>Fullscreen</span></button>
+      <div class="langs" id="langs" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></div>
+      <div class="mcard">
+        <h2><span>Lumen</span>bell</h2>
+        <p class="eyebrow chap">Chapter I · Ember Bridge</p>
+        <p class="tag">The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower.</p>
+        <button class="btn ghost" id="mResume" type="button" hidden>Resume</button>
+        <div class="mph" id="mphM" role="group" aria-label="Choisir la difficulté">
+          <button type="button" data-diff="easy"><b>Easy</b><span>Breathe</span></button>
+          <button type="button" data-diff="normal" aria-pressed="true"><b>Normal</b><span>The real fight</span></button>
+          <button type="button" data-diff="hard"><b>Hard</b><span>The Colossus unleashed</span></button>
+          <button type="button" data-diff="trial"><b>Trial by Fire</b><span>Ultimate challenge</span></button>
+        </div>
+        <div class="mph" id="mphT" role="group" aria-label="Trial by Fire" hidden>
+          <button type="button" data-diff="tn"><b>Normal</b><span>4 lives</span></button>
+          <button type="button" data-diff="th"><b>Hard</b><span>3 lives</span></button>
+          <button type="button" id="mBackT"><b>‹ Back</b><span>Difficulties</span></button>
+        </div>
+        <div class="tnote" id="trialNote" hidden>
+          <b>Trial by Fire</b>
+          <ul><li>The three phases in a row, with no pause and no visual help.</li><li>You recover 1 life between phases.</li><li>A single death sends you back to Phase I.</li><li>One stats table at the end of the run.</li></ul>
+        </div>
+        <p class="how">One button: block, dodge, parry. Space, up arrow or tap the screen. P to pause.</p>
+        <p class="ver" aria-label="Version 1.0.0">v1.0.0</p>
+        <div class="mfoot"><button type="button" class="mlink" id="mNext" aria-disabled="true"><span class="nm"></span> <small class="soon"></small></button></div>
+      </div>
+    </div>
+    <div class="ov" id="pause" hidden>
+      <div class="card">
+        <p class="eyebrow">Pause</p>
+        <h2>Fight paused</h2>
+        <button class="btn" id="pResume" type="button">Resume</button>
+        <button class="btn ghost" id="pMenu" type="button">Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ward" id="ward" type="button">Block</button>
+    <div class="mrow"><button class="mbtn" id="pauseBtn" type="button">Pause</button><button class="mbtn" id="retryBtn" type="button">Retry</button></div>
+    <p class="hint">Space, up arrow, or tap the screen · P pause · R retry</p>
+    <div class="opts">
+      <label for="optHelp"><input type="checkbox" id="optHelp"> Visual help</label>
+      <label for="optSnd"><input type="checkbox" id="optSnd" checked> Sound</label>
+      <label for="optMus"><input type="checkbox" id="optMus" checked> Music</label>
+    </div>
+  </div>
+
+  <p class="sr" id="live" aria-live="polite"></p>
+</main>
+<div class="cine" id="cine" hidden><div class="cbox"><canvas id="cineC" aria-hidden="true"></canvas></div><p class="ccap" id="cineCap" aria-live="polite"></p><button type="button" class="btn ghost" id="cineSkip">Skip ›</button></div>
+
+<script>
