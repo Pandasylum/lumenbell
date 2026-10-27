@@ -1,0 +1,29 @@
+name: Tests
+on:
+  push:
+  pull_request:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Le build reproduit exactement le fichier de reference
+        run: |
+          python3 build/build.py
+          git diff --exit-code chapters/ch1-ember-bridge/dist/index.html
+      - name: Version de test
+        run: python3 build/build_test.py
+      - name: Installer Playwright
+        working-directory: tests
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Test de fumee (3 phases x 3 difficultes) et polices hors ligne
+        working-directory: tests
+        run: |
+          node smoke.js
+          node fonts-offline.js
