@@ -254,8 +254,8 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
           <button type="button" data-diff="trial"><b>Épreuve</b><span>Sans soin</span></button>
         </div>
         <div class="mph" id="mphT" role="group" aria-label="Épreuve" hidden>
-          <button type="button" data-diff="tn"><b>Normal</b><span>6 PV au total</span></button>
-          <button type="button" data-diff="th"><b>Difficile</b><span>5 PV au total</span></button>
+          <button type="button" data-diff="tn"><b>Normal</b><span>4 PV au total</span></button>
+          <button type="button" data-diff="th"><b>Difficile</b><span>4 PV au total</span></button>
           <button type="button" id="mBackT"><b>‹ Retour</b><span>Difficultés</span></button>
         </div>
         <p class="how" id="mHow"></p>
@@ -295,13 +295,18 @@ const _=(en,fr)=>LANG==='fr'?fr:en;
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
+/* Difficulty, same values as Ember Bridge for the Watcher: hp = Watcher HP (6 / 4 / 3, trial 4 for the whole run);
+   m = multiplier of the timing windows (x2 / x1 / x0.6) applied to WIN (parry/dodge window, perfect window, in seconds);
+   sp = attack speed; boss = boss HP (kept from the import until playtests); heal = HP refilled between phases. */
+const WIN={win:.2,perf:.08};
 const DIFFS={
-  easy:{hp:8,win:.26,perf:.11,sp:.85,boss:6,heal:true,fr:'Facile',en:'Easy'},
-  normal:{hp:6,win:.2,perf:.08,sp:1,boss:8,heal:true,fr:'Normal',en:'Normal'},
-  hard:{hp:5,win:.155,perf:.06,sp:1.18,boss:10,heal:true,fr:'Difficile',en:'Hard'},
-  tn:{hp:6,win:.2,perf:.08,sp:1,boss:8,heal:false,trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{hp:5,win:.155,perf:.06,sp:1.18,boss:10,heal:false,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  easy:{hp:6,m:2,sp:.85,boss:6,heal:true,fr:'Facile',en:'Easy'},
+  normal:{hp:4,m:1,sp:1,boss:8,heal:true,fr:'Normal',en:'Normal'},
+  hard:{hp:3,m:.6,sp:1.18,boss:10,heal:true,fr:'Difficile',en:'Hard'},
+  tn:{hp:4,m:1,sp:1,boss:8,heal:false,trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
+  th:{hp:4,m:.6,sp:1.18,boss:10,heal:false,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
+for(const d of Object.values(DIFFS)){d.win=WIN.win*d.m;d.perf=WIN.perf*d.m}
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const eio=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2, eout=t=>1-Math.pow(1-t,3), ein=t=>t*t*t;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -1983,7 +1988,7 @@ function applyLang(){
   $('mEye').textContent=_('Ember Bridge · Chapter II','Ember Bridge · Chapitre II');
   $('mSub').textContent=_('The Drowned Lighthouse','Le Phare Noyé');
   $('mTag').textContent=_("Sent back from the stars, the Watcher faces the Hollow Voice, the Rust King, then the tower the Bottomless built from his body.","Renvoyé des étoiles, le Veilleur affronte la Voix Creuse, le Roi de Rouille, puis la tour que la Sans-Fond a bâtie avec son corps.");
-  const M=[['easy','Facile','Easy','Respirer','Breathe'],['normal','Normal','Normal','Le vrai combat','The real fight'],['hard','Difficile','Hard','Sans pitié','No mercy'],['trial','Épreuve','Trial','Sans soin','No healing'],['tn','Normal','Normal','6 PV au total','6 HP total'],['th','Difficile','Hard','5 PV au total','5 HP total']];
+  const M=[['easy','Facile','Easy','Respirer','Breathe'],['normal','Normal','Normal','Le vrai combat','The real fight'],['hard','Difficile','Hard','Sans pitié','No mercy'],['trial','Épreuve','Trial','Sans soin','No healing'],['tn','Normal','Normal','4 PV au total','4 HP total'],['th','Difficile','Hard','4 PV au total','4 HP total']];
   for(const m of M){const b=document.querySelector(`[data-diff="${m[0]}"]`);b.querySelector('b').textContent=_(m[2],m[1]);b.querySelector('span').textContent=_(m[4],m[3])}
   $('mBackT').querySelector('b').textContent=_('‹ Back','‹ Retour');$('mBackT').querySelector('span').textContent=_('Difficulties','Difficultés');
   $('mHow').textContent=_("One button. Phase I: dodge, without falling for reflections. Phase II: parry. Phase III: hold to guard, tap to counter. Space, up arrow or tap the screen.","Un seul bouton. Phase I : esquiver, sans mordre aux reflets. Phase II : parer. Phase III : maintenir la garde, toucher pour contrer. Espace, flèche haut ou toucher l'écran.");

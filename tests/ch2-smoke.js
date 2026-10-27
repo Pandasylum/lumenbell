@@ -1,5 +1,6 @@
 // Test de fumee du Chapitre II (Silent Bells) sur chapters/ch2-silent-bells/dist/index.html.
-// Syntaxe du script final, puis Normal : prologue, phases I, II, III (deblocage via localStorage db-unl).
+// Syntaxe du script final, puis Normal et Difficile : prologue, phases I, II, III (deblocage via localStorage db-unl),
+// PV du Veilleur affiches (4 en Normal, 3 en Difficile).
 // Aucun appel reseau externe : controle statique du fichier (aucune URL http(s) ni API reseau), puis en jeu,
 // hors ligne, toute requete autre que file:/data:/blob: (page, sous-ressource, worker, WebSocket, appel d'API
 // reseau depuis le script) est interceptee et comptee comme erreur. Sortie attendue : errs []
@@ -43,22 +44,25 @@ const st=()=>pg.evaluate(()=>({ph:document.body.dataset.ph,eye:document.getEleme
  locked:[...document.querySelectorAll('#phases button')].map(x=>x.disabled?1:0).join('')}));
 // passe prologue et cinematique (Entree) jusqu'a la carte de phase
 const toCard=async lbl=>{for(let i=0;i<40;i++){const s=await st();if(s.card)return s;if(s.skip)await pg.keyboard.press('Enter');await pg.waitForTimeout(250)}errs.push(lbl+': carte de phase jamais affichee');return st()};
-const play=async(lbl,ph)=>{let s=await toCard(lbl);
+const play=async(lbl,ph,hp)=>{let s=await toCard(lbl);
  await pg.click('#go');await pg.waitForTimeout(300);
  for(let i=0;i<12;i++){await pg.keyboard.down('Space');await pg.waitForTimeout(120);await pg.keyboard.up('Space');await pg.waitForTimeout(380)}
  s=await st();console.log(lbl,JSON.stringify(s));
  if(s.ph!==String(ph))errs.push(lbl+': phase interne '+s.ph+' au lieu de '+ph);
- if(s.menu)errs.push(lbl+': menu affiche')};
+ if(s.menu)errs.push(lbl+': menu affiche');
+ if(!s.hp.endsWith('/'+hp))errs.push(lbl+': PV '+s.hp+' (max attendu '+hp+')')};
 console.log('menu',JSON.stringify(await st()));
 if(await pg.evaluate(()=>localStorage.getItem('db-unl'))!=='3')errs.push('db-unl non pose');
-await pg.click('[data-diff=normal]');await pg.waitForTimeout(300);
-await play('phase I',2);
-// frise : boutons I, II, III ; ORDER=[2,1,3]
-const s0=await st();if(s0.locked!=='000')errs.push('phases verrouillees malgre db-unl=3: '+s0.locked);
-await pg.click('#phases button[data-ph="2"]');await pg.waitForTimeout(300);
-await play('phase II',1);
-await pg.click('#phases button[data-ph="3"]');await pg.waitForTimeout(300);
-await play('phase III',3);
+for(const [dk,hp] of [['normal',4],['hard',3]]){
+ if(dk!=='normal'){await pg.click('#menuBtn');await pg.waitForTimeout(300)}
+ await pg.click('[data-diff='+dk+']');await pg.waitForTimeout(300);
+ await play(dk+' phase I',2,hp);
+ // frise : boutons I, II, III ; ORDER=[2,1,3]
+ const s0=await st();if(s0.locked!=='000')errs.push('phases verrouillees malgre db-unl=3: '+s0.locked);
+ await pg.click('#phases button[data-ph="2"]');await pg.waitForTimeout(300);
+ await play(dk+' phase II',1,hp);
+ await pg.click('#phases button[data-ph="3"]');await pg.waitForTimeout(300);
+ await play(dk+' phase III',3,hp)}
 // pages non file: ouvertes par la page (onglet, navigation) : aucune
 for(const p of ctx.pages())if(!p.url().startsWith('file:'))errs.push('page externe: '+p.url());
 console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)})

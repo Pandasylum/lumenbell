@@ -38,6 +38,7 @@ jobs:
           node ch2-texts.js
           node ch2-keys.js
           node ch2-smoke.js
+          node ch2-trial.js
           node ch2-announce.js
       - name: Apercu du jeu (Chapitres I et II)
         uses: actions/upload-artifact@v4
