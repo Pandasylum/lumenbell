@@ -34,4 +34,6 @@ jobs:
           node fonts-offline.js
       - name: Chapitre II - syntaxe et test de fumee (3 phases en Normal, hors ligne)
         working-directory: tests
-        run: node ch2-smoke.js
+        run: |
+          node ch2-texts.js
+          node ch2-smoke.js
