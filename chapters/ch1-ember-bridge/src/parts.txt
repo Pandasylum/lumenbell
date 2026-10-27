@@ -18,4 +18,8 @@ js/55-p3-belfry-logic.js
 js/60-p3-belfry-poses.js
 js/65-p3-belfry-decor.js
 js/70-p3-belfry-render.js
+js/75-ui-menu.js
+js/80-audio-music.js
+js/85-texts-ui.js
+js/90-boot.js
 page/end.html

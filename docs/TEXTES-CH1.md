@@ -225,36 +225,36 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | src/js/55-p3-belfry-logic.js:464 | _() |  | One by one, the Spires answer. | Une à une, les Flèches répondent. |
 | src/js/55-p3-belfry-logic.js:468 | _() |  | All but one. | Toutes, sauf une. |
 | src/js/55-p3-belfry-logic.js:469 | _() |  | Far out at sea, the Drowned Beacon stays silent. End of Chapter I. | Au large, le Phare Noyé reste muet. Fin du chapitre I. |
-| src/js/70-p3-belfry-render.js:556 | _() |  | Phase I · The Bridge | Phase I · Le pont |
-| src/js/70-p3-belfry-render.js:556 | _() |  | The last watch. | La dernière veille. |
-| src/js/70-p3-belfry-render.js:557 | _() |  | The Colossus has reached the bridge. Behind the Watcher lies nothing but the road to the valleys. A single rule: not one step back. | Le Colosse a atteint le pont. Derrière le Veilleur, il n'y a plus que la route des vallées. Une seule règle : ne pas reculer d'un pas. |
-| src/js/70-p3-belfry-render.js:558 | _() |  | Start | Commencer |
-| src/js/70-p3-belfry-render.js:566 | _() |  | Phase I. | Phase I. |
-| src/js/70-p3-belfry-render.js:595 | _() |  | Retry | Réessayer |
-| src/js/70-p3-belfry-render.js:598 | _() |  | Give up? | Abandonner ? |
-| src/js/70-p3-belfry-render.js:599 | _() |  | Press Retry again to give up the run and start over from Phase I. | Rappuie sur Réessayer pour abandonner la run et repartir de la phase I. |
-| src/js/70-p3-belfry-render.js:610 | _() |  | Phase I. New attempt. | Phase I. Nouvel essai. |
-| src/js/70-p3-belfry-render.js:644 | _() |  | Not available in the trial | Indisponible dans l'épreuve |
-| src/js/70-p3-belfry-render.js:950 | SC | 6 | For a thousand winters, the mountain has burned beneath its stone. | Depuis mille hivers, la montagne brûle sous sa pierre. |
-| src/js/70-p3-belfry-render.js:951 | SC | 7 | In the valleys below, the villages sleep, kept safe by a single stone bridge. Beneath its arch lies a foundry forgotten by all, even by those who keep watch. | Dans les vallées, les villages dorment, à l'abri d'un unique pont de pierre. Sous son arche dort une fonderie oubliée de tous, même de ceux qui veillent. |
-| src/js/70-p3-belfry-render.js:952 | SC | 7 | On the bridge, a lone silhouette: the Watcher, a member of an order sworn to protect the Bound Spires. His lantern lives with him. | Sur le pont, une seule silhouette : le Veilleur, membre d'un ordre qui protège les Flèches liées. Sa lanterne vit avec lui. |
-| src/js/70-p3-belfry-render.js:953 | SC | 7 | Tonight, a chain gives way beneath the mountain. The Ember Colossus climbs toward the light. | Cette nuit, une chaîne cède sous la montagne. Le Colosse de braise remonte vers la lumière. |
-| src/js/70-p3-belfry-render.js:954 | SC | 7 | If the Watcher falls, the fire will reach the villages. | Si le Veilleur tombe, le feu atteindra les villages. |
-| src/js/70-p3-belfry-render.js:1034 | _() |  | CHAPTER I · EMBER BRIDGE | CHAPITRE I · EMBER BRIDGE |
-| src/js/70-p3-belfry-render.js:1060 | _() |  | Skip › | Passer › |
-| src/js/70-p3-belfry-render.js:1078 | SC | 9.5 | The great bell has fallen silent. Atop the Bell Tower, the Ember Colossus is now only a statue of black stone, kneeling before the bell. Lit by the Watcher, the beacon now keeps watch over him. | La grande cloche s'est tue. Au sommet du Clocher, le Colosse de braise n'est plus qu'une statue de pierre noire, à genoux face à la cloche. Allumé par le Veilleur, le fanal veille désormais sur lui. |
-| src/js/70-p3-belfry-render.js:1079 | SC | 6.5 | In the valleys, the villages are still asleep. They will never know what was at stake that night, above their roofs. | Dans les vallées, les villages dorment encore. Ils ne sauront jamais ce qui s'est joué cette nuit au-dessus de leurs toits. |
-| src/js/70-p3-belfry-render.js:1080 | SC | 9.5 | One by one, the Bound Spires answered the call. From peak to peak, their bells carried the news across the mountains, and beneath every tower, the stone trembled. | Une à une, les Flèches liées ont répondu à l'appel. De sommet en sommet, leurs cloches ont porté la nouvelle à travers les montagnes, et sous chaque tour, la pierre a tremblé. |
-| src/js/70-p3-belfry-render.js:1081 | SC | 8 | Every bell answered. Every one but one. Far out at sea, the Drowned Beacon stayed silent, as if the depths had imposed silence on it. | Toutes les cloches ont répondu. Toutes, sauf une. Au large, le Phare Noyé est resté muet, comme si les profondeurs lui avaient imposé le silence. |
-| src/js/70-p3-belfry-render.js:1082 | SC | 6 | At dawn, lantern in hand, the Watcher set out for the coast. | À l'aube, lanterne à la main, le Veilleur s'est mis en route vers la côte. |
-| src/js/70-p3-belfry-render.js:1083 | SC | 7 | Chapter II · Silent Bells. To be continued. | Chapitre II · Silent Bells. À suivre. |
-| src/js/70-p3-belfry-render.js:1159 | _() |  | LUMENBELL · CHAPTER II | LUMENBELL · CHAPITRE II |
-| src/js/70-p3-belfry-render.js:1178 | _() |  | Skip › | Passer › |
-| src/js/70-p3-belfry-render.js:1192 | _() |  | No record yet | Pas encore de record |
-| src/js/70-p3-belfry-render.js:1195 | _() |  | Trial by Fire | Épreuve du feu |
-| src/js/70-p3-belfry-render.js:1195 | _() |  | 🔒 Trial by Fire | 🔒 Épreuve du feu |
-| src/js/70-p3-belfry-render.js:1196 | _() |  | To unlock | À débloquer |
-| src/js/70-p3-belfry-render.js:1196 | _() |  | Ultimate challenge | Challenge ultime |
-| src/js/70-p3-belfry-render.js:1197 | _() |  | Chapter II · Silent Bells | Chapitre II · Silent Bells |
-| src/js/70-p3-belfry-render.js:1197 | _() |  | 🔒 Chapter II | 🔒 Chapitre II |
-| src/js/70-p3-belfry-render.js:1198 | _() |  | Coming soon | À venir |
+| src/js/75-ui-menu.js:2 | _() |  | Phase I · The Bridge | Phase I · Le pont |
+| src/js/75-ui-menu.js:2 | _() |  | The last watch. | La dernière veille. |
+| src/js/75-ui-menu.js:3 | _() |  | The Colossus has reached the bridge. Behind the Watcher lies nothing but the road to the valleys. A single rule: not one step back. | Le Colosse a atteint le pont. Derrière le Veilleur, il n'y a plus que la route des vallées. Une seule règle : ne pas reculer d'un pas. |
+| src/js/75-ui-menu.js:4 | _() |  | Start | Commencer |
+| src/js/75-ui-menu.js:12 | _() |  | Phase I. | Phase I. |
+| src/js/75-ui-menu.js:41 | _() |  | Retry | Réessayer |
+| src/js/75-ui-menu.js:44 | _() |  | Give up? | Abandonner ? |
+| src/js/75-ui-menu.js:45 | _() |  | Press Retry again to give up the run and start over from Phase I. | Rappuie sur Réessayer pour abandonner la run et repartir de la phase I. |
+| src/js/75-ui-menu.js:56 | _() |  | Phase I. New attempt. | Phase I. Nouvel essai. |
+| src/js/75-ui-menu.js:90 | _() |  | Not available in the trial | Indisponible dans l'épreuve |
+| src/js/90-boot.js:24 | SC | 6 | For a thousand winters, the mountain has burned beneath its stone. | Depuis mille hivers, la montagne brûle sous sa pierre. |
+| src/js/90-boot.js:25 | SC | 7 | In the valleys below, the villages sleep, kept safe by a single stone bridge. Beneath its arch lies a foundry forgotten by all, even by those who keep watch. | Dans les vallées, les villages dorment, à l'abri d'un unique pont de pierre. Sous son arche dort une fonderie oubliée de tous, même de ceux qui veillent. |
+| src/js/90-boot.js:26 | SC | 7 | On the bridge, a lone silhouette: the Watcher, a member of an order sworn to protect the Bound Spires. His lantern lives with him. | Sur le pont, une seule silhouette : le Veilleur, membre d'un ordre qui protège les Flèches liées. Sa lanterne vit avec lui. |
+| src/js/90-boot.js:27 | SC | 7 | Tonight, a chain gives way beneath the mountain. The Ember Colossus climbs toward the light. | Cette nuit, une chaîne cède sous la montagne. Le Colosse de braise remonte vers la lumière. |
+| src/js/90-boot.js:28 | SC | 7 | If the Watcher falls, the fire will reach the villages. | Si le Veilleur tombe, le feu atteindra les villages. |
+| src/js/90-boot.js:108 | _() |  | CHAPTER I · EMBER BRIDGE | CHAPITRE I · EMBER BRIDGE |
+| src/js/90-boot.js:134 | _() |  | Skip › | Passer › |
+| src/js/90-boot.js:152 | SC | 9.5 | The great bell has fallen silent. Atop the Bell Tower, the Ember Colossus is now only a statue of black stone, kneeling before the bell. Lit by the Watcher, the beacon now keeps watch over him. | La grande cloche s'est tue. Au sommet du Clocher, le Colosse de braise n'est plus qu'une statue de pierre noire, à genoux face à la cloche. Allumé par le Veilleur, le fanal veille désormais sur lui. |
+| src/js/90-boot.js:153 | SC | 6.5 | In the valleys, the villages are still asleep. They will never know what was at stake that night, above their roofs. | Dans les vallées, les villages dorment encore. Ils ne sauront jamais ce qui s'est joué cette nuit au-dessus de leurs toits. |
+| src/js/90-boot.js:154 | SC | 9.5 | One by one, the Bound Spires answered the call. From peak to peak, their bells carried the news across the mountains, and beneath every tower, the stone trembled. | Une à une, les Flèches liées ont répondu à l'appel. De sommet en sommet, leurs cloches ont porté la nouvelle à travers les montagnes, et sous chaque tour, la pierre a tremblé. |
+| src/js/90-boot.js:155 | SC | 8 | Every bell answered. Every one but one. Far out at sea, the Drowned Beacon stayed silent, as if the depths had imposed silence on it. | Toutes les cloches ont répondu. Toutes, sauf une. Au large, le Phare Noyé est resté muet, comme si les profondeurs lui avaient imposé le silence. |
+| src/js/90-boot.js:156 | SC | 6 | At dawn, lantern in hand, the Watcher set out for the coast. | À l'aube, lanterne à la main, le Veilleur s'est mis en route vers la côte. |
+| src/js/90-boot.js:157 | SC | 7 | Chapter II · Silent Bells. To be continued. | Chapitre II · Silent Bells. À suivre. |
+| src/js/90-boot.js:233 | _() |  | LUMENBELL · CHAPTER II | LUMENBELL · CHAPITRE II |
+| src/js/90-boot.js:252 | _() |  | Skip › | Passer › |
+| src/js/90-boot.js:266 | _() |  | No record yet | Pas encore de record |
+| src/js/90-boot.js:269 | _() |  | Trial by Fire | Épreuve du feu |
+| src/js/90-boot.js:269 | _() |  | 🔒 Trial by Fire | 🔒 Épreuve du feu |
+| src/js/90-boot.js:270 | _() |  | To unlock | À débloquer |
+| src/js/90-boot.js:270 | _() |  | Ultimate challenge | Challenge ultime |
+| src/js/90-boot.js:271 | _() |  | Chapter II · Silent Bells | Chapitre II · Silent Bells |
+| src/js/90-boot.js:271 | _() |  | 🔒 Chapter II | 🔒 Chapitre II |
+| src/js/90-boot.js:272 | _() |  | Coming soon | À venir |
