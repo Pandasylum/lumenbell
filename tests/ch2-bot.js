@@ -1,12 +1,12 @@
 // Chapitre II : bot de simulation (sur la copie de test a crochets, voir ch2-lib.js), temps a pas fixe de 1/60 s.
-// Le bot joue comme un joueur a un seul bouton : il appuie a l'instant d'impact de chaque attaque reelle avec une
-// erreur de timing gaussienne (sigma, en secondes), ne touche pas aux faux reflets et reste appuye pendant les
+// Le bot joue comme un joueur a un seul bouton : il appuie avant l'impact de chaque attaque reelle (aim, par defaut le milieu de la fenetre
+// d'arret : 0,14 s avant en Normal, 0,075 s en Difficile) avec une erreur de timing gaussienne (sigma, en secondes), ne touche pas aux faux reflets et reste appuye pendant les
 // faisceaux (des `lead` secondes avant jusqu'a la fin du passage). Mode `sloppy` : appuie aussi sur les reflets,
 // tient la garde trop longtemps et rate des coups (pour declencher tous les cas : blessure, reflet, garde brisee).
 // Option miss : nombre de premieres attaques reelles laissees passer volontairement (coups recus).
 // Option spam : periode (s) d'appuis repetes a l'aveugle a la place des appuis vises (la garde des faisceaux reste tenue
 // si spamGuard). Option early {n, d} : la n-ieme attaque a toucher (reelle, comptee a partir de 1) est jouee une seule fois,
-// d secondes avant l'ouverture de sa fenetre (un appui un peu trop tot), puis le joueur continue normalement.
+// d secondes avant l'ouverture de sa fenetre, c'est-a-dire avant l'impact moins la duree de l'action (un appui un peu trop tot), puis le joueur continue normalement.
 // Option skip {n} : la n-ieme attaque a toucher n'est pas jouee du tout (simple oubli, pour comparer).
 // Usage : node tests/ch2-bot.js [parties] [--check]  -> mesures de la phase III (formes I et II) en Normal et Difficile.
 // --check (CI) : echoue si le bot gagne moins de 90 % des parties en Normal avec une erreur de timing de 40 ou 70 ms
@@ -19,8 +19,9 @@ function sim(o){
   Math.random=rnd;
   const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
   if(o.cont){}else if(o.phase){T.startRun(o.dk,true);T.jumpPhase(o.phase)}else T.startRun(o.dk,!o.prologue);
+  if(o.debug&&!T._dw){T._dw=1;const D=T.down;T.down=()=>{T._lp={t:T.gt,s:T.S.pl.s,pt:+T.S.pl.t.toFixed(2)};D()}}
   const dt=1/60;let f=0,held=false,tapUp=false,cards=0,res=null;const startPh=T.S.phase;
-  const log={forms:[],deaths:0,hpAt:{}},g0=T.gt;let nTap=0,nextSpam=null;
+  const log={forms:[],deaths:0,hpAt:{}},g0=T.gt,aim=o.aim!=null?o.aim:(.333*T.S.d.m-.05)/2;;let nTap=0,nextSpam=null;   // aim par defaut : milieu de la fenetre [impact - action, impact + grace]
   while(!res){
     const S=T.S;
     if(S.mode==='won'){res='win';break}
@@ -39,9 +40,9 @@ function sim(o){
           if(t>=th.ta-th._lead&&t<=th.tb+.04)wantHold=true;continue}
         if(th.ti==null)continue;
         if(th._bp==null&&th.real!==false&&o.miss>0){o.miss--;th._bp=Infinity}
-        if(th._bp==null&&th.real!==false&&(o.early||o.skip)&&++nTap===(o.early||o.skip).n)th._bp=o.skip?Infinity:th.ti-(th.win||S.d.win)-o.early.d;
+        if(th._bp==null&&th.real!==false&&(o.early||o.skip)&&++nTap===(o.early||o.skip).n)th._bp=o.skip?Infinity:th.ti-.333*S.d.m-o.early.d;
         if(o.spam)th._bp=Infinity;
-        if(th._bp==null){const fake=th.real===false;th._bp=fake?(o.sloppy&&rnd()<.5?th.ti+gauss()*o.sigma:Infinity):(o.sloppy&&rnd()<.25?Infinity:th.ti+gauss()*o.sigma)}
+        if(th._bp==null){const fake=th.real===false;th._bp=fake?(o.sloppy&&rnd()<.5?th.ti-aim+gauss()*o.sigma:Infinity):(o.sloppy&&rnd()<.25?Infinity:th.ti-aim+gauss()*o.sigma)}
         if(!th._pr&&t>=th._bp){th._pr=1;tap=true}}
       if(o.sloppy&&S.phase===3&&rnd()<.002)wantHold=true;
       if(o.spam){if(!o.spamGuard)wantHold=false;if(nextSpam==null)nextSpam=t;if(t>=nextSpam){nextSpam+=o.spam;tap=true}}
@@ -53,9 +54,11 @@ function sim(o){
     }else if(held){T.up();held=false;tapUp=false}
     const pf=S.phase*10+(S.form||1);if(log.forms[log.forms.length-1]!==pf&&S.mode==='play'){log.forms.push(pf);log.hpAt[pf]=S.hp}
     if(S.mode==='ko')log.hpAt['ko'+pf]=S.hp;
+    const h0=S.hits,ps=S.pl&&S.pl.s,pt=S.pl&&S.pl.t,hd=held;
     T.step(dt,o.drawEvery&&f%o.drawEvery===0);f++;
+    if(o.debug&&T.S.hits>h0)(log.dbg=log.dbg||[]).push({k:T.S.threats.filter(x=>x.res==='hit'&&Math.abs(x.okT-T.gt)<.02).map(x=>x.k+'['+[x._bp,x.ti,x._pr,x.t0].map(v=>v==null?v:+(+v).toFixed(2)).join(',')+']').join('+'),s:ps,t:+(pt||0).toFixed(2),held:hd,last:T._lp&&{ago:+(T.gt-T._lp.t).toFixed(2),s:T._lp.s,pt:T._lp.pt}});
   }
-  const S=T.S;return{res,t:+S.runT.toFixed(1),hits:S.hits,hp:S.hp,hpMax:S.hpMax,boss:S.bossHp,phase:S.phase,form:S.form||1,forms:log.forms,hpAt:log.hpAt,mode:S.mode,trial:!!S.d.trial};
+  const S=T.S;return{res,t:+S.runT.toFixed(1),hits:S.hits,hp:S.hp,hpMax:S.hpMax,boss:S.bossHp,phase:S.phase,form:S.form||1,forms:log.forms,hpAt:log.hpAt,dbg:log.dbg,mode:S.mode,trial:!!S.d.trial};
 }
 
 async function open(b){const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true});

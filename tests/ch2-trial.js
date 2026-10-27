@@ -4,10 +4,11 @@
 const launch=require('./launch');const {open,run,go}=require('./ch2-bot');
 const errs=[];
 (async()=>{const b=await launch(),{pg,errs:perr}=await open(b);
- const want={easy:[6,.4],normal:[4,.2],hard:[3,.12],tn:[4,.2],th:[4,.12]};
- const d=await pg.evaluate(()=>Object.fromEntries(Object.entries(__t.DIFFS).map(([k,v])=>[k,[v.hp,+v.win.toFixed(3),+v.perf.toFixed(3),!!v.trial,v.heal]])));
- console.log('DIFFS [PV, fenetre, parfait, epreuve, soin]',JSON.stringify(d));
- for(const k in want){if(d[k][0]!==want[k][0])errs.push(k+': PV '+d[k][0]+' au lieu de '+want[k][0]);if(d[k][1]!==want[k][1])errs.push(k+': fenetre '+d[k][1]+' au lieu de '+want[k][1])}
+ // [PV, multiplicateur de l'action m (x2 / x1 / x0,6), multiplicateur de la recuperation rm (x1,2 en Difficile, comme au Chapitre I)]
+ const want={easy:[6,2,1],normal:[4,1,1],hard:[3,.6,1.2],tn:[4,1,1],th:[4,.6,1.2]};
+ const d=await pg.evaluate(()=>Object.fromEntries(Object.entries(__t.DIFFS).map(([k,v])=>[k,[v.hp,v.m,v.rm,!!v.trial,v.heal]])));
+ console.log('DIFFS [PV, m, rm, epreuve, soin]',JSON.stringify(d));
+ for(const k in want){if(d[k][0]!==want[k][0])errs.push(k+': PV '+d[k][0]+' au lieu de '+want[k][0]);if(d[k][1]!==want[k][1]||d[k][2]!==want[k][2])errs.push(k+': m '+d[k][1]+' rm '+d[k][2]+' au lieu de '+want[k][1]+' / '+want[k][2])}
  if(!d.tn[3]||!d.th[3]||d.tn[4]||d.th[4])errs.push('Epreuve : drapeaux trial/heal');
  for(const dk of ['tn','th','normal']){
   // phase I (interne 2) gagnee, puis arret au debut de la phase II (interne 1)

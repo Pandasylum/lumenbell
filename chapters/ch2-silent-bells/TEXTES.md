@@ -4,11 +4,11 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 
 | # | Anglais | Français |
 |---|---|---|
-| 1 | The Watcher falls. Defeat. | Le Veilleur tombe. Défaite. |
-| 2 | The Rust King collapses. | Le Roi de Rouille s'effondre. |
-| 3 | The Hollow Voice's mirror shatters. | Le miroir de la Voix Creuse éclate. |
-| 4 | The lantern goes dark. | La lanterne s'éteint. |
-| 5 | Your guard is broken. | Ta garde est brisée. |
+| 1 | Your guard is broken. | Ta garde est brisée. |
+| 2 | The Watcher falls. Defeat. | Le Veilleur tombe. Défaite. |
+| 3 | The Rust King collapses. | Le Roi de Rouille s'effondre. |
+| 4 | The Hollow Voice's mirror shatters. | Le miroir de la Voix Creuse éclate. |
+| 5 | The lantern goes dark. | La lanterne s'éteint. |
 | 6 | Series parried. The Watcher counters. | Série parée. Le Veilleur riposte. |
 | 7 | Volley dodged. The Watcher sends the light back. | Volée esquivée. Le Veilleur renvoie la lumière. |
 | 8 | Attacks countered. The Watcher sends the lightning back. | Attaques contrées. Le Veilleur renvoie la foudre. |
