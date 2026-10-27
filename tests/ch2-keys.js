@@ -1,18 +1,25 @@
 // Chapitre II : cles de sauvegarde communes lb-* et migration des anciennes (pn-, db-, eb-lang du Chapitre I).
 // Chaque cas : localStorage pose avant le chargement, puis lecture de l'etat (langue, options, frise, cles).
+// UNLOCK_ALL=true dans le jeu : frise toujours ouverte (000). Les cas marques off tournent sur une copie avec UNLOCK_ALL=false
+// (build/out/ch2-unlock-off.html) pour verifier que le deblocage progressif (lb-ch2-unl) marche encore.
 // Hors ligne. Sortie attendue : errs []
-const path=require('path');const launch=require('./launch');
+const fs=require('fs'),path=require('path');const launch=require('./launch');
 const FILE=path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html');
+const OFF=path.resolve(__dirname,'../build/out/ch2-unlock-off.html');
+{const h=fs.readFileSync(FILE,'utf8'),a='const UNLOCK_ALL=true;';if(h.split(a).length!==2)throw new Error('UNLOCK_ALL introuvable');fs.mkdirSync(path.dirname(OFF),{recursive:true});fs.writeFileSync(OFF,h.replace(a,'const UNLOCK_ALL=false;'))}
 const errs=[];
 const CASES=[
  {nom:'anciennes cles seules',set:{'pn-lang':'en','db-optSnd':'0','db-optMus':'0','db-optHelp':'1','db-unl':'2','db-best-tn':'123.5'},
-  want:{lang:'en',snd:false,mus:false,help:true,locked:'001'},
+  want:{lang:'en',snd:false,mus:false,help:true,locked:'000'},
   keys:{'lb-lang':'en','lb-snd':'0','lb-mus':'0','lb-help':'1','lb-ch2-unl':'2','lb-ch2-best-tn':'123.5','pn-lang':'en','db-unl':'2'}},
  {nom:'nouvelles cles prioritaires',set:{'lb-lang':'fr','pn-lang':'en','eb-lang':'en','lb-ch2-unl':'3','db-unl':'1','lb-snd':'1','db-optSnd':'0'},
   want:{lang:'fr',snd:true,locked:'000'},keys:{'lb-lang':'fr','lb-ch2-unl':'3','lb-snd':'1'}},
  {nom:'langue du Chapitre I (eb-lang)',set:{'eb-lang':'en'},want:{lang:'en'},keys:{'lb-lang':'en','eb-lang':'en'}},
  {nom:'pn-lang avant eb-lang',set:{'pn-lang':'fr','eb-lang':'en'},want:{lang:'fr'},keys:{'lb-lang':'fr'}},
- {nom:'aucune cle',set:{},want:{lang:'fr',snd:true,mus:true,help:false,locked:'011'},keys:{'lb-lang':null,'lb-ch2-unl':null}},
+ {nom:'aucune cle',set:{},want:{lang:'fr',snd:true,mus:true,help:false,locked:'000'},keys:{'lb-lang':null,'lb-ch2-unl':null}},
+ {nom:'off : aucune cle',off:1,set:{},want:{locked:'011'},keys:{'lb-ch2-unl':null}},
+ {nom:'off : db-unl=2 migre',off:1,set:{'db-unl':'2'},want:{locked:'001'},keys:{'lb-ch2-unl':'2'}},
+ {nom:'off : lb-ch2-unl=3',off:1,set:{'lb-ch2-unl':'3'},want:{locked:'000'},keys:{'lb-ch2-unl':'3'}},
 ];
 (async()=>{const b=await launch();
 for(const c of CASES){
@@ -21,7 +28,7 @@ for(const c of CASES){
  const pg=await ctx.newPage();
  pg.on('pageerror',e=>errs.push(c.nom+': pageerror: '+e.message));
  pg.on('request',r=>{if(!/^(file|data|blob):/.test(r.url()))errs.push(c.nom+': reseau: '+r.url())});
- await pg.goto('file://'+FILE);await pg.waitForTimeout(300);
+ await pg.goto('file://'+(c.off?OFF:FILE));await pg.waitForTimeout(300);
  const st=await pg.evaluate(ks=>({lang:document.documentElement.lang,snd:optSnd.checked,mus:optMus.checked,help:optHelp.checked,
   locked:[...document.querySelectorAll('#phases button')].map(x=>x.disabled?1:0).join(''),
   keys:Object.fromEntries(ks.map(k=>[k,localStorage.getItem(k)]))}),Object.keys(c.keys));

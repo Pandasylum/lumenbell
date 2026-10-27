@@ -1,4 +1,6 @@
 // Test de fumee du Chapitre II (Silent Bells) sur chapters/ch2-silent-bells/dist/index.html.
+// Puis, sans aucune cle de sauvegarde (UNLOCK_ALL) : phases II et III lancees directement depuis le menu et la frise,
+// en Facile, Normal et Difficile ; l'Epreuve se lance depuis le menu (frise fermee).
 // Syntaxe du script final, puis Normal et Difficile : prologue, phases I, II, III (deblocage via localStorage db-unl),
 // PV du Veilleur affiches (4 en Normal, 3 en Difficile).
 // Aucun appel reseau externe : controle statique du fichier (aucune URL http(s) ni API reseau), puis en jeu,
@@ -30,7 +32,7 @@ await ctx.addInitScript(()=>{const hit=(k,u)=>{try{console.error('reseau-api '+k
  if(navigator.sendBeacon){const B=navigator.sendBeacon.bind(navigator);navigator.sendBeacon=(u,d)=>{hit('beacon',u);return B(u,d)}}
  const E=window.EventSource;if(E)window.EventSource=function(u){hit('eventsource',u);return new E(...arguments)};
  window.open=u=>{hit('window.open',u);return null}});
-const pg=await ctx.newPage();
+let pg=await ctx.newPage();
 pg.on('websocket',w=>errs.push('websocket: '+w.url()));
 pg.on('worker',w=>{if(!/^(file|data|blob):/.test(w.url()))errs.push('worker: '+w.url())});
 pg.on('popup',p=>errs.push('popup: '+p.url()));
@@ -63,6 +65,22 @@ for(const [dk,hp] of [['normal',4],['hard',3]]){
  await play(dk+' phase II',1,hp);
  await pg.click('#phases button[data-ph="3"]');await pg.waitForTimeout(300);
  await play(dk+' phase III',3,hp)}
+// sans cle : tout est ouvert des le depart (UNLOCK_ALL)
+{const ctx2=await b.newContext({viewport:{width:1100,height:760},offline:true});
+ await ctx2.route(u=>!/^(file|data|blob):/.test(u.href),r=>{errs.push('reseau: '+r.request().url());return r.abort()});
+ pg=await ctx2.newPage();pg.on('pageerror',e=>errs.push('pageerror: '+e.message));
+ await pg.goto('file://'+FILE);await pg.waitForTimeout(500);
+ if(await pg.evaluate(()=>localStorage.length))errs.push('sans cle : localStorage non vide');
+ const s0=await st();console.log('sans cle, menu',JSON.stringify(s0));if(s0.locked!=='000')errs.push('sans cle : frise verrouillee '+s0.locked);
+ for(const [dk,gp,ph,hp] of [['normal',3,3,4],['hard',2,1,3],['easy',3,3,6]]){
+  await pg.click('[data-diff='+dk+']');await pg.waitForTimeout(300);           // menu -> prologue
+  await pg.click('#phases button[data-ph="'+gp+'"]');await pg.waitForTimeout(300); // frise, sans finir le niveau precedent
+  await play('sans cle '+dk+' phase '+['','I','II','III'][gp]+' directe',ph,hp);
+  await pg.click('#menuBtn');await pg.waitForTimeout(300)}
+ await pg.click('[data-diff=trial]');await pg.waitForTimeout(200);await pg.click('[data-diff=tn]');await pg.waitForTimeout(300);
+ const t=await toCard('Epreuve');console.log('sans cle, Epreuve',JSON.stringify(t));
+ if(t.ph!=='2'||!t.hp.endsWith('/4')||t.locked!=='111')errs.push('Epreuve : phase '+t.ph+', PV '+t.hp+', frise '+t.locked+' (attendu phase I, 4 PV, frise fermee)');
+ await ctx2.close()}
 // pages non file: ouvertes par la page (onglet, navigation) : aucune
 for(const p of ctx.pages())if(!p.url().startsWith('file:'))errs.push('page externe: '+p.url());
 console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)})

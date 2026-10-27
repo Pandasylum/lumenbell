@@ -23,6 +23,8 @@
 - **Difficultés** (`DIFFS`, `WIN`) : Veilleur 6 / 4 / 3 PV, Épreuve 4 PV pour tout le parcours (Normal et Difficile), PV conservés, une chute renvoie à la phase I. Fenêtres : `WIN` (0,2 s de fenêtre, 0,08 s de parfait) × `m` (2 / 1 / 0,6). PV des boss inchangés (6 / 8 / 10, à régler après essais). `sp` (vitesse des attaques) inchangé.
 - **Riposte** (`closePat`, table `R_CNT`) : dans les trois phases, une série sans faute déclenche la riposte automatique (2 dégâts si toutes les parades sont parfaites et la série compte au moins deux attaques à toucher). Phase III : foudre renvoyée vers la lanterne (forme I) ou la méduse (forme II). La contre-attaque « quand la lanterne faiblit, touche pour frapper » (menace `strike`) et la fenêtre de l'orbite de la forme II sont **supprimées** ; l'orbite tourne sans s'arrêter. Le barrage (rester appuyé) reste la mécanique de la phase. La contre-attaque à jauge de fatigue n'existait pas dans le code : rien à garder ni à retirer (réservée à un chapitre suivant).
 - **Écrit à l'écran** : seulement les titres (cinématiques), les noms de boss, les cartons d'intro et d'outro, et trois onomatopées (`ONO` : `CLANG` parade de la phase II, `BAM` coup porté au boss, `KRAKOOM` coup final). Les rages et derniers assauts ne s'affichent plus : sting + `say()` (lecteur d'écran). Aide visuelle des faisceaux : un demi-cercle (pointillé : se préparer ; plein : tenir) au lieu de « TIENS ! ».
+- **Blocage des appuis** (`INPUT`, `down()`, `guarding()`) : appui sans effet → `S.lock` = +0,7 s (`lockBy='whiff'`) ; appui pendant ce blocage → +0,25 s ; reflet → 0,6 s ; coup reçu → le blocage en cours est remplacé par 0,1 s ; appui réussi → rien. `S.holding` (garde de la phase III) est réglé avant le test de blocage : la garde marche pendant le blocage, seul le succès d'un tap est bloqué. Un appui pendant un faisceau (menace `hold`, de `ta` − 1 s à `tb`) n'est jamais un raté et ne prolonge pas le blocage.
+- **Déblocage** : `UNLOCK_ALL = true` (en tête du script) ouvre les trois phases de la frise dès le départ ; `false` rétablit le déblocage progressif par `lb-ch2-unl` (fonction `unlocked()`). Difficultés et Épreuve : toujours ouvertes ; la frise est fermée en Épreuve.
 - Les définitions mortes (`P1`, `P2`, `P3`, `spawn`, `fooled`, `anim1`, `drawOrbs` déclarées deux fois, la seconde l'emportait) ont été retirées ; seules restent celles du bas du script.
 
 ## Textes (étape B)
@@ -58,9 +60,10 @@
 - `tests/ch2-lib.js` : extracteur commun, lecture du cahier des charges, et **copie de test à crochets** `build/out/ch2-test.html` (dist + `window.__t`, sans boucle `requestAnimationFrame` : le test avance le temps par pas de 1/60 s). Le `dist` publié n'a aucun crochet.
 - `node tests/ch2-bot.js [parties] [--check]` : bot à un bouton (appui à l'impact avec une erreur de timing gaussienne `sigma`, ignore les reflets, reste appuyé pendant les faisceaux). Mesure la phase III (formes I et II, lancée depuis la frise). `--check` (CI, 20 parties) : au moins 90 % de victoires en Normal à 40 et 70 ms.
 - `node tests/ch2-announce.js` : aucun mot d'annonce (liste `BAN`) dans les appels `pop`/`fillText`/`caption`/`title`/`bossBar`, puis en jeu (FR et EN, Normal et Difficile) : parcours complet avec un bon bot (prologue → outro → victoire) et chaque phase avec un bot maladroit (blessures, reflets, garde brisée, défaite) ; tout texte dessiné sur le canvas est relevé et doit être un texte du cahier des charges, « Lumenbell » ou une onomatopée. ~3 min.
+- `node tests/ch2-input.js` : règles du blocage (0,7 s, +0,25 s, garde pendant le blocage, pas de raté avant un faisceau) ; appuis toutes les 0,25 s (garde des faisceaux tenue) → dégâts en Normal et Difficile, phases I à III ; un seul appui 0,05 / 0,1 / 0,2 s avant la fenêtre (Normal, 8 attaques différentes par phase) → au plus un coup dans 90 % des cas au moins ; joueur parfait → 0 coup. ~5 s.
 - `node tests/ch2-trial.js` : PV et fenêtres par difficulté ; en Épreuve, PV conservés de la phase I à la phase II et une chute renvoie à la phase I avec 4 PV ; en Normal, PV rendus entre les phases.
-- `node tests/ch2-keys.js` : migration (anciennes clés seules, nouvelles prioritaires, `eb-lang`, `pn-lang` avant `eb-lang`, aucune clé) et écriture dans les seules clés `lb-…`.
-- `node tests/ch2-smoke.js` : sur `dist/index.html`. Syntaxe (`new Function`), puis **réseau** : contrôle statique (aucune URL `http(s)://` ni `//hôte`, aucun `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, `sendBeacon`, `serviceWorker`, `import()`, `window.open`, aucune ressource liée par `href`/`src`) ; en jeu, contexte hors ligne, `context.route` intercepte et refuse toute requête autre que `file:`/`data:`/`blob:`, les API réseau sont espionnées, les WebSocket, workers externes, popups et pages non `file:` sont relevés. Puis `db-unl=3` (ancienne clé, donc migration) posé avant le chargement, Normal puis Difficile (retour au menu entre les deux), prologue passé (Entrée), phase I → II → III via la frise `#phases`, PV max affichés (4 puis 3). Sortie attendue : `errs []`.
+- `node tests/ch2-keys.js` : migration (anciennes clés seules, nouvelles prioritaires, `eb-lang`, `pn-lang` avant `eb-lang`, aucune clé) et écriture dans les seules clés `lb-…` ; frise ouverte (`UNLOCK_ALL`), et déblocage progressif vérifié sur une copie `UNLOCK_ALL = false` (`build/out/ch2-unlock-off.html`).
+- `node tests/ch2-smoke.js` : sur `dist/index.html`. Syntaxe (`new Function`), puis **réseau** : contrôle statique (aucune URL `http(s)://` ni `//hôte`, aucun `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, `sendBeacon`, `serviceWorker`, `import()`, `window.open`, aucune ressource liée par `href`/`src`) ; en jeu, contexte hors ligne, `context.route` intercepte et refuse toute requête autre que `file:`/`data:`/`blob:`, les API réseau sont espionnées, les WebSocket, workers externes, popups et pages non `file:` sont relevés. Puis `db-unl=3` (ancienne clé, donc migration) posé avant le chargement, Normal puis Difficile (retour au menu entre les deux), prologue passé (Entrée), phase I → II → III via la frise `#phases`, PV max affichés (4 puis 3). Puis sans aucune clé : depuis le menu (Normal, Difficile, Facile) puis la frise, phases III et II lancées directement ; Épreuve lancée depuis le menu (phase I, 4 PV, frise fermée). Sortie attendue : `errs []`.
 - Numéros de phase : interne `S.phase` 2 = Phase I (la Voix Creuse), 1 = Phase II (le Roi de Rouille), 3 = Phase III (le Phare Noyé) ; `ORDER=[2,1,3]`. Le test lit `document.body.dataset.ph` (interne) et `#hdEye` (affiché).
 - Lancement local si Playwright ne trouve pas son Chromium : `PW_CHROMIUM=/opt/pw-browsers/chromium node tests/ch2-smoke.js` (voir `NOTES.md` racine).
 
@@ -70,6 +73,14 @@
 - Résultat contre le `dist` de `main` : identique au pixel après chaque étape (inversion, clés, `<head>`) ; après le retrait du lien, seuls les six écrans de menu diffèrent (le lien disparaît, le bloc du menu se recentre verticalement).
 - Le script n'est pas dans `tests/` (outil ponctuel) ; le refaire au besoin à partir de cette description.
 
+## Mesures du blocage des appuis (27 octobre, `node tests/ch2-input.js`)
+| Cas | Avant (blocage 0,25 s, rien en phase III) | Après |
+|---|---|---|
+| Appuis toutes les 0,25 s, garde tenue, Normal, phases I / II / III | mort, boss 4/8 ; mort, boss 4/8 ; **boss battu sans un coup** | mort en 8 / 11 / 19 s, boss 8/8, 8/8, 6/8 |
+| Idem en Difficile | mort, boss 5/10 ; mort, 5/10 ; **boss battu sans un coup** | mort en 5 / 7 / 15 s, boss 10/10, 10/10, 8/10 |
+| Un appui trop tôt (0,05 / 0,1 / 0,2 s), Normal, 72 cas | 1 coup : 54 ; 2 coups : 6 ; 3 coups : 12 | 1 coup : 72 |
+| Joueur parfait, Normal et Difficile, 3 phases | 0 coup | 0 coup |
+
 ## Mesures de la phase III sans contre-attaque (27 octobre, `node tests/ch2-bot.js 100`)
 Victoires sur 100 parties (formes I et II), temps moyen d'une victoire, coups reçus en moyenne :
 
@@ -78,5 +89,7 @@ Victoires sur 100 parties (formes I et II), temps moyen d'une victoire, coups re
 | 40 ms | 100/100, 55,6 s, 0,0 | 99/100, 69,9 s, 0,0 |
 | 70 ms | 99/100, 63,6 s, 0,3 | 39/100, 80,5 s, 1,3 |
 | 100 ms | 81/100, 69,7 s, 1,4 | 2/100, 84,0 s, 2,0 |
+
+Avec le blocage des appuis (même mesure) : Normal 100/100, 99/100, 86/100 ; Difficile 100/100, 52/100, 2/100 (le blocage après coup plus court compense).
 
 Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à frapper, que le bot touchait aussi), 30 parties : Normal 30/30 à 40, 70 et 100 ms (45,7 / 50,0 / 57,6 s) ; Difficile 30/30, 30/30, 28/30. La phase reste gagnable ; elle est plus longue (riposte à 1 dégât quand la série ne compte que des faisceaux) et Difficile est nettement plus dur (3 PV, fenêtre ×0,6) : à régler avec les PV des boss après les essais sur téléphone.

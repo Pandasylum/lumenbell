@@ -4,6 +4,10 @@
 // faisceaux (des `lead` secondes avant jusqu'a la fin du passage). Mode `sloppy` : appuie aussi sur les reflets,
 // tient la garde trop longtemps et rate des coups (pour declencher tous les cas : blessure, reflet, garde brisee).
 // Option miss : nombre de premieres attaques reelles laissees passer volontairement (coups recus).
+// Option spam : periode (s) d'appuis repetes a l'aveugle a la place des appuis vises (la garde des faisceaux reste tenue
+// si spamGuard). Option early {n, d} : la n-ieme attaque a toucher (reelle, comptee a partir de 1) est jouee une seule fois,
+// d secondes avant l'ouverture de sa fenetre (un appui un peu trop tot), puis le joueur continue normalement.
+// Option skip {n} : la n-ieme attaque a toucher n'est pas jouee du tout (simple oubli, pour comparer).
 // Usage : node tests/ch2-bot.js [parties] [--check]  -> mesures de la phase III (formes I et II) en Normal et Difficile.
 // --check (CI) : echoue si le bot gagne moins de 90 % des parties en Normal avec une erreur de timing de 40 ou 70 ms
 // (la phase III doit rester gagnable sans contre-attaque a frapper).
@@ -16,7 +20,7 @@ function sim(o){
   const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
   if(o.cont){}else if(o.phase){T.startRun(o.dk,true);T.jumpPhase(o.phase)}else T.startRun(o.dk,!o.prologue);
   const dt=1/60;let f=0,held=false,tapUp=false,cards=0,res=null;const startPh=T.S.phase;
-  const log={forms:[],deaths:0,hpAt:{}},g0=T.gt;
+  const log={forms:[],deaths:0,hpAt:{}},g0=T.gt;let nTap=0,nextSpam=null;
   while(!res){
     const S=T.S;
     if(S.mode==='won'){res='win';break}
@@ -35,9 +39,12 @@ function sim(o){
           if(t>=th.ta-th._lead&&t<=th.tb+.04)wantHold=true;continue}
         if(th.ti==null)continue;
         if(th._bp==null&&th.real!==false&&o.miss>0){o.miss--;th._bp=Infinity}
+        if(th._bp==null&&th.real!==false&&(o.early||o.skip)&&++nTap===(o.early||o.skip).n)th._bp=o.skip?Infinity:th.ti-(th.win||S.d.win)-o.early.d;
+        if(o.spam)th._bp=Infinity;
         if(th._bp==null){const fake=th.real===false;th._bp=fake?(o.sloppy&&rnd()<.5?th.ti+gauss()*o.sigma:Infinity):(o.sloppy&&rnd()<.25?Infinity:th.ti+gauss()*o.sigma)}
         if(!th._pr&&t>=th._bp){th._pr=1;tap=true}}
       if(o.sloppy&&S.phase===3&&rnd()<.002)wantHold=true;
+      if(o.spam){if(!o.spamGuard)wantHold=false;if(nextSpam==null)nextSpam=t;if(t>=nextSpam){nextSpam+=o.spam;tap=true}}
       if(tapUp){T.up();held=false;tapUp=false}
       if(tap){if(held)T.up();T.down();held=true;tapUp=!wantHold}
       else if(wantHold&&!held){T.down();held=true}

@@ -289,6 +289,11 @@ const store={get(k,d){try{let v=localStorage.getItem(k);
 try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
   Object.keys(OLD_KEYS).concat(ks.filter(o=>o.startsWith('db-best-')).map(o=>'lb-ch2-best-'+o.slice(8))).forEach(k=>store.get(k))}catch(e){}
 const OPT_KEY={optSnd:'lb-snd',optMus:'lb-mus',optHelp:'lb-help'};
+/* UNLOCK_ALL: true = the three phases are open from the start (phase track), as in Ember Bridge; the difficulties and the
+   Trial are always open. false = progressive unlock: a phase opens once the previous one is cleared (key lb-ch2-unl, still
+   written on every clear). Disabled for testing; idea to extend to the whole series later (common screen). */
+const UNLOCK_ALL=true;
+const unlocked=()=>UNLOCK_ALL?3:+store.get('lb-ch2-unl',1);
 let LANG='fr';{const v=store.get('lb-lang',null);if(v==='fr'||v==='en')LANG=v}
 const _=(en,fr)=>LANG==='fr'?fr:en;
 
@@ -318,7 +323,7 @@ let ctx=document.createElement('canvas').getContext('2d');let SC=1;const hasFilt
 let gt=0,rt=0;
 let S=fresh('normal');S.mode='menu';
 function fresh(dk){const d=DIFFS[dk];return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.boss,bossMax:d.boss,
-  threats:[],pat:null,nextAt:0,cnt:null,lock:0,guardT:-9,okT:-9,hurtT:-9,whiffT:-9,dodgeT:-9,foolT:-9,holding:false,stam:1,broken:0,
+  threats:[],pat:null,nextAt:0,cnt:null,lock:0,lockBy:'',guardT:-9,okT:-9,hurtT:-9,whiffT:-9,dodgeT:-9,foolT:-9,holding:false,stam:1,broken:0,
   hits:0,perfects:0,runT:0,full:true,parts:[],pops:[],shake:0,bossFlash:-9,koT:0,deadT:0,deadShown:false,lastK:''}}
 
 function say(t){$('live').textContent=t}
@@ -376,17 +381,25 @@ function pop(txt,col,x,y){S.pops.push({txt,c:col,x:x||HX+10,y:y||GY-150,t0:gt})}
 function sched(list){const pat={ths:list,ok:true,perf:0,nReal:list.filter(t=>t.real!==false&&!t.hold).length};list.forEach(th=>{if(th.real===undefined)th.real=true;th.pat=pat;S.threats.push(th)});S.pat=pat;return pat}
 
 /* ---------- input ---------- */
+/* Lock after a press (s), as in Ember Bridge (barrier then recovery; a press during recovery extends it):
+   whiff = a press that hits nothing blocks the successful presses for this long; extend = a press during that block adds this much;
+   fool = after dodging a reflection (phase I); hurt = after taking a hit, which also ends the lock in progress (the hit pays
+   for the mistake, so one mistake costs one hit and not the next attacks of the series); holdGrace = a press during a beam (hold threat) or in
+   the second before it is a guard, never a whiff. A successful press never locks. In phase III the shield (holding) still
+   works during a lock: only the success of a tap is blocked. */
+const INPUT={whiff:.7,extend:.25,fool:.6,hurt:.1,holdGrace:1};
+function guarding(){return S.threats.some(th=>th.hold&&gt>=th.ta-INPUT.holdGrace&&gt<=th.tb)}
 function down(){
   if(S.mode!=='play'||S.paused)return;
   ensureAudio();
   $('ward').classList.add('down');
   if(S.phase===3&&gt>=S.broken){if(!S.holding)play('shield');S.holding=true}
   S.guardT=gt;if(S.phase===2)S.dodgeT=gt;
-  if(gt<S.lock)return;
+  if(gt<S.lock){if(S.lockBy==='whiff'&&!guarding())S.lock+=INPUT.extend;return}
   let best=null,bd=1e9;
   for(const th of S.threats){if(th.done||th.hold)continue;const w=th.win||S.d.win,dd=Math.abs(gt-th.ti);if(dd<=w){const sc=dd+(th.real===false?.06:0);if(sc<bd){bd=sc;best=th}}}
   if(best){if(best.real===false)fooled(best);else success(best,Math.abs(gt-best.ti)<=(best.perfW||S.d.perf))}
-  else if(S.phase!==3){S.lock=gt+.25;S.whiffT=gt;play('whiff')}
+  else if(!guarding()){S.lock=gt+INPUT.whiff;S.lockBy='whiff';S.whiffT=gt;play('whiff')}
 }
 function up(){S.holding=false;$('ward').classList.remove('down')}
 
@@ -400,7 +413,7 @@ function success(th,perfect){
 }
 function hurt(){
   if(S.mode!=='play')return;
-  S.hp=Math.max(0,S.hp-1);S.hits++;S.hurtT=gt;S.lock=Math.max(S.lock,gt+.3);S.shake=12;
+  S.hp=Math.max(0,S.hp-1);S.hits++;S.hurtT=gt;S.lock=gt+INPUT.hurt;S.lockBy='hurt';S.shake=12;
   burst(HX,GY-70,18,'#ff6a5a',5,.55);play('hurt');MUSIC.fx('chunk');hud();
   if(S.hp<=0){S.mode='dead';S.deadT=gt;S.holding=false;say(_('The Watcher falls. Defeat.','Le Veilleur tombe. Défaite.'))}
 }
@@ -1574,7 +1587,7 @@ function hud(){
   $('hpPn').textContent=S.hp+'/'+S.hpMax;$('hpBn').textContent=S.bossHp+'/'+S.bossMax;
   const P=PH[S.phase];$('nmB').textContent=P.boss();$('hdEye').textContent=P.head();$('ward').textContent=P.btn();
   $('c').setAttribute('aria-label',P.aria());document.body.dataset.ph=S.phase;
-  const unl=+store.get('lb-ch2-unl',1),gp=gpOf(S.phase);
+  const unl=unlocked(),gp=gpOf(S.phase);
   document.querySelectorAll('#phases li').forEach((li,i)=>{const on=i+1===gp;li.classList.toggle('on',on);if(on)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');li.firstChild.disabled=!!S.d.trial||i+1>unl});
 }
 
@@ -1610,7 +1623,7 @@ function P2(stage,f,b,final){
   const p1=[()=>volley(4,1),()=>volley(5,2),echo,()=>{echo();wail()},()=>{volley(3,1);echo()},()=>{wail();volley(4,2)},()=>rain(5),()=>{rain(3);volley(3,1)}];
   pick(stage?p1:p0)();return T;
 }
-function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;S.lock=gt+.6;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
+function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;S.lock=gt+INPUT.fool;S.lockBy='fool';S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
   if(S.phase===2&&(S.angerShown||S.dk==='hard'||S.dk==='th')){const nt={k:'back',t0:gt,tl:gt+.1,ti:gt+1.1,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}}
 function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
 function drawOrbs(){
@@ -1829,7 +1842,7 @@ function playCine(id,k,cb){
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;S.ringT=0;S.proHand=null;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function resetPhaseState(){Object.assign(S,{angerShown:false,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,lock:0,post:null})}
+function resetPhaseState(){Object.assign(S,{angerShown:false,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,lock:0,lockBy:'',post:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
