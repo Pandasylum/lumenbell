@@ -42,12 +42,12 @@ Journal daté. Une décision validée n'est pas remise en question dans une autr
 
 ## 2026-10-27 – Chapitre II · gameplay et textes (session 03, étape B)
 Application de `docs/CH2-SPEC.md` ; choix faits là où le cahier des charges ne tranchait pas (à valider par Kevin) :
-- **Onomatopées** : comme la table `ONO` du Chapitre I, parade → `CLANG` (phase II), coup porté au boss → `BAM`, coup final de la forme II → `KRAKOOM`. Esquives (phase I) et contres de la phase III : aucun mot, le son suffit. Le compteur « ×1…×7 » du coup final est retiré.
+- **Onomatopées** (coup final : `KRAAAK`, comme au Chapitre I, corrigé le 27 octobre) : comme la table `ONO` du Chapitre I, parade → `CLANG` (phase II), coup porté au boss → `BAM`, coup final de la forme II → `KRAAAK`. Esquives (phase I) et contres de la phase III : aucun mot, le son suffit. Le compteur « ×1…×7 » du coup final est retiré.
 - **Rages et derniers assauts** (« Miroir brisé », « Cœur bleu », « Double orbite », « Dernier assaut ») : plus de bandeau écrit ; le son reste, le nom et la phrase vont au lecteur d'écran.
 - **Difficultés** : la fenêtre « parfait » suit le même multiplicateur que la fenêtre de parade (×2 / ×1 / ×0,6). Difficile passe de 0,155 s à 0,12 s et de 5 à 3 PV : nettement plus dur (mesures dans `chapters/ch2-silent-bells/NOTES.md`).
 - **Phase III** : riposte automatique après une série sans faute, même règle de dégâts qu'aux phases I et II ; durée et instant d'impact de l'ancienne contre-attaque gardés pour l'animation (`R_CNT[3]`).
 - **Cartes** : sourcil = titre de phase, titre = nom du boss, texte = panneau du cahier des charges en entier. Carte de fin de phase III ajoutée avant l'outro (comme le panneau de fin du Chapitre I). Défaite : « Le Veilleur est à terre. » gardé, conseil « Respire, observe les signes… » retiré, note d'Épreuve (« une chute te renvoie à la phase I ») gardée. « Le Veilleur reprend son souffle. » / « Épreuve : pas de soin. » retirés des cartes de fin de phase.
-- **Intro** : titre final « Lumenbell » (petit) au-dessus de « Chapitre II · Silent Bells » (grand), turquoise. **Outro** : carton 6 en vert mousse `#b9cf5a` (code couleur du Chapitre III). Durées des cartons dans des tables ; scènes inchangées.
+- **Intro** : titre final « Lumenbell » en grand, « Chapitre II · Silent Bells » en dessous, en petit et en turquoise (décision de Kevin, même construction qu'au Chapitre I). **Outro** : carton 6 en vert mousse `#b9cf5a` (code couleur du Chapitre III). Durées des cartons dans des tables ; scènes inchangées.
 - **Menu** : « Chapitre II · Silent Bells » en sourcil, « Lumenbell » en titre (Lumen en turquoise, comme au Chapitre I) ; plus de sous-titre « Le Phare Noyé », d'accroche ni de mode d'emploi. Libellés des difficultés (« Respirer », « Le vrai combat »…) gardés.
 - Phrases pour le lecteur d'écran (`say`, descriptions `aria`) : gardées et mises à jour (« lac gelé » → « récifs »), hors cahier des charges car invisibles.
 

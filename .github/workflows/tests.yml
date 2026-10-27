@@ -40,6 +40,7 @@ jobs:
           node ch2-smoke.js
           node ch2-trial.js
           node ch2-input.js
+          node ch2-title.js
           node ch2-announce.js
           node ch2-bot.js 20 --check
       - name: Apercu du jeu (Chapitres I et II)

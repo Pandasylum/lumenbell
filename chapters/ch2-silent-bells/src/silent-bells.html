@@ -374,7 +374,7 @@ function musTick(){
 /* ---------- particles & pops ---------- */
 function burst(x,y,n,col,spd,life,g){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.3+Math.random())*spd;S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-(g?spd*.4:0),g:g||0,t0:gt,life:life*(.6+Math.random()*.6),c:col,r:1.5+Math.random()*2.2})}}
 /* floating text: only onomatopoeia (same words in both languages, as in Ember Bridge); no announcement words */
-const ONO={parry:'CLANG',hit:'BAM',final:'KRAKOOM'};
+const ONO={parry:'CLANG',hit:'BAM',final:'KRAAAK'};
 function pop(txt,col,x,y){S.pops.push({txt,c:col,x:x||HX+10,y:y||GY-150,t0:gt})}
 
 /* ---------- patterns ---------- */
@@ -1078,6 +1078,16 @@ function title(t,t0,eye,name,col,ncol){if(t<t0)return;const a=clamp((t-t0)/.5,0,
   ctx.font='700 16px "DM Sans",system-ui,sans-serif';ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,H*.42-46+(1-a)*8);
   ctx.font='800 64px "Big Shoulders Display",Impact,sans-serif';{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px "Big Shoulders Display",Impact,sans-serif`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
   ctx.fillStyle=col;ctx.fillRect(W/2-60*a,H*.42+18,120*a,3);ctx.restore()}
+/* end of the intro: the series name large, the chapter below it, small, in the chapter colour (as in Ember Bridge).
+   Vertical layout from the measured glyph boxes, so the two lines never touch whatever the font fallback. */
+const SERIES_T={size:96,sub:17,gap:22,y:.36};   // y: baseline of the name (fraction of the height), above the Watcher's lantern
+function seriesTitle(t,t0,name,sub,col){if(t<t0)return;const a=clamp((t-t0)/.5,0,1),dy=(1-a)*8;ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
+  const N=name.toUpperCase(),U=sub.toUpperCase().split('').join(String.fromCharCode(8202));
+  ctx.font=`800 ${SERIES_T.size}px "Big Shoulders Display",Impact,sans-serif`;{const mw=ctx.measureText(N).width;if(mw>W-120)ctx.font=`800 ${Math.floor(SERIES_T.size*(W-120)/mw)}px "Big Shoulders Display",Impact,sans-serif`}
+  const mN=ctx.measureText(N),yN=H*SERIES_T.y+dy;
+  ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(N,W/2+3,yN+3);ctx.fillStyle='#f4eee4';ctx.fillText(N,W/2,yN);
+  ctx.font=`700 ${SERIES_T.sub}px "DM Sans",system-ui,sans-serif`;const mS=ctx.measureText(U),yS=yN+(mN.actualBoundingBoxDescent||0)+3+SERIES_T.gap+(mS.actualBoundingBoxAscent||SERIES_T.sub*.72);
+  ctx.fillStyle=col;ctx.fillText(U,W/2,yS);ctx.fillRect(W/2-60*a,yS+(mS.actualBoundingBoxDescent||4)+12,120*a,3);ctx.restore()}
 function caption(txt,a){if(a<=0)return;ctx.save();ctx.globalAlpha=clamp(a,0,1);ctx.textAlign='center';ctx.font='italic 500 22px "DM Sans",system-ui,sans-serif';
   // too wide for the screen: two lines, cut at the space nearest the middle
   let L=[txt];if(ctx.measureText(txt).width>W-120){let c=-1;for(let i=0;i<txt.length;i++)if(txt[i]===' '&&(c<0||Math.abs(i-txt.length/2)<Math.abs(c-txt.length/2)))c=i;if(c>0)L=[txt.slice(0,c),txt.slice(c+1)]}
@@ -1554,7 +1564,7 @@ function drawPrologue(t){
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   // text
   for(const c of PCAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0)caption(c[2],a)}
-  title(t,PRO_TITLE,'Lumenbell',_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),CH_COL[2]);
+  seriesTitle(t,PRO_TITLE,'Lumenbell',_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),CH_COL[2]);
   fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-17.9)/.7,0,1));
   PSFX.forEach((c,i)=>{if(t>=c[0]&&once('pfx'+i))MUSIC.fx(c[1])});
 }
