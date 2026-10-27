@@ -56,6 +56,19 @@ La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (�
 
 À supprimer de l'ancienne version : « Le Roi n'est plus le Roi », « Fais taire le glas », « Ne crois pas ce que tu vois », « Éteins le phare », les modes d'emploi dans les cartes de phase, l'intro « étoiles / bâton », « marais des Cloches », « lac gelé », la fonderie, « les villages avaient fondu leurs cloches ».
 
+## Textes validés (anglais)
+Titres et boss : Phase I · The Mirror Hall (The Hollow Voice) ; Phase II · The Hold (The Rust King) ; Phase III · The Reefs (The Drowned Lighthouse ; forme II : The Shattered). « Crown » traduit « Couronne ». Le féminin de la gardienne n'apparaît pas en anglais (« its keeper »), il se voit à l'image.
+
+**Intro** : 1. "On the coast, the mist no longer lifts." 2. "Out at sea, the Drowned Lighthouse stands dark. No bell answers it." 3. "The ships no longer return. The fishermen say the sea keeps what it takes." 4. "They say its keeper still watches up there." 5. Title: "Chapter II · Silent Bells".
+
+**Phase I** : entrée "At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there." ; fin "The mirror shatters. Beneath the hall, a hatch opens onto the hold of a wreck."
+
+**Phase II** : entrée "Rusted bells hang from the beams of the hold. An anchor lies there, too heavy for a man's hand." ; fin "The King sinks beneath the waves. A turquoise glow rises from his body, toward the Lighthouse."
+
+**Phase III** : entrée "From the King's body, the glow has built a tower. The Drowned Lighthouse lights again, with a flame that is not its own." ; forme II "The tower bursts. Among the debris, the jellyfish, laid bare." ; fin "In the wreckage, the Lighthouse's bell, cracked and silent."
+
+**Outro** : 1. "By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again." 2. "On it, a single word is engraved: Crown." 3. "And this time, the earth has not stopped trembling." 4. "Beneath the waves, a turquoise glow still pulses, faintly." 5. "Deep in the forest, a faint light flickers." 6. "Chapter III. To be continued."
+
 ## Code couleur par chapitre
 Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III : racines, vert mousse tirant sur le jaune (distinct du turquoise). Chapitre IV : givre, bleu-blanc pâle. Le titre « à suivre » et le point de la Couronne dans le menu suivent ce code.
 
