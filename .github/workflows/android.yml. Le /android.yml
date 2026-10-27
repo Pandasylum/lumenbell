@@ -1,0 +1,143 @@
+name: Build Android (APK + AAB)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Construire le jeu depuis la source
+        working-directory: .
+        run: python3 build/build.py
+      - name: Prepare www
+        run: |
+          rm -rf www
+          mkdir www
+          cp ../chapters/ch1-ember-bridge/dist/index.html www/index.html
+          ls -la www
+      - name: Securiser la page (CSP + minification)
+        run: |
+          cat > /tmp/protect.js <<'JS'
+          const fs = require('fs');
+          const f = 'www/index.html';
+          let h = fs.readFileSync(f, 'utf8');
+          const csp = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
+          if (!/Content-Security-Policy/i.test(h)) h = h.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="' + csp + '">');
+          fs.writeFileSync(f, h);
+          console.log('CSP ajoutee');
+          JS
+          sed -i 's/^          //' /tmp/protect.js
+          node /tmp/protect.js
+      - name: Minifier le JavaScript du jeu
+        continue-on-error: true
+        run: |
+          mkdir -p /tmp/min && cd /tmp/min && npm init -y >/dev/null && npm install terser@5 >/dev/null
+          cat > /tmp/min/min.js <<'JS'
+          const fs = require('fs');
+          const { minify } = require('/tmp/min/node_modules/terser');
+          (async () => {
+            const f = process.env.GITHUB_WORKSPACE + '/apk/www/index.html';
+            let h = fs.readFileSync(f, 'utf8');
+            const m = h.match(/<script>([\s\S]*)<\/script>/);
+            if (!m) throw new Error('script introuvable');
+            const r = await minify(m[1], { compress: { passes: 1 }, mangle: true, format: { comments: false } });
+            if (!r.code) throw new Error('minification vide');
+            new (require('vm').Script)(r.code); // verifie que le code minifie est valide
+            h = h.replace(m[0], () => '<script>' + r.code + '</script>');
+            fs.writeFileSync(f, h);
+            console.log('minifie :', m[1].length, '->', r.code.length);
+          })().catch(e => { console.error(e); process.exit(1); });
+          JS
+          sed -i 's/^          //' /tmp/min/min.js
+          node /tmp/min/min.js
+      - run: npm install
+      - run: npx cap add android
+      - name: Durcir la configuration Capacitor
+        run: |
+          node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('capacitor.config.json','utf8'));c.android=Object.assign({},c.android,{allowMixedContent:false,webContentsDebuggingEnabled:false});fs.writeFileSync('capacitor.config.json',JSON.stringify(c,null,2));console.log(fs.readFileSync('capacitor.config.json','utf8'))"
+      - name: Icone
+        run: |
+          mkdir -p /tmp/ia
+          cp "$(find . -name icon-only.png -not -path './node_modules/*' | head -n 1)" /tmp/ia/icon-only.png
+          cp "$(find . -name icon-foreground.png -not -path './node_modules/*' | head -n 1)" /tmp/ia/icon-foreground.png
+          cp "$(find . -name icon-background.png -not -path './node_modules/*' | head -n 1)" /tmp/ia/icon-background.png
+          mkdir -p assets && cp /tmp/ia/*.png assets/
+          npx --yes @capacitor/assets@3 generate --android --iconBackgroundColor '#07050b' --iconBackgroundColorDark '#07050b'
+      - name: Rotation libre, plein ecran, fond noir
+        run: |
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.0"/' android/app/build.gradle
+          grep -n 'versionName' android/app/build.gradle
+          grep -n 'versionCode' android/app/build.gradle
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's|<activity|<activity android:screenOrientation="fullUser"|' $M
+          sed -i 's|android:allowBackup="true"|android:allowBackup="false"|' $M
+          sed -i 's|<application|<application android:usesCleartextTraffic="false"|' $M
+          grep -n 'allowBackup\|usesCleartext' $M
+          S=android/app/src/main/res/values/styles.xml
+          sed -i 's|</style>|<item name="android:windowBackground">@android:color/black</item><item name="android:navigationBarColor">@android:color/black</item><item name="android:statusBarColor">@android:color/black</item></style>|' $S
+          J=$(find android/app/src/main/java -name MainActivity.java)
+          PK=$(grep -m1 '^package' $J)
+          cat > $J <<JAVA
+          $PK
+          import android.os.Bundle;
+          import android.view.WindowManager;
+          import android.view.WindowManager.LayoutParams;
+          import androidx.core.view.WindowCompat;
+          import androidx.core.view.WindowInsetsCompat;
+          import androidx.core.view.WindowInsetsControllerCompat;
+          import com.getcapacitor.BridgeActivity;
+          public class MainActivity extends BridgeActivity {
+            @Override public void onCreate(Bundle b) {
+              super.onCreate(b);
+              getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
+              WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+              if (android.os.Build.VERSION.SDK_INT >= 28) {
+                getWindow().getAttributes().layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+              }
+              hide();
+            }
+            @Override public void onWindowFocusChanged(boolean f) { super.onWindowFocusChanged(f); if (f) hide(); }
+            @Override public void onPause() { super.onPause(); try { getBridge().getWebView().onPause(); getBridge().getWebView().pauseTimers(); } catch (Exception e) {} }
+            @Override public void onResume() { super.onResume(); try { getBridge().getWebView().onResume(); getBridge().getWebView().resumeTimers(); } catch (Exception e) {} }
+            private void hide() {
+              WindowInsetsControllerCompat c = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+              c.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+              c.hide(WindowInsetsCompat.Type.systemBars());
+            }
+          }
+          JAVA
+          sed -i 's/^          //' $J
+          cat $J
+      - run: npx cap sync android
+      - run: cd android && chmod +x gradlew && ./gradlew assembleRelease bundleRelease
+      - name: Signer l'APK
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          KEY_PASS: ${{ secrets.KEY_PASS }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEY_PASS" ]; then echo "Secrets KEYSTORE_B64 / KEY_PASS manquants"; exit 1; fi
+          echo "$KEYSTORE_B64" | base64 -d > /tmp/ember.jks
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n 1)
+          $BT/zipalign -p -f 4 android/app/build/outputs/apk/release/app-release-unsigned.apk /tmp/aligned.apk
+          $BT/apksigner sign --ks /tmp/ember.jks --ks-pass env:KEY_PASS --key-pass env:KEY_PASS --ks-key-alias ember --out Lumenbell.apk /tmp/aligned.apk
+          $BT/apksigner verify --print-certs Lumenbell.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab Lumenbell.aab
+          jarsigner -keystore /tmp/ember.jks -storepass:env KEY_PASS -keypass:env KEY_PASS -sigalg SHA256withRSA -digestalg SHA-256 Lumenbell.aab ember
+          jarsigner -verify Lumenbell.aab | head -n 3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lumenbell-android
+          path: |
+            apk/Lumenbell.apk
+            apk/Lumenbell.aab
