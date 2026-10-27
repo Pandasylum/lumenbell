@@ -51,13 +51,13 @@ La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (�
 2. Gros plan de la cloche : « Sur celle-ci, un seul mot est gravé : Couronne. »
 3. « Et cette fois, la terre n'a pas cessé de trembler. » Image : la vallée et les tours du Chapitre I, fissures, une tour éteinte, les autres vacillent.
 4. « Sous les vagues, une lueur turquoise pulse encore, faiblement. » Image : la mer, la base du phare, la lueur sous la surface.
-5. « Loin au nord, sur la glace, une lumière pâle vacille. » (indice de la tour suivante)
+5. « Au cœur de la forêt, une faible lumière vacille. » (indice de la tour suivante : les Racines)
 6. « Chapitre III. À suivre. », titre teinté de la couleur du chapitre suivant.
 
 À supprimer de l'ancienne version : « Le Roi n'est plus le Roi », « Fais taire le glas », « Ne crois pas ce que tu vois », « Éteins le phare », les modes d'emploi dans les cartes de phase, l'intro « étoiles / bâton », « marais des Cloches », « lac gelé », la fonderie, « les villages avaient fondu leurs cloches ».
 
 ## Code couleur par chapitre
-Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III : givre, bleu-blanc pâle (distinct du turquoise). Le titre « à suivre » et le point de la Couronne dans le menu suivent ce code.
+Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III : racines, vert mousse tirant sur le jaune (distinct du turquoise). Chapitre IV : givre, bleu-blanc pâle. Le titre « à suivre » et le point de la Couronne dans le menu suivent ce code.
 
 ## La Couronne et les tours (ordre définitif)
 Six tours en cercle, une au centre (la clé, le dénouement). Chaque lumière perdue fragilise le sceau et l'ancre que la Couronne représente. Trois pertes sur six. **Les pertes ne dépendent jamais de la performance** (les chapitres se rejouent à volonté).
@@ -66,10 +66,10 @@ Six tours en cercle, une au centre (la clé, le dénouement). Chaque lumière pe
 |---|---|---|
 | I | Montagne | Gardée |
 | II | Phare Noyé | Perdue |
-| III | Givre | Perdue (carnets de la Forge) |
-| IV | Racines | Au choix (le village ou la tour ; le choix se rejoue à chaque passage, le dernier fait foi) |
-| V | Tour vide | Perdue |
-| VI | La brèche (le Roi Sombre) | Gardée |
+| III | Racines | Au choix (le village ou la tour ; le choix se rejoue à chaque passage, le dernier fait foi) ; fragment : la berceuse du village |
+| IV | Givre | Perdue ; fragment : page des carnets de la Forge (« se disent aussi les Liés »), le milieu du jeu |
+| V | Tour vide | Perdue ; fragment : deux lanternes, un seul lit |
+| VI | La brèche (le Roi Sombre) | Gardée ; fragment : sa lanterne de Veilleur éteinte à la ceinture |
 | VII | Le cœur | Dénouement |
 
 La fin : les lumières ne changent que le rendu (image, ton), jamais le choix de l'issue (cloche, rayon, éclats). Idée de menu : la Couronne (six points autour d'un septième, allumés / éteints / fragiles).
