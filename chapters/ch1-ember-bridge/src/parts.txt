@@ -22,4 +22,7 @@ js/75-ui-menu.js
 js/80-audio-music.js
 js/85-texts-ui.js
 js/90-boot.js
+js/95-cine-intro.js
+js/100-cine-outro.js
+js/105-loop.js
 page/end.html
