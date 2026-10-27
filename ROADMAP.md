@@ -12,11 +12,12 @@
    - C · visuels (`ch2/visuals`) : décors, Roi et tour, lanterne turquoise, gravure, outro, code couleur.
 4. Test sur téléphone (ressenti, lisibilité, fluidité).
 5. D · optimisation et découpage du Chapitre II (`ch2/perf`) : mesure des images par seconde, poids, minification, source en plusieurs fichiers, build identique à chaque étape, comme pour le Chapitre I.
-6. Moteur commun (`engine/`, `shared/`) : boucle, entrées, audio, langues, sauvegarde, difficultés, Veilleur ; migration des clés `eb-…` du Chapitre I vers `lb-…`.
+6. Moteur commun (`engine/`, `shared/`) : boucle, entrées, audio, langues, sauvegarde, difficultés, **un seul Veilleur dessiné et animé pour tous les chapitres** (poses de garde, pas de côté, coup reçu, victoire ; demande à écrire dans `DEMANDES.md` par la session C1) ; migration des clés `eb-…` du Chapitre I vers `lb-…`.
 7. Menu : écran titre commun, choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres.
 8. Plus tard : modules ES, Google Play, iOS ; chapitre III (Racines).
 
 ## Idées notées pour plus tard
+- **Session « sorts et équilibrage »** (après C1) : coder les nouveaux sorts du Chapitre II (vague d'eau, nuage de rouille, double vague, marée montante, tempête de cloches, voir `docs/CH2-SPEC.md`), puis régler fenêtres et durées. En tête : la phase III en Difficile (84 / 9 / 0 victoires du bot à 40 / 70 / 100 ms), le Difficile en général, la pénalité du reflet (0,6 s).
 - **Déblocage progressif** (phases, difficultés) : à étendre à toute la série avec un écran commun ; désactivé pour les tests (constante de réglage dans le Chapitre II).
 - **Revue complète des sorts, des fenêtres de contre et des effets des boss**, chapitre par chapitre : un tableau par chapitre (attaque, préparation, fenêtre, contre, effet, durée), puis équilibrage Facile / Normal / Difficile. À faire après les visuels et le test sur téléphone (session d'équilibrage).
 - **Contre-attaque à jauge de fatigue** (chaque attaque du boss la fait monter, point faible dévoilé, contre-attaque automatique) : mécanique réservée à un chapitre suivant.
