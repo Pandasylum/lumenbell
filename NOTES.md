@@ -24,7 +24,7 @@
 - Noms d'attaques « Marteau de guerre » / « Combo de marteau » pas encore renommés (masse).
 - Le crochet et la queue se chevauchaient en phase II ; crochet à la hanche gauche.
 - Non vérifiés sur appareil : APK minifié avec CSP, pause/reprise audio native.
-- **Playwright** : `npm install` peut installer une version plus récente que le Chromium déjà présent (« Executable doesn't exist ») ; lancer les tests avec `PW_CHROMIUM=/chemin/vers/chrome` plutôt que retélécharger. `npm install` crée `tests/package-lock.json` (non suivi : ne pas le committer sans décision).
+- **Playwright** : `npm install` peut installer une version plus récente que le Chromium déjà présent (« Executable doesn't exist ») ; lancer les tests avec `PW_CHROMIUM=/chemin/vers/chrome` plutôt que retélécharger. `tests/package-lock.json` est suivi (Playwright figé, 1.64.1 au 27 octobre 2026) ; la CI installe avec `npm ci`. Pour changer de version : `npm install playwright@x.y.z` dans `tests/`, puis committer le lockfile.
 - **Source du Chapitre I découpée** : l'ordre de `src/parts.txt` est l'ordre d'exécution (une seule IIFE) ; chaque morceau finit par un saut de ligne. Détails : `chapters/ch1-ember-bridge/NOTES.md`.
 - Le workflow Android cherche l'`index.html` à un chemin explicite (`chapters/ch1-ember-bridge/dist/index.html`), pas par `find`.
 
