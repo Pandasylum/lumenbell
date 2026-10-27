@@ -28,7 +28,7 @@ Variable `PW_CHROMIUM` : chemin d'un Chromium déjà installé (sinon celui de P
 | `ROADMAP.md`, `CHANGELOG.md` | Suite prévue, versions |
 | `docs/LORE.md` | Lore et arc long terme (secret, vocabulaire) |
 | `docs/TEXTES-CH1.md` | Tous les textes FR/EN du Chapitre I (extrait auto) |
-| `chapters/ch1-ember-bridge/legacy/` | Source actuelle (un seul fichier) |
+| `chapters/ch1-ember-bridge/src/` | Source découpée (ordre d'assemblage : `src/parts.txt`) |
 | `chapters/ch1-ember-bridge/dist/` | Jeu construit (référence v1.0) |
 | `build/` | Scripts de construction |
 | `tests/` | Bots et tests (Playwright) |
