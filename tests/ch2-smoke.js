@@ -1,6 +1,8 @@
 // Test de fumee du Chapitre II (Silent Bells) sur chapters/ch2-silent-bells/dist/index.html.
 // Syntaxe du script final, puis Normal : prologue, phases I, II, III (deblocage via localStorage db-unl).
-// Hors ligne : toute requete externe est une erreur. Sortie attendue : errs []
+// Aucun appel reseau externe : controle statique du fichier (aucune URL http(s) ni API reseau), puis en jeu,
+// hors ligne, toute requete autre que file:/data:/blob: (page, sous-ressource, worker, WebSocket, appel d'API
+// reseau depuis le script) est interceptee et comptee comme erreur. Sortie attendue : errs []
 const fs=require('fs'),path=require('path');const launch=require('./launch');
 const FILE=path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html');
 const errs=[];
@@ -8,14 +10,32 @@ const html=fs.readFileSync(FILE,'utf8');let nScript=0;
 for(const m of html.matchAll(/<script>([\s\S]*?)<\/script>/g)){nScript++;try{new Function(m[1])}catch(e){errs.push('syntaxe: '+e.message)}}
 if(nScript!==1)errs.push('scripts: '+nScript+' au lieu de 1');
 console.log('syntaxe',errs.length?'KO':'OK');
+// statique : aucune URL externe ni API reseau dans le fichier publie
+{const n=errs.length;
+ for(const m of html.matchAll(/(?:https?:)?\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)+(?=[\/"'\s)?:]|$)/gi))errs.push('URL externe: '+m[0]);
+ for(const m of html.matchAll(/\b(?:fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|serviceWorker|importScripts|import\s*\(|window\.open\s*\()/g))errs.push('API reseau: '+m[0]);
+ for(const m of html.matchAll(/<(?:a|link|iframe|img|script|source|audio|video|embed|object|form)\b[^>]*\b(?:href|src|action|data)\s*=/gi))errs.push('ressource liee: '+m[0]);
+ console.log('reseau (statique)',errs.length>n?'KO':'OK')}
 (async()=>{const b=await launch();
 const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true});
 await ctx.addInitScript(()=>{try{localStorage.setItem('db-unl','3')}catch(e){}});
+// toute requete HTTP(S) du contexte (page, workers) est interceptee et refusee
+await ctx.route(u=>!/^(file|data|blob):/.test(u.href),r=>{errs.push('reseau: '+r.request().url());return r.abort()});
+// appels d'API reseau depuis le script, meme s'ils echouaient en silence hors ligne
+await ctx.addInitScript(()=>{const hit=(k,u)=>{try{console.error('reseau-api '+k+' '+u)}catch(e){}};
+ const F=window.fetch;window.fetch=function(u){hit('fetch',u&&u.url||u);return F.apply(this,arguments)};
+ const O=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){hit('xhr',u);return O.apply(this,arguments)};
+ const W=window.WebSocket;window.WebSocket=function(u){hit('websocket',u);return new W(...arguments)};
+ if(navigator.sendBeacon){const B=navigator.sendBeacon.bind(navigator);navigator.sendBeacon=(u,d)=>{hit('beacon',u);return B(u,d)}}
+ const E=window.EventSource;if(E)window.EventSource=function(u){hit('eventsource',u);return new E(...arguments)};
+ window.open=u=>{hit('window.open',u);return null}});
 const pg=await ctx.newPage();
+pg.on('websocket',w=>errs.push('websocket: '+w.url()));
+pg.on('worker',w=>{if(!/^(file|data|blob):/.test(w.url()))errs.push('worker: '+w.url())});
+pg.on('popup',p=>errs.push('popup: '+p.url()));
 pg.on('pageerror',e=>errs.push('pageerror: '+e.message));
 pg.on('console',m=>{if(m.type()==='error')errs.push('console: '+m.text())});
 pg.on('requestfailed',r=>errs.push('requestfailed: '+r.url()));
-pg.on('request',r=>{if(!/^(file|data|blob):/.test(r.url()))errs.push('reseau: '+r.url())});
 await pg.goto('file://'+FILE);await pg.waitForTimeout(500);
 const st=()=>pg.evaluate(()=>({ph:document.body.dataset.ph,eye:document.getElementById('hdEye').textContent,
  menu:!document.getElementById('menu').hidden,card:!document.getElementById('ov').hidden,skip:!document.getElementById('skip').hidden,
@@ -39,4 +59,6 @@ await pg.click('#phases button[data-ph="2"]');await pg.waitForTimeout(300);
 await play('phase II',1);
 await pg.click('#phases button[data-ph="3"]');await pg.waitForTimeout(300);
 await play('phase III',3);
+// pages non file: ouvertes par la page (onglet, navigation) : aucune
+for(const p of ctx.pages())if(!p.url().startsWith('file:'))errs.push('page externe: '+p.url());
 console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)})
