@@ -31,3 +31,11 @@ Journal daté. Une décision validée n'est pas remise en question dans une autr
 - L'enveloppe de l'hébergeur (ligne 1 : `<head>` et style de base) est gardée telle quelle pour ne pas toucher au rendu ; la remise en ordre du `<head>` se fera avec l'harmonisation.
 - Pas de version de test ni de crochets pour le Chapitre II : le test de fumée pilote le `dist` publié par le DOM (menu, frise des phases, clavier) et débloque les phases via `db-unl`.
 - Zip itch.io du Chapitre II à date fixe (reproductible).
+
+## 2026-10-27 – Chapitre II · écarts techniques (session 03, étape A)
+- **Source éditable** : `chapters/ch2-silent-bells/src/silent-bells.html` ; `legacy/silent-bells.source.html` reste l'import d'origine, figé (référence des contrôles). Le build lit `src/`.
+- **Fonction de texte** : `_(en, fr)` comme au Chapitre I. Inversion faite par script (`build/ch2_swap_args.py`, passe unique), contrôlée par `tests/ch2-texts.js`.
+- **Clés de sauvegarde** : préfixe `lb-`. Communes à la série : `lb-lang`, `lb-snd`, `lb-mus`, `lb-help`. Propres à un chapitre : `lb-chN-…` (`lb-ch2-unl`, `lb-ch2-best-<mode>` ; à venir `lb-ch1-intro`, `lb-ch1-end`, `lb-ch1-best-<mode>`). Migration : lire la nouvelle clé, sinon l'ancienne (`pn-lang` puis `eb-lang` pour la langue ; `db-optSnd`, `db-optMus`, `db-optHelp`, `db-unl`, `db-best-<mode>`), puis écrire la nouvelle. Les anciennes clés ne sont pas effacées (le Chapitre I lit encore `eb-lang`). Le Chapitre II n'a pas de drapeau « intro vue » (le prologue se passe par Entrée) : aucun n'a été ajouté.
+- **`<head>`** : l'enveloppe de l'hébergeur d'artefacts est retirée ; seule règle reprise dans les styles du jeu : les marges de zones sûres haut/bas (`html{padding-top/bottom:env(safe-area-inset-…)}`, comme au Chapitre I). Les autres règles de l'enveloppe étaient toutes écrasées par celles du jeu. `<html lang="fr">` (langue par défaut du chapitre, remise à jour par le script).
+- **Lien du menu vers l'artefact du Chapitre I** : retiré, rien à la place (le menu commun viendra avec l'harmonisation).
+- Aucun changement de jeu, de texte affiché ni de rendu, hormis le menu sans le lien (vérifié en image).

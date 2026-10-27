@@ -32,6 +32,18 @@ jobs:
         run: |
           node smoke.js
           node fonts-offline.js
-      - name: Chapitre II - syntaxe et test de fumee (3 phases en Normal, hors ligne)
+      - name: Chapitre II - textes, cles de sauvegarde, test de fumee (3 phases en Normal, hors ligne, sans reseau)
         working-directory: tests
-        run: node ch2-smoke.js
+        run: |
+          node ch2-texts.js
+          node ch2-keys.js
+          node ch2-smoke.js
+      - name: Apercu du jeu (Chapitres I et II)
+        uses: actions/upload-artifact@v4
+        with:
+          name: jeu-apercu
+          path: |
+            chapters/ch1-ember-bridge/dist/index.html
+            chapters/ch2-silent-bells/dist/index.html
+          retention-days: 14
+          if-no-files-found: error
