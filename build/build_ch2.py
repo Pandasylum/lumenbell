@@ -3,7 +3,7 @@ Usage : python3 build/build_ch2.py
 Entree : chapters/ch2-silent-bells/src/silent-bells.html (legacy/silent-bells.source.html = import d'origine, fige)
 Sortie : chapters/ch2-silent-bells/dist/index.html, build/out/silent-bells-itch.zip
 Seuls ecarts avec la source (voir chapters/ch2-silent-bells/NOTES.md) : meta propre a l'hebergeur
-d'artefacts retiree, polices Google remplacees par build/fonts.css inlinees. Jeu, textes et rendu inchanges.
+d'artefacts retiree, polices Google remplacees par build/fonts.css inlinees.
 """
 import sys, zipfile
 from pathlib import Path
@@ -19,7 +19,7 @@ def cut(s, old, new):
     return s.replace(old, new)
 
 s = SRC.read_text(encoding="utf-8")
-assert s.startswith("<!doctype html><html><head>")
+assert s.startswith("<!doctype html>\n<html lang=\"fr\">\n<head>\n")
 # meta retiree (propre a l'hebergeur d'artefacts, sans effet ailleurs)
 s = cut(s, '<meta name="claude:viewport-fit-sides" content="cover">\n', "")
 # polices integrees (hors connexion) a la place de Google Fonts
