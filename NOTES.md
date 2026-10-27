@@ -11,10 +11,12 @@
 
 ## Outillage
 - `python3 build/build.py` : assemble `chapters/ch1-ember-bridge/src/` (ordre : `src/parts.txt`, via `build/assemble.py`) et construit `dist/index.html` (polices inlinées, doctype) et `build/out/ember-bridge-itch.zip`. Doit rester identique à la référence v1.0.
+- `python3 build/build_ch2.py` : construit `chapters/ch2-silent-bells/dist/index.html` (source `legacy/` + polices inlinées, rien d'autre) et `build/out/silent-bells-itch.zip`. Doit redonner exactement le `dist` suivi (vérifié en CI). Écarts avec la source : `chapters/ch2-silent-bells/NOTES.md`.
 - `python3 build/extract_texts.py` : régénère `docs/TEXTES-CH1.md` (colonne `fichier:ligne`).
 - `python3 build/build_test.py` : `build/out/test.html` avec crochets `window.__t` (le fichier de test désactive la lecture du drapeau d'intro).
 - `tests/` : `smoke.js` (3 phases × 3 difficultés), `bot.js`, `trial-play.js`, `trial-end.js` (Épreuve du feu), `fonts-offline.js`, `menu-title.js`. `launch.js` lit `PW_CHROMIUM`.
-- Vérification de syntaxe du fichier final : `node -e 'const h=require("fs").readFileSync("chapters/ch1-ember-bridge/dist/index.html","utf8");for(const m of h.matchAll(/<script>([\s\S]*?)<\/script>/g))new Function(m[1]);console.log("syntaxe OK")'`.
+- `tests/ch2-smoke.js` : Chapitre II sur `dist/index.html` (syntaxe, `db-unl=3`, Normal, phases I à III, hors ligne) ; `errs []` attendu.
+- Vérification de syntaxe du fichier final (le Chapitre II la fait dans `ch2-smoke.js`) : `node -e 'const h=require("fs").readFileSync("chapters/ch1-ember-bridge/dist/index.html","utf8");for(const m of h.matchAll(/<script>([\s\S]*?)<\/script>/g))new Function(m[1]);console.log("syntaxe OK")'`.
 - Captures d'écran : utiliser une horloge simulée, sinon le rendu varie.
 - Mesure de fluidité : ~60 fps (P2 lac un peu plus lourd). Un « lag » vu dans l'aperçu Claude n'est pas celui du jeu.
 
