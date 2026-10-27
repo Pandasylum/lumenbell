@@ -277,9 +277,18 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
-let LANG='fr';try{const v=localStorage.getItem('pn-lang');if(v==='fr'||v==='en')LANG=v}catch(e){}
+/* save keys: common lb-* (lb-lang, lb-snd, lb-mus, lb-help) and per chapter lb-ch2-* (unlock, records).
+   Read the new key first, else the old one (pn-/db-, eb-lang from Chapter I), then write it to the new key. */
+const OLD_KEYS={'lb-lang':['pn-lang','eb-lang'],'lb-snd':['db-optSnd'],'lb-mus':['db-optMus'],'lb-help':['db-optHelp'],'lb-ch2-unl':['db-unl']};
+const oldKeys=k=>OLD_KEYS[k]||(k.startsWith('lb-ch2-best-')?['db-best-'+k.slice(12)]:[]);
+const store={get(k,d){try{let v=localStorage.getItem(k);
+  if(v==null)for(const o of oldKeys(k)){v=localStorage.getItem(o);if(v!=null){try{localStorage.setItem(k,v)}catch(e){}break}}
+  return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
+  Object.keys(OLD_KEYS).concat(ks.filter(o=>o.startsWith('db-best-')).map(o=>'lb-ch2-best-'+o.slice(8))).forEach(k=>store.get(k))}catch(e){}
+const OPT_KEY={optSnd:'lb-snd',optMus:'lb-mus',optHelp:'lb-help'};
+let LANG='fr';{const v=store.get('lb-lang',null);if(v==='fr'||v==='en')LANG=v}
 const _=(en,fr)=>LANG==='fr'?fr:en;
-const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
@@ -1607,7 +1616,7 @@ function hud(){
   $('hpPn').textContent=S.hp+'/'+S.hpMax;$('hpBn').textContent=S.bossHp+'/'+S.bossMax;
   const P=PH[S.phase];$('nmB').textContent=P.boss();$('hdEye').textContent=P.head();$('ward').textContent=P.btn();
   $('c').setAttribute('aria-label',P.aria());document.body.dataset.ph=S.phase;
-  const unl=+store.get('db-unl',1),gp=gpOf(S.phase);
+  const unl=+store.get('lb-ch2-unl',1),gp=gpOf(S.phase);
   document.querySelectorAll('#phases li').forEach((li,i)=>{const on=i+1===gp;li.classList.toggle('on',on);if(on)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');li.firstChild.disabled=!!S.d.trial||i+1>unl});
 }
 
@@ -1883,7 +1892,7 @@ function phaseCleared(){
         desc:_("The tower has burst. The King's pieces orbit the jellyfish, finally exposed.","La tour a éclaté. Les morceaux du Roi tournent autour de la méduse, enfin à découvert."),
         how:_("Same controls. TAP against the rings and the bell trap, HOLD against the anchor, the lanterns and the burst. To strike, tap when the gap in the orbit passes in front of you.","Mêmes commandes. TOUCHE contre les anneaux et la cloche-piège, MAINTIENS contre l'ancre, les lanternes et l'éclatement. Pour frapper, touche quand la fenêtre de l'orbite passe devant toi."),
         go:_('Continue','Continuer'),onGo:beginPlay})});return}
-  store.set('db-unl',String(Math.max(+store.get('db-unl',1),Math.min(3,gpOf(id)+1))));
+  store.set('lb-ch2-unl',String(Math.max(+store.get('lb-ch2-unl',1),Math.min(3,gpOf(id)+1))));
   if(id===3){playCine(3,'out',()=>playEpilogue(victory));return}
   playCine(id,'out',()=>clearedCard(id));
 }
@@ -1895,7 +1904,7 @@ function clearedCard(id){S.mode='card';const next=ORDER[gpOf(id)];
 }
 function fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0')}
 function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
-  const t=S.runT,key='db-best-'+S.dk,rec=+store.get(key,0);let isRec=false;
+  const t=S.runT,key='lb-ch2-best-'+S.dk,rec=+store.get(key,0);let isRec=false;
   if(S.full&&(!rec||t<rec)){store.set(key,String(t));isRec=true}
   const best=S.full?(isRec?t:rec):rec;
   showCard({eye:_('Victory','Victoire')+' · '+S.d[LANG],title:_('The stars shine again.','Les étoiles se rallument.'),
@@ -2078,11 +2087,11 @@ $('mResume').addEventListener('click',()=>{hideMenu();MUSIC.stop();if(S.mode==='
 document.querySelectorAll('#phases button').forEach(b=>b.addEventListener('click',()=>jumpPhase(+b.dataset.ph)));
 document.querySelectorAll('[data-diff]').forEach(b=>b.addEventListener('click',()=>{ensureAudio();const dk=b.dataset.diff;if(dk==='trial'){$('mphM').hidden=true;$('mphT').hidden=false;return}startRun(dk)}));
 $('mBackT').addEventListener('click',()=>{$('mphM').hidden=false;$('mphT').hidden=true});
-document.querySelectorAll('#langs button').forEach(b=>b.addEventListener('click',()=>{LANG=b.dataset.lang;store.set('pn-lang',LANG);applyLang()}));
-['optSnd','optMus'].forEach(id=>{$(id).checked=store.get('db-'+id,'1')==='1'});$('optHelp').checked=store.get('db-optHelp','0')==='1';
+document.querySelectorAll('#langs button').forEach(b=>b.addEventListener('click',()=>{LANG=b.dataset.lang;store.set('lb-lang',LANG);applyLang()}));
+['optSnd','optMus'].forEach(id=>{$(id).checked=store.get(OPT_KEY[id],'1')==='1'});$('optHelp').checked=store.get(OPT_KEY.optHelp,'0')==='1';
 function syncAudio(){MUSIC.setFx($('optSnd').checked);MUSIC.setMus($('optMus').checked);applyVol();
   if($('optMus').checked){if(!$('menu').hidden)setTheme(4);else if(S.mode==='play'&&!S.paused)setTheme(S.phase)}}
-['optHelp','optSnd','optMus'].forEach(id=>{const el=$(id);el.addEventListener('change',()=>{store.set('db-'+id,el.checked?'1':'0');if(id!=='optHelp')syncAudio();el.blur()})});
+['optHelp','optSnd','optMus'].forEach(id=>{const el=$(id);el.addEventListener('change',()=>{store.set(OPT_KEY[id],el.checked?'1':'0');if(id!=='optHelp')syncAudio();el.blur()})});
 MUSIC.setFx($('optSnd').checked);MUSIC.setMus($('optMus').checked);
 // menu music starts on the first interaction (browsers block sound before that)
 document.addEventListener('pointerdown',()=>{if(!$('menu').hidden&&MUSIC.cur!==4)setTheme(4)});
