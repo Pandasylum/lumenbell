@@ -20,6 +20,8 @@ function sim(o){
     if(S.mode==='won'){res='win';break}
     if(o.untilPhase&&S.phase===o.untilPhase&&S.mode==='play'){log.hpAt[S.phase*10+(S.form||1)]=S.hp;res='phase';break}
     if(S.mode==='dead'&&S.deadShown){res='dead';break}
+    if(o.untilEpilogue&&S.mode==='epilogue'){res='epilogue';break}
+    if(o.untilCard&&S.mode==='card'&&document.getElementById('ovEye').textContent.includes(o.untilCard)){res='card';break}
     if(S.mode==='card'){if(o.phase&&S.phase!==startPh){res='cleared';break}
       if(++cards>40){res='cards';break}T.go();continue}
     if(S.mode==='menu'){res='menu';break}

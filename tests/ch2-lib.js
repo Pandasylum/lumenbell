@@ -27,4 +27,17 @@ const HOOK='S.d=DIFFS.normal;S.phase=2;applyLang();\n'+
  'update(dt);gameUpdate(dt);if(drawIt){ctx=ctxMain;SC=SCm;draw()}}};';
 function testPage(){const h=fs.readFileSync(DIST,'utf8');if(h.split(END).length!==2)throw new Error('fin du script introuvable dans dist');
  const out=path.join(ROOT,'build/out/ch2-test.html');fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,h.replace(END,HOOK));return out}
-module.exports={ROOT,DIST,script,calls,lit,testPage};
+// Textes valides du cahier des charges (docs/CH2-SPEC.md), mot pour mot : phrases entre « » de la section francaise et
+// entre " " de la section anglaise (meme ordre), hors ligne « À supprimer » ; titres de phase et noms de boss (listes ci-dessous,
+// recopiees du cahier des charges, qui les donne hors guillemets).
+const TITLES=[['Phase I · The Mirror Hall','Phase I · La salle des reflets'],['Phase II · The Hold','Phase II · La cale'],['Phase III · The Reefs','Phase III · Les récifs']];
+const BOSSES=[['The Hollow Voice','La Voix Creuse'],['The Rust King','Le Roi de Rouille'],['The Drowned Lighthouse','Le Phare Noyé'],['The Shattered',"L'Éclaté"]];
+function specTexts(){const md=fs.readFileSync(path.join(ROOT,'docs/CH2-SPEC.md'),'utf8');
+ const sec=(a,b)=>{const i=md.indexOf(a),j=md.indexOf(b,i);if(i<0||j<0)throw new Error('section introuvable: '+a);return md.slice(i,j)};
+ const fr=sec('## Textes validés (français','## Textes validés (anglais)').split('\n').filter(l=>!l.startsWith('À supprimer')).join('\n');
+ const en=sec('## Textes validés (anglais)','## Code couleur');
+ const F=[...fr.matchAll(/«\s*([^»]+?)\s*»/g)].map(m=>m[1]),E=[...en.matchAll(/"([^"]+)"/g)].map(m=>m[1]);
+ if(F.length!==E.length)throw new Error('cahier des charges : '+F.length+' textes FR, '+E.length+' EN');
+ return{pairs:F.map((f,i)=>[E[i],f]),titles:TITLES,bosses:BOSSES,
+  removed:[...md.match(/^À supprimer.*$/m)[0].matchAll(/«\s*([^»]+?)\s*»/g)].map(m=>m[1])}}
+module.exports={ROOT,DIST,script,calls,lit,testPage,specTexts};

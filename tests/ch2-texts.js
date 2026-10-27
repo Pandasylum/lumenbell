@@ -4,8 +4,11 @@
 //    chapters/ch2-silent-bells/TEXTES.md (tableau lisible, relu et valide). Apres un changement de texte voulu :
 //    node tests/ch2-texts.js --write, relire le diff de TEXTES.md, committer avec la source ;
 // 3. FR et EN identiques en structure (chaine vide des deux cotes ou d'aucun, meme nombre de phrases,
-//    de « · » et de « … », meme ponctuation finale).
-const fs=require('fs'),path=require('path');const {ROOT,DIST,script,calls,lit}=require('./ch2-lib');
+//    de « · » et de « … », meme ponctuation finale) ;
+// 4. cahier des charges (docs/CH2-SPEC.md) : chaque texte valide (intro, panneaux, forme II, outro), chaque titre de phase et
+//    chaque nom de boss est un appel _(en, fr) du dist, mot pour mot ; les textes « À supprimer » et les anciens noms
+//    (galerie, fonderie, lac gele, Ember Bridge · Chapitre II, modes d'emploi...) n'apparaissent plus dans aucun texte.
+const fs=require('fs'),path=require('path');const {ROOT,DIST,script,calls,lit,specTexts}=require('./ch2-lib');
 const REF=path.join(ROOT,'chapters/ch2-silent-bells/TEXTES.md');
 const errs=[];
 const code=script(fs.readFileSync(DIST,'utf8'));
@@ -29,5 +32,19 @@ let nLit=0;
 for(const c of C){const en=lit(c.args[0]),fr=lit(c.args[1]);if(en===null||fr===null)continue;nLit++;
  const a=shape(en),b=shape(fr);
  for(const k of ['empty','dots','ell','sent','end'])if(a[k]!==b[k]){errs.push('structure ('+k+'): '+JSON.stringify(en)+' / '+JSON.stringify(fr));break}}
+// cahier des charges
+{const sp=specTexts(),have=new Set(C.map(c=>JSON.stringify([lit(c.args[0]),lit(c.args[1])])));
+ const need=[...sp.pairs,...sp.titles,...sp.bosses];
+ for(const pr of need)if(!have.has(JSON.stringify(pr)))errs.push('cahier des charges : couple absent '+JSON.stringify(pr));
+ const OLD=[...sp.removed,"n’est plus le Roi","no longer the King",'Silence the toll','Do not trust your eyes','Put out the beacon',
+  'galerie','Gallery','fonderie','Foundry','lac gelé','Frozen Lake','marais','marsh','Marsh of Bells','bâton','staff','Ember Bridge',
+  'fondu leurs cloches','melted their bells','Le bouton','The button','MAINTIENS','TOUCHE ','HOLD the','TAP ','Mêmes commandes','Same controls',
+  'Forme II','Form II','Les étoiles se rallument','stars shine again','Respire, observe','read the tells'];
+ // tout en capitales (MAINTIENS, TAP...) : casse exacte ; sinon sans tenir compte de la casse
+ const has=(v,o)=>o===o.toUpperCase()?v.includes(o):v.toLowerCase().includes(o.toLowerCase());
+ const html=fs.readFileSync(DIST,'utf8'),page=html.slice(html.indexOf('<body>'),html.indexOf('<script>'));
+ for(const c of C)for(const a of c.args){const v=lit(a);if(v===null)continue;for(const o of OLD)if(has(v,o))errs.push('texte retire encore present ('+o+') : '+JSON.stringify(v))}
+ for(const o of OLD)if(has(page.replace(/<[^>]*>/g,' '),o))errs.push('texte retire encore present dans la page ('+o+')');
+ console.log('cahier des charges :',sp.pairs.length,'textes,',sp.titles.length,'titres,',sp.bosses.length,'noms ;',OLD.length,'textes retires controles')}
 console.log('couples',C.length,'dont',nLit,'litteraux ; reference',path.relative(ROOT,REF));
 console.log('errs',errs);process.exitCode=errs.length?1:0;

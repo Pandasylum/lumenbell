@@ -5,8 +5,11 @@
 // 2. en jeu (copie de test a crochets) : tout texte dessine sur le canvas pendant un parcours complet (prologue,
 //    phases I a III, forme II, fin, outro) avec un bon bot, puis chaque phase avec un bot maladroit (blessures,
 //    reflets touches, garde brisee, defaite), en Normal et en Difficile, FR et EN.
+// 3. aucun texte hors du cahier des charges sur le canvas : chaque texte dessine est un texte valide de docs/CH2-SPEC.md
+//    (intro, outro, titres de phase, noms de boss, titre du chapitre), le nom de la serie ou une onomatopee (ONO), ou une
+//    ligne d'un de ces textes coupe en deux (legendes trop longues).
 // Sortie attendue : errs []
-const fs=require('fs');const launch=require('./launch');const {DIST,script}=require('./ch2-lib');const {open,run}=require('./ch2-bot');
+const fs=require('fs');const launch=require('./launch');const {DIST,script,specTexts}=require('./ch2-lib');const {open,run}=require('./ch2-bot');
 const BAN=[/parfait/i,/\bparée?s?\b/i,/esquiv/i,/touché/i,/contré/i,/un reflet/i,/trop tard/i,/frappe\s*!/i,/tiens\s*!/i,/coup de grâce/i,
  /coup double/i,/bloqué/i,/garde brisée/i,/il revient/i,/prépare la garde/i,/riposte/i,/parade/i,
  /\bperfect/i,/parried/i,/\bparry!/i,/dodged/i,/countered/i,/a reflection/i,/too late/i,/strike\s*!/i,/hold\s*!/i,/get ready/i,
@@ -30,5 +33,8 @@ const errs=[];
   const d=await pg.evaluate(()=>{const d=window.__drawn;window.__drawn={};return d});
   for(const k in d)seen[k]=(seen[k]||0)+d[k]}
  for(const k in seen){const b2=banned(k);if(b2)errs.push('affiche : '+JSON.stringify(k)+' ('+seen[k]+' images) : '+b2)}
+ {const sp=specTexts(),ONO=['CLANG','BAM','KRAKOOM'],ok=[...sp.pairs,...sp.titles,...sp.bosses].flat().concat('Lumenbell',ONO).map(x=>x.toUpperCase());
+  for(const k in seen){const t=k.replace(/\u200a/g,'').toUpperCase().trim();if(!t)continue;
+   if(!ok.some(x=>x===t||(t.length>12&&(x.startsWith(t+' ')||x.endsWith(' '+t)))))errs.push('texte hors cahier des charges : '+JSON.stringify(k))}}
  console.log('textes dessines :',Object.keys(seen).sort().map(k=>JSON.stringify(k.replace(/ /g,''))).join(', '));
  errs.push(...perr);console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});
