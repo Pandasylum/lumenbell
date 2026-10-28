@@ -39,5 +39,7 @@ function specTexts(){const md=fs.readFileSync(path.join(ROOT,'docs/CH2-SPEC.md')
  const F=[...fr.matchAll(/«\s*([^»]+?)\s*»/g)].map(m=>m[1]),E=[...en.matchAll(/"([^"]+)"/g)].map(m=>m[1]);
  if(F.length!==E.length)throw new Error('cahier des charges : '+F.length+' textes FR, '+E.length+' EN');
  return{pairs:F.map((f,i)=>[E[i],f]),titles:TITLES,bosses:BOSSES,
-  removed:[...md.match(/^À supprimer.*$/m)[0].matchAll(/«\s*([^»]+?)\s*»/g)].map(m=>m[1])}}
+  removed:[...md.match(/^À supprimer.*$/m)[0].matchAll(/«\s*([^»]+?)\s*»/g)].map(m=>m[1]),
+  // mot grave en clair sur la cloche (section « La cloche ») : [EN, FR]
+  engraving:(m=>{if(!m)throw new Error('mot grave de la cloche introuvable');return[m[2],m[1]]})(md.match(/le mot \*\*([^*]+)\*\* \(EN : \*\*([^*]+)\*\*\)/))}}
 module.exports={ROOT,DIST,script,calls,lit,testPage,specTexts};
