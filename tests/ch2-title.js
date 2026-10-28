@@ -15,7 +15,7 @@ const errs=[],SIZES=[[360,740],[390,844],[412,915],[844,390],[768,1024],[1100,76
   const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(w+'x'+h+' '+lang+': pageerror: '+e.message));
   await pg.goto('file://'+file);await pg.waitForTimeout(150);
   const B=await pg.evaluate(l=>{document.querySelector('#langs button[data-lang='+l+']').click();const T=__t;T.startRun('normal',false);
-   for(let i=0;i<Math.round(16.6*60);i++)T.step(1/60);window.__boxes=[];T.step(1/60,true);
+   for(let i=0;i<Math.round((T.PRO_TITLE+1)*60);i++)T.step(1/60);window.__boxes=[];   /* une seconde apres le debut du titre */T.step(1/60,true);
    const out=window.__boxes;window.__boxes=null;
    const c=document.getElementById('c').getBoundingClientRect();return{boxes:out,canvas:[c.left,c.right],page:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}},lang);
   await pg.screenshot({path:path.join(__dirname,'shots','ch2-title-'+w+'x'+h+'-'+lang+'.png')});

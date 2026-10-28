@@ -50,6 +50,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .pips span{flex:1;height:12px;background:#07090c;border:1px solid var(--line)}
 .pips span.on{background:var(--ward);border-color:var(--ward)}
 .bar.boss .pips span.on{background:var(--acc);border-color:var(--acc)}
+.bar .pips span.mark,.bar.boss .pips span.mark{border-bottom:3px solid var(--fg)}
 .stage{position:relative;aspect-ratio:16/9;width:100%;max-width:100%;border:1px solid var(--line);background:#06080b;overflow:hidden;touch-action:manipulation}
 .stage canvas{display:block;width:100%;height:100%}
 .skip{position:absolute;right:12px;bottom:12px;z-index:5;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;background:rgba(6,8,12,.6);color:var(--fg);border:1px solid rgba(236,230,220,.35);cursor:pointer}
@@ -300,15 +301,16 @@ const _=(en,fr)=>LANG==='fr'?fr:en;
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
 /* Difficulty, same values as Ember Bridge for the Watcher: hp = Watcher HP (6 / 4 / 3, trial 4 for the whole run);
-   m = multiplier of the Watcher's action (parry, side step, guard: x2 / x1 / x0.6) and rm of his recovery (x1.2 in Hard),
+   m = multiplier of the Watcher's action (block, side step, held block: x2 / x1 / x0.6) and rm of his recovery (x1.2 in Hard),
    as applyDiff() in Ember Bridge; sp = attack speed; boss = boss HP (kept from the import until playtests);
-   heal = HP refilled between phases. */
+   heal = HP refilled between phases; u = boss HP at which a rage starts (one in Easy and Normal, two in Hard, as in
+   Ember Bridge, where Normal raged at 5 of 10 HP and Hard at 10 and 5 of 14: same proportions here). */
 const DIFFS={
-  easy:{hp:6,m:2,rm:1,sp:.85,boss:6,heal:true,fr:'Facile',en:'Easy'},
-  normal:{hp:4,m:1,rm:1,sp:1,boss:8,heal:true,fr:'Normal',en:'Normal'},
-  hard:{hp:3,m:.6,rm:1.2,sp:1.18,boss:10,heal:true,fr:'Difficile',en:'Hard'},
-  tn:{hp:4,m:1,rm:1,sp:1,boss:8,heal:false,trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{hp:4,m:.6,rm:1.2,sp:1.18,boss:10,heal:false,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  easy:{hp:6,m:2,rm:1,sp:.85,boss:6,u:[3],heal:true,fr:'Facile',en:'Easy'},
+  normal:{hp:4,m:1,rm:1,sp:1,boss:8,u:[4],heal:true,fr:'Normal',en:'Normal'},
+  hard:{hp:3,m:.6,rm:1.2,sp:1.18,boss:10,u:[7,4],heal:true,fr:'Difficile',en:'Hard'},
+  tn:{hp:4,m:1,rm:1,sp:1,boss:8,u:[4],heal:false,trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
+  th:{hp:4,m:.6,rm:1.2,sp:1.18,boss:10,u:[7,4],heal:false,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const eio=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2, eout=t=>1-Math.pow(1-t,3), ein=t=>t*t*t;
@@ -335,12 +337,13 @@ function tone(f,dur,type,vol,dest,when,f2){if(!AC)return;const t=when||AC.curren
 let NB=null;function nbuf(){if(!NB){NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return NB}
 function noise(dur,vol,ft,ff,q,dest,when,ff2){if(!AC)return;const t=when||AC.currentTime;const s=AC.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=AC.createBiquadFilter();fl.type=ft;fl.frequency.setValueAtTime(ff,t);if(ff2)fl.frequency.exponentialRampToValueAtTime(ff2,t+dur);fl.Q.value=q||1;const g=AC.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0005,t+dur);s.connect(fl);fl.connect(g);g.connect(dest||SG);s.start(t);s.stop(t+dur+.05)}
 const sfx={
-  parry(p){tone(p?1046:880,.5,'sine',.22);tone(p?1568:1318,.35,'sine',.1);tone(2217,.2,'triangle',.05);if(p)tone(2093,.6,'sine',.07)},
+  block(p){tone(p?1046:880,.5,'sine',.22);tone(p?1568:1318,.35,'sine',.1);tone(2217,.2,'triangle',.05);if(p)tone(2093,.6,'sine',.07)},
   dodge(p){noise(.22,.25,'bandpass',600,2,null,null,2600);if(p)tone(1760,.25,'sine',.06)},
   hurt(){noise(.3,.4,'lowpass',700);tone(160,.35,'sawtooth',.12,null,null,60)},
   whiff(){tone(200,.08,'square',.05)},
   fool(){tone(2600,.25,'triangle',.08);tone(3150,.2,'triangle',.06);noise(.2,.12,'highpass',4000)},
   bossHit(){tone(80,.5,'sine',.4,null,null,40);noise(.25,.3,'lowpass',1200)},
+  thud(p){tone(55,.2+.12*p,'sine',.3+.1*p,null,null,35);noise(.09+.05*p,.14+.07*p,'lowpass',2400,1,null,null,240)},
   toll(){[196,392,466,587,784].forEach((f,i)=>tone(f*(1+i*.002),1.6-i*.2,'sine',[.18,.1,.06,.05,.03][i]))},
   charge(){tone(220,.8,'sawtooth',.04,null,null,880)},
   bolt(){noise(.35,.35,'highpass',1800);tone(60,.4,'sine',.25,null,null,30)},
@@ -373,7 +376,8 @@ function musTick(){
 /* ---------- particles & pops ---------- */
 function burst(x,y,n,col,spd,life,g){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.3+Math.random())*spd;S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-(g?spd*.4:0),g:g||0,t0:gt,life:life*(.6+Math.random()*.6),c:col,r:1.5+Math.random()*2.2})}}
 /* floating text: only onomatopoeia (same words in both languages, as in Ember Bridge); no announcement words */
-const ONO={parry:'CLANG',hit:'BAM',final:'KRAKOOM',crush:'KRAAAK'};
+/* onomatopoeia: no word on an ordinary riposte (as in Ember Bridge); the Voice only cries, by sound */
+const ONO={block:'CLANG',final:'KRAKOOM',crush:'KRAAAK'};
 function pop(txt,col,x,y){S.pops.push({txt,c:col,x:x||HX+10,y:y||GY-150,t0:gt})}
 
 /* ---------- patterns ---------- */
@@ -384,20 +388,21 @@ function sched(list){const pat={ths:list,ok:true,perf:0,nReal:list.filter(t=>t.r
    only sets deny (the recovery bar turns red). Each attack is settled at its impact: it is stopped if the Watcher is in his
    action then, or within `grace` of his recovery; a stopped attack sends him back to ready, so a series can be chained.
    Durations in seconds, base values from Ember Bridge: the action lasts base x m, the recovery base x rm (DIFFS).
-   T = parry (phase II, the King, T.barrier / T.recovery), DG = side step (phase I, the Voice, DG.act / DG.rec),
+   T = block (phase II, the King, T.barrier / T.recovery), DG = side step (phase I, the Voice, DG.act / DG.rec),
    R_T = guard (phase III, R_T.guard / R_T.rec; the guard lasts as long as the button is held, against the beams, and wears
    the stamina out: drain / regen per second, broken = recovery when it runs out; a beam blocked to its end counts as a
    stopped attack). hurt / down = stun after a hit, cut short so that the next attack can still be stopped (one hit per
-   mistake); fool = extra recovery after dodging a reflection; perf = a stop pressed this close before impact is perfect
+   mistake); backTurn / backWin = a reflection dodged turns round behind the Watcher (backTurn s) and comes back as a real
+   attack after the action + the recovery + backWin s (PROVISIONAL), so it can be dodged again; perf = a stop pressed this close before impact is perfect
    (x m); deny = red bar after a refused press. */
 const T={barrier:.333,recovery:.7,grace:.06,hurt:.38,perf:.08,deny:.25};
-const DG={act:.333,rec:.7,grace:.05,hurt:.38,perf:.08,fool:.6,deny:.25};
+const DG={act:.333,rec:.7,grace:.05,hurt:.38,perf:.08,backTurn:.35,backWin:.45,deny:.25};
 const R_T={guard:.333,rec:.7,grace:.06,down:.55,perf:.08,broken:.9,drain:.36,regen:.38,deny:.25};
 function newPl(){return{s:'ready',t:0,deny:0,at:-9,rd:0,rk:''}}
 /* durations for the current phase and difficulty */
 function PT(){const d=S.d,m=d.m,rm=d.rm||1;
   if(S.phase===1)return{act:T.barrier*m,rec:T.recovery*rm,grace:T.grace,hurt:T.hurt,perf:T.perf*m,deny:T.deny};
-  if(S.phase===2)return{act:DG.act*m,rec:DG.rec*rm,grace:DG.grace,hurt:DG.hurt,perf:DG.perf*m,deny:DG.deny,fool:DG.fool};
+  if(S.phase===2)return{act:DG.act*m,rec:DG.rec*rm,grace:DG.grace,hurt:DG.hurt,perf:DG.perf*m,deny:DG.deny};
   return{act:R_T.guard*m,rec:R_T.rec*rm,grace:R_T.grace,hurt:R_T.down,perf:R_T.perf*m,deny:R_T.deny,broken:R_T.broken}}
 function down(){
   if(S.mode!=='play'||S.paused)return;
@@ -411,7 +416,7 @@ function down(){
 function up(){S.held=false;$('ward').classList.remove('down')}
 function recover(p,d,k){p.s='recover';p.t=0;p.rd=d;p.rk=k}
 /* is the attack stopped at its impact? */
-function stops(){const p=S.pl,c=PT();return(p.s==='act'&&p.t<=c.act+.002)||(p.s==='recover'&&p.rk==='act'&&p.t<c.grace)}
+function stops(th){const p=S.pl,c=PT(),gr=c.grace+(th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0);return(p.s==='act'&&p.t<=c.act+.002)||(p.s==='recover'&&p.rk==='act'&&p.t<gr)}
 /* the Watcher's state over time (phase III: the guard is held while the button is down) */
 function plStep(dt){
   const p=S.pl,c=PT();p.t+=dt;p.deny=Math.max(0,p.deny-dt);
@@ -428,32 +433,47 @@ function success(th,perfect){
   th.done=true;th.res='ok';th.okT=gt;th.perfect=perfect;S.okT=gt;
   if(perfect){th.pat.perf++;S.perfects++}
   const ph=S.phase;
-  if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('parry',perfect);MUSIC.fx('clank');pop(ONO.parry,perfect?'#f2fffb':'#bff3ea')}
+  if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('block',perfect);MUSIC.fx('clank');pop(ONO.block,perfect?'#f2fffb':'#bff3ea')}
   else if(ph===2){S.dodgeOk=gt;play('dodge',perfect)}
-  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('parry',perfect)}
+  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect)}
 }
 function hurt(th){
   if(S.mode!=='play')return;
   S.hp=Math.max(0,S.hp-1);S.hits++;S.hurtT=gt;S.shake=12;
   // stun, cut short so that the next attack can still be stopped (Ember Bridge: min(base, max(.14, gap - .2)))
   {let nx=99;for(const o of S.threats)if(o!==th&&!o.done&&o.real!==false){const at=o.hold?o.ta:o.ti;if(at!=null&&at>gt)nx=Math.min(nx,at-gt)}
-   const p=S.pl;p.s='hurt';p.t=0;p.rd=Math.min(PT().hurt,Math.max(.14,nx-.2));p.rk=''}
-  if(th&&th.k==='rock')pop(ONO.crush,'#ff8a6b',HX-30,GY-190);
+   const p=S.pl;p.s='hurt';p.t=0;p.rd=Math.min(th&&th.k==='shard'?RAIN.hurt:PT().hurt,Math.max(.14,nx-.2));p.rk=''}
+  if(th&&th.k==='rafter')pop(ONO.crush,'#ff8a6b',HX-30,GY-190);
   burst(HX,GY-70,18,'#ff6a5a',5,.55);play('hurt');MUSIC.fx('chunk');hud();
   if(S.hp<=0){S.mode='dead';S.deadT=gt;S.holding=false;say(_('The Watcher falls. Defeat.','Le Veilleur tombe. Défaite.'))}
 }
+/* the riposte's impact, taken from Ember Bridge (36-p2-foundry-logic.js qDamage, and qFinalStep for the last blow of a
+   phase): screen shake (Ember Bridge amplitude; this chapter shakes ±shake/2, hence x2 when applied), hitstop (game time
+   stops, s), white flash (fading flashDecay per s), dull impact sound, a ring (ringLife s) and sparks tinted by phase
+   (white turquoise for the Voice, violet for the King, turquoise for the tower), the boss pushed back recoilPx (recovering
+   recoilDecay per s), then staggered `hurt` s once the riposte is over. All values taken from Ember Bridge. */
+const SHOCK={shake:13,hitstop:.11,flash:.4,flashDecay:2.2,ringLife:.35,recoilPx:20,recoilDecay:3.5,hurt:.55,
+  final:{shake:16,hitstop:.14,flash:.8},
+  tint:{2:['#ffffff','#dffcf6','#8fe8d8'],1:['#ffffff','#e2d2ff','#b48cff'],3:['#ffffff','#b8fff4','#4fe0cc']}};
 function damageBoss(n){
-  S.bossHp=Math.max(0,S.bossHp-n);S.bossFlash=gt;S.shake=8;play('bossHit');MUSIC.fx([null,'bellHit','crackGlass','creature'][S.phase]);
-  const p=bossCore();burst(p.x,p.y,26,S.phase===1?'#cfeee6':S.phase===2?'#e2d2ff':'#b8fff4',7,.7);
-  pop(ONO.hit,'#fff',p.x,p.y-60);hud();
+  S.bossHp=Math.max(0,S.bossHp-n);S.bossFlash=gt;
+  const F=S.bossHp<=0?SHOCK.final:SHOCK,col=SHOCK.tint[S.phase];
+  S.shake=Math.max(S.shake,F.shake*2);S.hitstop=F.hitstop;S.flashHit=F.flash;S.recoil=1;
+  play('thud',S.bossHp<=0?1.6:1.2);MUSIC.fx([null,'bellHit','crackGlass','creature'][S.phase]);
+  const p=bossCore();col.forEach((c,i)=>burst(p.x,p.y,i?12:10,c,7,.7));(S.rings||(S.rings=[])).push({x:p.x,y:p.y,life:SHOCK.ringLife,c:col[2]});
+  hud();
   if(S.bossHp<=0){S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
     say([null,_('The Rust King collapses.','Le Roi de Rouille s\'effondre.'),_('The Hollow Voice\'s mirror shatters.','Le miroir de la Voix Creuse éclate.'),_('The lantern goes dark.','La lanterne s\'éteint.')][S.phase]);
     }
 }
-function bossCore(){return S.phase===1?{x:700,y:GY-160}:S.phase===2?{x:730,y:150}:S.form===2?{x:LX,y:ECY}:{x:760,y:GY-292}}
+function bossCore(){return S.phase===1?{x:700,y:GY-160}:S.phase===2?{x:730,y:150}:S.form===2?{x:LX,y:ECY}:{x:LX,y:LY}}
 
 /* ---------- update ---------- */
 function update(dt){
+  // the riposte's shock: decays run in real time; during the hitstop the game time stands still
+  S.flashHit=Math.max(0,(S.flashHit||0)-dt*SHOCK.flashDecay);S.recoil=Math.max(0,(S.recoil||0)-dt*SHOCK.recoilDecay);
+  if(S.rings){for(const r of S.rings)r.life-=dt;S.rings=S.rings.filter(r=>r.life>0)}
+  if(S.hitstop>0&&(S.mode==='play'||S.mode==='ko')&&!S.paused){const d=Math.min(dt,S.hitstop);S.hitstop-=d;gt-=d;return}
   if(S.mode==='play'&&!S.paused){
     S.runT+=dt;
     plStep(dt);
@@ -468,13 +488,13 @@ function update(dt){
       if(gt>=th.ti){
         th.done=true;th.okT=gt;const p=S.pl;
         if(th.real===false){if(p.s==='act'&&aimedAt(th))fooled(th);else{th.res='pass';burst(HX+20,GY-70,10,'#a49bbd',3,.5);play('fool')}}
-        else if(stops()){success(th,p.s==='act'&&gt-p.at<=PT().perf);p.s='ready';p.t=0}
+        else if(stops(th)){success(th,p.s==='act'&&gt-p.at<=PT().perf);p.s='ready';p.t=0}
         else{th.res='hit';th.pat.ok=false;hurt(th);if(S.mode!=='play')break}
       }
     }
     if(S.mode==='play'&&S.pat&&S.pat.ths.every(t=>t.done))closePat();
     if(S.cnt&&!S.cnt.hit&&gt>=S.cnt.t+S.cnt.hitAt){S.cnt.hit=true;damageBoss(S.cnt.dmg)}
-    if(S.cnt&&gt>=S.cnt.t+S.cnt.dur)S.cnt=null;
+    if(S.cnt&&gt>=S.cnt.t+S.cnt.dur){S.cnt=null;S.bossHurtT=gt}
   }
   if(S.mode==='ko'&&gt>S.koT+2.6&&!S.koShown){S.koShown=true;phaseCleared()}
   if(S.mode==='dead'&&gt>S.deadT+1.1&&!S.deadShown){S.deadShown=true;deathCard()}
@@ -493,7 +513,7 @@ function closePat(){
   if(p.ok){
     const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=R_CNT[S.phase];
     S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
-    say(S.phase===1?_('Series parried. The Watcher counters.','Série parée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
+    say(S.phase===1?_('Series blocked. The Watcher counters.','Série bloquée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
   }else S.nextAt=gt+R_CNT.nextFail;
 }
 
@@ -582,6 +602,13 @@ function bg1(){
   // deck beams, bells on chains
   ctx.fillStyle='#0a0806';ctx.fillRect(0,0,W,30);ctx.fillStyle='rgba(160,120,80,.12)';ctx.fillRect(0,28,W,2);
   for(let x=-20;x<W;x+=150){ctx.fillStyle='#0c0907';ctx.fillRect(x,0,26,44);ctx.fillStyle='rgba(160,120,80,.08)';ctx.fillRect(x+22,0,3,44)}
+  // the hatch from the mirror hall, seen from below: open, a cold light from above, the broken chain hanging
+  {const hx=HATCH.x;ctx.fillStyle='#050a0b';ctx.fillRect(hx-60,0,120,30);const lg=ctx.createLinearGradient(0,0,0,GY);lg.addColorStop(0,'rgba(79,224,204,.16)');lg.addColorStop(1,'rgba(79,224,204,0)');
+   ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle=lg;ctx.beginPath();ctx.moveTo(hx-50,30);ctx.lineTo(hx+50,30);ctx.lineTo(hx+110,GY);ctx.lineTo(hx-90,GY);ctx.closePath();ctx.fill();glow(hx,14,70,'rgba(120,230,215,.7)',.35);ctx.restore();
+   ctx.fillStyle='#3a1e10';for(const sd of[-1,1]){ctx.beginPath();ctx.moveTo(hx+sd*60,30);ctx.lineTo(hx+sd*58,62);ctx.lineTo(hx+sd*50,60);ctx.lineTo(hx+sd*50,30);ctx.fill()}
+   chainLinks(hx-56,32,hx-50+Math.sin(rt*.8)*4,74,0,'#5a3018');
+   if(S.camDY>0){ctx.fillStyle='#0b1618';ctx.fillRect(-20,-S.camDY-20,W+40,S.camDY+20);const sg=ctx.createLinearGradient(0,-S.camDY,0,0);sg.addColorStop(0,'rgba(79,224,204,.25)');sg.addColorStop(1,'rgba(79,224,204,.05)');ctx.fillStyle=sg;ctx.fillRect(hx-60,-S.camDY,120,S.camDY);
+     ctx.strokeStyle='rgba(205,250,242,.4)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(hx-60,-S.camDY);ctx.lineTo(hx-60,0);ctx.moveTo(hx+60,-S.camDY);ctx.lineTo(hx+60,0);ctx.stroke()}}
   for(const b of HBELLS){const sw=Math.sin(rt*.7+b.x)*.08+Math.sin(rt*9+b.x)*(S.shake||0)*.012;
     const ex=b.x+Math.sin(sw)*b.l,ey=30+Math.cos(sw)*b.l;chainLinks(b.x,30,ex,ey,0,'rgba(70,40,24,.95)');rustBell(ex,ey,b.s,sw)}
   // dripping water
@@ -600,19 +627,37 @@ function bg1(){
 }
 
 /* Phase I · the mirror hall at the foot of the Lighthouse: sea stone, arches open on the mist, floating mirror shards,
-   a flooded floor that mirrors the hall (mirrorFloor, laid after the figures) and the closed hatch to the hold */
-const HATCH={x:470,y0:GY+26,y1:GY+64,w0:116,w1:142};
-function hatchPath(k){const h=HATCH;ctx.beginPath();ctx.moveTo(h.x-h.w0/2,h.y0);ctx.lineTo(h.x+h.w0/2,h.y0);ctx.lineTo(h.x+h.w1/2,h.y1);ctx.lineTo(h.x-h.w1/2,h.y1);ctx.closePath()}
-/* k = 0 closed ... 1 open (the two leaves fold down into the hold) */
-function drawHatch(k){const h=HATCH;
-  if(k>0){hatchPath();const g=ctx.createLinearGradient(0,h.y0,0,h.y1);g.addColorStop(0,'#000');g.addColorStop(1,'#120c08');ctx.fillStyle=g;ctx.fill();ctx.strokeStyle=`rgba(205,250,242,${.5*k})`;ctx.lineWidth=2;ctx.stroke();
-    ctx.save();hatchPath();ctx.clip();ctx.strokeStyle='rgba(120,90,60,.35)';ctx.lineWidth=2;for(let i=0;i<4;i++){const y=h.y0+10+i*9;ctx.beginPath();ctx.moveTo(h.x-80,y);ctx.lineTo(h.x+80,y+2);ctx.stroke()}ctx.restore()}
-  const lh=(h.y1-h.y0)*(1-k);
-  for(const sd of[-1,1]){const xa=h.x,xb=h.x+sd*h.w0/2,xc=h.x+sd*h.w1/2;
-    ctx.beginPath();ctx.moveTo(xa,h.y0);ctx.lineTo(xb,h.y0);ctx.lineTo(lerp(xb,xc,1-k),h.y0+lh);ctx.lineTo(xa,h.y0+lh);ctx.closePath();
-    ctx.fillStyle=k>0?'#2e2318':'rgba(46,35,24,.7)';ctx.fill();ctx.strokeStyle='rgba(10,6,4,.8)';ctx.lineWidth=1.5;ctx.stroke();
-    for(let i=1;i<3;i++){const x=lerp(xa,xb,i/3);ctx.beginPath();ctx.moveTo(x,h.y0);ctx.lineTo(x+sd*i*4*(1-k),h.y0+lh);ctx.stroke()}}
-  if(k<.1){ctx.strokeStyle='rgba(70,40,24,.8)';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(h.x+30,h.y0+16,7,3,0,0,Math.PI*2);ctx.stroke()}}
+   a flooded floor that mirrors the hall (mirrorFloor, laid after the figures) and, on a stone step just above the water
+   (so the water reflects it), the hatch down to the hold of the wreck: rusted, chained, a muffled bell tolling beneath */
+const HATCH={x:470,w:150,face:16,top:12,toll:7.5};   // toll: seconds between two muffled tolls under the hatch (phase I)
+function hatchTop(){const h=HATCH,y1=GY-h.face,y0=y1-h.top;return{y0,y1,l0:h.x-h.w/2+10,r0:h.x+h.w/2-10,l1:h.x-h.w/2,r1:h.x+h.w/2}}
+/* k = 0 closed ... 1 open (the chain snaps first, then the two leaves swing up on their outer hinges) */
+function drawHatch(k){const h=HATCH,T=hatchTop(),y1=GY-h.face;
+  // the stone step
+  let g=ctx.createLinearGradient(0,y1,0,GY);g.addColorStop(0,'#1d3236');g.addColorStop(1,'#0c1a1d');ctx.fillStyle=g;ctx.fillRect(h.x-h.w/2-12,y1,h.w+24,h.face);
+  ctx.fillStyle='#16272a';ctx.beginPath();ctx.moveTo(T.l0-12,T.y0);ctx.lineTo(T.r0+12,T.y0);ctx.lineTo(T.r1+12,y1);ctx.lineTo(T.l1-12,y1);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=1;for(const x of[-40,10,55])ctx.strokeRect(h.x+x-30,y1,50,h.face);
+  // the opening (dark, a faint sea light from the hold below)
+  ctx.beginPath();ctx.moveTo(T.l0,T.y0);ctx.lineTo(T.r0,T.y0);ctx.lineTo(T.r1,T.y1);ctx.lineTo(T.l1,T.y1);ctx.closePath();
+  g=ctx.createLinearGradient(0,T.y0,0,T.y1);g.addColorStop(0,'#000');g.addColorStop(1,'#0a1414');ctx.fillStyle=g;ctx.fill();
+  if(k>0){ctx.save();ctx.clip();glow(h.x,T.y1,70,'rgba(79,224,204,.8)',.35*k);ctx.restore()}
+  // the two leaves (rusted iron plates), swinging up from flat (0) to nearly upright
+  const th=k*Math.PI/2*.92;
+  for(const sd of[-1,1]){const hx0=sd<0?T.l0:T.r0,hx1=sd<0?T.l1:T.r1,cx0=h.x,cx1=h.x,c=Math.cos(th),s=Math.sin(th),half=h.w/2;
+    const f0={x:hx0+(cx0-hx0)*c,y:T.y0-half*s*.8},f1={x:hx1+(cx1-hx1)*c,y:T.y1-half*s*.8};
+    ctx.beginPath();ctx.moveTo(hx0,T.y0);ctx.lineTo(f0.x,f0.y);ctx.lineTo(f1.x,f1.y);ctx.lineTo(hx1,T.y1);ctx.closePath();
+    g=ctx.createLinearGradient(hx1,0,f1.x,0);g.addColorStop(0,'#3a1e10');g.addColorStop(.6,'#5a2e16');g.addColorStop(1,'#2a160c');ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle='rgba(12,6,3,.85)';ctx.lineWidth=1.5;ctx.stroke();
+    for(const q of[.35,.7]){ctx.beginPath();ctx.moveTo(lerp(hx0,f0.x,q),lerp(T.y0,f0.y,q));ctx.lineTo(lerp(hx1,f1.x,q),lerp(T.y1,f1.y,q));ctx.strokeStyle='rgba(20,10,5,.7)';ctx.lineWidth=2.5;ctx.stroke()}
+    ell(lerp(hx1,f1.x,.5),lerp(T.y1,f1.y,.5)-2,4,2,'rgba(79,170,150,.35)')}
+  // the chain: across the leaves and down the face, padlocked; once snapped, its two halves hang from the step
+  const snap=S.hatchSnap;
+  if(!snap){ctx.save();chainLinks(T.l1+6,y1+10,h.x,T.y1-4,0,'#5a3018');chainLinks(h.x,T.y1-4,T.r1-6,y1+10,0,'#5a3018');ctx.restore();
+    ctx.fillStyle='#4a2612';rrect(h.x-6,T.y1-2,12,11,2);ctx.fill();ctx.strokeStyle='#2a1408';ctx.lineWidth=2;ctx.beginPath();ctx.arc(h.x,T.y1-2,4,Math.PI,0);ctx.stroke()}
+  else{chainLinks(T.l1+6,y1+10,T.l1+14,GY+4,0,'#5a3018');chainLinks(T.r1-6,y1+10,T.r1-14,GY+4,0,'#5a3018')}}
+/* the muffled toll under the hatch: a ring on the water at the foot of the step (date in S.hatchRing) */
+function hatchRing(){if(!S.hatchRing)return;const q=gt-S.hatchRing;if(q<0||q>2)return;
+  ctx.strokeStyle=`rgba(200,250,240,${.35*(1-q/2)})`;ctx.lineWidth=1.5;for(let i=0;i<2;i++){const r=20+q*70+i*16;ctx.beginPath();ctx.ellipse(HATCH.x,GY+3,r,r*.1,0,0,Math.PI*2);ctx.stroke()}}
 function bg2(){
   let g=ctx.createLinearGradient(0,0,0,GY);g.addColorStop(0,'#03090c');g.addColorStop(.6,'#0a1b20');g.addColorStop(1,'#0f272b');ctx.fillStyle=g;ctx.fillRect(0,0,W,GY);
   // stone courses
@@ -636,7 +681,7 @@ function bg2(){
   g=ctx.createLinearGradient(0,GY,0,H);g.addColorStop(0,'#0c2b2f');g.addColorStop(1,'#020708');ctx.fillStyle=g;ctx.fillRect(0,GY,W,H-GY);
   ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1;for(let i=-8;i<=8;i++){ctx.beginPath();ctx.moveTo(480+i*44,GY);ctx.lineTo(480+i*130,H);ctx.stroke()}
   for(let y=GY+14,k=1;y<H;y+=10*k,k*=1.5){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-  if(!S.hatchK)drawHatch(0);
+  drawHatch(S.hatchK||0);
 }
 /* the water of the mirror hall reflects what stands above it (copied from the frame itself, flipped and squashed) */
 const MIRROR={src:220,a:.42};
@@ -652,11 +697,21 @@ function mirrorFloor(){
 
 /* Phase III · the reefs at night: low clouds, the open sea, black reef rock with foam and spray */
 const R4=mulberry(44),FARROCK=[...Array(6)].map(()=>({x:R4()*W,w:20+R4()*50,h:6+R4()*16}));
+/* the moon over the wreck (end of phase II) and the reefs (phase III) */
+const MOON={x:720,y:78,r:26};
+/* wrecks on the reef (x, keel y, scale, tilt) */
+/* the lanternless staff in its heap of debris (phase III): heap centre x, top offset dx, visible height h */
+const STAFF={x:150,dx:8,h:58};
+const WRECKS=[[200,GY-34,.7,.08],[470,GY-22,.5,-.12]];
+function wreck(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(s,s);ctx.fillStyle='#070b0c';ctx.beginPath();ctx.moveTo(-90,-30);ctx.quadraticCurveTo(-40,10,60,0);ctx.lineTo(96,-38);ctx.lineTo(80,-36);ctx.quadraticCurveTo(0,-14,-80,-40);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#070b0c';ctx.lineWidth=5;for(let i=0;i<5;i++){const xx=-60+i*28;ctx.beginPath();ctx.moveTo(xx,-14);ctx.quadraticCurveTo(xx-6,-50,xx+4,-70+i*4);ctx.stroke()}ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(10,-20);ctx.lineTo(24,-130);ctx.stroke();ctx.restore()}
 const MIDROCK=[[0,GY-34,150,30],[120,GY-20,140,18],[330,GY-26,120,22],[470,GY-14,160,12],[880,GY-30,120,26]];
 function reefRock(x,y,w,h,seed){const R=mulberry(seed);ctx.beginPath();ctx.moveTo(x-w/2,y+h);for(let i=0;i<=8;i++){const t=i/8;ctx.lineTo(x-w/2+t*w,y+h-Math.sin(Math.PI*t)*h*(.6+R()*.6))}ctx.closePath();ctx.fill()}
 function bg3(){
   let g=ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'#02060a');g.addColorStop(1,'#0a2228');ctx.fillStyle=g;ctx.fillRect(0,0,W,300);
   for(const s of STARS){if(s.y>200)continue;ctx.globalAlpha=.15+.2*Math.sin(rt*1.5+s.o);ctx.fillStyle='#e8f6f2';ctx.fillRect(s.x,s.y,s.r,s.r)}ctx.globalAlpha=1;
+  // the moon that lit the King at the end of phase II
+  glow(MOON.x-120,MOON.y-10,110,'rgba(220,235,255,.8)',.3);ell(MOON.x-120,MOON.y-10,MOON.r*.8,MOON.r*.8,'rgba(225,235,242,.85)');
   // low clouds
   for(let b=0;b<3;b++)for(let i=0;i<6;i++){const x=((i*210+rt*(4+b*3)+b*90)%(W+300))-150,y=40+b*55+Math.sin(i+b)*12;const cg=ctx.createRadialGradient(x,y,10,x,y,170);cg.addColorStop(0,`rgba(${18+b*6},${36+b*8},${42+b*8},.75)`);cg.addColorStop(1,'rgba(10,30,36,0)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(x,y,170,40,0,0,Math.PI*2);ctx.fill()}
   // the open sea
@@ -665,6 +720,8 @@ function bg3(){
   ctx.strokeStyle='rgba(140,230,220,.12)';ctx.lineWidth=1.2;for(let i=0;i<9;i++){const y=304+i*i*1.6,ph=rt*.6+i;ctx.beginPath();for(let x=0;x<=W;x+=30){const yy=y+Math.sin(x*.02+ph)*(1+i*.4);x?ctx.lineTo(x,yy):ctx.moveTo(x,yy)}ctx.stroke()}
   // rocks of the reef behind the fight, foam at their feet
   ctx.fillStyle='#060c0e';MIDROCK.forEach((r,i)=>reefRock(r[0]+r[2]/2,r[1],r[2],r[3],60+i));
+  // the ships the sea took, asleep on the reef
+  for(const [x,y,s,a] of WRECKS)wreck(x,y,s,a);
   for(let i=0;i<5;i++){const r=MIDROCK[i],k=(rt*.35+i*.23)%1;ctx.strokeStyle=`rgba(220,245,240,${.35*(1-k)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(r[0]+r[2]/2,r[1]+r[3],r[2]*.5*(.8+k*.4),3+k*4,0,Math.PI,0);ctx.stroke()}
   // the reef floor: wet black rock, crevices, foam pools, the mooring rocks
   g=ctx.createLinearGradient(0,GY-20,0,H);g.addColorStop(0,'#101a1d');g.addColorStop(.3,'#0a1114');g.addColorStop(1,'#030607');ctx.fillStyle=g;ctx.fillRect(0,GY-6,W,H-GY+6);
@@ -672,6 +729,16 @@ function bg3(){
   ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=2;for(const c of CRACKS){ctx.beginPath();c.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke()}
   for(const c of CRACKS){const p=c[2];ell(p[0],p[1],18,3,`rgba(160,230,220,${.08+.05*Math.sin(rt+p[0])})`)}
   ctx.strokeStyle='rgba(150,235,225,.28)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,GY-6);ctx.lineTo(W,GY-6);ctx.stroke();
+  // a Watcher's staff without its lantern, planted in a heap of debris on the left: only its upper half shows, its small bell
+  {const S0=STAFF;ctx.lineCap='round';ctx.strokeStyle='#3a2a1a';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(S0.x,GY-18);ctx.lineTo(S0.x+S0.dx,GY-18-S0.h);ctx.stroke();
+   const tx=S0.x+S0.dx,ty=GY-18-S0.h;ctx.strokeStyle='#2a3238';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-4,ty-12);ctx.moveTo(tx,ty);ctx.lineTo(tx+7,ty-10);ctx.stroke();
+   const sw=Math.sin(rt*1.1)*.15;ctx.save();ctx.translate(tx+2,ty+4);ctx.rotate(sw);ctx.strokeStyle='#2a3238';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,6);ctx.stroke();
+   ctx.fillStyle=bronze(-5,5);ctx.beginPath();ctx.moveTo(-5,15);ctx.quadraticCurveTo(-4,6,0,6);ctx.quadraticCurveTo(4,6,5,15);ctx.closePath();ctx.fill();ctx.restore();
+   ctx.fillStyle='#0a0705';ctx.beginPath();ctx.moveTo(S0.x-46,GY+2);ctx.lineTo(S0.x-30,GY-14);ctx.lineTo(S0.x-8,GY-22);ctx.lineTo(S0.x+12,GY-26);ctx.lineTo(S0.x+34,GY-12);ctx.lineTo(S0.x+52,GY+2);ctx.closePath();ctx.fill();
+   ctx.fillStyle='#16100b';ctx.save();ctx.translate(S0.x-14,GY-18);ctx.rotate(-.35);ctx.fillRect(-22,-3,44,6);ctx.restore();ctx.save();ctx.translate(S0.x+20,GY-14);ctx.rotate(.5);ctx.fillRect(-16,-3,32,5);ctx.restore()}
+  // the gutted hull of the wreck around the fight: broken frames rising from the reef at both edges
+  for(const [x,d] of[[18,1],[96,1],[952,-1]]){ctx.strokeStyle='#0a0705';ctx.lineWidth=20;ctx.beginPath();ctx.moveTo(x,GY+4);ctx.quadraticCurveTo(x-d*16,GY-160,x+d*40,GY-250+(x%3)*20);ctx.stroke();ctx.strokeStyle='rgba(150,120,90,.12)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+d*6,GY+4);ctx.quadraticCurveTo(x-d*10,GY-160,x+d*44,GY-246+(x%3)*20);ctx.stroke()}
+  ctx.fillStyle='#120d09';ctx.fillRect(0,GY-26,150,8);ctx.fillRect(0,GY-58,90,7);ctx.fillRect(900,GY-40,60,8);
   // surf breaking at the front edge, spray in the wind
   for(let i=0;i<4;i++){const k=(rt*.25+i*.25)%1,y=H-6-k*18;ctx.strokeStyle=`rgba(225,245,240,${.3*Math.sin(Math.PI*k)})`;ctx.lineWidth=2;ctx.beginPath();for(let x=0;x<=W;x+=40){const yy=y+Math.sin(x*.03+i*2+rt)*3;x?ctx.lineTo(x,yy):ctx.moveTo(x,yy)}ctx.stroke()}
   ctx.fillStyle='rgba(225,245,240,.55)';for(const s of SPRAY){const y=H-((s.y*.5+rt*s.v)%(H*.55)),x=(s.x+rt*s.v*.8+Math.sin(rt+s.d)*10)%W;ctx.globalAlpha=clamp((y-H*.45)/80,0,1)*.7;ctx.fillRect(x,y,1.6,1.6)}ctx.globalAlpha=1;
@@ -738,7 +805,8 @@ function heroShape(x,y,lean,staffA,tint){
   ctx.strokeStyle='#6e5238';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(sb[0],sb[1]);ctx.lineTo(st[0],st[1]);ctx.stroke();
   ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(hand[0],hand[1],5,0,6.283);ctx.fill();
   const lit=up>.3||S.holding;
-  ctx.save();ctx.translate(st[0],st[1]);ctx.rotate(staffA+Math.PI/2);ctx.shadowColor=lit?'#6fd3ff':'#2d6f8f';ctx.shadowBlur=lit?22:8;ctx.fillStyle=lit?'#d8f4ff':'#7fc6e6';
+  const dm=S.lampDim||0;   // the lantern dims (end of phase I), 0..1
+  ctx.save();ctx.translate(st[0],st[1]);ctx.rotate(staffA+Math.PI/2);ctx.shadowColor=lit?'#6fd3ff':'#2d6f8f';ctx.shadowBlur=(lit?22:8)*(1-dm);ctx.fillStyle=dm>0?lerpC(lit?[216,244,255]:[127,198,230],[38,58,70],dm):lit?'#d8f4ff':'#7fc6e6';
   ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(8,0);ctx.lineTo(0,10);ctx.lineTo(-8,0);ctx.closePath();ctx.fill();ctx.restore();
   ctx.restore();
   const c=Math.cos(lean),s=Math.sin(lean);S.orbX=x+st[0]*c-st[1]*s;S.orbY=y+st[0]*s+st[1]*c;
@@ -825,8 +893,9 @@ function drawBoss1(){
   glow(0,hy,80,'rgba(220,150,80,.7)',clamp(hp,0,1)*.45*(1-pz));if(pz>0)glow(0,hy,110,'rgba(90,220,255,.9)',pz*.7);
   // sea water running off the rims
   for(const d of DRIPS){const k=(rt*.6+d.o)%1;ell(d.x,GY-96+k*86,1.8,3+k*3,`rgba(170,235,225,${.6*(1-k)})`)}
-  // 4. the anchor's sling: one chain from left hip to right shoulder (the tower's moorings)
+  // 4. the anchor's sling: one chain from left hip to right shoulder (the tower's moorings); at the belt, a Watcher's lantern cage, unlit
   chainLinks(-74,GY-112,rS.x-6,rS.y-8,-6,'#4a2a18');
+  ctx.save();ctx.translate(46,GY-100);ctx.scale(1.4,1.4);deadLantern(0,0,Math.sin(rt*1.4)*.12);ctx.restore();ctx.strokeStyle='#4a2a18';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(40,GY-112);ctx.lineTo(46,GY-121);ctx.stroke();
   // 5. left arm: the harpoon (thrown on its chain, then hauled back)
   let lh;
   if(A.larm){lh={x:lerp(-96,-150,A.larm),y:lerp(GY-118,ty+6,A.larm)}}else lh={x:-98+Math.sin(rt*1.3)*2,y:GY-118};
@@ -844,8 +913,13 @@ function drawBoss1(){
   fist(lh.x,lh.y);
   // 6. shoulder bells (the tower's balconies)
   for(const s of[-1,1])drawP('sbell',s*80,ty+40,0);
+  // what is left of a Watcher on him: a torn strip of cloak hanging from the left shoulder
+  {const sw=Math.sin(rt*1.2)*4;ctx.fillStyle='#2a3554';ctx.beginPath();ctx.moveTo(lS.x-8,lS.y-14);ctx.quadraticCurveTo(lS.x-40,lS.y+40,lS.x-44+sw,GY-140);
+   [[-38,GY-126],[-30,GY-142],[-24,GY-122],[-16,GY-140],[-10,GY-150]].forEach(([dx,y])=>ctx.lineTo(lS.x+dx+sw*.6,y));ctx.quadraticCurveTo(lS.x-12,lS.y+30,lS.x+14,lS.y-10);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='rgba(120,140,190,.18)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(lS.x-4,lS.y);ctx.quadraticCurveTo(lS.x-20,lS.y+50,lS.x-22+sw,GY-150);ctx.stroke()}
   // 7. head bell, hunched forward between the shoulders: the Lighthouse's bell, its lamp still lit
   const hs=A.toll*Math.sin(gt*60)*.09-.2;
+  S.kingHead={x:X+sh-6,y:ty+20};
   ctx.save();ctx.translate(-6,ty+6);ctx.rotate(hs);
   pHead();
   const lit=clamp(.6+.3*Math.sin(rt*2.4)+A.toll*.6,0,1);
@@ -859,6 +933,8 @@ function drawBoss1(){
   if(!A.onBack&&!S.noAnchor){const tip=drawAnchor(rh.x,rh.y,Math.cos(A.clap),Math.sin(A.clap),curAct(['slam','sweep'],0)?.45:0);S.clapTip={x:tip[0]+X,y:tip[1]}}
   limb(rS.x,rS.y,rh.x,rh.y,A.onBack?14:-14,22);
   fist(rh.x,rh.y);
+  // a chain ring at the wrist, one link hanging
+  {const dx=rh.x-rS.x,dy=rh.y-rS.y,l=Math.hypot(dx,dy)||1,wx=rh.x-dx/l*16,wy=rh.y-dy/l*16;ctx.strokeStyle='#6a3a1c';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(wx,wy,5,12,Math.atan2(dy,dx),0,Math.PI*2);ctx.stroke();ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(wx+2,wy+13,3,6,.3,0,Math.PI*2);ctx.stroke()}
   ctx.restore();
   if(S.mode==='ko'&&S.phase===1&&!S.koBurst){S.koBurst=true;for(let i=0;i<5;i++)burst(700+(Math.random()-.5)*160,GY-120-Math.random()*120,14,i%2?'#cfeee6':'#c9925e',6,1.4,.35)}
 }
@@ -879,9 +955,15 @@ function drawToll(){
 }
 
 /* ---------- boss 2: the Hollow Voice ---------- */
+/* the turquoise glow deep in the mirror (the keeper's lantern, unseen): faint at first, rising as the Voice weakens,
+   brightest just before the mirror shatters. MIRROR_GLOW: base / max during the fight, end = before the shattering */
+const MIRROR_GLOW={base:.06,max:.65,end:.95};
+function mirrorLight(){if(S.phase!==2)return 0;const G=MIRROR_GLOW;
+  if(S.cine&&S.cine.k==='out'){const t=gt-S.cine.t0;return t<CINE_P1.drop?lerp(G.max,G.end,clamp(t/CINE_P1.drop,0,1)):0}
+  if(S.mode==='play'||S.mode==='ko'||S.mode==='dead')return G.base+(G.max-G.base)*(1-S.bossHp/S.bossMax);return G.base}
 function voiceAnim(){
   let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
-  let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1}
+  let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
   return{cast,echo};
 }
 const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160}];
@@ -891,7 +973,11 @@ function drawBoss2(){
   const A=voiceAnim();
   let ko=S.mode==='ko'&&S.phase===2?clamp((gt-S.koT)/2,0,1):0;
   if(A.echo){S.echoA=Math.min(1,(S.echoA||0)+.06)}else S.echoA=Math.max(0,(S.echoA||0)-.05);
-  if(S.echoA>0){for(const i of[1,2]){const has=S.threats.some(t=>t.k==='orb'&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,S.echoA*.5,has?1:0,0)}}
+  if(S.echoA>0){for(const i of[1,2]){
+    // rage: a reflection shatters, sending a shard at the Watcher
+    const br=S.threats.find(t=>t.k==='shard'&&t.from===i&&gt>=t.t0);
+    if(br){if(!br.bk){br.bk=1;const p=voicePos(i);burst(p.x,p.y-80,26,'#ece4ff',6,.9,.2);burst(p.x,p.y-20,16,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass')}continue}
+    const has=S.threats.some(t=>t.k==='orb'&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,S.echoA*.5,has?1:0,0)}}
   ctx.save();
   if(hasFilter&&gt-S.bossFlash<.15)ctx.filter='brightness(1.8)';
   drawVoice(0,1-clamp((ko-.4)/.6,0,1),A.cast,ko);
@@ -929,7 +1015,8 @@ function drawVoice(i,alpha,cast,ko){
   if(!S.noFace){
   const mg=ctx.createRadialGradient(fx-8,fy-10,2,fx,fy,30);mg.addColorStop(0,'#8a80a8');mg.addColorStop(.5,'#2c2440');mg.addColorStop(1,'#0c0816');
   ctx.fillStyle=mg;ctx.beginPath();ctx.ellipse(fx,fy,25,31,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#05030a';ctx.lineWidth=4;ctx.stroke();
+  if(i===0){const L=mirrorLight();if(L>0){ctx.save();ctx.clip();ctx.globalCompositeOperation='lighter';const g2=ctx.createRadialGradient(fx-2,fy+10,1,fx-2,fy+10,22);g2.addColorStop(0,`rgba(150,255,235,${L*(.75+.25*Math.sin(rt*3.4))})`);g2.addColorStop(1,'rgba(79,224,204,0)');ctx.fillStyle=g2;ctx.fillRect(fx-26,fy-32,52,64);ctx.restore()}}
+  ctx.strokeStyle='#05030a';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(fx,fy,25,31,0,0,Math.PI*2);ctx.stroke();
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,160,255,${.55+.4*pulse})`;ctx.lineWidth=1.6;
   ctx.beginPath();ctx.moveTo(fx+4,fy-31);ctx.lineTo(fx,fy-10);ctx.lineTo(fx+12,fy+2);ctx.lineTo(fx+3,fy+30);ctx.moveTo(fx,fy-10);ctx.lineTo(fx-20,fy-4);ctx.moveTo(fx+12,fy+2);ctx.lineTo(fx+24,fy-8);ctx.moveTo(fx-10,fy-6);ctx.lineTo(fx-14,fy+20);ctx.moveTo(fx+6,fy+14);ctx.lineTo(fx-6,fy+26);ctx.stroke();
   glow(fx+2,fy-6,26,'rgba(190,150,255,.8)',.35*pulse);ctx.restore();
@@ -945,6 +1032,10 @@ function drawVoice(i,alpha,cast,ko){
 function lanternPos(t,fx,fy){const C=CINE_P1,d=t-C.drop;
   if(d<C.fall){const k=d/C.fall;return{x:fx-20*k,y:lerp(fy,GY,k*k),a:k*2.4,splash:false}}
   const s=eout(clamp((d-C.fall)/C.sink,0,1));return{x:fx-20+Math.sin(d*1.3)*4,y:GY+8+s*C.depth,a:2.4+Math.sin(d*1.1)*.25,splash:true,sub:s}}
+/* a Watcher's lantern cage, unlit, hanging at the Rust King's belt */
+function deadLantern(x,y,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.strokeStyle='#2a1a10';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-15,4,Math.PI,0);ctx.stroke();
+  ctx.fillStyle='#24180f';ctx.beginPath();ctx.moveTo(-6,-11);ctx.lineTo(6,-11);ctx.lineTo(8,-7);ctx.lineTo(-8,-7);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(20,30,30,.8)';ctx.fillRect(-6,-7,12,14);
+  ctx.strokeStyle='#24180f';ctx.lineWidth=1.5;for(const x0 of[-6,0,6]){ctx.beginPath();ctx.moveTo(x0,-7);ctx.lineTo(x0,7);ctx.stroke()}ctx.fillStyle='#24180f';ctx.fillRect(-8,7,16,3);ctx.strokeStyle='rgba(170,230,210,.15)';ctx.beginPath();ctx.moveTo(-4,-5);ctx.lineTo(-4,4);ctx.stroke();ctx.restore()}
 function keeperLantern(x,y,a,t){const p=.55+.45*Math.sin(t*3.4);
   ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(1.5,1.5);
   glow(0,0,46,'rgba(79,224,204,.9)',.55*p);
@@ -956,9 +1047,11 @@ function keeperLantern(x,y,a,t){const p=.55+.45*Math.sin(t*3.4);
   ctx.fillStyle='#22312e';ctx.fillRect(-8,6,16,3);ctx.restore()}
 /* phase I end, over the water: the hatch opening on the hold, and the lantern's pulse once it has sunk */
 function sinkGlow(t){
-    // the hatch to the hold opens in the floor
-    S.hatchK=eio(clamp((t-CINE_P1.hatch)/.8,0,1));if(S.hatchK>0){drawHatch(S.hatchK);if(once('hatch')){MUSIC.fx('clank');S.shake=6}
-      if(S.hatchK<1||t<CINE_P1.hatch+1.6){const h=HATCH;ctx.strokeStyle='rgba(210,250,240,.5)';ctx.lineWidth=1.5;for(let i=0;i<6;i++){const x=h.x-h.w0/2+8+i*(h.w0-16)/5,k=(t*2+i*.3)%1;ctx.beginPath();ctx.moveTo(x,h.y0-4);ctx.lineTo(x+(i-2.5)*2,h.y0+k*24);ctx.stroke()}}}
+    // the hatch: the chain snaps, then the leaves swing open (drawn with the hall, so the water reflects it)
+    const C=CINE_P1;{const k=clamp((t-C.dim)/C.dimD,0,1);S.lampDim=k>0&&k<1?Math.sin(Math.PI*k)*(Math.sin(t*37)>-.3?1:.6):0}
+    if(t>=C.hatch-C.snap&&once('snap')){S.hatchSnap=1;S.shake=7;const T=hatchTop();burst(HATCH.x,T.y1,18,'#8a4a24',5,.7,.4);MUSIC.fx('chainSlip');MUSIC.fx('clank')}
+    S.hatchK=eio(clamp((t-C.hatch)/.8,0,1));if(S.hatchK>0&&once('hatch')){MUSIC.fx('plant');S.shake=6}
+    if(S.hatchK>0)glow(HATCH.x,GY-30,90,'rgba(79,224,204,.8)',.3*S.hatchK);
   if(t<CINE_P1.drop+CINE_P1.fall)return;const vp=voicePos(0),q=lanternPos(t,vp.x,vp.y-96),p=.5+.5*Math.sin(t*3.4);
   ctx.save();ctx.globalCompositeOperation='lighter';glow(q.x,q.y,60+20*p,'rgba(79,224,204,.9)',.35+.3*p);ell(q.x,q.y-1,2.5,4,`rgba(220,255,248,${.5+.4*p})`);ctx.restore()}
 function shard(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a*1.5);const g=ctx.createLinearGradient(-s,-s,s,s);g.addColorStop(0,'rgba(235,225,255,.75)');g.addColorStop(1,'rgba(90,70,140,.4)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*.5,s*.2);ctx.lineTo(-s*.3,s*.7);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
@@ -1123,6 +1216,11 @@ function drawTransform(){
 }
 function drawBeacon(){
   for(const th of S.threats){
+    // the King's wave: it swells at the foot of the tower, rolls across the reef, then ebbs back
+    if(th.k==='kwave'&&gt>=th.t0&&gt<=th.ts+th.D+1){
+      if(gt<th.ts){const k=(gt-th.t0)/(th.ts-th.t0);drawWave(LX-110,10+70*eout(k),.5+.5*k);if(k>.5&&Math.random()<.4)burst(LX-110+Math.random()*80,GY-30,2,'#e6f8f2',3,.5,.3)}
+      else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D,bx=940-1000*s;drawWave(bx,96,1);if(Math.abs(bx-HX)<90&&S.holding)burst(HX+30+(Math.random()-.5)*60,GY-80-Math.random()*60,2,'#e6f8f2',4,.4)}
+      else{const q=(gt-th.ts-th.D)/1;ctx.save();ctx.globalAlpha=1-q;ctx.scale(-1,1);drawWave(-lerp(-60,700,eio(q)),40*(1-q*.5),1);ctx.restore()}}
     if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D+.1){
       let bx;if(gt<th.ts){bx=th.dir<0?940:-60;const k=(gt-th.t0)/(th.ts-th.t0);ctx.save();ctx.globalAlpha=.12+.25*k;beamShape(bx,.6);ctx.restore();continue}
       const s=(gt-th.ts)/th.D;bx=th.dir<0?940-1000*s:-60+1000*s;
@@ -1189,19 +1287,24 @@ let last=performance.now();
 function draw(){
   ctx.setTransform(SC,0,0,SC,0,0);
   if(S.mode==='epilogue'){ctx.save();drawEpilogue(gt-S.epT0);ctx.restore();return}
+  if(S.mode==='card'&&S.still){ctx.save();drawStill(S.still);ctx.restore();const vs=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vs.addColorStop(0,'rgba(0,0,0,0)');vs.addColorStop(1,'rgba(0,0,0,.55)');ctx.fillStyle=vs;ctx.fillRect(0,0,W,H);return}
   if(S.mode==='prologue'){ctx.save();drawPrologue(gt-S.proT0);ctx.restore();const vg0=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vg0.addColorStop(0,'rgba(0,0,0,0)');vg0.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=vg0;ctx.fillRect(0,0,W,H);return}
   ctx.save();
   if(S.shake>.3)ctx.translate((Math.random()-.5)*S.shake,(Math.random()-.5)*S.shake);
   const ph=S.phase;
+  S.camDY=0;if(S.cine&&ph===1&&S.cine.k==='in'){const C=CINE_P2;S.camDY=C.descD*(1-eio(clamp((gt-S.cine.t0)/C.desc,0,1)));if(S.camDY>0)ctx.translate(0,S.camDY)}
   if(S.cine&&ph===3&&S.cine.k==='out'){const C=CINE_P3,z=1+(C.zoomZ-1)*eio(clamp((gt-S.cine.t0-C.zoom)/C.zoomD,0,1));if(z>1){const cx=BELL_REST.x-20,cy=GY-40;ctx.translate(cx,cy);ctx.scale(z,z);ctx.translate(-cx,-cy)}}
   [bg1,bg2,bg3][ph-1]();
   if(S.cine)cineBoss();
-  else if(ph===1){drawBoss1();drawToll();drawKingFx()}
-  else if(ph===2){drawBoss2()}
-  else if(S.form===2)drawEclGame();else{beaconHide();drawBoss3();drawBeacon();drawBeaconFx()}
+  else{const rc=(S.mode==='play'||S.mode==='ko')?S.recoil*SHOCK.recoilPx:0,hk=gt-(S.bossHurtT==null?-9:S.bossHurtT),hu=hk>=0&&hk<SHOCK.hurt?Math.sin(Math.PI*hk/SHOCK.hurt):0;
+    const body=f=>{if(!rc&&!hu){f();return}const c=bossCore();ctx.save();ctx.translate(c.x+rc,GY);ctx.rotate(hu*.035);ctx.translate(-c.x,-GY);f();ctx.restore()};
+    if(ph===1){body(drawBoss1);drawRust();drawToll();drawKingFx()}
+    else if(ph===2){body(drawBoss2)}
+    else if(S.form===2)body(drawEclGame);else{beaconHide();body(drawBoss3);drawBeacon();drawBeaconFx()}}
   if(S.mode!=='dead'||gt-S.deadT<.6){ctx.save();ctx.translate(S.heroDX||0,S.heroDY||0);drawHero();ctx.restore()}
   else{ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');ctx.save();ctx.translate(HX,GY);ctx.rotate(-Math.PI/2*.9);ctx.translate(-HX,-GY);heroShape(HX,GY,0,-1.42,.3);ctx.restore()}
   if(S.post){const f=S.post;S.post=null;f()}
+  if(ph===2)hatchRing();
   if(ph===2){mirrorFloor();if(S.cine&&S.cine.k==='out')sinkGlow(gt-S.cine.t0)}
   if(ph===2)drawOrbs();
   drawCounter();
@@ -1217,21 +1320,68 @@ function draw(){
   // vignette & hurt flash
   const vg=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
   if(S.cine)cineOverlay();
+  if(S.rings)for(const r of S.rings){const u=1-r.life/SHOCK.ringLife;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle=r.c;ctx.lineWidth=5*(1-u)+1;ctx.beginPath();ctx.arc(r.x,r.y,18+120*u,0,Math.PI*2);ctx.stroke();ctx.restore()}
+  if(S.flashHit>0){ctx.fillStyle=`rgba(255,255,255,${S.flashHit})`;ctx.fillRect(0,0,W,H)}
+  if(S.mode==='play'&&gt-S.roarT<.35){ctx.fillStyle=`rgba(230,250,245,${.3*(1-(gt-S.roarT)/.35)})`;ctx.fillRect(0,0,W,H)}
   const hk=gt-S.hurtT;if(hk<.3){ctx.fillStyle=`rgba(255,40,30,${.25*(1-hk/.3)})`;ctx.fillRect(0,0,W,H)}
   if(S.mode==='ko'){const k=gt-S.koT;if(k<.5){ctx.fillStyle=`rgba(255,255,255,${.5*(1-k/.5)})`;ctx.fillRect(0,0,W,H)}}
 }
 
+/* ---------- still backgrounds behind the end-of-phase cards (internal phase id): the scene as its closing cinematic
+   left it, never the start of the fight ---------- */
+function drawStill(id){
+  if(id===2){S.hatchK=1;S.hatchSnap=1;bg2();const vp=voicePos(0),q=lanternPos(60,vp.x,vp.y-96);keeperLantern(q.x,q.y,q.a,rt);
+    ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0);mirrorFloor();
+    ctx.save();ctx.globalCompositeOperation='lighter';glow(q.x,q.y,70,'rgba(79,224,204,.9)',.4+.2*Math.sin(rt*3.4));ctx.restore()}
+  else if(id===1)kingEndStill();
+  else{bg3();base();const O=ecPose(0);
+    TOWER.forEach((p,i)=>{if(FIXED(p.k)){const o=O[i];drawP(p.k,o.x,o.y,o.r)}else if(i!==EHEAD){const F=EFALL[i];drawP(p.k,F.x,F.y,F.r)}});
+    drawAnchorQ({x:LX+135,y:GY-120,a:1.78,sc:1,clip:true});
+    ctx.save();ctx.translate(BELL_REST.x,BELL_REST.y);ctx.rotate(BELL_REST.r);pHead(.85,bellMarks());ctx.restore();
+    const hx=BELL_REST.x-78;ell(hx,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(hx,GY,0,-1.42,0)}}
+/* ---- phase II end: the hull collapsing, the opened deck, the moon ---- */
+/* debris of the hull falling around the King (planks of the deck and broken frames): x, start delay, size, spin, rest pose */
+const DEBRIS=(()=>{const R=mulberry(313);return[...Array(14)].map((_,i)=>{const side=i%3===2;return{x:side?(R()<.5?40+R()*120:820+R()*120):360+R()*560,d:i*.11+R()*.2,w:side?18:60+R()*70,h:side?110+R()*60:12+R()*6,r0:(R()-.5)*.6,spin:(R()-.5)*3,rx:0,ry:GY-(side?20:7),rr:side?(R()<.5?-1.35:1.35):(R()-.5)*.25,frame:side}})})();
+function hullDebris(tc){for(const d of DEBRIS){const q=clamp((tc-d.d)/.9,0,1);if(q<=0)continue;const e=ein(q),y=lerp(-60,d.ry,e),r=q<1?d.r0+d.spin*q:d.rr;
+    if(q>=1&&once('db'+d.x.toFixed(0))){S.shake=Math.max(S.shake,5);burst(d.x,GY,8,'#6a5a48',4,.7,.3)}
+    ctx.save();ctx.translate(d.x,y);ctx.rotate(r);ctx.fillStyle=d.frame?'#120d09':'#2a2017';ctx.fillRect(-d.w/2,-d.h/2,d.w,d.h);ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1.5;ctx.strokeRect(-d.w/2,-d.h/2,d.w,d.h);
+    ctx.fillStyle='#2a2017';ctx.beginPath();ctx.moveTo(d.w/2,-d.h/2);ctx.lineTo(d.w/2+8,0);ctx.lineTo(d.w/2,d.h/2);ctx.fill();ctx.restore()}}
+/* the hole torn in the deck and the hull's side: the night sky, the moon, the reefs outside (k 0..1) */
+function hullHole(k){ctx.beginPath();ctx.moveTo(300,-2);const R=mulberry(29),n=9;for(let i=0;i<=n;i++){const x=lerp(300,W+2,i/n),y=k*(160+Math.sin(i*1.7)*40+R()*40);ctx.lineTo(x,y)}ctx.lineTo(W+2,-2);ctx.closePath()}
+function hullSky(k){ctx.save();hullHole(k);ctx.clip();
+  const g=ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,'#05101a');g.addColorStop(1,'#163038');ctx.fillStyle=g;ctx.fillRect(0,0,W,260);
+  for(const s of STARS){if(s.y<200){ctx.globalAlpha=.4+.3*Math.sin(rt*1.5+s.o);ctx.fillStyle='#e8f6f2';ctx.fillRect(s.x,s.y,s.r,s.r)}}ctx.globalAlpha=1;
+  glow(MOON.x,MOON.y,120,'rgba(220,235,255,.8)',.45);ell(MOON.x,MOON.y,MOON.r,MOON.r,'#e8eef4');ell(MOON.x-8,MOON.y-5,6,5,'rgba(170,185,200,.5)');ell(MOON.x+9,MOON.y+8,4,3,'rgba(170,185,200,.45)');
+  ctx.fillStyle='#071014';ctx.fillRect(0,220,W,60);
+  ctx.restore();
+  ctx.strokeStyle='#0d0907';ctx.lineWidth=6;hullHole(k);ctx.stroke()}
+/* the moonlight falling through the hole onto the King */
+function moonCone(a){ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(MOON.x,MOON.y,700,GY);g.addColorStop(0,`rgba(210,225,255,${.22*a})`);g.addColorStop(1,`rgba(180,205,240,${.08*a})`);
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(MOON.x-30,MOON.y+20);ctx.lineTo(MOON.x+30,MOON.y+20);ctx.lineTo(840,GY+6);ctx.lineTo(560,GY+6);ctx.closePath();ctx.fill();ell(700,GY+4,150,14,`rgba(200,220,255,${.12*a})`);ctx.restore()}
+/* the King on his knees (sink 0..45) */
+function kingKneel(sink){ctx.save();ctx.translate(700,GY);ctx.rotate(.08*sink/45);ctx.translate(-700,-GY);ctx.translate(0,sink);drawBoss1();ctx.restore()}
+/* moonlight on his metal: cold highlights along the bells, and his heart's turquoise glow */
+function moonOnKing(sink,a){ctx.save();ctx.translate(700,GY);ctx.rotate(.08*sink/45);ctx.translate(0,sink-GY);ctx.globalCompositeOperation='lighter';
+  ctx.strokeStyle=`rgba(220,235,255,${.55*a})`;ctx.lineWidth=2.5;
+  for(const [hw,y,h] of[[104,-98,54],[88,-140,50],[72,-180,48]]){ctx.beginPath();ctx.moveTo(hw*.62,y-h*.98);ctx.quadraticCurveTo(hw*.7,y-h*.45,hw*.98,y-2);ctx.stroke()}
+  ctx.beginPath();ctx.arc(-6,-224-40,30,-1.2,-.2);ctx.stroke();
+  glow(0,-166,120,'rgba(79,224,204,.9)',.55*a);ctx.restore()}
+function kingEndStill(){bg1();hullSky(1);hullDebris(9);drawAnchorAt({x:878,y:GY-150,a:1.95,f:1});S.parasite=1;S.noAnchor=true;moonCone(1);kingKneel(45);moonOnKing(45,1);S.noAnchor=false;
+  ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0)}
+
 /* ---------- cinematics: phase entries and exits ---------- */
-const CINE_LEN={1:{in:7.8,out:6.4},2:{in:4.8,out:7.4},3:{in:13.8,out:12.8,p2:7.4}};
+const CINE_LEN={1:{in:7.8,out:7.8},2:{in:4.8,out:7.4},3:{in:13.8,out:12.8,p2:7.4}};
 /* beats inside the cinematics (s): phase I end (internal 2): the lantern drops at `drop`, touches the water after `fall`,
    sinks `depth` units in `sink`; the hatch opens at `hatch`. Phase II entry (internal 1): the King hauls the anchor off the
-   floor by its chain (`haul`) and slings it on his back (`lift`, until `slung`). Phase II end: the glow rises at `rise`.
+   floor by its chain (`haul`) and slings it on his back (`lift`, until `slung`); before that the camera comes down through
+   the hatch (`desc` s, from `descD` units above). Phase II end: the hull collapses from `collapse` (`collapseD`), the deck
+   opens from `open` (`openD`), the moon lights the King from `moon`.
    Phase III end: the camera closes in on the bell from `zoom` over `zoomD`, up to `zoomZ`. */
-const CINE_P1={drop:3.1,fall:.65,sink:3.2,depth:70,hatch:5.5};
-const CINE_P2={haul:4.0,lift:4.35,slung:4.75,rise:3.4};
+const CINE_P1={drop:3.1,fall:.65,sink:3.2,depth:70,hatch:5.5,snap:.45,dim:3.8,dimD:1.1};
+const CINE_P2={haul:4.0,lift:4.35,slung:4.75,desc:1.8,descD:380,collapse:1.4,collapseD:2.2,open:2.4,openD:1.4,moon:3.6};
 const CINE_P3={zoom:9.4,zoomD:2.6,zoomZ:2.1};
 function once(k){if(S.cineDone[k])return false;S.cineDone[k]=1;return true}
-function resetCine(s){s.hatchK=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.parasite=0;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
+function resetCine(s){s.hatchK=0;s.hatchSnap=0;s.lampDim=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.parasite=0;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
 function startCine(p,k){const s=p.s;resetCine(s);if(MUSIC.cur!==s.phase)MUSIC.bed(s.phase);s.demo=false;s.parts=[];s.pops=[];s.cine={k,t0:gt};s.tfBurst=s.tfFlash=s.tfAnch=false;s.tfId=(s.tfId||0)+1;s.flashT=-9}
 function fadeAll(a,c){if(a<=0)return;ctx.fillStyle=`rgba(${c||'0,0,0'},${clamp(a,0,1)})`;ctx.fillRect(0,0,W,H)}
 /* chapter colours (docs/CH2-SPEC.md): II tide turquoise, III roots moss green leaning yellow */
@@ -1378,8 +1528,6 @@ function ecFinisher(tAll,T,P){
   ctx.restore();
   if(S.zapT&&gt-S.zapT<.12&&tAll<2.7){ctx.fillStyle=`rgba(220,245,255,${.2*(1-(gt-S.zapT)/.12)})`;ctx.fillRect(0,0,W,H)}
 }
-function bossBar(label,fill){const x0=W/2-180,w=360,y=34;ctx.save();ctx.textAlign='left';ctx.font='700 13px "DM Sans",system-ui,sans-serif';ctx.fillStyle='#cfeee9';ctx.fillText(label.toUpperCase(),x0,y-8);
-  ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(x0,y,w,10);ctx.fillStyle='#4fe0cc';ctx.fillRect(x0,y,w*fill,10);ctx.strokeStyle='rgba(255,255,255,.25)';ctx.strokeRect(x0+.5,y+.5,w-1,9);ctx.restore()}
 const CSFX=(()=>{const L={'2:in':[[0,'glints'],[1.1,'swell'],[1.95,'crackGlass'],[2.4,'shatter'],[3.1,'sting']],
   '2:out':[[.3,'charge'],[1.45,'throw'],[1.75,'impactLight'],[1.8,'overload'],[3.1,'explosion'],[3.3,'glassRain'],[4.4,'voice'],[5.4,'rumble']],
   '1:in':[[0,'rumble'],[4.5,'heart'],[4.8,'draw'],[5.5,'whoosh'],[5.75,'slam'],[6.3,'sting']],
@@ -1454,14 +1602,6 @@ function cineBoss(){
       S.noFace=true;const e=eio(clamp((t-3.2)/1.4,0,1));
       if(e<1){ctx.save();ctx.globalAlpha=1-e;ctx.translate(vp.x,GY);ctx.scale(1,1-e*.8);ctx.translate(-vp.x,-GY);drawVoice(0,1,0,0);ctx.restore()}
       if(e>.6)ell(vp.x,GY+2,80*e,7,`rgba(200,190,220,${.35*(1-clamp((t-5.4)/1,0,1))})`)}
-    const fa=clamp((t-4.3)/.5,0,1)*(1-clamp((t-5.8)/.5,0,1));
-    if(fa>0){ctx.save();ctx.globalAlpha=fa;const cx=W/2,cy=H*.4,s=70;
-      ctx.beginPath();ctx.moveTo(cx,cy-s*1.4);ctx.lineTo(cx+s*.75,cy);ctx.lineTo(cx+s*.1,cy+s*1.25);ctx.lineTo(cx-s*.7,cy+s*.15);ctx.closePath();
-      const g=ctx.createLinearGradient(cx-s,cy-s,cx+s,cy+s);g.addColorStop(0,'rgba(235,228,250,.9)');g.addColorStop(1,'rgba(120,95,170,.8)');ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.clip();
-      ctx.fillStyle='#3a2a2a';ctx.beginPath();ctx.ellipse(cx,cy-10,34,44,0,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#e6d2c0';ctx.beginPath();ctx.ellipse(cx,cy+2,25,33,0,0,Math.PI*2);ctx.fill();
-      ctx.strokeStyle='#6a4a40';ctx.lineWidth=2;for(const o of[-10,10]){ctx.beginPath();ctx.arc(cx+o,cy-2,6,.15*Math.PI,.85*Math.PI);ctx.stroke()}
-      ctx.beginPath();ctx.moveTo(cx-6,cy+18);ctx.quadraticCurveTo(cx,cy+21,cx+6,cy+18);ctx.stroke();ctx.restore()}
     // the keeper's lantern drops from the shattered face into the water and sinks, pulsing
     if(boom){const q=lanternPos(t,fx,fy);if(q.splash&&once('splash')){burst(q.x,GY,26,'#cff7ef',5,.7,.35);S.ripT=gt;S.ripX=q.x}
       keeperLantern(q.x,q.y,q.a,t)}
@@ -1500,38 +1640,24 @@ function cineBoss(){
     const dim=.55*(1-clamp(t/3,0,1));fadeAll(dim,'12,9,6');
     return}
   if(ph===1&&k==='out'){
+    // the floor holds: the hull collapses around the King, the deck opens, the moon lights his metal body for the first time
+    const C=CINE_P2,col=clamp((t-C.collapse)/C.collapseD,0,1),open=eio(clamp((t-C.open)/C.openD,0,1)),moon=clamp((t-C.moon)/.8,0,1);
+    if(t>C.collapse&&t<C.open+C.openD)S.shake=Math.max(S.shake,3+4*Math.sin(Math.PI*col));
+    if(open>0)hullSky(open);
+    hullDebris(t-C.collapse);
     // the anchor slips off his back and plants itself behind him
     S.noAnchor=t>.6;
-    const XS=[160,262,348,430,508,590,670,752,832,940];
-    const fallStart=j=>3.3+j*.17;               // j counted from the right (anchor side)
-    const chunkFall=x=>{for(let i=0;i<XS.length-1;i++)if(x>=XS[i]&&x<XS[i+1]){const j=XS.length-2-i;return clamp((t-fallStart(j))/1.1,0,1)}return 0};
-    // holes left by fallen chunks, then the falling chunks
-    for(let i=0;i<XS.length-1;i++){const j=XS.length-2-i,f=clamp((t-fallStart(j))/1.1,0,1),x0=XS[i],x1=XS[i+1];
-      const pre=clamp((t-fallStart(j)+.25)/.25,0,1);
-      if(f>0){const g=ctx.createLinearGradient(0,GY,0,H);g.addColorStop(0,'#0a2c31');g.addColorStop(1,'#020a0c');ctx.fillStyle=g;ctx.fillRect(x0,GY-1,x1-x0,H-GY+1);glow((x0+x1)/2,H,90,'rgba(79,224,204,.5)',.35);ctx.strokeStyle=`rgba(210,250,240,${.3+.2*Math.sin(t*3+i)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x0,GY+8+Math.sin(t*2+i)*2);ctx.lineTo(x1,GY+8-Math.sin(t*2+i)*2);ctx.stroke()}
-      if(f>0&&f<1){const e=ein(f),R=mulberry(i*7+3);ctx.save();ctx.translate((x0+x1)/2,GY+e*440);ctx.rotate((R()-.5)*e*.9);
-        const hw=(x1-x0)/2;ctx.beginPath();ctx.moveTo(-hw,0);ctx.lineTo(hw,0);ctx.lineTo(hw,26);ctx.lineTo(hw-14,34);ctx.lineTo(hw/3,28);ctx.lineTo(0,40);ctx.lineTo(-hw/2,30);ctx.lineTo(-hw,36);ctx.closePath();
-        const g=ctx.createLinearGradient(0,0,0,40);g.addColorStop(0,'#2a2017');g.addColorStop(1,'#0e0a07');ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1.5;for(let k=-hw+18;k<hw;k+=20){ctx.beginPath();ctx.moveTo(k,0);ctx.lineTo(k,30);ctx.stroke()}ctx.strokeStyle='rgba(200,250,240,.3)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-hw,1);ctx.lineTo(hw,1);ctx.stroke();ctx.restore();
-        if(once('c'+i)){S.shake=Math.max(S.shake,8);burst((x0+x1)/2,GY,14,i%2?'#5a4330':'#cff7ef',4,1,.4)}}
-      if(f===0&&pre>0){ctx.strokeStyle=`rgba(210,250,240,${pre})`;ctx.lineWidth=2;for(const x of[x0,x1]){ctx.beginPath();ctx.moveTo(x,GY+2);ctx.lineTo(x+6,GY+30*pre);ctx.lineTo(x-4,GY+60*pre);ctx.stroke()}}}
-    // the crack running from the anchor to the Watcher
-    const cr=clamp((t-2.3)/1,0,1);
-    if(cr>0&&t<5){const xa=868,xb=lerp(xa,HX,eio(cr));const R=mulberry(17);ctx.save();ctx.strokeStyle='#d8fbf4';ctx.lineWidth=3;ctx.shadowColor='rgba(79,224,204,.9)';ctx.shadowBlur=12;ctx.beginPath();ctx.moveTo(xa,GY+3);
-      for(let x=xa;x>xb;x-=22){ctx.lineTo(x,GY+3+(R()-.5)*8)}ctx.lineTo(xb,GY+3);ctx.stroke();ctx.restore();
-      if(cr<1&&Math.random()<.7)burst(xb,GY,2,'#bff6ec',3,.5,.4);if(cr<1)S.shake=Math.max(S.shake,3)}
-    // anchor: slips off, plants, then drops with its chunk
-    if(t>.6){const e=ein(clamp((t-.6)/.5,0,1)),af=ein(chunkFall(868))*440;const q={x:lerp(753,878,e),y:lerp(GY-280,GY-150,e)+af,a:lerp(2.11,1.95,e),f:af>0?0:e};drawAnchorAt(q);if(e>=1&&once('an')){S.shake=10;burst(862,GY,24,'#cff7ef',6,.7,.4)}}
-    // the King kneels, tolls one last time, then goes down with the floor
-    const sink=eio(clamp((t-1)/.8,0,1))*45,kf=ein(chunkFall(700))*440;
+    if(t>.6){const e=ein(clamp((t-.6)/.5,0,1));drawAnchorAt({x:lerp(753,878,e),y:lerp(GY-280,GY-150,e),a:lerp(2.11,1.95,e),f:e});if(e>=1&&once('an')){S.shake=10;burst(862,GY,24,'#cff7ef',6,.7,.4)}}
+    // the King kneels and tolls one last time; the parasite's light shows in his heart
+    const sink=eio(clamp((t-1)/.8,0,1))*45;
     S.parasite=clamp((t-1.6)/1.4,0,1);
     if(t<1)S.shake=Math.max(S.shake,3);
-    ctx.save();if(kf<=0){ctx.beginPath();ctx.rect(0,0,W,GY+4);ctx.clip()}ctx.translate(700,GY);ctx.rotate(.08*sink/45+kf/440*.4);ctx.translate(-700,-GY);ctx.translate(0,sink+kf);drawBoss1();ctx.restore();
+    if(moon>0)moonCone(moon);
+    kingKneel(sink);
+    if(moon>0)moonOnKing(sink,moon);
     if(t>1.4&&t<3){const a=1-(t-1.4)/1.6;ctx.strokeStyle=`rgba(240,226,184,${a*.8})`;ctx.lineWidth=3;for(let i=0;i<4;i++){const r=30+((t-1.4)*90+i*35)%140;ctx.beginPath();ctx.arc(694,GY-226+sink,r,Math.PI*.1,Math.PI*.9,true);ctx.stroke()}S.shake=Math.max(S.shake,2)}
-    // from the sunken body, a turquoise glow rises toward the Lighthouse (off to the right)
-    if(t>CINE_P2.rise){const k=clamp((t-CINE_P2.rise)/1.4,0,1);glow(700,GY+20-k*60,140,'rgba(79,224,204,.8)',.55*k);
-      for(let i=0;i<3;i++)S.parts.push({x:640+Math.random()*120,y:GY+10,vx:.9+Math.random()*.8,vy:-1.6-Math.random()*1.2,g:0,t0:gt,life:1.6+Math.random(),c:Math.random()<.3?'#e8fffb':'#4fe0cc',r:1.6+Math.random()*1.8})}
-    // the Watcher's chunk goes last
-    const hf=chunkFall(HX);S.heroDY=ein(hf)*440;S.heroPose=hf>0?{staffA:-2.6,lean:-.35*hf}:null;
+    // the Watcher braces while the hull comes down
+    S.heroDY=0;S.heroPose=col>0&&col<1?{staffA:-1.9,lean:-.1}:null;
     return}
   /* ===== Drowned Beacon (Phase III) ===== */
   if(ph===3&&k==='in'){
@@ -1548,9 +1674,9 @@ function cineOverlay(){
   if(ph===2&&k==='in')title(t,3.1,PH[2].eye(),PH[2].boss(),CH_COL[2]);
   if(ph===2&&k==='out')fadeAll(clamp((t-6.5)/.7,0,1));
   if(ph===1&&k==='in')title(t,6.3,PH[1].eye(),PH[1].boss(),CH_COL[2]);
-  if(ph===1&&k==='out')fadeAll(clamp((t-5)/.7,0,1));
+  if(ph===1&&k==='out')fadeAll(clamp((t-(CINE_LEN[1].out-1.1))/.7,0,1));
   if(ph===3&&k==='in')title(t,12.3,PH[3].eye(),_('The Drowned Lighthouse','Le Phare Noyé'),CH_COL[2]);
-  if(ph===3&&k==='p2'){const shat=_('The Shattered',"L'Éclaté");bossBar(t<5.8?_('The Drowned Lighthouse','Le Phare Noyé'):shat,t<2.1?0:clamp((t-2.2)/3.4,0,1));title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
+  if(ph===3&&k==='p2'){const shat=_('The Shattered',"L'Éclaté");title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
 }
 /* ---------- music & ambience (procedural, Web Audio) ---------- */
 const MUSIC=(()=>{
@@ -1656,6 +1782,7 @@ const MUSIC=(()=>{
     dissolve:t=>{for(let i=0;i<10;i++)osc('sine',900+i*170,t+i*.12,.1,.025,1.4,.9,1300+i*200)},
     bellHit:t=>{const b=180+Math.random()*240;clang(t,b,.075,1.7);osc('sine',b*.5,t,.004,.04,1.2,.6)},
     bellBig:t=>{clang(t,110,.12,3.2);osc('sine',55,t,.005,.08,2.6,.7);clang(t+.18,112,.04,2.2)},
+    bellMuffled:t=>{[[1,.12,2.6],[2.7,.04,1.4]].forEach(([m,p,d])=>osc('sine',98*m,t,.01,p,d,.6));nz(t,.8,.05,'lowpass',180,1,.4)},
     bellSoft:t=>{const b=420+Math.random()*380;clang(t,b,.03,1.4)},
     bellChime:t=>{[0,.09,.2].forEach((d,i)=>clang(t+d,520+i*130+Math.random()*60,.035,1.2))},
     bellCascade:t=>{for(let i=0;i<9;i++)clang(t+i*.06+Math.random()*.04,160+Math.random()*420,.05,1.5)},
@@ -1671,16 +1798,22 @@ const MUSIC=(()=>{
   function play(id){if(!musOn){stop();bedStop();return}if(!init())return;ac.resume();stop();bedStop();cur=id;step=0;next=ac.currentTime+.15;out.gain.setTargetAtTime(.5*(THEMES[id].vol||1),ac.currentTime,.3);THEMES[id].start();timer=setInterval(tick,100)}
   return{play,stop,fx,bed,bedStop,setMus(v){musOn=v;if(!v){stop();bedStop()}},setFx(v){fxOn=v},get cur(){return cur},get bedId(){return bedId}};
 })();
-/* ---------- Prologue: called back from the stars ---------- */
-const PRO_LEN=18.6;
-const PSTARS=(()=>{const R=mulberry(404);return[...Array(190)].map((_,i)=>({x:R()*W,y:R()*H*1.6-H*.3,r:.6+R()*1.6,o:R()*6,drain:i%4===0,gather:i%7===3,d0:5.7+R()*3,g0:8.4+R()*1.2}))})();
-/* intro cartons (docs/CH2-SPEC.md) over the provisional scenes: [start, end, text] in seconds; then the title */
-const PCAPF=()=>[[.5,4.2,_('On the coast, the mist no longer lifts.','Sur la côte, la brume ne se lève plus.')],
-  [4.4,8.4,_('Out at sea, the Drowned Lighthouse stands dark. No bell answers it.','Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond.')],
-  [8.6,12.8,_('The ships no longer return. The fishermen say the sea keeps what it takes.',"Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend.")],
-  [13,15.4,_('They say its keeper still watches up there.','On dit que sa gardienne veille encore là-haut.')]];
-const PRO_TITLE=15.6;
-const PSFX=[[0,'stars'],[3.2,'glints'],[5.8,'fallWhine'],[7.1,'fallWhine'],[8.4,'charge'],[10.15,'impactLight'],[10.8,'whooshDown'],[12.1,'whooshDown'],[14.8,'land'],[15.6,'bellSoft'],[16,'sting']];
+/* ---------- Prologue: the silent coast (docs/CH2-SPEC.md, intro) ---------- */
+/* intro rhythm, as in Ember Bridge (76-cine-intro.js): one shot per carton, 6 to 7 s each (PRO_T.cap); each carton
+   fades in PRO_T.lead after its shot starts and out PRO_T.lead before it ends, fades of PRO_T.fade; a dip to black of
+   PRO_T.fade on each side of a cut; then the title shot (PRO_T.title). Shots: A the coast in the mist, B the dark
+   Lighthouse out at sea, C the beach with the boats that no longer go out, D the Lighthouse's top, a faint glimmer up
+   there; E (title) the Watcher comes onto the shore. */
+const PRO_T={cap:[6,7,7,7],title:4.6,lead:.5,fade:.5,walk:1.4,titleAt:.6};
+const PRO_SHOTS=PRO_T.cap.reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of A, B, C, D, E
+const PRO_TITLE=PRO_SHOTS[4]+PRO_T.titleAt,PRO_LEN=PRO_SHOTS[4]+PRO_T.title;
+const PCAP_TXT=()=>[_('On the coast, the mist no longer lifts.','Sur la côte, la brume ne se lève plus.'),
+  _('Out at sea, the Drowned Lighthouse stands dark. No bell answers it.','Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond.'),
+  _('The ships no longer return. The fishermen say the sea keeps what it takes.',"Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend."),
+  _('They say its keeper still watches up there.','On dit que sa gardienne veille encore là-haut.')];
+/* intro cartons: [start, end, text] in seconds */
+const PCAPF=()=>PCAP_TXT().map((s,i)=>[PRO_SHOTS[i]+PRO_T.lead,PRO_SHOTS[i+1]-PRO_T.lead,s]);
+const PSFX=[[0,'swell'],[PRO_SHOTS[1],'rumble'],[PRO_SHOTS[2],'swell'],[PRO_SHOTS[3],'glints'],[PRO_SHOTS[4]+PRO_T.walk,'land'],[PRO_TITLE+.4,'sting']];
 function proHero(x,y,white,staffA,stA,lean){
   ctx.save();ctx.translate(x,y);ctx.rotate(lean||0);
   if(white<1){drawWizard({fl:Math.sin(rt*4)*1.5})}
@@ -1694,60 +1827,84 @@ function proHero(x,y,white,staffA,stA,lean){
   ctx.restore();
   return{x:x+hand[0],y:y+hand[1],tx:x+st[0],ty:y+st[1]};
 }
-function proMarsh(top){
-  // far hills and the village of bells, the broken tower
-  ctx.fillStyle='#0a1418';ctx.beginPath();ctx.moveTo(0,top-40);[[120,top-90],[260,top-55],[400,top-110],[560,top-60],[700,top-100],[860,top-50],[960,top-80]].forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(W,top+10);ctx.lineTo(0,top+10);ctx.fill();
-  ctx.fillStyle='#071014';
-  for(const [x,h] of[[90,46],[150,30],[650,40],[720,58],[790,34]]){ctx.fillRect(x,top-h,26,h);ctx.beginPath();ctx.moveTo(x-4,top-h);ctx.lineTo(x+13,top-h-16);ctx.lineTo(x+30,top-h);ctx.fill()}
-  ctx.fillRect(700,top-110,22,60);ctx.beginPath();ctx.moveTo(696,top-110);ctx.lineTo(711,top-128);ctx.lineTo(718,top-120);ctx.lineTo(726,top-110);ctx.fill();
-  ctx.fillStyle='#0f1d1f';ctx.beginPath();ctx.moveTo(703,top-96);ctx.quadraticCurveTo(711,top-108,719,top-96);ctx.lineTo(720,top-88);ctx.lineTo(702,top-88);ctx.fill();
-  // peat and pools
-  let g=ctx.createLinearGradient(0,top,0,top+200);g.addColorStop(0,'#1b211a');g.addColorStop(1,'#080b08');ctx.fillStyle=g;ctx.fillRect(0,top,W,H-top+400);
-  ctx.fillStyle='rgba(120,180,200,.12)';for(const [x,w] of[[60,140],[380,90],[600,200],[860,120]])ell(x,top+40,w/2,8,'rgba(120,170,190,.13)');
-  ctx.strokeStyle='#121a12';ctx.lineWidth=2;for(let i=0;i<40;i++){const x=(i*53)%W,h=14+(i*7)%22,sw=Math.sin(rt*1.3+i)*3;ctx.beginPath();ctx.moveTo(x,top+4);ctx.quadraticCurveTo(x+sw,top-h/2,x+sw*2,top-h);ctx.stroke()}
-  for(let i=0;i<3;i++){const y=top-20+i*22,x=(rt*(10+i*6))%W;g=ctx.createLinearGradient(0,y-24,0,y+24);g.addColorStop(0,'rgba(160,190,200,0)');g.addColorStop(.5,'rgba(160,190,200,.1)');g.addColorStop(1,'rgba(160,190,200,0)');ctx.fillStyle=g;ctx.fillRect(-x,y-24,W*2,48)}
-}
+/* ---- pieces of the coast, shared by the intro and the outro ---- */
+function skyGrad(top,bot,y1){const g=ctx.createLinearGradient(0,0,0,y1);g.addColorStop(0,top);g.addColorStop(1,bot);ctx.fillStyle=g;ctx.fillRect(-40,-40,W+80,y1+40)}
+/* the sea from y0 down: colour stops, swell lines */
+function seaBand(y0,c0,c1,a){const g=ctx.createLinearGradient(0,y0,0,H);g.addColorStop(0,c0);g.addColorStop(1,c1);ctx.fillStyle=g;ctx.fillRect(-40,y0,W+80,H-y0+40);
+  ctx.strokeStyle=`rgba(170,235,225,${a})`;ctx.lineWidth=1.2;for(let i=0;i<10;i++){const y=y0+4+i*i*2.2,ph=rt*.5+i;ctx.beginPath();for(let x=-40;x<=W+40;x+=30){const yy=y+Math.sin(x*.018+ph)*(1+i*.5);x>-40?ctx.lineTo(x,yy):ctx.moveTo(x,yy)}ctx.stroke()}}
+/* mist banks drifting along the coast */
+function mist(y,n,a,sp){for(let i=0;i<n;i++){const x=((i*260+rt*sp*(1+i%3*.3))%(W+520))-260,yy=y+Math.sin(i*1.7)*18;const g=ctx.createRadialGradient(x,yy,10,x,yy,220);g.addColorStop(0,`rgba(170,200,200,${a})`);g.addColorStop(1,'rgba(170,200,200,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(x,yy,240,52,0,0,Math.PI*2);ctx.fill()}}
+/* the Drowned Lighthouse itself (stone, before the tower of bells): base on its reef at (x, y), scale s; glim = turquoise
+   glimmer up in the lantern room (0..1); sub = how much of the base is under water (0..1) */
+function lighthouse(x,y,s,glim){ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+  ctx.fillStyle='#060c0e';ctx.beginPath();ctx.moveTo(-80,0);ctx.lineTo(-56,-18);ctx.lineTo(-20,-22);ctx.lineTo(30,-16);ctx.lineTo(70,-6);ctx.lineTo(90,0);ctx.closePath();ctx.fill();
+  const g=ctx.createLinearGradient(-34,0,34,0);g.addColorStop(0,'#0b1214');g.addColorStop(.45,'#2a3a3c');g.addColorStop(1,'#080e10');ctx.fillStyle=g;
+  ctx.beginPath();ctx.moveTo(-34,-14);ctx.lineTo(-22,-250);ctx.lineTo(22,-250);ctx.lineTo(34,-14);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.35)';for(const y0 of[-60,-120,-180])ctx.fillRect(-32+(-y0)*.045,y0,64-(-y0)*.09,6);
+  ctx.fillStyle='#030607';for(const [wy,wx] of[[-90,-4],[-150,3],[-205,-3]])ctx.fillRect(wx-3,wy,6,12);
+  ctx.fillStyle='#0d1618';ctx.fillRect(-32,-258,64,8);ctx.strokeStyle='#0d1618';ctx.lineWidth=2;for(let i=-28;i<=28;i+=7){ctx.beginPath();ctx.moveTo(i,-258);ctx.lineTo(i,-270);ctx.stroke()}
+  ctx.fillStyle='#0a1214';ctx.fillRect(-16,-296,32,38);ctx.fillStyle='rgba(30,50,52,.9)';ctx.fillRect(-12,-292,24,28);
+  ctx.strokeStyle='#050a0b';ctx.lineWidth=2;for(const i of[-4,4]){ctx.beginPath();ctx.moveTo(i,-292);ctx.lineTo(i,-264);ctx.stroke()}
+  ctx.fillStyle='#0a1214';ctx.beginPath();ctx.moveTo(-20,-296);ctx.lineTo(0,-318);ctx.lineTo(20,-296);ctx.closePath();ctx.fill();
+  if(glim>0){ctx.globalCompositeOperation='lighter';glow(0,-278,40,'rgba(79,224,204,.9)',glim);ell(0,-278,2.5,3.5,`rgba(220,255,248,${glim})`);ctx.globalCompositeOperation='source-over'}
+  ctx.restore()}
+/* a fishing village on the shore: houses, a chapel with its bell, all dark (lit = window light 0..1) */
+function village(x0,y,lit){ctx.fillStyle='#071014';
+  for(const [x,w,h] of[[0,46,40],[54,38,30],[100,52,46],[170,40,34],[218,48,40]]){ctx.fillRect(x0+x,y-h,w,h);ctx.beginPath();ctx.moveTo(x0+x-4,y-h);ctx.lineTo(x0+x+w/2,y-h-18);ctx.lineTo(x0+x+w+4,y-h);ctx.fill();
+    if(lit>0){ctx.fillStyle=`rgba(255,207,122,${lit*(.6+.3*Math.sin(rt*2+x))})`;ctx.fillRect(x0+x+w/2-4,y-h+12,7,8);ctx.fillStyle='#071014'}}
+  ctx.fillRect(x0+290,y-96,26,96);ctx.beginPath();ctx.moveTo(x0+286,y-96);ctx.lineTo(x0+303,y-122);ctx.lineTo(x0+320,y-96);ctx.fill();
+  ctx.fillStyle='#0c1a1c';ctx.beginPath();ctx.moveTo(x0+294,y-70);ctx.quadraticCurveTo(x0+303,y-84,x0+312,y-70);ctx.lineTo(x0+313,y-62);ctx.lineTo(x0+293,y-62);ctx.fill()}
+/* a boat pulled up on the sand, keel up */
+function boat(x,y,s,up){ctx.save();ctx.translate(x,y);ctx.scale(s,up?-s:s);ctx.fillStyle='#120d09';ctx.beginPath();ctx.moveTo(-50,-14);ctx.quadraticCurveTo(0,8,50,-18);ctx.lineTo(44,-4);ctx.quadraticCurveTo(0,10,-44,-2);ctx.closePath();ctx.fill();ctx.restore()}
 function drawPrologue(t){
-  const S0=S;
-  const desc=eio(clamp((t-10.8)/3.8,0,1)),speed=Math.sin(Math.PI*clamp((t-10.8)/3.8,0,1));
-  // sky
-  let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#03040b');g.addColorStop(.6,lerpC([8,10,28],[10,22,30],desc));g.addColorStop(1,lerpC([14,12,34],[20,34,40],desc));ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-  const drainP={x:W*.66,y:H+70-desc*0};
-  // stars
-  for(const s of PSTARS){
-    let x=s.x,y=s.y-desc*620,a=.55+.4*Math.sin(rt*2+s.o);
-    if(t>5.6&&t<9.5&&!s.drain&&!s.gather)a*=.55+.45*Math.abs(Math.sin(rt*9+s.o));
-    if(s.drain&&t>s.d0){const k=clamp((t-s.d0)/1.6,0,1),e=ein(k);x=lerp(s.x,drainP.x,e);y=lerp(s.y,drainP.y,e);a*=1-k;if(k>0&&k<1){ctx.strokeStyle=`rgba(150,230,255,${.6*(1-k)})`;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(lerp(s.x,drainP.x,ein(Math.max(0,k-.12))),lerp(s.y,drainP.y,ein(Math.max(0,k-.12))));ctx.stroke()}}
-    if(s.gather&&t>s.g0&&S.proHand){const k=clamp((t-s.g0)/1,0,1),e=eio(k);x=lerp(s.x,S.proHand.x,e);y=lerp(s.y,S.proHand.y,e);a=1-k*.6;if(k>=1)continue}
-    if(a<=0||y<-20||y>H+20)continue;
-    if(speed>.15){ctx.strokeStyle=`rgba(230,240,255,${a*.8})`;ctx.lineWidth=s.r;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+speed*60*s.r);ctx.stroke()}
-    else{ctx.fillStyle=`rgba(235,242,255,${a})`;ctx.fillRect(x,y,s.r,s.r)}
-  }
-  // the cold light below, drinking the sky
-  const cl=clamp((t-5)/1.5,0,1)*(1-desc);if(cl>0){glow(drainP.x,drainP.y,300+50*Math.sin(rt*2),'rgba(90,220,255,.9)',.85*cl);glow(drainP.x,drainP.y,120,'rgba(220,252,255,.95)',.9*cl);ctx.save();ctx.globalCompositeOperation='lighter';const cg2=ctx.createLinearGradient(0,H,0,H*.35);cg2.addColorStop(0,`rgba(120,230,255,${.35*cl})`);cg2.addColorStop(1,'rgba(120,230,255,0)');ctx.fillStyle=cg2;ctx.beginPath();ctx.moveTo(drainP.x-60,H);ctx.lineTo(drainP.x-8,H*.35);ctx.lineTo(drainP.x+8,H*.35);ctx.lineTo(drainP.x+60,H);ctx.fill();ctx.restore()}
-  // clouds during the fall
-  const cy=lerp(H+140,-260,clamp((t-11.3)/2.4,0,1));if(t>11.3&&t<13.7){for(let i=0;i<12;i++){const x=(i*137+40)%W,y=cy+(i%3)*50,r=120+(i%4)*30;const cg=ctx.createRadialGradient(x,y,10,x,y,r);cg.addColorStop(0,'rgba(34,50,64,.9)');cg.addColorStop(1,'rgba(34,50,64,0)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(x,y,r,r*.35,0,0,Math.PI*2);ctx.fill()}}
-  // the marsh rising to meet him
-  const top=lerp(H+420,GY,desc);if(top<H+100)proMarsh(top);
-  // the Watcher
-  const bob=Math.sin(rt*1.4)*6*(1-desc);
-  const land=eio(clamp((t-13.2)/1.6,0,1));
-  const hy=lerp(H*.58+bob,GY,land),hx=W/2-60;
-  const white=1-clamp((t-9.6)/1,0,1);
-  const stA=clamp((t-9.6)/.6,0,1);
-  const staffA=t<14.8?lerp(-1.42,-1.62,clamp((t-9.6)/.5,0,1)):-1.42;
-  if(land<1)glow(hx,hy-60,90,'rgba(200,230,255,.8)',(white*.5+.2));
-  const h=proHero(hx,hy,white,staffA,stA,t<10.8?Math.sin(rt*.8)*.04:0);S.proHand={x:h.x,y:h.y};
-  if(t>9.6)glow(h.tx,h.ty,50,'rgba(127,214,255,.9)',.5+.2*Math.sin(rt*3));
-  if(t>=10.15&&once('staff')){burst(h.tx,h.ty,30,'#d8f4ff',6,.8)}
-  if(t>=14.8&&once('land')){burst(hx,GY,24,'#9fb6a0',4,.9,.35);S.ringT=gt}
-  if(S.ringT){const q=gt-S.ringT;if(q<1.4){ctx.strokeStyle=`rgba(160,210,230,${.5*(1-q/1.4)})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(hx,GY+4,q*120,q*12,0,0,Math.PI*2);ctx.stroke()}}
+  const shot=PRO_SHOTS.filter(s=>t>=s).length-1,ts=t-PRO_SHOTS[shot],drift=ts*5;
+  ctx.save();
+  if(shot===0){ // A: the coast in the mist
+    skyGrad('#070c10','#2a3a3e',330);mist(150,4,.18,10);
+    ctx.translate(-drift,0);
+    ctx.fillStyle='#0b1619';ctx.beginPath();ctx.moveTo(-40,300);[[120,280],[300,292],[480,276],[700,290],[1000,284]].forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(1000,330);ctx.lineTo(-40,330);ctx.fill();
+    seaBand(330,'#1d3236','#071214',.14);
+    ctx.fillStyle='#0a1012';ctx.beginPath();ctx.moveTo(-40,H);ctx.lineTo(-40,380);ctx.quadraticCurveTo(300,350,560,372);ctx.quadraticCurveTo(760,392,1000,360);ctx.lineTo(1000,H);ctx.fill();
+    village(120,372,.25);
+    ctx.translate(drift,0);mist(330,5,.32,16);mist(420,4,.28,-12)}
+  else if(shot===1){ // B: the Lighthouse out at sea, dark
+    skyGrad('#05090c','#1c2c30',300);mist(120,3,.14,8);
+    seaBand(300,'#14292d','#040b0d',.16);
+    lighthouse(640-drift*.6,306,.62,0);
+    for(let i=0;i<4;i++){const k=(rt*.3+i*.25)%1;ctx.strokeStyle=`rgba(220,245,240,${.25*Math.sin(Math.PI*k)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(640-drift*.6,307,40+k*30,3+k*2,0,Math.PI,0);ctx.stroke()}
+    mist(290,5,.26,14)}
+  else if(shot===2){ // C: the beach, boats keel up, empty moorings
+    skyGrad('#060a0d','#22343a',310);mist(170,3,.15,9);
+    seaBand(310,'#18303a','#050c0e',.15);
+    lighthouse(860,312,.22,0);
+    ctx.translate(-drift,0);
+    ctx.fillStyle='#14110d';ctx.beginPath();ctx.moveTo(-40,H);ctx.lineTo(-40,400);ctx.quadraticCurveTo(400,382,1000,410);ctx.lineTo(1000,H);ctx.fill();
+    for(const x of[120,190,620,700,770]){ctx.fillStyle='#0a0806';ctx.fillRect(x,350,6,64);ctx.strokeStyle='rgba(60,40,24,.8)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+3,366);ctx.quadraticCurveTo(x+40,400,x+80,374);ctx.stroke()}
+    boat(330,420,1.3,true);boat(480,432,1.1,true);boat(880,424,1,false);
+    ctx.fillStyle='#071014';for(const x of[560,590]){ctx.beginPath();ctx.moveTo(x,412);ctx.lineTo(x+6,370);ctx.arc(x+8,362,7,0,Math.PI*2);ctx.lineTo(x+16,412);ctx.closePath();ctx.fill()}
+    ctx.translate(drift,0);
+    ctx.fillStyle='#0a0f10';ctx.fillRect(760-drift*.3,320,3,-60);ctx.fillRect(748-drift*.3,288,26,2); // a mast out of the water
+    mist(360,4,.22,12)}
+  else{ // D: the Lighthouse's top, a glimmer; E: the same, the Watcher comes onto the shore
+    skyGrad('#04080b','#1a2b30',330);mist(110,3,.12,8);
+    seaBand(330,'#132a2e','#040b0d',.15);
+    const z=1+.06*eio(clamp((t-PRO_SHOTS[3])/8,0,1));ctx.save();ctx.translate(700,330);ctx.scale(z,z);ctx.translate(-700,-330);
+    lighthouse(700,336,.95,.55+.35*Math.sin(t*2.2));ctx.restore();
+    ctx.fillStyle='#0a1012';ctx.beginPath();ctx.moveTo(-40,H);ctx.lineTo(-40,GY-8);ctx.quadraticCurveTo(300,GY-16,520,GY+6);ctx.quadraticCurveTo(580,GY+40,640,H);ctx.fill();
+    ctx.strokeStyle='rgba(220,245,240,.3)';ctx.lineWidth=1.5;for(let i=0;i<3;i++){const k=(rt*.3+i*.33)%1;ctx.beginPath();ctx.moveTo(520-k*40,GY+10+i*8);ctx.quadraticCurveTo(700,GY+20+i*12,W+40,GY+14+i*12);ctx.stroke()}
+    mist(400,3,.2,10);
+    if(shot>=4){const walk=eio(clamp(ts/PRO_T.walk,0,1)),hx=lerp(-40,W/2-60,walk),hy=GY-(walk<1?Math.abs(Math.sin(t*6))*3:0);
+    proHero(hx,hy,0,walk<1?-1.3:-1.42,1,walk<1?.03:0);
+    if(ts>=PRO_T.walk&&once('land'))burst(W/2-60,GY,14,'#9fb6a0',3,.7,.3)}}
+  ctx.restore();
+  // cuts between shots: a short dip to black
+  for(const s of PRO_SHOTS.slice(1,4)){const d=Math.abs(t-s);if(d<PRO_T.fade)fadeAll(1-d/PRO_T.fade)}
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   // text
-  for(const c of PCAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0)caption(c[2],a)}
+  for(const c of PCAPF()){const a=clamp((t-c[0])/PRO_T.fade,0,1)*(1-clamp((t-c[1]+PRO_T.fade)/PRO_T.fade,0,1));if(a>0)caption(c[2],a)}
   seriesTitle(t,PRO_TITLE,'Lumenbell',_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),CH_COL[2]);
-  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-17.9)/.7,0,1));
+  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-(PRO_LEN-.7))/.7,0,1));
   PSFX.forEach((c,i)=>{if(t>=c[0]&&once('pfx'+i))MUSIC.fx(c[1])});
 }
 function lerpC(a,b,k){return`rgb(${a.map((v,i)=>Math.round(lerp(v,b[i],k))).join(',')})`}
@@ -1757,25 +1914,25 @@ const gpOf=id=>ORDER.indexOf(id)+1;
 /* phase texts (docs/CH2-SPEC.md): eye = phase title, boss = name (card title), desc = entry panel, end = end panel */
 const PH=[null,
  {eye:()=>_('Phase II · The Hold','Phase II · La cale'),
-  desc:()=>_("Rusted bells hang from the beams of the hold. An anchor lies there, too heavy for a man's hand.","Des cloches rouillées pendent aux poutres de la cale. Une ancre traîne, trop lourde pour une main d'homme."),
-  end:()=>_("The King sinks beneath the waves. A turquoise glow rises from his body, toward the Lighthouse.","Le Roi sombre sous les vagues. De son corps monte une lueur turquoise, vers le Phare."),
-  head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust King','Le Roi de Rouille'),btn:()=>_('Parry','Parer'),
+  desc:()=>_('Beneath the Lighthouse, the hull of a stranded ship. It smells of iron and salt.',"Sous le Phare, la coque d'un navire échoué. Elle sent le fer et le sel."),
+  end:()=>_('The hull collapses around the King. For the first time, the moon gleams on his body of metal.',"La coque s'effondre autour du Roi. Pour la première fois, la lune se reflète sur son corps de métal."),
+  head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust King','Le Roi de Rouille'),btn:()=>_('Block','Bloquer'),
   aria:()=>_("The Watcher facing the Rust King, a colossus of bells armed with an anchor","Le Veilleur face au Roi de Rouille, un colosse de cloches armé d'une ancre")},
  {eye:()=>_('Phase I · The Mirror Hall','Phase I · La salle des reflets'),
   desc:()=>_("At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there.","Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur."),
-  end:()=>_("The mirror shatters. Beneath the hall, a hatch opens onto the hold of a wreck.","Le miroir vole en éclats. Sous la salle, une trappe s'ouvre sur la cale d'une épave."),
+  end:()=>_("For a moment, the Watcher's lantern dims.","L'espace d'un instant, la lanterne du Veilleur faiblit."),
   head:()=>_('Phase I of III · The Mirror Hall','Phase I sur III · La salle des reflets'),boss:()=>_('The Hollow Voice','La Voix Creuse'),btn:()=>_('Dodge','Esquiver'),
   aria:()=>_('The Watcher facing the Hollow Voice, a figure with a cracked mirror face','Le Veilleur face à la Voix Creuse, une silhouette au visage de miroir fêlé')},
  {eye:()=>_('Phase III · The Reefs','Phase III · Les récifs'),
-  desc:()=>_("From the King's body, the glow has built a tower. The Drowned Lighthouse lights again, with a flame that is not its own.","Du corps du Roi, la lueur a bâti une tour. Le Phare Noyé se rallume d'une flamme qui n'est pas la sienne."),
+  desc:()=>_('The sea has drawn back. The ships it took sleep on the reef.',"La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif."),
   form2:()=>_("The tower bursts. Among the debris, the jellyfish, laid bare.","La tour éclate. Au milieu des débris, la méduse, à découvert."),
   end:()=>_("In the wreckage, the Lighthouse's bell, cracked and silent.","Dans les décombres, la cloche du Phare, fêlée et muette."),
   head:()=>_('Phase III of III · The Reefs','Phase III sur III · Les récifs'),boss:()=>S.form===2?_('The Shattered',"L'Éclaté"):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Guard','Garde'),
   aria:()=>_("The Watcher on the reefs facing the Drowned Lighthouse, a tower made of the King's body, crowned by an electric jellyfish","Le Veilleur sur les récifs face au Phare Noyé, une tour faite du corps du Roi et couronnée d'une méduse électrique")}
 ];
-function pips(el,n,max){if(el.children.length!==max){el.innerHTML='';for(let i=0;i<max;i++)el.appendChild(document.createElement('span'))}[...el.children].forEach((s,i)=>s.classList.toggle('on',i<n))}
+function pips(el,n,max,marks){if(el.children.length!==max){el.innerHTML='';for(let i=0;i<max;i++)el.appendChild(document.createElement('span'))}[...el.children].forEach((s,i)=>{s.classList.toggle('on',i<n);s.classList.toggle('mark',!!marks&&marks.includes(i))})}
 function hud(){
-  pips($('hpP'),S.hp,S.hpMax);pips($('hpB'),S.bossHp,S.bossMax);
+  pips($('hpP'),S.hp,S.hpMax);pips($('hpB'),S.bossHp,S.bossMax,rageMarks());
   $('hpPn').textContent=S.hp+'/'+S.hpMax;$('hpBn').textContent=S.bossHp+'/'+S.bossMax;
   const P=PH[S.phase];$('nmB').textContent=P.boss();$('hdEye').textContent=P.head();$('ward').textContent=P.btn();
   $('c').setAttribute('aria-label',P.aria());document.body.dataset.ph=S.phase;
@@ -1785,58 +1942,101 @@ function hud(){
 
 /* ================= spells, anger and final assaults ================= */
 /* rages and final assaults: nothing written on screen (the sound and the attacks tell it); the screen reader gets the name */
-function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting')}
-function angerCheck(){
-  if(S.mode!=='play'||S.angerShown||S.bossHp>S.bossMax/2)return;S.angerShown=true;
-  if(S.phase===2)banner(_('Broken mirror','Miroir brisé'),_('Reflections now look like real orbs. Only real orbs cast a shadow.','Les reflets ressemblent aux vraies orbes. Seules les vraies ont une ombre.'));
+function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
+/* rages, as in Ember Bridge (00-core.js DIFFS u / rages / mk, 36-p2-foundry-logic.js qTurn / qRage): when the boss's HP has
+   reached a threshold of DIFFS[..].u, his next turn is a roar (RAGE.dur, RAGE.dur2 for the next ones: shake, flash, sting),
+   then his rage spell (the signature spell of the phase), then the second-half patterns; the final assault comes at
+   RAGE.finalHp. The boss bar marks the thresholds (pips underlined, as in Ember Bridge). */
+const RAGE={dur:1.6,dur2:.8,finalHp:1};
+const rageMarks=()=>[...(S.phase!==3||S.form===2?[RAGE.finalHp-1]:[]),...S.d.u.map(x=>x-1)];   // form I of phase III has no final assault
+function rageBanner(){
+  if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
   else if(S.phase===1){banner(_('Blue heart','Cœur bleu'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
-  else if(S.form===2)banner(_('Double orbit','Double orbite'),_('The rings split and spin faster.','Les anneaux se séparent et tournent plus vite.'));
+  else if(S.form===2)banner(_('Bell storm','Tempête de cloches'),_('The side lanterns fire rings in turn, then the trap bell falls.','Les lanternes latérales tirent des anneaux tour à tour, puis la cloche-piège tombe.'));
+  else banner(_('Rising tide','Marée montante'),_('The wave floods the reefs; spikes rise as it ebbs.','La vague noie les récifs ; des pics jaillissent quand elle se retire.'));
 }
-const FINAL_AT=2;
+const FINAL_AT=RAGE.finalHp;
+/* shard rain (phase I), aligned on Ember Bridge's stone rain (36-p2-foundry-logic.js qRoar / qResolve / qHurt):
+   spacing between two shards drawn at random in [lo, hi] s (Normal and Easy .32-.62, Hard .55-.9: the Hard window is
+   shorter, so the rhythm is slower), not scaled by the attack speed; in Hard, `grace` s more after the impact (irregular
+   rhythm); a shard that hits stuns only `hurt` s. PROVISIONAL, from Ember Bridge. */
+const RAIN={normal:[.32,.62],hard:[.55,.9],grace:.13,hurt:.14};
+/* new spells (docs/CH2-SPEC.md, « Sorts et rages »): times in seconds, multiplied by f (attack speed, like every pattern).
+   PROVISIONAL values, taken from the neighbouring spells they replace or extend; to be set in the balancing session.
+   wave  (II): stomp lands at `land`, the wave reaches the Watcher at `hit` (= old stomp), the beam falls twice,
+               `fall1` / `fall2` after the wave (= old stones .8 / 1.15), next attack `after` later (= old stomp 1.6);
+   dwave (II, rage): second, bigger wave `gap` after the first (chain spacing .4 + margin); the beam falls after it;
+   rust  (II, rage): the King shakes his bell for `cloud` (cloud descends), then advances: block at contact `hit` later
+               (anchor swing, lunge x `ls`); the cloud clears `fade` after the contact; next attack `after` later;
+   kwave (III, form I): the King's wave crosses the reef like the beam (= sweep: `ts` .95, `D` 1.6, `after` .35); hold;
+   tide  (III, form I, rage): the wave, then as it ebbs two reef spikes (taps) `spike1` / `spike2` after it (= spike .8,
+               second +.35), `gap` between their tells, next attack `after` later (= spike 1.15);
+   storm (III, form II, rage): `n` rings fired in turn from the two side lanterns, every `gap` (= ring .34), each `tl` /
+               `ti` (= ring .5 / .95); then the trap bell, `trapGap` later: hovers until `trapTl`, presses from `trapTa` to
+               `trapTb` (hold; = trap .75 / 1.3, +.5 held), next attack `after` later;
+   echo  (I, rage): after the three orbs of the echo, the two reflections shatter `break1` / `break2` after the last orb,
+               each sending a shard (= shard rain .42 / .95). */
+const SP={
+  wave:{land:.55,hit:1.05,fall1:.8,fall2:1.15,after:1.6},
+  dwave:{gap:.55},
+  rust:{cloud:.6,hit:1.55,ls:1.6,fade:2.2,after:1.4},
+  kwave:{ts:.95,D:1.6,after:.35},
+  tide:{spike1:.8,spike2:1.15,gap:.35,after:1.15},
+  storm:{n:5,gap:.34,tl:.5,ti:.95,trapGap:.4,trapTl:.75,trapTa:1.3,trapTb:1.8,after:.7},
+  echo:{break1:.2,break2:.65,tl:.42,ti:.95}
+};
 function spawn(){
-  const d=S.d,stage=S.bossHp<=S.bossMax/2?1:0,f=1/(d.sp*(1+.1*stage)),id=S.phase,f2=id===3&&S.form===2;
-  const gen=f2?P3b:[P1,P2,P3][id-1];
+  const d=S.d,id=S.phase,f2=id===3&&S.form===2,gen=f2?P3b:[P1,P2,P3][id-1];
+  const n=d.u.filter(x=>S.bossHp<=x).length;
+  if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
+  const stage=S.rageN?1:0,f=1/(d.sp*(1+.1*stage));
+  if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;sched(gen(stage,f,gt+.25,false,r));return}
   if(!S.finalDone&&S.bossHp<=FINAL_AT&&(id!==3||f2)){
-    S.finalDone=true;
+    S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=RAGE.dur2;S.shake=10;
     banner(_('Final assault','Dernier assaut'),[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
     sched(gen(1,f,gt+1.6,true));return}
   sched(gen(stage,f,gt+.25));
 }
 /* ---- Phase I · the Hollow Voice ---- */
-function P2(stage,f,b,final){
+function P2(stage,f,b,final,rage){
   const T=[];let t=b;
   const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+.45*f,ti:t+1.3*f,real,src:src||0});t+=.44*f};
   const volley=(n,ill)=>{const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i));t+=.9*f};
   const echo=()=>{const real=Math.floor(Math.random()*3);[0,1,2].sort(()=>Math.random()-.5).forEach(s=>{orb(s===real,s);t+=.1*f});t+=.9*f};
+  // rage: the echo, then the two reflections shatter one by one, each sending a shard at the Watcher
+  const echoR=()=>{const t0=t;echo();const last=t0+2*.54*f+1.3*f,E=SP.echo;[1,2].forEach((src,j)=>{const s=last+E['break'+(j+1)]*f;T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src})});t=Math.max(t,last+E.break2*f+E.ti*f+.4*f)};
   const wail=()=>{T.push({k:'wail',t0:t,tl:t+.8*f,ti:t+1.9*f,real:true});t+=1.3*f};
-  const rain=n=>{const t0=t;for(let i=0;i<n;i++){const s=t0+i*.3*f;S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f,ti:s+.95*f,si:S.shardNext})}t=t0+(n-1)*.3*f+1.3*f};
-  if(final){echo();volley(5,2);wail();return T}
+  const rain=n=>{const G=RAIN[S.d.m<1?'hard':'normal'];let s=t;for(let i=0;i<n;i++){if(i)s+=G[0]+Math.random()*(G[1]-G[0]);S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f,ti:s+.95*f,si:S.shardNext})}t=s+1.3*f};
+  if(rage){echoR();return T}
+  if(final){echoR();volley(5,2);wail();return T}
   const p0=[()=>volley(2,0),()=>volley(3,1),wail,()=>volley(3,0),()=>{wail();volley(2,1)},()=>rain(3)];
-  const p1=[()=>volley(4,1),()=>volley(5,2),echo,()=>{echo();wail()},()=>{volley(3,1);echo()},()=>{wail();volley(4,2)},()=>rain(5),()=>{rain(3);volley(3,1)}];
+  const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},()=>rain(5),()=>{rain(3);volley(3,1)}];
   pick(stage?p1:p0)();return T;
 }
-function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;recover(S.pl,PT().rec+DG.fool,'fool');S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
-  if(S.phase===2&&(S.angerShown||S.dk==='hard'||S.dk==='th')){const nt={k:'back',t0:gt,tl:gt+.1,ti:gt+1.1,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}}
+/* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and
+   comes back as a real attack once he can dodge again (action + recovery + DG.backWin); the series is no longer clean */
+function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
+  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}
 function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
 function drawOrbs(){
-  const anger=S.angerShown;
   for(const th of S.threats){
     if(gt<th.t0)continue;
     if(th.k==='orb'||th.k==='back'){
-      const h=th.k==='back'?{x:-30,y:HY-60}:voiceHand(th.src,1),tx=HX+14,ty=HY;
-      let x,y,r=13,a=1,p=0;
-      if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);x=h.x;y=h.y;r=4+9*k}
+      const back=th.k==='back',h=back?{x:HX-110,y:HY-56}:voiceHand(th.src,1),tx=HX+14,ty=HY;
+      let x,y,r=13,a=1,p=0,dash=th.real?0:1;
+      if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);if(back){const e=eout(k);x=lerp(tx,h.x,e);y=lerp(ty,h.y,e)-Math.sin(Math.PI*k)*30;dash=1-k}else{x=h.x;y=h.y;r=4+9*k}}
       else{p=(gt-th.tl)/(th.ti-th.tl);
         if(th.done){if(th.res==='hit'||th.res==='pass'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.45)}}
         x=lerp(h.x,tx,p);y=lerp(h.y,ty,p)-Math.sin(Math.PI*Math.min(p,1))*(th.k==='back'?20:46)}
       if(a<=0)continue;
       ctx.save();ctx.globalAlpha=a;
       if(th.real&&gt>=th.tl){const sh=clamp(1-(GY-y)/400,.25,1);ell(x,GY+3,r*1.6*sh,4*sh,`rgba(0,0,0,${.5*sh})`)}
-      if(th.real||anger){glow(x,y,r*3,'rgba(176,124,255,.95)',.85);ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff')}
-      else{const fl=.45+.35*Math.sin(gt*30);ctx.globalAlpha=a*fl;glow(x,y,r*2.4,'rgba(176,124,255,.6)',.35);ctx.strokeStyle='#d8c4ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ell(x,y,r*.45,r*.45,'rgba(240,230,255,.18)')}
+      // every orb is full; an illusory one (clones' included) has a dotted outline, a real one casts its shadow (above)
+      glow(x,y,r*3,'rgba(176,124,255,.95)',th.real?.85:.6);ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff');
+      if(dash>0){ctx.save();ctx.globalAlpha*=dash;ctx.setLineDash([3,4]);ctx.lineDashOffset=-gt*12;ctx.strokeStyle='#f4ecff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.stroke();ctx.restore()}
       ctx.restore();
     }else if(th.k==='shard'){
-      const o=shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;
+      const o=th.from!=null?{x:voicePos(th.from).x,y:voicePos(th.from).y-90,s:24}:shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;
       if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);x=o.x;y=o.y;ang=Math.atan2(ty-y,tx-x);glow(x,y,30,'rgba(220,200,255,.9)',.8*k)}
       else{let p=(gt-th.tl)/(th.ti-th.tl);if(th.done){if(th.res==='hit'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.3);if(!th.sf){th.sf=1;burst(tx+30,ty-20,10,'#f2ecff',5,.4)}}}
         p=Math.min(p,1);x=lerp(o.x,tx,ein(p));y=lerp(o.y,ty,ein(p));ang=Math.atan2(ty-o.y,tx-o.x)}
@@ -1853,17 +2053,24 @@ function drawOrbs(){
   }
 }
 /* ---- Phase II · the Rust King ---- */
-function P1(stage,f,b,final){
+function P1(stage,f,b,final,rage){
   const T=[];let t=b;
   const slam=()=>{T.push({k:'slam',t0:t,ti:t+.95*f});t+=1.4*f};
   const sweep=()=>{T.push({k:'sweep',t0:t,ti:t+.72*f});t+=1.17*f};
   const chain=n=>{const t0=t;for(let i=0;i<n;i++)T.push({k:'chain',t0,ti:t0+.85*f+i*.4*f,i,n});t=t0+.85*f+(n-1)*.4*f+.55*f};
   const toll=()=>{T.push({k:'toll',t0:t,tw:t+.55*f,ti:t+1.55*f});t+=1.05*f};
   const harpoon=()=>{const ti=t+1.1*f,tb=ti+.7*f;T.push({k:'hpOut',t0:t,ti,tb,ret:tb+.5*f});T.push({k:'hpBack',t0:t,ti:tb});t=tb+.8*f};
-  const stomp=()=>{const ti=t+1.05*f;T.push({k:'stomp',t0:t,ti});T.push({k:'rock',t0:ti,ti:ti+.8*f,rx:HX+8});T.push({k:'rock',t0:ti+.2*f,ti:ti+1.15*f,rx:HX+20});t=ti+1.6*f};
-  if(final){stomp();slam();chain(3);toll();toll();return T}
-  const p0=[slam,sweep,()=>{slam();sweep()},()=>chain(3),toll,()=>{sweep();slam()},harpoon,stomp];
-  const p1=[()=>{slam();chain(3)},()=>{sweep();slam();chain(3)},()=>{chain(3);toll()},()=>chain(5),harpoon,()=>{stomp();slam()},()=>{harpoon();sweep()}];
+  // the water wave: he stamps, the wave grows towards the Watcher (block), hits the back wall, a beam falls twice (two blocks)
+  const wave=big=>{const ti=t+SP.wave.hit*f;T.push({k:'wave',t0:t,tl:t+SP.wave.land*f,ti,big:!!big});return ti};
+  const rafter=ti=>{T.push({k:'rafter',n:1,t0:ti,ti:ti+SP.wave.fall1*f});T.push({k:'rafter',n:2,t0:ti+.2*f,ti:ti+SP.wave.fall2*f});t=ti+SP.wave.after*f};
+  const surge=()=>rafter(wave());
+  const dwave=()=>{wave();t+=SP.dwave.gap*f;rafter(wave(true))};
+  // the rust cloud: he shakes his bell, red dust comes down over the hold, he advances: block at contact
+  const rust=()=>{const R=SP.rust,tc=t+R.cloud*f,ti=tc+R.hit*f;S.rust={t0:t,tc,end:ti+R.fade*f};T.push({k:'slam',t0:tc,ti,ls:R.ls,rust:1});t=ti+R.after*f};
+  if(rage){(rage>1?dwave:rust)();return T}
+  if(final){surge();slam();chain(3);toll();toll();return T}
+  const p0=[slam,sweep,()=>{slam();sweep()},()=>chain(3),toll,()=>{sweep();slam()},harpoon,surge];
+  const p1=[()=>{slam();chain(3)},()=>{sweep();slam();chain(3)},()=>{chain(3);toll()},()=>chain(5),harpoon,()=>{surge();slam()},()=>{harpoon();sweep()},dwave,rust,()=>{rust();sweep()}];
   pick(stage?p1:p0)();if(stage)toll();return T;
 }
 function anim1(){
@@ -1879,24 +2086,63 @@ function anim1(){
       else{const k=eio(clamp((gt-hp.tb)/(hp.ret-hp.tb),0,1));pos={x:lerp(hero.x,hand.x,k),y:lerp(hero.y,hand.y,k)}}
       r.harp={x:pos.x,y:pos.y};
       if(!hp.sf&&gt>=w){hp.sf=1;MUSIC.fx('whoosh');MUSIC.fx('chainSlip')}}}
-  const st=S.threats.find(t=>t.k==='stomp'&&gt>=t.t0&&gt<=t.ti+.1);
-  if(st){const up=st.ti-.18;r.stomp=gt<up?eout(clamp((gt-st.t0)/(up-st.t0),0,1))*46:lerp(46,0,ein(clamp((gt-up)/.18,0,1)))}
+  if(S.rust&&gt>=S.rust.t0&&gt<S.rust.tc+.2)r.toll=Math.max(r.toll,.8);
+  if(gt<S.roarT+S.roarD)r.toll=Math.max(r.toll,.9);
+  const st=S.threats.find(t=>t.k==='wave'&&gt>=t.t0&&gt<=t.tl+.1);
+  if(st){const up=st.tl-.18;r.stomp=gt<up?eout(clamp((gt-st.t0)/(up-st.t0),0,1))*46:lerp(46,0,ein(clamp((gt-up)/.18,0,1)))}
   return r;
 }
 function drawKingFx(){
   for(const th of S.threats){
-    if(th.k==='stomp'&&gt>=th.ti&&!th.sf){th.sf=1;S.shake=Math.max(S.shake,14);MUSIC.fx('step');for(let i=0;i<20;i++)S.parts.push({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*.25,vy:.3,g:.28,t0:gt,life:1.6,c:'#9a8a76',r:2})}
-    if(th.k==='stomp'&&gt>=th.ti&&gt<th.ti+.8){const q=(gt-th.ti)/.8;ctx.strokeStyle=`rgba(210,250,240,${.7*(1-q)})`;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(700-38,GY+4,q*520,q*30,0,0,Math.PI*2);ctx.stroke()}
-    if(th.k==='rock'&&gt>=th.t0){
-      const k=clamp((gt-th.t0)/(th.ti-th.t0),0,1),tx=th.rx,ty=HY-70;
-      if(th.done){if(!th.sf){th.sf=1;burst(tx,ty,16,th.res==='ok'?'#cdb69a':'#8a7a6a',5,.6,.3);MUSIC.fx('chunk')}continue}
-      ell(tx,GY+3,10+16*k,3+3*k,`rgba(0,0,0,${.2+.35*k})`);
-      const y=lerp(-30,ty,ein(k));ctx.save();ctx.translate(tx,y);ctx.rotate(gt*4);ctx.fillStyle='#4a3a2c';ctx.beginPath();ctx.moveTo(-14,-8);ctx.lineTo(-4,-15);ctx.lineTo(12,-10);ctx.lineTo(15,4);ctx.lineTo(4,14);ctx.lineTo(-12,10);ctx.closePath();ctx.fill();ctx.strokeStyle='#1e1610';ctx.lineWidth=2;ctx.stroke();ctx.restore();
-    }
+    if(th.k==='wave'&&gt>=th.tl&&!th.sf){th.sf=1;S.shake=Math.max(S.shake,10);MUSIC.fx('step');burst(662,GY,18,'#cff7ef',5,.6,.4)}
+    if(th.k==='wave'&&gt>=th.tl){const big=th.big?1.35:1,k=clamp((gt-th.tl)/(th.ti-th.tl),0,1);
+      if(gt<th.ti)drawWave(lerp(650,HX+40,eio(k)),lerp(14,86*big,eout(k)),1);
+      else{const q=(gt-th.ti)/.55;if(q<1)drawWave(lerp(HX+40,-90,q),86*big*(th.res==='ok'?1-q*.6:1-q*.3),th.res==='ok'?1-q*.5:1);
+        if(!th.wf&&q>=.62){th.wf=1;S.shake=Math.max(S.shake,13);MUSIC.fx('rumble');for(let i=0;i<14;i++)S.parts.push({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*.25,vy:.3,g:.28,t0:gt,life:1.6,c:'#7a6a56',r:2})}
+        if(!th.bf){th.bf=1;burst(HX+40,GY-50,th.res==='ok'?26:14,'#e6f8f2',6,.7,.3)}}}
   }
+  drawRafter();
 }
+/* a breaking wave, crest towards the Watcher (left): front at x, height h, opacity a */
+function drawWave(x,h,a){if(a<=0||h<=1)return;ctx.save();ctx.globalAlpha*=a;
+  const g=ctx.createLinearGradient(0,GY-h,0,GY+6);g.addColorStop(0,'rgba(175,245,230,.95)');g.addColorStop(.35,'rgba(40,170,165,.88)');g.addColorStop(1,'rgba(8,60,66,.92)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x+h*2.4,GY+6);ctx.quadraticCurveTo(x+h*1.1,GY+2,x+h*.45,GY-h*.85);ctx.quadraticCurveTo(x+h*.05,GY-h*1.08,x-h*.38,GY-h*.72);
+  ctx.quadraticCurveTo(x-h*.12,GY-h*.56,x-h*.2,GY-h*.22);ctx.quadraticCurveTo(x-h*.3,GY+2,x-h*.62,GY+6);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(235,252,248,.9)';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x+h*1.1,GY-h*.25);ctx.quadraticCurveTo(x+h*.5,GY-h*.85,x+h*.05,GY-h*1.05);ctx.quadraticCurveTo(x-h*.25,GY-h*.95,x-h*.38,GY-h*.72);ctx.stroke();
+  for(let i=0;i<6;i++){const k=(gt*2+i*.17)%1;ell(x-h*.3-k*20+i*4,GY-h*.8-k*18+i*3,1.6,1.6,`rgba(235,252,248,${.8*(1-k)})`)}
+  ctx.restore()}
+/* the deck beam that falls twice after the wave hits the back wall: first it swings down on its hinge, then the hinge breaks */
+const RAFTER={px:HX-150,py:34,L:330,aHit:.95,aHang:.62};
+function drawRafter(){const r1=S.threats.find(t=>t.k==='rafter'&&t.n===1),r2=S.threats.find(t=>t.k==='rafter'&&t.n===2);if(!r1&&!r2)return;
+  const R=RAFTER,P={x:R.px,y:R.py},end=a=>({x:P.x+Math.cos(a)*R.L,y:P.y+Math.sin(a)*R.L});let A=P,B,al=1,shadow=0;
+  const hang=()=>{const a=r1&&r1.res==='hit'&&gt-r1.okT<.3?R.aHit:R.aHang;return a};
+  if(r1&&!r1.done){const k=gt<r1.t0?0:ein(clamp((gt-r1.t0)/(r1.ti-r1.t0),0,1));B=end(R.aHit*k);shadow=k;if(gt>=r1.t0&&!r1.cr){r1.cr=1;MUSIC.fx('crackRun')}}
+  else if(r2&&!r2.done&&gt<r2.t0){const q=r1?clamp((gt-r1.okT)/.3,0,1):1;B=end(lerp(R.aHit,R.aHang,eout(q)));if(r1&&r1.res==='ok'&&!r1.bf){r1.bf=1;burst(B.x,B.y,14,'#cdb69a',5,.5,.3);MUSIC.fx('chunk')}}
+  else if(r2&&!r2.done){const k=ein(clamp((gt-r2.t0)/(r2.ti-r2.t0),0,1)),b0=end(R.aHang),c={x:HX+10,y:GY-138};
+    A={x:lerp(P.x,c.x-R.L/2,k),y:lerp(P.y,c.y-6,k)};B={x:lerp(b0.x,c.x+R.L/2,k),y:lerp(b0.y,c.y+6,k)};shadow=k}
+  else if(r2){const q=clamp((gt-r2.okT)/.8,0,1),c={x:HX+10,y:GY-138};al=1-q;if(!r2.bf){r2.bf=1;burst(HX+10,GY-130,20,r2.res==='ok'?'#cdb69a':'#8a7a6a',6,.6,.3);MUSIC.fx('chunk')}
+    const dx=r2.res==='ok'?220*eout(q):0,dy=r2.res==='ok'?(GY-12-c.y)*ein(q):0;A={x:c.x-R.L/2+dx,y:c.y-6+dy};B={x:c.x+R.L/2+dx,y:c.y+6+dy}}
+  else return;
+  if(shadow>0)ell(HX+10,GY+3,30+40*shadow,4+3*shadow,`rgba(0,0,0,${.15+.35*shadow})`);
+  ctx.save();ctx.globalAlpha*=al;ctx.lineCap='butt';ctx.strokeStyle='#120c08';ctx.lineWidth=22;ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();
+  ctx.strokeStyle='#4a3320';ctx.lineWidth=15;ctx.stroke();ctx.strokeStyle='rgba(200,160,110,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(A.x,A.y-4);ctx.lineTo(B.x,B.y-4);ctx.stroke();
+  const dx=B.x-A.x,dy=B.y-A.y,l=Math.hypot(dx,dy)||1;for(const t of[.2,.5,.8])ell(A.x+dx*t,A.y+dy*t,2,2,'#1a120b');
+  ctx.fillStyle='#4a3320';ctx.beginPath();ctx.moveTo(B.x-dy/l*7,B.y+dx/l*7);ctx.lineTo(B.x+dx/l*14,B.y+dy/l*14-4);ctx.lineTo(B.x+dx/l*6,B.y+dy/l*6+2);ctx.lineTo(B.x+dx/l*12,B.y+dy/l*12+6);ctx.lineTo(B.x+dy/l*7,B.y-dx/l*7);ctx.fill();
+  ctx.restore()}
+/* the rust cloud: red dust coming down over the hold. It hides the scenery, never the block signal: it thins out around the
+   Watcher, and the King's bell lamp and the anchor's head shine through it */
+const RUSTP=(()=>{const R=mulberry(57);return[...Array(26)].map(()=>({x:R()*W,y:R()*GY,r:60+R()*90,v:(R()-.5)*14,o:R()*6}))})();
+function drawRust(){const R=S.rust;if(!R||gt<R.t0||gt>R.end)return;
+  const a=clamp((gt-R.t0)/(R.tc-R.t0),0,1)*(1-clamp((gt-(R.end-.9))/.9,0,1)),front=lerp(-40,H+60,eout(clamp((gt-R.t0)/(R.tc-R.t0+.5),0,1)));
+  ctx.save();
+  for(let x=0;x<W;x+=40){const k=.35+.65*eio(clamp((x-HX)/220,0,1)),g=ctx.createLinearGradient(0,front-160,0,front);g.addColorStop(0,`rgba(110,40,18,${.62*a*k})`);g.addColorStop(1,'rgba(110,40,18,0)');ctx.fillStyle=g;ctx.fillRect(x,0,40,front)}
+  for(const p of RUSTP){const x=(p.x+gt*p.v+W)%W,k=(x<HX+90?.3:1)*clamp((front-p.y)/90,0,1);const rg=ctx.createRadialGradient(x,p.y,4,x,p.y,p.r);rg.addColorStop(0,`rgba(150,62,28,${.45*a*k})`);rg.addColorStop(1,'rgba(120,45,20,0)');ctx.fillStyle=rg;ctx.fillRect(x-p.r,p.y-p.r,p.r*2,p.r*2)}
+  for(let i=0;i<40;i++){const x=(i*97+gt*20)%W,y=(i*53+gt*40)%front;ctx.fillStyle=`rgba(200,110,60,${.5*a})`;ctx.fillRect(x,y,1.6,1.6)}
+  ctx.restore();
+  if(S.kingHead)glow(S.kingHead.x,S.kingHead.y,70,'rgba(255,220,160,.9)',.55*a+.2);
+  const sl=S.threats.find(t=>t.rust&&!t.done&&gt>=t.t0);if(sl&&S.clapTip)glow(S.clapTip.x,S.clapTip.y,50,'rgba(220,250,240,.9)',.7)}
 /* ---- Phase III · Form I: the tower's tentacles and torn pieces ---- */
-function P3(stage,f,b){
+function P3(stage,f,b,final,rage){
   const T=[];let t=b;
   const R=88;
   const sweep=dir=>{const ts=t+.95*f,D=1.6*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
@@ -1905,8 +2151,13 @@ function P3(stage,f,b){
   const spike=()=>{T.push({k:'spike',t0:t,ti:t+.8*f,real:true,seed:Math.random()});t+=1.15*f};
   const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*f,side:Math.random()<.5?-1:1});t+=1.2*f};
   const chunk=()=>{T.push({k:'chunk',t0:t,tl:t+.6*f,ti:t+1.2*f,ri:RINGS[Math.floor(Math.random()*6)]});t+=1.55*f};
-  const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()},whip,chunk,()=>{whip();bolt()}];
-  const p1=[()=>{bolt();spike();bolt()},()=>{sweep(-1);sweep(1)},()=>{sweep(-1);t-=.15*f;spike()},()=>{spike();sweep(1);bolt()},()=>{bolt();bolt();sweep(-1)},()=>{whip();whip();chunk()},()=>{sweep(-1);chunk()}];
+  // the King's wave (hold), crossing the reef like the beam
+  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;return th};
+  // rage, the rising tide: the wave (hold), then reef spikes rise in its wake as it ebbs (taps)
+  const tide=()=>{const w=kwave(),e=w.ts+w.D,P=SP.tide;T.push({k:'spike',t0:e,ti:e+P.spike1*f,real:true,seed:Math.random(),tide:1});T.push({k:'spike',t0:e+P.gap*f,ti:e+P.spike2*f,real:true,seed:Math.random(),tide:1});t=e+P.spike2*f+P.after*f};
+  const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()},whip,chunk,()=>{whip();bolt()},kwave];
+  const p1=[()=>{bolt();spike();bolt()},()=>{sweep(-1);sweep(1)},()=>{sweep(-1);t-=.15*f;spike()},()=>{spike();sweep(1);bolt()},()=>{bolt();bolt();sweep(-1)},()=>{whip();whip();chunk()},()=>{sweep(-1);chunk()},tide,()=>{kwave();bolt()}];
+  if(rage){tide();return T}
   pick(stage?p1:p0)();return T;
 }
 function beaconHide(){S.hide=null;for(const th of S.threats){if(th.k==='chunk'&&gt>=th.tl&&!(th.done&&gt>th.okT+.8)){(S.hide||(S.hide=new Set())).add(TOWER[th.ri])}}}
@@ -1937,7 +2188,7 @@ function base(){ell(LX,GY+8,160,18,'#050e12');for(const r of RIBS){ctx.strokeSty
 const RINGS=TOWER.map((p,i)=>p.k==='ring'?i:-1).filter(i=>i>=0);
 const SBELLS=TOWER.map((p,i)=>p.k==='sbell'?i:-1).filter(i=>i>=0);
 const MOV=TOWER.map((p,i)=>(p.k==='ring'||p.k==='seg'||p.k==='sbell')?i:-1).filter(i=>i>=0);
-function P3b(stage,f,b,final){
+function P3b(stage,f,b,final,rage){
   const T=[];let t=b;
   const ring=n=>{const t0=t;for(let i=0;i<n;i++){const s=t0+i*.34*f;S.ringNext=((S.ringNext||0)+1)%6;T.push({k:'ring',t0:s,tl:s+.5*f,ti:s+.95*f,ri:S.ringNext})}t=t0+(n-1)*.34*f+1.35*f};
   const moon=()=>{const ts=t+.9*f,D=1.25*f;T.push({k:'moon',t0:t,ts,D,ta:ts+D*((1000-(HX+90))/1080),tb:ts+D*((1000-(HX-70))/1080),hold:true});t=ts+D+.45*f};
@@ -1945,9 +2196,13 @@ function P3b(stage,f,b,final){
   const trap=()=>{T.push({k:'trap',t0:t,tl:t+.75*f,ti:t+1.3*f});t+=1.85*f};
   const burstOut=()=>{T.push({k:'burst',t0:t,ta:t+1.15*f,tb:t+1.5*f,hold:true});t+=2*f};
   const reform=()=>{const tr=t+.9*f,ts=tr+.35*f,D=1.5*f;T.push({k:'reform',t0:t,tr,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});const td=ts+D+.5*f;T.push({k:'disp',t0:ts+D,ti:td,rf:1});t=td+.7*f};
+  // rage, the bell storm: rings fired in turn from the two side lanterns (taps), then the trap bell pressing down (hold)
+  const storm=()=>{const Q=SP.storm;for(let i=0;i<Q.n;i++){const s=t+i*Q.gap*f;T.push({k:'sring',side:i%2,t0:s,tl:s+Q.tl*f,ti:s+Q.ti*f})}t+=(Q.n-1)*Q.gap*f+Q.ti*f+Q.trapGap*f;
+    T.push({k:'trap',t0:t,tl:t+Q.trapTl*f,ta:t+Q.trapTa*f,tb:t+Q.trapTb*f,hold:true});t+=Q.trapTb*f+Q.after*f};
+  if(rage){storm();return T}
   if(final){T.push({k:'implode',t0:t,ta:t+1.7*f,tb:t+2.3*f,hold:true});t+=2.8*f;return T}
   const p0=[()=>ring(3),moon,trap,()=>{ring(2);trap()},cross,burstOut,reform];
-  const p1=[()=>ring(5),()=>{moon();ring(3)},()=>{trap();trap()},()=>{cross();ring(2)},()=>{burstOut();moon()},()=>{ring(3);cross()},()=>{reform();ring(2)}];
+  const p1=[()=>ring(5),()=>{moon();ring(3)},()=>{trap();trap()},()=>{cross();ring(2)},()=>{burstOut();moon()},()=>{ring(3);cross()},()=>{reform();ring(2)},storm];
   pick(stage?p1:p0)();return T;
 }
 function beamFrom(ox,oy,bx,a){const g=ctx.createLinearGradient(ox,oy,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(ox-7,oy);ctx.lineTo(ox+7,oy);ctx.lineTo(bx+70,GY+16);ctx.lineTo(bx-70,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,80,11,`rgba(200,250,255,${.25*a})`)}
@@ -1970,7 +2225,7 @@ function drawEclGame(){
       if(post>0&&post<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,245,255,${1-post})`;ctx.lineWidth=8*(1-post)+1;ctx.beginPath();ctx.arc(J.x,J.y,post*900,0,Math.PI*2);ctx.stroke();ctx.restore()}}
   }
   const on=1;
-  const hit={x:HX+20,y:GY-80},tells=[],beams=[],fx=[];let trapQ=null;
+  const hit={x:HX+20,y:GY-80},tells=[],beams=[],fx=[],srings=[];let trapQ=null;
   for(const th of S.threats){
     if(gt<th.t0)continue;
     if(th.done&&th.res==='ok'&&!th.sfx){th.sfx=1;if(th.k==='ring')MUSIC.fx('bellHit');if(th.k==='trap')MUSIC.fx('bellBig')}
@@ -1979,9 +2234,9 @@ function drawEclGame(){
       else if(!th.done){const k=clamp((gt-th.tl)/(th.ti-th.tl),0,1);q={x:lerp(o.x,hit.x,ein(k)),y:lerp(o.y,hit.y,ein(k))-Math.sin(Math.PI*k)*30,r:o.r+k*8,z:2}}
       else{const k=eio(clamp((gt-th.okT)/.7,0,1)),from=th.res==='ok'?{x:hit.x+110,y:hit.y-90}:hit;q={x:lerp(from.x,o.x,k),y:lerp(from.y,o.y,k),r:o.r,z:k<1?2:o.z}}
       P[idx]=q}
-    else if(th.k==='trap'){const o=P[EHEAD],hov={x:HX+12,y:GY-250},grd={x:HX+12,y:GY+2};let q;
+    else if(th.k==='trap'){const o=P[EHEAD],hov={x:HX+12,y:GY-250},grd={x:HX+12,y:GY+2},ti=th.hold?th.ta:th.ti;let q;
       if(gt<th.tl){const k=eio(clamp((gt-th.t0)/(th.tl-th.t0),0,1));q={x:lerp(o.x,hov.x,k),y:lerp(o.y,hov.y,k)+Math.sin(gt*8)*3*k,r:lerp(Math.PI,0,k),z:2,sc:lerp(1,2.3,k)}}
-      else if(!th.done){const k=ein(clamp((gt-th.tl)/(th.ti-th.tl),0,1));q={x:hov.x,y:lerp(hov.y,grd.y,k),r:0,z:2,sc:2.3}}
+      else if(!th.done){const k=ein(clamp((gt-th.tl)/(ti-th.tl),0,1));q={x:hov.x,y:lerp(hov.y,grd.y,k)+(gt>ti?Math.sin(gt*40)*2:0),r:0,z:2,sc:2.3};if(gt>ti)S.shake=Math.max(S.shake,3)}
       else{const d=gt-th.okT,hold=th.res==='hit'?.5:0,k=eio(clamp((d-hold)/.8,0,1)),from=th.res==='ok'?{x:hov.x+70,y:hov.y-30}:grd;
         q={x:lerp(from.x,o.x,k),y:lerp(from.y,o.y,k),r:lerp(0,Math.PI,k),z:2,sc:lerp(2.3,1,k)};
         if(th.res==='hit'&&d<.7)fx.push(['toll',grd.x,grd.y-90,d/.7])}
@@ -1996,6 +2251,7 @@ function drawEclGame(){
       else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D;A={x:1000-1080*s,y:GY-60-Math.sin(s*Math.PI)*20,a:s*Math.PI*7,sc:.85,z:3};if(!th.wf){th.wf=1;MUSIC.fx('whoosh')}}
       else{const k=eio(clamp((gt-th.ts-th.D)/.8,0,1));A={x:lerp(-80,A0.x,k),y:lerp(GY-60,A0.y,k),a:A0.a,sc:lerp(.85,A0.sc,k),z:k<1?3:A0.z}}}
     else if(th.k==='lbeam')beams.push(th);
+    else if(th.k==='sring')srings.push(th);
   }
   drawEcl(P,A,J,1,on,null);
   if(reBeam!=null){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*reBeam,1);ctx.restore()}
@@ -2004,6 +2260,13 @@ function drawEclGame(){
     if(gt<th.ts){const k=(gt-th.t0)/(th.ts-th.t0);glow(o.x,o.y,60,'rgba(110,235,255,.9)',.4+.5*k);beamFrom(o.x,o.y,940,.12+.25*k)}
     else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D;beamFrom(o.x,o.y,940-1000*s,1);glow(o.x,o.y,70,'rgba(200,250,255,.9)',.8)}}
   for(const t of tells)glow(t[0],t[1],46,'rgba(200,250,255,.95)',.9*t[2]);
+  // rings of the bell storm, from the side lanterns
+  for(const th of srings){const o=P[SBELLS[th.side]];
+    if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);glow(o.x,o.y,56,'rgba(110,235,255,.9)',.3+.6*k);ctx.strokeStyle=`rgba(220,252,255,${k})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(o.x,o.y,30-18*k,0,Math.PI*2);ctx.stroke();continue}
+    let x,y,a=1,rr=16;
+    if(!th.done){const k=ein(clamp((gt-th.tl)/(th.ti-th.tl),0,1));x=lerp(o.x,hit.x,k);y=lerp(o.y,hit.y,k)-Math.sin(Math.PI*k)*40;rr=14+12*k}
+    else{const q=(gt-th.okT)/.35;if(q>=1)continue;a=1-q;x=hit.x+(th.res==='ok'?40*q:0);y=hit.y-(th.res==='ok'?50*q:0);rr=26+30*q;if(!th.bf){th.bf=1;burst(hit.x,hit.y,th.res==='ok'?16:8,'#dff8ff',5,.5)}}
+    ctx.globalAlpha=a;glow(x,y,rr*2.2,'rgba(110,235,255,.9)',.6);ctx.strokeStyle='#eafcff';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(x,y,rr,rr*.55,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='rgba(110,235,255,.8)';ctx.lineWidth=8;ctx.globalAlpha=a*.4;ctx.stroke();ctx.globalAlpha=1}
   for(const e of fx){if(e[0]==='wave'){ctx.strokeStyle=`rgba(200,245,255,${1-e[3]})`;ctx.lineWidth=6*(1-e[3])+1;ctx.beginPath();ctx.arc(e[1],e[2],e[3]*700,0,Math.PI*2);ctx.stroke()}
     else{ctx.strokeStyle=`rgba(255,200,120,${.8*(1-e[3])})`;ctx.lineWidth=3;for(let i=0;i<3;i++){const r=30+((e[3]*90+i*30)%90);ctx.beginPath();ctx.arc(e[1],e[2],r,Math.PI*.15,Math.PI*.85,true);ctx.stroke()}}}
   ctx.restore();
@@ -2027,9 +2290,9 @@ function playCine(id,k,cb){
   hideCard();hud();if($('optMus').checked)MUSIC.bed(id);$('skip').hidden=false;
 }
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;S.ringT=0;S.proHand=null;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
+function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function resetPhaseState(){Object.assign(S,{angerShown:false,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,pl:newPl(),post:null})}
+function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
@@ -2045,7 +2308,7 @@ function phaseCleared(){
   if(id===3){playCine(3,'out',()=>clearedCard(3));return}
   playCine(id,'out',()=>clearedCard(id));
 }
-function clearedCard(id){S.mode='card';const next=ORDER[gpOf(id)];
+function clearedCard(id){S.mode='card';S.still=id;const next=ORDER[gpOf(id)];
   showCard({eye:[null,_('Phase II cleared','Phase II terminée'),_('Phase I cleared','Phase I terminée'),_('Phase III cleared','Phase III terminée')][id],title:PH[id].boss(),desc:PH[id].end(),
     go:_('Continue','Continuer'),onGo:id===3?()=>playEpilogue(victory):()=>enterPhase(next),go2:id===3?null:_('Menu','Menu'),onGo2:showMenu});
 }
@@ -2064,7 +2327,8 @@ function deathCard(){MUSIC.stop();const tr=S.d.trial;
     desc:tr?_('Trial: one fall sends you back to Phase I.','Épreuve : une chute te renvoie à la phase I.'):'',
     go:tr?_('Restart','Recommencer'):_('Retry phase','Réessayer la phase'),onGo:()=>tr?startRun(S.dk,true):retryPhase(),go2:_('Menu','Menu'),onGo2:showMenu});
 }
-function retryPhase(){const f=S.form||1;S.hp=S.hpMax;S.bossHp=S.bossMax;resetPhaseState();S.form=f;S.mode='card';hud();beginPlay()}
+/* retry: from the start of the phase; in phase III that is form I, even after a defeat in form II (as in Ember Bridge) */
+function retryPhase(){S.hp=S.hpMax;S.bossHp=S.bossMax;resetPhaseState();S.form=1;S.mode='card';hud();beginPlay()}
 function startRun(dk,noPro){
   S=fresh(dk);S.full=true;S.phase=2;S.form=1;S.cineDone={};
   $('optHelp').checked=dk==='easy'?true:DIFFS[dk].trial?false:$('optHelp').checked;$('optHelp').disabled=!!DIFFS[dk].trial;
@@ -2082,59 +2346,68 @@ function showMenu(){
 function hideMenu(){$('menu').hidden=true}
 function setPause(p){if(S.mode!=='play')return;S.paused=p;$('pause').hidden=!p;if(p){up();MUSIC.stop();try{$('pResume').focus({preventScroll:true})}catch(e){}}else setTheme(S.phase)}
 
-/* ---------- Epilogue: the bell rings again ---------- */
-const EPI_LEN=23;
-/* outro cartons (docs/CH2-SPEC.md) over the provisional scenes: [start, end, text] in seconds; carton 6 is the title,
-   tinted with the next chapter's colour */
+/* ---------- Epilogue (docs/CH2-SPEC.md, outro) ---------- */
+const EPI_LEN=19;
+/* outro cartons: [start, end, text] in seconds; carton 5 is the title, tinted with the next chapter's colour.
+   Shots (EPI_SHOTS, start times): 1 morning, the Lighthouse mute; 2 close-up of the bell, the word engraved; 3 the valley
+   of Chapter I, the earth trembling, one tower going dark; 4 the forest, the Spire's light failing (and the title over it).
+   No glow under the waves any more (revisions of 28 October): the only light left is the forest Spire's. */
 const ECAPF=()=>[[.4,4.2,_('By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again.','Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus.')],
   [4.4,8.2,_('On it, a single word is engraved: Crown.','Sur celle-ci, un seul mot est gravé : Couronne.')],
   [8.4,12.2,_('And this time, the earth has not stopped trembling.',"Et cette fois, la terre n'a pas cessé de trembler.")],
-  [12.4,16.2,_('Beneath the waves, a turquoise glow still pulses, faintly.','Sous les vagues, une lueur turquoise pulse encore, faiblement.')],
-  [16.4,19.8,_('Deep in the forest, a faint light flickers.','Au cœur de la forêt, une faible lumière vacille.')]];
-const EPI_TITLE=20.2;
-const EFXL=[[.2,'stars'],[5.3,'charge'],[7.6,'bellSoft'],[10.4,'bellBig'],[11.9,'bellBig'],[13.3,'bellHit'],[16,'land'],[18.1,'whooshDown'],[19.8,'heart'],[20.8,'sting']];
-function hangBell(x,y,sw){ctx.save();ctx.translate(x,y);ctx.rotate(sw);ctx.translate(0,26);ctx.scale(.44,.44);PDRAW.head(.85);ctx.restore()}
+  [12.4,15.8,_("In the heart of the forest, a Spire's light is failing.","Au cœur de la forêt, la lumière d'une Flèche faiblit.")]];
+const EPI_TITLE=16.2;
+const EPI_SHOTS=[0,4.3,8.3,12.3];
+/* shot 4: the forest Spire (x, top), its light fading from SPIRE.a0 to SPIRE.a1 over the shot, with flickers */
+const SPIRE={x:500,top:170,a0:.9,a1:.25,fade:6};
+/* shot 3: the valley's towers (x, height); TOWER_OUT goes dark at EPI_DARK; the earth cracks along VCRACKS */
+const VTOW=[[150,150],[300,110],[470,170],[640,120],[800,140]],TOWER_OUT=3,EPI_DARK=9.6;
+const VCRACKS=(()=>{const R=mulberry(808);return[...Array(5)].map((_,i)=>{const pts=[];let x=80+i*190,y=430;for(let k=0;k<7;k++){pts.push([x,y]);x+=(R()-.5)*60;y+=14+R()*10}return{pts,t0:8.9+i*.45}})})();
+const EFXL=[[.2,'swell'],[4.3,'glints'],[8.3,'rumble'],[9.6,'crackRun'],[10.4,'rumble'],[12.3,'glints'],[14.6,'heart'],[16.8,'sting']];
 function drawEpilogue(t){
-  const dawn=eio(clamp((t-9.6)/3.4,0,1)),pan=eio(clamp((t-18)/1.6,0,1));
-  ctx.save();ctx.translate(0,-pan*330);
-  // sky: night to dawn
-  const g=ctx.createLinearGradient(0,0,0,GY);g.addColorStop(0,lerpC([3,4,11],[40,34,66],dawn));g.addColorStop(.6,lerpC([10,22,30],[150,90,96],dawn));g.addColorStop(1,lerpC([20,34,40],[240,170,110],dawn));ctx.fillStyle=g;ctx.fillRect(0,-40,W,GY+80);
-  for(const s of PSTARS){const a=(.55+.4*Math.sin(rt*2+s.o))*(1-dawn);if(a>.02&&s.y<GY-60){ctx.fillStyle=`rgba(235,242,255,${a})`;ctx.fillRect(s.x,s.y,s.r,s.r)}}
-  if(dawn>0){glow(W*.78,GY-40,320,'rgba(255,200,120,.9)',.55*dawn);ell(W*.78,GY-20,46,46,`rgba(255,226,160,${dawn})`)}
-  proMarsh(GY);
-  if(dawn>0){ctx.fillStyle=`rgba(255,180,110,${.12*dawn})`;ctx.fillRect(0,GY,W,40)}
-  // village windows light up at dawn
-  for(const [x,h] of[[90,46],[150,30],[650,40],[790,34]]){const a=clamp((dawn-.3)/.5,0,1)*(.75+.25*Math.sin(rt*3+x));if(a>0){ctx.fillStyle=`rgba(255,207,122,${a})`;ctx.fillRect(x+9,GY-h+12,8,9);glow(x+13,GY-h+16,22,'rgba(255,200,110,.8)',a*.5)}}
-  // the Watcher and the bell
-  let hx,face=1,sA=-1.3,carry=true,bell=null;
-  if(t<5){hx=lerp(110,600,eio(clamp(t/4.8,0,1)))}
-  else if(t<14){hx=600;sA=t<8?-1.75:-1.45}
-  else if(t<16){hx=lerp(600,380,eio(clamp((t-14)/2,0,1)));face=-1}
-  else{hx=380;sA=-1.57}
-  const walking=(t<4.8)||(t>14&&t<16);const hy=GY-(walking?Math.abs(Math.sin(t*6))*3:0);
-  ctx.save();if(face<0){ctx.translate(hx,0);ctx.scale(-1,1);ctx.translate(-hx,0)}
-  const h=proHero(hx,hy,0,sA,1,walking?.03*face:0);ctx.restore();
-  const tip={x:face<0?2*hx-h.tx:h.tx,y:h.ty};
-  glow(tip.x,tip.y,40,'rgba(127,214,255,.9)',.5+.2*Math.sin(rt*3));
-  const niche={x:711,y:GY-118};
-  if(t<5.2){hangBell(tip.x,tip.y+4,Math.sin(t*6)*.12)}
-  else if(t<7.6){const k=eio((t-5.2)/2.4),x=lerp(tip.x,niche.x,k),y=lerp(tip.y+4,niche.y,k)-Math.sin(Math.PI*k)*60;glow(x,y+16,50,'rgba(127,214,255,.9)',.7);hangBell(x,y,Math.sin(t*4)*.1);
-    ctx.strokeStyle=`rgba(160,230,255,${.6*(1-k)})`;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tip.x,tip.y);ctx.quadraticCurveTo((tip.x+x)/2,Math.min(tip.y,y)-60,x,y+14);ctx.stroke()}
-  else{let sw=0;for(const r of[10.4,11.9,13.3]){const d=t-r;if(d>0&&d<1.4)sw+=Math.sin(d*9)*.35*(1-d/1.4)}hangBell(niche.x,niche.y,sw);
-    if(t>=7.6&&once('bellIn'))burst(niche.x,niche.y+12,16,'#bff6ff',4,.6);
-    for(const r of[10.4,11.9,13.3]){const d=t-r;if(d>0&&d<1.6){ctx.strokeStyle=`rgba(255,220,150,${.7*(1-d/1.6)})`;ctx.lineWidth=2.5;for(let i=0;i<3;i++){const rr=20+d*120+i*26;ctx.beginPath();ctx.arc(niche.x,niche.y+14,rr,Math.PI*1.05,Math.PI*1.95);ctx.stroke()}}}}
-  if(t>=16&&once('plant'))burst(hx+30,GY,14,'#9fb6a0',3,.7,.3);
-  // under the ice
-  const ug=ctx.createLinearGradient(0,GY+60,0,GY+560);ug.addColorStop(0,'#0b1d1f');ug.addColorStop(1,'#010304');ctx.fillStyle=ug;ctx.fillRect(0,GY+60,W,600);
-  ctx.strokeStyle='rgba(160,220,230,.15)';ctx.lineWidth=1;for(let i=0;i<8;i++){const y=GY+60+i*7;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y+Math.sin(i)*3);ctx.stroke()}
-  for(let i=0;i<24;i++){const x=(i*173)%W,y=GY+120+((i*97+rt*8)%420);ctx.fillStyle='rgba(160,220,230,.18)';ctx.fillRect(x,y,1.5,1.5)}
-  const pu=.5+.5*Math.sin(t*2.6);glow(W*.62,GY+340,90,'rgba(90,220,255,.9)',(.35+.4*pu)*pan);ell(W*.62,GY+340,5+pu*2,5+pu*2,`rgba(220,252,255,${pan})`);
+  const shot=EPI_SHOTS.filter(s=>t>=s).length-1,ts=t-EPI_SHOTS[shot];
+  ctx.save();
+  if(shot===0){ // the morning: the Lighthouse stands, mute; the Watcher on the reef, the bell at his feet
+    const g=ctx.createLinearGradient(0,0,0,320);g.addColorStop(0,'#1c2a3a');g.addColorStop(.6,'#6a6670');g.addColorStop(1,'#d8a882');ctx.fillStyle=g;ctx.fillRect(0,0,W,320);
+    glow(W*.2,300,260,'rgba(255,200,140,.8)',.35);mist(250,3,.12,6);
+    seaBand(318,'#4a6068','#0d1c20',.18);
+    lighthouse(690,330,.85,0);
+    ctx.fillStyle='#0a1114';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,GY-6);ctx.quadraticCurveTo(300,GY-20,560,GY+4);ctx.quadraticCurveTo(620,GY+40,680,H);ctx.fill();
+    for(const [x,y,r,k] of[[400,GY-4,.4,'ring'],[460,GY-2,-.3,'seg'],[250,GY-6,.2,'ring']])drawP(k,x,y,r);
+    drawP('head',330,GY-6,-.28,.85);
+    proHero(220,GY,0,-1.42,1,0)}
+  else if(shot===1){ // close-up of the bell: the signs, the crack, the word
+    const g=ctx.createRadialGradient(W/2,H*.45,40,W/2,H*.45,520);g.addColorStop(0,'#2a3a3c');g.addColorStop(1,'#05090a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#070c0d';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,380);ctx.quadraticCurveTo(480,350,W,390);ctx.lineTo(W,H);ctx.fill();
+    const z=4.2+.35*eio(clamp(ts/4,0,1));ctx.save();ctx.translate(W/2,372);ctx.scale(z,z);ctx.rotate(-.12);pHead(.85,bellMarks());ctx.restore();
+    glow(W/2+60,200,160,'rgba(255,210,160,.6)',.18+.08*Math.sin(t*1.3))}
+  else if(shot===2){ // the valley of Chapter I: the earth does not stop trembling, one tower goes dark, the others falter
+    if(ts<3.9)S.shake=Math.max(S.shake||0,2+3*Math.abs(Math.sin(t*3)));
+    const sx=(Math.random()-.5)*(S.shake||0),sy=(Math.random()-.5)*(S.shake||0);ctx.translate(sx,sy);
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0a0c14');g.addColorStop(.7,'#1e1c22');g.addColorStop(1,'#120e0c');ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);
+    ctx.fillStyle='#0d0f14';ctx.beginPath();ctx.moveTo(-20,330);[[120,220],[260,280],[420,190],[560,260],[720,200],[880,270],[980,240]].forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(980,H);ctx.lineTo(-20,H);ctx.fill();
+    ctx.fillStyle='#14120f';ctx.beginPath();ctx.moveTo(-20,H);ctx.lineTo(-20,400);ctx.quadraticCurveTo(480,360,980,410);ctx.lineTo(980,H);ctx.fill();
+    // the stone bridge of Chapter I, small, down in the valley
+    ctx.fillStyle='#0a0908';ctx.fillRect(380,384,200,10);for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(390+i*64,394);ctx.quadraticCurveTo(422+i*64,372,454+i*64,394);ctx.lineTo(454+i*64,410);ctx.lineTo(390+i*64,410);ctx.fill()}
+    VTOW.forEach(([x,h],i)=>{const base=i%2?330:300,top=base-h,sway=Math.sin(t*9+i)*1.5;ctx.fillStyle='#08090c';ctx.beginPath();ctx.moveTo(x-9,base);ctx.lineTo(x-5+sway,top);ctx.lineTo(x+5+sway,top);ctx.lineTo(x+9,base);ctx.closePath();ctx.fill();
+      let a;if(i===TOWER_OUT)a=t<EPI_DARK?.9:Math.max(0,.9-(t-EPI_DARK)/.8)*(Math.sin(t*40)>0?1:.3);else a=.55+.35*Math.sin(t*(5+i)+i*2)*Math.sin(t*13+i);
+      if(a>0){ctx.save();ctx.globalCompositeOperation='lighter';glow(x+sway,top-6,34,i===0?'rgba(255,170,90,.9)':'rgba(230,225,200,.9)',a);ell(x+sway,top-6,2.5,3,`rgba(255,250,235,${a})`);ctx.restore()}});
+    for(const c of VCRACKS){const k=clamp((t-c.t0)/.6,0,1);if(k<=0)continue;const n=Math.max(2,Math.ceil(c.pts.length*k));ctx.strokeStyle='#020202';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<n;i++)i?ctx.lineTo(c.pts[i][0],c.pts[i][1]):ctx.moveTo(c.pts[i][0],c.pts[i][1]);ctx.stroke();
+      if(k<1&&Math.random()<.5)burst(c.pts[n-1][0],c.pts[n-1][1],2,'#6a5a48',3,.6,.3)}}
+  else{ // the forest: a Bound Spire among the trees, its light failing; the title of the next chapter
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#05070a');g.addColorStop(1,'#0b0e0a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    const P=SPIRE,dim=lerp(P.a0,P.a1,eio(clamp(ts/P.fade,0,1))),fl=dim*Math.max(.15,.75+.25*Math.sin(t*7)*Math.sin(t*3.1)-(Math.sin(t*2.3)>.92?.6:0));
+    const light=()=>{const sg=ctx.createLinearGradient(P.x-16,0,P.x+16,0);sg.addColorStop(0,'#0c110c');sg.addColorStop(.45,'#263022');sg.addColorStop(1,'#0a0e0a');ctx.fillStyle=sg;ctx.beginPath();ctx.moveTo(P.x-16,H);ctx.lineTo(P.x-7,P.top+18);ctx.lineTo(P.x,P.top);ctx.lineTo(P.x+7,P.top+18);ctx.lineTo(P.x+16,H);ctx.closePath();ctx.fill();
+      ctx.save();ctx.globalCompositeOperation='lighter';glow(P.x,P.top+8,130,'rgba(185,207,90,.9)',.55*fl);ell(P.x,P.top+8,3,4,`rgba(240,245,210,${.9*fl})`);ctx.restore()};
+    const R=mulberry(616);for(let layer=0;layer<3;layer++){if(layer===1)light();ctx.fillStyle=['#0b0f0c','#070a08','#030504'][layer];for(let i=0;i<8;i++){const x=R()*W,w=10+layer*12+R()*14;if(layer&&Math.abs(x-P.x)<40)continue;  // the Spire stays visible between the near trunks
+      ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
+    mist(420,4,.08,6)}
   ctx.restore();
-  // particles, text
+  for(const s of EPI_SHOTS.slice(1)){const d=Math.abs(t-s);if(d<.3)fadeAll(1-d/.3)}
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
-  for(const c of ECAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0){ctx.save();ctx.translate(0,-H*.64);caption(c[2],a);ctx.restore()}}
+  for(const c of ECAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0)caption(c[2],a)}
   title(t,EPI_TITLE,'',_('Chapter III. To be continued.','Chapitre III. À suivre.'),CH_COL[3],CH_COL[3]);
-  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-22.2)/.8,0,1));
+  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-(EPI_LEN-.8))/.8,0,1));
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
 }
 function playEpilogue(cb){MUSIC.stop();MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();setTheme(4);$('skip').hidden=false;$('hdEye').textContent=_('Epilogue','Épilogue')}
@@ -2142,9 +2415,9 @@ function endEpilogue(){if(S.mode!=='epilogue')return;const cb=S.epCb;S.epCb=null
 
 
 /* ---------- combat sound effects: wind-ups, releases and impacts ---------- */
-const SFX_START={slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
-const SFX_MID={orb:'throw',toll:'tollLast',ring:'whoosh',trap:'whooshDown',chunk:'clank',shard:'whoosh',sweep:'whoosh',slam:'whoosh'};
-const SFX_HIT={slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank'};
+const SFX_START={wave:'rumble',rafter:'fallWhine',kwave:'swell',sring:'bellSoft',slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
+const SFX_MID={sring:'whoosh',orb:'throw',toll:'tollLast',ring:'whoosh',trap:'whooshDown',chunk:'clank',shard:'whoosh',sweep:'whoosh',slam:'whoosh'};
+const SFX_HIT={wave:'plant',sring:'clank',slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank'};
 function combatSfx(){
   if(S.mode!=='play'||S.paused)return;
   for(const th of S.threats){
@@ -2161,8 +2434,10 @@ function gameUpdate(dt){
   if(S.mode==='cine'&&S.cine&&gt-S.cine.t0>=CINE_LEN[S.phase][S.cine.k])endCine();
   if(S.mode==='prologue'&&gt-S.proT0>=PRO_LEN)endPrologue();
   if(S.mode==='epilogue'&&gt-S.epT0>=EPI_LEN)endEpilogue();
-  angerCheck();combatSfx();
-  if(S.mode==='play'&&S.phase===1)S.parasite=S.bossHp<=S.bossMax/2?.6+.15*Math.sin(gt*3):0;
+  combatSfx();
+  // phase I: the muffled bell under the hatch
+  if(S.phase===2&&(S.mode==='play'||(S.mode==='cine'&&S.cine&&S.cine.k==='in'))&&!S.paused){if(!S.hatchRing||gt-S.hatchRing>HATCH.toll){S.hatchRing=gt;MUSIC.fx('bellMuffled')}}
+  if(S.mode==='play'&&S.phase===1)S.parasite=S.rageN?.6+.15*Math.sin(gt*3):0;
   if(S.phase===3&&S.form===2&&(S.mode==='play'||S.mode==='ko')&&!S.paused){
     S.ecPhi+=(S.bossHp<=S.bossMax/2?1.05:.7)*dt;
   }
