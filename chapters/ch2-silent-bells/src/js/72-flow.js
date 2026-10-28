@@ -29,7 +29,7 @@ function phaseCleared(){
   if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();S.mode='card';hud();
       showCard({eye:PH[3].eye(),title:PH[3].boss(),desc:PH[3].form2(),
         go:_('Continue','Continuer'),onGo:beginPlay})});return}
-  store.set('lb-ch2-unl',String(Math.max(+store.get('lb-ch2-unl',1),Math.min(3,gpOf(id)+1))));
+  LB.store.set(LB.key('unl'),String(Math.max(+LB.store.get(LB.key('unl'),1),Math.min(3,gpOf(id)+1))));
   if(id===3){playCine(3,'out',()=>clearedCard(3));return}
   playCine(id,'out',()=>clearedCard(id));
 }
@@ -39,10 +39,10 @@ function clearedCard(id){S.mode='card';S.still=id;const next=ORDER[gpOf(id)];
 }
 function fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0')}
 function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
-  const t=S.runT,key='lb-ch2-best-'+S.dk,rec=+store.get(key,0);let isRec=false;
-  if(S.full&&(!rec||t<rec)){store.set(key,String(t));isRec=true}
+  const t=S.runT,key=LB.key('best-'+S.dk),rec=+LB.store.get(key,0);let isRec=false;
+  if(S.full&&(!rec||t<rec)){LB.store.set(key,String(t));isRec=true}
   const best=S.full?(isRec?t:rec):rec;
-  showCard({eye:_('Victory','Victoire')+' · '+S.d[LANG],title:_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
+  showCard({eye:_('Victory','Victoire')+' · '+S.d[LB.lang.cur],title:_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
     table:[[_('Time','Temps'),fmt(t)],[_('Hits taken','Coups reçus'),S.hits],[_('Perfects','Parfaits'),S.perfects],[_('Best','Record'),best?fmt(best):'—',true]],
     desc:(isRec?_('New record. ','Nouveau record. '):'')+(S.full?'':_('Records only count for runs started from the beginning.','Le record ne compte que pour une partie lancée depuis le début.')),
     go:_('Play again','Rejouer'),onGo:()=>startRun(S.dk),go2:_('Menu','Menu'),onGo2:showMenu});

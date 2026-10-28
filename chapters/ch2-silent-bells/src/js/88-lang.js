@@ -1,7 +1,7 @@
 /* ---------- language ---------- */
 function applyLang(){
-  document.documentElement.lang=LANG;
-  document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)));
+  document.documentElement.lang=LB.lang.cur;
+  document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
   $('mEye').textContent=_('Chapter II · Silent Bells','Chapitre II · Silent Bells');
   const M=[['easy',_('Easy','Facile'),_('Breathe','Respirer')],['normal',_('Normal','Normal'),_('The real fight','Le vrai combat')],['hard',_('Hard','Difficile'),_('No mercy','Sans pitié')],
     ['trial',_('Trial','Épreuve'),_('No healing','Sans soin')],['tn',_('Normal','Normal'),_('4 HP total','4 PV au total')],['th',_('Hard','Difficile'),_('4 HP total','4 PV au total')]];

@@ -1,10 +1,7 @@
-(()=>{
-'use strict';
-let LANG='en';
-/* Langue par défaut : celle de l'appareil (français si elle commence par « fr », sinon anglais) ; le choix du joueur, une fois fait, est mémorisé et prioritaire. */
-try{const nl=(navigator.languages&&navigator.languages[0])||navigator.language||'';if(/^fr/i.test(nl))LANG='fr'}catch(e){}
-try{const sv=localStorage.getItem('eb-lang');if(sv==='fr'||sv==='en')LANG=sv}catch(e){}
-function _(en,fr){return LANG==='fr'?fr:en}
+/* Sauvegarde et langue : communes à la série (shared/, clés lb-…). Anciennes clés du Chapitre I (eb-…) lues si la nouvelle manque :
+   eb-lang (langue, avec pn-lang : LB.OLD_KEYS), eb-intro, eb-end, eb-best-<mode>. */
+LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},oldPrefix:[['lb-ch1-best-','eb-best-']]});
+const _=LB._;
 const W=960,H=540,DECK=410,PX=250,BX=730;
 /* Difficulté. php/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de parade et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
    jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; mk1/mk : repères sur la jauge du Colosse (phase I / phases II-III) ;
@@ -30,7 +27,7 @@ const T={windup:.75,strike:0.5,barrier:0.333,recovery:0.7,rebound:0.42,stagger:.
 T.sw3g=.32;T.sw3w=.4;T.sw3=.3;
 T.fyt=.45;T.fyg=.15; /* fureur : annonce d'un jet, pause entre deux jets */
 const DMG_GRAB=1,DMG_PARRY=1,DMG_SWORD=1,DMG_ORB=1,DMG_FLAME=1,DMG_STAB=1,LIFT_MAX=170;
-const DISPLAY='"Big Shoulders Display",Impact,sans-serif';
+const DISPLAY=LB.FONT.display;
 
 const cv=document.getElementById('c');let ctx=cv.getContext('2d');
 const OFF=document.createElement('canvas'),OFFX=OFF.getContext('2d'); /* calque hors écran : la pétrification grise le Colosse en une seule opération */
@@ -53,7 +50,7 @@ function perfWatch(raw){
 }
 const $=id=>document.getElementById(id);
 const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live'),help:$('optHelp'),snd:$('optSnd')};
-const prefs={help:false,sound:true,music:true};
+const prefs={help:LB.store.get(LB.key('help'),'0')==='1',sound:LB.store.get(LB.key('snd'),'1')==='1',music:LB.store.get(LB.key('mus'),'1')==='1'}; /* mémorisées (lb-help, lb-snd, lb-mus) */
 let deaths=0; // défaites depuis le choix de la difficulté (Facile : propose l'aide visuelle à la 3e)
 let paused=true,pendingLore=false;
 const LORE={

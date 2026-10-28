@@ -21,7 +21,7 @@ const CINE=(()=>{
     {d:7,en:'If the Watcher falls, the fire will reach the villages.',fr:'Si le Veilleur tombe, le feu atteindra les villages.'}
   ];
   let st=null,seen=false; /* vue une fois (Passer ou fin) : mémorisé dans le navigateur quand c'est possible, sinon jusqu'au prochain chargement */
-  try{seen=localStorage.getItem('eb-intro')==='1'}catch(e){}
+  seen=LB.store.get(LB.key('intro'),'0')==='1';
   function sky(top,mid,bot){const g=cx.createLinearGradient(0,0,0,540);g.addColorStop(0,top);g.addColorStop(.6,mid);g.addColorStop(1,bot);cx.fillStyle=g;cx.fillRect(0,0,960,540)}
   function stars(t,a){cx.fillStyle='#f1e3cf';for(const s of STARS){cx.globalAlpha=a*(.35+.35*Math.sin(t*1.3+s.p));cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.283);cx.fill()}cx.globalAlpha=1}
   function embers(t,k){cx.fillStyle='#ffb060';for(const e of EMB){const y=540-((e.p+t*e.v)%580),x=e.x+Math.sin(t*.8+e.ph)*16;cx.globalAlpha=k*clamp01(Math.min(1,(540-y)/90))*clamp01(y/120+.2);cx.beginPath();cx.arc(x,y,e.s,0,6.283);cx.fill()}cx.globalAlpha=1}
@@ -119,7 +119,7 @@ const CINE=(()=>{
   }
   function finish(){
     if(!st)return;const d=st.done;cancelAnimationFrame(st.raf);st=null;box.hidden=true;
-    seen=true;try{localStorage.setItem('eb-intro','1')}catch(e){}
+    seen=true;LB.store.set(LB.key('intro'),'1');
     try{d&&d()}catch(e){}
   }
   function play(done){

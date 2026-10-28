@@ -334,11 +334,45 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 <script>
 (()=>{
 'use strict';
-let LANG='en';
-/* Langue par défaut : celle de l'appareil (français si elle commence par « fr », sinon anglais) ; le choix du joueur, une fois fait, est mémorisé et prioritaire. */
-try{const nl=(navigator.languages&&navigator.languages[0])||navigator.language||'';if(/^fr/i.test(nl))LANG='fr'}catch(e){}
-try{const sv=localStorage.getItem('eb-lang');if(sv==='fr'||sv==='en')LANG=sv}catch(e){}
-function _(en,fr){return LANG==='fr'?fr:en}
+/* ---------- shared/ : commun à la série (voir shared/NOTES.md). Un seul objet, LB, dans l'IIFE du chapitre ---------- */
+const LB={};
+/* Polices du canvas : mêmes familles que --font-display / --font-body du CSS (build/fonts.css, inlinées par le build) */
+LB.FONT={display:'"Big Shoulders Display",Impact,sans-serif',body:'"DM Sans",system-ui,sans-serif'};
+/* ---------- sauvegarde : clés lb-… ----------
+   Clés communes à la série : lb-<nom> pour les noms de COMMON ; propres à un chapitre : lb-<id>-<nom> (LB.key).
+   LB.store.get lit la nouvelle clé, sinon les anciennes dans l'ordre (OLD_KEYS communes, puis celles du chapitre, puis
+   les préfixes du chapitre) et recopie la première trouvée dans la nouvelle. Les anciennes clés ne sont jamais effacées ni écrites. */
+LB.COMMON=['lang','snd','mus','help'];
+LB.OLD_KEYS={'lb-lang':['pn-lang','eb-lang'],'lb-snd':['db-optSnd'],'lb-mus':['db-optMus'],'lb-help':['db-optHelp']};
+LB.id='';LB.old={};LB.oldPrefix=[];
+LB.key=name=>LB.COMMON.includes(name)?'lb-'+name:'lb-'+LB.id+'-'+name;
+LB.oldKeys=k=>{const o=(LB.OLD_KEYS[k]||[]).concat(LB.old[k]||[]);
+  for(const [n,a] of LB.oldPrefix)if(k.startsWith(n))o.push(a+k.slice(n.length));return o};
+LB.store={get(k,d){try{let v=localStorage.getItem(k);
+  if(v==null)for(const o of LB.oldKeys(k)){v=localStorage.getItem(o);if(v!=null){try{localStorage.setItem(k,v)}catch(e){}break}}
+  return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+/* À appeler en tête du chapitre, avant toute lecture : id (préfixe lb-<id>-), old ({nouvelle clé:[anciennes]}),
+   oldPrefix ([[début de la nouvelle clé, début de l'ancienne]], pour les records). Migre au démarrage toutes les clés
+   connues (et chaque ancienne clé à préfixe présente), puis fixe la langue. */
+LB.setup=({id,old={},oldPrefix=[]})=>{LB.id=id;LB.old=old;LB.oldPrefix=oldPrefix;
+  try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
+    const want=Object.keys(LB.OLD_KEYS).concat(Object.keys(old));
+    for(const [n,a] of oldPrefix)ks.filter(k=>k.startsWith(a)).forEach(k=>want.push(n+k.slice(a.length)));
+    want.forEach(k=>LB.store.get(k))}catch(e){}
+  LB.lang.init()};
+/* ---------- langue et texte ----------
+   Choix mémorisé (lb-lang) prioritaire ; sinon la langue de l'appareil (français si elle commence par « fr »), sinon anglais.
+   LB.LANGS : ordre des boutons de langue (celui du Chapitre I). */
+LB.LANGS=['en','fr'];
+LB.lang={cur:'en',
+  init(){let l='en';try{const nl=(navigator.languages&&navigator.languages[0])||navigator.language||'';if(/^fr/i.test(nl))l='fr'}catch(e){}
+    const v=LB.store.get(LB.key('lang'),null);if(LB.LANGS.includes(v))l=v;return LB.lang.cur=l},
+  set(l){if(!LB.LANGS.includes(l))return;LB.lang.cur=l;LB.store.set(LB.key('lang'),l)}};
+LB._=(en,fr)=>LB.lang.cur==='fr'?fr:en;
+/* Sauvegarde et langue : communes à la série (shared/, clés lb-…). Anciennes clés du Chapitre I (eb-…) lues si la nouvelle manque :
+   eb-lang (langue, avec pn-lang : LB.OLD_KEYS), eb-intro, eb-end, eb-best-<mode>. */
+LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},oldPrefix:[['lb-ch1-best-','eb-best-']]});
+const _=LB._;
 const W=960,H=540,DECK=410,PX=250,BX=730;
 /* Difficulté. php/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de parade et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
    jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; mk1/mk : repères sur la jauge du Colosse (phase I / phases II-III) ;
@@ -364,7 +398,7 @@ const T={windup:.75,strike:0.5,barrier:0.333,recovery:0.7,rebound:0.42,stagger:.
 T.sw3g=.32;T.sw3w=.4;T.sw3=.3;
 T.fyt=.45;T.fyg=.15; /* fureur : annonce d'un jet, pause entre deux jets */
 const DMG_GRAB=1,DMG_PARRY=1,DMG_SWORD=1,DMG_ORB=1,DMG_FLAME=1,DMG_STAB=1,LIFT_MAX=170;
-const DISPLAY='"Big Shoulders Display",Impact,sans-serif';
+const DISPLAY=LB.FONT.display;
 
 const cv=document.getElementById('c');let ctx=cv.getContext('2d');
 const OFF=document.createElement('canvas'),OFFX=OFF.getContext('2d'); /* calque hors écran : la pétrification grise le Colosse en une seule opération */
@@ -387,7 +421,7 @@ function perfWatch(raw){
 }
 const $=id=>document.getElementById(id);
 const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live'),help:$('optHelp'),snd:$('optSnd')};
-const prefs={help:false,sound:true,music:true};
+const prefs={help:LB.store.get(LB.key('help'),'0')==='1',sound:LB.store.get(LB.key('snd'),'1')==='1',music:LB.store.get(LB.key('mus'),'1')==='1'}; /* mémorisées (lb-help, lb-snd, lb-mus) */
 let deaths=0; // défaites depuis le choix de la difficulté (Facile : propose l'aide visuelle à la 3e)
 let paused=true,pendingLore=false;
 const LORE={
@@ -588,7 +622,7 @@ function deathCard(){
     el.go2.hidden=false;
   }
 }
-el.go2.addEventListener('click',()=>{prefs.help=el.help.checked=true;start()});
+el.go2.addEventListener('click',()=>{prefs.help=el.help.checked=true;LB.store.set(LB.key('help'),'1');start()});
 function showEnd(){
   const win=G.mode==='won';
   el.eye.textContent=win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite');
@@ -2982,9 +3016,8 @@ function rBoss(dt){
 }
 function fmtT(t){const m=Math.floor(t/60),r=t-m*60;return m+':'+(r<10?'0':'')+r.toFixed(1)}
 function runTable(){
-  const tot=RUN.t,key='eb-best-'+RUN.name;let best=0,rec=false;
-  try{best=parseFloat(localStorage.getItem(key))||0}catch(e){}
-  if(!best||tot<best){rec=true;best=tot;try{localStorage.setItem(key,String(tot))}catch(e){}}
+  const tot=RUN.t,key=LB.key('best-'+RUN.name);let best=parseFloat(LB.store.get(key,'0'))||0,rec=false;
+  if(!best||tot<best){rec=true;best=tot;LB.store.set(key,String(tot))}
   const a=RUN.st[1]||{p:0,h:0},b=RUN.st[2]||{p:0,h:0};
   const C=[[_('Total time','Temps total'),fmtT(tot)],[_('Hits taken','Coups subis'),a.h+b.h+R.taken],[_('Attempts','Essais'),RUN.n],
     [_('Phase I','Phase I'),fmtT(RUN.pt[0])],[_('Phase II','Phase II'),fmtT(RUN.pt[1])],[_('Phase III','Phase III'),fmtT(RUN.pt[2])],
@@ -3002,7 +3035,7 @@ function rEnd(){
     return;
   }
   const sp=R.mode==='space',win=R.mode==='won'||sp;
-  if(sp){try{localStorage.setItem('eb-end','1')}catch(e){}updNext()}
+  if(sp){LB.store.set(LB.key('end'),'1');updNext()}
   el.ov.classList.toggle('clear',sp);
   el.eye.textContent=sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III');
   el.title.textContent=sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.');
@@ -4204,9 +4237,10 @@ cv.addEventListener('pointerdown',e=>{e.preventDefault();press()});
 el.ward.addEventListener('pointerdown',e=>{e.preventDefault();press()});
 el.ward.addEventListener('click',e=>{if(e.detail===0)press()});
 el.go.addEventListener('click',start);
-el.help.addEventListener('change',()=>{prefs.help=el.help.checked});
-el.snd.addEventListener('change',()=>{prefs.sound=el.snd.checked;if(prefs.sound)ensureAudio()});
-$('optMus').addEventListener('change',()=>{prefs.music=$('optMus').checked;if(prefs.music)ensureAudio()});
+el.help.checked=prefs.help;el.snd.checked=prefs.sound;$('optMus').checked=prefs.music;
+el.help.addEventListener('change',()=>{prefs.help=el.help.checked;LB.store.set(LB.key('help'),prefs.help?'1':'0')});
+el.snd.addEventListener('change',()=>{prefs.sound=el.snd.checked;LB.store.set(LB.key('snd'),prefs.sound?'1':'0');if(prefs.sound)ensureAudio()});
+$('optMus').addEventListener('change',()=>{prefs.music=$('optMus').checked;LB.store.set(LB.key('mus'),prefs.music?'1':'0');if(prefs.music)ensureAudio()});
 const pauseEl=$('pause');
 const menuEl=$('menu');
 function setPause(on){
@@ -4269,7 +4303,7 @@ function applyDiff(name){
   T.recovery=BASEW.rec*rm;DG.rec=BASEW.drec*rm;R_T.rec=BASEW.rrec*rm;
   document.querySelectorAll('#phases button').forEach((b,i)=>{b.disabled=!!d.trial;b.title=d.trial?_('Not available in the trial','Indisponible dans l\'épreuve'):''});
   lastP=lastB=-1;
-  prefs.help=el.help.checked=false;deaths=0;tries=[0,0,0,0];cntS=null;
+  prefs.help=el.help.checked=!d.noHelp&&LB.store.get(LB.key('help'),'0')==='1';deaths=0; /* aide mémorisée (lb-help), toujours coupée là où elle est masquée */tries=[0,0,0,0];cntS=null;
   el.help.closest('label').hidden=!!d.noHelp;
 }
 function trialMenu(on){updBest();$('mphM').hidden=on;$('mphT').hidden=!on;$('trialNote').hidden=!on;try{(on?$('mphT').querySelector('button'):$('mphM').querySelector('[data-diff=normal]')).focus({preventScroll:true})}catch(e){}}
@@ -4538,16 +4572,16 @@ const UIT=[
 ];
 const UIA=[['#phases','Fight phases','Phases du combat'],['.bars','Hit points','Points de vie'],['#hpP',"The Watcher's hit points",'Points de vie du Veilleur'],['#hpB',"The Colossus's hit points",'Points de vie du Colosse'],['#menu .mph','Choose difficulty','Choisir la difficulté']];
 function applyLang(){updNext();updBest();
-  document.documentElement.lang=LANG;
+  document.documentElement.lang=LB.lang.cur;
   UIT.forEach(([sel,en,fr,node])=>{const e=document.querySelector(sel);if(!e)return;const t=_(en,fr);
     if(node==='last'){e.lastChild.textContent=t}else if(node==='first'){e.firstChild.textContent=t}else e.textContent=t});
   UIA.forEach(([sel,en,fr])=>{const e=document.querySelector(sel);if(e)e.setAttribute('aria-label',_(en,fr))});
-  document.querySelectorAll('#langs button,#gateLangs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)));
+  document.querySelectorAll('#langs button,#gateLangs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
   try{setPhaseUI(R?3:Q?2:1)}catch(e){}
   try{el.help.closest('label').hidden=!!(DIFF&&DIFF.noHelp)}catch(e){}
 }
 document.querySelectorAll('#langs button,#gateLangs button').forEach(b=>b.addEventListener('click',()=>{
-  LANG=b.dataset.lang;try{localStorage.setItem('eb-lang',LANG)}catch(e){}applyLang();b.blur();
+  LB.lang.set(b.dataset.lang);applyLang();b.blur();
 }));
 applyLang();
 /* ---------- boot ---------- */
@@ -4580,7 +4614,7 @@ const CINE=(()=>{
     {d:7,en:'If the Watcher falls, the fire will reach the villages.',fr:'Si le Veilleur tombe, le feu atteindra les villages.'}
   ];
   let st=null,seen=false; /* vue une fois (Passer ou fin) : mémorisé dans le navigateur quand c'est possible, sinon jusqu'au prochain chargement */
-  try{seen=localStorage.getItem('eb-intro')==='1'}catch(e){}
+  seen=LB.store.get(LB.key('intro'),'0')==='1';
   function sky(top,mid,bot){const g=cx.createLinearGradient(0,0,0,540);g.addColorStop(0,top);g.addColorStop(.6,mid);g.addColorStop(1,bot);cx.fillStyle=g;cx.fillRect(0,0,960,540)}
   function stars(t,a){cx.fillStyle='#f1e3cf';for(const s of STARS){cx.globalAlpha=a*(.35+.35*Math.sin(t*1.3+s.p));cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.283);cx.fill()}cx.globalAlpha=1}
   function embers(t,k){cx.fillStyle='#ffb060';for(const e of EMB){const y=540-((e.p+t*e.v)%580),x=e.x+Math.sin(t*.8+e.ph)*16;cx.globalAlpha=k*clamp01(Math.min(1,(540-y)/90))*clamp01(y/120+.2);cx.beginPath();cx.arc(x,y,e.s,0,6.283);cx.fill()}cx.globalAlpha=1}
@@ -4678,7 +4712,7 @@ const CINE=(()=>{
   }
   function finish(){
     if(!st)return;const d=st.done;cancelAnimationFrame(st.raf);st=null;box.hidden=true;
-    seen=true;try{localStorage.setItem('eb-intro','1')}catch(e){}
+    seen=true;LB.store.set(LB.key('intro'),'1');
     try{d&&d()}catch(e){}
   }
   function play(done){
@@ -4813,9 +4847,9 @@ const OUTRO=(()=>{
 $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();OUTRO.play(()=>{})});
 
 /* Chapitre II : verrouillé tant que la vraie fin n'a pas été vue (mémorisé dans le navigateur, quand c'est possible) */
-function endSeen(){try{return localStorage.getItem('eb-end')==='1'}catch(e){return false}}
+function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
 /* Épreuve du feu : meilleur temps affiché sous chaque difficulté (mémorisé dans le navigateur) */
-function updBest(){for(const n of ['tn','th']){const sp=document.querySelector('#mphT [data-diff='+n+'] span');if(!sp)continue;let v=0;try{v=parseFloat(localStorage.getItem('eb-best-'+n))||0}catch(e){}sp.textContent=v?'🏆 '+fmtT(v):_('No record yet','Pas encore de record')}}
+function updBest(){for(const n of ['tn','th']){const sp=document.querySelector('#mphT [data-diff='+n+'] span');if(!sp)continue;const v=parseFloat(LB.store.get(LB.key('best-'+n),'0'))||0;sp.textContent=v?'🏆 '+fmtT(v):_('No record yet','Pas encore de record')}}
 function updNext(){const b=$('mNext'),ok=endSeen();try{$('outroBtn').hidden=!ok}catch(e){}
   const tb=document.querySelector('#mphM [data-diff=trial]');tb.setAttribute('aria-disabled',String(!ok)); /* Épreuve du feu : débloquée par la vraie fin */
   tb.querySelector('b').textContent=ok?_('Trial by Fire','Épreuve du feu'):_('🔒 Trial by Fire','🔒 Épreuve du feu');

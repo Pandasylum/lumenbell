@@ -77,7 +77,7 @@ function deathCard(){
     el.go2.hidden=false;
   }
 }
-el.go2.addEventListener('click',()=>{prefs.help=el.help.checked=true;start()});
+el.go2.addEventListener('click',()=>{prefs.help=el.help.checked=true;LB.store.set(LB.key('help'),'1');start()});
 function showEnd(){
   const win=G.mode==='won';
   el.eye.textContent=win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite');

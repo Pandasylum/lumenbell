@@ -2,6 +2,10 @@
 
 Journal daté. Une décision validée n'est pas remise en question dans une autre session sans accord de Kevin.
 
+## Index des fichiers de décision (`docs/decisions/`)
+Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier ici.
+- [2026-10-28 · éléments communs : décisions de Kevin sur l'audit (barre de récupération, Épreuve, aide, phase I, respiration, titre, langue, repère d'aide, libellé de Difficile) et session `engine/shared` (`shared/`, `LB`, clés `lb-…` du Chapitre I, options mémorisées, Chapitre II en morceaux)](docs/decisions/2026-10-28-engine-shared.md)
+
 ## 2026-10-26 / 27 – Refonte du lore et des textes du Chapitre I
 - Le secret (les Scellés sont d'anciens Veilleurs) n'est **jamais dit** ; un fragment par chapitre, davantage dans le premier.
 - Intro : « membre d'un ordre qui protège les Flèches liées. Sa lanterne vit avec lui. » (ambivalence voulue). Carton 4 : « une chaîne cède » (jamais « brisée »). Carton 5 : « le feu atteindra les villages » (f minuscule : l'élément est la braise).

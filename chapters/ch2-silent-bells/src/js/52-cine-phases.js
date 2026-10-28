@@ -16,20 +16,20 @@ function fadeAll(a,c){if(a<=0)return;ctx.fillStyle=`rgba(${c||'0,0,0'},${clamp(a
 /* chapter colours (docs/CH2-SPEC.md): II tide turquoise, III roots moss green leaning yellow */
 const CH_COL={2:'#4fe0cc',3:'#b9cf5a'};
 function title(t,t0,eye,name,col,ncol){if(t<t0)return;const a=clamp((t-t0)/.5,0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
-  ctx.font='700 16px "DM Sans",system-ui,sans-serif';ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,H*.42-46+(1-a)*8);
-  ctx.font='800 64px "Big Shoulders Display",Impact,sans-serif';{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px "Big Shoulders Display",Impact,sans-serif`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
+  ctx.font='700 16px '+LB.FONT.body;ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,H*.42-46+(1-a)*8);
+  ctx.font='800 64px '+LB.FONT.display;{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px ${LB.FONT.display}`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
   ctx.fillStyle=col;ctx.fillRect(W/2-60*a,H*.42+18,120*a,3);ctx.restore()}
 /* end of the intro: the series name large, the chapter below it, small, in the chapter colour (as in Ember Bridge).
    Vertical layout from the measured glyph boxes, so the two lines never touch whatever the font fallback. */
 const SERIES_T={size:96,sub:17,gap:22,y:.36};   // y: baseline of the name (fraction of the height), above the Watcher's lantern
 function seriesTitle(t,t0,name,sub,col){if(t<t0)return;const a=clamp((t-t0)/.5,0,1),dy=(1-a)*8;ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
   const N=name.toUpperCase(),U=sub.toUpperCase().split('').join(String.fromCharCode(8202));
-  ctx.font=`800 ${SERIES_T.size}px "Big Shoulders Display",Impact,sans-serif`;{const mw=ctx.measureText(N).width;if(mw>W-120)ctx.font=`800 ${Math.floor(SERIES_T.size*(W-120)/mw)}px "Big Shoulders Display",Impact,sans-serif`}
+  ctx.font=`800 ${SERIES_T.size}px ${LB.FONT.display}`;{const mw=ctx.measureText(N).width;if(mw>W-120)ctx.font=`800 ${Math.floor(SERIES_T.size*(W-120)/mw)}px ${LB.FONT.display}`}
   const mN=ctx.measureText(N),yN=H*SERIES_T.y+dy;
   ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(N,W/2+3,yN+3);ctx.fillStyle='#f4eee4';ctx.fillText(N,W/2,yN);
-  ctx.font=`700 ${SERIES_T.sub}px "DM Sans",system-ui,sans-serif`;const mS=ctx.measureText(U),yS=yN+(mN.actualBoundingBoxDescent||0)+3+SERIES_T.gap+(mS.actualBoundingBoxAscent||SERIES_T.sub*.72);
+  ctx.font=`700 ${SERIES_T.sub}px ${LB.FONT.body}`;const mS=ctx.measureText(U),yS=yN+(mN.actualBoundingBoxDescent||0)+3+SERIES_T.gap+(mS.actualBoundingBoxAscent||SERIES_T.sub*.72);
   ctx.fillStyle=col;ctx.fillText(U,W/2,yS);ctx.fillRect(W/2-60*a,yS+(mS.actualBoundingBoxDescent||4)+12,120*a,3);ctx.restore()}
-function caption(txt,a){if(a<=0)return;ctx.save();ctx.globalAlpha=clamp(a,0,1);ctx.textAlign='center';ctx.font='italic 500 22px "DM Sans",system-ui,sans-serif';
+function caption(txt,a){if(a<=0)return;ctx.save();ctx.globalAlpha=clamp(a,0,1);ctx.textAlign='center';ctx.font='italic 500 22px '+LB.FONT.body;
   // too wide for the screen: two lines, cut at the space nearest the middle
   let L=[txt];if(ctx.measureText(txt).width>W-120){let c=-1;for(let i=0;i<txt.length;i++)if(txt[i]===' '&&(c<0||Math.abs(i-txt.length/2)<Math.abs(c-txt.length/2)))c=i;if(c>0)L=[txt.slice(0,c),txt.slice(c+1)]}
   L.forEach((l,i)=>{const y=H*.78+(i-(L.length-1)/2)*28;ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(l,W/2+2,y+2);ctx.fillStyle='#efe7ff';ctx.fillText(l,W/2,y)});ctx.restore()}

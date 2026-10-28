@@ -56,7 +56,7 @@ function draw(){
   ctx.restore();
   drawHelp();
   // pops
-  ctx.textAlign='center';ctx.font='800 26px "Big Shoulders Display",Impact,sans-serif';
+  ctx.textAlign='center';ctx.font='800 26px '+LB.FONT.display;
   for(const p of S.pops){const t=gt-p.t0;ctx.globalAlpha=1-t;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillText(p.txt.toUpperCase(),p.x+2,p.y-t*40+2);ctx.fillStyle=p.c;ctx.fillText(p.txt.toUpperCase(),p.x,p.y-t*40)}
   ctx.globalAlpha=1;ctx.restore();
   // vignette & hurt flash

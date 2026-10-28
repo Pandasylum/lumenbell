@@ -1,21 +1,14 @@
 const $=id=>document.getElementById(id);
-/* save keys: common lb-* (lb-lang, lb-snd, lb-mus, lb-help) and per chapter lb-ch2-* (unlock, records).
-   Read the new key first, else the old one (pn-/db-, eb-lang from Chapter I), then write it to the new key. */
-const OLD_KEYS={'lb-lang':['pn-lang','eb-lang'],'lb-snd':['db-optSnd'],'lb-mus':['db-optMus'],'lb-help':['db-optHelp'],'lb-ch2-unl':['db-unl']};
-const oldKeys=k=>OLD_KEYS[k]||(k.startsWith('lb-ch2-best-')?['db-best-'+k.slice(12)]:[]);
-const store={get(k,d){try{let v=localStorage.getItem(k);
-  if(v==null)for(const o of oldKeys(k)){v=localStorage.getItem(o);if(v!=null){try{localStorage.setItem(k,v)}catch(e){}break}}
-  return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
-  Object.keys(OLD_KEYS).concat(ks.filter(o=>o.startsWith('db-best-')).map(o=>'lb-ch2-best-'+o.slice(8))).forEach(k=>store.get(k))}catch(e){}
-const OPT_KEY={optSnd:'lb-snd',optMus:'lb-mus',optHelp:'lb-help'};
+/* save keys and language: common to the series (shared/, LB.store, LB.key, LB.lang). Common keys lb-lang, lb-snd, lb-mus,
+   lb-help (old pn-lang, eb-lang, db-opt*: LB.OLD_KEYS); this chapter's keys lb-ch2-* (unlock, records), old db-unl, db-best-*. */
+LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']]});
+const OPT_KEY={optSnd:LB.key('snd'),optMus:LB.key('mus'),optHelp:LB.key('help')};
 /* UNLOCK_ALL: true = the three phases are open from the start (phase track), as in Ember Bridge; the difficulties and the
    Trial are always open. false = progressive unlock: a phase opens once the previous one is cleared (key lb-ch2-unl, still
    written on every clear). Disabled for testing; idea to extend to the whole series later (common screen). */
 const UNLOCK_ALL=true;
-const unlocked=()=>UNLOCK_ALL?3:+store.get('lb-ch2-unl',1);
-let LANG='fr';{const v=store.get('lb-lang',null);if(v==='fr'||v==='en')LANG=v}
-const _=(en,fr)=>LANG==='fr'?fr:en;
+const unlocked=()=>UNLOCK_ALL?3:+LB.store.get(LB.key('unl'),1);
+const _=LB._;
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;

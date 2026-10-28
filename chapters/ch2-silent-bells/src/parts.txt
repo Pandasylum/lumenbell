@@ -3,6 +3,7 @@ page/head.html
 page/style.css
 page/body.html
 js/00-open.js
+@shared
 js/02-core.js
 js/04-audio-sfx.js
 js/08-effects.js

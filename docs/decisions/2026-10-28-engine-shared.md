@@ -1,0 +1,24 @@
+# 2026-10-28 – Éléments communs : décisions de Kevin et session `engine/shared`
+
+## 1. Décisions de Kevin sur l'audit (`docs/COMMUN.md` § 5) — **validées**
+| # | Décision | Où et quand l'appliquer |
+|---|---|---|
+| 1 | **Barre de récupération toujours visible** (en jeu, dans les trois phases, dans les deux chapitres ; plus liée à l'aide visuelle au Chapitre I) | Session 3 `engine/hero-states` (barre commune `LB.drawRecoveryBar`). Pas codée ici : changement de rendu. |
+| 2 | **Épreuve : 4 PV pour tout le parcours, aucun soin entre les phases** (règle de la bible, celle du Chapitre II) ; **ouverte** pendant les tests (plus verrouillée par la vraie fin au Chapitre I) | Session 3 (`HERO_DIFF.trial`) et session 6 `menu/common` (accès, texte de `#trialNote`). Pas codée ici. |
+| 3 | **Aide visuelle décochée par défaut**, proposée à la 3ᵉ défaite en Facile (comme au Chapitre I), **activable partout** (Difficile compris) | Mémorisation `lb-help` faite ici (décochée sans clé). Reste à faire en session 6 : case disponible en Difficile au Chapitre I (`noHelp`), plus d'aide cochée d'office en Facile au Chapitre II, proposition à la 3ᵉ défaite au Chapitre II. |
+| 4 | **Phase I du Chapitre I : une attaque bloquée renvoie à `ready`**, comme partout ailleurs | Session 3, à valider en jeu (ressenti du pont). Pas codée ici. |
+| 5 | **Respiration du Veilleur gardée** (balancement et pans du Chapitre II) | Session 4 `engine/watcher`. Pas codée ici. |
+| 6 | **Titre de fin d'intro comme au Chapitre I** (« LUMEN » couleur du chapitre + « BELL » crème, 96 px ; ligne du chapitre en Big Shoulders 26 px dessous) | Session 5 `engine/cine` (`LB.title`) ; le contrôle sans chevauchement de `tests/ch2-title.js` est à garder. La règle du titre de fin d'outro reste à trancher. Pas codée ici : changement de rendu. |
+| 7 | **Langue du navigateur par défaut** (sinon anglais), **ordre des boutons du Chapitre I** (EN, FR) | **Codée ici** : `LB.lang.init`, `LB.LANGS`. Le Chapitre II n'est plus en français par défaut ; ses boutons passent dans l'ordre EN, FR. |
+| 8 | **Repère d'aide du Chapitre I** (barre au-dessus de la tête en Normal, cercle qui se resserre en Facile) | Session 6 (`LB.cue`). Pas codée ici. |
+| 9 | **Libellé de la difficulté Difficile propre au chapitre** (Facile et Normal communs) | Déjà le cas ; table du chapitre (`CHAPTER.sub.hard`) en session 6. |
+
+## 2. Session `engine/shared` (branche `engine/shared`)
+- **Dossier `shared/`** : morceaux `.js` communs, listés dans `shared/parts.txt`, insérés par `build/assemble.py` à la ligne `@shared` du `parts.txt` de chaque chapitre, dans l'IIFE du chapitre. Pas de modules ES (décision du 27 octobre). Un seul nom commun : `LB`. Détails : `shared/NOTES.md`.
+- **Chapitre II en morceaux** comme le Chapitre I (`src/parts.txt`, 30 morceaux coupés sur les commentaires de section) ; l'ancienne page `src/silent-bells.html` est retirée (son contenu = la concaténation exacte, vérifiée). `legacy/` inchangé. Couvre la partie « source en plusieurs fichiers » de la session D `ch2/perf`.
+- **API** : `LB._(en, fr)`, `LB.lang` (`cur`, `init`, `set`), `LB.LANGS`, `LB.store` (`get`, `set`), `LB.key(nom)`, `LB.setup({id, old, oldPrefix})`, `LB.FONT` (`display`, `body`). Les chapitres font `const _=LB._;` et lisent `LB.lang.cur`.
+- **Clés** : communes `lb-lang`, `lb-snd`, `lb-mus`, `lb-help` ; propres `lb-<id>-<nom>`. Anciennes clés communes lues dans le même ordre dans les deux chapitres : `pn-lang` puis `eb-lang` ; `db-optSnd`, `db-optMus`, `db-optHelp` (lues aussi par le Chapitre I : sans effet s'il n'y en a pas). Anciennes clés jamais effacées ni écrites.
+- **Chapitre I migré** : `eb-lang` → `lb-lang`, `eb-intro` → `lb-ch1-intro`, `eb-end` → `lb-ch1-end`, `eb-best-<mode>` → `lb-ch1-best-<mode>`. Ferme la demande du 27 octobre (`DEMANDES.md`).
+- **Options mémorisées dans les deux chapitres** : Son (`lb-snd`), Musique (`lb-mus`), Aide (`lb-help`). Au Chapitre I, l'aide n'est plus remise à zéro à chaque choix de difficulté : elle reprend la valeur mémorisée, et reste coupée là où la case est masquée (Difficile, Épreuve) sans que `lb-help` change ; « Activer l'aide » (3ᵉ défaite en Facile) l'écrit aussi.
+- **Polices du canvas** : `LB.FONT` ; le Chapitre I garde `DISPLAY` (= `LB.FONT.display`), le Chapitre II n'a plus de chaînes recopiées. Mêmes chaînes qu'avant : rendu identique.
+- **Rendu, gameplay, textes : inchangés**, sauf la décision 7 (langue par défaut et ordre des boutons du Chapitre II). Les deux `dist` changent (nouvelles références) ; captures avant/après identiques au pixel (voir `NOTES.md`, `tests/visual-shots.js`).

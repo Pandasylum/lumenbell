@@ -267,6 +267,8 @@ Chaque session : une branche, une PR, tests verts, `NOTES.md` et `DECISIONS.md` 
 Ordre des dépendances : 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 ; 4 et 5 peuvent s'inverser. Les sessions de chapitre en cours (Ch. II étape C « visuels ») doivent passer **avant** la session 4 ou attendre après la session 6, pour ne pas redessiner un Veilleur ou des cinématiques qui vont être remplacés.
 
 ## 5. Décisions à prendre par Kevin
+**Tranchées le 28 octobre 2026** : voir `docs/decisions/2026-10-28-engine-shared.md` (réponses et session où chacune s'applique). La session 1 `engine/shared` est faite.
+
 1. Barre de récupération : toujours visible (Ch. II) ou seulement avec l'aide (Ch. I) ?
 2. Épreuve : 4 PV pour tout le parcours et aucun soin (bible, Ch. II) ou PV de la difficulté et +1 PV entre les phases (Ch. I) ? Épreuve verrouillée par la vraie fin (Ch. I) ou ouverte ?
 3. Aide visuelle : décochée par défaut et proposée à la 3ᵉ défaite en Facile (Ch. I), ou cochée d'office en Facile (Ch. II) ? Disponible en Difficile ?
