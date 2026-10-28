@@ -147,3 +147,5 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - Onomatopées : `ONO` = `block` (`CLANG`), `final` (`KRAKOOM`), `crush` (`KRAAAK`) ; plus de `hit`.
 - Lueur du miroir : `MIRROR_GLOW`, `mirrorLight()` (dans `drawVoice`, visage de la vraie Voix seulement).
 - Bâton sans lanterne : `STAFF` (dans `bg3`). Plus de `bossBar` (transformation de la phase III).
+- Choc de la riposte : `SHOCK` (valeurs du Chapitre I), `S.hitstop` (dans `update`, le temps du jeu `gt` recule d'autant : arrêt sur image), `S.flashHit`, `S.recoil`, `S.rings`, `S.bossHurtT` ; son `sfx.thud`. Le corps du boss est décalé et incliné dans `draw()` (fonction `body`).
+- `retryPhase()` repart toujours de la forme I.
