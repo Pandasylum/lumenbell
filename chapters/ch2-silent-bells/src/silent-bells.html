@@ -375,7 +375,8 @@ function musTick(){
 /* ---------- particles & pops ---------- */
 function burst(x,y,n,col,spd,life,g){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.3+Math.random())*spd;S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-(g?spd*.4:0),g:g||0,t0:gt,life:life*(.6+Math.random()*.6),c:col,r:1.5+Math.random()*2.2})}}
 /* floating text: only onomatopoeia (same words in both languages, as in Ember Bridge); no announcement words */
-const ONO={block:'CLANG',hit:'BAM',final:'KRAKOOM',crush:'KRAAAK'};
+/* onomatopoeia: no word on an ordinary riposte (as in Ember Bridge); the Voice only cries, by sound */
+const ONO={block:'CLANG',final:'KRAKOOM',crush:'KRAAAK'};
 function pop(txt,col,x,y){S.pops.push({txt,c:col,x:x||HX+10,y:y||GY-150,t0:gt})}
 
 /* ---------- patterns ---------- */
@@ -447,7 +448,7 @@ function hurt(th){
 function damageBoss(n){
   S.bossHp=Math.max(0,S.bossHp-n);S.bossFlash=gt;S.shake=8;play('bossHit');MUSIC.fx([null,'bellHit','crackGlass','creature'][S.phase]);
   const p=bossCore();burst(p.x,p.y,26,S.phase===1?'#cfeee6':S.phase===2?'#e2d2ff':'#b8fff4',7,.7);
-  pop(ONO.hit,'#fff',p.x,p.y-60);hud();
+  hud();
   if(S.bossHp<=0){S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
     say([null,_('The Rust King collapses.','Le Roi de Rouille s\'effondre.'),_('The Hollow Voice\'s mirror shatters.','Le miroir de la Voix Creuse éclate.'),_('The lantern goes dark.','La lanterne s\'éteint.')][S.phase]);
     }
@@ -682,6 +683,8 @@ const R4=mulberry(44),FARROCK=[...Array(6)].map(()=>({x:R4()*W,w:20+R4()*50,h:6+
 /* the moon over the wreck (end of phase II) and the reefs (phase III) */
 const MOON={x:720,y:78,r:26};
 /* wrecks on the reef (x, keel y, scale, tilt) */
+/* the lanternless staff in its heap of debris (phase III): heap centre x, top offset dx, visible height h */
+const STAFF={x:150,dx:8,h:58};
 const WRECKS=[[200,GY-34,.7,.08],[470,GY-22,.5,-.12]];
 function wreck(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(s,s);ctx.fillStyle='#070b0c';ctx.beginPath();ctx.moveTo(-90,-30);ctx.quadraticCurveTo(-40,10,60,0);ctx.lineTo(96,-38);ctx.lineTo(80,-36);ctx.quadraticCurveTo(0,-14,-80,-40);ctx.closePath();ctx.fill();
   ctx.strokeStyle='#070b0c';ctx.lineWidth=5;for(let i=0;i<5;i++){const xx=-60+i*28;ctx.beginPath();ctx.moveTo(xx,-14);ctx.quadraticCurveTo(xx-6,-50,xx+4,-70+i*4);ctx.stroke()}ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(10,-20);ctx.lineTo(24,-130);ctx.stroke();ctx.restore()}
@@ -709,9 +712,13 @@ function bg3(){
   ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=2;for(const c of CRACKS){ctx.beginPath();c.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke()}
   for(const c of CRACKS){const p=c[2];ell(p[0],p[1],18,3,`rgba(160,230,220,${.08+.05*Math.sin(rt+p[0])})`)}
   ctx.strokeStyle='rgba(150,235,225,.28)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,GY-6);ctx.lineTo(W,GY-6);ctx.stroke();
-  // a Watcher's staff without its lantern, wedged against the mooring rock at the tower's foot
-  ctx.lineCap='round';ctx.strokeStyle='#3a2a1a';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(900,GY-2);ctx.lineTo(921,GY-112);ctx.stroke();
-  ctx.strokeStyle='#2a3238';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(921,GY-112);ctx.lineTo(917,GY-124);ctx.moveTo(921,GY-112);ctx.lineTo(928,GY-122);ctx.stroke();
+  // a Watcher's staff without its lantern, planted in a heap of debris on the left: only its upper half shows, its small bell
+  {const S0=STAFF;ctx.lineCap='round';ctx.strokeStyle='#3a2a1a';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(S0.x,GY-18);ctx.lineTo(S0.x+S0.dx,GY-18-S0.h);ctx.stroke();
+   const tx=S0.x+S0.dx,ty=GY-18-S0.h;ctx.strokeStyle='#2a3238';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-4,ty-12);ctx.moveTo(tx,ty);ctx.lineTo(tx+7,ty-10);ctx.stroke();
+   const sw=Math.sin(rt*1.1)*.15;ctx.save();ctx.translate(tx+2,ty+4);ctx.rotate(sw);ctx.strokeStyle='#2a3238';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,6);ctx.stroke();
+   ctx.fillStyle=bronze(-5,5);ctx.beginPath();ctx.moveTo(-5,15);ctx.quadraticCurveTo(-4,6,0,6);ctx.quadraticCurveTo(4,6,5,15);ctx.closePath();ctx.fill();ctx.restore();
+   ctx.fillStyle='#0a0705';ctx.beginPath();ctx.moveTo(S0.x-46,GY+2);ctx.lineTo(S0.x-30,GY-14);ctx.lineTo(S0.x-8,GY-22);ctx.lineTo(S0.x+12,GY-26);ctx.lineTo(S0.x+34,GY-12);ctx.lineTo(S0.x+52,GY+2);ctx.closePath();ctx.fill();
+   ctx.fillStyle='#16100b';ctx.save();ctx.translate(S0.x-14,GY-18);ctx.rotate(-.35);ctx.fillRect(-22,-3,44,6);ctx.restore();ctx.save();ctx.translate(S0.x+20,GY-14);ctx.rotate(.5);ctx.fillRect(-16,-3,32,5);ctx.restore()}
   // the gutted hull of the wreck around the fight: broken frames rising from the reef at both edges
   for(const [x,d] of[[18,1],[96,1],[952,-1]]){ctx.strokeStyle='#0a0705';ctx.lineWidth=20;ctx.beginPath();ctx.moveTo(x,GY+4);ctx.quadraticCurveTo(x-d*16,GY-160,x+d*40,GY-250+(x%3)*20);ctx.stroke();ctx.strokeStyle='rgba(150,120,90,.12)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+d*6,GY+4);ctx.quadraticCurveTo(x-d*10,GY-160,x+d*44,GY-246+(x%3)*20);ctx.stroke()}
   ctx.fillStyle='#120d09';ctx.fillRect(0,GY-26,150,8);ctx.fillRect(0,GY-58,90,7);ctx.fillRect(900,GY-40,60,8);
@@ -931,6 +938,12 @@ function drawToll(){
 }
 
 /* ---------- boss 2: the Hollow Voice ---------- */
+/* the turquoise glow deep in the mirror (the keeper's lantern, unseen): faint at first, rising as the Voice weakens,
+   brightest just before the mirror shatters. MIRROR_GLOW: base / max during the fight, end = before the shattering */
+const MIRROR_GLOW={base:.06,max:.65,end:.95};
+function mirrorLight(){if(S.phase!==2)return 0;const G=MIRROR_GLOW;
+  if(S.cine&&S.cine.k==='out'){const t=gt-S.cine.t0;return t<CINE_P1.drop?lerp(G.max,G.end,clamp(t/CINE_P1.drop,0,1)):0}
+  if(S.mode==='play'||S.mode==='ko'||S.mode==='dead')return G.base+(G.max-G.base)*(1-S.bossHp/S.bossMax);return G.base}
 function voiceAnim(){
   let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
   let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
@@ -985,7 +998,8 @@ function drawVoice(i,alpha,cast,ko){
   if(!S.noFace){
   const mg=ctx.createRadialGradient(fx-8,fy-10,2,fx,fy,30);mg.addColorStop(0,'#8a80a8');mg.addColorStop(.5,'#2c2440');mg.addColorStop(1,'#0c0816');
   ctx.fillStyle=mg;ctx.beginPath();ctx.ellipse(fx,fy,25,31,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#05030a';ctx.lineWidth=4;ctx.stroke();
+  if(i===0){const L=mirrorLight();if(L>0){ctx.save();ctx.clip();ctx.globalCompositeOperation='lighter';const g2=ctx.createRadialGradient(fx-2,fy+10,1,fx-2,fy+10,22);g2.addColorStop(0,`rgba(150,255,235,${L*(.75+.25*Math.sin(rt*3.4))})`);g2.addColorStop(1,'rgba(79,224,204,0)');ctx.fillStyle=g2;ctx.fillRect(fx-26,fy-32,52,64);ctx.restore()}}
+  ctx.strokeStyle='#05030a';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(fx,fy,25,31,0,0,Math.PI*2);ctx.stroke();
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,160,255,${.55+.4*pulse})`;ctx.lineWidth=1.6;
   ctx.beginPath();ctx.moveTo(fx+4,fy-31);ctx.lineTo(fx,fy-10);ctx.lineTo(fx+12,fy+2);ctx.lineTo(fx+3,fy+30);ctx.moveTo(fx,fy-10);ctx.lineTo(fx-20,fy-4);ctx.moveTo(fx+12,fy+2);ctx.lineTo(fx+24,fy-8);ctx.moveTo(fx-10,fy-6);ctx.lineTo(fx-14,fy+20);ctx.moveTo(fx+6,fy+14);ctx.lineTo(fx-6,fy+26);ctx.stroke();
   glow(fx+2,fy-6,26,'rgba(190,150,255,.8)',.35*pulse);ctx.restore();
@@ -1493,8 +1507,6 @@ function ecFinisher(tAll,T,P){
   ctx.restore();
   if(S.zapT&&gt-S.zapT<.12&&tAll<2.7){ctx.fillStyle=`rgba(220,245,255,${.2*(1-(gt-S.zapT)/.12)})`;ctx.fillRect(0,0,W,H)}
 }
-function bossBar(label,fill){const x0=W/2-180,w=360,y=34;ctx.save();ctx.textAlign='left';ctx.font='700 13px "DM Sans",system-ui,sans-serif';ctx.fillStyle='#cfeee9';ctx.fillText(label.toUpperCase(),x0,y-8);
-  ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(x0,y,w,10);ctx.fillStyle='#4fe0cc';ctx.fillRect(x0,y,w*fill,10);ctx.strokeStyle='rgba(255,255,255,.25)';ctx.strokeRect(x0+.5,y+.5,w-1,9);ctx.restore()}
 const CSFX=(()=>{const L={'2:in':[[0,'glints'],[1.1,'swell'],[1.95,'crackGlass'],[2.4,'shatter'],[3.1,'sting']],
   '2:out':[[.3,'charge'],[1.45,'throw'],[1.75,'impactLight'],[1.8,'overload'],[3.1,'explosion'],[3.3,'glassRain'],[4.4,'voice'],[5.4,'rumble']],
   '1:in':[[0,'rumble'],[4.5,'heart'],[4.8,'draw'],[5.5,'whoosh'],[5.75,'slam'],[6.3,'sting']],
@@ -1569,14 +1581,6 @@ function cineBoss(){
       S.noFace=true;const e=eio(clamp((t-3.2)/1.4,0,1));
       if(e<1){ctx.save();ctx.globalAlpha=1-e;ctx.translate(vp.x,GY);ctx.scale(1,1-e*.8);ctx.translate(-vp.x,-GY);drawVoice(0,1,0,0);ctx.restore()}
       if(e>.6)ell(vp.x,GY+2,80*e,7,`rgba(200,190,220,${.35*(1-clamp((t-5.4)/1,0,1))})`)}
-    const fa=clamp((t-4.3)/.5,0,1)*(1-clamp((t-5.8)/.5,0,1));
-    if(fa>0){ctx.save();ctx.globalAlpha=fa;const cx=W/2,cy=H*.4,s=70;
-      ctx.beginPath();ctx.moveTo(cx,cy-s*1.4);ctx.lineTo(cx+s*.75,cy);ctx.lineTo(cx+s*.1,cy+s*1.25);ctx.lineTo(cx-s*.7,cy+s*.15);ctx.closePath();
-      const g=ctx.createLinearGradient(cx-s,cy-s,cx+s,cy+s);g.addColorStop(0,'rgba(235,228,250,.9)');g.addColorStop(1,'rgba(120,95,170,.8)');ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.clip();
-      ctx.fillStyle='#3a2a2a';ctx.beginPath();ctx.ellipse(cx,cy-10,34,44,0,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#e6d2c0';ctx.beginPath();ctx.ellipse(cx,cy+2,25,33,0,0,Math.PI*2);ctx.fill();
-      ctx.strokeStyle='#6a4a40';ctx.lineWidth=2;for(const o of[-10,10]){ctx.beginPath();ctx.arc(cx+o,cy-2,6,.15*Math.PI,.85*Math.PI);ctx.stroke()}
-      ctx.beginPath();ctx.moveTo(cx-6,cy+18);ctx.quadraticCurveTo(cx,cy+21,cx+6,cy+18);ctx.stroke();ctx.restore()}
     // the keeper's lantern drops from the shattered face into the water and sinks, pulsing
     if(boom){const q=lanternPos(t,fx,fy);if(q.splash&&once('splash')){burst(q.x,GY,26,'#cff7ef',5,.7,.35);S.ripT=gt;S.ripX=q.x}
       keeperLantern(q.x,q.y,q.a,t)}
@@ -1651,7 +1655,7 @@ function cineOverlay(){
   if(ph===1&&k==='in')title(t,6.3,PH[1].eye(),PH[1].boss(),CH_COL[2]);
   if(ph===1&&k==='out')fadeAll(clamp((t-(CINE_LEN[1].out-1.1))/.7,0,1));
   if(ph===3&&k==='in')title(t,12.3,PH[3].eye(),_('The Drowned Lighthouse','Le Phare Noyé'),CH_COL[2]);
-  if(ph===3&&k==='p2'){const shat=_('The Shattered',"L'Éclaté");bossBar(t<5.8?_('The Drowned Lighthouse','Le Phare Noyé'):shat,t<2.1?0:clamp((t-2.2)/3.4,0,1));title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
+  if(ph===3&&k==='p2'){const shat=_('The Shattered',"L'Éclaté");title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
 }
 /* ---------- music & ambience (procedural, Web Audio) ---------- */
 const MUSIC=(()=>{

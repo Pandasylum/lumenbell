@@ -138,3 +138,11 @@ Travail sans surveillance, choix à valider par Kevin (repris dans la PR).
   - Timings des sorts eux-mêmes : inchangés.
 - **Mesures** (bot de la phase III, 20 parties) : Normal 20/20, 18/20, 11/20 à 40 / 70 / 100 ms (avant : 20/20, 20/20, 11/20) ; Difficile 11/20, 0/20, 0/20 (avant : 17/20, 2/20, 1/20). Le Difficile durcit (deux rages, dernier assaut à 1 PV) : à reprendre dans la session d'équilibrage. Joueur parfait : 0 coup sur chaque sort de rage forcé, Normal et Difficile (14 cas).
 - Repères de la jauge : bord inférieur clair (couleur du texte) sous les cases des seuils, visible que la case soit pleine ou vide.
+
+## 2026-10-28 – Chapitre II · deuxième passe de retouches (branche `ch2/retouches`)
+### A. Visuels
+- **Fin de phase I** : le petit losange avec un visage (portrait dans un éclat, 4,3 à 5,8 s) est retiré ; le visage du miroir reste dessiné jusqu'à l'explosion, puis le miroir éclate directement.
+- **Onomatopées** : `ONO.hit` (`BAM` sur un coup porté au boss) retiré dans les trois phases, comme au Chapitre I (aucun mot sur une riposte ordinaire). Restent `KRAKOOM` (coup final de la forme II), `KRAAAK` (Veilleur écrasé par la poutre) et `CLANG` (blocage de la phase II : la consigne ne le visait pas ; à confirmer). En phase I, la Voix ne fait que des cris, au son.
+- **Lueur dans le miroir** (phase I) : un halo turquoise discret au fond du visage-miroir (la lanterne de la gardienne, jamais nommée), de 6 % au début à 65 % quand la Voix n'a plus de vie, puis jusqu'à 95 % dans la cinématique de fin, juste avant la chute de la lanterne (table `MIRROR_GLOW`).
+- **Bâton sans lanterne** (phase III) : déplacé à gauche (x 150, devant les membrures), planté dans un tas de débris ; seule la moitié haute dépasse, avec la fourche vide et une petite cloche qui pend (table `STAFF`). Autres débris de la coque inchangés (passe suivante, avec un dessin de référence).
+- **Changement de forme** (phase III) : plus de barre de vie dessinée dans le plan de transformation (`bossBar` retiré) ; la barre normale du combat (HUD) reprend au début de la forme II. Le titre « L'Éclaté » reste. `TEXTES.md` : un couple de moins (l'étiquette de cette barre).

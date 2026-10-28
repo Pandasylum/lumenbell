@@ -142,3 +142,8 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - **Rages** : `DIFFS[..].u` (seuils), `RAGE` (cri, dernier assaut), `rageMarks()` (cases soulignées de la jauge, classe `mark`), `S.rageN` / `S.rageNext` / `S.roarT` ; `spawn()` lance le cri puis le sort de rage (`gen(stage, f, b, false, rage)` : `rage` = numéro de la rage). `angerCheck()` est remplacé (le nom va au lecteur d'écran par `rageBanner()`).
 - **Pluie de bris** : `RAIN` (espacement aléatoire, marge et étourdissement du Difficile, valeurs du Chapitre I) ; `stops(th)` reçoit la menace pour la marge.
 - **Orbes illusoires** : pleines, contour en pointillé (`drawOrbs`).
+
+## Deuxième passe de retouches (28 octobre, `ch2/retouches`)
+- Onomatopées : `ONO` = `block` (`CLANG`), `final` (`KRAKOOM`), `crush` (`KRAAAK`) ; plus de `hit`.
+- Lueur du miroir : `MIRROR_GLOW`, `mirrorLight()` (dans `drawVoice`, visage de la vraie Voix seulement).
+- Bâton sans lanterne : `STAFF` (dans `bg3`). Plus de `bossBar` (transformation de la phase III).
