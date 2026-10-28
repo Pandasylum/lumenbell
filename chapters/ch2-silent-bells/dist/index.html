@@ -436,7 +436,7 @@ function hurt(th){
   // stun, cut short so that the next attack can still be stopped (Ember Bridge: min(base, max(.14, gap - .2)))
   {let nx=99;for(const o of S.threats)if(o!==th&&!o.done&&o.real!==false){const at=o.hold?o.ta:o.ti;if(at!=null&&at>gt)nx=Math.min(nx,at-gt)}
    const p=S.pl;p.s='hurt';p.t=0;p.rd=Math.min(PT().hurt,Math.max(.14,nx-.2));p.rk=''}
-  if(th&&th.k==='rock')pop(ONO.crush,'#ff8a6b',HX-30,GY-190);
+  if(th&&th.k==='rafter')pop(ONO.crush,'#ff8a6b',HX-30,GY-190);
   burst(HX,GY-70,18,'#ff6a5a',5,.55);play('hurt');MUSIC.fx('chunk');hud();
   if(S.hp<=0){S.mode='dead';S.deadT=gt;S.holding=false;say(_('The Watcher falls. Defeat.','Le Veilleur tombe. Défaite.'))}
 }
@@ -844,6 +844,7 @@ function drawBoss1(){
   for(const s of[-1,1])drawP('sbell',s*80,ty+40,0);
   // 7. head bell, hunched forward between the shoulders: the Lighthouse's bell, its lamp still lit
   const hs=A.toll*Math.sin(gt*60)*.09-.2;
+  S.kingHead={x:X+sh-6,y:ty+20};
   ctx.save();ctx.translate(-6,ty+6);ctx.rotate(hs);
   pHead();
   const lit=clamp(.6+.3*Math.sin(rt*2.4)+A.toll*.6,0,1);
@@ -879,7 +880,7 @@ function drawToll(){
 /* ---------- boss 2: the Hollow Voice ---------- */
 function voiceAnim(){
   let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
-  let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1}
+  let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
   return{cast,echo};
 }
 const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160}];
@@ -889,7 +890,11 @@ function drawBoss2(){
   const A=voiceAnim();
   let ko=S.mode==='ko'&&S.phase===2?clamp((gt-S.koT)/2,0,1):0;
   if(A.echo){S.echoA=Math.min(1,(S.echoA||0)+.06)}else S.echoA=Math.max(0,(S.echoA||0)-.05);
-  if(S.echoA>0){for(const i of[1,2]){const has=S.threats.some(t=>t.k==='orb'&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,S.echoA*.5,has?1:0,0)}}
+  if(S.echoA>0){for(const i of[1,2]){
+    // rage: a reflection shatters, sending a shard at the Watcher
+    const br=S.threats.find(t=>t.k==='shard'&&t.from===i&&gt>=t.t0);
+    if(br){if(!br.bk){br.bk=1;const p=voicePos(i);burst(p.x,p.y-80,26,'#ece4ff',6,.9,.2);burst(p.x,p.y-20,16,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass')}continue}
+    const has=S.threats.some(t=>t.k==='orb'&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,S.echoA*.5,has?1:0,0)}}
   ctx.save();
   if(hasFilter&&gt-S.bossFlash<.15)ctx.filter='brightness(1.8)';
   drawVoice(0,1-clamp((ko-.4)/.6,0,1),A.cast,ko);
@@ -1121,6 +1126,11 @@ function drawTransform(){
 }
 function drawBeacon(){
   for(const th of S.threats){
+    // the King's wave: it swells at the foot of the tower, rolls across the reef, then ebbs back
+    if(th.k==='kwave'&&gt>=th.t0&&gt<=th.ts+th.D+1){
+      if(gt<th.ts){const k=(gt-th.t0)/(th.ts-th.t0);drawWave(LX-110,10+70*eout(k),.5+.5*k);if(k>.5&&Math.random()<.4)burst(LX-110+Math.random()*80,GY-30,2,'#e6f8f2',3,.5,.3)}
+      else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D,bx=940-1000*s;drawWave(bx,96,1);if(Math.abs(bx-HX)<90&&S.holding)burst(HX+30+(Math.random()-.5)*60,GY-80-Math.random()*60,2,'#e6f8f2',4,.4)}
+      else{const q=(gt-th.ts-th.D)/1;ctx.save();ctx.globalAlpha=1-q;ctx.scale(-1,1);drawWave(-lerp(-60,700,eio(q)),40*(1-q*.5),1);ctx.restore()}}
     if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D+.1){
       let bx;if(gt<th.ts){bx=th.dir<0?940:-60;const k=(gt-th.t0)/(th.ts-th.t0);ctx.save();ctx.globalAlpha=.12+.25*k;beamShape(bx,.6);ctx.restore();continue}
       const s=(gt-th.ts)/th.D;bx=th.dir<0?940-1000*s:-60+1000*s;
@@ -1194,7 +1204,7 @@ function draw(){
   if(S.cine&&ph===3&&S.cine.k==='out'){const C=CINE_P3,z=1+(C.zoomZ-1)*eio(clamp((gt-S.cine.t0-C.zoom)/C.zoomD,0,1));if(z>1){const cx=BELL_REST.x-20,cy=GY-40;ctx.translate(cx,cy);ctx.scale(z,z);ctx.translate(-cx,-cy)}}
   [bg1,bg2,bg3][ph-1]();
   if(S.cine)cineBoss();
-  else if(ph===1){drawBoss1();drawToll();drawKingFx()}
+  else if(ph===1){drawBoss1();drawRust();drawToll();drawKingFx()}
   else if(ph===2){drawBoss2()}
   else if(S.form===2)drawEclGame();else{beaconHide();drawBoss3();drawBeacon();drawBeaconFx()}
   if(S.mode!=='dead'||gt-S.deadT<.6){ctx.save();ctx.translate(S.heroDX||0,S.heroDY||0);drawHero();ctx.restore()}
@@ -1786,11 +1796,36 @@ function hud(){
 function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting')}
 function angerCheck(){
   if(S.mode!=='play'||S.angerShown||S.bossHp>S.bossMax/2)return;S.angerShown=true;
-  if(S.phase===2)banner(_('Broken mirror','Miroir brisé'),_('Reflections now look like real orbs. Only real orbs cast a shadow.','Les reflets ressemblent aux vraies orbes. Seules les vraies ont une ombre.'));
+  if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
   else if(S.phase===1){banner(_('Blue heart','Cœur bleu'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
-  else if(S.form===2)banner(_('Double orbit','Double orbite'),_('The rings split and spin faster.','Les anneaux se séparent et tournent plus vite.'));
+  else if(S.form===2)banner(_('Bell storm','Tempête de cloches'),_('The side lanterns fire rings in turn, then the trap bell falls.','Les lanternes latérales tirent des anneaux tour à tour, puis la cloche-piège tombe.'));
+  else banner(_('Rising tide','Marée montante'),_('The wave floods the reefs; spikes rise as it ebbs.','La vague noie les récifs ; des pics jaillissent quand elle se retire.'));
 }
 const FINAL_AT=2;
+/* new spells (docs/CH2-SPEC.md, « Sorts et rages »): times in seconds, multiplied by f (attack speed, like every pattern).
+   PROVISIONAL values, taken from the neighbouring spells they replace or extend; to be set in the balancing session.
+   wave  (II): stomp lands at `land`, the wave reaches the Watcher at `hit` (= old stomp), the beam falls twice,
+               `fall1` / `fall2` after the wave (= old stones .8 / 1.15), next attack `after` later (= old stomp 1.6);
+   dwave (II, rage): second, bigger wave `gap` after the first (chain spacing .4 + margin); the beam falls after it;
+   rust  (II, rage): the King shakes his bell for `cloud` (cloud descends), then advances: block at contact `hit` later
+               (anchor swing, lunge x `ls`); the cloud clears `fade` after the contact; next attack `after` later;
+   kwave (III, form I): the King's wave crosses the reef like the beam (= sweep: `ts` .95, `D` 1.6, `after` .35); hold;
+   tide  (III, form I, rage): the wave, then as it ebbs two reef spikes (taps) `spike1` / `spike2` after it (= spike .8,
+               second +.35), `gap` between their tells, next attack `after` later (= spike 1.15);
+   storm (III, form II, rage): `n` rings fired in turn from the two side lanterns, every `gap` (= ring .34), each `tl` /
+               `ti` (= ring .5 / .95); then the trap bell, `trapGap` later: hovers until `trapTl`, presses from `trapTa` to
+               `trapTb` (hold; = trap .75 / 1.3, +.5 held), next attack `after` later;
+   echo  (I, rage): after the three orbs of the echo, the two reflections shatter `break1` / `break2` after the last orb,
+               each sending a shard (= shard rain .42 / .95). */
+const SP={
+  wave:{land:.55,hit:1.05,fall1:.8,fall2:1.15,after:1.6},
+  dwave:{gap:.55},
+  rust:{cloud:.6,hit:1.55,ls:1.6,fade:2.2,after:1.4},
+  kwave:{ts:.95,D:1.6,after:.35},
+  tide:{spike1:.8,spike2:1.15,gap:.35,after:1.15},
+  storm:{n:5,gap:.34,tl:.5,ti:.95,trapGap:.4,trapTl:.75,trapTa:1.3,trapTb:1.8,after:.7},
+  echo:{break1:.2,break2:.65,tl:.42,ti:.95}
+};
 function spawn(){
   const d=S.d,stage=S.bossHp<=S.bossMax/2?1:0,f=1/(d.sp*(1+.1*stage)),id=S.phase,f2=id===3&&S.form===2;
   const gen=f2?P3b:[P1,P2,P3][id-1];
@@ -1806,11 +1841,13 @@ function P2(stage,f,b,final){
   const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+.45*f,ti:t+1.3*f,real,src:src||0});t+=.44*f};
   const volley=(n,ill)=>{const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i));t+=.9*f};
   const echo=()=>{const real=Math.floor(Math.random()*3);[0,1,2].sort(()=>Math.random()-.5).forEach(s=>{orb(s===real,s);t+=.1*f});t+=.9*f};
+  // rage: the echo, then the two reflections shatter one by one, each sending a shard at the Watcher
+  const echoR=()=>{const t0=t;echo();const last=t0+2*.54*f+1.3*f,E=SP.echo;[1,2].forEach((src,j)=>{const s=last+E['break'+(j+1)]*f;T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src})});t=Math.max(t,last+E.break2*f+E.ti*f+.4*f)};
   const wail=()=>{T.push({k:'wail',t0:t,tl:t+.8*f,ti:t+1.9*f,real:true});t+=1.3*f};
   const rain=n=>{const t0=t;for(let i=0;i<n;i++){const s=t0+i*.3*f;S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f,ti:s+.95*f,si:S.shardNext})}t=t0+(n-1)*.3*f+1.3*f};
-  if(final){echo();volley(5,2);wail();return T}
+  if(final){echoR();volley(5,2);wail();return T}
   const p0=[()=>volley(2,0),()=>volley(3,1),wail,()=>volley(3,0),()=>{wail();volley(2,1)},()=>rain(3)];
-  const p1=[()=>volley(4,1),()=>volley(5,2),echo,()=>{echo();wail()},()=>{volley(3,1);echo()},()=>{wail();volley(4,2)},()=>rain(5),()=>{rain(3);volley(3,1)}];
+  const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},()=>rain(5),()=>{rain(3);volley(3,1)}];
   pick(stage?p1:p0)();return T;
 }
 function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;recover(S.pl,PT().rec+DG.fool,'fool');S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
@@ -1834,7 +1871,7 @@ function drawOrbs(){
       else{const fl=.45+.35*Math.sin(gt*30);ctx.globalAlpha=a*fl;glow(x,y,r*2.4,'rgba(176,124,255,.6)',.35);ctx.strokeStyle='#d8c4ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ell(x,y,r*.45,r*.45,'rgba(240,230,255,.18)')}
       ctx.restore();
     }else if(th.k==='shard'){
-      const o=shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;
+      const o=th.from!=null?{x:voicePos(th.from).x,y:voicePos(th.from).y-90,s:24}:shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;
       if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);x=o.x;y=o.y;ang=Math.atan2(ty-y,tx-x);glow(x,y,30,'rgba(220,200,255,.9)',.8*k)}
       else{let p=(gt-th.tl)/(th.ti-th.tl);if(th.done){if(th.res==='hit'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.3);if(!th.sf){th.sf=1;burst(tx+30,ty-20,10,'#f2ecff',5,.4)}}}
         p=Math.min(p,1);x=lerp(o.x,tx,ein(p));y=lerp(o.y,ty,ein(p));ang=Math.atan2(ty-o.y,tx-o.x)}
@@ -1858,10 +1895,16 @@ function P1(stage,f,b,final){
   const chain=n=>{const t0=t;for(let i=0;i<n;i++)T.push({k:'chain',t0,ti:t0+.85*f+i*.4*f,i,n});t=t0+.85*f+(n-1)*.4*f+.55*f};
   const toll=()=>{T.push({k:'toll',t0:t,tw:t+.55*f,ti:t+1.55*f});t+=1.05*f};
   const harpoon=()=>{const ti=t+1.1*f,tb=ti+.7*f;T.push({k:'hpOut',t0:t,ti,tb,ret:tb+.5*f});T.push({k:'hpBack',t0:t,ti:tb});t=tb+.8*f};
-  const stomp=()=>{const ti=t+1.05*f;T.push({k:'stomp',t0:t,ti});T.push({k:'rock',t0:ti,ti:ti+.8*f,rx:HX+8});T.push({k:'rock',t0:ti+.2*f,ti:ti+1.15*f,rx:HX+20});t=ti+1.6*f};
-  if(final){stomp();slam();chain(3);toll();toll();return T}
-  const p0=[slam,sweep,()=>{slam();sweep()},()=>chain(3),toll,()=>{sweep();slam()},harpoon,stomp];
-  const p1=[()=>{slam();chain(3)},()=>{sweep();slam();chain(3)},()=>{chain(3);toll()},()=>chain(5),harpoon,()=>{stomp();slam()},()=>{harpoon();sweep()}];
+  // the water wave: he stamps, the wave grows towards the Watcher (block), hits the back wall, a beam falls twice (two blocks)
+  const wave=big=>{const ti=t+SP.wave.hit*f;T.push({k:'wave',t0:t,tl:t+SP.wave.land*f,ti,big:!!big});return ti};
+  const rafter=ti=>{T.push({k:'rafter',n:1,t0:ti,ti:ti+SP.wave.fall1*f});T.push({k:'rafter',n:2,t0:ti+.2*f,ti:ti+SP.wave.fall2*f});t=ti+SP.wave.after*f};
+  const surge=()=>rafter(wave());
+  const dwave=()=>{wave();t+=SP.dwave.gap*f;rafter(wave(true))};
+  // the rust cloud: he shakes his bell, red dust comes down over the hold, he advances: block at contact
+  const rust=()=>{const R=SP.rust,tc=t+R.cloud*f,ti=tc+R.hit*f;S.rust={t0:t,tc,end:ti+R.fade*f};T.push({k:'slam',t0:tc,ti,ls:R.ls,rust:1});t=ti+R.after*f};
+  if(final){surge();slam();chain(3);toll();toll();return T}
+  const p0=[slam,sweep,()=>{slam();sweep()},()=>chain(3),toll,()=>{sweep();slam()},harpoon,surge];
+  const p1=[()=>{slam();chain(3)},()=>{sweep();slam();chain(3)},()=>{chain(3);toll()},()=>chain(5),harpoon,()=>{surge();slam()},()=>{harpoon();sweep()},dwave,rust,()=>{rust();sweep()}];
   pick(stage?p1:p0)();if(stage)toll();return T;
 }
 function anim1(){
@@ -1877,22 +1920,60 @@ function anim1(){
       else{const k=eio(clamp((gt-hp.tb)/(hp.ret-hp.tb),0,1));pos={x:lerp(hero.x,hand.x,k),y:lerp(hero.y,hand.y,k)}}
       r.harp={x:pos.x,y:pos.y};
       if(!hp.sf&&gt>=w){hp.sf=1;MUSIC.fx('whoosh');MUSIC.fx('chainSlip')}}}
-  const st=S.threats.find(t=>t.k==='stomp'&&gt>=t.t0&&gt<=t.ti+.1);
-  if(st){const up=st.ti-.18;r.stomp=gt<up?eout(clamp((gt-st.t0)/(up-st.t0),0,1))*46:lerp(46,0,ein(clamp((gt-up)/.18,0,1)))}
+  if(S.rust&&gt>=S.rust.t0&&gt<S.rust.tc+.2)r.toll=Math.max(r.toll,.8);
+  const st=S.threats.find(t=>t.k==='wave'&&gt>=t.t0&&gt<=t.tl+.1);
+  if(st){const up=st.tl-.18;r.stomp=gt<up?eout(clamp((gt-st.t0)/(up-st.t0),0,1))*46:lerp(46,0,ein(clamp((gt-up)/.18,0,1)))}
   return r;
 }
 function drawKingFx(){
   for(const th of S.threats){
-    if(th.k==='stomp'&&gt>=th.ti&&!th.sf){th.sf=1;S.shake=Math.max(S.shake,14);MUSIC.fx('step');for(let i=0;i<20;i++)S.parts.push({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*.25,vy:.3,g:.28,t0:gt,life:1.6,c:'#9a8a76',r:2})}
-    if(th.k==='stomp'&&gt>=th.ti&&gt<th.ti+.8){const q=(gt-th.ti)/.8;ctx.strokeStyle=`rgba(210,250,240,${.7*(1-q)})`;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(700-38,GY+4,q*520,q*30,0,0,Math.PI*2);ctx.stroke()}
-    if(th.k==='rock'&&gt>=th.t0){
-      const k=clamp((gt-th.t0)/(th.ti-th.t0),0,1),tx=th.rx,ty=HY-70;
-      if(th.done){if(!th.sf){th.sf=1;burst(tx,ty,16,th.res==='ok'?'#cdb69a':'#8a7a6a',5,.6,.3);MUSIC.fx('chunk')}continue}
-      ell(tx,GY+3,10+16*k,3+3*k,`rgba(0,0,0,${.2+.35*k})`);
-      const y=lerp(-30,ty,ein(k));ctx.save();ctx.translate(tx,y);ctx.rotate(gt*4);ctx.fillStyle='#4a3a2c';ctx.beginPath();ctx.moveTo(-14,-8);ctx.lineTo(-4,-15);ctx.lineTo(12,-10);ctx.lineTo(15,4);ctx.lineTo(4,14);ctx.lineTo(-12,10);ctx.closePath();ctx.fill();ctx.strokeStyle='#1e1610';ctx.lineWidth=2;ctx.stroke();ctx.restore();
-    }
+    if(th.k==='wave'&&gt>=th.tl&&!th.sf){th.sf=1;S.shake=Math.max(S.shake,10);MUSIC.fx('step');burst(662,GY,18,'#cff7ef',5,.6,.4)}
+    if(th.k==='wave'&&gt>=th.tl){const big=th.big?1.35:1,k=clamp((gt-th.tl)/(th.ti-th.tl),0,1);
+      if(gt<th.ti)drawWave(lerp(650,HX+40,eio(k)),lerp(14,86*big,eout(k)),1);
+      else{const q=(gt-th.ti)/.55;if(q<1)drawWave(lerp(HX+40,-90,q),86*big*(th.res==='ok'?1-q*.6:1-q*.3),th.res==='ok'?1-q*.5:1);
+        if(!th.wf&&q>=.62){th.wf=1;S.shake=Math.max(S.shake,13);MUSIC.fx('rumble');for(let i=0;i<14;i++)S.parts.push({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*.25,vy:.3,g:.28,t0:gt,life:1.6,c:'#7a6a56',r:2})}
+        if(!th.bf){th.bf=1;burst(HX+40,GY-50,th.res==='ok'?26:14,'#e6f8f2',6,.7,.3)}}}
   }
+  drawRafter();
 }
+/* a breaking wave, crest towards the Watcher (left): front at x, height h, opacity a */
+function drawWave(x,h,a){if(a<=0||h<=1)return;ctx.save();ctx.globalAlpha*=a;
+  const g=ctx.createLinearGradient(0,GY-h,0,GY+6);g.addColorStop(0,'rgba(175,245,230,.95)');g.addColorStop(.35,'rgba(40,170,165,.88)');g.addColorStop(1,'rgba(8,60,66,.92)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x+h*2.4,GY+6);ctx.quadraticCurveTo(x+h*1.1,GY+2,x+h*.45,GY-h*.85);ctx.quadraticCurveTo(x+h*.05,GY-h*1.08,x-h*.38,GY-h*.72);
+  ctx.quadraticCurveTo(x-h*.12,GY-h*.56,x-h*.2,GY-h*.22);ctx.quadraticCurveTo(x-h*.3,GY+2,x-h*.62,GY+6);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(235,252,248,.9)';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x+h*1.1,GY-h*.25);ctx.quadraticCurveTo(x+h*.5,GY-h*.85,x+h*.05,GY-h*1.05);ctx.quadraticCurveTo(x-h*.25,GY-h*.95,x-h*.38,GY-h*.72);ctx.stroke();
+  for(let i=0;i<6;i++){const k=(gt*2+i*.17)%1;ell(x-h*.3-k*20+i*4,GY-h*.8-k*18+i*3,1.6,1.6,`rgba(235,252,248,${.8*(1-k)})`)}
+  ctx.restore()}
+/* the deck beam that falls twice after the wave hits the back wall: first it swings down on its hinge, then the hinge breaks */
+const RAFTER={px:HX-150,py:34,L:330,aHit:.95,aHang:.62};
+function drawRafter(){const r1=S.threats.find(t=>t.k==='rafter'&&t.n===1),r2=S.threats.find(t=>t.k==='rafter'&&t.n===2);if(!r1&&!r2)return;
+  const R=RAFTER,P={x:R.px,y:R.py},end=a=>({x:P.x+Math.cos(a)*R.L,y:P.y+Math.sin(a)*R.L});let A=P,B,al=1,shadow=0;
+  const hang=()=>{const a=r1&&r1.res==='hit'&&gt-r1.okT<.3?R.aHit:R.aHang;return a};
+  if(r1&&!r1.done){const k=gt<r1.t0?0:ein(clamp((gt-r1.t0)/(r1.ti-r1.t0),0,1));B=end(R.aHit*k);shadow=k;if(gt>=r1.t0&&!r1.cr){r1.cr=1;MUSIC.fx('crackRun')}}
+  else if(r2&&!r2.done&&gt<r2.t0){const q=r1?clamp((gt-r1.okT)/.3,0,1):1;B=end(lerp(R.aHit,R.aHang,eout(q)));if(r1&&r1.res==='ok'&&!r1.bf){r1.bf=1;burst(B.x,B.y,14,'#cdb69a',5,.5,.3);MUSIC.fx('chunk')}}
+  else if(r2&&!r2.done){const k=ein(clamp((gt-r2.t0)/(r2.ti-r2.t0),0,1)),b0=end(R.aHang),c={x:HX+10,y:GY-138};
+    A={x:lerp(P.x,c.x-R.L/2,k),y:lerp(P.y,c.y-6,k)};B={x:lerp(b0.x,c.x+R.L/2,k),y:lerp(b0.y,c.y+6,k)};shadow=k}
+  else if(r2){const q=clamp((gt-r2.okT)/.8,0,1),c={x:HX+10,y:GY-138};al=1-q;if(!r2.bf){r2.bf=1;burst(HX+10,GY-130,20,r2.res==='ok'?'#cdb69a':'#8a7a6a',6,.6,.3);MUSIC.fx('chunk')}
+    const dx=r2.res==='ok'?220*eout(q):0,dy=r2.res==='ok'?(GY-12-c.y)*ein(q):0;A={x:c.x-R.L/2+dx,y:c.y-6+dy};B={x:c.x+R.L/2+dx,y:c.y+6+dy}}
+  else return;
+  if(shadow>0)ell(HX+10,GY+3,30+40*shadow,4+3*shadow,`rgba(0,0,0,${.15+.35*shadow})`);
+  ctx.save();ctx.globalAlpha*=al;ctx.lineCap='butt';ctx.strokeStyle='#120c08';ctx.lineWidth=22;ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();
+  ctx.strokeStyle='#4a3320';ctx.lineWidth=15;ctx.stroke();ctx.strokeStyle='rgba(200,160,110,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(A.x,A.y-4);ctx.lineTo(B.x,B.y-4);ctx.stroke();
+  const dx=B.x-A.x,dy=B.y-A.y,l=Math.hypot(dx,dy)||1;for(const t of[.2,.5,.8])ell(A.x+dx*t,A.y+dy*t,2,2,'#1a120b');
+  ctx.fillStyle='#4a3320';ctx.beginPath();ctx.moveTo(B.x-dy/l*7,B.y+dx/l*7);ctx.lineTo(B.x+dx/l*14,B.y+dy/l*14-4);ctx.lineTo(B.x+dx/l*6,B.y+dy/l*6+2);ctx.lineTo(B.x+dx/l*12,B.y+dy/l*12+6);ctx.lineTo(B.x+dy/l*7,B.y-dx/l*7);ctx.fill();
+  ctx.restore()}
+/* the rust cloud: red dust coming down over the hold. It hides the scenery, never the block signal: it thins out around the
+   Watcher, and the King's bell lamp and the anchor's head shine through it */
+const RUSTP=(()=>{const R=mulberry(57);return[...Array(26)].map(()=>({x:R()*W,y:R()*GY,r:60+R()*90,v:(R()-.5)*14,o:R()*6}))})();
+function drawRust(){const R=S.rust;if(!R||gt<R.t0||gt>R.end)return;
+  const a=clamp((gt-R.t0)/(R.tc-R.t0),0,1)*(1-clamp((gt-(R.end-.9))/.9,0,1)),front=lerp(-40,H+60,eout(clamp((gt-R.t0)/(R.tc-R.t0+.5),0,1)));
+  ctx.save();
+  for(let x=0;x<W;x+=40){const k=.35+.65*eio(clamp((x-HX)/220,0,1)),g=ctx.createLinearGradient(0,front-160,0,front);g.addColorStop(0,`rgba(110,40,18,${.62*a*k})`);g.addColorStop(1,'rgba(110,40,18,0)');ctx.fillStyle=g;ctx.fillRect(x,0,40,front)}
+  for(const p of RUSTP){const x=(p.x+gt*p.v+W)%W,k=(x<HX+90?.3:1)*clamp((front-p.y)/90,0,1);const rg=ctx.createRadialGradient(x,p.y,4,x,p.y,p.r);rg.addColorStop(0,`rgba(150,62,28,${.45*a*k})`);rg.addColorStop(1,'rgba(120,45,20,0)');ctx.fillStyle=rg;ctx.fillRect(x-p.r,p.y-p.r,p.r*2,p.r*2)}
+  for(let i=0;i<40;i++){const x=(i*97+gt*20)%W,y=(i*53+gt*40)%front;ctx.fillStyle=`rgba(200,110,60,${.5*a})`;ctx.fillRect(x,y,1.6,1.6)}
+  ctx.restore();
+  if(S.kingHead)glow(S.kingHead.x,S.kingHead.y,70,'rgba(255,220,160,.9)',.55*a+.2);
+  const sl=S.threats.find(t=>t.rust&&!t.done&&gt>=t.t0);if(sl&&S.clapTip)glow(S.clapTip.x,S.clapTip.y,50,'rgba(220,250,240,.9)',.7)}
 /* ---- Phase III · Form I: the tower's tentacles and torn pieces ---- */
 function P3(stage,f,b){
   const T=[];let t=b;
@@ -1903,8 +1984,12 @@ function P3(stage,f,b){
   const spike=()=>{T.push({k:'spike',t0:t,ti:t+.8*f,real:true,seed:Math.random()});t+=1.15*f};
   const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*f,side:Math.random()<.5?-1:1});t+=1.2*f};
   const chunk=()=>{T.push({k:'chunk',t0:t,tl:t+.6*f,ti:t+1.2*f,ri:RINGS[Math.floor(Math.random()*6)]});t+=1.55*f};
-  const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()},whip,chunk,()=>{whip();bolt()}];
-  const p1=[()=>{bolt();spike();bolt()},()=>{sweep(-1);sweep(1)},()=>{sweep(-1);t-=.15*f;spike()},()=>{spike();sweep(1);bolt()},()=>{bolt();bolt();sweep(-1)},()=>{whip();whip();chunk()},()=>{sweep(-1);chunk()}];
+  // the King's wave (hold), crossing the reef like the beam
+  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;return th};
+  // rage, the rising tide: the wave (hold), then reef spikes rise in its wake as it ebbs (taps)
+  const tide=()=>{const w=kwave(),e=w.ts+w.D,P=SP.tide;T.push({k:'spike',t0:e,ti:e+P.spike1*f,real:true,seed:Math.random(),tide:1});T.push({k:'spike',t0:e+P.gap*f,ti:e+P.spike2*f,real:true,seed:Math.random(),tide:1});t=e+P.spike2*f+P.after*f};
+  const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()},whip,chunk,()=>{whip();bolt()},kwave];
+  const p1=[()=>{bolt();spike();bolt()},()=>{sweep(-1);sweep(1)},()=>{sweep(-1);t-=.15*f;spike()},()=>{spike();sweep(1);bolt()},()=>{bolt();bolt();sweep(-1)},()=>{whip();whip();chunk()},()=>{sweep(-1);chunk()},tide,()=>{kwave();bolt()}];
   pick(stage?p1:p0)();return T;
 }
 function beaconHide(){S.hide=null;for(const th of S.threats){if(th.k==='chunk'&&gt>=th.tl&&!(th.done&&gt>th.okT+.8)){(S.hide||(S.hide=new Set())).add(TOWER[th.ri])}}}
@@ -1943,9 +2028,12 @@ function P3b(stage,f,b,final){
   const trap=()=>{T.push({k:'trap',t0:t,tl:t+.75*f,ti:t+1.3*f});t+=1.85*f};
   const burstOut=()=>{T.push({k:'burst',t0:t,ta:t+1.15*f,tb:t+1.5*f,hold:true});t+=2*f};
   const reform=()=>{const tr=t+.9*f,ts=tr+.35*f,D=1.5*f;T.push({k:'reform',t0:t,tr,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});const td=ts+D+.5*f;T.push({k:'disp',t0:ts+D,ti:td,rf:1});t=td+.7*f};
+  // rage, the bell storm: rings fired in turn from the two side lanterns (taps), then the trap bell pressing down (hold)
+  const storm=()=>{const Q=SP.storm;for(let i=0;i<Q.n;i++){const s=t+i*Q.gap*f;T.push({k:'sring',side:i%2,t0:s,tl:s+Q.tl*f,ti:s+Q.ti*f})}t+=(Q.n-1)*Q.gap*f+Q.ti*f+Q.trapGap*f;
+    T.push({k:'trap',t0:t,tl:t+Q.trapTl*f,ta:t+Q.trapTa*f,tb:t+Q.trapTb*f,hold:true});t+=Q.trapTb*f+Q.after*f};
   if(final){T.push({k:'implode',t0:t,ta:t+1.7*f,tb:t+2.3*f,hold:true});t+=2.8*f;return T}
   const p0=[()=>ring(3),moon,trap,()=>{ring(2);trap()},cross,burstOut,reform];
-  const p1=[()=>ring(5),()=>{moon();ring(3)},()=>{trap();trap()},()=>{cross();ring(2)},()=>{burstOut();moon()},()=>{ring(3);cross()},()=>{reform();ring(2)}];
+  const p1=[()=>ring(5),()=>{moon();ring(3)},()=>{trap();trap()},()=>{cross();ring(2)},()=>{burstOut();moon()},()=>{ring(3);cross()},()=>{reform();ring(2)},storm];
   pick(stage?p1:p0)();return T;
 }
 function beamFrom(ox,oy,bx,a){const g=ctx.createLinearGradient(ox,oy,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(ox-7,oy);ctx.lineTo(ox+7,oy);ctx.lineTo(bx+70,GY+16);ctx.lineTo(bx-70,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,80,11,`rgba(200,250,255,${.25*a})`)}
@@ -1968,7 +2056,7 @@ function drawEclGame(){
       if(post>0&&post<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,245,255,${1-post})`;ctx.lineWidth=8*(1-post)+1;ctx.beginPath();ctx.arc(J.x,J.y,post*900,0,Math.PI*2);ctx.stroke();ctx.restore()}}
   }
   const on=1;
-  const hit={x:HX+20,y:GY-80},tells=[],beams=[],fx=[];let trapQ=null;
+  const hit={x:HX+20,y:GY-80},tells=[],beams=[],fx=[],srings=[];let trapQ=null;
   for(const th of S.threats){
     if(gt<th.t0)continue;
     if(th.done&&th.res==='ok'&&!th.sfx){th.sfx=1;if(th.k==='ring')MUSIC.fx('bellHit');if(th.k==='trap')MUSIC.fx('bellBig')}
@@ -1977,9 +2065,9 @@ function drawEclGame(){
       else if(!th.done){const k=clamp((gt-th.tl)/(th.ti-th.tl),0,1);q={x:lerp(o.x,hit.x,ein(k)),y:lerp(o.y,hit.y,ein(k))-Math.sin(Math.PI*k)*30,r:o.r+k*8,z:2}}
       else{const k=eio(clamp((gt-th.okT)/.7,0,1)),from=th.res==='ok'?{x:hit.x+110,y:hit.y-90}:hit;q={x:lerp(from.x,o.x,k),y:lerp(from.y,o.y,k),r:o.r,z:k<1?2:o.z}}
       P[idx]=q}
-    else if(th.k==='trap'){const o=P[EHEAD],hov={x:HX+12,y:GY-250},grd={x:HX+12,y:GY+2};let q;
+    else if(th.k==='trap'){const o=P[EHEAD],hov={x:HX+12,y:GY-250},grd={x:HX+12,y:GY+2},ti=th.hold?th.ta:th.ti;let q;
       if(gt<th.tl){const k=eio(clamp((gt-th.t0)/(th.tl-th.t0),0,1));q={x:lerp(o.x,hov.x,k),y:lerp(o.y,hov.y,k)+Math.sin(gt*8)*3*k,r:lerp(Math.PI,0,k),z:2,sc:lerp(1,2.3,k)}}
-      else if(!th.done){const k=ein(clamp((gt-th.tl)/(th.ti-th.tl),0,1));q={x:hov.x,y:lerp(hov.y,grd.y,k),r:0,z:2,sc:2.3}}
+      else if(!th.done){const k=ein(clamp((gt-th.tl)/(ti-th.tl),0,1));q={x:hov.x,y:lerp(hov.y,grd.y,k)+(gt>ti?Math.sin(gt*40)*2:0),r:0,z:2,sc:2.3};if(gt>ti)S.shake=Math.max(S.shake,3)}
       else{const d=gt-th.okT,hold=th.res==='hit'?.5:0,k=eio(clamp((d-hold)/.8,0,1)),from=th.res==='ok'?{x:hov.x+70,y:hov.y-30}:grd;
         q={x:lerp(from.x,o.x,k),y:lerp(from.y,o.y,k),r:lerp(0,Math.PI,k),z:2,sc:lerp(2.3,1,k)};
         if(th.res==='hit'&&d<.7)fx.push(['toll',grd.x,grd.y-90,d/.7])}
@@ -1994,6 +2082,7 @@ function drawEclGame(){
       else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D;A={x:1000-1080*s,y:GY-60-Math.sin(s*Math.PI)*20,a:s*Math.PI*7,sc:.85,z:3};if(!th.wf){th.wf=1;MUSIC.fx('whoosh')}}
       else{const k=eio(clamp((gt-th.ts-th.D)/.8,0,1));A={x:lerp(-80,A0.x,k),y:lerp(GY-60,A0.y,k),a:A0.a,sc:lerp(.85,A0.sc,k),z:k<1?3:A0.z}}}
     else if(th.k==='lbeam')beams.push(th);
+    else if(th.k==='sring')srings.push(th);
   }
   drawEcl(P,A,J,1,on,null);
   if(reBeam!=null){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*reBeam,1);ctx.restore()}
@@ -2002,6 +2091,13 @@ function drawEclGame(){
     if(gt<th.ts){const k=(gt-th.t0)/(th.ts-th.t0);glow(o.x,o.y,60,'rgba(110,235,255,.9)',.4+.5*k);beamFrom(o.x,o.y,940,.12+.25*k)}
     else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D;beamFrom(o.x,o.y,940-1000*s,1);glow(o.x,o.y,70,'rgba(200,250,255,.9)',.8)}}
   for(const t of tells)glow(t[0],t[1],46,'rgba(200,250,255,.95)',.9*t[2]);
+  // rings of the bell storm, from the side lanterns
+  for(const th of srings){const o=P[SBELLS[th.side]];
+    if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);glow(o.x,o.y,56,'rgba(110,235,255,.9)',.3+.6*k);ctx.strokeStyle=`rgba(220,252,255,${k})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(o.x,o.y,30-18*k,0,Math.PI*2);ctx.stroke();continue}
+    let x,y,a=1,rr=16;
+    if(!th.done){const k=ein(clamp((gt-th.tl)/(th.ti-th.tl),0,1));x=lerp(o.x,hit.x,k);y=lerp(o.y,hit.y,k)-Math.sin(Math.PI*k)*40;rr=14+12*k}
+    else{const q=(gt-th.okT)/.35;if(q>=1)continue;a=1-q;x=hit.x+(th.res==='ok'?40*q:0);y=hit.y-(th.res==='ok'?50*q:0);rr=26+30*q;if(!th.bf){th.bf=1;burst(hit.x,hit.y,th.res==='ok'?16:8,'#dff8ff',5,.5)}}
+    ctx.globalAlpha=a;glow(x,y,rr*2.2,'rgba(110,235,255,.9)',.6);ctx.strokeStyle='#eafcff';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(x,y,rr,rr*.55,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='rgba(110,235,255,.8)';ctx.lineWidth=8;ctx.globalAlpha=a*.4;ctx.stroke();ctx.globalAlpha=1}
   for(const e of fx){if(e[0]==='wave'){ctx.strokeStyle=`rgba(200,245,255,${1-e[3]})`;ctx.lineWidth=6*(1-e[3])+1;ctx.beginPath();ctx.arc(e[1],e[2],e[3]*700,0,Math.PI*2);ctx.stroke()}
     else{ctx.strokeStyle=`rgba(255,200,120,${.8*(1-e[3])})`;ctx.lineWidth=3;for(let i=0;i<3;i++){const r=30+((e[3]*90+i*30)%90);ctx.beginPath();ctx.arc(e[1],e[2],r,Math.PI*.15,Math.PI*.85,true);ctx.stroke()}}}
   ctx.restore();
@@ -2027,7 +2123,7 @@ function playCine(id,k,cb){
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;S.ringT=0;S.proHand=null;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function resetPhaseState(){Object.assign(S,{angerShown:false,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,pl:newPl(),post:null})}
+function resetPhaseState(){Object.assign(S,{angerShown:false,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,pl:newPl(),post:null,rust:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
@@ -2140,9 +2236,9 @@ function endEpilogue(){if(S.mode!=='epilogue')return;const cb=S.epCb;S.epCb=null
 
 
 /* ---------- combat sound effects: wind-ups, releases and impacts ---------- */
-const SFX_START={slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
-const SFX_MID={orb:'throw',toll:'tollLast',ring:'whoosh',trap:'whooshDown',chunk:'clank',shard:'whoosh',sweep:'whoosh',slam:'whoosh'};
-const SFX_HIT={slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank'};
+const SFX_START={wave:'rumble',rafter:'fallWhine',kwave:'swell',sring:'bellSoft',slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
+const SFX_MID={sring:'whoosh',orb:'throw',toll:'tollLast',ring:'whoosh',trap:'whooshDown',chunk:'clank',shard:'whoosh',sweep:'whoosh',slam:'whoosh'};
+const SFX_HIT={wave:'plant',sring:'clank',slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank'};
 function combatSfx(){
   if(S.mode!=='play'||S.paused)return;
   for(const th of S.threats){

@@ -48,70 +48,72 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 42 | The Drowned Lighthouse | Le Phare Noyé |
 | 43 | Guard | Garde |
 | 44 | The Watcher on the reefs facing the Drowned Lighthouse, a tower made of the King's body, crowned by an electric jellyfish | Le Veilleur sur les récifs face au Phare Noyé, une tour faite du corps du Roi et couronnée d'une méduse électrique |
-| 45 | Broken mirror | Miroir brisé |
-| 46 | Reflections now look like real orbs. Only real orbs cast a shadow. | Les reflets ressemblent aux vraies orbes. Seules les vraies ont une ombre. |
+| 45 | Echoes | Échos |
+| 46 | Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one. | Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un. |
 | 47 | Blue heart | Cœur bleu |
 | 48 | The Bottomless takes control: every attack calls a toll. | La Sans-Fond prend le contrôle : chaque attaque appelle un glas. |
-| 49 | Double orbit | Double orbite |
-| 50 | The rings split and spin faster. | Les anneaux se séparent et tournent plus vite. |
-| 51 | Final assault | Dernier assaut |
-| 52 | Funeral toll | Glas funèbre |
-| 53 | Chorus of reflections | Chœur des reflets |
-| 54 | Implosion | Implosion |
-| 55 | You dodged a reflection. | Tu as esquivé un reflet. |
-| 56 | The reflection comes back. | Le reflet revient. |
-| 57 | Start | Commencer |
-| 58 | Continue | Continuer |
-| 59 | Phase II cleared | Phase II terminée |
-| 60 | Phase I cleared | Phase I terminée |
-| 61 | Phase III cleared | Phase III terminée |
-| 62 | Continue | Continuer |
-| 63 | Menu | Menu |
-| 64 | Victory | Victoire |
-| 65 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
-| 66 | Time | Temps |
-| 67 | Hits taken | Coups reçus |
-| 68 | Perfects | Parfaits |
-| 69 | Best | Record |
-| 70 | New record.  | Nouveau record.  |
-| 71 | Records only count for runs started from the beginning. | Le record ne compte que pour une partie lancée depuis le début. |
-| 72 | Play again | Rejouer |
-| 73 | Menu | Menu |
-| 74 | Defeat | Défaite |
-| 75 | The Watcher is down. | Le Veilleur est à terre. |
-| 76 | Trial: one fall sends you back to Phase I. | Épreuve : une chute te renvoie à la phase I. |
-| 77 | Restart | Recommencer |
-| 78 | Retry phase | Réessayer la phase |
-| 79 | Menu | Menu |
-| 80 | By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again. | Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus. |
-| 81 | On it, a single word is engraved: Crown. | Sur celle-ci, un seul mot est gravé : Couronne. |
-| 82 | And this time, the earth has not stopped trembling. | Et cette fois, la terre n'a pas cessé de trembler. |
-| 83 | Beneath the waves, a turquoise glow still pulses, faintly. | Sous les vagues, une lueur turquoise pulse encore, faiblement. |
-| 84 | Deep in the forest, a faint light flickers. | Au cœur de la forêt, une faible lumière vacille. |
-| 85 | Chapter III. To be continued. | Chapitre III. À suivre. |
-| 86 | Epilogue | Épilogue |
-| 87 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
-| 88 | Easy | Facile |
-| 89 | Breathe | Respirer |
-| 90 | Normal | Normal |
-| 91 | The real fight | Le vrai combat |
-| 92 | Hard | Difficile |
-| 93 | No mercy | Sans pitié |
-| 94 | Trial | Épreuve |
-| 95 | No healing | Sans soin |
-| 96 | Normal | Normal |
-| 97 | 4 HP total | 4 PV au total |
-| 98 | Hard | Difficile |
+| 49 | Bell storm | Tempête de cloches |
+| 50 | The side lanterns fire rings in turn, then the trap bell falls. | Les lanternes latérales tirent des anneaux tour à tour, puis la cloche-piège tombe. |
+| 51 | Rising tide | Marée montante |
+| 52 | The wave floods the reefs; spikes rise as it ebbs. | La vague noie les récifs ; des pics jaillissent quand elle se retire. |
+| 53 | Final assault | Dernier assaut |
+| 54 | Funeral toll | Glas funèbre |
+| 55 | Chorus of reflections | Chœur des reflets |
+| 56 | Implosion | Implosion |
+| 57 | You dodged a reflection. | Tu as esquivé un reflet. |
+| 58 | The reflection comes back. | Le reflet revient. |
+| 59 | Start | Commencer |
+| 60 | Continue | Continuer |
+| 61 | Phase II cleared | Phase II terminée |
+| 62 | Phase I cleared | Phase I terminée |
+| 63 | Phase III cleared | Phase III terminée |
+| 64 | Continue | Continuer |
+| 65 | Menu | Menu |
+| 66 | Victory | Victoire |
+| 67 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
+| 68 | Time | Temps |
+| 69 | Hits taken | Coups reçus |
+| 70 | Perfects | Parfaits |
+| 71 | Best | Record |
+| 72 | New record.  | Nouveau record.  |
+| 73 | Records only count for runs started from the beginning. | Le record ne compte que pour une partie lancée depuis le début. |
+| 74 | Play again | Rejouer |
+| 75 | Menu | Menu |
+| 76 | Defeat | Défaite |
+| 77 | The Watcher is down. | Le Veilleur est à terre. |
+| 78 | Trial: one fall sends you back to Phase I. | Épreuve : une chute te renvoie à la phase I. |
+| 79 | Restart | Recommencer |
+| 80 | Retry phase | Réessayer la phase |
+| 81 | Menu | Menu |
+| 82 | By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again. | Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus. |
+| 83 | On it, a single word is engraved: Crown. | Sur celle-ci, un seul mot est gravé : Couronne. |
+| 84 | And this time, the earth has not stopped trembling. | Et cette fois, la terre n'a pas cessé de trembler. |
+| 85 | Beneath the waves, a turquoise glow still pulses, faintly. | Sous les vagues, une lueur turquoise pulse encore, faiblement. |
+| 86 | Deep in the forest, a faint light flickers. | Au cœur de la forêt, une faible lumière vacille. |
+| 87 | Chapter III. To be continued. | Chapitre III. À suivre. |
+| 88 | Epilogue | Épilogue |
+| 89 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
+| 90 | Easy | Facile |
+| 91 | Breathe | Respirer |
+| 92 | Normal | Normal |
+| 93 | The real fight | Le vrai combat |
+| 94 | Hard | Difficile |
+| 95 | No mercy | Sans pitié |
+| 96 | Trial | Épreuve |
+| 97 | No healing | Sans soin |
+| 98 | Normal | Normal |
 | 99 | 4 HP total | 4 PV au total |
-| 100 | ‹ Back | ‹ Retour |
-| 101 | Difficulties | Difficultés |
-| 102 | Resume | Reprendre |
-| 103 | Resume | Reprendre |
-| 104 | Fight paused | Combat en pause |
-| 105 | Retry | Réessayer |
-| 106 | Skip › | Passer › |
-| 107 | Space, up arrow or tap the screen · P pause · R retry · Enter to skip | Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer |
-| 108 | Visual help | Aide visuelle |
-| 109 | Sound | Son |
-| 110 | Music | Musique |
-| 111 | The Watcher | Le Veilleur |
+| 100 | Hard | Difficile |
+| 101 | 4 HP total | 4 PV au total |
+| 102 | ‹ Back | ‹ Retour |
+| 103 | Difficulties | Difficultés |
+| 104 | Resume | Reprendre |
+| 105 | Resume | Reprendre |
+| 106 | Fight paused | Combat en pause |
+| 107 | Retry | Réessayer |
+| 108 | Skip › | Passer › |
+| 109 | Space, up arrow or tap the screen · P pause · R retry · Enter to skip | Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer |
+| 110 | Visual help | Aide visuelle |
+| 111 | Sound | Son |
+| 112 | Music | Musique |
+| 113 | The Watcher | Le Veilleur |

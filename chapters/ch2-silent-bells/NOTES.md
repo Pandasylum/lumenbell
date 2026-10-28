@@ -118,3 +118,12 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - Le Veilleur n'a plus d'épée : **bloquer** (EN *block*) en phase II et en phase III (blocage tenu, le barrage), **esquiver** en phase I. Bouton de la phase II : « Bloquer » / « Block » ; lecteur d'écran : « Série bloquée » ; son `sfx.block`, onomatopée `ONO.block` (`CLANG`). Les états restent ceux du Chapitre I (`ready` → action → `recover`).
 - Clés de tables gardées : `T.barrier` (durée du blocage), `R_T.guard` (blocage tenu de la phase III), `S.guardT` (date d'animation du blocage).
 - Bouton de la phase III : « Garde » / « Guard » gardé (à valider). Les mots d'annonce « Paré », « Parade »… restent interdits à l'écran (`tests/ch2-announce.js`), comme « Bloqué ».
+
+## Nouveaux sorts (étape C1, partie 2, 28 octobre, `ch2/spells`)
+- **Table `SP`** (à côté de `FINAL_AT`) : toutes les durées des nouveaux sorts, × `f` comme les autres séries ; valeurs **provisoires** reprises des sorts voisins (le commentaire de la table dit d'où vient chacune).
+- **Phase II** (`P1`) : `wave(big)` (menace `wave` : `tl` pied posé, `ti` blocage), `rafter(ti)` (menaces `rafter` n = 1 et 2), `surge()` = vague + poutre (remplace `stomp` et `rock`), `dwave()` (rage), `rust()` (rage : `S.rust` = nuage, puis une menace `slam` avec `ls` et `rust`). Dessin : `drawWave()`, `drawRafter()` (table `RAFTER`), `drawRust()` (`RUSTP`, `S.kingHead`).
+- **Phase III, forme I** (`P3`) : `kwave()` (menace `kwave`, maintien comme `beam`), `tide()` (rage : vague puis deux `spike` avec `tide`). Dessin dans `drawBeacon()`.
+- **Phase III, forme II** (`P3b`) : `storm()` (rage : menaces `sring` puis `trap` avec `hold`, `ta`, `tb`). La cloche-piège sait maintenant appuyer (maintien) en plus de tomber (tap).
+- **Phase I** (`P2`) : `echoR()` (rage : l'écho, puis deux `shard` avec `from` = reflet 1 ou 2 qui se brise). `drawBoss2()` cache le reflet brisé ; `drawOrbs()` fait partir l'éclat de son visage.
+- **Captures** : scènes forcées (un tirage fixe de `pick`) pour chaque nouveau sort ; planches dans `shots/c1-2-sorts/`.
+- **Contrôle du 28 octobre** : joueur parfait (bot à erreur nulle) sur chaque nouveau sort forcé, Normal et Difficile : 0 coup reçu dans les 14 cas. Bot de la phase III (20 parties) : Normal 20/20, 20/20, 11/20 à 40 / 70 / 100 ms ; Difficile 17/20, 2/20, 1/20 (avant les nouveaux sorts : 20/20, 19/20, 11/20 ; 20/20, 0/20, 0/20).
