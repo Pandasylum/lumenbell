@@ -1,6 +1,7 @@
 """Construit le jeu du Chapitre II (Silent Bells).
 Usage : python3 build/build_ch2.py
-Entree : chapters/ch2-silent-bells/src/silent-bells.html (legacy/silent-bells.source.html = import d'origine, fige)
+Entree : morceaux de chapters/ch2-silent-bells/src/ (ordre : src/parts.txt, via build/assemble.py, avec les morceaux
+communs de shared/) ; legacy/silent-bells.source.html = import d'origine, fige
 Sortie : chapters/ch2-silent-bells/dist/index.html, build/out/silent-bells-itch.zip
 Seuls ecarts avec la source (voir chapters/ch2-silent-bells/NOTES.md) : meta propre a l'hebergeur
 d'artefacts retiree, polices Google remplacees par build/fonts.css inlinees.
@@ -8,8 +9,9 @@ d'artefacts retiree, polices Google remplacees par build/fonts.css inlinees.
 import sys, zipfile
 from pathlib import Path
 sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from assemble import source, CH2
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "chapters/ch2-silent-bells/src/silent-bells.html"
 DIST = ROOT / "chapters/ch2-silent-bells/dist/index.html"
 OUT = ROOT / "build/out"
 
@@ -18,7 +20,7 @@ def cut(s, old, new):
     assert s.count(old) == 1, (s.count(old), old[:80])
     return s.replace(old, new)
 
-s = SRC.read_text(encoding="utf-8")
+s = source(CH2)
 assert s.startswith("<!doctype html>\n<html lang=\"fr\">\n<head>\n")
 # meta retiree (propre a l'hebergeur d'artefacts, sans effet ailleurs)
 s = cut(s, '<meta name="claude:viewport-fit-sides" content="cover">\n', "")

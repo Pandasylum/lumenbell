@@ -1,0 +1,138 @@
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header class="top">
+    <div>
+      <p class="eyebrow" id="hdEye">Prologue</p>
+      <h1>Silent Bells</h1>
+    </div>
+    <div class="hright">
+      <ol class="phases" id="phases" aria-label="Phases">
+        <li class="on"><button type="button" data-ph="1" aria-label="Phase I">I</button></li><li><button type="button" data-ph="2" aria-label="Phase II">II</button></li><li><button type="button" data-ph="3" aria-label="Phase III">III</button></li>
+      </ol>
+      <button type="button" class="mbtn" id="menuBtn">Menu</button>
+    </div>
+  </header>
+
+  <section class="bars" aria-label="Points de vie">
+    <div class="bar"><span><i id="nmP">Le Veilleur</i> <b id="hpPn"></b></span><div class="pips" id="hpP"></div></div>
+    <div class="bar boss"><span><i id="nmB">La Voix Creuse</i> <b id="hpBn"></b></span><div class="pips" id="hpB"></div></div>
+  </section>
+
+  <div class="stage" id="stage">
+    <canvas id="c" role="img" aria-label="Arène du combat"></canvas>
+    <button type="button" class="skip" id="skip" hidden>Passer ›</button>
+
+    <div class="ov" id="ov" hidden>
+      <div class="card">
+        <p class="eyebrow" id="ovEye"></p>
+        <h2 id="ovTitle"></h2>
+        <div class="rtab" id="ovTable" hidden></div>
+        <p id="ovDesc"></p>
+        <p class="how2" id="ovHow" hidden></p>
+        <div class="brow">
+          <button class="btn" id="go" type="button">Commencer</button>
+          <button class="btn ghost" id="go2" type="button" hidden>Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ov" id="pause" hidden>
+      <div class="card">
+        <p class="eyebrow">Pause</p>
+        <h2 id="pTitle">Combat en pause</h2>
+        <div class="brow">
+          <button class="btn" id="pResume" type="button">Reprendre</button>
+          <button class="btn ghost" id="pMenu" type="button">Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ov menu" id="menu">
+      <svg class="mscene" id="mScene" viewBox="0 0 960 540" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="msky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#03070c"/><stop offset=".6" stop-color="#0a2027"/><stop offset="1" stop-color="#0f3c3d"/></linearGradient>
+          <linearGradient id="maur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fa3a2" stop-opacity="0"/><stop offset=".55" stop-color="#7fa3a2" stop-opacity=".22"/><stop offset="1" stop-color="#7fa3a2" stop-opacity="0"/></linearGradient>
+          <radialGradient id="mgl" cx=".5" cy="1" r=".7"><stop offset="0" stop-color="#4fe0cc" stop-opacity=".6"/><stop offset="1" stop-color="#4fe0cc" stop-opacity="0"/></radialGradient>
+          <linearGradient id="mbeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8fbff" stop-opacity=".65"/><stop offset="1" stop-color="#6fe8ff" stop-opacity="0"/></linearGradient>
+          <radialGradient id="mjel" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#f2feff"/><stop offset=".45" stop-color="#5fd8ff"/><stop offset="1" stop-color="#2aa8ff" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect width="960" height="540" fill="url(#msky)"/>
+        <circle cx="170" cy="110" r="34" fill="#e8f4f2" opacity=".12"/>
+        <g fill="#e8f4f2" opacity=".55"><circle cx="80" cy="60" r="1.2"/><circle cx="260" cy="40" r="1"/><circle cx="420" cy="90" r="1.2"/><circle cx="640" cy="50" r="1"/><circle cx="860" cy="80" r="1.2"/><circle cx="740" cy="130" r="1"/><circle cx="330" cy="150" r=".9"/><circle cx="560" cy="120" r="1"/><circle cx="910" cy="160" r=".9"/></g>
+        <path class="aur" d="M0 170 Q160 90 320 160 T640 130 T960 150 L960 240 Q800 190 640 230 T320 220 T0 250Z" fill="url(#maur)"/>
+        <g opacity=".5"><path class="aur2" d="M0 120 Q200 70 380 120 T760 100 T960 110 L960 160 Q760 140 600 160 T260 150 T0 170Z" fill="url(#maur)"/></g>
+        <path d="M0 352 L960 352 L960 540 L0 540Z" fill="#0b2328"/><path d="M60 352 L72 344 L96 346 L104 352Z M380 352 L396 340 L430 343 L446 352Z M820 352 L840 338 L872 344 L884 352Z" fill="#050d10"/>
+        <path d="M0 462 L60 440 L130 450 L220 428 L300 452 L420 436 L520 456 L600 438 L700 452 L830 432 L900 448 L960 440 L960 540 L0 540Z" fill="#071318"/>
+        <rect class="lava" y="400" width="960" height="140" fill="url(#mgl)"/>
+        <g opacity=".14"><path d="M0 470 Q480 430 960 470 L960 540 L0 540Z" fill="#4fe0cc" class="lava"/></g>
+        <!-- the beacon's sweeping beam -->
+        <path class="beam" d="M715 200 L520 470 L660 470Z" fill="url(#mbeam)"/>
+        <g fill="#03080b">
+          <!-- reef shelf -->
+          <path d="M0 455 L110 452 L180 457 L300 453 L420 458 L560 452 L700 456 L840 452 L960 456 L960 476 L880 476 L860 492 L800 492 L780 476 L560 476 L540 494 L470 494 L450 476 L210 476 L190 490 L120 490 L100 476 L0 476Z"/>
+          <!-- the Watcher -->
+          <path class="mw" d="M205 455 L215 392 Q205 380 213 366 Q222 354 234 366 Q242 380 232 392 L242 455Z"/>
+          <path class="mw" d="M250 455 L250 330" stroke="#03080b" stroke-width="4" fill="none"/>
+          <!-- the Drowned Lighthouse: the King's bells stacked into a tower -->
+          <path d="M640 455 Q650 420 664 394 Q670 376 676 362 L754 362 Q760 376 766 394 Q780 420 790 455Z"/>
+          <rect x="693" y="334" width="44" height="24" rx="4"/><rect x="694" y="307" width="42" height="24" rx="4"/><rect x="695" y="280" width="40" height="24" rx="4"/><rect x="696" y="253" width="38" height="24" rx="4"/>
+          <path d="M700 300 L672 352 L680 356 L706 308Z M730 300 L758 352 L750 356 L724 308Z"/>
+          <path d="M668 262 Q648 250 650 236 L664 236 L686 248 L686 262Z M762 262 Q782 250 780 236 L766 236 L744 248 L744 262Z"/>
+          <path d="M684 206 L746 206 Q742 228 728 236 L702 236 Q688 228 684 206Z"/>
+          <!-- the anchor, planted in the reef -->
+          <path d="M818 455 L818 340" stroke="#03080b" stroke-width="7" fill="none"/>
+          <path d="M800 352 L836 352" stroke="#03080b" stroke-width="7" fill="none"/>
+          <circle cx="818" cy="330" r="9" fill="none" stroke="#03080b" stroke-width="5"/>
+        </g>
+        <!-- moorings -->
+        <path d="M676 400 Q630 440 600 456 M754 400 Q790 430 800 456" stroke="#03080b" stroke-width="4" stroke-dasharray="6 3" fill="none"/>
+        <!-- tentacles holding the pieces together -->
+        <g opacity=".6"><g class="tent" fill="none" stroke="#6fe8ff" stroke-width="1.6" stroke-linecap="round">
+          <path d="M702 208 Q676 260 690 330 Q684 380 668 440"/><path d="M728 208 Q754 260 740 330 Q746 380 762 440"/>
+          <path d="M710 210 Q700 300 714 360"/><path d="M720 210 Q732 290 718 360"/>
+          <path d="M696 206 Q660 196 640 230"/><path d="M734 206 Q770 196 790 230"/>
+        </g></g>
+        <!-- the jellyfish in the lantern -->
+        <g opacity=".3"><circle class="orb" cx="715" cy="196" r="64" fill="url(#mjel)"/></g>
+        <path class="orb" d="M683 206 Q684 168 715 164 Q746 168 747 206 Q731 200 715 206 Q699 200 683 206Z" fill="url(#mjel)"/>
+        <g class="mw"><circle class="eye" cx="250" cy="326" r="7" fill="#7fd6ff"/></g>
+        <g opacity=".12"><ellipse cx="715" cy="470" rx="90" ry="8" fill="#9ff2ff" class="lava"/></g>
+      </svg>
+      <div class="mem-wrap" id="mSnow" aria-hidden="true"></div>
+      <div class="langs" id="langs" role="group" aria-label="Langue"><button type="button" data-lang="fr" aria-pressed="true">FR</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+      <div class="mcard">
+        <p class="eyebrow" id="mEye">Chapitre II · Silent Bells</p>
+        <h2><span>Lumen</span>bell</h2>
+        <button class="btn ghost" id="mResume" type="button" hidden>Reprendre</button>
+        <div class="mph" id="mphM" role="group" aria-label="Difficulté">
+          <button type="button" data-diff="easy"><b>Facile</b><span>Respirer</span></button>
+          <button type="button" data-diff="normal"><b>Normal</b><span>Le vrai combat</span></button>
+          <button type="button" data-diff="hard"><b>Difficile</b><span>Sans pitié</span></button>
+          <button type="button" data-diff="trial"><b>Épreuve</b><span>Sans soin</span></button>
+        </div>
+        <div class="mph" id="mphT" role="group" aria-label="Épreuve" hidden>
+          <button type="button" data-diff="tn"><b>Normal</b><span>4 PV au total</span></button>
+          <button type="button" data-diff="th"><b>Difficile</b><span>4 PV au total</span></button>
+          <button type="button" id="mBackT"><b>‹ Retour</b><span>Difficultés</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ward" id="ward" type="button">Esquiver</button>
+    <div class="mrow"><button class="mbtn" id="pauseBtn" type="button">Pause</button><button class="mbtn" id="retryBtn" type="button">Réessayer</button></div>
+    <p class="hint" id="hint">Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer</p>
+    <div class="opts">
+      <label for="optHelp"><input type="checkbox" id="optHelp"> <span id="lHelp">Aide visuelle</span></label>
+      <label for="optSnd"><input type="checkbox" id="optSnd" checked> <span id="lSnd">Son</span></label>
+      <label for="optMus"><input type="checkbox" id="optMus" checked> <span id="lMus">Musique</span></label>
+    </div>
+  </div>
+  <p class="sr" id="live" aria-live="polite"></p>
+</main>
+
+<script>

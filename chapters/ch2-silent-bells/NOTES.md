@@ -6,12 +6,13 @@
 - **Pièges connus** : numéros de phase internes ≠ numéros affichés (voir plus bas) ; le Chapitre I garde ses clés `eb-…` tant que la demande de `DEMANDES.md` n'est pas traitée.
 
 ## Fichiers
-- `src/silent-bells.html` : **la source à modifier** (page complète, un seul `<script>`). Créée le 27 octobre depuis `legacy/` par `build/ch2_swap_args.py`, puis éditée.
+- `src/` : **la source à modifier**, en morceaux (28 octobre 2026, branche `engine/shared`), comme au Chapitre I : `src/parts.txt` donne l'ordre d'assemblage (= ordre d'exécution, une seule IIFE ouverte dans `js/00-open.js` et fermée dans `js/96-loop.js`) ; `build/assemble.py` colle les morceaux octet pour octet. Ancienne page unique `src/silent-bells.html` (créée le 27 octobre depuis `legacy/` par `build/ch2_swap_args.py`) : retirée, son contenu est la concaténation exacte des morceaux. Les numéros de ligne `ch2:NNN` de `docs/COMMUN.md` renvoient à cette ancienne page.
+- Carte : `page/head.html` (jusqu'au `<style>` ouvrant), `page/style.css`, `page/body.html` (de `</style>` au `<script>` ouvrant), `js/00-open.js` (ouverture de l'IIFE), `js/02-core.js` (clés, constantes, `DIFFS`, canvas, état), `04-audio-sfx.js`, `08-effects.js` (particules, motifs), `12-hero-states.js` (états du Veilleur), `16-update.js`, `20-draw-helpers.js`, `24-backgrounds.js`, `28-hero-draw.js` (Veilleur : `drawHero`, `heroShape`), `32-boss-rust-king.js`, `36-boss-hollow-voice.js`, `40-boss-drowned-beacon.js`, `44-counters-help-frame.js`, `48-stills.js`, `52-cine-phases.js`, `56-form2-render.js`, `60-music.js`, `64-prologue.js` (`proHero`), `68-form2-logic.js`, `72-flow.js`, `76-epilogue.js`, `80-sfx-combat.js`, `84-menu-art.js`, `88-lang.js`, `92-events.js`, `96-loop.js`, `page/end.html`. Coupes sur les commentaires de section ; la ligne vide qui précède reste à la fin du morceau précédent ; chaque morceau finit par un saut de ligne.
 - `legacy/silent-bells.source.html` : import d'origine, **ne pas modifier** (référence de `tests/ch2-texts.js`).
 - `dist/index.html` : généré, suivi dans git ; à committer avec sa source.
 
 ## Build (`python3 build/build_ch2.py`)
-- Entrée : `src/silent-bells.html`. Sorties : `dist/index.html` (la CI fait `git diff --exit-code`) et `build/out/silent-bells-itch.zip` (non suivi ; `index.html` à la racine, date fixe 1980-01-01, zip identique d'un build à l'autre).
+- Entrée : les morceaux de `src/` (ordre : `src/parts.txt`). Sorties : `dist/index.html` (la CI fait `git diff --exit-code`) et `build/out/silent-bells-itch.zip` (non suivi ; `index.html` à la racine, date fixe 1980-01-01, zip identique d'un build à l'autre).
 - Chaque remplacement exige une occurrence unique : si la source change à cet endroit, le build échoue au lieu de produire un fichier faux.
 - Écarts entre `dist/index.html` et `src/` (les seuls), comme au Chapitre I :
   1. retrait de `<meta name="claude:viewport-fit-sides" content="cover">` (propre à l'hébergeur d'artefacts) ;
