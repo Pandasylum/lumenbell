@@ -22,7 +22,7 @@ function calls(code){const out=[];const re=/(?<![\w$.])_\(/g;let m;
 function lit(a){if(!/^(['"`])[\s\S]*\1$/.test(a)||(a[0]==='`'&&a.includes('${')))return null;try{return Function('return '+a)()}catch(e){return null}}
 const END='S.d=DIFFS.normal;S.phase=2;applyLang();requestAnimationFrame(loop);';
 const HOOK='S.d=DIFFS.normal;S.phase=2;applyLang();\n'+
- 'window.__t={get S(){return S},get gt(){return gt},DIFFS,CINE_LEN,PRO_TITLE,down,up,startRun,jumpPhase,SHOCK,MUSIC,sfx,damageBoss,success,HULL,CINE_P3,ONO,'+
+ 'window.__t={LB,get S(){return S},get gt(){return gt},DIFFS,CINE_LEN,PRO_TITLE,down,up,startRun,jumpPhase,SHOCK,MUSIC,sfx,damageBoss,success,HULL,CINE_P3,ONO,'+
  'go(){onGo&&onGo()},step(dt,drawIt){rt+=dt;if(!S.paused&&["play","ko","dead","cine","prologue","epilogue"].includes(S.mode))gt+=dt;'+
  'update(dt);gameUpdate(dt);if(drawIt){ctx=ctxMain;SC=SCm;draw()}}};';
 function testPage(){const h=fs.readFileSync(DIST,'utf8');if(h.split(END).length!==2)throw new Error('fin du script introuvable dans dist');

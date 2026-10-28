@@ -297,12 +297,12 @@ LB.store={get(k,d){try{let v=localStorage.getItem(k);
 /* À appeler en tête du chapitre, avant toute lecture : id (préfixe lb-<id>-), old ({nouvelle clé:[anciennes]}),
    oldPrefix ([[début de la nouvelle clé, début de l'ancienne]], pour les records). Migre au démarrage toutes les clés
    connues (et chaque ancienne clé à préfixe présente), puis fixe la langue. */
-LB.setup=({id,old={},oldPrefix=[]})=>{LB.id=id;LB.old=old;LB.oldPrefix=oldPrefix;
+LB.setup=({id,old={},oldPrefix=[],audio})=>{LB.id=id;LB.old=old;LB.oldPrefix=oldPrefix;
   try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
     const want=Object.keys(LB.OLD_KEYS).concat(Object.keys(old));
     for(const [n,a] of oldPrefix)ks.filter(k=>k.startsWith(a)).forEach(k=>want.push(n+k.slice(a.length)));
     want.forEach(k=>LB.store.get(k))}catch(e){}
-  LB.lang.init()};
+  LB.lang.init();LB.audio.config(audio);LB.audio.load()};
 /* ---------- langue et texte ----------
    Choix mémorisé (lb-lang) prioritaire ; sinon la langue de l'appareil (français si elle commence par « fr »), sinon anglais.
    LB.LANGS : ordre des boutons de langue (celui du Chapitre I). */
@@ -312,11 +312,83 @@ LB.lang={cur:'en',
     const v=LB.store.get(LB.key('lang'),null);if(LB.LANGS.includes(v))l=v;return LB.lang.cur=l},
   set(l){if(!LB.LANGS.includes(l))return;LB.lang.cur=l;LB.store.set(LB.key('lang'),l)}};
 LB._=(en,fr)=>LB.lang.cur==='fr'?fr:en;
+/* ---------- audio : un seul contexte pour toute la série ----------
+   LB.audio.ctx : l'unique AudioContext (créé au premier ensure(), recréé s'il est fermé). Chaîne : sources → bus sfx / mus → master → sortie.
+   Niveaux par chapitre : LB.setup({audio:{master,sfx,mus}}), 1 par défaut. LB.audio.dest = sortie brute (musique qui a sa propre chaîne).
+   Réglages Son / Musique : lb-snd, lb-mus lus par LB.store (load, appelé par LB.setup), écrits par setSound / setMusic.
+   Arrière-plan (onglet caché, écran verrouillé, page quittée) : le contexte est suspendu, relancé au retour ou au premier geste. */
+LB.audio=(()=>{
+  let ctx=null,master=null,sfx=null,mus=null,bg=false,nb=null;
+  const lv={master:1,sfx:1,mus:1},A={sound:true,music:true,stat:{tone:0,noise:0,made:0}};
+  const apply=()=>{if(!ctx)return;master.gain.value=lv.master;sfx.gain.value=A.sound?lv.sfx:0;mus.gain.value=A.music?lv.mus:0};
+  function ensure(){
+    try{
+      if(ctx&&ctx.state==='closed'){ctx=null;nb=null}
+      if(!ctx){
+        const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+        try{ctx=new C({latencyHint:'playback'})}catch(e){ctx=new C()}
+        try{master=ctx.createGain();master.connect(ctx.destination);sfx=ctx.createGain();sfx.connect(master);mus=ctx.createGain();mus.connect(master);apply();A.stat.made++}
+        catch(e){ctx=null;return null}
+      }
+      if(!bg&&ctx.state!=='running'&&ctx.resume)ctx.resume().catch(()=>{}); /* suspended, ou « interrupted » sur Safari */
+    }catch(e){}
+    return ctx;
+  }
+  /* off=true : le contexte est suspendu et reste coupé tant qu'on n'est pas revenu */
+  function background(off){bg=off;try{if(ctx){if(off){if(ctx.state==='running')ctx.suspend().catch(()=>{})}else ensure()}}catch(e){}}
+  /* enveloppe par défaut = celle du Chapitre II ; o={atk,end,tail} pour une enveloppe plus ancienne (Chapitre I) */
+  function tone(f,dur,type,vol,dest,when,f2,o){
+    if(!ctx||(!dest&&!A.sound))return;
+    if(ctx.state!=='running')ensure();
+    try{
+      const t=when||ctx.currentTime,atk=o&&o.atk!=null?o.atk:.006,end=o&&o.end||.0005,tail=o&&o.tail!=null?o.tail:.05;
+      const os=ctx.createOscillator(),g=ctx.createGain();
+      os.type=type||'sine';os.frequency.setValueAtTime(f,t);if(f2)os.frequency.exponentialRampToValueAtTime(f2,t+dur);
+      if(atk>0){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+atk)}else g.gain.setValueAtTime(vol,t);
+      g.gain.exponentialRampToValueAtTime(end,t+dur);
+      os.connect(g);g.connect(dest||sfx);os.start(t);os.stop(t+dur+tail);A.stat.tone++;
+    }catch(e){}
+  }
+  function noise(dur,vol,ft,ff,q,dest,when,ff2,o){
+    if(!ctx||(!dest&&!A.sound))return;
+    if(ctx.state!=='running')ensure();
+    try{
+      if(!nb){nb=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+      const t=when||ctx.currentTime,atk=o&&o.atk||0,end=o&&o.end||.0005;
+      const s=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain();
+      s.buffer=nb;s.loop=true;fl.type=ft;fl.frequency.setValueAtTime(ff,t);if(ff2)fl.frequency.exponentialRampToValueAtTime(ff2,t+dur);fl.Q.value=q||1;
+      if(atk>0){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+atk)}else g.gain.setValueAtTime(vol,t);
+      g.gain.exponentialRampToValueAtTime(end,t+dur);
+      s.connect(fl);fl.connect(g);g.connect(dest||sfx);s.start(t);s.stop(t+dur+.05);A.stat.noise++;
+    }catch(e){}
+  }
+  /* le navigateur n'autorise le son qu'après un vrai geste : on crée / relance le contexte à chacun d'eux tant qu'il ne tourne pas, et on joue un son muet pour l'amorcer */
+  function unlock(){
+    ensure();
+    try{if(ctx&&ctx.state==='running'&&!ctx.__u){ctx.__u=1;const b=ctx.createBuffer(1,1,22050),n=ctx.createBufferSource();n.buffer=b;n.connect(ctx.destination);n.start(0)}}catch(e){}
+  }
+  ['click','pointerup','mousedown','touchend','keydown'].forEach(ev=>window.addEventListener(ev,()=>{if(!ctx||ctx.state!=='running'||!ctx.__u)unlock()},true));
+  document.addEventListener('visibilitychange',()=>background(document.hidden));
+  window.addEventListener('pagehide',()=>background(true));window.addEventListener('pageshow',()=>background(document.hidden));
+  window.addEventListener('blur',()=>{if(document.hidden)background(true)});window.addEventListener('focus',()=>{if(!document.hidden)background(false)});
+  Object.assign(A,{
+    ensure,background,tone,noise,
+    config(o){Object.assign(lv,o||{});apply()},
+    load(){A.sound=LB.store.get(LB.key('snd'),'1')==='1';A.music=LB.store.get(LB.key('mus'),'1')==='1';apply()},
+    setSound(on){A.sound=!!on;LB.store.set(LB.key('snd'),A.sound?'1':'0');apply();if(A.sound)ensure()},
+    setMusic(on){A.music=!!on;LB.store.set(LB.key('mus'),A.music?'1':'0');apply();if(A.music)ensure()},
+    now(){return ctx?ctx.currentTime:0}
+  });
+  /* défini à part : Object.assign recopierait la valeur des accesseurs au lieu de les garder */
+  Object.defineProperties(A,{ctx:{get:()=>ctx},dest:{get:()=>ctx&&ctx.destination},sfx:{get:()=>sfx},mus:{get:()=>mus},master:{get:()=>master},
+    state:{get:()=>ctx?ctx.state:'none'},bg:{get:()=>bg}});
+  return A;
+})();
 const $=id=>document.getElementById(id);
 /* save keys and language: common to the series (shared/, LB.store, LB.key, LB.lang). Common keys lb-lang, lb-snd, lb-mus,
    lb-help (old pn-lang, eb-lang, db-opt*: LB.OLD_KEYS); this chapter's keys lb-ch2-* (unlock, records), old db-unl, db-best-*. */
-LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']]});
-const OPT_KEY={optSnd:LB.key('snd'),optMus:LB.key('mus'),optHelp:LB.key('help')};
+LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']],audio:{master:.75,sfx:.9,mus:.3}});
+const OPT_KEY={optHelp:LB.key('help')};
 /* UNLOCK_ALL: true = the three phases are open from the start (phase track), as in Ember Bridge; the difficulties and the
    Trial are always open. false = progressive unlock: a phase opens once the previous one is cleared (key lb-ch2-unl, still
    written on every clear). Disabled for testing; idea to extend to the whole series later (common screen). */
@@ -355,13 +427,9 @@ function fresh(dk){const d=DIFFS[dk];return{dk,d,phase:1,mode:'card',paused:fals
 
 function say(t){$('live').textContent=t}
 
-/* ---------- audio ---------- */
-let AC=null,M,SG,MG;
-function ensureAudio(){if(AC){if(AC.state==='suspended')AC.resume();return}try{AC=new(window.AudioContext||window.webkitAudioContext)();M=AC.createGain();M.gain.value=.75;M.connect(AC.destination);SG=AC.createGain();SG.connect(M);MG=AC.createGain();MG.gain.value=.3;MG.connect(M);applyVol()}catch(e){AC=null}}
-function applyVol(){if(!AC)return;SG.gain.value=$('optSnd').checked?.9:0;MG.gain.value=$('optMus').checked?.3:0}
-function tone(f,dur,type,vol,dest,when,f2){if(!AC)return;const t=when||AC.currentTime;const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.006);g.gain.exponentialRampToValueAtTime(.0005,t+dur);o.connect(g);g.connect(dest||SG);o.start(t);o.stop(t+dur+.05)}
-let NB=null;function nbuf(){if(!NB){NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return NB}
-function noise(dur,vol,ft,ff,q,dest,when,ff2){if(!AC)return;const t=when||AC.currentTime;const s=AC.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=AC.createBiquadFilter();fl.type=ft;fl.frequency.setValueAtTime(ff,t);if(ff2)fl.frequency.exponentialRampToValueAtTime(ff2,t+dur);fl.Q.value=q||1;const g=AC.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0005,t+dur);s.connect(fl);fl.connect(g);g.connect(dest||SG);s.start(t);s.stop(t+dur+.05)}
+/* ---------- audio : tout passe par LB.audio (shared/js/12-audio.js), un seul contexte pour la série ---------- */
+const ensureAudio=()=>LB.audio.ensure();
+const tone=(...a)=>LB.audio.tone(...a),noise=(...a)=>LB.audio.noise(...a);
 const sfx={
   block(p){tone(p?1046:880,.5,'sine',.22);tone(p?1568:1318,.35,'sine',.1);tone(2217,.2,'triangle',.05);if(p)tone(2093,.6,'sine',.07)},
   dodge(p){noise(.22,.25,'bandpass',600,2,null,null,2600);if(p)tone(1760,.25,'sine',.06)},
@@ -377,24 +445,24 @@ const sfx={
   shield(){tone(660,.15,'sine',.05);tone(990,.15,'sine',.03)},
   counter(){tone(330,.4,'triangle',.12,null,null,990);noise(.3,.12,'bandpass',2000,3)},
   ko(){tone(110,2,'sine',.3,null,null,40);noise(1.4,.25,'lowpass',900,1,null,null,100)},
-  win(){[523,659,784,1046].forEach((f,i)=>tone(f,1.2,'sine',.12,null,AC?AC.currentTime+i*.12:0))}
+  win(){[523,659,784,1046].forEach((f,i)=>tone(f,1.2,'sine',.12,null,LB.audio.ctx?LB.audio.now()+i*.12:0))}
 };
-function play(k,a){if(AC&&$('optSnd').checked)sfx[k](a)}
+function play(k,a){if(LB.audio.ctx&&LB.audio.sound)sfx[k](a)}
 /* music */
 const MUS=[null,{bpm:84,bass:[73.4,73.4,87.3,65.4],lead:'bell'},{bpm:96,bass:[82.4,87.3,82.4,61.7],lead:'choir'},{bpm:118,bass:[55,55,65.4,49],lead:'arp'}];
 let mStep=0,mNext=0;
 function musTick(){
-  if(!AC||!$('optMus').checked||S.mode!=='play'||S.paused)return;
+  if(!LB.audio.ctx||!LB.audio.music||S.mode!=='play'||S.paused)return;
   const m=MUS[S.phase],bt=60/m.bpm;
-  if(mNext<AC.currentTime)mNext=AC.currentTime+.05;
-  while(mNext<AC.currentTime+.25){
+  if(mNext<LB.audio.now())mNext=LB.audio.now()+.05;
+  while(mNext<LB.audio.now()+.25){
     const t=mNext,beat=mStep%16,bar=Math.floor(mStep/16)%4,root=m.bass[bar];
-    if(beat%4===0){tone(90,.25,'sine',.35,MG,t,38)}
-    if(beat%8===6&&S.phase>1)noise(.12,.08,'highpass',5000,1,MG,t);
-    if(beat===0||beat===8)tone(root,bt*3.6,'sawtooth',.07,MG,t);
-    if(m.lead==='bell'&&(beat===0||beat===10))tone(root*4,1.4,'sine',.04,MG,t);
-    if(m.lead==='choir'&&beat===0){[1,1.19,1.5].forEach(r=>tone(root*4*r,bt*3.8,'triangle',.025,MG,t))}
-    if(m.lead==='arp'&&beat%2===0){const r=[1,1.5,2,2.4,3,2.4,2,1.5][(beat/2)%8];tone(root*4*r,bt*.45,'sine',.03,MG,t)}
+    if(beat%4===0){tone(90,.25,'sine',.35,LB.audio.mus,t,38)}
+    if(beat%8===6&&S.phase>1)noise(.12,.08,'highpass',5000,1,LB.audio.mus,t);
+    if(beat===0||beat===8)tone(root,bt*3.6,'sawtooth',.07,LB.audio.mus,t);
+    if(m.lead==='bell'&&(beat===0||beat===10))tone(root*4,1.4,'sine',.04,LB.audio.mus,t);
+    if(m.lead==='choir'&&beat===0){[1,1.19,1.5].forEach(r=>tone(root*4*r,bt*3.8,'triangle',.025,LB.audio.mus,t))}
+    if(m.lead==='arp'&&beat%2===0){const r=[1,1.5,2,2.4,3,2.4,2,1.5][(beat/2)%8];tone(root*4*r,bt*.45,'sine',.03,LB.audio.mus,t)}
     mNext+=bt/4;mStep++;
   }
 }
@@ -1747,10 +1815,10 @@ function cineOverlay(){
 }
 /* ---------- music & ambience (procedural, Web Audio) ---------- */
 const MUSIC=(()=>{
-  let musOn=true,fxOn=true;
   let ac=null,out,rev,cur=null,layers=[],bedLayers=[],bedId=null,bedTimer=null,timer=null,next=0,step=0,NB=null,ARR=null;
-  function init(){if(ac)return true;try{const AC_=window.AudioContext||window.webkitAudioContext;try{ac=new AC_({latencyHint:'playback'})}catch(e){ac=new AC_()}}catch(e){return false}
-    out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(ac.destination);
+  /* le contexte est celui de la série (LB.audio) ; la chaîne de la musique (out, compresseur, réverbération) est refaite s'il a été recréé */
+  function init(){const c=LB.audio.ensure();if(!c)return false;if(ac===c)return true;ac=c;NB=null;
+    out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(LB.audio.dest);
     rev=ac.createConvolver();const n=ac.sampleRate*3.8,b=ac.createBuffer(2,n,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}rev.buffer=b;
     const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out);return true}
   const nbuf=()=>{if(!NB){NB=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return NB};
@@ -1858,13 +1926,13 @@ const MUSIC=(()=>{
     refill:t=>{osc('sine',180,t,3.4,.05,.4,.6,720);osc('sine',270,t,3.4,.03,.4,.6,1080);nz(t,3.6,.03,'bandpass',500,4,.6,3000,3.4)},
     stars:t=>{[1046.5,1318.5,1568,2093,2637].forEach((f,i)=>osc('sine',f,t+i*.28,.01,.05,3,.9))}
   };
-  function fx(name){if(!fxOn)return;if(!init())return;ac.resume();const f=FX[name];if(f)f(ac.currentTime+.02)}
-  function bed(id){if(!musOn)return;if(!init())return;ac.resume();if(cur===id)return;bedStop();bedId=id;ARR=bedLayers;THEMES[id].bed();ARR=null;bedTimer=setInterval(()=>{if(Math.random()<.18)THEMES[id].amb(ac.currentTime+.05)},200)}
+  function fx(name){if(!LB.audio.sound)return;if(!init())return;const f=FX[name];if(f)f(ac.currentTime+.02)}
+  function bed(id){if(!LB.audio.music)return;if(!init())return;if(cur===id)return;bedStop();bedId=id;ARR=bedLayers;THEMES[id].bed();ARR=null;bedTimer=setInterval(()=>{if(Math.random()<.18)THEMES[id].amb(ac.currentTime+.05)},200)}
   function bedStop(){if(!ac)return;clearInterval(bedTimer);bedTimer=null;bedId=null;const t=ac.currentTime;bedLayers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+1);setTimeout(L.stop,1200)});bedLayers=[]}
   function tick(){const th=THEMES[cur];if(!th)return;const spb=60/th.bpm/4;if(next<ac.currentTime){const miss=Math.ceil((ac.currentTime-next)/spb);next+=miss*spb;step+=miss}while(next<ac.currentTime+.6){th.step(step,next);if(Math.random()<th.ambP)th.amb(next+Math.random()*spb);next+=spb;step++}}
   function stop(){if(!ac)return;clearInterval(timer);timer=null;cur=null;out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);const t=ac.currentTime;layers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+.8);setTimeout(L.stop,1000)});layers=[]}
-  function play(id){if(!musOn){stop();bedStop();return}if(!init())return;ac.resume();stop();bedStop();cur=id;step=0;next=ac.currentTime+.15;out.gain.setTargetAtTime(.5*(THEMES[id].vol||1),ac.currentTime,.3);THEMES[id].start();timer=setInterval(tick,100)}
-  return{play,stop,fx,bed,bedStop,setMus(v){musOn=v;if(!v){stop();bedStop()}},setFx(v){fxOn=v},get cur(){return cur},get bedId(){return bedId}};
+  function play(id){if(!LB.audio.music){stop();bedStop();return}if(!init())return;stop();bedStop();cur=id;step=0;next=ac.currentTime+.15;out.gain.setTargetAtTime(.5*(THEMES[id].vol||1),ac.currentTime,.3);THEMES[id].start();timer=setInterval(tick,100)}
+  return{play,stop,fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
 })();
 /* ---------- Prologue: the silent coast (docs/CH2-SPEC.md, intro) ---------- */
 /* intro rhythm, as in Ember Bridge (76-cine-intro.js): one shot per carton, 6 to 7 s each (PRO_T.cap); each carton
@@ -2575,11 +2643,10 @@ document.querySelectorAll('#phases button').forEach(b=>b.addEventListener('click
 document.querySelectorAll('[data-diff]').forEach(b=>b.addEventListener('click',()=>{ensureAudio();const dk=b.dataset.diff;if(dk==='trial'){$('mphM').hidden=true;$('mphT').hidden=false;return}startRun(dk)}));
 $('mBackT').addEventListener('click',()=>{$('mphM').hidden=false;$('mphT').hidden=true});
 document.querySelectorAll('#langs button').forEach(b=>b.addEventListener('click',()=>{LB.lang.set(b.dataset.lang);applyLang()}));
-['optSnd','optMus'].forEach(id=>{$(id).checked=LB.store.get(OPT_KEY[id],'1')==='1'});$('optHelp').checked=LB.store.get(OPT_KEY.optHelp,'0')==='1';
-function syncAudio(){MUSIC.setFx($('optSnd').checked);MUSIC.setMus($('optMus').checked);applyVol();
+$('optSnd').checked=LB.audio.sound;$('optMus').checked=LB.audio.music;$('optHelp').checked=LB.store.get(OPT_KEY.optHelp,'0')==='1';
+function syncAudio(){LB.audio.setSound($('optSnd').checked);LB.audio.setMusic($('optMus').checked);MUSIC.setMus($('optMus').checked);
   if($('optMus').checked){if(!$('menu').hidden)setTheme(4);else if(S.mode==='play'&&!S.paused)setTheme(S.phase)}}
-['optHelp','optSnd','optMus'].forEach(id=>{const el=$(id);el.addEventListener('change',()=>{LB.store.set(OPT_KEY[id],el.checked?'1':'0');if(id!=='optHelp')syncAudio();el.blur()})});
-MUSIC.setFx($('optSnd').checked);MUSIC.setMus($('optMus').checked);
+['optHelp','optSnd','optMus'].forEach(id=>{const el=$(id);el.addEventListener('change',()=>{if(id==='optHelp')LB.store.set(OPT_KEY[id],el.checked?'1':'0');else syncAudio();el.blur()})});
 // menu music starts on the first interaction (browsers block sound before that)
 document.addEventListener('pointerdown',()=>{if(!$('menu').hidden&&MUSIC.cur!==4)setTheme(4)});
 document.addEventListener('keydown',()=>{if(!$('menu').hidden&&MUSIC.cur!==4)setTheme(4)});

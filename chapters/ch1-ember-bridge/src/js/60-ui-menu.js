@@ -24,10 +24,10 @@ cv.addEventListener('pointerdown',e=>{e.preventDefault();press()});
 el.ward.addEventListener('pointerdown',e=>{e.preventDefault();press()});
 el.ward.addEventListener('click',e=>{if(e.detail===0)press()});
 el.go.addEventListener('click',start);
-el.help.checked=prefs.help;el.snd.checked=prefs.sound;$('optMus').checked=prefs.music;
+el.help.checked=prefs.help;el.snd.checked=LB.audio.sound;$('optMus').checked=LB.audio.music;
 el.help.addEventListener('change',()=>{prefs.help=el.help.checked;LB.store.set(LB.key('help'),prefs.help?'1':'0')});
-el.snd.addEventListener('change',()=>{prefs.sound=el.snd.checked;LB.store.set(LB.key('snd'),prefs.sound?'1':'0');if(prefs.sound)ensureAudio()});
-$('optMus').addEventListener('change',()=>{prefs.music=$('optMus').checked;LB.store.set(LB.key('mus'),prefs.music?'1':'0');if(prefs.music)ensureAudio()});
+el.snd.addEventListener('change',()=>LB.audio.setSound(el.snd.checked));
+$('optMus').addEventListener('change',()=>LB.audio.setMusic($('optMus').checked));
 const pauseEl=$('pause');
 const menuEl=$('menu');
 function setPause(on){

@@ -1,9 +1,9 @@
 /* ---------- music & ambience (procedural, Web Audio) ---------- */
 const MUSIC=(()=>{
-  let musOn=true,fxOn=true;
   let ac=null,out,rev,cur=null,layers=[],bedLayers=[],bedId=null,bedTimer=null,timer=null,next=0,step=0,NB=null,ARR=null;
-  function init(){if(ac)return true;try{const AC_=window.AudioContext||window.webkitAudioContext;try{ac=new AC_({latencyHint:'playback'})}catch(e){ac=new AC_()}}catch(e){return false}
-    out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(ac.destination);
+  /* le contexte est celui de la série (LB.audio) ; la chaîne de la musique (out, compresseur, réverbération) est refaite s'il a été recréé */
+  function init(){const c=LB.audio.ensure();if(!c)return false;if(ac===c)return true;ac=c;NB=null;
+    out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(LB.audio.dest);
     rev=ac.createConvolver();const n=ac.sampleRate*3.8,b=ac.createBuffer(2,n,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}rev.buffer=b;
     const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out);return true}
   const nbuf=()=>{if(!NB){NB=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return NB};
@@ -111,11 +111,11 @@ const MUSIC=(()=>{
     refill:t=>{osc('sine',180,t,3.4,.05,.4,.6,720);osc('sine',270,t,3.4,.03,.4,.6,1080);nz(t,3.6,.03,'bandpass',500,4,.6,3000,3.4)},
     stars:t=>{[1046.5,1318.5,1568,2093,2637].forEach((f,i)=>osc('sine',f,t+i*.28,.01,.05,3,.9))}
   };
-  function fx(name){if(!fxOn)return;if(!init())return;ac.resume();const f=FX[name];if(f)f(ac.currentTime+.02)}
-  function bed(id){if(!musOn)return;if(!init())return;ac.resume();if(cur===id)return;bedStop();bedId=id;ARR=bedLayers;THEMES[id].bed();ARR=null;bedTimer=setInterval(()=>{if(Math.random()<.18)THEMES[id].amb(ac.currentTime+.05)},200)}
+  function fx(name){if(!LB.audio.sound)return;if(!init())return;const f=FX[name];if(f)f(ac.currentTime+.02)}
+  function bed(id){if(!LB.audio.music)return;if(!init())return;if(cur===id)return;bedStop();bedId=id;ARR=bedLayers;THEMES[id].bed();ARR=null;bedTimer=setInterval(()=>{if(Math.random()<.18)THEMES[id].amb(ac.currentTime+.05)},200)}
   function bedStop(){if(!ac)return;clearInterval(bedTimer);bedTimer=null;bedId=null;const t=ac.currentTime;bedLayers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+1);setTimeout(L.stop,1200)});bedLayers=[]}
   function tick(){const th=THEMES[cur];if(!th)return;const spb=60/th.bpm/4;if(next<ac.currentTime){const miss=Math.ceil((ac.currentTime-next)/spb);next+=miss*spb;step+=miss}while(next<ac.currentTime+.6){th.step(step,next);if(Math.random()<th.ambP)th.amb(next+Math.random()*spb);next+=spb;step++}}
   function stop(){if(!ac)return;clearInterval(timer);timer=null;cur=null;out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);const t=ac.currentTime;layers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+.8);setTimeout(L.stop,1000)});layers=[]}
-  function play(id){if(!musOn){stop();bedStop();return}if(!init())return;ac.resume();stop();bedStop();cur=id;step=0;next=ac.currentTime+.15;out.gain.setTargetAtTime(.5*(THEMES[id].vol||1),ac.currentTime,.3);THEMES[id].start();timer=setInterval(tick,100)}
-  return{play,stop,fx,bed,bedStop,setMus(v){musOn=v;if(!v){stop();bedStop()}},setFx(v){fxOn=v},get cur(){return cur},get bedId(){return bedId}};
+  function play(id){if(!LB.audio.music){stop();bedStop();return}if(!init())return;stop();bedStop();cur=id;step=0;next=ac.currentTime+.15;out.gain.setTargetAtTime(.5*(THEMES[id].vol||1),ac.currentTime,.3);THEMES[id].start();timer=setInterval(tick,100)}
+  return{play,stop,fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
 })();

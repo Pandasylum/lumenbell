@@ -35,6 +35,9 @@ jobs:
       - name: Cles de sauvegarde communes aux deux chapitres (lb-*, migration des anciennes cles)
         working-directory: tests
         run: node keys.js
+      - name: Audio commun (un seul contexte, suspension et reprise, bruitages et musiques par LB.audio)
+        working-directory: tests
+        run: node audio.js
       - name: Chapitre II - textes, cles de sauvegarde, test de fumee (3 phases, hors ligne, sans reseau), aucun mot d'annonce
         working-directory: tests
         run: |

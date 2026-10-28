@@ -163,3 +163,8 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - **Avancement** : fait = points 1 à 4 ; point 5 (retours du test de Kevin) vide. Reste à faire : juger au téléphone la caméra d'entrée, le décor et les deux sons de choc ; régler `HULL` et `SHOCK.form` ensuite.
 - Décisions : `docs/decisions/2026-10-28-ch2-retouches-3.md`.
 - **Mesure du bot de la phase III** (100 parties, après cette passe) : Normal 100/100, 94/100, 41/100 ; Difficile 60/100, 3/100, 0/100 (aucune logique de combat touchée : le tirage de `Math.random` change avec les nouvelles particules, d'où les écarts de `--check` à 20 parties : 17/20 une fois à 70 ms, 20/20 sur `main`).
+
+## Audio commun (session `engine/audio`, 28 octobre)
+- Plus de contexte propre : `04-audio-sfx.js` est réduit à `ensureAudio`, `tone`, `noise` (renvois à `LB.audio`), `sfx`, `play` ; `60-music.js` (`MUSIC`) se branche sur `LB.audio.ctx` (sortie brute `LB.audio.dest`) et lit `LB.audio.sound` / `music` au lieu de `fxOn` / `musOn`. Niveaux déclarés dans `LB.setup` (`audio:{master:.75,sfx:.9,mus:.3}`). Cases Son / Musique : `syncAudio` (`92-events.js`) appelle `LB.audio.setSound` / `setMusic`.
+- Code mort `MUS` / `musTick` (`04-audio-sfx.js`) toujours présent, branché sur `LB.audio.mus`.
+- **Avancement** : fait = rebranchement, test `tests/audio.js`. Reste à faire : juger sur téléphone la latence des bruitages (contexte en `latencyHint:'playback'` comme le reste de la série) et la reprise après écran verrouillé.

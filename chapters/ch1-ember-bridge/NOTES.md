@@ -16,7 +16,7 @@
 | `page/body.html` | `</style>`, balisage HTML (menu, overlay `#ovDesc`, pause, cinématique), `<script>` ouvrant |
 | `js/00-open.js` | Ouverture de l'IIFE (suivie, dans `parts.txt`, de `@shared` : le code commun `shared/`, objet `LB`) |
 | `js/00-core.js` | `LB.setup` (clés `lb-ch1-…`, anciennes `eb-…`), `_ = LB._`, constantes, `DIFFS`, `RUN`, `T`, canvas, `el`, `LORE`, utilitaires, repères géométriques |
-| `js/04-audio-sfx.js` | Contexte audio, `tone`, `noise`, bruitages, cris (`painCry`, `roar`) |
+| `js/04-audio-sfx.js` | `ensureAudio` (= `LB.audio.ensure`), `tone` et `noise` (enveloppe d'origine, via `LB.audio.tone`/`noise`), bruitages, cris (`painCry`, `roar`). Le contexte, la suspension en arrière-plan et le déverrouillage sont dans `shared/js/12-audio.js` |
 | `js/08-state.js` | `newGame`, `start`, `press`, intro de phase, `deathCard`, `showEnd` |
 | `js/12-effects.js` | Étincelles, onomatopées (`ONO`, `ONOSZ`), cris du Colosse (`CRIES`, `MEGA`), `float` |
 | `js/16-p1-bridge-logic.js` | Phase I : logique du combat, rages, `bossStep`, `hud`, `step` |
@@ -48,3 +48,7 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 - Le texte d'ouverture de la phase I existe deux fois : `#ovDesc` dans `page/body.html` et `CARD1` dans `js/60-ui-menu.js`.
 - `js/72-boot.js` finit par un commentaire « écran de démarrage » qui décrit en fait le code de `84-loop.js` : laissé tel quel pour rester octet pour octet identique.
 - Les coupes sont faites sur les commentaires de section (`/* ---------- … */`) ; la ligne vide qui précède reste à la fin du morceau précédent.
+
+## Audio commun (session `engine/audio`, 28 octobre)
+- Le contexte audio, `bgAudio` / `unlockAudio` et les réglages Son / Musique sont passés à `LB.audio` (`shared/js/12-audio.js`). `tone(f,d,type,v,slide)` et `noise(d,v,f0,f1)` restent ici, avec leur enveloppe d'origine, et appellent `LB.audio.tone` / `noise` ; la musique (`64-audio-music.js`) se branche sur le bus `LB.audio.mus`. `prefs` ne garde que `help`.
+- **Avancement** : fait = rebranchement, test `tests/audio.js`. Reste à faire : écoute sur téléphone (pause / reprise, coupure de la musique sans fondu).
