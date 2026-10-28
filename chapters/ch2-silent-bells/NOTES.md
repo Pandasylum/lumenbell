@@ -139,3 +139,6 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - **Trappe** : `HATCH` (position, marche, `toll` = intervalle du tintement), `hatchTop()`, `drawHatch(k)` (dessinée avec la salle, donc reflétée), `S.hatchSnap` (chaîne rompue), `hatchRing()` (ondes du tintement, `S.hatchRing`), son `bellMuffled`. Vue d'en dessous dans `bg1`. Descente de caméra : `S.camDY` (entrée de la phase II).
 - **Fin de phase II** : `hullSky(k)` (trou dans le pont, ciel, `MOON`), `hullDebris()` (`DEBRIS`), `moonCone()`, `kingKneel()`, `moonOnKing()` ; temps dans `CINE_P2` ; fond fixe `kingEndStill()`.
 - **Restes de Veilleur** sur le Roi : cape et anneau dans `drawBoss1`, cage `deadLantern()`. Phase III : `WRECKS`/`wreck()`, membrures, bâton sans lanterne, lune, dans `bg3`.
+- **Rages** : `DIFFS[..].u` (seuils), `RAGE` (cri, dernier assaut), `rageMarks()` (cases soulignées de la jauge, classe `mark`), `S.rageN` / `S.rageNext` / `S.roarT` ; `spawn()` lance le cri puis le sort de rage (`gen(stage, f, b, false, rage)` : `rage` = numéro de la rage). `angerCheck()` est remplacé (le nom va au lecteur d'écran par `rageBanner()`).
+- **Pluie de bris** : `RAIN` (espacement aléatoire, marge et étourdissement du Difficile, valeurs du Chapitre I) ; `stops(th)` reçoit la menace pour la marge.
+- **Orbes illusoires** : pleines, contour en pointillé (`drawOrbs`).
