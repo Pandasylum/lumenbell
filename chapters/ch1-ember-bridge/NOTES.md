@@ -4,6 +4,7 @@
 - **Assemblage** : `build/assemble.py` colle les morceaux listés dans `src/parts.txt`, **dans cet ordre, octet pour octet, sans rien ajouter**. Le résultat est l'ancien fragment (sans doctype, une IIFE unique) ; `build.py` et `build_test.py` le transforment comme avant. Pas de modules JS : tous les fichiers JS partagent la portée de l'IIFE ouverte dans `00-core.js` et fermée dans `84-loop.js`.
 - **Structure du code** : phases `G` (P1 pont), `Q` (P2 Fonderie, `drawLake`, `lakeY()`), `R` (P3 Clocher, `ringBell`, `FIN`, `finaleScore`) ; cinématiques `SC` (cartons `{d,en,fr}`) et `DRAW=[sStatue,sValley,sTowers,sSea,sDawn,sTitle]` ; panneaux `CARD1`, `LORE`, `showEnd`, `qEnd`, `rEnd` ; i18n `_(en,fr)`.
 - **Textes** : `docs/TEXTES-CH1.md` (régénérable, colonne `fichier:ligne`). Lore : `docs/LORE.md`.
+- **Cartes de transition** (fin de phase I : `showEnd`, cas `G.p2` ; fin de phase II : `qEnd`) : ligne du haut « Transition », titre neutre « Phase I/II terminée », le récit dans le texte seulement (voir `DECISIONS.md`, 28 octobre 2026).
 - **Tests** : `tests/smoke.js` doit afficher `errs []`.
 
 ## Carte de `src/`

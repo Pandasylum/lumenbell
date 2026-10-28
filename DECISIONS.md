@@ -64,3 +64,9 @@ Application de `docs/CH2-SPEC.md` ; choix faits là où le cahier des charges ne
 - **Choix pour la phase III** : la garde dure tant que le bouton est tenu (le barrage), puis récupération au relâchement ; un faisceau bloqué jusqu'au bout compte comme une attaque arrêtée et renvoie à `ready`, sinon un joueur parfait ne pouvait pas enchaîner « reformation puis dispersion » en Difficile (0,69 s d'écart, 0,84 s de récupération). Un tap n'est arrêté que par une garde fraîche (moins de 0,333 s × m), pas par une garde tenue depuis longtemps.
 - **Conséquence mesurée** : la fenêtre n'est plus symétrique (avant : ±0,2 s autour de l'impact ; maintenant : action lancée dans les 0,333 s × m avant l'impact, 0,05 à 0,06 s de grâce après). Difficile devient nettement plus dur ; on n'y touche pas avant la session d'équilibrage (décision de Kevin).
 - **Onomatopées** : `KRAKOOM` rétabli pour le coup final de la forme II ; `KRAAAK` pour le Veilleur écrasé par un débris dans la cale.
+
+## 2026-10-28 – Chapitre I · cartes de transition (session `ch1/texts`)
+- **Principe** : le titre d'une carte de transition est neutre ; ce qui raconte va dans le texte, qu'on peut ne pas lire sans perdre le fil. Ce qui est déjà montré à l'écran n'est pas écrit.
+- **Fin de phase I** : ligne du haut « Transition » (au lieu de « Transition · Phase II »), titre « Phase I terminée », texte « Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin. » La phrase sur le Veilleur qui saute à sa poursuite est supprimée.
+- **Fin de phase II** : ligne du haut « Transition », titre « Phase II terminée », texte « Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée. » La phrase sur la passerelle est supprimée (montrée et sous-titrée à l'écran).
+- Textes de défaite et vocabulaire « parer / parade » inchangés (ce dernier sera traité par la session moteur).
