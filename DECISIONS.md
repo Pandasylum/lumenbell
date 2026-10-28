@@ -79,3 +79,9 @@ Travail sans surveillance : choix faits sans pouvoir demander, **tous à valider
 - **Menu** (même décor que la phase III) : aurore → brume, montagnes → mer et récifs, neige → embruns qui montent.
 - **Veilleur** : dessin inchangé ; demande d'un Veilleur commun à toute la série écrite dans `DEMANDES.md`.
 - **Tests** : `tests/ch2-announce.js` accepte le mot gravé sur la cloche (lu dans la section « La cloche » du cahier des charges) ; `TEXTES.md` régénéré (un couple ajouté : `Crown` / `Couronne`).
+
+## 2026-10-28 – Chapitre II · bloquer au lieu de parer (décision de Kevin, appliquée en session C1, étape 2)
+- Le Veilleur n'a plus d'épée : plus de « parade ». Un seul geste, **bloquer** (EN *block*), là où l'on parait (phase II) ; **esquiver** en phase I ; blocage tenu (barrage) en phase III. Mêmes états qu'au Chapitre I (`ready` → action → `recover`).
+- Textes du Chapitre II changés : bouton de la phase II « Bloquer » / « Block », lecteur d'écran « Série bloquée. Le Veilleur riposte. » / "Series blocked. The Watcher counters." ; code : `sfx.block`, `ONO.block`. Les entrées plus anciennes de ce journal qui disent « parade » décrivent l'état d'alors et ne sont pas réécrites.
+- **Choix à valider** : le bouton de la phase III reste « Garde » / « Guard » (le cahier des charges parle de « blocage tenu » ; « Bloquer » partout serait plus uniforme) ; le lecteur d'écran garde « Ta garde est brisée ».
+- Le Chapitre I n'est pas modifié ; l'écart de vocabulaire est écrit dans `DEMANDES.md`. Hors périmètre aussi : `docs/CH2-SPEC.md` dit encore « Phase II : parer » (Mécaniques) et « fenêtres de parade » (Difficultés).

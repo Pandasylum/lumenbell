@@ -9,7 +9,7 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 3 | The Rust King collapses. | Le Roi de Rouille s'effondre. |
 | 4 | The Hollow Voice's mirror shatters. | Le miroir de la Voix Creuse éclate. |
 | 5 | The lantern goes dark. | La lanterne s'éteint. |
-| 6 | Series parried. The Watcher counters. | Série parée. Le Veilleur riposte. |
+| 6 | Series blocked. The Watcher counters. | Série bloquée. Le Veilleur riposte. |
 | 7 | Volley dodged. The Watcher sends the light back. | Volée esquivée. Le Veilleur renvoie la lumière. |
 | 8 | Attacks countered. The Watcher sends the lightning back. | Attaques contrées. Le Veilleur renvoie la foudre. |
 | 9 | The parasite wakes in his heart | Le parasite se réveille dans son cœur |
@@ -30,7 +30,7 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 24 | The King sinks beneath the waves. A turquoise glow rises from his body, toward the Lighthouse. | Le Roi sombre sous les vagues. De son corps monte une lueur turquoise, vers le Phare. |
 | 25 | Phase II of III · The Hold | Phase II sur III · La cale |
 | 26 | The Rust King | Le Roi de Rouille |
-| 27 | Parry | Parer |
+| 27 | Block | Bloquer |
 | 28 | The Watcher facing the Rust King, a colossus of bells armed with an anchor | Le Veilleur face au Roi de Rouille, un colosse de cloches armé d'une ancre |
 | 29 | Phase I · The Mirror Hall | Phase I · La salle des reflets |
 | 30 | At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there. | Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur. |

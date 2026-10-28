@@ -300,7 +300,7 @@ const _=(en,fr)=>LANG==='fr'?fr:en;
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
 /* Difficulty, same values as Ember Bridge for the Watcher: hp = Watcher HP (6 / 4 / 3, trial 4 for the whole run);
-   m = multiplier of the Watcher's action (parry, side step, guard: x2 / x1 / x0.6) and rm of his recovery (x1.2 in Hard),
+   m = multiplier of the Watcher's action (block, side step, held block: x2 / x1 / x0.6) and rm of his recovery (x1.2 in Hard),
    as applyDiff() in Ember Bridge; sp = attack speed; boss = boss HP (kept from the import until playtests);
    heal = HP refilled between phases. */
 const DIFFS={
@@ -335,7 +335,7 @@ function tone(f,dur,type,vol,dest,when,f2){if(!AC)return;const t=when||AC.curren
 let NB=null;function nbuf(){if(!NB){NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return NB}
 function noise(dur,vol,ft,ff,q,dest,when,ff2){if(!AC)return;const t=when||AC.currentTime;const s=AC.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=AC.createBiquadFilter();fl.type=ft;fl.frequency.setValueAtTime(ff,t);if(ff2)fl.frequency.exponentialRampToValueAtTime(ff2,t+dur);fl.Q.value=q||1;const g=AC.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0005,t+dur);s.connect(fl);fl.connect(g);g.connect(dest||SG);s.start(t);s.stop(t+dur+.05)}
 const sfx={
-  parry(p){tone(p?1046:880,.5,'sine',.22);tone(p?1568:1318,.35,'sine',.1);tone(2217,.2,'triangle',.05);if(p)tone(2093,.6,'sine',.07)},
+  block(p){tone(p?1046:880,.5,'sine',.22);tone(p?1568:1318,.35,'sine',.1);tone(2217,.2,'triangle',.05);if(p)tone(2093,.6,'sine',.07)},
   dodge(p){noise(.22,.25,'bandpass',600,2,null,null,2600);if(p)tone(1760,.25,'sine',.06)},
   hurt(){noise(.3,.4,'lowpass',700);tone(160,.35,'sawtooth',.12,null,null,60)},
   whiff(){tone(200,.08,'square',.05)},
@@ -373,7 +373,7 @@ function musTick(){
 /* ---------- particles & pops ---------- */
 function burst(x,y,n,col,spd,life,g){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.3+Math.random())*spd;S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-(g?spd*.4:0),g:g||0,t0:gt,life:life*(.6+Math.random()*.6),c:col,r:1.5+Math.random()*2.2})}}
 /* floating text: only onomatopoeia (same words in both languages, as in Ember Bridge); no announcement words */
-const ONO={parry:'CLANG',hit:'BAM',final:'KRAKOOM',crush:'KRAAAK'};
+const ONO={block:'CLANG',hit:'BAM',final:'KRAKOOM',crush:'KRAAAK'};
 function pop(txt,col,x,y){S.pops.push({txt,c:col,x:x||HX+10,y:y||GY-150,t0:gt})}
 
 /* ---------- patterns ---------- */
@@ -384,7 +384,7 @@ function sched(list){const pat={ths:list,ok:true,perf:0,nReal:list.filter(t=>t.r
    only sets deny (the recovery bar turns red). Each attack is settled at its impact: it is stopped if the Watcher is in his
    action then, or within `grace` of his recovery; a stopped attack sends him back to ready, so a series can be chained.
    Durations in seconds, base values from Ember Bridge: the action lasts base x m, the recovery base x rm (DIFFS).
-   T = parry (phase II, the King, T.barrier / T.recovery), DG = side step (phase I, the Voice, DG.act / DG.rec),
+   T = block (phase II, the King, T.barrier / T.recovery), DG = side step (phase I, the Voice, DG.act / DG.rec),
    R_T = guard (phase III, R_T.guard / R_T.rec; the guard lasts as long as the button is held, against the beams, and wears
    the stamina out: drain / regen per second, broken = recovery when it runs out; a beam blocked to its end counts as a
    stopped attack). hurt / down = stun after a hit, cut short so that the next attack can still be stopped (one hit per
@@ -428,9 +428,9 @@ function success(th,perfect){
   th.done=true;th.res='ok';th.okT=gt;th.perfect=perfect;S.okT=gt;
   if(perfect){th.pat.perf++;S.perfects++}
   const ph=S.phase;
-  if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('parry',perfect);MUSIC.fx('clank');pop(ONO.parry,perfect?'#f2fffb':'#bff3ea')}
+  if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('block',perfect);MUSIC.fx('clank');pop(ONO.block,perfect?'#f2fffb':'#bff3ea')}
   else if(ph===2){S.dodgeOk=gt;play('dodge',perfect)}
-  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('parry',perfect)}
+  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect)}
 }
 function hurt(th){
   if(S.mode!=='play')return;
@@ -493,7 +493,7 @@ function closePat(){
   if(p.ok){
     const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=R_CNT[S.phase];
     S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
-    say(S.phase===1?_('Series parried. The Watcher counters.','Série parée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
+    say(S.phase===1?_('Series blocked. The Watcher counters.','Série bloquée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
   }else S.nextAt=gt+R_CNT.nextFail;
 }
 
@@ -1759,7 +1759,7 @@ const PH=[null,
  {eye:()=>_('Phase II · The Hold','Phase II · La cale'),
   desc:()=>_("Rusted bells hang from the beams of the hold. An anchor lies there, too heavy for a man's hand.","Des cloches rouillées pendent aux poutres de la cale. Une ancre traîne, trop lourde pour une main d'homme."),
   end:()=>_("The King sinks beneath the waves. A turquoise glow rises from his body, toward the Lighthouse.","Le Roi sombre sous les vagues. De son corps monte une lueur turquoise, vers le Phare."),
-  head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust King','Le Roi de Rouille'),btn:()=>_('Parry','Parer'),
+  head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust King','Le Roi de Rouille'),btn:()=>_('Block','Bloquer'),
   aria:()=>_("The Watcher facing the Rust King, a colossus of bells armed with an anchor","Le Veilleur face au Roi de Rouille, un colosse de cloches armé d'une ancre")},
  {eye:()=>_('Phase I · The Mirror Hall','Phase I · La salle des reflets'),
   desc:()=>_("At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there.","Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur."),
