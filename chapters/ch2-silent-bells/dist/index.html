@@ -320,13 +320,15 @@ LB._=(en,fr)=>LB.lang.cur==='fr'?fr:en;
 LB.audio=(()=>{
   let ctx=null,master=null,sfx=null,mus=null,bg=false,nb=null;
   const lv={master:1,sfx:1,mus:1},A={sound:true,music:true,stat:{tone:0,noise:0,made:0}};
-  const apply=()=>{if(!ctx)return;master.gain.value=lv.master;sfx.gain.value=A.sound?lv.sfx:0;mus.gain.value=A.music?lv.mus:0};
+  /* smooth : le bus musique suit en fondu (constante de temps 0,12 s, celle de l'arrêt de la musique du Chapitre I) ; sinon il prend sa valeur d'un coup (création du contexte) */
+  const apply=smooth=>{if(!ctx)return;master.gain.value=lv.master;sfx.gain.value=A.sound?lv.sfx:0;
+    const m=A.music?lv.mus:0;if(smooth)mus.gain.setTargetAtTime(m,ctx.currentTime,.12);else mus.gain.value=m};
   function ensure(){
     try{
       if(ctx&&ctx.state==='closed'){ctx=null;nb=null}
       if(!ctx){
         const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
-        try{ctx=new C({latencyHint:'playback'})}catch(e){ctx=new C()}
+        try{ctx=new C({latencyHint:'interactive'})}catch(e){ctx=new C()}
         try{master=ctx.createGain();master.connect(ctx.destination);sfx=ctx.createGain();sfx.connect(master);mus=ctx.createGain();mus.connect(master);apply();A.stat.made++}
         catch(e){ctx=null;return null}
       }
@@ -376,7 +378,7 @@ LB.audio=(()=>{
     config(o){Object.assign(lv,o||{});apply()},
     load(){A.sound=LB.store.get(LB.key('snd'),'1')==='1';A.music=LB.store.get(LB.key('mus'),'1')==='1';apply()},
     setSound(on){A.sound=!!on;LB.store.set(LB.key('snd'),A.sound?'1':'0');apply();if(A.sound)ensure()},
-    setMusic(on){A.music=!!on;LB.store.set(LB.key('mus'),A.music?'1':'0');apply();if(A.music)ensure()},
+    setMusic(on){A.music=!!on;LB.store.set(LB.key('mus'),A.music?'1':'0');apply(true);if(A.music)ensure()},
     now(){return ctx?ctx.currentTime:0}
   });
   /* défini à part : Object.assign recopierait la valeur des accesseurs au lieu de les garder */

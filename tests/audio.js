@@ -12,7 +12,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const SPY=`(()=>{window.__acs=[];window.__h=false;
  Object.defineProperty(document,'hidden',{get:()=>window.__h,configurable:true});
  const C=window.AudioContext;if(!C)return;
- window.AudioContext=class extends C{constructor(...a){super(...a);this.__src=0;window.__acs.push(this)}};
+ window.AudioContext=class extends C{constructor(...a){super(...a);window.__hint=a[0]&&a[0].latencyHint;this.__src=0;window.__acs.push(this)}};
  window.webkitAudioContext=window.AudioContext;
  for(const k of ['createOscillator','createBufferSource']){const f=C.prototype[k];C.prototype[k]=function(...a){this.__src=(this.__src||0)+1;return f.apply(this,a)}}})();`;
 const CH={
@@ -31,7 +31,7 @@ const hide=(p,off)=>p.evaluate(off=>{window.__h=off;document.dispatchEvent(new E
   ok(!bad.length,ch+' : ni AudioContext ni .destination dans le code du chapitre '+bad.join(','));
  }
  const sh=fs.readFileSync(path.join(ROOT,'shared/js/12-audio.js'),'utf8');
- ok((sh.match(/new C\(/g)||[]).length===2,'shared : le contexte n\'est construit que dans ensure() (essai playback, repli)');
+ ok((sh.match(/new C\(/g)||[]).length===2,'shared : le contexte n\'est construit que dans ensure() (essai interactive, repli)');
  const b=await launch();
  // 2. dist publies : contexte unique, musique du menu, suspension et reprise
  for(const [ch,c] of Object.entries(CH)){
@@ -39,6 +39,7 @@ const hide=(p,off)=>p.evaluate(off=>{window.__h=off;document.dispatchEvent(new E
   await p.click(c.gate).catch(()=>p.mouse.click(300,300));await sleep(1500);
   let s=await state(p);
   ok(s.n===1,ch+' dist : un seul contexte apres le premier geste ('+s.n+')');
+  ok(await p.evaluate(()=>window.__hint)==='interactive',ch+' dist : latencyHint interactive');
   ok(s.st[0]==='running',ch+' dist : contexte actif ('+s.st[0]+')');
   ok(s.src[0]>3,ch+' dist : la musique du menu joue sur ce contexte ('+s.src[0]+' sources, hors amorcage)');
   await p.mouse.click(5,5);await p.keyboard.press('a');await sleep(300);
@@ -81,6 +82,8 @@ const hide=(p,off)=>p.evaluate(off=>{window.__h=off;document.dispatchEvent(new E
   ok(await ev(()=>__t.LB.audio.stat.tone)===t0,ch+' test : Son coupe -> aucun bruitage');
   await ev(()=>__t.LB.audio.setMusic(false));
   ok((await ev(()=>localStorage.getItem('lb-mus')))==='0',ch+' test : Musique coupee -> lb-mus=0');
+  const g0=await ev(()=>__t.LB.audio.mus.gain.value);await sleep(1500);const g1=await ev(()=>__t.LB.audio.mus.gain.value);
+  ok(g0>0&&g1<0.001,ch+' test : le bus musique fond en 0,12 s au lieu de se couper net ('+g0.toFixed(3)+' -> '+g1.toFixed(4)+')');
   await p.reload();await sleep(500);
   const r=await ev(()=>[__t.LB.audio.sound,__t.LB.audio.music,document.getElementById('optSnd').checked,document.getElementById('optMus').checked]);
   ok(r.join()==='false,false,false,false',ch+' test : reglages relus apres rechargement ('+r+')');

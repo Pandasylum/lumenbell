@@ -31,8 +31,8 @@
 - Le texte d'ouverture de la phase I existe deux fois (HTML statique `#ovDesc` dans `src/page/body.html` et `CARD1` dans `src/js/60-ui-menu.js`) : modifier les deux.
 - Noms d'attaques « Marteau de guerre » / « Combo de marteau » pas encore renommés (masse).
 - Le crochet et la queue se chevauchaient en phase II ; crochet à la hanche gauche.
-- Non vérifiés sur appareil : APK minifié avec CSP, pause/reprise audio native (le comportement navigateur est testé par `tests/audio.js`), latence des bruitages du Chapitre II depuis le passage à `latencyHint:'playback'`.
-- `tests/keys.js` : le contrôle « relit le choix de l'autre chapitre » échoue de façon intermittente (aussi sur `main`) ; relancer avant de conclure.
+- Non vérifiés sur appareil : APK minifié avec CSP, pause/reprise audio native (le comportement navigateur est testé par `tests/audio.js`), latence et coupures éventuelles de la musique depuis le passage du contexte commun à `latencyHint:'interactive'`.
+- **À traiter par la session `engine/tests`** : `tests/keys.js`, contrôle « relit le choix de l'autre chapitre » (`ch1`/`ch2 relit le choix de …`), échoue de façon intermittente, aussi sur `main` (4 échecs sur 6 essais le 28 octobre ; course entre l'écriture de `localStorage` et la relecture dans une seconde page `file://`). Non corrigé par `engine/audio`.
 - **Playwright** : `npm install` peut installer une version plus récente que le Chromium déjà présent (« Executable doesn't exist ») ; lancer les tests avec `PW_CHROMIUM=/chemin/vers/chrome` plutôt que retélécharger. `tests/package-lock.json` est suivi (Playwright figé, 1.64.1 au 27 octobre 2026) ; la CI installe avec `npm ci`. Pour changer de version : `npm install playwright@x.y.z` dans `tests/`, puis committer le lockfile.
 - **Source du Chapitre I découpée** : l'ordre de `src/parts.txt` est l'ordre d'exécution (une seule IIFE) ; chaque morceau finit par un saut de ligne. Détails : `chapters/ch1-ember-bridge/NOTES.md`.
 - **Fonction de texte** : `_(anglais, français)` dans les deux chapitres (le Chapitre II a été inversé le 27 octobre 2026).

@@ -51,4 +51,4 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 
 ## Audio commun (session `engine/audio`, 28 octobre)
 - Le contexte audio, `bgAudio` / `unlockAudio` et les réglages Son / Musique sont passés à `LB.audio` (`shared/js/12-audio.js`). `tone(f,d,type,v,slide)` et `noise(d,v,f0,f1)` restent ici, avec leur enveloppe d'origine, et appellent `LB.audio.tone` / `noise` ; la musique (`64-audio-music.js`) se branche sur le bus `LB.audio.mus`. `prefs` ne garde que `help`.
-- **Avancement** : fait = rebranchement, test `tests/audio.js`. Reste à faire : écoute sur téléphone (pause / reprise, coupure de la musique sans fondu).
+- **Avancement** : fait = rebranchement, test `tests/audio.js`. Reste à faire : écoute sur téléphone (pause / reprise, latence `interactive`).
