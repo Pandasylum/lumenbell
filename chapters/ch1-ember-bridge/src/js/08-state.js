@@ -80,11 +80,11 @@ function deathCard(){
 el.go2.addEventListener('click',()=>{prefs.help=el.help.checked=true;start()});
 function showEnd(){
   const win=G.mode==='won';
-  el.eye.textContent=win?(G.p2?_('Transition · Phase II','Transition · Phase II'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite');
-  el.title.textContent=win?(G.p2?_(`The Colossus smashes the bridge.`,`Le Colosse fracasse le pont.`):_('The Colossus drops to one knee.','Le Colosse plie un genou.')):_('Crushed on the stone.','Écrasé sur la pierre.');
+  el.eye.textContent=win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite');
+  el.title.textContent=win?(G.p2?_('Phase I cleared','Phase I terminée'):_('The Colossus drops to one knee.','Le Colosse plie un genou.')):_('Crushed on the stone.','Écrasé sur la pierre.');
   el.stats.textContent=_('Parries ','Parades ')+G.parries+_(' · Hits taken ',' · Coups subis ')+G.grabs+trStr(1);
   el.stats.hidden=false;
-  el.desc.textContent=win?(G.p2?_('Through the breach, he dives into the foundry beneath the arch, as if he knew the way. Without a moment\'s doubt, the Watcher leaps after him.','Par la brèche, il plonge dans la fonderie cachée sous l\'arche, comme s\'il en connaissait le chemin. Sans hésiter, le Veilleur saute à sa poursuite.'):_(`Phase II will open with its upcoming attacks.`,`La phase II s'ouvrira avec ses prochaines attaques.`)):_(`The lantern rolls across the stones of the bridge and goes out. Nothing holds the Colossus back now: the road to the valleys lies open.`,`La lanterne roule sur les pierres du pont et s'éteint. Plus rien ne retient le Colosse : la route des vallées est ouverte.`);
+  el.desc.textContent=win?(G.p2?_('The Colossus smashes the bridge and dives through the breach into the foundry beneath the arch, as if he knew the way.',"Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin."):_(`Phase II will open with its upcoming attacks.`,`La phase II s'ouvrira avec ses prochaines attaques.`)):_(`The lantern rolls across the stones of the bridge and goes out. Nothing holds the Colossus back now: the road to the valleys lies open.`,`La lanterne roule sur les pierres du pont et s'éteint. Plus rien ne retient le Colosse : la route des vallées est ouverte.`);
   el.go.textContent=win?(G.p2?_('Start Phase II','Lancer la phase II'):_('Replay Phase I','Rejouer la phase I')):_('Retry','Réessayer');
   if(!win)deathCard();
   el.ov.hidden=false;

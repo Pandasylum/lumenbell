@@ -241,11 +241,11 @@ function qLayout(){
 function qEnd(){
   const win=Q.mode==='lake';
   if(win&&RUN.on){setTimeout(()=>beginP3(true),0);return} /* épreuve : pas de carte entre les phases */
-  el.eye.textContent=win?_('Transition · Phase III','Transition · Phase III'):_('Defeat · Phase II','Défaite · Phase II');
-  el.title.textContent=win?_(`The great furnace swallows the Colossus.`,`Le grand four engloutit le Colosse.`):_('Swept away by the fall.','Emporté par la chute.');
+  el.eye.textContent=win?_('Transition','Transition'):_('Defeat · Phase II','Défaite · Phase II');
+  el.title.textContent=win?_('Phase II cleared','Phase II terminée'):_('Swept away by the fall.','Emporté par la chute.');
   el.stats.textContent=_('Dodges ','Esquives ')+Q.parries+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2);
   el.stats.hidden=false;
-  el.desc.textContent=win?_(`The Watcher barely catches himself on a catwalk. Rekindled, the Colossus bursts from the furnace and flies up the chimney.`,`Le Veilleur se rattrape de justesse sur une passerelle. Ravivé, le Colosse jaillit du four et s'envole par la cheminée.`):_(`Nothing holds the Watcher anymore. He vanishes into the depths of the Foundry, and his light goes out with him.`,`Rien ne retient plus le Veilleur. Il disparaît dans les profondeurs de la Fonderie, et sa lumière s'éteint avec lui.`);
+  el.desc.textContent=win?_('The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney.',"Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée."):_(`Nothing holds the Watcher anymore. He vanishes into the depths of the Foundry, and his light goes out with him.`,`Rien ne retient plus le Veilleur. Il disparaît dans les profondeurs de la Fonderie, et sa lumière s'éteint avec lui.`);
   el.go.textContent=win?_('Start Phase III','Lancer la phase III'):_('Retry Phase II','Réessayer la phase II');
   if(!win)deathCard();
   el.ov.hidden=false;

@@ -65,6 +65,12 @@ Application de `docs/CH2-SPEC.md` ; choix faits là où le cahier des charges ne
 - **Conséquence mesurée** : la fenêtre n'est plus symétrique (avant : ±0,2 s autour de l'impact ; maintenant : action lancée dans les 0,333 s × m avant l'impact, 0,05 à 0,06 s de grâce après). Difficile devient nettement plus dur ; on n'y touche pas avant la session d'équilibrage (décision de Kevin).
 - **Onomatopées** : `KRAKOOM` rétabli pour le coup final de la forme II ; `KRAAAK` pour le Veilleur écrasé par un débris dans la cale.
 
+## 2026-10-28 – Chapitre I · cartes de transition (session `ch1/texts`)
+- **Principe** : le titre d'une carte de transition est neutre ; ce qui raconte va dans le texte, qu'on peut ne pas lire sans perdre le fil. Ce qui est déjà montré à l'écran n'est pas écrit.
+- **Fin de phase I** : ligne du haut « Transition » (au lieu de « Transition · Phase II »), titre « Phase I terminée », texte « Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin. » La phrase sur le Veilleur qui saute à sa poursuite est supprimée.
+- **Fin de phase II** : ligne du haut « Transition », titre « Phase II terminée », texte « Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée. » La phrase sur la passerelle est supprimée (montrée et sous-titrée à l'écran).
+- Textes de défaite et vocabulaire « parer / parade » inchangés (ce dernier sera traité par la session moteur).
+
 ## 2026-10-28 – Audit des éléments communs (session `engine/audit`, propositions à valider)
 Livrable : `docs/COMMUN.md`. Aucun code de jeu modifié. Rien ci-dessous n'est appliqué ; ce sont des propositions soumises à Kevin.
 - **Référence par élément** : le Chapitre I pour ce que le joueur voit et qui est validé (Veilleur avec heaume, tabard et sceptre-lanterne ; menu avec « Lumenbell » en grand et le chapitre dessous ; module de cinématique `CINE` avec `play`, `seen`, « Passer » et rejeu ; écran de démarrage ; tailles des onomatopées ; repères de rage sur la barre du boss) ; le Chapitre II pour la mécanique et l'outillage (une seule machine à états `ready` → `act` → `recover` lue dans des tables, règle unique d'étourdissement, `store` avec migration, options mémorisées, tests à pas fixe, placement mesuré du titre de fin d'intro, zones sûres).
@@ -73,6 +79,7 @@ Livrable : `docs/COMMUN.md`. Aucun code de jeu modifié. Rien ci-dessous n'est a
 - **Ordre des sessions** : `engine/shared` (langue, clés `lb-…` dont la migration du Chapitre I) → `engine/audio` → `engine/hero-states` (états et vocabulaire) → `engine/watcher` (dessin) → `engine/cine` → `menu/common` → `engine/tests` → `menu/crown` → `ch3/skeleton`. L'étape C du Chapitre II (visuels) passe avant `engine/watcher` ou après `menu/common`.
 - **À trancher par Kevin avant les sessions concernées** (liste complète : `docs/COMMUN.md` § 5) : barre de récupération toujours visible ou seulement avec l'aide ; règles de l'Épreuve (4 PV sans soin comme la bible et le Chapitre II, ou PV de la difficulté avec +1 PV entre les phases comme le Chapitre I ; Épreuve verrouillée ou non) ; aide visuelle par défaut en Facile et disponibilité en Difficile ; retour à `ready` après un blocage simple en phase I du Chapitre I ; typographie du titre de fin d'intro ; langue par défaut et ordre des boutons de langue.
 - **Documents à corriger par la session « 00 · Direction »** (hors périmètre de cette session) : `BIBLE.md` emploie encore « pare » et « fenêtres de parade » (l. 31, 36, 81).
+
 
 ## 2026-10-27 – Chapitre II · décors et personnages (session C1, étape 1, branche `ch2/visuals-fights`)
 Travail sans surveillance : choix faits sans pouvoir demander, **tous à valider par Kevin**.

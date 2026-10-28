@@ -22,15 +22,15 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | src/js/08-state.js:76 | _() |  |  Visual cues can help you find the right moment to parry. |  Des repères visuels peuvent t'aider à choisir le bon moment pour parer. |
 | src/js/08-state.js:83 | _() |  | Defeat | Défaite |
 | src/js/08-state.js:83 | _() |  | Phase I cleared | Phase I terminée |
-| src/js/08-state.js:83 | _() |  | Transition · Phase II | Transition · Phase II |
+| src/js/08-state.js:83 | _() |  | Transition | Transition |
 | src/js/08-state.js:84 | _() |  | Crushed on the stone. | Écrasé sur la pierre. |
+| src/js/08-state.js:84 | _() |  | Phase I cleared | Phase I terminée |
 | src/js/08-state.js:84 | _() |  | The Colossus drops to one knee. | Le Colosse plie un genou. |
-| src/js/08-state.js:84 | _() |  | The Colossus smashes the bridge. | Le Colosse fracasse le pont. |
 | src/js/08-state.js:85 | _() |  |  · Hits taken  |  · Coups subis  |
 | src/js/08-state.js:85 | _() |  | Parries  | Parades  |
 | src/js/08-state.js:87 | _() |  | Phase II will open with its upcoming attacks. | La phase II s'ouvrira avec ses prochaines attaques. |
+| src/js/08-state.js:87 | _() |  | The Colossus smashes the bridge and dives through the breach into the foundry beneath the arch, as if he knew the way. | Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin. |
 | src/js/08-state.js:87 | _() |  | The lantern rolls across the stones of the bridge and goes out. Nothing holds the Colossus back now: the road to the valleys lies open. | La lanterne roule sur les pierres du pont et s'éteint. Plus rien ne retient le Colosse : la route des vallées est ouverte. |
-| src/js/08-state.js:87 | _() |  | Through the breach, he dives into the foundry beneath the arch, as if he knew the way. Without a moment's doubt, the Watcher leaps after him. | Par la brèche, il plonge dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin. Sans hésiter, le Veilleur saute à sa poursuite. |
 | src/js/08-state.js:88 | _() |  | Replay Phase I | Rejouer la phase I |
 | src/js/08-state.js:88 | _() |  | Retry | Réessayer |
 | src/js/08-state.js:88 | _() |  | Start Phase II | Lancer la phase II |
@@ -118,13 +118,13 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | src/js/36-p2-foundry-logic.js:211 | _() |  | The Colossus plunges toward the great furnace. | Le Colosse plonge vers le grand four. |
 | src/js/36-p2-foundry-logic.js:238 | _() |  | The Watcher catches himself on a catwalk, above the molten metal. | Le Veilleur se rattrape sur une passerelle, au-dessus du métal en fusion. |
 | src/js/36-p2-foundry-logic.js:244 | _() |  | Defeat · Phase II | Défaite · Phase II |
-| src/js/36-p2-foundry-logic.js:244 | _() |  | Transition · Phase III | Transition · Phase III |
+| src/js/36-p2-foundry-logic.js:244 | _() |  | Transition | Transition |
+| src/js/36-p2-foundry-logic.js:245 | _() |  | Phase II cleared | Phase II terminée |
 | src/js/36-p2-foundry-logic.js:245 | _() |  | Swept away by the fall. | Emporté par la chute. |
-| src/js/36-p2-foundry-logic.js:245 | _() |  | The great furnace swallows the Colossus. | Le grand four engloutit le Colosse. |
 | src/js/36-p2-foundry-logic.js:246 | _() |  |  · Hits taken  |  · Coups subis  |
 | src/js/36-p2-foundry-logic.js:246 | _() |  | Dodges  | Esquives  |
 | src/js/36-p2-foundry-logic.js:248 | _() |  | Nothing holds the Watcher anymore. He vanishes into the depths of the Foundry, and his light goes out with him. | Rien ne retient plus le Veilleur. Il disparaît dans les profondeurs de la Fonderie, et sa lumière s'éteint avec lui. |
-| src/js/36-p2-foundry-logic.js:248 | _() |  | The Watcher barely catches himself on a catwalk. Rekindled, the Colossus bursts from the furnace and flies up the chimney. | Le Veilleur se rattrape de justesse sur une passerelle. Ravivé, le Colosse jaillit du four et s'envole par la cheminée. |
+| src/js/36-p2-foundry-logic.js:248 | _() |  | The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney. | Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée. |
 | src/js/36-p2-foundry-logic.js:249 | _() |  | Retry Phase II | Réessayer la phase II |
 | src/js/36-p2-foundry-logic.js:249 | _() |  | Start Phase III | Lancer la phase III |
 | src/js/36-p2-foundry-logic.js:275 | _() |  | PHASE II | PHASE II |
