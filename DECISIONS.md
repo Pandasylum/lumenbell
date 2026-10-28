@@ -137,3 +137,4 @@ Travail sans surveillance, choix à valider par Kevin (repris dans la PR).
   - **Affichage** : les seuils sont soulignés sur la jauge du boss (cases marquées, comme les repères `mk` du Chapitre I) : le dernier assaut et chaque rage ; la forme I de la phase III n'a pas de dernier assaut, donc pas de repère pour lui. Le nom de la rage va toujours au seul lecteur d'écran.
   - Timings des sorts eux-mêmes : inchangés.
 - **Mesures** (bot de la phase III, 20 parties) : Normal 20/20, 18/20, 11/20 à 40 / 70 / 100 ms (avant : 20/20, 20/20, 11/20) ; Difficile 11/20, 0/20, 0/20 (avant : 17/20, 2/20, 1/20). Le Difficile durcit (deux rages, dernier assaut à 1 PV) : à reprendre dans la session d'équilibrage. Joueur parfait : 0 coup sur chaque sort de rage forcé, Normal et Difficile (14 cas).
+- Repères de la jauge : bord inférieur clair (couleur du texte) sous les cases des seuils, visible que la case soit pleine ou vide.
