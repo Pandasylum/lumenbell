@@ -35,6 +35,7 @@ function draw(){
   if(S.shake>.3)ctx.translate((Math.random()-.5)*S.shake,(Math.random()-.5)*S.shake);
   const ph=S.phase;
   S.camDY=0;if(S.cine&&ph===1&&S.cine.k==='in'){const C=CINE_P2;S.camDY=C.descD*(1-eio(clamp((gt-S.cine.t0)/C.desc,0,1)));if(S.camDY>0)ctx.translate(0,S.camDY)}
+  if(S.cine&&ph===3&&S.cine.k==='in'){const C=CINE_P3,z=1+(C.revealZ-1)*(1-eio(clamp((gt-S.cine.t0)/C.reveal,0,1)));if(z>1){ctx.translate(C.revealX,C.revealY);ctx.scale(z,z);ctx.translate(-C.revealX,-C.revealY)}}
   if(S.cine&&ph===3&&S.cine.k==='out'){const C=CINE_P3,z=1+(C.zoomZ-1)*eio(clamp((gt-S.cine.t0-C.zoom)/C.zoomD,0,1));if(z>1){const cx=BELL_REST.x-20,cy=GY-40;ctx.translate(cx,cy);ctx.scale(z,z);ctx.translate(-cx,-cy)}}
   [bg1,bg2,bg3][ph-1]();
   if(S.cine)cineBoss();

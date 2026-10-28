@@ -370,6 +370,7 @@ const sfx={
   fool(){tone(2600,.25,'triangle',.08);tone(3150,.2,'triangle',.06);noise(.2,.12,'highpass',4000)},
   bossHit(){tone(80,.5,'sine',.4,null,null,40);noise(.25,.3,'lowpass',1200)},
   thud(p){tone(55,.2+.12*p,'sine',.3+.1*p,null,null,35);noise(.09+.05*p,.14+.07*p,'lowpass',2400,1,null,null,240)},
+  squelch(p){tone(150,.3+.1*p,'sine',.24,null,null,48);noise(.22,.22,'lowpass',520,1,null,null,160)},
   toll(){[196,392,466,587,784].forEach((f,i)=>tone(f*(1+i*.002),1.6-i*.2,'sine',[.18,.1,.06,.05,.03][i]))},
   charge(){tone(220,.8,'sawtooth',.04,null,null,880)},
   bolt(){noise(.35,.35,'highpass',1800);tone(60,.4,'sine',.25,null,null,30)},
@@ -461,7 +462,7 @@ function success(th,perfect){
   const ph=S.phase;
   if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('block',perfect);MUSIC.fx('clank');pop(ONO.block,perfect?'#f2fffb':'#bff3ea')}
   else if(ph===2){S.dodgeOk=gt;play('dodge',perfect)}
-  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect)}
+  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
 }
 function hurt(th){
   if(S.mode!=='play')return;
@@ -480,13 +481,19 @@ function hurt(th){
    recoilDecay per s), then staggered `hurt` s once the riposte is over. All values taken from Ember Bridge. */
 const SHOCK={shake:13,hitstop:.11,flash:.4,flashDecay:2.2,ringLife:.35,recoilPx:20,recoilDecay:3.5,hurt:.55,
   final:{shake:16,hitstop:.14,flash:.8},
-  tint:{2:['#ffffff','#dffcf6','#8fe8d8'],1:['#ffffff','#e2d2ff','#b48cff'],3:['#ffffff','#b8fff4','#4fe0cc']}};
+  tint:{2:['#ffffff','#dffcf6','#8fe8d8'],1:['#ffffff','#e2d2ff','#b48cff'],3:['#ffffff','#b8fff4','#4fe0cc']},
+  /* phase III, per form (sound `snd` with `body`, bell or wet fx `fx`, particles `tint` n each of speed `spd`, life `life`, gravity `g`):
+     form I = the tower made of the King, rusted metal and bell (metal sparks, bell ring); form II = the jellyfish's own
+     matter, soft and gelatinous (dull wet sound, translucent splashes that fall back) */
+  form:{1:{snd:'thud',fx:'bellHit',tint:['#ffffff','#ffd9a0','#ff9a4a'],n:[10,16,10],spd:9,life:.6,g:.5},
+        2:{snd:'squelch',fx:'jellyHit',tint:['rgba(210,250,255,.55)','rgba(120,225,255,.45)','rgba(90,190,235,.4)'],n:[8,14,14],spd:5,life:.9,g:.9}}};
 function damageBoss(n){
   S.bossHp=Math.max(0,S.bossHp-n);S.bossFlash=gt;
   const F=S.bossHp<=0?SHOCK.final:SHOCK,col=SHOCK.tint[S.phase];
   S.shake=Math.max(S.shake,F.shake*2);S.hitstop=F.hitstop;S.flashHit=F.flash;S.recoil=1;
-  play('thud',S.bossHp<=0?1.6:1.2);MUSIC.fx([null,'bellHit','crackGlass','creature'][S.phase]);
-  const p=bossCore();col.forEach((c,i)=>burst(p.x,p.y,i?12:10,c,7,.7));(S.rings||(S.rings=[])).push({x:p.x,y:p.y,life:SHOCK.ringLife,c:col[2]});
+  const FM=S.phase===3?SHOCK.form[S.form===2?2:1]:null,pw=S.bossHp<=0?1.6:1.2;
+  play(FM?FM.snd:'thud',pw);MUSIC.fx(FM?FM.fx:[null,'bellHit','crackGlass'][S.phase]);
+  const p=bossCore();if(FM)FM.tint.forEach((c,i)=>burst(p.x,p.y,FM.n[i],c,FM.spd,FM.life,FM.g));else col.forEach((c,i)=>burst(p.x,p.y,i?12:10,c,7,.7));(S.rings||(S.rings=[])).push({x:p.x,y:p.y,life:SHOCK.ringLife,c:col[2]});
   hud();
   if(S.bossHp<=0){S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
     say([null,_('The Rust King collapses.','Le Roi de Rouille s\'effondre.'),_('The Hollow Voice\'s mirror shatters.','Le miroir de la Voix Creuse éclate.'),_('The lantern goes dark.','La lanterne s\'éteint.')][S.phase]);
@@ -733,6 +740,39 @@ function wreck(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(s,
   ctx.strokeStyle='#070b0c';ctx.lineWidth=5;for(let i=0;i<5;i++){const xx=-60+i*28;ctx.beginPath();ctx.moveTo(xx,-14);ctx.quadraticCurveTo(xx-6,-50,xx+4,-70+i*4);ctx.stroke()}ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(10,-20);ctx.lineTo(24,-130);ctx.stroke();ctx.restore()}
 const MIDROCK=[[0,GY-34,150,30],[120,GY-20,140,18],[330,GY-26,120,22],[470,GY-14,160,12],[880,GY-30,120,26]];
 function reefRock(x,y,w,h,seed){const R=mulberry(seed);ctx.beginPath();ctx.moveTo(x-w/2,y+h);for(let i=0;i<=8;i++){const t=i/8;ctx.lineTo(x-w/2+t*w,y+h-Math.sin(Math.PI*t)*h*(.6+R()*.6))}ctx.closePath();ctx.fill()}
+/* phase III: the same hull as the end of phase II (hullSky), now open to the night. Everything here is a number in HULL:
+   ribs = [foot x, side (1 = leans right), height of the broken top, thickness], mast = foot, lean, height, sail tear,
+   decks = [x, width] of plank decks on the reef floor, spikes = reef points between them (x, height),
+   floats = planks and the barrel on the water (x, y on the sea, tilt, length; barrel: kind 'b'), bob = sway of the floating pieces */
+const HULL={ribs:[[18,1,250,20],[96,1,210,16],[168,1,150,12],[952,-1,260,20],[880,-1,200,14]],
+  mast:{x:470,lean:.22,h:230,w:9,sail:[.34,.9]},
+  decks:[[0,150,26],[300,120,16],[560,90,12],[880,80,18]],spikes:[[168,14],[196,22],[222,12],[430,16],[458,26],[490,12],[672,14],[700,22],[800,12],[836,20]],
+  floats:[[330,332,.06,46,'p'],[420,352,-.08,36,'p'],[610,338,.1,50,'p'],[700,358,0,0,'b'],[860,336,-.05,40,'p']],bob:{a:3,v:.9}};
+function hullRuin(){
+  const H3=HULL;ctx.lineCap='round';
+  // the ribs of the hull: an arch at each side, broken at the top
+  for(const [x,d,h,w] of H3.ribs){const tx=x+d*70,ty=GY-h;ctx.strokeStyle='#0a0705';ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x,GY+4);ctx.quadraticCurveTo(x-d*18,GY-h*.62,tx,ty);ctx.stroke();
+    ctx.strokeStyle='rgba(150,120,90,.12)';ctx.lineWidth=Math.max(2,w*.15);ctx.beginPath();ctx.moveTo(x+d*5,GY+4);ctx.quadraticCurveTo(x-d*13,GY-h*.62,tx+d*3,ty+3);ctx.stroke();
+    // the splintered end
+    ctx.strokeStyle='#0a0705';ctx.lineWidth=Math.max(2,w*.3);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx+d*5,ty-16);ctx.moveTo(tx-d*3,ty+2);ctx.lineTo(tx-d*2,ty-12);ctx.stroke()}
+  // the broken mast, leaning, its torn sail
+  {const M=H3.mast,tx=M.x+Math.sin(M.lean)*M.h,ty=GY-Math.cos(M.lean)*M.h;ctx.strokeStyle='#120d09';ctx.lineWidth=M.w;ctx.beginPath();ctx.moveTo(M.x,GY+2);ctx.lineTo(tx,ty);ctx.stroke();
+   ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx+10,ty-14);ctx.moveTo(tx-2,ty+3);ctx.lineTo(tx-9,ty-9);ctx.stroke();
+   const sx=M.x+Math.sin(M.lean)*M.h*M.sail[0],sy=GY-Math.cos(M.lean)*M.h*M.sail[0],sx2=M.x+Math.sin(M.lean)*M.h*M.sail[1],sy2=GY-Math.cos(M.lean)*M.h*M.sail[1],sw=Math.sin(rt*.8)*5;
+   ctx.fillStyle='rgba(30,36,38,.82)';ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx2,sy2);ctx.quadraticCurveTo(sx2+34+sw,(sy+sy2)/2-6,sx2+50+sw*1.4,sy2+40);ctx.lineTo(sx2+36+sw,sy2+34);ctx.lineTo(sx2+30+sw,sy2+58);ctx.lineTo(sx2+14+sw*.6,sy2+44);ctx.lineTo(sx+22+sw*.4,sy+70);ctx.lineTo(sx+8,sy+62);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='rgba(150,170,175,.14)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx2+50+sw*1.4,sy2+40);ctx.stroke()}
+  // the plank decks lying on the reef, reef points between them
+  ctx.fillStyle='#050809';for(const [x,h] of H3.spikes){ctx.beginPath();ctx.moveTo(x-9,GY+2);ctx.lineTo(x-2,GY+2-h);ctx.lineTo(x+9,GY+2);ctx.closePath();ctx.fill()}
+  for(const [x,w,t] of H3.decks){ctx.fillStyle='#120d09';ctx.fillRect(x,GY-t,w,t*.5);ctx.fillStyle='#0a0705';ctx.fillRect(x,GY-t*.5,w,t*.5+3);
+    ctx.strokeStyle='rgba(150,120,90,.14)';ctx.lineWidth=1;ctx.beginPath();for(let k=1;k*22<w;k++){ctx.moveTo(x+k*22,GY-t);ctx.lineTo(x+k*22,GY+3)}ctx.moveTo(x,GY-t*.5);ctx.lineTo(x+w,GY-t*.5);ctx.stroke()}
+}
+/* planks and a barrel afloat on the open sea behind the fight */
+function floatDebris(){
+  for(const [x,y,a,l,k] of HULL.floats){const dy=Math.sin(rt*HULL.bob.v+x*.03)*HULL.bob.a;ctx.save();ctx.translate(x,y+dy);ctx.rotate(a+Math.sin(rt*HULL.bob.v+x)*.03);ctx.fillStyle='#0c0907';
+    if(k==='b'){ctx.beginPath();ctx.ellipse(0,0,14,11,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(150,120,90,.25)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-13,-4);ctx.lineTo(13,-4);ctx.moveTo(-13,4);ctx.lineTo(13,4);ctx.stroke()}
+    else{ctx.fillRect(-l/2,-3,l,6);ctx.fillRect(-l/3,3,l*.5,4)}
+    ctx.strokeStyle='rgba(200,235,230,.18)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(0,5,(k==='b'?18:l*.6),2.5,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
+}
 function bg3(){
   let g=ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'#02060a');g.addColorStop(1,'#0a2228');ctx.fillStyle=g;ctx.fillRect(0,0,W,300);
   for(const s of STARS){if(s.y>200)continue;ctx.globalAlpha=.15+.2*Math.sin(rt*1.5+s.o);ctx.fillStyle='#e8f6f2';ctx.fillRect(s.x,s.y,s.r,s.r)}ctx.globalAlpha=1;
@@ -748,6 +788,7 @@ function bg3(){
   ctx.fillStyle='#060c0e';MIDROCK.forEach((r,i)=>reefRock(r[0]+r[2]/2,r[1],r[2],r[3],60+i));
   // the ships the sea took, asleep on the reef
   for(const [x,y,s,a] of WRECKS)wreck(x,y,s,a);
+  floatDebris();
   for(let i=0;i<5;i++){const r=MIDROCK[i],k=(rt*.35+i*.23)%1;ctx.strokeStyle=`rgba(220,245,240,${.35*(1-k)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(r[0]+r[2]/2,r[1]+r[3],r[2]*.5*(.8+k*.4),3+k*4,0,Math.PI,0);ctx.stroke()}
   // the reef floor: wet black rock, crevices, foam pools, the mooring rocks
   g=ctx.createLinearGradient(0,GY-20,0,H);g.addColorStop(0,'#101a1d');g.addColorStop(.3,'#0a1114');g.addColorStop(1,'#030607');ctx.fillStyle=g;ctx.fillRect(0,GY-6,W,H-GY+6);
@@ -762,9 +803,7 @@ function bg3(){
    ctx.fillStyle=bronze(-5,5);ctx.beginPath();ctx.moveTo(-5,15);ctx.quadraticCurveTo(-4,6,0,6);ctx.quadraticCurveTo(4,6,5,15);ctx.closePath();ctx.fill();ctx.restore();
    ctx.fillStyle='#0a0705';ctx.beginPath();ctx.moveTo(S0.x-46,GY+2);ctx.lineTo(S0.x-30,GY-14);ctx.lineTo(S0.x-8,GY-22);ctx.lineTo(S0.x+12,GY-26);ctx.lineTo(S0.x+34,GY-12);ctx.lineTo(S0.x+52,GY+2);ctx.closePath();ctx.fill();
    ctx.fillStyle='#16100b';ctx.save();ctx.translate(S0.x-14,GY-18);ctx.rotate(-.35);ctx.fillRect(-22,-3,44,6);ctx.restore();ctx.save();ctx.translate(S0.x+20,GY-14);ctx.rotate(.5);ctx.fillRect(-16,-3,32,5);ctx.restore()}
-  // the gutted hull of the wreck around the fight: broken frames rising from the reef at both edges
-  for(const [x,d] of[[18,1],[96,1],[952,-1]]){ctx.strokeStyle='#0a0705';ctx.lineWidth=20;ctx.beginPath();ctx.moveTo(x,GY+4);ctx.quadraticCurveTo(x-d*16,GY-160,x+d*40,GY-250+(x%3)*20);ctx.stroke();ctx.strokeStyle='rgba(150,120,90,.12)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+d*6,GY+4);ctx.quadraticCurveTo(x-d*10,GY-160,x+d*44,GY-246+(x%3)*20);ctx.stroke()}
-  ctx.fillStyle='#120d09';ctx.fillRect(0,GY-26,150,8);ctx.fillRect(0,GY-58,90,7);ctx.fillRect(900,GY-40,60,8);
+  hullRuin();
   // surf breaking at the front edge, spray in the wind
   for(let i=0;i<4;i++){const k=(rt*.25+i*.25)%1,y=H-6-k*18;ctx.strokeStyle=`rgba(225,245,240,${.3*Math.sin(Math.PI*k)})`;ctx.lineWidth=2;ctx.beginPath();for(let x=0;x<=W;x+=40){const yy=y+Math.sin(x*.03+i*2+rt)*3;x?ctx.lineTo(x,yy):ctx.moveTo(x,yy)}ctx.stroke()}
   ctx.fillStyle='rgba(225,245,240,.55)';for(const s of SPRAY){const y=H-((s.y*.5+rt*s.v)%(H*.55)),x=(s.x+rt*s.v*.8+Math.sin(rt+s.d)*10)%W;ctx.globalAlpha=clamp((y-H*.45)/80,0,1)*.7;ctx.fillRect(x,y,1.6,1.6)}ctx.globalAlpha=1;
@@ -1319,6 +1358,7 @@ function draw(){
   if(S.shake>.3)ctx.translate((Math.random()-.5)*S.shake,(Math.random()-.5)*S.shake);
   const ph=S.phase;
   S.camDY=0;if(S.cine&&ph===1&&S.cine.k==='in'){const C=CINE_P2;S.camDY=C.descD*(1-eio(clamp((gt-S.cine.t0)/C.desc,0,1)));if(S.camDY>0)ctx.translate(0,S.camDY)}
+  if(S.cine&&ph===3&&S.cine.k==='in'){const C=CINE_P3,z=1+(C.revealZ-1)*(1-eio(clamp((gt-S.cine.t0)/C.reveal,0,1)));if(z>1){ctx.translate(C.revealX,C.revealY);ctx.scale(z,z);ctx.translate(-C.revealX,-C.revealY)}}
   if(S.cine&&ph===3&&S.cine.k==='out'){const C=CINE_P3,z=1+(C.zoomZ-1)*eio(clamp((gt-S.cine.t0-C.zoom)/C.zoomD,0,1));if(z>1){const cx=BELL_REST.x-20,cy=GY-40;ctx.translate(cx,cy);ctx.scale(z,z);ctx.translate(-cx,-cy)}}
   [bg1,bg2,bg3][ph-1]();
   if(S.cine)cineBoss();
@@ -1402,10 +1442,11 @@ const CINE_LEN={1:{in:7.8,out:7.8},2:{in:4.8,out:7.4},3:{in:13.8,out:12.8,p2:7.4
    floor by its chain (`haul`) and slings it on his back (`lift`, until `slung`); before that the camera comes down through
    the hatch (`desc` s, from `descD` units above). Phase II end: the hull collapses from `collapse` (`collapseD`), the deck
    opens from `open` (`openD`), the moon lights the King from `moon`.
-   Phase III end: the camera closes in on the bell from `zoom` over `zoomD`, up to `zoomZ`. */
+   Phase III entry: the Watcher already stands in the open hull; the camera starts close on him (`revealZ`, on (`revealX`,
+   `revealY`)) and pulls back over `reveal` s. Phase III end: the camera closes in on the bell from `zoom` over `zoomD`, up to `zoomZ`. */
 const CINE_P1={drop:3.1,fall:.65,sink:3.2,depth:70,hatch:5.5,snap:.45,dim:3.8,dimD:1.1};
 const CINE_P2={haul:4.0,lift:4.35,slung:4.75,desc:1.8,descD:380,collapse:1.4,collapseD:2.2,open:2.4,openD:1.4,moon:3.6};
-const CINE_P3={zoom:9.4,zoomD:2.6,zoomZ:2.1};
+const CINE_P3={zoom:9.4,zoomD:2.6,zoomZ:2.1,reveal:3.2,revealZ:1.7,revealX:HX,revealY:GY-60};
 function once(k){if(S.cineDone[k])return false;S.cineDone[k]=1;return true}
 function resetCine(s){s.hatchK=0;s.hatchSnap=0;s.lampDim=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.parasite=0;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
 function startCine(p,k){const s=p.s;resetCine(s);if(MUSIC.cur!==s.phase)MUSIC.bed(s.phase);s.demo=false;s.parts=[];s.pops=[];s.cine={k,t0:gt};s.tfBurst=s.tfFlash=s.tfAnch=false;s.tfId=(s.tfId||0)+1;s.flashT=-9}
@@ -1558,7 +1599,7 @@ const CSFX=(()=>{const L={'2:in':[[0,'glints'],[1.1,'swell'],[1.95,'crackGlass']
   '2:out':[[.3,'charge'],[1.45,'throw'],[1.75,'impactLight'],[1.8,'overload'],[3.1,'explosion'],[3.3,'glassRain'],[4.4,'voice'],[5.4,'rumble']],
   '1:in':[[0,'rumble'],[4.5,'heart'],[4.8,'draw'],[5.5,'whoosh'],[5.75,'slam'],[6.3,'sting']],
   '1:out':[[.6,'chainSlip'],[1.1,'plant'],[1.4,'tollLast'],[1.7,'heart'],[2.3,'crackRun'],[3.3,'rumble'],[4.75,'whooshDown'],[5.6,'iceCrack']],
-  '3:in':[[0,'whooshDown'],[1,'land'],[1.6,'heart'],[3.5,'burst'],[3.7,'creature'],[9.2,'plant'],[9.3,'creature'],[10.1,'ignite'],[11.7,'beam'],[12.3,'sting']],
+  '3:in':[[1.6,'heart'],[3.5,'burst'],[3.7,'creature'],[9.2,'plant'],[9.3,'creature'],[10.1,'ignite'],[11.7,'beam'],[12.3,'sting']],
   '3:out':[[.5,'thunder'],[.7,'scream'],[4.4,'fallWhine'],[5,'stars'],[6,'dissolve'],[8.3,'sting']]};
   for(let i=0;i<5;i++)L['1:in'].push([.3+.8*(i+1),'step']);
   for(let j=0;j<9;j++)L['1:out'].push([3.3+j*.17,'chunk']);
@@ -1687,7 +1728,7 @@ function cineBoss(){
     return}
   /* ===== Drowned Beacon (Phase III) ===== */
   if(ph===3&&k==='in'){
-    if(t<1.5){ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();S.heroDY=lerp(-440,0,ein(clamp(t/1,0,1)));if(t>=1&&once('land')){burst(HX,GY,30,'#dff8ff',6,.8,.4);S.shake=12}}
+    if(t<1.5){ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();S.heroDY=0}
     else if(t<11.5){S.heroDY=0;S.tfT=S.cine.t0+1.5;drawTransform()}
     else{drawBoss3();const s=clamp((t-11.7)/1.4,0,1);if(s>0&&s<1){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*s,.8);ctx.restore()}}
     return}
@@ -1799,6 +1840,7 @@ const MUSIC=(()=>{
     land:t=>{thump(t,90,.5,.5);nz(t,.4,.12,'highpass',1800,1,.3)},
     burst:t=>{nz(t,.6,.3,'bandpass',700,1.5,.5,180);osc('sine',320,t,.005,.2,.6,.5,70);nz(t,.1,.25,'highpass',3000)},
     creature:t=>{osc('sine',260,t,.3,.05,1.4,.8,520,0);osc('sine',263,t+.05,.3,.04,1.3,.8,480)},
+    jellyHit:t=>{osc('sine',210,t,.01,.07,.5,.7,70);osc('sine',140,t+.04,.01,.04,.45,.7,55);nz(t,.35,.09,'lowpass',700,1,.4,220,.3)},
     clank:t=>{clang(t,150+Math.random()*160,.07,.9);thump(t,120,.2,.25)},
     ignite:t=>{nz(t,.4,.2,'highpass',3000);[440,523.3,659.3].forEach((f,i)=>osc('sine',f,t+i*.08,.4,.05,2.4,.8));osc('sawtooth',55,t,.5,.03,2.5,.4)},
     beam:t=>{nz(t,1.4,.1,'bandpass',300,3,.4,2600,.6);osc('sine',110,t,.4,.05,1.2,.4,165)},

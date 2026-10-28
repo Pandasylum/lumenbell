@@ -153,3 +153,13 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - Choc de la riposte : `SHOCK` (valeurs du Chapitre I), `S.hitstop` (dans `update`, le temps du jeu `gt` recule d'autant : arrêt sur image), `S.flashHit`, `S.recoil`, `S.rings`, `S.bossHurtT` ; son `sfx.thud`. Le corps du boss est décalé et incliné dans `draw()` (fonction `body`).
 - `retryPhase()` repart toujours de la forme I.
 - Illusions : `fooled()` lance une menace `back` réelle (`DG.backTurn`, `DG.backWin`) ; `drawOrbs` la fait passer derrière le Veilleur et durcir (pointillé qui s'efface). Test : `tests/ch2-input.js`, partie 4.
+
+## Troisième passe de retouches (28 octobre, `ch2/retouches-3`)
+- **Entrée de la phase III** : le Veilleur est déjà posé ; la caméra recule depuis lui (`CINE_P3.reveal`, `revealZ`, `revealX`, `revealY`). Plus de `whooshDown` ni de `land` dans `CSFX['3:in']`.
+- **Décor de la phase III** : table `HULL` (côtes, mât et voile, ponts, pointes, flottants, ballant), `hullRuin()` et `floatDebris()` dans `bg3`. Bâton et lune inchangés.
+- **Onomatopées** : `CLANG` aussi à la garde de la phase III (`success`, phase 3). Phase I : aucun mot ; phase II : aucun mot pour les attaques du Roi.
+- **Chocs** : `SHOCK.form` (1 = tour : `thud` + `bellHit`, étincelles ; 2 = méduse : `sfx.squelch` + `MUSIC.fx('jellyHit')`, éclaboussures translucides). `damageBoss` lit la forme en phase III.
+- **Test** : `node tests/ch2-retouches3.js` (crochets de test étendus dans `tests/ch2-lib.js`).
+- **Avancement** : fait = points 1 à 4 ; point 5 (retours du test de Kevin) vide. Reste à faire : juger au téléphone la caméra d'entrée, le décor et les deux sons de choc ; régler `HULL` et `SHOCK.form` ensuite.
+- Décisions : `docs/decisions/2026-10-28-ch2-retouches-3.md`.
+- **Mesure du bot de la phase III** (100 parties, après cette passe) : Normal 100/100, 94/100, 41/100 ; Difficile 60/100, 3/100, 0/100 (aucune logique de combat touchée : le tirage de `Math.random` change avec les nouvelles particules, d'où les écarts de `--check` à 20 parties : 17/20 une fois à 70 ms, 20/20 sur `main`).

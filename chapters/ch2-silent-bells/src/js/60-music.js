@@ -93,6 +93,7 @@ const MUSIC=(()=>{
     land:t=>{thump(t,90,.5,.5);nz(t,.4,.12,'highpass',1800,1,.3)},
     burst:t=>{nz(t,.6,.3,'bandpass',700,1.5,.5,180);osc('sine',320,t,.005,.2,.6,.5,70);nz(t,.1,.25,'highpass',3000)},
     creature:t=>{osc('sine',260,t,.3,.05,1.4,.8,520,0);osc('sine',263,t+.05,.3,.04,1.3,.8,480)},
+    jellyHit:t=>{osc('sine',210,t,.01,.07,.5,.7,70);osc('sine',140,t+.04,.01,.04,.45,.7,55);nz(t,.35,.09,'lowpass',700,1,.4,220,.3)},
     clank:t=>{clang(t,150+Math.random()*160,.07,.9);thump(t,120,.2,.25)},
     ignite:t=>{nz(t,.4,.2,'highpass',3000);[440,523.3,659.3].forEach((f,i)=>osc('sine',f,t+i*.08,.4,.05,2.4,.8));osc('sawtooth',55,t,.5,.03,2.5,.4)},
     beam:t=>{nz(t,1.4,.1,'bandpass',300,3,.4,2600,.6);osc('sine',110,t,.4,.05,1.2,.4,165)},

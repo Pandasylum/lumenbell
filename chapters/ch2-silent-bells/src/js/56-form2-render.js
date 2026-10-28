@@ -121,7 +121,7 @@ const CSFX=(()=>{const L={'2:in':[[0,'glints'],[1.1,'swell'],[1.95,'crackGlass']
   '2:out':[[.3,'charge'],[1.45,'throw'],[1.75,'impactLight'],[1.8,'overload'],[3.1,'explosion'],[3.3,'glassRain'],[4.4,'voice'],[5.4,'rumble']],
   '1:in':[[0,'rumble'],[4.5,'heart'],[4.8,'draw'],[5.5,'whoosh'],[5.75,'slam'],[6.3,'sting']],
   '1:out':[[.6,'chainSlip'],[1.1,'plant'],[1.4,'tollLast'],[1.7,'heart'],[2.3,'crackRun'],[3.3,'rumble'],[4.75,'whooshDown'],[5.6,'iceCrack']],
-  '3:in':[[0,'whooshDown'],[1,'land'],[1.6,'heart'],[3.5,'burst'],[3.7,'creature'],[9.2,'plant'],[9.3,'creature'],[10.1,'ignite'],[11.7,'beam'],[12.3,'sting']],
+  '3:in':[[1.6,'heart'],[3.5,'burst'],[3.7,'creature'],[9.2,'plant'],[9.3,'creature'],[10.1,'ignite'],[11.7,'beam'],[12.3,'sting']],
   '3:out':[[.5,'thunder'],[.7,'scream'],[4.4,'fallWhine'],[5,'stars'],[6,'dissolve'],[8.3,'sting']]};
   for(let i=0;i<5;i++)L['1:in'].push([.3+.8*(i+1),'step']);
   for(let j=0;j<9;j++)L['1:out'].push([3.3+j*.17,'chunk']);
@@ -250,7 +250,7 @@ function cineBoss(){
     return}
   /* ===== Drowned Beacon (Phase III) ===== */
   if(ph===3&&k==='in'){
-    if(t<1.5){ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();S.heroDY=lerp(-440,0,ein(clamp(t/1,0,1)));if(t>=1&&once('land')){burst(HX,GY,30,'#dff8ff',6,.8,.4);S.shake=12}}
+    if(t<1.5){ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();S.heroDY=0}
     else if(t<11.5){S.heroDY=0;S.tfT=S.cine.t0+1.5;drawTransform()}
     else{drawBoss3();const s=clamp((t-11.7)/1.4,0,1);if(s>0&&s<1){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*s,.8);ctx.restore()}}
     return}
