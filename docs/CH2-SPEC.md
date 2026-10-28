@@ -40,19 +40,18 @@ La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (�
 ## Textes validés (français ; l'anglais est à écrire dans le même esprit)
 **Intro** : 1. « Sur la côte, la brume ne se lève plus. » 2. « Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond. » 3. « Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend. » 4. « On dit que sa gardienne veille encore là-haut. » 5. Titre : « Chapitre II · Silent Bells ».
 
-**Phase I · La salle des reflets** (boss : la Voix Creuse) : entrée « Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur. » ; fin « Le miroir vole en éclats. Sous la salle, une trappe s'ouvre sur la cale d'une épave. »
+**Phase I · La salle des reflets** (boss : la Voix Creuse) : entrée « Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur. » ; fin « L'espace d'un instant, la lanterne du Veilleur faiblit. » (c'est la lanterne du joueur qui faiblit, pas la turquoise ; la trappe, la chute de la lanterne turquoise et le miroir brisé sont montrés, pas écrits)
 
-**Phase II · La cale** (boss : le Roi de Rouille) : entrée « Des cloches rouillées pendent aux poutres de la cale. Une ancre traîne, trop lourde pour une main d'homme. » ; fin « Le Roi sombre sous les vagues. De son corps monte une lueur turquoise, vers le Phare. »
+**Phase II · La cale** (boss : le Roi de Rouille) : entrée « Sous le Phare, la coque d'un navire échoué. Elle sent le fer et le sel. » ; fin « La coque s'effondre autour du Roi. Pour la première fois, la lune se reflète sur son corps de métal. » (le sol ne cède pas : c'est le navire qui s'écroule, la lueur turquoise vient de son cœur et se voit)
 
-**Phase III · Les récifs** (boss : le Phare Noyé ; forme II : l'Éclaté) : entrée « Du corps du Roi, la lueur a bâti une tour. Le Phare Noyé se rallume d'une flamme qui n'est pas la sienne. » ; forme II « La tour éclate. Au milieu des débris, la méduse, à découvert. » ; fin « Dans les décombres, la cloche du Phare, fêlée et muette. »
+**Phase III · Les récifs** (boss : le Phare Noyé ; forme II : l'Éclaté) : entrée « La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif. » ; forme II « La tour éclate. Au milieu des débris, la méduse, à découvert. » ; fin « Dans les décombres, la cloche du Phare, fêlée et muette. »
 
 **Outro** (6 cartons, même construction que celui du Chapitre I : `SC` avec durées + dessins) :
 1. « Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus. »
 2. Gros plan de la cloche : « Sur celle-ci, un seul mot est gravé : Couronne. »
 3. « Et cette fois, la terre n'a pas cessé de trembler. » Image : la vallée et les tours du Chapitre I, fissures, une tour éteinte, les autres vacillent.
-4. « Sous les vagues, une lueur turquoise pulse encore, faiblement. » Image : la mer, la base du phare, la lueur sous la surface.
-5. « Au cœur de la forêt, une faible lumière vacille. » (indice de la tour suivante : les Racines)
-6. « Chapitre III. À suivre. », titre teinté de la couleur du chapitre suivant.
+4. « Au cœur de la forêt, la lumière d'une Flèche faiblit. » (indice de la tour suivante : les Racines ; la Flèche liée de la forêt commence à faiblir ; plus de lueur turquoise sous les vagues)
+5. « Chapitre III. À suivre. », titre teinté de la couleur du chapitre suivant.
 
 À supprimer de l'ancienne version : « Le Roi n'est plus le Roi », « Fais taire le glas », « Ne crois pas ce que tu vois », « Éteins le phare », les modes d'emploi dans les cartes de phase, l'intro « étoiles / bâton », « marais des Cloches », « lac gelé », la fonderie, « les villages avaient fondu leurs cloches ».
 
@@ -61,13 +60,13 @@ Titres et boss : Phase I · The Mirror Hall (The Hollow Voice) ; Phase II · The
 
 **Intro** : 1. "On the coast, the mist no longer lifts." 2. "Out at sea, the Drowned Lighthouse stands dark. No bell answers it." 3. "The ships no longer return. The fishermen say the sea keeps what it takes." 4. "They say its keeper still watches up there." 5. Title: "Chapter II · Silent Bells".
 
-**Phase I** : entrée "At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there." ; fin "The mirror shatters. Beneath the hall, a hatch opens onto the hold of a wreck."
+**Phase I** : entrée "At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there." ; fin "For a moment, the Watcher's lantern dims."
 
-**Phase II** : entrée "Rusted bells hang from the beams of the hold. An anchor lies there, too heavy for a man's hand." ; fin "The King sinks beneath the waves. A turquoise glow rises from his body, toward the Lighthouse."
+**Phase II** : entrée "Beneath the Lighthouse, the hull of a stranded ship. It smells of iron and salt." ; fin "The hull collapses around the King. For the first time, the moon gleams on his body of metal."
 
-**Phase III** : entrée "From the King's body, the glow has built a tower. The Drowned Lighthouse lights again, with a flame that is not its own." ; forme II "The tower bursts. Among the debris, the jellyfish, laid bare." ; fin "In the wreckage, the Lighthouse's bell, cracked and silent."
+**Phase III** : entrée "The sea has drawn back. The ships it took sleep on the reef." ; forme II "The tower bursts. Among the debris, the jellyfish, laid bare." ; fin "In the wreckage, the Lighthouse's bell, cracked and silent."
 
-**Outro** : 1. "By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again." 2. "On it, a single word is engraved: Crown." 3. "And this time, the earth has not stopped trembling." 4. "Beneath the waves, a turquoise glow still pulses, faintly." 5. "Deep in the forest, a faint light flickers." 6. "Chapter III. To be continued."
+**Outro** : 1. "By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again." 2. "On it, a single word is engraved: Crown." 3. "And this time, the earth has not stopped trembling." 4. "In the heart of the forest, a Spire's light is failing." 5. "Chapter III. To be continued."
 
 ## Code couleur par chapitre
 Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III : racines, vert mousse tirant sur le jaune (distinct du turquoise). Chapitre IV : givre, bleu-blanc pâle. Le titre « à suivre » et le point de la Couronne dans le menu suivent ce code.
@@ -121,3 +120,15 @@ Seul l'aspect change ; les valeurs (timings, fenêtres) restent celles du code j
 
 ### Décor (C1)
 Plus de forge, de neige, de lac gelé ni d'aurore : salle des reflets (eau-miroir), cale d'épave (ancre au sol avant l'arrivée du Roi), récifs. La lanterne turquoise de la gardienne tombe à l'eau quand le miroir éclate et coule en pulsant.
+
+## Révisions du 28 octobre (retours après test des PR #5 à #7)
+
+**Lore : la cale et le Phare.** Le Phare se dresse sur un récif, une épave est coincée dans ses fondations ; la trappe de la salle des reflets donne dans la cale de cette épave. Fin de phase II : le sol ne cède pas, c'est la coque qui s'effondre autour du Roi ; le plafond s'ouvre, la lune éclaire pour la première fois son corps de métal, et la lueur turquoise de son cœur se voit. La phase III se déroule dans la coque éventrée, à l'air libre, parmi les récifs.
+
+**Indices (rien d'écrit en plus).**
+- Phase I : la trappe est visible dès le début (fermée, rouillée, enchaînée, reflétée dans l'eau), tintement sourd de cloche en dessous, rupture de la chaîne à la fin, la caméra descend par la trappe au début de la phase II (la trappe vue d'en dessous). À la fin, la lanterne du Veilleur (joueur) faiblit un instant.
+- Phase II : le Roi porte les restes d'un Veilleur : lambeau de cape, cage de lanterne éteinte à la ceinture, anneau de chaîne au poignet.
+- Phase III : un bâton de Veilleur sans lanterne, discret dans le décor (récif ou débris au pied de la tour).
+- Outro : pas de lueur sous les vagues ; une seule lumière, celle de la Flèche de la forêt qui faiblit.
+
+**Technique (session de chapitre).** Texte d'intro à la vitesse du Chapitre I (6 à 7 s par carton) ; orbes illusoires et clones pleins avec contour en pointillé ; récupération face aux pluies denses comparée à la pluie de pierres du Chapitre I ; rages (déclenchement, séquence, affichage dans la barre de vie) comme au Chapitre I ; carton de fin de phase I sur fond fixe (pas de début de combat derrière) ; intro et outro dans un module commun avec « Passer » et bouton de rejeu (session moteur).
