@@ -136,3 +136,6 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 ## Retouches du 28 octobre (`ch2/retouches`)
 - **Intro** : `PRO_T` (durées des cartons comme au Chapitre I, fondus), `PRO_SHOTS` calculé (débuts des plans A à E), `PRO_TITLE`, `PRO_LEN` ; textes dans `PCAP_TXT`, temps des cartons dans `PCAPF`. **Outro** : 4 plans + titre, `SPIRE` (Flèche de la forêt).
 - **Fonds fixes des cartons de fin** : `S.still` (id interne de la phase, posé par `clearedCard`, remis à 0 par `resetPhaseState`) ; `drawStill(id)` est dessiné à la place de la scène tant que la carte est ouverte.
+- **Trappe** : `HATCH` (position, marche, `toll` = intervalle du tintement), `hatchTop()`, `drawHatch(k)` (dessinée avec la salle, donc reflétée), `S.hatchSnap` (chaîne rompue), `hatchRing()` (ondes du tintement, `S.hatchRing`), son `bellMuffled`. Vue d'en dessous dans `bg1`. Descente de caméra : `S.camDY` (entrée de la phase II).
+- **Fin de phase II** : `hullSky(k)` (trou dans le pont, ciel, `MOON`), `hullDebris()` (`DEBRIS`), `moonCone()`, `kingKneel()`, `moonOnKing()` ; temps dans `CINE_P2` ; fond fixe `kingEndStill()`.
+- **Restes de Veilleur** sur le Roi : cape et anneau dans `drawBoss1`, cage `deadLantern()`. Phase III : `WRECKS`/`wreck()`, membrures, bâton sans lanterne, lune, dans `bg3`.

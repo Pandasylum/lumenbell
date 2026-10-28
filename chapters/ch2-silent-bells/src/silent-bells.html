@@ -582,6 +582,13 @@ function bg1(){
   // deck beams, bells on chains
   ctx.fillStyle='#0a0806';ctx.fillRect(0,0,W,30);ctx.fillStyle='rgba(160,120,80,.12)';ctx.fillRect(0,28,W,2);
   for(let x=-20;x<W;x+=150){ctx.fillStyle='#0c0907';ctx.fillRect(x,0,26,44);ctx.fillStyle='rgba(160,120,80,.08)';ctx.fillRect(x+22,0,3,44)}
+  // the hatch from the mirror hall, seen from below: open, a cold light from above, the broken chain hanging
+  {const hx=HATCH.x;ctx.fillStyle='#050a0b';ctx.fillRect(hx-60,0,120,30);const lg=ctx.createLinearGradient(0,0,0,GY);lg.addColorStop(0,'rgba(79,224,204,.16)');lg.addColorStop(1,'rgba(79,224,204,0)');
+   ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle=lg;ctx.beginPath();ctx.moveTo(hx-50,30);ctx.lineTo(hx+50,30);ctx.lineTo(hx+110,GY);ctx.lineTo(hx-90,GY);ctx.closePath();ctx.fill();glow(hx,14,70,'rgba(120,230,215,.7)',.35);ctx.restore();
+   ctx.fillStyle='#3a1e10';for(const sd of[-1,1]){ctx.beginPath();ctx.moveTo(hx+sd*60,30);ctx.lineTo(hx+sd*58,62);ctx.lineTo(hx+sd*50,60);ctx.lineTo(hx+sd*50,30);ctx.fill()}
+   chainLinks(hx-56,32,hx-50+Math.sin(rt*.8)*4,74,0,'#5a3018');
+   if(S.camDY>0){ctx.fillStyle='#0b1618';ctx.fillRect(-20,-S.camDY-20,W+40,S.camDY+20);const sg=ctx.createLinearGradient(0,-S.camDY,0,0);sg.addColorStop(0,'rgba(79,224,204,.25)');sg.addColorStop(1,'rgba(79,224,204,.05)');ctx.fillStyle=sg;ctx.fillRect(hx-60,-S.camDY,120,S.camDY);
+     ctx.strokeStyle='rgba(205,250,242,.4)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(hx-60,-S.camDY);ctx.lineTo(hx-60,0);ctx.moveTo(hx+60,-S.camDY);ctx.lineTo(hx+60,0);ctx.stroke()}}
   for(const b of HBELLS){const sw=Math.sin(rt*.7+b.x)*.08+Math.sin(rt*9+b.x)*(S.shake||0)*.012;
     const ex=b.x+Math.sin(sw)*b.l,ey=30+Math.cos(sw)*b.l;chainLinks(b.x,30,ex,ey,0,'rgba(70,40,24,.95)');rustBell(ex,ey,b.s,sw)}
   // dripping water
@@ -600,19 +607,37 @@ function bg1(){
 }
 
 /* Phase I · the mirror hall at the foot of the Lighthouse: sea stone, arches open on the mist, floating mirror shards,
-   a flooded floor that mirrors the hall (mirrorFloor, laid after the figures) and the closed hatch to the hold */
-const HATCH={x:470,y0:GY+26,y1:GY+64,w0:116,w1:142};
-function hatchPath(k){const h=HATCH;ctx.beginPath();ctx.moveTo(h.x-h.w0/2,h.y0);ctx.lineTo(h.x+h.w0/2,h.y0);ctx.lineTo(h.x+h.w1/2,h.y1);ctx.lineTo(h.x-h.w1/2,h.y1);ctx.closePath()}
-/* k = 0 closed ... 1 open (the two leaves fold down into the hold) */
-function drawHatch(k){const h=HATCH;
-  if(k>0){hatchPath();const g=ctx.createLinearGradient(0,h.y0,0,h.y1);g.addColorStop(0,'#000');g.addColorStop(1,'#120c08');ctx.fillStyle=g;ctx.fill();ctx.strokeStyle=`rgba(205,250,242,${.5*k})`;ctx.lineWidth=2;ctx.stroke();
-    ctx.save();hatchPath();ctx.clip();ctx.strokeStyle='rgba(120,90,60,.35)';ctx.lineWidth=2;for(let i=0;i<4;i++){const y=h.y0+10+i*9;ctx.beginPath();ctx.moveTo(h.x-80,y);ctx.lineTo(h.x+80,y+2);ctx.stroke()}ctx.restore()}
-  const lh=(h.y1-h.y0)*(1-k);
-  for(const sd of[-1,1]){const xa=h.x,xb=h.x+sd*h.w0/2,xc=h.x+sd*h.w1/2;
-    ctx.beginPath();ctx.moveTo(xa,h.y0);ctx.lineTo(xb,h.y0);ctx.lineTo(lerp(xb,xc,1-k),h.y0+lh);ctx.lineTo(xa,h.y0+lh);ctx.closePath();
-    ctx.fillStyle=k>0?'#2e2318':'rgba(46,35,24,.7)';ctx.fill();ctx.strokeStyle='rgba(10,6,4,.8)';ctx.lineWidth=1.5;ctx.stroke();
-    for(let i=1;i<3;i++){const x=lerp(xa,xb,i/3);ctx.beginPath();ctx.moveTo(x,h.y0);ctx.lineTo(x+sd*i*4*(1-k),h.y0+lh);ctx.stroke()}}
-  if(k<.1){ctx.strokeStyle='rgba(70,40,24,.8)';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(h.x+30,h.y0+16,7,3,0,0,Math.PI*2);ctx.stroke()}}
+   a flooded floor that mirrors the hall (mirrorFloor, laid after the figures) and, on a stone step just above the water
+   (so the water reflects it), the hatch down to the hold of the wreck: rusted, chained, a muffled bell tolling beneath */
+const HATCH={x:470,w:150,face:16,top:12,toll:7.5};   // toll: seconds between two muffled tolls under the hatch (phase I)
+function hatchTop(){const h=HATCH,y1=GY-h.face,y0=y1-h.top;return{y0,y1,l0:h.x-h.w/2+10,r0:h.x+h.w/2-10,l1:h.x-h.w/2,r1:h.x+h.w/2}}
+/* k = 0 closed ... 1 open (the chain snaps first, then the two leaves swing up on their outer hinges) */
+function drawHatch(k){const h=HATCH,T=hatchTop(),y1=GY-h.face;
+  // the stone step
+  let g=ctx.createLinearGradient(0,y1,0,GY);g.addColorStop(0,'#1d3236');g.addColorStop(1,'#0c1a1d');ctx.fillStyle=g;ctx.fillRect(h.x-h.w/2-12,y1,h.w+24,h.face);
+  ctx.fillStyle='#16272a';ctx.beginPath();ctx.moveTo(T.l0-12,T.y0);ctx.lineTo(T.r0+12,T.y0);ctx.lineTo(T.r1+12,y1);ctx.lineTo(T.l1-12,y1);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=1;for(const x of[-40,10,55])ctx.strokeRect(h.x+x-30,y1,50,h.face);
+  // the opening (dark, a faint sea light from the hold below)
+  ctx.beginPath();ctx.moveTo(T.l0,T.y0);ctx.lineTo(T.r0,T.y0);ctx.lineTo(T.r1,T.y1);ctx.lineTo(T.l1,T.y1);ctx.closePath();
+  g=ctx.createLinearGradient(0,T.y0,0,T.y1);g.addColorStop(0,'#000');g.addColorStop(1,'#0a1414');ctx.fillStyle=g;ctx.fill();
+  if(k>0){ctx.save();ctx.clip();glow(h.x,T.y1,70,'rgba(79,224,204,.8)',.35*k);ctx.restore()}
+  // the two leaves (rusted iron plates), swinging up from flat (0) to nearly upright
+  const th=k*Math.PI/2*.92;
+  for(const sd of[-1,1]){const hx0=sd<0?T.l0:T.r0,hx1=sd<0?T.l1:T.r1,cx0=h.x,cx1=h.x,c=Math.cos(th),s=Math.sin(th),half=h.w/2;
+    const f0={x:hx0+(cx0-hx0)*c,y:T.y0-half*s*.8},f1={x:hx1+(cx1-hx1)*c,y:T.y1-half*s*.8};
+    ctx.beginPath();ctx.moveTo(hx0,T.y0);ctx.lineTo(f0.x,f0.y);ctx.lineTo(f1.x,f1.y);ctx.lineTo(hx1,T.y1);ctx.closePath();
+    g=ctx.createLinearGradient(hx1,0,f1.x,0);g.addColorStop(0,'#3a1e10');g.addColorStop(.6,'#5a2e16');g.addColorStop(1,'#2a160c');ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle='rgba(12,6,3,.85)';ctx.lineWidth=1.5;ctx.stroke();
+    for(const q of[.35,.7]){ctx.beginPath();ctx.moveTo(lerp(hx0,f0.x,q),lerp(T.y0,f0.y,q));ctx.lineTo(lerp(hx1,f1.x,q),lerp(T.y1,f1.y,q));ctx.strokeStyle='rgba(20,10,5,.7)';ctx.lineWidth=2.5;ctx.stroke()}
+    ell(lerp(hx1,f1.x,.5),lerp(T.y1,f1.y,.5)-2,4,2,'rgba(79,170,150,.35)')}
+  // the chain: across the leaves and down the face, padlocked; once snapped, its two halves hang from the step
+  const snap=S.hatchSnap;
+  if(!snap){ctx.save();chainLinks(T.l1+6,y1+10,h.x,T.y1-4,0,'#5a3018');chainLinks(h.x,T.y1-4,T.r1-6,y1+10,0,'#5a3018');ctx.restore();
+    ctx.fillStyle='#4a2612';rrect(h.x-6,T.y1-2,12,11,2);ctx.fill();ctx.strokeStyle='#2a1408';ctx.lineWidth=2;ctx.beginPath();ctx.arc(h.x,T.y1-2,4,Math.PI,0);ctx.stroke()}
+  else{chainLinks(T.l1+6,y1+10,T.l1+14,GY+4,0,'#5a3018');chainLinks(T.r1-6,y1+10,T.r1-14,GY+4,0,'#5a3018')}}
+/* the muffled toll under the hatch: a ring on the water at the foot of the step (date in S.hatchRing) */
+function hatchRing(){if(!S.hatchRing)return;const q=gt-S.hatchRing;if(q<0||q>2)return;
+  ctx.strokeStyle=`rgba(200,250,240,${.35*(1-q/2)})`;ctx.lineWidth=1.5;for(let i=0;i<2;i++){const r=20+q*70+i*16;ctx.beginPath();ctx.ellipse(HATCH.x,GY+3,r,r*.1,0,0,Math.PI*2);ctx.stroke()}}
 function bg2(){
   let g=ctx.createLinearGradient(0,0,0,GY);g.addColorStop(0,'#03090c');g.addColorStop(.6,'#0a1b20');g.addColorStop(1,'#0f272b');ctx.fillStyle=g;ctx.fillRect(0,0,W,GY);
   // stone courses
@@ -636,7 +661,7 @@ function bg2(){
   g=ctx.createLinearGradient(0,GY,0,H);g.addColorStop(0,'#0c2b2f');g.addColorStop(1,'#020708');ctx.fillStyle=g;ctx.fillRect(0,GY,W,H-GY);
   ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1;for(let i=-8;i<=8;i++){ctx.beginPath();ctx.moveTo(480+i*44,GY);ctx.lineTo(480+i*130,H);ctx.stroke()}
   for(let y=GY+14,k=1;y<H;y+=10*k,k*=1.5){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-  if(!S.hatchK)drawHatch(0);
+  drawHatch(S.hatchK||0);
 }
 /* the water of the mirror hall reflects what stands above it (copied from the frame itself, flipped and squashed) */
 const MIRROR={src:220,a:.42};
@@ -652,11 +677,19 @@ function mirrorFloor(){
 
 /* Phase III · the reefs at night: low clouds, the open sea, black reef rock with foam and spray */
 const R4=mulberry(44),FARROCK=[...Array(6)].map(()=>({x:R4()*W,w:20+R4()*50,h:6+R4()*16}));
+/* the moon over the wreck (end of phase II) and the reefs (phase III) */
+const MOON={x:720,y:78,r:26};
+/* wrecks on the reef (x, keel y, scale, tilt) */
+const WRECKS=[[200,GY-34,.7,.08],[470,GY-22,.5,-.12]];
+function wreck(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(s,s);ctx.fillStyle='#070b0c';ctx.beginPath();ctx.moveTo(-90,-30);ctx.quadraticCurveTo(-40,10,60,0);ctx.lineTo(96,-38);ctx.lineTo(80,-36);ctx.quadraticCurveTo(0,-14,-80,-40);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#070b0c';ctx.lineWidth=5;for(let i=0;i<5;i++){const xx=-60+i*28;ctx.beginPath();ctx.moveTo(xx,-14);ctx.quadraticCurveTo(xx-6,-50,xx+4,-70+i*4);ctx.stroke()}ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(10,-20);ctx.lineTo(24,-130);ctx.stroke();ctx.restore()}
 const MIDROCK=[[0,GY-34,150,30],[120,GY-20,140,18],[330,GY-26,120,22],[470,GY-14,160,12],[880,GY-30,120,26]];
 function reefRock(x,y,w,h,seed){const R=mulberry(seed);ctx.beginPath();ctx.moveTo(x-w/2,y+h);for(let i=0;i<=8;i++){const t=i/8;ctx.lineTo(x-w/2+t*w,y+h-Math.sin(Math.PI*t)*h*(.6+R()*.6))}ctx.closePath();ctx.fill()}
 function bg3(){
   let g=ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'#02060a');g.addColorStop(1,'#0a2228');ctx.fillStyle=g;ctx.fillRect(0,0,W,300);
   for(const s of STARS){if(s.y>200)continue;ctx.globalAlpha=.15+.2*Math.sin(rt*1.5+s.o);ctx.fillStyle='#e8f6f2';ctx.fillRect(s.x,s.y,s.r,s.r)}ctx.globalAlpha=1;
+  // the moon that lit the King at the end of phase II
+  glow(MOON.x-120,MOON.y-10,110,'rgba(220,235,255,.8)',.3);ell(MOON.x-120,MOON.y-10,MOON.r*.8,MOON.r*.8,'rgba(225,235,242,.85)');
   // low clouds
   for(let b=0;b<3;b++)for(let i=0;i<6;i++){const x=((i*210+rt*(4+b*3)+b*90)%(W+300))-150,y=40+b*55+Math.sin(i+b)*12;const cg=ctx.createRadialGradient(x,y,10,x,y,170);cg.addColorStop(0,`rgba(${18+b*6},${36+b*8},${42+b*8},.75)`);cg.addColorStop(1,'rgba(10,30,36,0)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(x,y,170,40,0,0,Math.PI*2);ctx.fill()}
   // the open sea
@@ -665,6 +698,8 @@ function bg3(){
   ctx.strokeStyle='rgba(140,230,220,.12)';ctx.lineWidth=1.2;for(let i=0;i<9;i++){const y=304+i*i*1.6,ph=rt*.6+i;ctx.beginPath();for(let x=0;x<=W;x+=30){const yy=y+Math.sin(x*.02+ph)*(1+i*.4);x?ctx.lineTo(x,yy):ctx.moveTo(x,yy)}ctx.stroke()}
   // rocks of the reef behind the fight, foam at their feet
   ctx.fillStyle='#060c0e';MIDROCK.forEach((r,i)=>reefRock(r[0]+r[2]/2,r[1],r[2],r[3],60+i));
+  // the ships the sea took, asleep on the reef
+  for(const [x,y,s,a] of WRECKS)wreck(x,y,s,a);
   for(let i=0;i<5;i++){const r=MIDROCK[i],k=(rt*.35+i*.23)%1;ctx.strokeStyle=`rgba(220,245,240,${.35*(1-k)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(r[0]+r[2]/2,r[1]+r[3],r[2]*.5*(.8+k*.4),3+k*4,0,Math.PI,0);ctx.stroke()}
   // the reef floor: wet black rock, crevices, foam pools, the mooring rocks
   g=ctx.createLinearGradient(0,GY-20,0,H);g.addColorStop(0,'#101a1d');g.addColorStop(.3,'#0a1114');g.addColorStop(1,'#030607');ctx.fillStyle=g;ctx.fillRect(0,GY-6,W,H-GY+6);
@@ -672,6 +707,12 @@ function bg3(){
   ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=2;for(const c of CRACKS){ctx.beginPath();c.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke()}
   for(const c of CRACKS){const p=c[2];ell(p[0],p[1],18,3,`rgba(160,230,220,${.08+.05*Math.sin(rt+p[0])})`)}
   ctx.strokeStyle='rgba(150,235,225,.28)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,GY-6);ctx.lineTo(W,GY-6);ctx.stroke();
+  // a Watcher's staff without its lantern, wedged against the mooring rock at the tower's foot
+  ctx.lineCap='round';ctx.strokeStyle='#3a2a1a';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(900,GY-2);ctx.lineTo(921,GY-112);ctx.stroke();
+  ctx.strokeStyle='#2a3238';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(921,GY-112);ctx.lineTo(917,GY-124);ctx.moveTo(921,GY-112);ctx.lineTo(928,GY-122);ctx.stroke();
+  // the gutted hull of the wreck around the fight: broken frames rising from the reef at both edges
+  for(const [x,d] of[[18,1],[96,1],[952,-1]]){ctx.strokeStyle='#0a0705';ctx.lineWidth=20;ctx.beginPath();ctx.moveTo(x,GY+4);ctx.quadraticCurveTo(x-d*16,GY-160,x+d*40,GY-250+(x%3)*20);ctx.stroke();ctx.strokeStyle='rgba(150,120,90,.12)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+d*6,GY+4);ctx.quadraticCurveTo(x-d*10,GY-160,x+d*44,GY-246+(x%3)*20);ctx.stroke()}
+  ctx.fillStyle='#120d09';ctx.fillRect(0,GY-26,150,8);ctx.fillRect(0,GY-58,90,7);ctx.fillRect(900,GY-40,60,8);
   // surf breaking at the front edge, spray in the wind
   for(let i=0;i<4;i++){const k=(rt*.25+i*.25)%1,y=H-6-k*18;ctx.strokeStyle=`rgba(225,245,240,${.3*Math.sin(Math.PI*k)})`;ctx.lineWidth=2;ctx.beginPath();for(let x=0;x<=W;x+=40){const yy=y+Math.sin(x*.03+i*2+rt)*3;x?ctx.lineTo(x,yy):ctx.moveTo(x,yy)}ctx.stroke()}
   ctx.fillStyle='rgba(225,245,240,.55)';for(const s of SPRAY){const y=H-((s.y*.5+rt*s.v)%(H*.55)),x=(s.x+rt*s.v*.8+Math.sin(rt+s.d)*10)%W;ctx.globalAlpha=clamp((y-H*.45)/80,0,1)*.7;ctx.fillRect(x,y,1.6,1.6)}ctx.globalAlpha=1;
@@ -738,7 +779,8 @@ function heroShape(x,y,lean,staffA,tint){
   ctx.strokeStyle='#6e5238';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(sb[0],sb[1]);ctx.lineTo(st[0],st[1]);ctx.stroke();
   ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(hand[0],hand[1],5,0,6.283);ctx.fill();
   const lit=up>.3||S.holding;
-  ctx.save();ctx.translate(st[0],st[1]);ctx.rotate(staffA+Math.PI/2);ctx.shadowColor=lit?'#6fd3ff':'#2d6f8f';ctx.shadowBlur=lit?22:8;ctx.fillStyle=lit?'#d8f4ff':'#7fc6e6';
+  const dm=S.lampDim||0;   // the lantern dims (end of phase I), 0..1
+  ctx.save();ctx.translate(st[0],st[1]);ctx.rotate(staffA+Math.PI/2);ctx.shadowColor=lit?'#6fd3ff':'#2d6f8f';ctx.shadowBlur=(lit?22:8)*(1-dm);ctx.fillStyle=dm>0?lerpC(lit?[216,244,255]:[127,198,230],[38,58,70],dm):lit?'#d8f4ff':'#7fc6e6';
   ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(8,0);ctx.lineTo(0,10);ctx.lineTo(-8,0);ctx.closePath();ctx.fill();ctx.restore();
   ctx.restore();
   const c=Math.cos(lean),s=Math.sin(lean);S.orbX=x+st[0]*c-st[1]*s;S.orbY=y+st[0]*s+st[1]*c;
@@ -825,8 +867,9 @@ function drawBoss1(){
   glow(0,hy,80,'rgba(220,150,80,.7)',clamp(hp,0,1)*.45*(1-pz));if(pz>0)glow(0,hy,110,'rgba(90,220,255,.9)',pz*.7);
   // sea water running off the rims
   for(const d of DRIPS){const k=(rt*.6+d.o)%1;ell(d.x,GY-96+k*86,1.8,3+k*3,`rgba(170,235,225,${.6*(1-k)})`)}
-  // 4. the anchor's sling: one chain from left hip to right shoulder (the tower's moorings)
+  // 4. the anchor's sling: one chain from left hip to right shoulder (the tower's moorings); at the belt, a Watcher's lantern cage, unlit
   chainLinks(-74,GY-112,rS.x-6,rS.y-8,-6,'#4a2a18');
+  ctx.save();ctx.translate(46,GY-100);ctx.scale(1.4,1.4);deadLantern(0,0,Math.sin(rt*1.4)*.12);ctx.restore();ctx.strokeStyle='#4a2a18';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(40,GY-112);ctx.lineTo(46,GY-121);ctx.stroke();
   // 5. left arm: the harpoon (thrown on its chain, then hauled back)
   let lh;
   if(A.larm){lh={x:lerp(-96,-150,A.larm),y:lerp(GY-118,ty+6,A.larm)}}else lh={x:-98+Math.sin(rt*1.3)*2,y:GY-118};
@@ -844,6 +887,10 @@ function drawBoss1(){
   fist(lh.x,lh.y);
   // 6. shoulder bells (the tower's balconies)
   for(const s of[-1,1])drawP('sbell',s*80,ty+40,0);
+  // what is left of a Watcher on him: a torn strip of cloak hanging from the left shoulder
+  {const sw=Math.sin(rt*1.2)*4;ctx.fillStyle='#2a3554';ctx.beginPath();ctx.moveTo(lS.x-8,lS.y-14);ctx.quadraticCurveTo(lS.x-40,lS.y+40,lS.x-44+sw,GY-140);
+   [[-38,GY-126],[-30,GY-142],[-24,GY-122],[-16,GY-140],[-10,GY-150]].forEach(([dx,y])=>ctx.lineTo(lS.x+dx+sw*.6,y));ctx.quadraticCurveTo(lS.x-12,lS.y+30,lS.x+14,lS.y-10);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='rgba(120,140,190,.18)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(lS.x-4,lS.y);ctx.quadraticCurveTo(lS.x-20,lS.y+50,lS.x-22+sw,GY-150);ctx.stroke()}
   // 7. head bell, hunched forward between the shoulders: the Lighthouse's bell, its lamp still lit
   const hs=A.toll*Math.sin(gt*60)*.09-.2;
   S.kingHead={x:X+sh-6,y:ty+20};
@@ -860,6 +907,8 @@ function drawBoss1(){
   if(!A.onBack&&!S.noAnchor){const tip=drawAnchor(rh.x,rh.y,Math.cos(A.clap),Math.sin(A.clap),curAct(['slam','sweep'],0)?.45:0);S.clapTip={x:tip[0]+X,y:tip[1]}}
   limb(rS.x,rS.y,rh.x,rh.y,A.onBack?14:-14,22);
   fist(rh.x,rh.y);
+  // a chain ring at the wrist, one link hanging
+  {const dx=rh.x-rS.x,dy=rh.y-rS.y,l=Math.hypot(dx,dy)||1,wx=rh.x-dx/l*16,wy=rh.y-dy/l*16;ctx.strokeStyle='#6a3a1c';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(wx,wy,5,12,Math.atan2(dy,dx),0,Math.PI*2);ctx.stroke();ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(wx+2,wy+13,3,6,.3,0,Math.PI*2);ctx.stroke()}
   ctx.restore();
   if(S.mode==='ko'&&S.phase===1&&!S.koBurst){S.koBurst=true;for(let i=0;i<5;i++)burst(700+(Math.random()-.5)*160,GY-120-Math.random()*120,14,i%2?'#cfeee6':'#c9925e',6,1.4,.35)}
 }
@@ -950,6 +999,10 @@ function drawVoice(i,alpha,cast,ko){
 function lanternPos(t,fx,fy){const C=CINE_P1,d=t-C.drop;
   if(d<C.fall){const k=d/C.fall;return{x:fx-20*k,y:lerp(fy,GY,k*k),a:k*2.4,splash:false}}
   const s=eout(clamp((d-C.fall)/C.sink,0,1));return{x:fx-20+Math.sin(d*1.3)*4,y:GY+8+s*C.depth,a:2.4+Math.sin(d*1.1)*.25,splash:true,sub:s}}
+/* a Watcher's lantern cage, unlit, hanging at the Rust King's belt */
+function deadLantern(x,y,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.strokeStyle='#2a1a10';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-15,4,Math.PI,0);ctx.stroke();
+  ctx.fillStyle='#24180f';ctx.beginPath();ctx.moveTo(-6,-11);ctx.lineTo(6,-11);ctx.lineTo(8,-7);ctx.lineTo(-8,-7);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(20,30,30,.8)';ctx.fillRect(-6,-7,12,14);
+  ctx.strokeStyle='#24180f';ctx.lineWidth=1.5;for(const x0 of[-6,0,6]){ctx.beginPath();ctx.moveTo(x0,-7);ctx.lineTo(x0,7);ctx.stroke()}ctx.fillStyle='#24180f';ctx.fillRect(-8,7,16,3);ctx.strokeStyle='rgba(170,230,210,.15)';ctx.beginPath();ctx.moveTo(-4,-5);ctx.lineTo(-4,4);ctx.stroke();ctx.restore()}
 function keeperLantern(x,y,a,t){const p=.55+.45*Math.sin(t*3.4);
   ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(1.5,1.5);
   glow(0,0,46,'rgba(79,224,204,.9)',.55*p);
@@ -961,9 +1014,11 @@ function keeperLantern(x,y,a,t){const p=.55+.45*Math.sin(t*3.4);
   ctx.fillStyle='#22312e';ctx.fillRect(-8,6,16,3);ctx.restore()}
 /* phase I end, over the water: the hatch opening on the hold, and the lantern's pulse once it has sunk */
 function sinkGlow(t){
-    // the hatch to the hold opens in the floor
-    S.hatchK=eio(clamp((t-CINE_P1.hatch)/.8,0,1));if(S.hatchK>0){drawHatch(S.hatchK);if(once('hatch')){MUSIC.fx('clank');S.shake=6}
-      if(S.hatchK<1||t<CINE_P1.hatch+1.6){const h=HATCH;ctx.strokeStyle='rgba(210,250,240,.5)';ctx.lineWidth=1.5;for(let i=0;i<6;i++){const x=h.x-h.w0/2+8+i*(h.w0-16)/5,k=(t*2+i*.3)%1;ctx.beginPath();ctx.moveTo(x,h.y0-4);ctx.lineTo(x+(i-2.5)*2,h.y0+k*24);ctx.stroke()}}}
+    // the hatch: the chain snaps, then the leaves swing open (drawn with the hall, so the water reflects it)
+    const C=CINE_P1;{const k=clamp((t-C.dim)/C.dimD,0,1);S.lampDim=k>0&&k<1?Math.sin(Math.PI*k)*(Math.sin(t*37)>-.3?1:.6):0}
+    if(t>=C.hatch-C.snap&&once('snap')){S.hatchSnap=1;S.shake=7;const T=hatchTop();burst(HATCH.x,T.y1,18,'#8a4a24',5,.7,.4);MUSIC.fx('chainSlip');MUSIC.fx('clank')}
+    S.hatchK=eio(clamp((t-C.hatch)/.8,0,1));if(S.hatchK>0&&once('hatch')){MUSIC.fx('plant');S.shake=6}
+    if(S.hatchK>0)glow(HATCH.x,GY-30,90,'rgba(79,224,204,.8)',.3*S.hatchK);
   if(t<CINE_P1.drop+CINE_P1.fall)return;const vp=voicePos(0),q=lanternPos(t,vp.x,vp.y-96),p=.5+.5*Math.sin(t*3.4);
   ctx.save();ctx.globalCompositeOperation='lighter';glow(q.x,q.y,60+20*p,'rgba(79,224,204,.9)',.35+.3*p);ell(q.x,q.y-1,2.5,4,`rgba(220,255,248,${.5+.4*p})`);ctx.restore()}
 function shard(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a*1.5);const g=ctx.createLinearGradient(-s,-s,s,s);g.addColorStop(0,'rgba(235,225,255,.75)');g.addColorStop(1,'rgba(90,70,140,.4)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*.5,s*.2);ctx.lineTo(-s*.3,s*.7);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
@@ -1204,6 +1259,7 @@ function draw(){
   ctx.save();
   if(S.shake>.3)ctx.translate((Math.random()-.5)*S.shake,(Math.random()-.5)*S.shake);
   const ph=S.phase;
+  S.camDY=0;if(S.cine&&ph===1&&S.cine.k==='in'){const C=CINE_P2;S.camDY=C.descD*(1-eio(clamp((gt-S.cine.t0)/C.desc,0,1)));if(S.camDY>0)ctx.translate(0,S.camDY)}
   if(S.cine&&ph===3&&S.cine.k==='out'){const C=CINE_P3,z=1+(C.zoomZ-1)*eio(clamp((gt-S.cine.t0-C.zoom)/C.zoomD,0,1));if(z>1){const cx=BELL_REST.x-20,cy=GY-40;ctx.translate(cx,cy);ctx.scale(z,z);ctx.translate(-cx,-cy)}}
   [bg1,bg2,bg3][ph-1]();
   if(S.cine)cineBoss();
@@ -1213,6 +1269,7 @@ function draw(){
   if(S.mode!=='dead'||gt-S.deadT<.6){ctx.save();ctx.translate(S.heroDX||0,S.heroDY||0);drawHero();ctx.restore()}
   else{ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');ctx.save();ctx.translate(HX,GY);ctx.rotate(-Math.PI/2*.9);ctx.translate(-HX,-GY);heroShape(HX,GY,0,-1.42,.3);ctx.restore()}
   if(S.post){const f=S.post;S.post=null;f()}
+  if(ph===2)hatchRing();
   if(ph===2){mirrorFloor();if(S.cine&&S.cine.k==='out')sinkGlow(gt-S.cine.t0)}
   if(ph===2)drawOrbs();
   drawCounter();
@@ -1235,7 +1292,7 @@ function draw(){
 /* ---------- still backgrounds behind the end-of-phase cards (internal phase id): the scene as its closing cinematic
    left it, never the start of the fight ---------- */
 function drawStill(id){
-  if(id===2){S.hatchK=1;bg2();drawHatch(1);const vp=voicePos(0),q=lanternPos(60,vp.x,vp.y-96);keeperLantern(q.x,q.y,q.a,rt);
+  if(id===2){S.hatchK=1;S.hatchSnap=1;bg2();const vp=voicePos(0),q=lanternPos(60,vp.x,vp.y-96);keeperLantern(q.x,q.y,q.a,rt);
     ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0);mirrorFloor();
     ctx.save();ctx.globalCompositeOperation='lighter';glow(q.x,q.y,70,'rgba(79,224,204,.9)',.4+.2*Math.sin(rt*3.4));ctx.restore()}
   else if(id===1)kingEndStill();
@@ -1244,20 +1301,49 @@ function drawStill(id){
     drawAnchorQ({x:LX+135,y:GY-120,a:1.78,sc:1,clip:true});
     ctx.save();ctx.translate(BELL_REST.x,BELL_REST.y);ctx.rotate(BELL_REST.r);pHead(.85,bellMarks());ctx.restore();
     const hx=BELL_REST.x-78;ell(hx,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(hx,GY,0,-1.42,0)}}
-/* until the end of phase II is redrawn: the empty hold */
-function kingEndStill(){bg1();ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0)}
+/* ---- phase II end: the hull collapsing, the opened deck, the moon ---- */
+/* debris of the hull falling around the King (planks of the deck and broken frames): x, start delay, size, spin, rest pose */
+const DEBRIS=(()=>{const R=mulberry(313);return[...Array(14)].map((_,i)=>{const side=i%3===2;return{x:side?(R()<.5?40+R()*120:820+R()*120):360+R()*560,d:i*.11+R()*.2,w:side?18:60+R()*70,h:side?110+R()*60:12+R()*6,r0:(R()-.5)*.6,spin:(R()-.5)*3,rx:0,ry:GY-(side?20:7),rr:side?(R()<.5?-1.35:1.35):(R()-.5)*.25,frame:side}})})();
+function hullDebris(tc){for(const d of DEBRIS){const q=clamp((tc-d.d)/.9,0,1);if(q<=0)continue;const e=ein(q),y=lerp(-60,d.ry,e),r=q<1?d.r0+d.spin*q:d.rr;
+    if(q>=1&&once('db'+d.x.toFixed(0))){S.shake=Math.max(S.shake,5);burst(d.x,GY,8,'#6a5a48',4,.7,.3)}
+    ctx.save();ctx.translate(d.x,y);ctx.rotate(r);ctx.fillStyle=d.frame?'#120d09':'#2a2017';ctx.fillRect(-d.w/2,-d.h/2,d.w,d.h);ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1.5;ctx.strokeRect(-d.w/2,-d.h/2,d.w,d.h);
+    ctx.fillStyle='#2a2017';ctx.beginPath();ctx.moveTo(d.w/2,-d.h/2);ctx.lineTo(d.w/2+8,0);ctx.lineTo(d.w/2,d.h/2);ctx.fill();ctx.restore()}}
+/* the hole torn in the deck and the hull's side: the night sky, the moon, the reefs outside (k 0..1) */
+function hullHole(k){ctx.beginPath();ctx.moveTo(300,-2);const R=mulberry(29),n=9;for(let i=0;i<=n;i++){const x=lerp(300,W+2,i/n),y=k*(160+Math.sin(i*1.7)*40+R()*40);ctx.lineTo(x,y)}ctx.lineTo(W+2,-2);ctx.closePath()}
+function hullSky(k){ctx.save();hullHole(k);ctx.clip();
+  const g=ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,'#05101a');g.addColorStop(1,'#163038');ctx.fillStyle=g;ctx.fillRect(0,0,W,260);
+  for(const s of STARS){if(s.y<200){ctx.globalAlpha=.4+.3*Math.sin(rt*1.5+s.o);ctx.fillStyle='#e8f6f2';ctx.fillRect(s.x,s.y,s.r,s.r)}}ctx.globalAlpha=1;
+  glow(MOON.x,MOON.y,120,'rgba(220,235,255,.8)',.45);ell(MOON.x,MOON.y,MOON.r,MOON.r,'#e8eef4');ell(MOON.x-8,MOON.y-5,6,5,'rgba(170,185,200,.5)');ell(MOON.x+9,MOON.y+8,4,3,'rgba(170,185,200,.45)');
+  ctx.fillStyle='#071014';ctx.fillRect(0,220,W,60);
+  ctx.restore();
+  ctx.strokeStyle='#0d0907';ctx.lineWidth=6;hullHole(k);ctx.stroke()}
+/* the moonlight falling through the hole onto the King */
+function moonCone(a){ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(MOON.x,MOON.y,700,GY);g.addColorStop(0,`rgba(210,225,255,${.22*a})`);g.addColorStop(1,`rgba(180,205,240,${.08*a})`);
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(MOON.x-30,MOON.y+20);ctx.lineTo(MOON.x+30,MOON.y+20);ctx.lineTo(840,GY+6);ctx.lineTo(560,GY+6);ctx.closePath();ctx.fill();ell(700,GY+4,150,14,`rgba(200,220,255,${.12*a})`);ctx.restore()}
+/* the King on his knees (sink 0..45) */
+function kingKneel(sink){ctx.save();ctx.translate(700,GY);ctx.rotate(.08*sink/45);ctx.translate(-700,-GY);ctx.translate(0,sink);drawBoss1();ctx.restore()}
+/* moonlight on his metal: cold highlights along the bells, and his heart's turquoise glow */
+function moonOnKing(sink,a){ctx.save();ctx.translate(700,GY);ctx.rotate(.08*sink/45);ctx.translate(0,sink-GY);ctx.globalCompositeOperation='lighter';
+  ctx.strokeStyle=`rgba(220,235,255,${.55*a})`;ctx.lineWidth=2.5;
+  for(const [hw,y,h] of[[104,-98,54],[88,-140,50],[72,-180,48]]){ctx.beginPath();ctx.moveTo(hw*.62,y-h*.98);ctx.quadraticCurveTo(hw*.7,y-h*.45,hw*.98,y-2);ctx.stroke()}
+  ctx.beginPath();ctx.arc(-6,-224-40,30,-1.2,-.2);ctx.stroke();
+  glow(0,-166,120,'rgba(79,224,204,.9)',.55*a);ctx.restore()}
+function kingEndStill(){bg1();hullSky(1);hullDebris(9);drawAnchorAt({x:878,y:GY-150,a:1.95,f:1});S.parasite=1;S.noAnchor=true;moonCone(1);kingKneel(45);moonOnKing(45,1);S.noAnchor=false;
+  ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0)}
 
 /* ---------- cinematics: phase entries and exits ---------- */
-const CINE_LEN={1:{in:7.8,out:6.4},2:{in:4.8,out:7.4},3:{in:13.8,out:12.8,p2:7.4}};
+const CINE_LEN={1:{in:7.8,out:7.8},2:{in:4.8,out:7.4},3:{in:13.8,out:12.8,p2:7.4}};
 /* beats inside the cinematics (s): phase I end (internal 2): the lantern drops at `drop`, touches the water after `fall`,
    sinks `depth` units in `sink`; the hatch opens at `hatch`. Phase II entry (internal 1): the King hauls the anchor off the
-   floor by its chain (`haul`) and slings it on his back (`lift`, until `slung`). Phase II end: the glow rises at `rise`.
+   floor by its chain (`haul`) and slings it on his back (`lift`, until `slung`); before that the camera comes down through
+   the hatch (`desc` s, from `descD` units above). Phase II end: the hull collapses from `collapse` (`collapseD`), the deck
+   opens from `open` (`openD`), the moon lights the King from `moon`.
    Phase III end: the camera closes in on the bell from `zoom` over `zoomD`, up to `zoomZ`. */
-const CINE_P1={drop:3.1,fall:.65,sink:3.2,depth:70,hatch:5.5};
-const CINE_P2={haul:4.0,lift:4.35,slung:4.75,rise:3.4};
+const CINE_P1={drop:3.1,fall:.65,sink:3.2,depth:70,hatch:5.5,snap:.45,dim:3.8,dimD:1.1};
+const CINE_P2={haul:4.0,lift:4.35,slung:4.75,desc:1.8,descD:380,collapse:1.4,collapseD:2.2,open:2.4,openD:1.4,moon:3.6};
 const CINE_P3={zoom:9.4,zoomD:2.6,zoomZ:2.1};
 function once(k){if(S.cineDone[k])return false;S.cineDone[k]=1;return true}
-function resetCine(s){s.hatchK=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.parasite=0;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
+function resetCine(s){s.hatchK=0;s.hatchSnap=0;s.lampDim=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.parasite=0;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
 function startCine(p,k){const s=p.s;resetCine(s);if(MUSIC.cur!==s.phase)MUSIC.bed(s.phase);s.demo=false;s.parts=[];s.pops=[];s.cine={k,t0:gt};s.tfBurst=s.tfFlash=s.tfAnch=false;s.tfId=(s.tfId||0)+1;s.flashT=-9}
 function fadeAll(a,c){if(a<=0)return;ctx.fillStyle=`rgba(${c||'0,0,0'},${clamp(a,0,1)})`;ctx.fillRect(0,0,W,H)}
 /* chapter colours (docs/CH2-SPEC.md): II tide turquoise, III roots moss green leaning yellow */
@@ -1526,38 +1612,24 @@ function cineBoss(){
     const dim=.55*(1-clamp(t/3,0,1));fadeAll(dim,'12,9,6');
     return}
   if(ph===1&&k==='out'){
+    // the floor holds: the hull collapses around the King, the deck opens, the moon lights his metal body for the first time
+    const C=CINE_P2,col=clamp((t-C.collapse)/C.collapseD,0,1),open=eio(clamp((t-C.open)/C.openD,0,1)),moon=clamp((t-C.moon)/.8,0,1);
+    if(t>C.collapse&&t<C.open+C.openD)S.shake=Math.max(S.shake,3+4*Math.sin(Math.PI*col));
+    if(open>0)hullSky(open);
+    hullDebris(t-C.collapse);
     // the anchor slips off his back and plants itself behind him
     S.noAnchor=t>.6;
-    const XS=[160,262,348,430,508,590,670,752,832,940];
-    const fallStart=j=>3.3+j*.17;               // j counted from the right (anchor side)
-    const chunkFall=x=>{for(let i=0;i<XS.length-1;i++)if(x>=XS[i]&&x<XS[i+1]){const j=XS.length-2-i;return clamp((t-fallStart(j))/1.1,0,1)}return 0};
-    // holes left by fallen chunks, then the falling chunks
-    for(let i=0;i<XS.length-1;i++){const j=XS.length-2-i,f=clamp((t-fallStart(j))/1.1,0,1),x0=XS[i],x1=XS[i+1];
-      const pre=clamp((t-fallStart(j)+.25)/.25,0,1);
-      if(f>0){const g=ctx.createLinearGradient(0,GY,0,H);g.addColorStop(0,'#0a2c31');g.addColorStop(1,'#020a0c');ctx.fillStyle=g;ctx.fillRect(x0,GY-1,x1-x0,H-GY+1);glow((x0+x1)/2,H,90,'rgba(79,224,204,.5)',.35);ctx.strokeStyle=`rgba(210,250,240,${.3+.2*Math.sin(t*3+i)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x0,GY+8+Math.sin(t*2+i)*2);ctx.lineTo(x1,GY+8-Math.sin(t*2+i)*2);ctx.stroke()}
-      if(f>0&&f<1){const e=ein(f),R=mulberry(i*7+3);ctx.save();ctx.translate((x0+x1)/2,GY+e*440);ctx.rotate((R()-.5)*e*.9);
-        const hw=(x1-x0)/2;ctx.beginPath();ctx.moveTo(-hw,0);ctx.lineTo(hw,0);ctx.lineTo(hw,26);ctx.lineTo(hw-14,34);ctx.lineTo(hw/3,28);ctx.lineTo(0,40);ctx.lineTo(-hw/2,30);ctx.lineTo(-hw,36);ctx.closePath();
-        const g=ctx.createLinearGradient(0,0,0,40);g.addColorStop(0,'#2a2017');g.addColorStop(1,'#0e0a07');ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1.5;for(let k=-hw+18;k<hw;k+=20){ctx.beginPath();ctx.moveTo(k,0);ctx.lineTo(k,30);ctx.stroke()}ctx.strokeStyle='rgba(200,250,240,.3)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-hw,1);ctx.lineTo(hw,1);ctx.stroke();ctx.restore();
-        if(once('c'+i)){S.shake=Math.max(S.shake,8);burst((x0+x1)/2,GY,14,i%2?'#5a4330':'#cff7ef',4,1,.4)}}
-      if(f===0&&pre>0){ctx.strokeStyle=`rgba(210,250,240,${pre})`;ctx.lineWidth=2;for(const x of[x0,x1]){ctx.beginPath();ctx.moveTo(x,GY+2);ctx.lineTo(x+6,GY+30*pre);ctx.lineTo(x-4,GY+60*pre);ctx.stroke()}}}
-    // the crack running from the anchor to the Watcher
-    const cr=clamp((t-2.3)/1,0,1);
-    if(cr>0&&t<5){const xa=868,xb=lerp(xa,HX,eio(cr));const R=mulberry(17);ctx.save();ctx.strokeStyle='#d8fbf4';ctx.lineWidth=3;ctx.shadowColor='rgba(79,224,204,.9)';ctx.shadowBlur=12;ctx.beginPath();ctx.moveTo(xa,GY+3);
-      for(let x=xa;x>xb;x-=22){ctx.lineTo(x,GY+3+(R()-.5)*8)}ctx.lineTo(xb,GY+3);ctx.stroke();ctx.restore();
-      if(cr<1&&Math.random()<.7)burst(xb,GY,2,'#bff6ec',3,.5,.4);if(cr<1)S.shake=Math.max(S.shake,3)}
-    // anchor: slips off, plants, then drops with its chunk
-    if(t>.6){const e=ein(clamp((t-.6)/.5,0,1)),af=ein(chunkFall(868))*440;const q={x:lerp(753,878,e),y:lerp(GY-280,GY-150,e)+af,a:lerp(2.11,1.95,e),f:af>0?0:e};drawAnchorAt(q);if(e>=1&&once('an')){S.shake=10;burst(862,GY,24,'#cff7ef',6,.7,.4)}}
-    // the King kneels, tolls one last time, then goes down with the floor
-    const sink=eio(clamp((t-1)/.8,0,1))*45,kf=ein(chunkFall(700))*440;
+    if(t>.6){const e=ein(clamp((t-.6)/.5,0,1));drawAnchorAt({x:lerp(753,878,e),y:lerp(GY-280,GY-150,e),a:lerp(2.11,1.95,e),f:e});if(e>=1&&once('an')){S.shake=10;burst(862,GY,24,'#cff7ef',6,.7,.4)}}
+    // the King kneels and tolls one last time; the parasite's light shows in his heart
+    const sink=eio(clamp((t-1)/.8,0,1))*45;
     S.parasite=clamp((t-1.6)/1.4,0,1);
     if(t<1)S.shake=Math.max(S.shake,3);
-    ctx.save();if(kf<=0){ctx.beginPath();ctx.rect(0,0,W,GY+4);ctx.clip()}ctx.translate(700,GY);ctx.rotate(.08*sink/45+kf/440*.4);ctx.translate(-700,-GY);ctx.translate(0,sink+kf);drawBoss1();ctx.restore();
+    if(moon>0)moonCone(moon);
+    kingKneel(sink);
+    if(moon>0)moonOnKing(sink,moon);
     if(t>1.4&&t<3){const a=1-(t-1.4)/1.6;ctx.strokeStyle=`rgba(240,226,184,${a*.8})`;ctx.lineWidth=3;for(let i=0;i<4;i++){const r=30+((t-1.4)*90+i*35)%140;ctx.beginPath();ctx.arc(694,GY-226+sink,r,Math.PI*.1,Math.PI*.9,true);ctx.stroke()}S.shake=Math.max(S.shake,2)}
-    // from the sunken body, a turquoise glow rises toward the Lighthouse (off to the right)
-    if(t>CINE_P2.rise){const k=clamp((t-CINE_P2.rise)/1.4,0,1);glow(700,GY+20-k*60,140,'rgba(79,224,204,.8)',.55*k);
-      for(let i=0;i<3;i++)S.parts.push({x:640+Math.random()*120,y:GY+10,vx:.9+Math.random()*.8,vy:-1.6-Math.random()*1.2,g:0,t0:gt,life:1.6+Math.random(),c:Math.random()<.3?'#e8fffb':'#4fe0cc',r:1.6+Math.random()*1.8})}
-    // the Watcher's chunk goes last
-    const hf=chunkFall(HX);S.heroDY=ein(hf)*440;S.heroPose=hf>0?{staffA:-2.6,lean:-.35*hf}:null;
+    // the Watcher braces while the hull comes down
+    S.heroDY=0;S.heroPose=col>0&&col<1?{staffA:-1.9,lean:-.1}:null;
     return}
   /* ===== Drowned Beacon (Phase III) ===== */
   if(ph===3&&k==='in'){
@@ -1574,7 +1646,7 @@ function cineOverlay(){
   if(ph===2&&k==='in')title(t,3.1,PH[2].eye(),PH[2].boss(),CH_COL[2]);
   if(ph===2&&k==='out')fadeAll(clamp((t-6.5)/.7,0,1));
   if(ph===1&&k==='in')title(t,6.3,PH[1].eye(),PH[1].boss(),CH_COL[2]);
-  if(ph===1&&k==='out')fadeAll(clamp((t-5)/.7,0,1));
+  if(ph===1&&k==='out')fadeAll(clamp((t-(CINE_LEN[1].out-1.1))/.7,0,1));
   if(ph===3&&k==='in')title(t,12.3,PH[3].eye(),_('The Drowned Lighthouse','Le Phare Noyé'),CH_COL[2]);
   if(ph===3&&k==='p2'){const shat=_('The Shattered',"L'Éclaté");bossBar(t<5.8?_('The Drowned Lighthouse','Le Phare Noyé'):shat,t<2.1?0:clamp((t-2.2)/3.4,0,1));title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
 }
@@ -1682,6 +1754,7 @@ const MUSIC=(()=>{
     dissolve:t=>{for(let i=0;i<10;i++)osc('sine',900+i*170,t+i*.12,.1,.025,1.4,.9,1300+i*200)},
     bellHit:t=>{const b=180+Math.random()*240;clang(t,b,.075,1.7);osc('sine',b*.5,t,.004,.04,1.2,.6)},
     bellBig:t=>{clang(t,110,.12,3.2);osc('sine',55,t,.005,.08,2.6,.7);clang(t+.18,112,.04,2.2)},
+    bellMuffled:t=>{[[1,.12,2.6],[2.7,.04,1.4]].forEach(([m,p,d])=>osc('sine',98*m,t,.01,p,d,.6));nz(t,.8,.05,'lowpass',180,1,.4)},
     bellSoft:t=>{const b=420+Math.random()*380;clang(t,b,.03,1.4)},
     bellChime:t=>{[0,.09,.2].forEach((d,i)=>clang(t+d,520+i*130+Math.random()*60,.035,1.2))},
     bellCascade:t=>{for(let i=0;i<9;i++)clang(t+i*.06+Math.random()*.04,160+Math.random()*420,.05,1.5)},
@@ -2313,6 +2386,8 @@ function gameUpdate(dt){
   if(S.mode==='prologue'&&gt-S.proT0>=PRO_LEN)endPrologue();
   if(S.mode==='epilogue'&&gt-S.epT0>=EPI_LEN)endEpilogue();
   angerCheck();combatSfx();
+  // phase I: the muffled bell under the hatch
+  if(S.phase===2&&(S.mode==='play'||(S.mode==='cine'&&S.cine&&S.cine.k==='in'))&&!S.paused){if(!S.hatchRing||gt-S.hatchRing>HATCH.toll){S.hatchRing=gt;MUSIC.fx('bellMuffled')}}
   if(S.mode==='play'&&S.phase===1)S.parasite=S.bossHp<=S.bossMax/2?.6+.15*Math.sin(gt*3):0;
   if(S.phase===3&&S.form===2&&(S.mode==='play'||S.mode==='ko')&&!S.paused){
     S.ecPhi+=(S.bossHp<=S.bossMax/2?1.05:.7)*dt;
