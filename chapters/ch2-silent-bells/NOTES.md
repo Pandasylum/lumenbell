@@ -167,4 +167,4 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 ## Audio commun (session `engine/audio`, 28 octobre)
 - Plus de contexte propre : `04-audio-sfx.js` est réduit à `ensureAudio`, `tone`, `noise` (renvois à `LB.audio`), `sfx`, `play` ; `60-music.js` (`MUSIC`) se branche sur `LB.audio.ctx` (sortie brute `LB.audio.dest`) et lit `LB.audio.sound` / `music` au lieu de `fxOn` / `musOn`. Niveaux déclarés dans `LB.setup` (`audio:{master:.75,sfx:.9,mus:.3}`). Cases Son / Musique : `syncAudio` (`92-events.js`) appelle `LB.audio.setSound` / `setMusic`.
 - Code mort `MUS` / `musTick` (`04-audio-sfx.js`) toujours présent, branché sur `LB.audio.mus`.
-- **Avancement** : fait = rebranchement, test `tests/audio.js`. Reste à faire : juger sur téléphone la latence des bruitages (contexte commun en `latencyHint:'interactive'`) et la reprise après écran verrouillé.
+- **Avancement** : fait = rebranchement, test `tests/audio.js`. Reste à faire : juger sur téléphone la latence des bruitages (contexte commun en `latencyHint:'playback'`) et la reprise après écran verrouillé.

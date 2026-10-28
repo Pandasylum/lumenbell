@@ -11,10 +11,11 @@ LB.audio=(()=>{
     const m=A.music?lv.mus:0;if(smooth)mus.gain.setTargetAtTime(m,ctx.currentTime,.12);else mus.gain.value=m};
   function ensure(){
     try{
+      if(bg&&!document.hidden)bg=false; /* garde-fou : l'arrière-plan ne peut pas durer quand la page est visible (un événement de retour perdu bloquerait le son) */
       if(ctx&&ctx.state==='closed'){ctx=null;nb=null}
       if(!ctx){
         const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
-        try{ctx=new C({latencyHint:'interactive'})}catch(e){ctx=new C()}
+        try{ctx=new C({latencyHint:'playback'})}catch(e){ctx=new C()}
         try{master=ctx.createGain();master.connect(ctx.destination);sfx=ctx.createGain();sfx.connect(master);mus=ctx.createGain();mus.connect(master);apply();A.stat.made++}
         catch(e){ctx=null;return null}
       }
