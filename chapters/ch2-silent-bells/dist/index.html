@@ -390,16 +390,17 @@ function sched(list){const pat={ths:list,ok:true,perf:0,nReal:list.filter(t=>t.r
    R_T = guard (phase III, R_T.guard / R_T.rec; the guard lasts as long as the button is held, against the beams, and wears
    the stamina out: drain / regen per second, broken = recovery when it runs out; a beam blocked to its end counts as a
    stopped attack). hurt / down = stun after a hit, cut short so that the next attack can still be stopped (one hit per
-   mistake); fool = extra recovery after dodging a reflection; perf = a stop pressed this close before impact is perfect
+   mistake); backTurn / backWin = a reflection dodged turns round behind the Watcher (backTurn s) and comes back as a real
+   attack after the action + the recovery + backWin s (PROVISIONAL), so it can be dodged again; perf = a stop pressed this close before impact is perfect
    (x m); deny = red bar after a refused press. */
 const T={barrier:.333,recovery:.7,grace:.06,hurt:.38,perf:.08,deny:.25};
-const DG={act:.333,rec:.7,grace:.05,hurt:.38,perf:.08,fool:.6,deny:.25};
+const DG={act:.333,rec:.7,grace:.05,hurt:.38,perf:.08,backTurn:.35,backWin:.45,deny:.25};
 const R_T={guard:.333,rec:.7,grace:.06,down:.55,perf:.08,broken:.9,drain:.36,regen:.38,deny:.25};
 function newPl(){return{s:'ready',t:0,deny:0,at:-9,rd:0,rk:''}}
 /* durations for the current phase and difficulty */
 function PT(){const d=S.d,m=d.m,rm=d.rm||1;
   if(S.phase===1)return{act:T.barrier*m,rec:T.recovery*rm,grace:T.grace,hurt:T.hurt,perf:T.perf*m,deny:T.deny};
-  if(S.phase===2)return{act:DG.act*m,rec:DG.rec*rm,grace:DG.grace,hurt:DG.hurt,perf:DG.perf*m,deny:DG.deny,fool:DG.fool};
+  if(S.phase===2)return{act:DG.act*m,rec:DG.rec*rm,grace:DG.grace,hurt:DG.hurt,perf:DG.perf*m,deny:DG.deny};
   return{act:R_T.guard*m,rec:R_T.rec*rm,grace:R_T.grace,hurt:R_T.down,perf:R_T.perf*m,deny:R_T.deny,broken:R_T.broken}}
 function down(){
   if(S.mode!=='play'||S.paused)return;
@@ -2010,16 +2011,18 @@ function P2(stage,f,b,final,rage){
   const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},()=>rain(5),()=>{rain(3);volley(3,1)}];
   pick(stage?p1:p0)();return T;
 }
-function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;recover(S.pl,PT().rec+DG.fool,'fool');S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
-  if(S.phase===2&&(S.angerShown||S.dk==='hard'||S.dk==='th')){const nt={k:'back',t0:gt,tl:gt+.1,ti:gt+1.1,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}}
+/* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and
+   comes back as a real attack once he can dodge again (action + recovery + DG.backWin); the series is no longer clean */
+function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
+  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}
 function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
 function drawOrbs(){
   for(const th of S.threats){
     if(gt<th.t0)continue;
     if(th.k==='orb'||th.k==='back'){
-      const h=th.k==='back'?{x:-30,y:HY-60}:voiceHand(th.src,1),tx=HX+14,ty=HY;
-      let x,y,r=13,a=1,p=0;
-      if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);x=h.x;y=h.y;r=4+9*k}
+      const back=th.k==='back',h=back?{x:HX-110,y:HY-56}:voiceHand(th.src,1),tx=HX+14,ty=HY;
+      let x,y,r=13,a=1,p=0,dash=th.real?0:1;
+      if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);if(back){const e=eout(k);x=lerp(tx,h.x,e);y=lerp(ty,h.y,e)-Math.sin(Math.PI*k)*30;dash=1-k}else{x=h.x;y=h.y;r=4+9*k}}
       else{p=(gt-th.tl)/(th.ti-th.tl);
         if(th.done){if(th.res==='hit'||th.res==='pass'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.45)}}
         x=lerp(h.x,tx,p);y=lerp(h.y,ty,p)-Math.sin(Math.PI*Math.min(p,1))*(th.k==='back'?20:46)}
@@ -2028,7 +2031,7 @@ function drawOrbs(){
       if(th.real&&gt>=th.tl){const sh=clamp(1-(GY-y)/400,.25,1);ell(x,GY+3,r*1.6*sh,4*sh,`rgba(0,0,0,${.5*sh})`)}
       // every orb is full; an illusory one (clones' included) has a dotted outline, a real one casts its shadow (above)
       glow(x,y,r*3,'rgba(176,124,255,.95)',th.real?.85:.6);ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff');
-      if(!th.real){ctx.save();ctx.setLineDash([3,4]);ctx.lineDashOffset=-gt*12;ctx.strokeStyle='#f4ecff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.stroke();ctx.restore()}
+      if(dash>0){ctx.save();ctx.globalAlpha*=dash;ctx.setLineDash([3,4]);ctx.lineDashOffset=-gt*12;ctx.strokeStyle='#f4ecff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.stroke();ctx.restore()}
       ctx.restore();
     }else if(th.k==='shard'){
       const o=th.from!=null?{x:voicePos(th.from).x,y:voicePos(th.from).y-90,s:24}:shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;

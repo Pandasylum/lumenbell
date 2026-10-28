@@ -153,3 +153,8 @@ Travail sans surveillance, choix à valider par Kevin (repris dans la PR).
 - **Coup final de la forme II** : la cinématique garde `KRAKOOM` ; le coup qui fait passer le boss à 0 PV utilise les valeurs du coup final.
 - **Défaite en forme II** : « Réessayer la phase » (et R) ramène au début de la phase III, **forme I**, comme au Chapitre I (avant : on reprenait en forme II).
 - Mesure (bot de la phase III, 20 parties) : Normal 20/20, 20/20, 9/20 ; Difficile 12/20, 0/20, 0/20.
+### C. Illusions
+- `DG.fool` (+0,6 s de récupération après avoir esquivé une illusion) est **retiré** : l'action du Veilleur continue normalement, puis récupération ordinaire.
+- **L'illusion esquivée revient** (avant : seulement après la mi-vie ou en Difficile ; maintenant toujours) : elle passe derrière le Veilleur, se retourne en 0,35 s (`DG.backTurn`) en perdant son pointillé (pleine et solide, avec une ombre), puis revient comme une vraie attaque **après action + récupération + 0,45 s** (`DG.backWin`, **provisoire**) : 1,48 s en Normal, 1,49 s en Difficile ; le Veilleur a donc 0,45 s en `ready` avant l'impact pour l'esquiver de nouveau.
+- Esquiver une illusion reste une faute pour la série (pas de riposte), même si le retour est esquivé : choix à valider.
+- **Test** (`tests/ch2-input.js`, partie 4, Normal et Difficile) : un joueur qui ignore l'illusion ne prend aucun coup et aucun retour n'est lancé ; un joueur qui l'esquive puis esquive son retour ne prend aucun coup ; un joueur qui l'esquive et laisse passer le retour prend exactement un coup. La règle « reflet esquivé » de la partie 0 vérifie maintenant l'absence de récupération rallongée et le délai du retour.
