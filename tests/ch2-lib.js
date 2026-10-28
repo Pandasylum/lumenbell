@@ -22,7 +22,7 @@ function calls(code){const out=[];const re=/(?<![\w$.])_\(/g;let m;
 function lit(a){if(!/^(['"`])[\s\S]*\1$/.test(a)||(a[0]==='`'&&a.includes('${')))return null;try{return Function('return '+a)()}catch(e){return null}}
 const END='S.d=DIFFS.normal;S.phase=2;applyLang();requestAnimationFrame(loop);';
 const HOOK='S.d=DIFFS.normal;S.phase=2;applyLang();\n'+
- 'window.__t={get S(){return S},get gt(){return gt},DIFFS,CINE_LEN,down,up,startRun,jumpPhase,'+
+ 'window.__t={get S(){return S},get gt(){return gt},DIFFS,CINE_LEN,PRO_TITLE,down,up,startRun,jumpPhase,'+
  'go(){onGo&&onGo()},step(dt,drawIt){rt+=dt;if(!S.paused&&["play","ko","dead","cine","prologue","epilogue"].includes(S.mode))gt+=dt;'+
  'update(dt);gameUpdate(dt);if(drawIt){ctx=ctxMain;SC=SCm;draw()}}};';
 function testPage(){const h=fs.readFileSync(DIST,'utf8');if(h.split(END).length!==2)throw new Error('fin du script introuvable dans dist');
@@ -39,5 +39,7 @@ function specTexts(){const md=fs.readFileSync(path.join(ROOT,'docs/CH2-SPEC.md')
  const F=[...fr.matchAll(/«\s*([^»]+?)\s*»/g)].map(m=>m[1]),E=[...en.matchAll(/"([^"]+)"/g)].map(m=>m[1]);
  if(F.length!==E.length)throw new Error('cahier des charges : '+F.length+' textes FR, '+E.length+' EN');
  return{pairs:F.map((f,i)=>[E[i],f]),titles:TITLES,bosses:BOSSES,
-  removed:[...md.match(/^À supprimer.*$/m)[0].matchAll(/«\s*([^»]+?)\s*»/g)].map(m=>m[1])}}
+  removed:[...md.match(/^À supprimer.*$/m)[0].matchAll(/«\s*([^»]+?)\s*»/g)].map(m=>m[1]),
+  // mot grave en clair sur la cloche (section « La cloche ») : [EN, FR]
+  engraving:(m=>{if(!m)throw new Error('mot grave de la cloche introuvable');return[m[2],m[1]]})(md.match(/le mot \*\*([^*]+)\*\* \(EN : \*\*([^*]+)\*\*\)/))}}
 module.exports={ROOT,DIST,script,calls,lit,testPage,specTexts};
