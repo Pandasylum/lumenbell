@@ -50,7 +50,7 @@ function success(th,perfect){
   const ph=S.phase;
   if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('block',perfect);MUSIC.fx('clank');pop(ONO.block,perfect?'#f2fffb':'#bff3ea')}
   else if(ph===2){S.dodgeOk=gt;play('dodge',perfect)}
-  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect)}
+  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
 }
 function hurt(th){
   if(S.mode!=='play')return;
@@ -69,13 +69,19 @@ function hurt(th){
    recoilDecay per s), then staggered `hurt` s once the riposte is over. All values taken from Ember Bridge. */
 const SHOCK={shake:13,hitstop:.11,flash:.4,flashDecay:2.2,ringLife:.35,recoilPx:20,recoilDecay:3.5,hurt:.55,
   final:{shake:16,hitstop:.14,flash:.8},
-  tint:{2:['#ffffff','#dffcf6','#8fe8d8'],1:['#ffffff','#e2d2ff','#b48cff'],3:['#ffffff','#b8fff4','#4fe0cc']}};
+  tint:{2:['#ffffff','#dffcf6','#8fe8d8'],1:['#ffffff','#e2d2ff','#b48cff'],3:['#ffffff','#b8fff4','#4fe0cc']},
+  /* phase III, per form (sound `snd` with `body`, bell or wet fx `fx`, particles `tint` n each of speed `spd`, life `life`, gravity `g`):
+     form I = the tower made of the King, rusted metal and bell (metal sparks, bell ring); form II = the jellyfish's own
+     matter, soft and gelatinous (dull wet sound, translucent splashes that fall back) */
+  form:{1:{snd:'thud',fx:'bellHit',tint:['#ffffff','#ffd9a0','#ff9a4a'],n:[10,16,10],spd:9,life:.6,g:.5},
+        2:{snd:'squelch',fx:'jellyHit',tint:['rgba(210,250,255,.55)','rgba(120,225,255,.45)','rgba(90,190,235,.4)'],n:[8,14,14],spd:5,life:.9,g:.9}}};
 function damageBoss(n){
   S.bossHp=Math.max(0,S.bossHp-n);S.bossFlash=gt;
   const F=S.bossHp<=0?SHOCK.final:SHOCK,col=SHOCK.tint[S.phase];
   S.shake=Math.max(S.shake,F.shake*2);S.hitstop=F.hitstop;S.flashHit=F.flash;S.recoil=1;
-  play('thud',S.bossHp<=0?1.6:1.2);MUSIC.fx([null,'bellHit','crackGlass','creature'][S.phase]);
-  const p=bossCore();col.forEach((c,i)=>burst(p.x,p.y,i?12:10,c,7,.7));(S.rings||(S.rings=[])).push({x:p.x,y:p.y,life:SHOCK.ringLife,c:col[2]});
+  const FM=S.phase===3?SHOCK.form[S.form===2?2:1]:null,pw=S.bossHp<=0?1.6:1.2;
+  play(FM?FM.snd:'thud',pw);MUSIC.fx(FM?FM.fx:[null,'bellHit','crackGlass'][S.phase]);
+  const p=bossCore();if(FM)FM.tint.forEach((c,i)=>burst(p.x,p.y,FM.n[i],c,FM.spd,FM.life,FM.g));else col.forEach((c,i)=>burst(p.x,p.y,i?12:10,c,7,.7));(S.rings||(S.rings=[])).push({x:p.x,y:p.y,life:SHOCK.ringLife,c:col[2]});
   hud();
   if(S.bossHp<=0){S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
     say([null,_('The Rust King collapses.','Le Roi de Rouille s\'effondre.'),_('The Hollow Voice\'s mirror shatters.','Le miroir de la Voix Creuse éclate.'),_('The lantern goes dark.','La lanterne s\'éteint.')][S.phase]);

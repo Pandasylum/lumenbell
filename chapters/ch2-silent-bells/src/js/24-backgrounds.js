@@ -138,6 +138,39 @@ function wreck(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(s,
   ctx.strokeStyle='#070b0c';ctx.lineWidth=5;for(let i=0;i<5;i++){const xx=-60+i*28;ctx.beginPath();ctx.moveTo(xx,-14);ctx.quadraticCurveTo(xx-6,-50,xx+4,-70+i*4);ctx.stroke()}ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(10,-20);ctx.lineTo(24,-130);ctx.stroke();ctx.restore()}
 const MIDROCK=[[0,GY-34,150,30],[120,GY-20,140,18],[330,GY-26,120,22],[470,GY-14,160,12],[880,GY-30,120,26]];
 function reefRock(x,y,w,h,seed){const R=mulberry(seed);ctx.beginPath();ctx.moveTo(x-w/2,y+h);for(let i=0;i<=8;i++){const t=i/8;ctx.lineTo(x-w/2+t*w,y+h-Math.sin(Math.PI*t)*h*(.6+R()*.6))}ctx.closePath();ctx.fill()}
+/* phase III: the same hull as the end of phase II (hullSky), now open to the night. Everything here is a number in HULL:
+   ribs = [foot x, side (1 = leans right), height of the broken top, thickness], mast = foot, lean, height, sail tear,
+   decks = [x, width] of plank decks on the reef floor, spikes = reef points between them (x, height),
+   floats = planks and the barrel on the water (x, y on the sea, tilt, length; barrel: kind 'b'), bob = sway of the floating pieces */
+const HULL={ribs:[[18,1,250,20],[96,1,210,16],[168,1,150,12],[952,-1,260,20],[880,-1,200,14]],
+  mast:{x:470,lean:.22,h:230,w:9,sail:[.34,.9]},
+  decks:[[0,150,26],[300,120,16],[560,90,12],[880,80,18]],spikes:[[168,14],[196,22],[222,12],[430,16],[458,26],[490,12],[672,14],[700,22],[800,12],[836,20]],
+  floats:[[330,332,.06,46,'p'],[420,352,-.08,36,'p'],[610,338,.1,50,'p'],[700,358,0,0,'b'],[860,336,-.05,40,'p']],bob:{a:3,v:.9}};
+function hullRuin(){
+  const H3=HULL;ctx.lineCap='round';
+  // the ribs of the hull: an arch at each side, broken at the top
+  for(const [x,d,h,w] of H3.ribs){const tx=x+d*70,ty=GY-h;ctx.strokeStyle='#0a0705';ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x,GY+4);ctx.quadraticCurveTo(x-d*18,GY-h*.62,tx,ty);ctx.stroke();
+    ctx.strokeStyle='rgba(150,120,90,.12)';ctx.lineWidth=Math.max(2,w*.15);ctx.beginPath();ctx.moveTo(x+d*5,GY+4);ctx.quadraticCurveTo(x-d*13,GY-h*.62,tx+d*3,ty+3);ctx.stroke();
+    // the splintered end
+    ctx.strokeStyle='#0a0705';ctx.lineWidth=Math.max(2,w*.3);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx+d*5,ty-16);ctx.moveTo(tx-d*3,ty+2);ctx.lineTo(tx-d*2,ty-12);ctx.stroke()}
+  // the broken mast, leaning, its torn sail
+  {const M=H3.mast,tx=M.x+Math.sin(M.lean)*M.h,ty=GY-Math.cos(M.lean)*M.h;ctx.strokeStyle='#120d09';ctx.lineWidth=M.w;ctx.beginPath();ctx.moveTo(M.x,GY+2);ctx.lineTo(tx,ty);ctx.stroke();
+   ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx+10,ty-14);ctx.moveTo(tx-2,ty+3);ctx.lineTo(tx-9,ty-9);ctx.stroke();
+   const sx=M.x+Math.sin(M.lean)*M.h*M.sail[0],sy=GY-Math.cos(M.lean)*M.h*M.sail[0],sx2=M.x+Math.sin(M.lean)*M.h*M.sail[1],sy2=GY-Math.cos(M.lean)*M.h*M.sail[1],sw=Math.sin(rt*.8)*5;
+   ctx.fillStyle='rgba(30,36,38,.82)';ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx2,sy2);ctx.quadraticCurveTo(sx2+34+sw,(sy+sy2)/2-6,sx2+50+sw*1.4,sy2+40);ctx.lineTo(sx2+36+sw,sy2+34);ctx.lineTo(sx2+30+sw,sy2+58);ctx.lineTo(sx2+14+sw*.6,sy2+44);ctx.lineTo(sx+22+sw*.4,sy+70);ctx.lineTo(sx+8,sy+62);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='rgba(150,170,175,.14)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx2+50+sw*1.4,sy2+40);ctx.stroke()}
+  // the plank decks lying on the reef, reef points between them
+  ctx.fillStyle='#050809';for(const [x,h] of H3.spikes){ctx.beginPath();ctx.moveTo(x-9,GY+2);ctx.lineTo(x-2,GY+2-h);ctx.lineTo(x+9,GY+2);ctx.closePath();ctx.fill()}
+  for(const [x,w,t] of H3.decks){ctx.fillStyle='#120d09';ctx.fillRect(x,GY-t,w,t*.5);ctx.fillStyle='#0a0705';ctx.fillRect(x,GY-t*.5,w,t*.5+3);
+    ctx.strokeStyle='rgba(150,120,90,.14)';ctx.lineWidth=1;ctx.beginPath();for(let k=1;k*22<w;k++){ctx.moveTo(x+k*22,GY-t);ctx.lineTo(x+k*22,GY+3)}ctx.moveTo(x,GY-t*.5);ctx.lineTo(x+w,GY-t*.5);ctx.stroke()}
+}
+/* planks and a barrel afloat on the open sea behind the fight */
+function floatDebris(){
+  for(const [x,y,a,l,k] of HULL.floats){const dy=Math.sin(rt*HULL.bob.v+x*.03)*HULL.bob.a;ctx.save();ctx.translate(x,y+dy);ctx.rotate(a+Math.sin(rt*HULL.bob.v+x)*.03);ctx.fillStyle='#0c0907';
+    if(k==='b'){ctx.beginPath();ctx.ellipse(0,0,14,11,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(150,120,90,.25)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-13,-4);ctx.lineTo(13,-4);ctx.moveTo(-13,4);ctx.lineTo(13,4);ctx.stroke()}
+    else{ctx.fillRect(-l/2,-3,l,6);ctx.fillRect(-l/3,3,l*.5,4)}
+    ctx.strokeStyle='rgba(200,235,230,.18)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(0,5,(k==='b'?18:l*.6),2.5,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
+}
 function bg3(){
   let g=ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'#02060a');g.addColorStop(1,'#0a2228');ctx.fillStyle=g;ctx.fillRect(0,0,W,300);
   for(const s of STARS){if(s.y>200)continue;ctx.globalAlpha=.15+.2*Math.sin(rt*1.5+s.o);ctx.fillStyle='#e8f6f2';ctx.fillRect(s.x,s.y,s.r,s.r)}ctx.globalAlpha=1;
@@ -153,6 +186,7 @@ function bg3(){
   ctx.fillStyle='#060c0e';MIDROCK.forEach((r,i)=>reefRock(r[0]+r[2]/2,r[1],r[2],r[3],60+i));
   // the ships the sea took, asleep on the reef
   for(const [x,y,s,a] of WRECKS)wreck(x,y,s,a);
+  floatDebris();
   for(let i=0;i<5;i++){const r=MIDROCK[i],k=(rt*.35+i*.23)%1;ctx.strokeStyle=`rgba(220,245,240,${.35*(1-k)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(r[0]+r[2]/2,r[1]+r[3],r[2]*.5*(.8+k*.4),3+k*4,0,Math.PI,0);ctx.stroke()}
   // the reef floor: wet black rock, crevices, foam pools, the mooring rocks
   g=ctx.createLinearGradient(0,GY-20,0,H);g.addColorStop(0,'#101a1d');g.addColorStop(.3,'#0a1114');g.addColorStop(1,'#030607');ctx.fillStyle=g;ctx.fillRect(0,GY-6,W,H-GY+6);
@@ -167,9 +201,7 @@ function bg3(){
    ctx.fillStyle=bronze(-5,5);ctx.beginPath();ctx.moveTo(-5,15);ctx.quadraticCurveTo(-4,6,0,6);ctx.quadraticCurveTo(4,6,5,15);ctx.closePath();ctx.fill();ctx.restore();
    ctx.fillStyle='#0a0705';ctx.beginPath();ctx.moveTo(S0.x-46,GY+2);ctx.lineTo(S0.x-30,GY-14);ctx.lineTo(S0.x-8,GY-22);ctx.lineTo(S0.x+12,GY-26);ctx.lineTo(S0.x+34,GY-12);ctx.lineTo(S0.x+52,GY+2);ctx.closePath();ctx.fill();
    ctx.fillStyle='#16100b';ctx.save();ctx.translate(S0.x-14,GY-18);ctx.rotate(-.35);ctx.fillRect(-22,-3,44,6);ctx.restore();ctx.save();ctx.translate(S0.x+20,GY-14);ctx.rotate(.5);ctx.fillRect(-16,-3,32,5);ctx.restore()}
-  // the gutted hull of the wreck around the fight: broken frames rising from the reef at both edges
-  for(const [x,d] of[[18,1],[96,1],[952,-1]]){ctx.strokeStyle='#0a0705';ctx.lineWidth=20;ctx.beginPath();ctx.moveTo(x,GY+4);ctx.quadraticCurveTo(x-d*16,GY-160,x+d*40,GY-250+(x%3)*20);ctx.stroke();ctx.strokeStyle='rgba(150,120,90,.12)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+d*6,GY+4);ctx.quadraticCurveTo(x-d*10,GY-160,x+d*44,GY-246+(x%3)*20);ctx.stroke()}
-  ctx.fillStyle='#120d09';ctx.fillRect(0,GY-26,150,8);ctx.fillRect(0,GY-58,90,7);ctx.fillRect(900,GY-40,60,8);
+  hullRuin();
   // surf breaking at the front edge, spray in the wind
   for(let i=0;i<4;i++){const k=(rt*.25+i*.25)%1,y=H-6-k*18;ctx.strokeStyle=`rgba(225,245,240,${.3*Math.sin(Math.PI*k)})`;ctx.lineWidth=2;ctx.beginPath();for(let x=0;x<=W;x+=40){const yy=y+Math.sin(x*.03+i*2+rt)*3;x?ctx.lineTo(x,yy):ctx.moveTo(x,yy)}ctx.stroke()}
   ctx.fillStyle='rgba(225,245,240,.55)';for(const s of SPRAY){const y=H-((s.y*.5+rt*s.v)%(H*.55)),x=(s.x+rt*s.v*.8+Math.sin(rt+s.d)*10)%W;ctx.globalAlpha=clamp((y-H*.45)/80,0,1)*.7;ctx.fillRect(x,y,1.6,1.6)}ctx.globalAlpha=1;
