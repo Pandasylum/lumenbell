@@ -24,9 +24,10 @@ cv.addEventListener('pointerdown',e=>{e.preventDefault();press()});
 el.ward.addEventListener('pointerdown',e=>{e.preventDefault();press()});
 el.ward.addEventListener('click',e=>{if(e.detail===0)press()});
 el.go.addEventListener('click',start);
-el.help.addEventListener('change',()=>{prefs.help=el.help.checked});
-el.snd.addEventListener('change',()=>{prefs.sound=el.snd.checked;if(prefs.sound)ensureAudio()});
-$('optMus').addEventListener('change',()=>{prefs.music=$('optMus').checked;if(prefs.music)ensureAudio()});
+el.help.checked=prefs.help;el.snd.checked=prefs.sound;$('optMus').checked=prefs.music;
+el.help.addEventListener('change',()=>{prefs.help=el.help.checked;LB.store.set(LB.key('help'),prefs.help?'1':'0')});
+el.snd.addEventListener('change',()=>{prefs.sound=el.snd.checked;LB.store.set(LB.key('snd'),prefs.sound?'1':'0');if(prefs.sound)ensureAudio()});
+$('optMus').addEventListener('change',()=>{prefs.music=$('optMus').checked;LB.store.set(LB.key('mus'),prefs.music?'1':'0');if(prefs.music)ensureAudio()});
 const pauseEl=$('pause');
 const menuEl=$('menu');
 function setPause(on){
@@ -89,7 +90,7 @@ function applyDiff(name){
   T.recovery=BASEW.rec*rm;DG.rec=BASEW.drec*rm;R_T.rec=BASEW.rrec*rm;
   document.querySelectorAll('#phases button').forEach((b,i)=>{b.disabled=!!d.trial;b.title=d.trial?_('Not available in the trial','Indisponible dans l\'épreuve'):''});
   lastP=lastB=-1;
-  prefs.help=el.help.checked=false;deaths=0;tries=[0,0,0,0];cntS=null;
+  prefs.help=el.help.checked=!d.noHelp&&LB.store.get(LB.key('help'),'0')==='1';deaths=0; /* aide mémorisée (lb-help), toujours coupée là où elle est masquée */tries=[0,0,0,0];cntS=null;
   el.help.closest('label').hidden=!!d.noHelp;
 }
 function trialMenu(on){updBest();$('mphM').hidden=on;$('mphT').hidden=!on;$('trialNote').hidden=!on;try{(on?$('mphT').querySelector('button'):$('mphM').querySelector('[data-diff=normal]')).focus({preventScroll:true})}catch(e){}}

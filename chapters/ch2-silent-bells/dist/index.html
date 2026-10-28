@@ -241,7 +241,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
         <g opacity=".12"><ellipse cx="715" cy="470" rx="90" ry="8" fill="#9ff2ff" class="lava"/></g>
       </svg>
       <div class="mem-wrap" id="mSnow" aria-hidden="true"></div>
-      <div class="langs" id="langs" role="group" aria-label="Langue"><button type="button" data-lang="fr" aria-pressed="true">FR</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+      <div class="langs" id="langs" role="group" aria-label="Langue"><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="fr" aria-pressed="true">FR</button></div>
       <div class="mcard">
         <p class="eyebrow" id="mEye">Chapitre II · Silent Bells</p>
         <h2><span>Lumen</span>bell</h2>
@@ -277,24 +277,52 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 <script>
 (()=>{
 'use strict';
-const $=id=>document.getElementById(id);
-/* save keys: common lb-* (lb-lang, lb-snd, lb-mus, lb-help) and per chapter lb-ch2-* (unlock, records).
-   Read the new key first, else the old one (pn-/db-, eb-lang from Chapter I), then write it to the new key. */
-const OLD_KEYS={'lb-lang':['pn-lang','eb-lang'],'lb-snd':['db-optSnd'],'lb-mus':['db-optMus'],'lb-help':['db-optHelp'],'lb-ch2-unl':['db-unl']};
-const oldKeys=k=>OLD_KEYS[k]||(k.startsWith('lb-ch2-best-')?['db-best-'+k.slice(12)]:[]);
-const store={get(k,d){try{let v=localStorage.getItem(k);
-  if(v==null)for(const o of oldKeys(k)){v=localStorage.getItem(o);if(v!=null){try{localStorage.setItem(k,v)}catch(e){}break}}
+/* ---------- shared/ : commun à la série (voir shared/NOTES.md). Un seul objet, LB, dans l'IIFE du chapitre ---------- */
+const LB={};
+/* Polices du canvas : mêmes familles que --font-display / --font-body du CSS (build/fonts.css, inlinées par le build) */
+LB.FONT={display:'"Big Shoulders Display",Impact,sans-serif',body:'"DM Sans",system-ui,sans-serif'};
+/* ---------- sauvegarde : clés lb-… ----------
+   Clés communes à la série : lb-<nom> pour les noms de COMMON ; propres à un chapitre : lb-<id>-<nom> (LB.key).
+   LB.store.get lit la nouvelle clé, sinon les anciennes dans l'ordre (OLD_KEYS communes, puis celles du chapitre, puis
+   les préfixes du chapitre) et recopie la première trouvée dans la nouvelle. Les anciennes clés ne sont jamais effacées ni écrites. */
+LB.COMMON=['lang','snd','mus','help'];
+LB.OLD_KEYS={'lb-lang':['pn-lang','eb-lang'],'lb-snd':['db-optSnd'],'lb-mus':['db-optMus'],'lb-help':['db-optHelp']};
+LB.id='';LB.old={};LB.oldPrefix=[];
+LB.key=name=>LB.COMMON.includes(name)?'lb-'+name:'lb-'+LB.id+'-'+name;
+LB.oldKeys=k=>{const o=(LB.OLD_KEYS[k]||[]).concat(LB.old[k]||[]);
+  for(const [n,a] of LB.oldPrefix)if(k.startsWith(n))o.push(a+k.slice(n.length));return o};
+LB.store={get(k,d){try{let v=localStorage.getItem(k);
+  if(v==null)for(const o of LB.oldKeys(k)){v=localStorage.getItem(o);if(v!=null){try{localStorage.setItem(k,v)}catch(e){}break}}
   return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
-  Object.keys(OLD_KEYS).concat(ks.filter(o=>o.startsWith('db-best-')).map(o=>'lb-ch2-best-'+o.slice(8))).forEach(k=>store.get(k))}catch(e){}
-const OPT_KEY={optSnd:'lb-snd',optMus:'lb-mus',optHelp:'lb-help'};
+/* À appeler en tête du chapitre, avant toute lecture : id (préfixe lb-<id>-), old ({nouvelle clé:[anciennes]}),
+   oldPrefix ([[début de la nouvelle clé, début de l'ancienne]], pour les records). Migre au démarrage toutes les clés
+   connues (et chaque ancienne clé à préfixe présente), puis fixe la langue. */
+LB.setup=({id,old={},oldPrefix=[]})=>{LB.id=id;LB.old=old;LB.oldPrefix=oldPrefix;
+  try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
+    const want=Object.keys(LB.OLD_KEYS).concat(Object.keys(old));
+    for(const [n,a] of oldPrefix)ks.filter(k=>k.startsWith(a)).forEach(k=>want.push(n+k.slice(a.length)));
+    want.forEach(k=>LB.store.get(k))}catch(e){}
+  LB.lang.init()};
+/* ---------- langue et texte ----------
+   Choix mémorisé (lb-lang) prioritaire ; sinon la langue de l'appareil (français si elle commence par « fr »), sinon anglais.
+   LB.LANGS : ordre des boutons de langue (celui du Chapitre I). */
+LB.LANGS=['en','fr'];
+LB.lang={cur:'en',
+  init(){let l='en';try{const nl=(navigator.languages&&navigator.languages[0])||navigator.language||'';if(/^fr/i.test(nl))l='fr'}catch(e){}
+    const v=LB.store.get(LB.key('lang'),null);if(LB.LANGS.includes(v))l=v;return LB.lang.cur=l},
+  set(l){if(!LB.LANGS.includes(l))return;LB.lang.cur=l;LB.store.set(LB.key('lang'),l)}};
+LB._=(en,fr)=>LB.lang.cur==='fr'?fr:en;
+const $=id=>document.getElementById(id);
+/* save keys and language: common to the series (shared/, LB.store, LB.key, LB.lang). Common keys lb-lang, lb-snd, lb-mus,
+   lb-help (old pn-lang, eb-lang, db-opt*: LB.OLD_KEYS); this chapter's keys lb-ch2-* (unlock, records), old db-unl, db-best-*. */
+LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']]});
+const OPT_KEY={optSnd:LB.key('snd'),optMus:LB.key('mus'),optHelp:LB.key('help')};
 /* UNLOCK_ALL: true = the three phases are open from the start (phase track), as in Ember Bridge; the difficulties and the
    Trial are always open. false = progressive unlock: a phase opens once the previous one is cleared (key lb-ch2-unl, still
    written on every clear). Disabled for testing; idea to extend to the whole series later (common screen). */
 const UNLOCK_ALL=true;
-const unlocked=()=>UNLOCK_ALL?3:+store.get('lb-ch2-unl',1);
-let LANG='fr';{const v=store.get('lb-lang',null);if(v==='fr'||v==='en')LANG=v}
-const _=(en,fr)=>LANG==='fr'?fr:en;
+const unlocked=()=>UNLOCK_ALL?3:+LB.store.get(LB.key('unl'),1);
+const _=LB._;
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
@@ -1090,7 +1118,7 @@ function pHead(heat,o){o=o||{};ctx.strokeStyle='#1c2b24';ctx.lineWidth=6;ctx.beg
   ctx.fillStyle=bronze(-38,38);ctx.beginPath();ctx.moveTo(-38,0);ctx.quadraticCurveTo(-34,-40,-15,-52);ctx.quadraticCurveTo(0,-60,15,-52);ctx.quadraticCurveTo(34,-40,38,0);ctx.closePath();ctx.fill();
   ctx.fillStyle='#0d1712';ctx.fillRect(-40,-4,80,7);
   ctx.save();ctx.strokeStyle='rgba(6,12,10,.85)';ctx.lineWidth=1.3;runes(-31,-8,7,1,7);ctx.strokeStyle='rgba(170,230,210,.22)';ctx.lineWidth=.8;runes(-30.5,-8.6,7,1,7);ctx.restore();
-  if(o.word){const w=o.word.toUpperCase();ctx.save();ctx.textAlign='center';ctx.font='700 9px "DM Sans",system-ui,sans-serif';{const m=ctx.measureText(w).width;if(m>50)ctx.font=`700 ${Math.floor(9*50/m)}px "DM Sans",system-ui,sans-serif`}
+  if(o.word){const w=o.word.toUpperCase();ctx.save();ctx.textAlign='center';ctx.font='700 9px '+LB.FONT.body;{const m=ctx.measureText(w).width;if(m>50)ctx.font=`700 ${Math.floor(9*50/m)}px ${LB.FONT.body}`}
     ctx.fillStyle='rgba(170,230,210,.35)';ctx.fillText(w,.6,-27.4);ctx.fillStyle='rgba(6,12,10,.9)';ctx.fillText(w,0,-28);ctx.restore()}
   if(o.crack){ctx.strokeStyle='#050a08';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(4,-55);ctx.lineTo(10,-46);ctx.lineTo(22,-39);ctx.lineTo(28,-25);ctx.lineTo(25,-13);ctx.lineTo(31,-2);ctx.stroke();ctx.strokeStyle='rgba(170,230,210,.3)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(5.5,-54);ctx.lineTo(11.5,-45);ctx.lineTo(23.5,-38);ctx.stroke()}}
 function pSeg(){seg(-24,0,24,0,20)}
@@ -1312,7 +1340,7 @@ function draw(){
   ctx.restore();
   drawHelp();
   // pops
-  ctx.textAlign='center';ctx.font='800 26px "Big Shoulders Display",Impact,sans-serif';
+  ctx.textAlign='center';ctx.font='800 26px '+LB.FONT.display;
   for(const p of S.pops){const t=gt-p.t0;ctx.globalAlpha=1-t;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillText(p.txt.toUpperCase(),p.x+2,p.y-t*40+2);ctx.fillStyle=p.c;ctx.fillText(p.txt.toUpperCase(),p.x,p.y-t*40)}
   ctx.globalAlpha=1;ctx.restore();
   // vignette & hurt flash
@@ -1385,20 +1413,20 @@ function fadeAll(a,c){if(a<=0)return;ctx.fillStyle=`rgba(${c||'0,0,0'},${clamp(a
 /* chapter colours (docs/CH2-SPEC.md): II tide turquoise, III roots moss green leaning yellow */
 const CH_COL={2:'#4fe0cc',3:'#b9cf5a'};
 function title(t,t0,eye,name,col,ncol){if(t<t0)return;const a=clamp((t-t0)/.5,0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
-  ctx.font='700 16px "DM Sans",system-ui,sans-serif';ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,H*.42-46+(1-a)*8);
-  ctx.font='800 64px "Big Shoulders Display",Impact,sans-serif';{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px "Big Shoulders Display",Impact,sans-serif`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
+  ctx.font='700 16px '+LB.FONT.body;ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,H*.42-46+(1-a)*8);
+  ctx.font='800 64px '+LB.FONT.display;{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px ${LB.FONT.display}`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
   ctx.fillStyle=col;ctx.fillRect(W/2-60*a,H*.42+18,120*a,3);ctx.restore()}
 /* end of the intro: the series name large, the chapter below it, small, in the chapter colour (as in Ember Bridge).
    Vertical layout from the measured glyph boxes, so the two lines never touch whatever the font fallback. */
 const SERIES_T={size:96,sub:17,gap:22,y:.36};   // y: baseline of the name (fraction of the height), above the Watcher's lantern
 function seriesTitle(t,t0,name,sub,col){if(t<t0)return;const a=clamp((t-t0)/.5,0,1),dy=(1-a)*8;ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
   const N=name.toUpperCase(),U=sub.toUpperCase().split('').join(String.fromCharCode(8202));
-  ctx.font=`800 ${SERIES_T.size}px "Big Shoulders Display",Impact,sans-serif`;{const mw=ctx.measureText(N).width;if(mw>W-120)ctx.font=`800 ${Math.floor(SERIES_T.size*(W-120)/mw)}px "Big Shoulders Display",Impact,sans-serif`}
+  ctx.font=`800 ${SERIES_T.size}px ${LB.FONT.display}`;{const mw=ctx.measureText(N).width;if(mw>W-120)ctx.font=`800 ${Math.floor(SERIES_T.size*(W-120)/mw)}px ${LB.FONT.display}`}
   const mN=ctx.measureText(N),yN=H*SERIES_T.y+dy;
   ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(N,W/2+3,yN+3);ctx.fillStyle='#f4eee4';ctx.fillText(N,W/2,yN);
-  ctx.font=`700 ${SERIES_T.sub}px "DM Sans",system-ui,sans-serif`;const mS=ctx.measureText(U),yS=yN+(mN.actualBoundingBoxDescent||0)+3+SERIES_T.gap+(mS.actualBoundingBoxAscent||SERIES_T.sub*.72);
+  ctx.font=`700 ${SERIES_T.sub}px ${LB.FONT.body}`;const mS=ctx.measureText(U),yS=yN+(mN.actualBoundingBoxDescent||0)+3+SERIES_T.gap+(mS.actualBoundingBoxAscent||SERIES_T.sub*.72);
   ctx.fillStyle=col;ctx.fillText(U,W/2,yS);ctx.fillRect(W/2-60*a,yS+(mS.actualBoundingBoxDescent||4)+12,120*a,3);ctx.restore()}
-function caption(txt,a){if(a<=0)return;ctx.save();ctx.globalAlpha=clamp(a,0,1);ctx.textAlign='center';ctx.font='italic 500 22px "DM Sans",system-ui,sans-serif';
+function caption(txt,a){if(a<=0)return;ctx.save();ctx.globalAlpha=clamp(a,0,1);ctx.textAlign='center';ctx.font='italic 500 22px '+LB.FONT.body;
   // too wide for the screen: two lines, cut at the space nearest the middle
   let L=[txt];if(ctx.measureText(txt).width>W-120){let c=-1;for(let i=0;i<txt.length;i++)if(txt[i]===' '&&(c<0||Math.abs(i-txt.length/2)<Math.abs(c-txt.length/2)))c=i;if(c>0)L=[txt.slice(0,c),txt.slice(c+1)]}
   L.forEach((l,i)=>{const y=H*.78+(i-(L.length-1)/2)*28;ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(l,W/2+2,y+2);ctx.fillStyle='#efe7ff';ctx.fillText(l,W/2,y)});ctx.restore()}
@@ -2302,7 +2330,7 @@ function phaseCleared(){
   if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();S.mode='card';hud();
       showCard({eye:PH[3].eye(),title:PH[3].boss(),desc:PH[3].form2(),
         go:_('Continue','Continuer'),onGo:beginPlay})});return}
-  store.set('lb-ch2-unl',String(Math.max(+store.get('lb-ch2-unl',1),Math.min(3,gpOf(id)+1))));
+  LB.store.set(LB.key('unl'),String(Math.max(+LB.store.get(LB.key('unl'),1),Math.min(3,gpOf(id)+1))));
   if(id===3){playCine(3,'out',()=>clearedCard(3));return}
   playCine(id,'out',()=>clearedCard(id));
 }
@@ -2312,10 +2340,10 @@ function clearedCard(id){S.mode='card';S.still=id;const next=ORDER[gpOf(id)];
 }
 function fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0')}
 function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
-  const t=S.runT,key='lb-ch2-best-'+S.dk,rec=+store.get(key,0);let isRec=false;
-  if(S.full&&(!rec||t<rec)){store.set(key,String(t));isRec=true}
+  const t=S.runT,key=LB.key('best-'+S.dk),rec=+LB.store.get(key,0);let isRec=false;
+  if(S.full&&(!rec||t<rec)){LB.store.set(key,String(t));isRec=true}
   const best=S.full?(isRec?t:rec):rec;
-  showCard({eye:_('Victory','Victoire')+' · '+S.d[LANG],title:_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
+  showCard({eye:_('Victory','Victoire')+' · '+S.d[LB.lang.cur],title:_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
     table:[[_('Time','Temps'),fmt(t)],[_('Hits taken','Coups reçus'),S.hits],[_('Perfects','Parfaits'),S.perfects],[_('Best','Record'),best?fmt(best):'—',true]],
     desc:(isRec?_('New record. ','Nouveau record. '):'')+(S.full?'':_('Records only count for runs started from the beginning.','Le record ne compte que pour une partie lancée depuis le début.')),
     go:_('Play again','Rejouer'),onGo:()=>startRun(S.dk),go2:_('Menu','Menu'),onGo2:showMenu});
@@ -2458,8 +2486,8 @@ function renderMenu(){
 
 /* ---------- language ---------- */
 function applyLang(){
-  document.documentElement.lang=LANG;
-  document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)));
+  document.documentElement.lang=LB.lang.cur;
+  document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
   $('mEye').textContent=_('Chapter II · Silent Bells','Chapitre II · Silent Bells');
   const M=[['easy',_('Easy','Facile'),_('Breathe','Respirer')],['normal',_('Normal','Normal'),_('The real fight','Le vrai combat')],['hard',_('Hard','Difficile'),_('No mercy','Sans pitié')],
     ['trial',_('Trial','Épreuve'),_('No healing','Sans soin')],['tn',_('Normal','Normal'),_('4 HP total','4 PV au total')],['th',_('Hard','Difficile'),_('4 HP total','4 PV au total')]];
@@ -2504,11 +2532,11 @@ $('mResume').addEventListener('click',()=>{hideMenu();MUSIC.stop();if(S.mode==='
 document.querySelectorAll('#phases button').forEach(b=>b.addEventListener('click',()=>jumpPhase(+b.dataset.ph)));
 document.querySelectorAll('[data-diff]').forEach(b=>b.addEventListener('click',()=>{ensureAudio();const dk=b.dataset.diff;if(dk==='trial'){$('mphM').hidden=true;$('mphT').hidden=false;return}startRun(dk)}));
 $('mBackT').addEventListener('click',()=>{$('mphM').hidden=false;$('mphT').hidden=true});
-document.querySelectorAll('#langs button').forEach(b=>b.addEventListener('click',()=>{LANG=b.dataset.lang;store.set('lb-lang',LANG);applyLang()}));
-['optSnd','optMus'].forEach(id=>{$(id).checked=store.get(OPT_KEY[id],'1')==='1'});$('optHelp').checked=store.get(OPT_KEY.optHelp,'0')==='1';
+document.querySelectorAll('#langs button').forEach(b=>b.addEventListener('click',()=>{LB.lang.set(b.dataset.lang);applyLang()}));
+['optSnd','optMus'].forEach(id=>{$(id).checked=LB.store.get(OPT_KEY[id],'1')==='1'});$('optHelp').checked=LB.store.get(OPT_KEY.optHelp,'0')==='1';
 function syncAudio(){MUSIC.setFx($('optSnd').checked);MUSIC.setMus($('optMus').checked);applyVol();
   if($('optMus').checked){if(!$('menu').hidden)setTheme(4);else if(S.mode==='play'&&!S.paused)setTheme(S.phase)}}
-['optHelp','optSnd','optMus'].forEach(id=>{const el=$(id);el.addEventListener('change',()=>{store.set(OPT_KEY[id],el.checked?'1':'0');if(id!=='optHelp')syncAudio();el.blur()})});
+['optHelp','optSnd','optMus'].forEach(id=>{const el=$(id);el.addEventListener('change',()=>{LB.store.set(OPT_KEY[id],el.checked?'1':'0');if(id!=='optHelp')syncAudio();el.blur()})});
 MUSIC.setFx($('optSnd').checked);MUSIC.setMus($('optMus').checked);
 // menu music starts on the first interaction (browsers block sound before that)
 document.addEventListener('pointerdown',()=>{if(!$('menu').hidden&&MUSIC.cur!==4)setTheme(4)});

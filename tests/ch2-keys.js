@@ -1,4 +1,5 @@
 // Chapitre II : cles de sauvegarde communes lb-* et migration des anciennes (pn-, db-, eb-lang du Chapitre I).
+// Langue par defaut : celle de l'appareil (locale du contexte), sinon anglais (decision du 28 octobre, commune a la serie).
 // Chaque cas : localStorage pose avant le chargement, puis lecture de l'etat (langue, options, frise, cles).
 // UNLOCK_ALL=true dans le jeu : frise toujours ouverte (000). Les cas marques off tournent sur une copie avec UNLOCK_ALL=false
 // (build/out/ch2-unlock-off.html) pour verifier que le deblocage progressif (lb-ch2-unl) marche encore.
@@ -16,14 +17,16 @@ const CASES=[
   want:{lang:'fr',snd:true,locked:'000'},keys:{'lb-lang':'fr','lb-ch2-unl':'3','lb-snd':'1'}},
  {nom:'langue du Chapitre I (eb-lang)',set:{'eb-lang':'en'},want:{lang:'en'},keys:{'lb-lang':'en','eb-lang':'en'}},
  {nom:'pn-lang avant eb-lang',set:{'pn-lang':'fr','eb-lang':'en'},want:{lang:'fr'},keys:{'lb-lang':'fr'}},
- {nom:'aucune cle',set:{},want:{lang:'fr',snd:true,mus:true,help:false,locked:'000'},keys:{'lb-lang':null,'lb-ch2-unl':null}},
+ {nom:'aucune cle, appareil en francais',locale:'fr-FR',set:{},want:{lang:'fr',snd:true,mus:true,help:false,locked:'000'},keys:{'lb-lang':null,'lb-ch2-unl':null}},
+ {nom:'aucune cle, appareil en anglais',locale:'en-US',set:{},want:{lang:'en'},keys:{'lb-lang':null}},
+ {nom:'aucune cle, autre langue',locale:'de-DE',set:{},want:{lang:'en'},keys:{'lb-lang':null}},
  {nom:'off : aucune cle',off:1,set:{},want:{locked:'011'},keys:{'lb-ch2-unl':null}},
  {nom:'off : db-unl=2 migre',off:1,set:{'db-unl':'2'},want:{locked:'001'},keys:{'lb-ch2-unl':'2'}},
  {nom:'off : lb-ch2-unl=3',off:1,set:{'lb-ch2-unl':'3'},want:{locked:'000'},keys:{'lb-ch2-unl':'3'}},
 ];
 (async()=>{const b=await launch();
 for(const c of CASES){
- const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true});
+ const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true,locale:c.locale||'en-US'});
  await ctx.addInitScript(o=>{if(sessionStorage.getItem('__init'))return;sessionStorage.setItem('__init','1');localStorage.clear();for(const k in o)localStorage.setItem(k,o[k])},c.set);
  const pg=await ctx.newPage();
  pg.on('pageerror',e=>errs.push(c.nom+': pageerror: '+e.message));

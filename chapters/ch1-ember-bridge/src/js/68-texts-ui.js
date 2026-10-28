@@ -25,15 +25,15 @@ const UIT=[
 ];
 const UIA=[['#phases','Fight phases','Phases du combat'],['.bars','Hit points','Points de vie'],['#hpP',"The Watcher's hit points",'Points de vie du Veilleur'],['#hpB',"The Colossus's hit points",'Points de vie du Colosse'],['#menu .mph','Choose difficulty','Choisir la difficulté']];
 function applyLang(){updNext();updBest();
-  document.documentElement.lang=LANG;
+  document.documentElement.lang=LB.lang.cur;
   UIT.forEach(([sel,en,fr,node])=>{const e=document.querySelector(sel);if(!e)return;const t=_(en,fr);
     if(node==='last'){e.lastChild.textContent=t}else if(node==='first'){e.firstChild.textContent=t}else e.textContent=t});
   UIA.forEach(([sel,en,fr])=>{const e=document.querySelector(sel);if(e)e.setAttribute('aria-label',_(en,fr))});
-  document.querySelectorAll('#langs button,#gateLangs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)));
+  document.querySelectorAll('#langs button,#gateLangs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
   try{setPhaseUI(R?3:Q?2:1)}catch(e){}
   try{el.help.closest('label').hidden=!!(DIFF&&DIFF.noHelp)}catch(e){}
 }
 document.querySelectorAll('#langs button,#gateLangs button').forEach(b=>b.addEventListener('click',()=>{
-  LANG=b.dataset.lang;try{localStorage.setItem('eb-lang',LANG)}catch(e){}applyLang();b.blur();
+  LB.lang.set(b.dataset.lang);applyLang();b.blur();
 }));
 applyLang();

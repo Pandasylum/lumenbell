@@ -6,12 +6,13 @@
 - **Pièges connus** : numéros de phase internes ≠ numéros affichés (voir plus bas) ; le Chapitre I garde ses clés `eb-…` tant que la demande de `DEMANDES.md` n'est pas traitée.
 
 ## Fichiers
-- `src/silent-bells.html` : **la source à modifier** (page complète, un seul `<script>`). Créée le 27 octobre depuis `legacy/` par `build/ch2_swap_args.py`, puis éditée.
+- `src/` : **la source à modifier**, en morceaux (28 octobre 2026, branche `engine/shared`), comme au Chapitre I : `src/parts.txt` donne l'ordre d'assemblage (= ordre d'exécution, une seule IIFE ouverte dans `js/00-open.js` et fermée dans `js/96-loop.js`) ; `build/assemble.py` colle les morceaux octet pour octet. Ancienne page unique `src/silent-bells.html` (créée le 27 octobre depuis `legacy/` par `build/ch2_swap_args.py`) : retirée, son contenu est la concaténation exacte des morceaux. Les numéros de ligne `ch2:NNN` de `docs/COMMUN.md` renvoient à cette ancienne page.
+- Carte : `page/head.html` (jusqu'au `<style>` ouvrant), `page/style.css`, `page/body.html` (de `</style>` au `<script>` ouvrant), `js/00-open.js` (ouverture de l'IIFE), `js/02-core.js` (clés, constantes, `DIFFS`, canvas, état), `04-audio-sfx.js`, `08-effects.js` (particules, motifs), `12-hero-states.js` (états du Veilleur), `16-update.js`, `20-draw-helpers.js`, `24-backgrounds.js`, `28-hero-draw.js` (Veilleur : `drawHero`, `heroShape`), `32-boss-rust-king.js`, `36-boss-hollow-voice.js`, `40-boss-drowned-beacon.js`, `44-counters-help-frame.js`, `48-stills.js`, `52-cine-phases.js`, `56-form2-render.js`, `60-music.js`, `64-prologue.js` (`proHero`), `68-form2-logic.js`, `72-flow.js`, `76-epilogue.js`, `80-sfx-combat.js`, `84-menu-art.js`, `88-lang.js`, `92-events.js`, `96-loop.js`, `page/end.html`. Coupes sur les commentaires de section ; la ligne vide qui précède reste à la fin du morceau précédent ; chaque morceau finit par un saut de ligne.
 - `legacy/silent-bells.source.html` : import d'origine, **ne pas modifier** (référence de `tests/ch2-texts.js`).
 - `dist/index.html` : généré, suivi dans git ; à committer avec sa source.
 
 ## Build (`python3 build/build_ch2.py`)
-- Entrée : `src/silent-bells.html`. Sorties : `dist/index.html` (la CI fait `git diff --exit-code`) et `build/out/silent-bells-itch.zip` (non suivi ; `index.html` à la racine, date fixe 1980-01-01, zip identique d'un build à l'autre).
+- Entrée : les morceaux de `src/` (ordre : `src/parts.txt`). Sorties : `dist/index.html` (la CI fait `git diff --exit-code`) et `build/out/silent-bells-itch.zip` (non suivi ; `index.html` à la racine, date fixe 1980-01-01, zip identique d'un build à l'autre).
 - Chaque remplacement exige une occurrence unique : si la source change à cet endroit, le build échoue au lieu de produire un fichier faux.
 - Écarts entre `dist/index.html` et `src/` (les seuls), comme au Chapitre I :
   1. retrait de `<meta name="claude:viewport-fit-sides" content="cover">` (propre à l'hébergeur d'artefacts) ;
@@ -38,20 +39,22 @@
 - Phrases pour le lecteur d'écran seulement (`say`, `aria`) : descriptives, hors cahier des charges, à relire si besoin (lignes 1 à 12 et 44 à 55 de `TEXTES.md`).
 
 ## Texte : `_(en, fr)`
-- Même ordre qu'au Chapitre I : `const _=(en,fr)=>LANG==='fr'?fr:en;`. Langue par défaut : français.
+- Même ordre qu'au Chapitre I. Depuis le 28 octobre (`engine/shared`) : `const _=LB._;` (fonction commune, `shared/js/08-lang.js`), langue courante `LB.lang.cur`. **Langue par défaut : celle de l'appareil, sinon anglais** (avant : français) ; boutons de langue dans l'ordre EN, FR (comme au Chapitre I). `<html lang="fr">` reste dans la page, remplacé au démarrage par `applyLang`.
 - L'inversion a été faite par script (150 appels, appels imbriqués et `_(m[1],m[2])` compris). Le contrôle de cette inversion par rapport à `legacy/` a servi jusqu'à l'étape A ; depuis l'étape B, `tests/ch2-texts.js` compare à `TEXTES.md` (voir plus haut).
 
 ## Clés de sauvegarde
+Communes à la série depuis le 28 octobre (`engine/shared`) : lecture et écriture par `LB.store` / `LB.key` (`shared/js/04-store.js`, voir `shared/NOTES.md`) ; ce chapitre déclare seulement `LB.setup({id:'ch2', old:{'lb-ch2-unl':['db-unl']}, oldPrefix:[['lb-ch2-best-','db-best-']]})` dans `js/02-core.js`.
+
 | Clé | Contenu | Ancienne(s) clé(s) lue(s) si absente |
 |---|---|---|
-| `lb-lang` | `fr` / `en` | `pn-lang`, puis `eb-lang` (Chapitre I) |
-| `lb-snd` | son `1`/`0` | `db-optSnd` |
-| `lb-mus` | musique `1`/`0` | `db-optMus` |
-| `lb-help` | aide visuelle `1`/`0` | `db-optHelp` |
+| `lb-lang` | `fr` / `en` | `pn-lang`, puis `eb-lang` (Chapitre I) — communes |
+| `lb-snd` | son `1`/`0` | `db-optSnd` — communes |
+| `lb-mus` | musique `1`/`0` | `db-optMus` — communes |
+| `lb-help` | aide visuelle `1`/`0` | `db-optHelp` — communes |
 | `lb-ch2-unl` | phases débloquées (1 à 3) | `db-unl` |
 | `lb-ch2-best-<mode>` | record en secondes (parcours complet) | `db-best-<mode>` |
-- Code : `OLD_KEYS`, `oldKeys`, `store` en tête du script. `store.get` lit la nouvelle clé, sinon l'ancienne, et la recopie dans la nouvelle ; au démarrage, toutes les clés connues (et chaque `db-best-*` présent) passent par là. Les anciennes clés ne sont jamais effacées ni écrites.
-- Pas de drapeau « intro vue » dans ce chapitre (le prologue se passe par Entrée). S'il en faut un : `lb-ch2-intro`.
+- Au démarrage, `LB.setup` fait passer toutes les clés connues (et chaque `db-best-*` présent) par `LB.store.get`, qui recopie l'ancienne valeur dans la nouvelle clé. Les anciennes clés ne sont jamais effacées ni écrites.
+- Pas de drapeau « intro vue » dans ce chapitre (le prologue se passe par Entrée). S'il en faut un : `LB.key('intro')` = `lb-ch2-intro`.
 
 ## `<head>`
 - Doctype, `<html lang="fr">`, `meta charset="utf-8"`, viewport (`viewport-fit=cover`), `<title>`, styles du jeu : tout dans `<head>`. L'enveloppe de l'hébergeur d'artefacts (ligne 1) est retirée.
@@ -65,7 +68,7 @@
 - `node tests/ch2-input.js` : règles des états dans les trois phases (appui en `ready` → action et date d'animation ; appui pendant l'action ou la récupération → rien d'autre que `deny` = 0,25 s, date d'animation inchangée ; 0,333 s puis 0,7 s puis `ready` ; garde tenue puis relâchée en phase III ; reflet → récupération de 1,3 s ; coup reçu → `hurt` raccourci) ; spam à l'aveugle toutes les 0,25 / 0,5 / 0,75 / 1 s → le Veilleur meurt, Normal et Difficile, phases I à III ; un seul appui 0,05 / 0,1 / 0,2 s avant l'ouverture de l'action (Normal, 8 attaques par phase) → jamais plus d'un coup ; joueur parfait → 0 coup. ~30 s.
 - `node tests/ch2-title.js` : titre de fin d'intro, FR et EN, à 360×740, 390×844, 412×915, 844×390, 768×1024, 1100×760 et 1920×1080 : boîtes mesurées des textes dessinés (aucun chevauchement, tout dans le canvas, au moins 8 unités entre les deux lignes, bloc au-dessus du sceptre-lanterne), « Lumenbell » plus grand, chapitre en turquoise, pas de débordement horizontal de la page. Captures dans `tests/shots/`.
 - `node tests/ch2-trial.js` : PV, `m` et `rm` par difficulté ; en Épreuve, PV conservés de la phase I à la phase II et une chute renvoie à la phase I avec 4 PV ; en Normal, PV rendus entre les phases.
-- `node tests/ch2-keys.js` : migration (anciennes clés seules, nouvelles prioritaires, `eb-lang`, `pn-lang` avant `eb-lang`, aucune clé) et écriture dans les seules clés `lb-…` ; frise ouverte (`UNLOCK_ALL`), et déblocage progressif vérifié sur une copie `UNLOCK_ALL = false` (`build/out/ch2-unlock-off.html`).
+- `node tests/ch2-keys.js` : migration (anciennes clés seules, aucune clé selon la langue de l'appareil, nouvelles prioritaires, `eb-lang`, `pn-lang` avant `eb-lang`, aucune clé) et écriture dans les seules clés `lb-…` ; frise ouverte (`UNLOCK_ALL`), et déblocage progressif vérifié sur une copie `UNLOCK_ALL = false` (`build/out/ch2-unlock-off.html`).
 - `node tests/ch2-smoke.js` : sur `dist/index.html`. Syntaxe (`new Function`), puis **réseau** : contrôle statique (aucune URL `http(s)://` ni `//hôte`, aucun `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, `sendBeacon`, `serviceWorker`, `import()`, `window.open`, aucune ressource liée par `href`/`src`) ; en jeu, contexte hors ligne, `context.route` intercepte et refuse toute requête autre que `file:`/`data:`/`blob:`, les API réseau sont espionnées, les WebSocket, workers externes, popups et pages non `file:` sont relevés. Puis `db-unl=3` (ancienne clé, donc migration) posé avant le chargement, Normal puis Difficile (retour au menu entre les deux), prologue passé (Entrée), phase I → II → III via la frise `#phases`, PV max affichés (4 puis 3). Puis sans aucune clé : depuis le menu (Normal, Difficile, Facile) puis la frise, phases III et II lancées directement ; Épreuve lancée depuis le menu (phase I, 4 PV, frise fermée). Sortie attendue : `errs []`.
 - Numéros de phase : interne `S.phase` 2 = Phase I (la Voix Creuse), 1 = Phase II (le Roi de Rouille), 3 = Phase III (le Phare Noyé) ; `ORDER=[2,1,3]`. Le test lit `document.body.dataset.ph` (interne) et `#hdEye` (affiché).
 - Lancement local si Playwright ne trouve pas son Chromium : `PW_CHROMIUM=/opt/pw-browsers/chromium node tests/ch2-smoke.js` (voir `NOTES.md` racine).

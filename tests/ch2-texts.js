@@ -12,7 +12,8 @@ const fs=require('fs'),path=require('path');const {ROOT,DIST,script,calls,lit,sp
 const REF=path.join(ROOT,'chapters/ch2-silent-bells/TEXTES.md');
 const errs=[];
 const code=script(fs.readFileSync(DIST,'utf8'));
-if(!/const _=\(en,fr\)=>LANG==='fr'\?fr:en;/.test(code))errs.push('definition _(en,fr) absente du dist');
+// _(en, fr) commune a la serie (shared/js/08-lang.js), reprise par le chapitre
+if(!/LB\._=\(en,fr\)=>LB\.lang\.cur==='fr'\?fr:en;/.test(code)||!/const _=LB\._;/.test(code))errs.push('definition _(en,fr) absente du dist');
 const C=calls(code);
 for(const c of C)if(c.args.length!==2)errs.push('appel a '+c.args.length+' arguments: '+code.slice(c.at,c.at+60));
 const cell=a=>{const v=lit(a);return v===null?'`'+a.replace(/`/g,"'")+'`':v===''?'*(vide)*':v.replace(/\|/g,'\\|').replace(/\n/g,' ')};

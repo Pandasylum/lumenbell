@@ -307,9 +307,8 @@ function rBoss(dt){
 }
 function fmtT(t){const m=Math.floor(t/60),r=t-m*60;return m+':'+(r<10?'0':'')+r.toFixed(1)}
 function runTable(){
-  const tot=RUN.t,key='eb-best-'+RUN.name;let best=0,rec=false;
-  try{best=parseFloat(localStorage.getItem(key))||0}catch(e){}
-  if(!best||tot<best){rec=true;best=tot;try{localStorage.setItem(key,String(tot))}catch(e){}}
+  const tot=RUN.t,key=LB.key('best-'+RUN.name);let best=parseFloat(LB.store.get(key,'0'))||0,rec=false;
+  if(!best||tot<best){rec=true;best=tot;LB.store.set(key,String(tot))}
   const a=RUN.st[1]||{p:0,h:0},b=RUN.st[2]||{p:0,h:0};
   const C=[[_('Total time','Temps total'),fmtT(tot)],[_('Hits taken','Coups subis'),a.h+b.h+R.taken],[_('Attempts','Essais'),RUN.n],
     [_('Phase I','Phase I'),fmtT(RUN.pt[0])],[_('Phase II','Phase II'),fmtT(RUN.pt[1])],[_('Phase III','Phase III'),fmtT(RUN.pt[2])],
@@ -327,7 +326,7 @@ function rEnd(){
     return;
   }
   const sp=R.mode==='space',win=R.mode==='won'||sp;
-  if(sp){try{localStorage.setItem('eb-end','1')}catch(e){}updNext()}
+  if(sp){LB.store.set(LB.key('end'),'1');updNext()}
   el.ov.classList.toggle('clear',sp);
   el.eye.textContent=sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III');
   el.title.textContent=sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.');

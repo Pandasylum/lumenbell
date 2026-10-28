@@ -32,6 +32,9 @@ jobs:
         run: |
           node smoke.js
           node fonts-offline.js
+      - name: Cles de sauvegarde communes aux deux chapitres (lb-*, migration des anciennes cles)
+        working-directory: tests
+        run: node keys.js
       - name: Chapitre II - textes, cles de sauvegarde, test de fumee (3 phases, hors ligne, sans reseau), aucun mot d'annonce
         working-directory: tests
         run: |

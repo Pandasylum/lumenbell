@@ -17,4 +17,4 @@ s=s.replace('requestAnimationFrame(frame);\nwindow.__t','document.getElementById
 OUTF.write_text(s,encoding='utf-8')
 s2=OUTF.read_text(encoding='utf-8');assert s2.count('seen=false; /*')==1;OUTF.write_text(s2.replace('seen=false; /*','seen=true; /*'),encoding='utf-8')
 
-t=OUTF.read_text(encoding='utf-8');a="try{seen=localStorage.getItem('eb-intro')==='1'}catch(e){}";assert t.count(a)==1;OUTF.write_text(t.replace(a,''),encoding='utf-8')
+t=OUTF.read_text(encoding='utf-8');a="seen=LB.store.get(LB.key('intro'),'0')==='1';";assert t.count(a)==1;OUTF.write_text(t.replace(a,''),encoding='utf-8')

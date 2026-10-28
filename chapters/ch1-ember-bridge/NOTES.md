@@ -5,7 +5,8 @@
 - **Structure du code** : phases `G` (P1 pont), `Q` (P2 Fonderie, `drawLake`, `lakeY()`), `R` (P3 Clocher, `ringBell`, `FIN`, `finaleScore`) ; cinématiques `SC` (cartons `{d,en,fr}`) et `DRAW=[sStatue,sValley,sTowers,sSea,sDawn,sTitle]` ; panneaux `CARD1`, `LORE`, `showEnd`, `qEnd`, `rEnd` ; i18n `_(en,fr)`.
 - **Textes** : `docs/TEXTES-CH1.md` (régénérable, colonne `fichier:ligne`). Lore : `docs/LORE.md`.
 - **Cartes de transition** (fin de phase I : `showEnd`, cas `G.p2` ; fin de phase II : `qEnd`) : ligne du haut « Transition », titre neutre « Phase I/II terminée », le récit dans le texte seulement (voir `DECISIONS.md`, 28 octobre 2026).
-- **Tests** : `tests/smoke.js` doit afficher `errs []`.
+- **Tests** : `tests/smoke.js` et `tests/keys.js` doivent afficher `errs []`.
+- **Sauvegarde** (28 octobre 2026, `engine/shared`) : `lb-lang`, `lb-snd`, `lb-mus`, `lb-help`, `lb-ch1-intro`, `lb-ch1-end`, `lb-ch1-best-<mode>` par `LB.store` / `LB.key` ; anciennes `eb-…` lues si la nouvelle manque. Son, Musique et Aide mémorisés ; l'aide reprend sa valeur mémorisée à chaque choix de difficulté, coupée là où la case est masquée (`noHelp`).
 
 ## Carte de `src/`
 | Fichier | Contenu |
@@ -13,7 +14,8 @@
 | `page/head.html` | `<title>`, metas, liens Google Fonts (retirés par `build.py`), `<style>` ouvrant |
 | `page/style.css` | Tout le CSS (entre `<style>` et `</style>`) |
 | `page/body.html` | `</style>`, balisage HTML (menu, overlay `#ovDesc`, pause, cinématique), `<script>` ouvrant |
-| `js/00-core.js` | Ouverture de l'IIFE, langue et `_()`, constantes, `DIFFS`, `RUN`, `T`, canvas, `el`, `LORE`, utilitaires, repères géométriques |
+| `js/00-open.js` | Ouverture de l'IIFE (suivie, dans `parts.txt`, de `@shared` : le code commun `shared/`, objet `LB`) |
+| `js/00-core.js` | `LB.setup` (clés `lb-ch1-…`, anciennes `eb-…`), `_ = LB._`, constantes, `DIFFS`, `RUN`, `T`, canvas, `el`, `LORE`, utilitaires, repères géométriques |
 | `js/04-audio-sfx.js` | Contexte audio, `tone`, `noise`, bruitages, cris (`painCry`, `roar`) |
 | `js/08-state.js` | `newGame`, `start`, `press`, intro de phase, `deathCard`, `showEnd` |
 | `js/12-effects.js` | Étincelles, onomatopées (`ONO`, `ONOSZ`), cris du Colosse (`CRIES`, `MEGA`), `float` |
@@ -42,7 +44,7 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 ## Pièges du découpage
 - **L'ordre de `parts.txt` est l'ordre d'exécution.** Une seule IIFE : déplacer un morceau peut casser une `const` utilisée avant sa déclaration (TDZ) même si le build « passe ». Ne pas réordonner sans raison.
 - **Chaque morceau finit par un saut de ligne**, et tout fichier de `src/` doit être listé dans `parts.txt` : `assemble.py` refuse sinon (erreur claire plutôt que JS collé ou fichier ignoré).
-- **Ancrages des scripts de build** : `build.py` cherche `<style>`/`</style>` et les 3 liens Google Fonts (`page/`) ; `build_test.py` cherche `requestAnimationFrame(frame);\n})();` (fin de `84-loop.js`), `seen=false; /*` et la lecture `eb-intro`. Ne pas modifier ces lignes sans adapter les scripts.
+- **Ancrages des scripts de build** : `build.py` cherche `<style>`/`</style>` et les 3 liens Google Fonts (`page/`) ; `build_test.py` cherche `requestAnimationFrame(frame);\n})();` (fin de `84-loop.js`), `seen=false; /*` et la lecture `seen=LB.store.get(LB.key('intro'),'0')==='1';`. Ne pas modifier ces lignes sans adapter les scripts.
 - Le texte d'ouverture de la phase I existe deux fois : `#ovDesc` dans `page/body.html` et `CARD1` dans `js/60-ui-menu.js`.
 - `js/72-boot.js` finit par un commentaire « écran de démarrage » qui décrit en fait le code de `84-loop.js` : laissé tel quel pour rester octet pour octet identique.
 - Les coupes sont faites sur les commentaires de section (`/* ---------- … */`) ; la ligne vide qui précède reste à la fin du morceau précédent.
