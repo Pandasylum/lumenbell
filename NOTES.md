@@ -32,6 +32,11 @@
 - **Source du Chapitre I découpée** : l'ordre de `src/parts.txt` est l'ordre d'exécution (une seule IIFE) ; chaque morceau finit par un saut de ligne. Détails : `chapters/ch1-ember-bridge/NOTES.md`.
 - **Fonction de texte** : `_(anglais, français)` dans les deux chapitres (le Chapitre II a été inversé le 27 octobre 2026).
 - **Clés de sauvegarde** : `lb-…` (voir `DECISIONS.md`) ; le Chapitre I est encore en `eb-…` (demande dans `DEMANDES.md`).
+- **Éléments communs** : inventaire des écarts entre chapitres, API commune proposée et plan des sessions moteur dans `docs/COMMUN.md` (audit du 28 octobre 2026). À lire avant toute session `engine/…` ou `menu/…`.
+- **Tables `T` et `DG` inversées d'un chapitre à l'autre** : au Chapitre I, `T` = blocage (phase I) et `DG` = esquive (phase II) ; au Chapitre II, `T` = parade de la phase II (le Roi) et `DG` = esquive de la phase I (la Voix). Toujours vérifier la phase avant de régler une valeur.
+- **Barre de récupération du Chapitre I** : dessinée seulement avec l'aide visuelle et seulement en phase I (`32-p1-bridge-render.js`, dans `drawHints`) ; au Chapitre II elle est toujours visible. Ne pas « corriger » un chapitre sur l'autre avant la décision (voir `docs/COMMUN.md` § 5).
+- Le Veilleur du Chapitre II n'est pas celui du Chapitre I (pas de heaume ni de tabard, bâton à cristal au lieu du sceptre-lanterne), malgré le commentaire « same skin as Ember Bridge ». Prévu dans la session `engine/watcher`.
+- Chapitre II : `renderMenu` lit un canvas `#mc` absent du HTML et n'est jamais appelé (code mort).
 - Le workflow Android cherche l'`index.html` à un chemin explicite (`chapters/ch1-ember-bridge/dist/index.html`), pas par `find`.
 
 ## Fonctionnement des sessions
