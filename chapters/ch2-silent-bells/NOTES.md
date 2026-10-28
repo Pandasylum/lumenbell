@@ -132,3 +132,7 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - `drawPrologue(t)` : plans `PRO_SHOTS` (côte et village, Phare au large, plage, haut du Phare + Veilleur + titre) ; cartons `PCAPF`, titre `PRO_TITLE` (inchangés) ; sons `PSFX`. `drawEpilogue(t)` : plans `EPI_SHOTS` (matin, gros plan de la cloche, vallée du Chapitre I, sous les vagues, forêt + titre) ; cartons `ECAPF`, titre `EPI_TITLE` (inchangés) ; sons `EFXL` ; tours de la vallée `VTOW`, tour qui s'éteint `TOWER_OUT` à `EPI_DARK`, fissures `VCRACKS`.
 - Décors partagés : `lighthouse(x, y, échelle, lueur)` (le Phare de pierre), `village()`, `boat()`, `seaBand()`, `mist()`, `skyGrad()`. Le gros plan de la cloche réutilise `pHead()` avec `bellMarks()`.
 - Retirés : `PSTARS`, `proMarsh`, `hangBell` (étoiles, marais, cloche suspendue de l'ancienne version). `proHero()` est gardé (dessin du Veilleur des cinématiques, inchangé).
+
+## Retouches du 28 octobre (`ch2/retouches`)
+- **Intro** : `PRO_T` (durées des cartons comme au Chapitre I, fondus), `PRO_SHOTS` calculé (débuts des plans A à E), `PRO_TITLE`, `PRO_LEN` ; textes dans `PCAP_TXT`, temps des cartons dans `PCAPF`. **Outro** : 4 plans + titre, `SPIRE` (Flèche de la forêt).
+- **Fonds fixes des cartons de fin** : `S.still` (id interne de la phase, posé par `clearedCard`, remis à 0 par `resetPhaseState`) ; `drawStill(id)` est dessiné à la place de la scène tant que la carte est ouverte.

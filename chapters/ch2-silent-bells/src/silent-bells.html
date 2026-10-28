@@ -1199,6 +1199,7 @@ let last=performance.now();
 function draw(){
   ctx.setTransform(SC,0,0,SC,0,0);
   if(S.mode==='epilogue'){ctx.save();drawEpilogue(gt-S.epT0);ctx.restore();return}
+  if(S.mode==='card'&&S.still){ctx.save();drawStill(S.still);ctx.restore();const vs=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vs.addColorStop(0,'rgba(0,0,0,0)');vs.addColorStop(1,'rgba(0,0,0,.55)');ctx.fillStyle=vs;ctx.fillRect(0,0,W,H);return}
   if(S.mode==='prologue'){ctx.save();drawPrologue(gt-S.proT0);ctx.restore();const vg0=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vg0.addColorStop(0,'rgba(0,0,0,0)');vg0.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=vg0;ctx.fillRect(0,0,W,H);return}
   ctx.save();
   if(S.shake>.3)ctx.translate((Math.random()-.5)*S.shake,(Math.random()-.5)*S.shake);
@@ -1230,6 +1231,21 @@ function draw(){
   const hk=gt-S.hurtT;if(hk<.3){ctx.fillStyle=`rgba(255,40,30,${.25*(1-hk/.3)})`;ctx.fillRect(0,0,W,H)}
   if(S.mode==='ko'){const k=gt-S.koT;if(k<.5){ctx.fillStyle=`rgba(255,255,255,${.5*(1-k/.5)})`;ctx.fillRect(0,0,W,H)}}
 }
+
+/* ---------- still backgrounds behind the end-of-phase cards (internal phase id): the scene as its closing cinematic
+   left it, never the start of the fight ---------- */
+function drawStill(id){
+  if(id===2){S.hatchK=1;bg2();drawHatch(1);const vp=voicePos(0),q=lanternPos(60,vp.x,vp.y-96);keeperLantern(q.x,q.y,q.a,rt);
+    ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0);mirrorFloor();
+    ctx.save();ctx.globalCompositeOperation='lighter';glow(q.x,q.y,70,'rgba(79,224,204,.9)',.4+.2*Math.sin(rt*3.4));ctx.restore()}
+  else if(id===1)kingEndStill();
+  else{bg3();base();const O=ecPose(0);
+    TOWER.forEach((p,i)=>{if(FIXED(p.k)){const o=O[i];drawP(p.k,o.x,o.y,o.r)}else if(i!==EHEAD){const F=EFALL[i];drawP(p.k,F.x,F.y,F.r)}});
+    drawAnchorQ({x:LX+135,y:GY-120,a:1.78,sc:1,clip:true});
+    ctx.save();ctx.translate(BELL_REST.x,BELL_REST.y);ctx.rotate(BELL_REST.r);pHead(.85,bellMarks());ctx.restore();
+    const hx=BELL_REST.x-78;ell(hx,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(hx,GY,0,-1.42,0)}}
+/* until the end of phase II is redrawn: the empty hold */
+function kingEndStill(){bg1();ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0)}
 
 /* ---------- cinematics: phase entries and exits ---------- */
 const CINE_LEN={1:{in:7.8,out:6.4},2:{in:4.8,out:7.4},3:{in:13.8,out:12.8,p2:7.4}};
@@ -1682,17 +1698,21 @@ const MUSIC=(()=>{
   return{play,stop,fx,bed,bedStop,setMus(v){musOn=v;if(!v){stop();bedStop()}},setFx(v){fxOn=v},get cur(){return cur},get bedId(){return bedId}};
 })();
 /* ---------- Prologue: the silent coast (docs/CH2-SPEC.md, intro) ---------- */
-const PRO_LEN=18.6;
-/* intro cartons: [start, end, text] in seconds; then the title. Shots (PRO_SHOTS, start times): A the coast in the mist,
-   B the dark Lighthouse out at sea, C the beach with the boats that no longer go out, D the Lighthouse's top, a faint
-   glimmer up there, and the Watcher coming onto the shore under the title */
-const PCAPF=()=>[[.5,4.2,_('On the coast, the mist no longer lifts.','Sur la côte, la brume ne se lève plus.')],
-  [4.4,8.4,_('Out at sea, the Drowned Lighthouse stands dark. No bell answers it.','Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond.')],
-  [8.6,12.8,_('The ships no longer return. The fishermen say the sea keeps what it takes.',"Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend.")],
-  [13,15.4,_('They say its keeper still watches up there.','On dit que sa gardienne veille encore là-haut.')]];
-const PRO_TITLE=15.6;
-const PRO_SHOTS=[0,4.3,8.5,12.9];
-const PSFX=[[0,'swell'],[4.3,'rumble'],[8.5,'swell'],[12.9,'glints'],[14.6,'land'],[16,'sting']];
+/* intro rhythm, as in Ember Bridge (76-cine-intro.js): one shot per carton, 6 to 7 s each (PRO_T.cap); each carton
+   fades in PRO_T.lead after its shot starts and out PRO_T.lead before it ends, fades of PRO_T.fade; a dip to black of
+   PRO_T.fade on each side of a cut; then the title shot (PRO_T.title). Shots: A the coast in the mist, B the dark
+   Lighthouse out at sea, C the beach with the boats that no longer go out, D the Lighthouse's top, a faint glimmer up
+   there; E (title) the Watcher comes onto the shore. */
+const PRO_T={cap:[6,7,7,7],title:4.6,lead:.5,fade:.5,walk:1.4,titleAt:.6};
+const PRO_SHOTS=PRO_T.cap.reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of A, B, C, D, E
+const PRO_TITLE=PRO_SHOTS[4]+PRO_T.titleAt,PRO_LEN=PRO_SHOTS[4]+PRO_T.title;
+const PCAP_TXT=()=>[_('On the coast, the mist no longer lifts.','Sur la côte, la brume ne se lève plus.'),
+  _('Out at sea, the Drowned Lighthouse stands dark. No bell answers it.','Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond.'),
+  _('The ships no longer return. The fishermen say the sea keeps what it takes.',"Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend."),
+  _('They say its keeper still watches up there.','On dit que sa gardienne veille encore là-haut.')];
+/* intro cartons: [start, end, text] in seconds */
+const PCAPF=()=>PCAP_TXT().map((s,i)=>[PRO_SHOTS[i]+PRO_T.lead,PRO_SHOTS[i+1]-PRO_T.lead,s]);
+const PSFX=[[0,'swell'],[PRO_SHOTS[1],'rumble'],[PRO_SHOTS[2],'swell'],[PRO_SHOTS[3],'glints'],[PRO_SHOTS[4]+PRO_T.walk,'land'],[PRO_TITLE+.4,'sting']];
 function proHero(x,y,white,staffA,stA,lean){
   ctx.save();ctx.translate(x,y);ctx.rotate(lean||0);
   if(white<1){drawWizard({fl:Math.sin(rt*4)*1.5})}
@@ -1764,26 +1784,26 @@ function drawPrologue(t){
     ctx.translate(drift,0);
     ctx.fillStyle='#0a0f10';ctx.fillRect(760-drift*.3,320,3,-60);ctx.fillRect(748-drift*.3,288,26,2); // a mast out of the water
     mist(360,4,.22,12)}
-  else{ // D: the Lighthouse's top, a glimmer; the Watcher comes onto the shore
+  else{ // D: the Lighthouse's top, a glimmer; E: the same, the Watcher comes onto the shore
     skyGrad('#04080b','#1a2b30',330);mist(110,3,.12,8);
     seaBand(330,'#132a2e','#040b0d',.15);
-    const z=1+.06*eio(clamp(ts/5,0,1));ctx.save();ctx.translate(700,330);ctx.scale(z,z);ctx.translate(-700,-330);
+    const z=1+.06*eio(clamp((t-PRO_SHOTS[3])/8,0,1));ctx.save();ctx.translate(700,330);ctx.scale(z,z);ctx.translate(-700,-330);
     lighthouse(700,336,.95,.55+.35*Math.sin(t*2.2));ctx.restore();
     ctx.fillStyle='#0a1012';ctx.beginPath();ctx.moveTo(-40,H);ctx.lineTo(-40,GY-8);ctx.quadraticCurveTo(300,GY-16,520,GY+6);ctx.quadraticCurveTo(580,GY+40,640,H);ctx.fill();
     ctx.strokeStyle='rgba(220,245,240,.3)';ctx.lineWidth=1.5;for(let i=0;i<3;i++){const k=(rt*.3+i*.33)%1;ctx.beginPath();ctx.moveTo(520-k*40,GY+10+i*8);ctx.quadraticCurveTo(700,GY+20+i*12,W+40,GY+14+i*12);ctx.stroke()}
     mist(400,3,.2,10);
-    const walk=eio(clamp((t-13.4)/1.4,0,1)),hx=lerp(-40,W/2-60,walk),hy=GY-(walk<1?Math.abs(Math.sin(t*6))*3:0);
+    if(shot>=4){const walk=eio(clamp(ts/PRO_T.walk,0,1)),hx=lerp(-40,W/2-60,walk),hy=GY-(walk<1?Math.abs(Math.sin(t*6))*3:0);
     proHero(hx,hy,0,walk<1?-1.3:-1.42,1,walk<1?.03:0);
-    if(t>=14.8&&once('land'))burst(W/2-60,GY,14,'#9fb6a0',3,.7,.3)}
+    if(ts>=PRO_T.walk&&once('land'))burst(W/2-60,GY,14,'#9fb6a0',3,.7,.3)}}
   ctx.restore();
   // cuts between shots: a short dip to black
-  for(const s of PRO_SHOTS.slice(1)){const d=Math.abs(t-s);if(d<.3)fadeAll(1-d/.3)}
+  for(const s of PRO_SHOTS.slice(1,4)){const d=Math.abs(t-s);if(d<PRO_T.fade)fadeAll(1-d/PRO_T.fade)}
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   // text
-  for(const c of PCAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0)caption(c[2],a)}
+  for(const c of PCAPF()){const a=clamp((t-c[0])/PRO_T.fade,0,1)*(1-clamp((t-c[1]+PRO_T.fade)/PRO_T.fade,0,1));if(a>0)caption(c[2],a)}
   seriesTitle(t,PRO_TITLE,'Lumenbell',_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),CH_COL[2]);
-  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-17.9)/.7,0,1));
+  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-(PRO_LEN-.7))/.7,0,1));
   PSFX.forEach((c,i)=>{if(t>=c[0]&&once('pfx'+i))MUSIC.fx(c[1])});
 }
 function lerpC(a,b,k){return`rgb(${a.map((v,i)=>Math.round(lerp(v,b[i],k))).join(',')})`}
@@ -1793,17 +1813,17 @@ const gpOf=id=>ORDER.indexOf(id)+1;
 /* phase texts (docs/CH2-SPEC.md): eye = phase title, boss = name (card title), desc = entry panel, end = end panel */
 const PH=[null,
  {eye:()=>_('Phase II · The Hold','Phase II · La cale'),
-  desc:()=>_("Rusted bells hang from the beams of the hold. An anchor lies there, too heavy for a man's hand.","Des cloches rouillées pendent aux poutres de la cale. Une ancre traîne, trop lourde pour une main d'homme."),
-  end:()=>_("The King sinks beneath the waves. A turquoise glow rises from his body, toward the Lighthouse.","Le Roi sombre sous les vagues. De son corps monte une lueur turquoise, vers le Phare."),
+  desc:()=>_('Beneath the Lighthouse, the hull of a stranded ship. It smells of iron and salt.',"Sous le Phare, la coque d'un navire échoué. Elle sent le fer et le sel."),
+  end:()=>_('The hull collapses around the King. For the first time, the moon gleams on his body of metal.',"La coque s'effondre autour du Roi. Pour la première fois, la lune se reflète sur son corps de métal."),
   head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust King','Le Roi de Rouille'),btn:()=>_('Block','Bloquer'),
   aria:()=>_("The Watcher facing the Rust King, a colossus of bells armed with an anchor","Le Veilleur face au Roi de Rouille, un colosse de cloches armé d'une ancre")},
  {eye:()=>_('Phase I · The Mirror Hall','Phase I · La salle des reflets'),
   desc:()=>_("At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there.","Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur."),
-  end:()=>_("The mirror shatters. Beneath the hall, a hatch opens onto the hold of a wreck.","Le miroir vole en éclats. Sous la salle, une trappe s'ouvre sur la cale d'une épave."),
+  end:()=>_("For a moment, the Watcher's lantern dims.","L'espace d'un instant, la lanterne du Veilleur faiblit."),
   head:()=>_('Phase I of III · The Mirror Hall','Phase I sur III · La salle des reflets'),boss:()=>_('The Hollow Voice','La Voix Creuse'),btn:()=>_('Dodge','Esquiver'),
   aria:()=>_('The Watcher facing the Hollow Voice, a figure with a cracked mirror face','Le Veilleur face à la Voix Creuse, une silhouette au visage de miroir fêlé')},
  {eye:()=>_('Phase III · The Reefs','Phase III · Les récifs'),
-  desc:()=>_("From the King's body, the glow has built a tower. The Drowned Lighthouse lights again, with a flame that is not its own.","Du corps du Roi, la lueur a bâti une tour. Le Phare Noyé se rallume d'une flamme qui n'est pas la sienne."),
+  desc:()=>_('The sea has drawn back. The ships it took sleep on the reef.',"La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif."),
   form2:()=>_("The tower bursts. Among the debris, the jellyfish, laid bare.","La tour éclate. Au milieu des débris, la méduse, à découvert."),
   end:()=>_("In the wreckage, the Lighthouse's bell, cracked and silent.","Dans les décombres, la cloche du Phare, fêlée et muette."),
   head:()=>_('Phase III of III · The Reefs','Phase III sur III · Les récifs'),boss:()=>S.form===2?_('The Shattered',"L'Éclaté"):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Guard','Garde'),
@@ -2151,7 +2171,7 @@ function playCine(id,k,cb){
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function resetPhaseState(){Object.assign(S,{angerShown:false,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,pl:newPl(),post:null,rust:null})}
+function resetPhaseState(){Object.assign(S,{angerShown:false,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,pl:newPl(),post:null,rust:null,still:0})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
@@ -2167,7 +2187,7 @@ function phaseCleared(){
   if(id===3){playCine(3,'out',()=>clearedCard(3));return}
   playCine(id,'out',()=>clearedCard(id));
 }
-function clearedCard(id){S.mode='card';const next=ORDER[gpOf(id)];
+function clearedCard(id){S.mode='card';S.still=id;const next=ORDER[gpOf(id)];
   showCard({eye:[null,_('Phase II cleared','Phase II terminée'),_('Phase I cleared','Phase I terminée'),_('Phase III cleared','Phase III terminée')][id],title:PH[id].boss(),desc:PH[id].end(),
     go:_('Continue','Continuer'),onGo:id===3?()=>playEpilogue(victory):()=>enterPhase(next),go2:id===3?null:_('Menu','Menu'),onGo2:showMenu});
 }
@@ -2205,22 +2225,23 @@ function hideMenu(){$('menu').hidden=true}
 function setPause(p){if(S.mode!=='play')return;S.paused=p;$('pause').hidden=!p;if(p){up();MUSIC.stop();try{$('pResume').focus({preventScroll:true})}catch(e){}}else setTheme(S.phase)}
 
 /* ---------- Epilogue (docs/CH2-SPEC.md, outro) ---------- */
-const EPI_LEN=23;
-/* outro cartons: [start, end, text] in seconds; carton 6 is the title, tinted with the next chapter's colour.
+const EPI_LEN=19;
+/* outro cartons: [start, end, text] in seconds; carton 5 is the title, tinted with the next chapter's colour.
    Shots (EPI_SHOTS, start times): 1 morning, the Lighthouse mute; 2 close-up of the bell, the word engraved; 3 the valley
-   of Chapter I, the earth trembling, one tower going dark; 4 under the waves at the Lighthouse's foot, the turquoise
-   glow; 5 the forest, a faint light (and the title over it) */
+   of Chapter I, the earth trembling, one tower going dark; 4 the forest, the Spire's light failing (and the title over it).
+   No glow under the waves any more (revisions of 28 October): the only light left is the forest Spire's. */
 const ECAPF=()=>[[.4,4.2,_('By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again.','Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus.')],
   [4.4,8.2,_('On it, a single word is engraved: Crown.','Sur celle-ci, un seul mot est gravé : Couronne.')],
   [8.4,12.2,_('And this time, the earth has not stopped trembling.',"Et cette fois, la terre n'a pas cessé de trembler.")],
-  [12.4,16.2,_('Beneath the waves, a turquoise glow still pulses, faintly.','Sous les vagues, une lueur turquoise pulse encore, faiblement.')],
-  [16.4,19.8,_('Deep in the forest, a faint light flickers.','Au cœur de la forêt, une faible lumière vacille.')]];
-const EPI_TITLE=20.2;
-const EPI_SHOTS=[0,4.3,8.3,12.3,16.3];
+  [12.4,15.8,_("In the heart of the forest, a Spire's light is failing.","Au cœur de la forêt, la lumière d'une Flèche faiblit.")]];
+const EPI_TITLE=16.2;
+const EPI_SHOTS=[0,4.3,8.3,12.3];
+/* shot 4: the forest Spire (x, top), its light fading from SPIRE.a0 to SPIRE.a1 over the shot, with flickers */
+const SPIRE={x:500,top:170,a0:.9,a1:.25,fade:6};
 /* shot 3: the valley's towers (x, height); TOWER_OUT goes dark at EPI_DARK; the earth cracks along VCRACKS */
 const VTOW=[[150,150],[300,110],[470,170],[640,120],[800,140]],TOWER_OUT=3,EPI_DARK=9.6;
 const VCRACKS=(()=>{const R=mulberry(808);return[...Array(5)].map((_,i)=>{const pts=[];let x=80+i*190,y=430;for(let k=0;k<7;k++){pts.push([x,y]);x+=(R()-.5)*60;y+=14+R()*10}return{pts,t0:8.9+i*.45}})})();
-const EFXL=[[.2,'swell'],[4.3,'glints'],[8.3,'rumble'],[9.6,'crackRun'],[10.4,'rumble'],[12.3,'heart'],[14.3,'heart'],[16.3,'glints'],[20.8,'sting']];
+const EFXL=[[.2,'swell'],[4.3,'glints'],[8.3,'rumble'],[9.6,'crackRun'],[10.4,'rumble'],[12.3,'glints'],[14.6,'heart'],[16.8,'sting']];
 function drawEpilogue(t){
   const shot=EPI_SHOTS.filter(s=>t>=s).length-1,ts=t-EPI_SHOTS[shot];
   ctx.save();
@@ -2251,19 +2272,12 @@ function drawEpilogue(t){
       if(a>0){ctx.save();ctx.globalCompositeOperation='lighter';glow(x+sway,top-6,34,i===0?'rgba(255,170,90,.9)':'rgba(230,225,200,.9)',a);ell(x+sway,top-6,2.5,3,`rgba(255,250,235,${a})`);ctx.restore()}});
     for(const c of VCRACKS){const k=clamp((t-c.t0)/.6,0,1);if(k<=0)continue;const n=Math.max(2,Math.ceil(c.pts.length*k));ctx.strokeStyle='#020202';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<n;i++)i?ctx.lineTo(c.pts[i][0],c.pts[i][1]):ctx.moveTo(c.pts[i][0],c.pts[i][1]);ctx.stroke();
       if(k<1&&Math.random()<.5)burst(c.pts[n-1][0],c.pts[n-1][1],2,'#6a5a48',3,.6,.3)}}
-  else if(shot===3){ // under the waves: the foot of the Lighthouse, the turquoise glow pulsing faintly
-    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#20363c');g.addColorStop(.22,'#123038');g.addColorStop(1,'#020809');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#0e1d22';ctx.beginPath();ctx.moveTo(520,0);ctx.lineTo(500,300);ctx.lineTo(760,300);ctx.lineTo(740,0);ctx.fill();
-    ctx.fillStyle='#071113';ctx.beginPath();ctx.moveTo(300,H);ctx.lineTo(360,330);ctx.lineTo(470,290);ctx.lineTo(800,300);ctx.lineTo(900,360);ctx.lineTo(960,H);ctx.fill();
-    ctx.strokeStyle='rgba(200,245,240,.35)';ctx.lineWidth=1.5;ctx.beginPath();for(let x=0;x<=W;x+=24){const y=96+Math.sin(x*.02+t*1.2)*5;x?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
-    ctx.fillStyle='rgba(20,40,44,.6)';ctx.fillRect(0,0,W,96);
-    ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<5;i++){const x=120+i*180+Math.sin(t*.6+i)*30;const lg=ctx.createLinearGradient(x,96,x+60,H);lg.addColorStop(0,'rgba(150,220,215,.08)');lg.addColorStop(1,'rgba(150,220,215,0)');ctx.fillStyle=lg;ctx.beginPath();ctx.moveTo(x-10,96);ctx.lineTo(x+14,96);ctx.lineTo(x+90,H);ctx.lineTo(x+30,H);ctx.fill()}
-    const pu=.5+.5*Math.sin(t*2.2);glow(600,380,90+20*pu,'rgba(79,224,204,.9)',.25+.3*pu);ell(600,380,3+pu,3+pu,`rgba(220,255,248,${.4+.4*pu})`);ctx.restore();
-    for(let i=0;i<20;i++){const x=(i*173)%W,y=H-((i*97+t*14)%(H-100));ctx.fillStyle='rgba(180,230,225,.25)';ctx.fillRect(x,y,1.5,1.5)}}
-  else{ // the forest: a faint light between the trunks; the title of the next chapter
+  else{ // the forest: a Bound Spire among the trees, its light failing; the title of the next chapter
     const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#05070a');g.addColorStop(1,'#0b0e0a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    const fl=Math.max(0,.5+.3*Math.sin(t*7)*Math.sin(t*3.1)+.15*Math.sin(t*17)),light=()=>{ctx.save();ctx.globalCompositeOperation='lighter';glow(500,330,120,'rgba(185,207,90,.9)',.55*fl);ell(500,330,2.6,3.2,`rgba(240,245,210,${.85*fl})`);ctx.restore()};
-    const R=mulberry(616);for(let layer=0;layer<3;layer++){if(layer===1)light();ctx.fillStyle=['#0b0f0c','#070a08','#030504'][layer];for(let i=0;i<8;i++){const x=R()*W,w=10+layer*12+R()*14;if(layer&&Math.abs(x-500)<40)continue;  // the light stays visible between the near trunks
+    const P=SPIRE,dim=lerp(P.a0,P.a1,eio(clamp(ts/P.fade,0,1))),fl=dim*Math.max(.15,.75+.25*Math.sin(t*7)*Math.sin(t*3.1)-(Math.sin(t*2.3)>.92?.6:0));
+    const light=()=>{const sg=ctx.createLinearGradient(P.x-16,0,P.x+16,0);sg.addColorStop(0,'#0c110c');sg.addColorStop(.45,'#263022');sg.addColorStop(1,'#0a0e0a');ctx.fillStyle=sg;ctx.beginPath();ctx.moveTo(P.x-16,H);ctx.lineTo(P.x-7,P.top+18);ctx.lineTo(P.x,P.top);ctx.lineTo(P.x+7,P.top+18);ctx.lineTo(P.x+16,H);ctx.closePath();ctx.fill();
+      ctx.save();ctx.globalCompositeOperation='lighter';glow(P.x,P.top+8,130,'rgba(185,207,90,.9)',.55*fl);ell(P.x,P.top+8,3,4,`rgba(240,245,210,${.9*fl})`);ctx.restore()};
+    const R=mulberry(616);for(let layer=0;layer<3;layer++){if(layer===1)light();ctx.fillStyle=['#0b0f0c','#070a08','#030504'][layer];for(let i=0;i<8;i++){const x=R()*W,w=10+layer*12+R()*14;if(layer&&Math.abs(x-P.x)<40)continue;  // the Spire stays visible between the near trunks
       ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
     mist(420,4,.08,6)}
   ctx.restore();
@@ -2271,7 +2285,7 @@ function drawEpilogue(t){
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   for(const c of ECAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0)caption(c[2],a)}
   title(t,EPI_TITLE,'',_('Chapter III. To be continued.','Chapitre III. À suivre.'),CH_COL[3],CH_COL[3]);
-  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-22.2)/.8,0,1));
+  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-(EPI_LEN-.8))/.8,0,1));
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
 }
 function playEpilogue(cb){MUSIC.stop();MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();setTheme(4);$('skip').hidden=false;$('hdEye').textContent=_('Epilogue','Épilogue')}

@@ -26,21 +26,21 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 20 | They say its keeper still watches up there. | On dit que sa gardienne veille encore là-haut. |
 | 21 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
 | 22 | Phase II · The Hold | Phase II · La cale |
-| 23 | Rusted bells hang from the beams of the hold. An anchor lies there, too heavy for a man's hand. | Des cloches rouillées pendent aux poutres de la cale. Une ancre traîne, trop lourde pour une main d'homme. |
-| 24 | The King sinks beneath the waves. A turquoise glow rises from his body, toward the Lighthouse. | Le Roi sombre sous les vagues. De son corps monte une lueur turquoise, vers le Phare. |
+| 23 | Beneath the Lighthouse, the hull of a stranded ship. It smells of iron and salt. | Sous le Phare, la coque d'un navire échoué. Elle sent le fer et le sel. |
+| 24 | The hull collapses around the King. For the first time, the moon gleams on his body of metal. | La coque s'effondre autour du Roi. Pour la première fois, la lune se reflète sur son corps de métal. |
 | 25 | Phase II of III · The Hold | Phase II sur III · La cale |
 | 26 | The Rust King | Le Roi de Rouille |
 | 27 | Block | Bloquer |
 | 28 | The Watcher facing the Rust King, a colossus of bells armed with an anchor | Le Veilleur face au Roi de Rouille, un colosse de cloches armé d'une ancre |
 | 29 | Phase I · The Mirror Hall | Phase I · La salle des reflets |
 | 30 | At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there. | Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur. |
-| 31 | The mirror shatters. Beneath the hall, a hatch opens onto the hold of a wreck. | Le miroir vole en éclats. Sous la salle, une trappe s'ouvre sur la cale d'une épave. |
+| 31 | For a moment, the Watcher's lantern dims. | L'espace d'un instant, la lanterne du Veilleur faiblit. |
 | 32 | Phase I of III · The Mirror Hall | Phase I sur III · La salle des reflets |
 | 33 | The Hollow Voice | La Voix Creuse |
 | 34 | Dodge | Esquiver |
 | 35 | The Watcher facing the Hollow Voice, a figure with a cracked mirror face | Le Veilleur face à la Voix Creuse, une silhouette au visage de miroir fêlé |
 | 36 | Phase III · The Reefs | Phase III · Les récifs |
-| 37 | From the King's body, the glow has built a tower. The Drowned Lighthouse lights again, with a flame that is not its own. | Du corps du Roi, la lueur a bâti une tour. Le Phare Noyé se rallume d'une flamme qui n'est pas la sienne. |
+| 37 | The sea has drawn back. The ships it took sleep on the reef. | La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif. |
 | 38 | The tower bursts. Among the debris, the jellyfish, laid bare. | La tour éclate. Au milieu des débris, la méduse, à découvert. |
 | 39 | In the wreckage, the Lighthouse's bell, cracked and silent. | Dans les décombres, la cloche du Phare, fêlée et muette. |
 | 40 | Phase III of III · The Reefs | Phase III sur III · Les récifs |
@@ -88,32 +88,31 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 82 | By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again. | Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus. |
 | 83 | On it, a single word is engraved: Crown. | Sur celle-ci, un seul mot est gravé : Couronne. |
 | 84 | And this time, the earth has not stopped trembling. | Et cette fois, la terre n'a pas cessé de trembler. |
-| 85 | Beneath the waves, a turquoise glow still pulses, faintly. | Sous les vagues, une lueur turquoise pulse encore, faiblement. |
-| 86 | Deep in the forest, a faint light flickers. | Au cœur de la forêt, une faible lumière vacille. |
-| 87 | Chapter III. To be continued. | Chapitre III. À suivre. |
-| 88 | Epilogue | Épilogue |
-| 89 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
-| 90 | Easy | Facile |
-| 91 | Breathe | Respirer |
-| 92 | Normal | Normal |
-| 93 | The real fight | Le vrai combat |
-| 94 | Hard | Difficile |
-| 95 | No mercy | Sans pitié |
-| 96 | Trial | Épreuve |
-| 97 | No healing | Sans soin |
-| 98 | Normal | Normal |
-| 99 | 4 HP total | 4 PV au total |
-| 100 | Hard | Difficile |
-| 101 | 4 HP total | 4 PV au total |
-| 102 | ‹ Back | ‹ Retour |
-| 103 | Difficulties | Difficultés |
+| 85 | In the heart of the forest, a Spire's light is failing. | Au cœur de la forêt, la lumière d'une Flèche faiblit. |
+| 86 | Chapter III. To be continued. | Chapitre III. À suivre. |
+| 87 | Epilogue | Épilogue |
+| 88 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
+| 89 | Easy | Facile |
+| 90 | Breathe | Respirer |
+| 91 | Normal | Normal |
+| 92 | The real fight | Le vrai combat |
+| 93 | Hard | Difficile |
+| 94 | No mercy | Sans pitié |
+| 95 | Trial | Épreuve |
+| 96 | No healing | Sans soin |
+| 97 | Normal | Normal |
+| 98 | 4 HP total | 4 PV au total |
+| 99 | Hard | Difficile |
+| 100 | 4 HP total | 4 PV au total |
+| 101 | ‹ Back | ‹ Retour |
+| 102 | Difficulties | Difficultés |
+| 103 | Resume | Reprendre |
 | 104 | Resume | Reprendre |
-| 105 | Resume | Reprendre |
-| 106 | Fight paused | Combat en pause |
-| 107 | Retry | Réessayer |
-| 108 | Skip › | Passer › |
-| 109 | Space, up arrow or tap the screen · P pause · R retry · Enter to skip | Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer |
-| 110 | Visual help | Aide visuelle |
-| 111 | Sound | Son |
-| 112 | Music | Musique |
-| 113 | The Watcher | Le Veilleur |
+| 105 | Fight paused | Combat en pause |
+| 106 | Retry | Réessayer |
+| 107 | Skip › | Passer › |
+| 108 | Space, up arrow or tap the screen · P pause · R retry · Enter to skip | Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer |
+| 109 | Visual help | Aide visuelle |
+| 110 | Sound | Son |
+| 111 | Music | Musique |
+| 112 | The Watcher | Le Veilleur |
