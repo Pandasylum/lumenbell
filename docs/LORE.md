@@ -2,9 +2,10 @@
  
 Version consolidée du 29 octobre 2026 · Kevin
  
-Ce document ne contient que le lore **validé**. Il prime sur `docs/CH2-SPEC.md` pour tout ce qui touche au lore. Il se lit avec un autre document :
+Ce document ne contient que le lore **validé**. Il prime sur `docs/CH2-SPEC.md` pour tout ce qui touche au lore. Il se lit avec deux autres documents :
  
 - `CHANGEMENTS.md` : ce qu'il faut modifier dans le jeu existant (chapitres I et II);
+- Lumenbell · À valider : les questions ouvertes, conflits et options non tranchées ;
  
 ## Comment tenir ce document à jour
  
@@ -33,10 +34,10 @@ Les Veilleurs croient garder la lumière du monde ; ils gardent en réalité le 
  
 - **Ce que croit le joueur** : un ordre de gardiens allume des tours pour guider les voyageurs et protéger les vallées contre la nuit.
 - **Ce qui est vrai** : les tours forment un cercle, la Couronne d'ancrage. Sous chacune est retenu un ancien Veilleur, enchaîné là pour tenir fermé quelque chose d'endormi au centre : l'Umbryn. Les Veilleurs les appellent les Scellés ; leur vrai nom est les Liés.
-- **Pourquoi ça tient avec le jeu** : le Colosse de braise est le premier Lié à se réveiller. Le vaincre, c'est le figer à nouveau dans la pierre, sous le fanal qui veille sur lui : un Veilleur qui veille sur un ancien Veilleur.
+- **Pourquoi ça tient avec le jeu** : le Colosse de braise est le premier Lié à se réveiller. Le battre, c'est le figer à nouveau dans la pierre, sous le fanal qui veille sur lui : un Veilleur qui veille sur un ancien Veilleur.
 ## 3. Vocabulaire du monde
  
-**Trois mots à ne pas mélanger** : la *tour* (ou flèche) est le lieu ; le *Scellé* (le *Lié*) est l'ancien Veilleur qu'elle retient ; la *Couronne d'ancrage* est le cercle de tours dans son ensemble. Le mot « ancre » seul ne désigne plus rien.
+**Trois mots à ne pas mélanger** : la *tour* (ou flèche) est le lieu ; le *Scellé* (le *Lié*) est l'ancien Veilleur qu'elle retient ; la *Couronne d'ancrage* est le cercle de tours dans son ensemble. Le mot « ancre » seul ne désigne plus rien dans le lore ; ce que la Couronne tient fermé s'appelle « le sceau ». (L'ancre géante du chapitre II est un simple accessoire.)
  
 **Double sens des Flèches liées** : les Veilleurs croient que ce sont les tours qui sont liées entre elles. Le sens caché : ce sont les anciens Veilleurs qui sont liés, par la chaîne et par le serment. Le mot « Lié » n'existe que dans des textes écrits, à partir du chapitre IV ; tout le monde continue de dire les Scellés. Il rejoint le héros de la fin, qui devient à son tour un Lié.
  
@@ -48,14 +49,14 @@ Les Veilleurs croient garder la lumière du monde ; ils gardent en réalité le 
 | Les cloches | The bells | Les verrous : leur son tient le Lié en place, répond au Veilleur, repousse le murmure de l'Umbryn et détruit les parasites | Courant |
 | Les Scellés | The Sealed | Nom courant des Liés chez les Veilleurs, qui ne disent pas ce qu'ils étaient | Courant |
 | Les Liés | The Bound | Les anciens Veilleurs enchaînés sous les tours, corrompus par l'Umbryn | Secret, textes écrits seulement, à partir du chapitre IV |
-| Les parasites | (jamais nommés) | Manifestations de l'Umbryn qui accélèrent la corruption des Liés, en leur servant d'intermédiaire physique : ils mangent le Lumen pour l'emporter à l'Umbryn | Secret, jamais nommés à l'écran |
+| Les parasites | (jamais définis) | Manifestations de l'Umbryn qui accélèrent la corruption des Liés, en leur servant d'intermédiaire physique : ils mangent le Lumen pour l'emporter à l'Umbryn | Secret : le mot « parasite » n'est jamais employé à l'écran ni expliqué ; une créature peut porter un nom propre (la Sans-Fond) |
 | L'Umbryn | The Umbryn | La présence ancienne endormie au centre. Phrase des anciens : « L'Umbryn a commencé » | Secret |
 | Le Silence | The Hush | Une tour ne répond plus aux cloches : le silence qui suit l'extinction | Chapitre II |
 | La Retenue | Stillfall | Le monde retient son souffle après l'extinction | Écran de transition |
 | Le Déclin | The Waning | Le lent affaiblissement quand plusieurs tours se taisent | Fil général |
 | La Rémanence | Afterglow | L'évaporation du Lumen une fois la Sans-Fond terrassée (animation de fin du chapitre II) : il ne retourne pas dans la lanterne, il retourne à son état principal (à définir) | Fil général |
 | Le murmure | (à définir) | Le son de l'Umbryn, un retour au son qui fait perdre la lumière des vivants : c'est la corruption. Elle peut être consentie. Les cloches la repoussent | Secret, jamais nommé à l'écran |
-| Les Sonneurs | The Bellringers | Rang de l'ordre : ceux qui réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang pas forcément utilisé dans le jeu | À voir |
+| Les Sonneurs | The Bellringers | Rang de l'ordre : ceux qui réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang pas forcément utilisé dans le jeu. « Fixer » = recharger la cloche en Lumen. | À voir |
  
 ## 4. Histoire ancienne
  
@@ -91,7 +92,7 @@ Sept Veilleurs se sont enchaînés : six sous les tours du cercle, un au centre.
 - Les **parasites ne sont pas toujours présents** : une transformation peut se faire sans eux. Une transformation brutale, comme celle de la gardienne du chapitre II, sous-entend la présence d'un parasite.
 - Le Colosse de braise n'était pas totalement transformé et a été scellé avant : on n'a pas vu son parasite.
 - **Au chapitre II**, la Sans-Fond (un parasite en forme de méduse) a mangé le Lumen de la lanterne de l'Ancien de Rouille et en porte la couleur, le turquoise. Cette lueur est une copie : fixe, sans pulsation, elle ne répond ni à la cloche ni au Lumen. Le Lumen vivant, lui, pulse (la lanterne de la gardienne qui coule). Le joueur distingue ainsi la lumière vivante de la lumière imitée sans aucun texte.
-- Un parasite n'est jamais expliqué, seulement vu.
+- Un parasite n'est jamais expliqué, seulement vu ; le mot lui-même n'est jamais employé à l'écran.
 ### 5.3 Le Roi Sombre
  
 Le Roi Sombre est un Veilleur qui a **volontairement donné sa vie à l'Umbryn**. Il commandait l'ordre. Il a cédé au murmure : sa transformation est consentie. Il était le principal des anciens de l'ordre. Au chapitre VI, on le **sacrifie** ou on le **scelle** : c'est le choix du chapitre. La manière de faire ce choix n'est pas fixée (voir « À valider »).
@@ -117,7 +118,7 @@ Le Roi Sombre est un Veilleur qui a **volontairement donné sa vie à l'Umbryn**
 ## 7. L'ordre des Veilleurs
  
 - **Les novices** apprennent à porter une part du Lumen dans une lanterne.
-- **Les Sonneurs** réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang de l'ordre, pas forcément utilisé dans le jeu.
+- **Les Sonneurs** réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang de l'ordre, pas forcément utilisé dans le jeu. « Fixer » = recharger la cloche en Lumen.
 - **Les Veilleurs** gardent les tours et les vallées ; chacun porte son Lumen. Féminin : **Veilleure**. L'ordre est lié : certains membres sont proches.
 - **Les anciens**, un à trois au plus, connaissent la vérité et se taisent : chacun a peur que dévoiler le secret ne casse le serment. Le principal d'entre eux a été corrompu et est devenu le Roi Sombre.
 - **Le héros** est le dernier Veilleur de la tour de la montagne. Il n'est jamais nommé et ne parle pas. Son passé reste inconnu.
@@ -139,7 +140,7 @@ Après le chapitre VI : sceller donne trois tours gardées (I, III, VI) et trois
  
 ## 9. Les sept chapitres
  
-Sept chapitres, une tour et un Lié par chapitre. Seuls les chapitres I et II existent. Le moteur ne change pas : un bouton, trois familles de contres (cloche, éclats, rayon). Tous les chapitres ont trois phases : un même boss peut les traverser, ou plusieurs entités s'y succéder. Chaque chapitre n'ajoute qu'une mécanique propre à son élément. Les actes servent à définir le rythme de l'histoire et la manière de faire avancer les chapitres : de la structure, pas du contenu. Leur découpage n'est pas fixé (voir « À valider »).
+Sept chapitres, une tour et un Lié par chapitre. Seuls les chapitres I et II existent. Le moteur ne change pas : un bouton, trois familles de contres (cloche, éclats, rayon). Tous les chapitres ont trois phases : un même boss peut les traverser, ou plusieurs entités s'y succéder. Chaque chapitre n'ajoute qu'une mécanique propre à son élément. Les actes servent à définir le rythme de l'histoire et la manière de faire avancer les chapitres : de la structure, pas du contenu. Découpage validé : acte 1 · Veiller (I–III), acte 2 · Savoir (IV–VI), acte 3 · Porter (VII).
  
 | Ch. | Titre | Lieu | Boss | Teinte |
 | --- | --- | --- | --- | --- |
@@ -167,7 +168,7 @@ Le Colosse de braise, premier Lié à se réveiller, atteint le pont. Le Veilleu
 | « Une chaîne cède sous la montagne » ; « comme s'il en connaissait le chemin » | Le Colosse est libéré d'un lien ; le passé du héros reste ouvert |
 | Chaînes trop grandes pour une main d'homme (phase II) ; mur avec deux équerres scellées, l'une avec une chaîne d'homme rompue, l'autre vide ; anneau de fer au sol, sans un mot ; en fin de phase II, à côté des chaînes, une petite lanterne à la lueur orange faible qui pulse lentement | Le Lié a grandi avec le temps ; la chaîne d'homme rompue est celle de son serment ; l'anneau porte un nom perdu ; la lanterne encore allumée dit qu'il n'est pas totalement consumé : il résiste |
 | « Un écho du passé résonne » ; la cloche sonne seule avant l'arrivée du Colosse (phase III) ; le Colosse s'incline face à la cloche (outro) ; anneau gravé d'un nom effacé dans sa main ouverte | La cloche reconnaît le Colosse ; il s'incline de lui-même, nom effacé |
-| « Sous chaque tour, la pierre a tremblé » ; « les Flèches liées ont répondu » (outro) | Sous chaque tour, un Lié sent la cloche ; « liées » nomme les créatures, pas les tours |
+| « Sous chaque tour, la pierre a tremblé » ; « les Flèches liées ont répondu » (outro) | Sous chaque tour, un Lié sent la cloche. Double sens de « liées » (§ 3) : les tours pour les Veilleurs, les anciens Veilleurs pour qui sait |
 | Le Veilleur ne parle pas ; le sceptre-lanterne est son seul outil | Il porte un fragment du Lumen, une clé |
  
 ### Chapitre II · Silent Bells (existe)
@@ -192,7 +193,8 @@ Le Colosse de braise, premier Lié à se réveiller, atteint le pont. Le Veilleu
  
 ### Chapitre III · Racines (à écrire)
  
-La tour de la forêt, gardée : un village l'entretient sans savoir pourquoi. Fragment principal : la berceuse du village, qui parle d'un gardien sous la terre. Elle est **chantée** (voix), en deux parties : dans l'intro et dans l'outro. Piste retenue : sur la dernière page de l'outro (avant l'annonce du chapitre IV), on découvre que celui qui chante est un Sonneur, pendant qu'il sonne la cloche du chapitre. Le chant du village raconte une histoire : il ne repousse rien, c'est l'usage de la cloche qui est efficace. Teinte vert mousse tirant sur le jaune, annoncée par la fin du chapitre II.
+La tour de la forêt, gardée : un village l'entretient sans savoir pourquoi. Fragment principal : la berceuse du village, dont les paroles restent à fixer (piste : un gardien sous la terre). Elle est **chantée** (voix), en deux parties : dans l'intro et dans l'outro. Piste retenue : sur la dernière page de l'outro (avant l'annonce du chapitre IV), on découvre que celui qui chante est un Sonneur, pendant qu'il sonne la cloche du chapitre. Le chant du village raconte une histoire : il ne repousse rien, c'est l'usage de la cloche qui est efficace. Teinte vert mousse tirant sur le jaune, annoncée par la fin du chapitre II. 
+Ici, « fixer » veut dire réparer : le Sonneur injecte du Lumen dans la cloche pour la recharger. Il chante en la sonnant.
  
 ### Chapitre IV · Givre (à écrire)
  
@@ -306,7 +308,7 @@ Une section par date. Ajouter les nouvelles décisions en bas, avec la date.
 - Roi Sombre : don volontaire à l'Umbryn ; choix sceller ou sacrifier au chapitre VI.
 - Ordre et sort des tours (§ 8) ; teintes V gris argenté, VI violet profond.
 - Fragment principal : la règle « un fragment par chapitre » ne vise que le fil du lore principal.
-- Chapitre II : cœur ambre-rouge, lueur turquoise de la Sans-Fond dès la phase II, pas de carton au changement de forme, nouveaux textes.
+- Chapitre II : lueur turquoise de la Sans-Fond dès la phase II (le cœur ambre-rouge prévu d'abord est remplacé le 29), pas de carton…
 - Chapitre III : berceuse chantée dans l'intro.
 - Genou à terre : motif validé (I et II).
 - « Drowned Lighthouse » partout.
@@ -322,5 +324,6 @@ Une section par date. Ajouter les nouvelles décisions en bas, avec la date.
 - Chapitre III : berceuse en deux parties (intro et outro) ; piste retenue : on découvre que le Sonneur chante en sonnant la cloche.
 - Genou à terre : on garde celui de l'outro ; les mentions de fin de phase I sont retirées (à confirmer).
 - Rendu du blanc selon les tours perdues : validé si le rendu est propre.
-* Le chant du village (chapitre III) raconte une histoire ; seul l'usage de la cloche repousse le murmure.
+- Le chant du village (chapitre III) raconte une histoire ; seul l'usage de la cloche repousse le murmure.
+- Actes : 1 · Veiller (I–III), 2 · Savoir (IV–VI), 3 · Porter (VII), validés.
  
