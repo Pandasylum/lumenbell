@@ -1,6 +1,6 @@
 Lumenbell · Changements à faire (chapitres I et II)
 
-Version du 29 octobre 2026 · Kevin
+Version du 30 octobre 2026 · Kevin
 
 À l'attention de Claude. Ce document liste les modifications validées à appliquer au jeu existant. Lire d'abord BIBLE.md et le document `docs/LORE.md`. Ne rien appliquer qui ne soit pas ici : les questions encore ouvertes sont dans Lumenbell · À valider et ne doivent pas être implémentées. En cas de doute : ne pas deviner, proposer.
 
@@ -9,14 +9,14 @@ Suivi
 Ce document évolue à chaque mise à jour du lore. Chaque section ci-dessous a un statut. Claude met à jour le statut après avoir appliqué une section (date et lien de la PR). Une section entièrement appliquée et fusionnée est déplacée en bas du document, dans « Appliqué », pour le garder court. Une nouvelle décision qui touche l'existant devient une nouvelle section (lettre suivante, avec la date).
 
 Section	Sujet	Statut	Date	PR
-A	Chapitre II · Textes et titre de la forme II	À faire	28 octobre 2026 (mis à jour le 29)	
+A	Chapitre II · Textes et titre de la forme II	À faire	30 octobre 2026 (mis à jour le 29)	
 B	Boss de la phase II : l'Ancien de Rouille	À faire	28 octobre 2026	
 C	Chapitre II · Lumière du boss et de la Sans-Fond	À faire	28 octobre 2026 (mis à jour le 29)	
 D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	À faire	28 octobre 2026 (mis à jour le 29)	
 E	Veilleur · Couleur de la lanterne et des tirs	À faire (validation à l'écran d'abord)	28 octobre 2026	
 F	Documents à mettre à jour	À faire	28 octobre 2026 (mis à jour le 29)	
 G	Chapitre I · Lanterne du Colosse de braise	À faire	29 octobre 2026	
-H	Chapitre II · Rémanence (évaporation du Lumen)	À faire	29 octobre 2026	
+H	Chapitre II · Rémanence (évaporation du Lumen)	À faire	30 octobre 2026	
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
@@ -25,7 +25,7 @@ Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la r
 Tout texte existe en anglais et en français, via _('anglais','français'). Aucun mot d'annonce à l'écran ; seuls les onomatopées et les titres de phase s'affichent ; les phrases descriptives servent au lecteur d'écran.
 Ne pas toucher aux valeurs d'équilibrage, aux timings, ni à la silhouette du Colosse (validée).
 Les noms de code (variables, fonctions, clés) peuvent rester ; seuls les textes affichés et les noms de boss affichés changent.
-Les traductions anglaises ont été validées par Kevin (29 octobre), sauf le nom anglais de la Sans-Fond, encore à choisir (voir Lumenbell · À valider, Q15).
+Les traductions anglaises ont été validées par Kevin (29 octobre).
 Après modification : régénérer TEXTES.md, lancer tests/ch2-texts.js et les autres tests du chapitre, vérifier visuellement les cartons (durées de lecture : 6 à 7 s pour l'intro, environ 4 s pour l'outro).
 Faire une branche et une PR par ensemble cohérent (textes, lumière, couleur du Veilleur, documents).
 Après chaque section appliquée : mettre à jour le tableau « Suivi », puis ajouter une ligne dans DECISIONS.md si une décision a été prise en cours de route.
@@ -46,7 +46,7 @@ Notes :
 Phase I, fin : seule la phrase change. L'animation de la lanterne du Veilleur qui faiblit (CINE_P1.dim) et la lanterne turquoise qui coule restent telles quelles : c'est montré, ce n'est plus écrit. La phrase est volontairement ouverte : le passé du héros reste inconnu.
 Phase II, fin : « l'Ancien » (FR) et « the Elder » (EN) sont les noms courts du boss de la phase II (voir B). Le sens de « rien ne répond à sa lumière » est volontairement ambigu (la lune, la lueur turquoise, la cloche) : il dit qu'il n'y a plus de présence vivante dans l'armure. Ne pas le préciser.
 Phase III, fin : le verbe « gît » sous-entend que tout le monde a perdu à cet endroit. Ne pas le remplacer.
-Phase III, forme II : supprimer le carton. Le Chapitre I n'a aucun carton quand le Colosse récupère sa vie en phase III ; le Chapitre II doit être cohérent. Retirer du changement de forme tout texte affiché, y compris « La tour éclate. Au milieu des débris, la méduse, à découvert. ». La cinématique de changement de forme et les effets restent inchangés. Le titre de la forme II devient « La Sans-Fond » (il remplace « L'Éclaté » / « The Shattered ») ; EN proposé : « The Bottomless » (nom anglais à confirmer, voir « À valider », Q15). Si une phrase de lecteur d'écran existe déjà pour ce moment, la garder telle quelle (elle ne doit rien ajouter à l'écran).
+Phase III, forme II : supprimer le carton. Le Chapitre I n'a aucun carton quand le Colosse récupère sa vie en phase III ; le Chapitre II doit être cohérent. Retirer du changement de forme tout texte affiché, y compris « La tour éclate. Au milieu des débris, la méduse, à découvert. ». La cinématique de changement de forme et les effets restent inchangés. Le titre de la forme II devient « La Sans-Fond » (il remplace « L'Éclaté » / « The Shattered ») ; EN proposé : « The Bottomless ». Si une phrase de lecteur d'écran existe déjà pour ce moment, la garder telle quelle (elle ne doit rien ajouter à l'écran).
 Ne pas ajouter de texte pour dire que la créature « emprunte une forme » : cela se déduit (voir C).
 Intro et outro du Chapitre II : aucun changement de texte.
 B. Chapitre II · Le boss de la phase II devient l'Ancien de Rouille
@@ -130,7 +130,7 @@ Ne pas toucher à la silhouette du Colosse (validée) : la lanterne est un élé
 H. Chapitre II · Rémanence : évaporation du Lumen (validé le 29 octobre)
 À la mort de la Sans-Fond (animation de fin de la phase III), la lueur turquoise s'évapore : c'est la Rémanence.
 Elle ne retourne pas dans une lanterne (la lanterne de l'Ancien reste éteinte).
-Destination précise (« état principal ») à définir : voir Lumenbell · À valider, Q23. En attendant : la lueur s'élève lentement et s'efface, sans texte ni bruitage ajouté.
+Le turquoise s’éclaircit vers le blanc en montant, sans texte ni bruitage
 L'évaporation accompagne ou précède l'image de la cloche fêlée (ordre à ajuster).
 I. Chapitre II · Pleurs avant la Voix (à tenter)
 Avant l'apparition de la Voix Creuse (phase I), ajouter un pleur étouffé dans le son. Tout le son est synthétisé : pas de fichier audio.
