@@ -2,7 +2,7 @@
  
 Version consolidée du 29 octobre 2026 · Kevin
  
-Ce document ne contient que le lore **validé**. Il prime sur `docs/CH2-SPEC.md` pour tout ce qui touche au lore. Il se lit avec deux autres documents :
+Ce document ne contient que le lore **validé**. Il prime sur `docs/CH2-SPEC.md` pour tout ce qui touche au lore. Il se lit avec un autre document :
  
 - `CHANGEMENTS.md` : ce qu'il faut modifier dans le jeu existant (chapitres I et II);
  
