@@ -25,6 +25,7 @@ Variable `PW_CHROMIUM` : chemin d'un Chromium déjà installé (sinon celui de P
 | `NOTES.md` | Règles de travail, outillage, pièges connus |
 | `DECISIONS.md` | Journal daté des choix de design |
 | `DEMANDES.md` | Ce qu'un chapitre demande au moteur/héros |
+| `CHANGEMENTS.md` | Ce qu'il faut apporter comme modification au chapitre I et II pour rendre cohérent avec le lore |
 | `ROADMAP.md`, `CHANGELOG.md` | Suite prévue, versions |
 | `docs/LORE.md` | Lore et arc long terme (secret, vocabulaire) |
 | `docs/TEXTES-CH1.md` | Tous les textes FR/EN du Chapitre I (extrait auto) |
