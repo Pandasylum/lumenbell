@@ -88,6 +88,7 @@ Relever la couleur actuelle de la lanterne et des tirs (éclats, rayon, foudre c
 Produire une comparaison en images (avant / jaune neutre + tirs jaune-blanc), sur une scène de chaque chapitre, et la joindre à la PR.
 Ne pas changer sans cette validation visuelle. Les valeurs de jeu ne bougent pas.
 Rester dans l'esprit de la bible : la lanterne est la seule couleur claire de l'écran ; le Veilleur dessiné une seule fois, partagé.
+
 F. Documents à mettre à jour
 docs/LORE.md : remplacer par l'export Markdown du document Lumenbell · Lore définitif.
 docs/CH2-SPEC.md :
@@ -105,6 +106,7 @@ Ajouter : le Lumen est blanc, chaque tour a sa teinte, le héros a un jaune neut
 Noms : Lumenbell validé ; les autres noms sont des noms communs, risque jugé faible.
 Nom anglais du Phare Noyé : Drowned Lighthouse.
 DECISIONS.md : ajouter l'entrée ci-dessous.
+Le renommage « Roi Sombre » en « Roi Spectral » dans docs/CH2-SPEC.md (tableau des tours : « La brèche (Roi Sombre) ») et dans DECISIONS.md. La section B (« Ne pas toucher au Roi Sombre ») devient « Roi Spectral ».
 ## 2026-10-28 – Lore : consolidation et changements des chapitres I et II (Kevin)
 - Documents de lore : Lore définitif, Changements à faire, À valider.
 - Principe directeur : le jeu se comprend par l'image et la voix ; le texte est un renfort ; si ça peut être montré, ça l'est.
