@@ -57,6 +57,7 @@ Les Veilleurs croient garder la lumière du monde ; ils gardent en réalité le 
 | La Rémanence | Afterglow | L'évaporation du Lumen une fois la Sans-Fond terrassée (animation de fin du chapitre II) : il ne retourne pas dans la lanterne, il retourne à son état principal (à définir) | Fil général |
 | Le murmure | (à définir) | Le son de l'Umbryn, un retour au son qui fait perdre la lumière des vivants : c'est la corruption. Elle peut être consentie. Les cloches la repoussent | Secret, jamais nommé à l'écran |
 | Les Sonneurs | The Bellringers | Rang de l'ordre : ceux qui réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang pas forcément utilisé dans le jeu. « Fixer » = recharger la cloche en Lumen. | À voir |
+| Les Doyens | The Doyens | Les plus anciens de l'ordre, vivants, qui connaissent la vérité et se taisent | À voir |
  
 ## 4. Histoire ancienne
  
@@ -65,7 +66,7 @@ Cinq temps, jamais racontés d'un bloc : le joueur en reconstitue des morceaux a
 - **Avant** : l'Umbryn, ce qui reste quand toute lumière s'éteint. Ni mauvaise ni cruelle : affamée.
 - **Le serment** : sept des premiers Veilleurs, les plus forts, se font forger dans la pierre et la braise et s'enchaînent eux-mêmes sous sept tours : six en cercle, une septième au centre. Leur serment : tenir l'Umbryn fermée.
 - **Les cloches** : chaque tour reçoit sa cloche. Le son verrouille, le Lumen entretient. Les Veilleurs deviennent les gardes du dispositif.
-- **Le mensonge** : au fil des siècles, l'ordre enseigne que les tours guident les voyageurs. Seuls les anciens savent que les Scellés étaient des leurs.
+- **Le mensonge** : au fil des siècles, l'ordre enseigne que les tours guident les voyageurs. Seuls les Doyens savent que les Scellés étaient des leurs.
 - **Les fêlures** : l'Umbryn ronge les Liés, qui oublient qui ils étaient. Le premier à se réveiller est celui de la montagne : c'est le début du chapitre I.
 ## 5. Les Liés et les parasites
  
@@ -80,12 +81,12 @@ Sept Veilleurs se sont enchaînés : six sous les tours du cercle, un au centre.
 | 3 · Les racines | Le Lié de racines (III, nom provisoire) | Les villages d'alentour | Racines, végétation | La berceuse du village |
 | 4 · Le givre | Le Lié de givre (IV, nom provisoire) | La mémoire de l'ordre | Gel, oubli | Les carnets de la Forge |
 | 5 · La tour vide | Le Lié de cendre (V, nom provisoire) | Une amitié | Cendre | Il a été libéré par un camarade vivant |
-| 6 · La brèche | Le Roi Sombre (VI) | Le commandement de l'ordre | Il s'est donné de son plein gré à l'Umbryn | La lanterne de Veilleur éteinte à sa ceinture |
-| 7 · Le cœur | Le Premier Lié (VII) | L'Umbryn elle-même | Il lui parle depuis si longtemps qu'il parle comme elle | Il a été le premier à dire « je tiendrai » ; il garde le blanc d'origine |
+| 6 · La brèche | Le Lié de la tour VI (à définir) | À définir | Tué par le Roi Spectral, non corrompu | Lanterne éteinte à la ceinture du Roi Spectral (piste, voir Q25) |
+| 7 · Le cœur | Le Premier Lié (VII) | L'Umbryn elle-même | Il lui parle depuis si longtemps qu'il parle comme elle | Il a été le premier à dire « je tiendrai » ; il garde le blanc d'origine ; Un point de lumière blanc qui pulse sur sa lanterne : la lumière d’origine, celle qui scelle la Couronne à l’Umbryn. Il résiste encore. |
  
 ### 5.2 Les parasites
  
-**La corruption.** La transformation d'un Lié est une corruption par l'Umbryn : un murmure (un retour au son) qui fait perdre la lumière des vivants. Le bruit des cloches peut repousser la transformation et détruire les parasites. La transformation peut être consentie : le Roi Sombre cède au murmure. Un parasite n'est pas la cause : c'est une manifestation de l'Umbryn qui accélère le processus, un intermédiaire physique qui mange le Lumen pour l'emporter à l'Umbryn.
+**La corruption.** La transformation d'un Lié est une corruption par l'Umbryn : un murmure (un retour au son) qui fait perdre la lumière des vivants. Le bruit des cloches peut repousser la transformation et détruire les parasites. La transformation peut être consentie : le Roi Spectral cède au murmure. Un parasite n'est pas la cause : c'est une manifestation de l'Umbryn qui accélère le processus, un intermédiaire physique qui mange le Lumen pour l'emporter à l'Umbryn.
  
 - Les parasites sont les êtres qui **accélèrent la corruption des anciens, en étant un intermédiaire physique de l'Umbryn**.
 - Un parasite **n'est pas un être vivant de notre plan** : il est lié à l'Umbryn.
@@ -93,9 +94,9 @@ Sept Veilleurs se sont enchaînés : six sous les tours du cercle, un au centre.
 - Le Colosse de braise n'était pas totalement transformé et a été scellé avant : on n'a pas vu son parasite.
 - **Au chapitre II**, la Sans-Fond (un parasite en forme de méduse) a mangé le Lumen de la lanterne de l'Ancien de Rouille et en porte la couleur, le turquoise. Cette lueur est une copie : fixe, sans pulsation, elle ne répond ni à la cloche ni au Lumen. Le Lumen vivant, lui, pulse (la lanterne de la gardienne qui coule). Le joueur distingue ainsi la lumière vivante de la lumière imitée sans aucun texte.
 - Un parasite n'est jamais expliqué, seulement vu ; le mot lui-même n'est jamais employé à l'écran.
-### 5.3 Le Roi Sombre
+### 5.3 Le Roi Spectral
  
-Le Roi Sombre est un Veilleur qui a **volontairement donné sa vie à l'Umbryn**. Il commandait l'ordre. Il a cédé au murmure : sa transformation est consentie. Il était le principal des anciens de l'ordre. Au chapitre VI, on le **sacrifie** ou on le **scelle** : c'est le choix du chapitre. La manière de faire ce choix n'est pas fixée (voir « À valider »).
+« Le Roi Spectral. Le Roi Spectral est le principal des Doyens et commandait l’ordre. Il a cédé au murmure de son plein gré et a tué le Lié de la tour VI pour aider l’Umbryn : cette tour est une brèche, non une corruption. Il n’est pas l’un des sept Liés. Les indices du meurtre sont montrés, jamais dits. Au chapitre VI, on le sacrifie ou on le scelle (voir « À valider », Q1). »
  
 ## 6. Le Lumen et ses teintes
  
@@ -120,7 +121,7 @@ Le Roi Sombre est un Veilleur qui a **volontairement donné sa vie à l'Umbryn**
 - **Les novices** apprennent à porter une part du Lumen dans une lanterne.
 - **Les Sonneurs** réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang de l'ordre, pas forcément utilisé dans le jeu. « Fixer » = recharger la cloche en Lumen.
 - **Les Veilleurs** gardent les tours et les vallées ; chacun porte son Lumen. Féminin : **Veilleure**. L'ordre est lié : certains membres sont proches.
-- **Les anciens**, un à trois au plus, connaissent la vérité et se taisent : chacun a peur que dévoiler le secret ne casse le serment. Le principal d'entre eux a été corrompu et est devenu le Roi Sombre.
+- **Les Doyens**, un à trois au plus, connaissent la vérité et se taisent : chacun a peur que dévoiler le secret ne casse le serment. Le principal d’entre eux est devenu le Roi Spectral.
 - **Le héros** est le dernier Veilleur de la tour de la montagne. Il n'est jamais nommé et ne parle pas. Son passé reste inconnu.
 ## 8. La Couronne et les tours
  
@@ -149,7 +150,7 @@ Sept chapitres, une tour et un Lié par chapitre. Seuls les chapitres I et II ex
 | III | Racines | La forêt et son village | Le Lié de racines (provisoire) | Vert mousse tirant sur le jaune |
 | IV | Givre | La tour du nord | Le Lié de givre (provisoire) | Bleu-blanc pâle |
 | V | La tour vide | Tour désertée | Le Lié de cendre (provisoire) | Gris argenté |
-| VI | La brèche | La brèche | Le Roi Sombre | Violet profond |
+| VI | La brèche | La brèche | Le Doyen, chef de l’ordre (phase I) ; Vharos, le Roi Spectral (phase II) ; Vharos sur Nocthrys, puis les deux au sol, Nocthrys blessé (phase III) (noms provisoires) | Violet profond |
 | VII | Le cœur | Au centre du cercle | Le Premier Lié et l'Umbryn | Blanc |
  
 ### Chapitre I · Ember Bridge (existe, canon)
@@ -206,7 +207,7 @@ Tour désertée, perdue. Fragment principal : deux lanternes, un seul lit. Un Ve
  
 ### Chapitre VI · La brèche (à écrire)
  
-Le Roi Sombre, qui s'est donné à l'Umbryn de son plein gré. Fragment principal : sa lanterne de Veilleur, éteinte, à sa ceinture. On le sacrifie ou on le scelle. Teinte violet profond.
+Le Roi Spectral, qui s'est donné à l'Umbryn de son plein gré. Fragment principal : sa lanterne de Veilleur, éteinte, à sa ceinture. On le sacrifie ou on le scelle. Teinte violet profond.
  
 ### Chapitre VII · Le cœur (à écrire)
  
@@ -237,7 +238,7 @@ Ce sont les fils du lore principal ; chacun doit pouvoir être déduit sans qu'a
 | III | La berceuse du village | Voix chantée, en deux parties | Intro et outro | Ce que la tour tient |
 | IV | Page des carnets : « … se disent aussi les Liés » | Texte écrit | Pupitre dans la tour | Qui sont les Liés |
 | V | Deux lanternes, un seul lit | Image, objets | Intérieur de la tour | Qui a libéré qui |
-| VI | Lanterne de Veilleur éteinte à la ceinture | Objet | Armure du Roi Sombre | Qu'il commandait l'ordre |
+| VI | Lanterne de Veilleur éteinte à la ceinture | Objet | Armure du Roi Spectral | Qu'il commandait l'ordre |
 | VII | Sept noms sur la grande cloche, un effacé | Texte gravé | Le cœur | À qui est la huitième place |
  
 ### Grammaire des objets
@@ -248,13 +249,21 @@ Un petit vocabulaire d'objets que le joueur peut recouper sans explication.
 | --- | --- | --- |
 | La chaîne | Colosse (I), amarres de l'Ancien (II) | Le serment, devenu arme |
 | L'anneau au nom effacé | Colosse (I), anneau de chaîne au poignet de l'Ancien (II) | L'identité perdue |
-| La lanterne | Tombée dans l'eau (II), éteinte sur l'Ancien (II), éteinte chez le Roi Sombre (VI), deux dans la tour vide (V), faible, orange et pulsante près des chaînes du Colosse (I) | Le Lumen d'un Veilleur, qui ne s'éteint jamais seul |
+| La lanterne | Tombée dans l'eau (II), éteinte sur l'Ancien (II), éteinte à la ceinture du Roi Spectral (VI), deux dans la tour vide (V), faible, orange et pulsante près des chaînes du Colosse (I) | Le Lumen d'un Veilleur, qui ne s'éteint jamais seul |
 | Le bâton | Sans lanterne, au pied du Phare (II) | Un gardien disparu |
 | La cape bleue | Lambeau sur l'Ancien (II) | Un Veilleur, de la même famille que le héros |
 | La cloche | Toutes les tours | Le verrou, qui reconnaît ce qu'il tient |
 | Le mot « Couronne » | Gravé (II) | Le réseau, jamais expliqué |
 | Le genou à terre | Le Colosse s'incline et la cloche lui répond (I) ; l'Ancien s'agenouille et rien ne lui répond (II) | Même geste, sens opposé : le premier garde ce qui reste de lui, le second est entièrement consumé |
 | Le Lumen qui pulse | Lanterne de la gardienne (II) | La lumière vivante, par opposition à la lumière copiée, fixe |
+
+### Grammaire de la lanterne
+
+| État de la lanterne | Ce que ça dit | Exemple |
+| Lueur faible qui pulse | Le Lié résiste encore | Le Colosse (I), le Premier Lié (VII) |
+| Éteinte | Le Lumen est perdu (pris par le murmure, ou par la main d’un autre) | La cage de l’Ancien de Rouille (II), la lanterne à la ceinture du Roi Spectral (VI) |
+| Couleur fixe portée par une créature | Un parasite a mangé le Lumen | La Sans-Fond (II) |
+| Lumière qui pulse librement | Lumen vivant | La gardienne (II), le héros |
  
 ## 11. La fin : trois issues
  
@@ -326,4 +335,5 @@ Une section par date. Ajouter les nouvelles décisions en bas, avec la date.
 - Rendu du blanc selon les tours perdues : validé si le rendu est propre.
 - Le chant du village (chapitre III) raconte une histoire ; seul l'usage de la cloche repousse le murmure.
 - Actes : 1 · Veiller (I–III), 2 · Savoir (IV–VI), 3 · Porter (VII), validés.
- 
+- Doyens (modèle B) ; Roi Sombre devenu Roi Spectral ; il a tué le Lié de la tour VI pour aider l’Umbryn.
+- Grammaire de la lanterne validée ; point de lumière blanc du Premier Lié
