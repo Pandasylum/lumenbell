@@ -106,7 +106,7 @@ Remplacer « un fragment par chapitre » par « un fragment principal par chapit
 Ajouter : le Lumen est blanc, chaque tour a sa teinte, le héros a un jaune neutre.
 Noms : Lumenbell validé ; les autres noms sont des noms communs, risque jugé faible.
 Nom anglais du Phare Noyé : Drowned Lighthouse.
-DECISIONS.md : ajouter l'entrée ci-dessous.
+DECISIONS.md : ajouter l'entrée ci-dessous. **Couvert** : renvoi au journal du lore, décision du 30 octobre (`docs/decisions/2026-10-30-decisions-lore-renvoi.md`) ; les entrées 28-29 octobre restent dans `docs/LORE.md` §15.
 Le renommage « Roi Sombre » en « Roi Spectral » dans docs/CH2-SPEC.md (tableau des tours : « La brèche (Roi Sombre) ») et dans DECISIONS.md. La section B (« Ne pas toucher au Roi Sombre ») devient « Roi Spectral ».
 ## 2026-10-28 – Lore : consolidation et changements des chapitres I et II (Kevin)
 - Documents de lore : Lore définitif, Changements à faire, À valider.

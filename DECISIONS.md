@@ -14,6 +14,7 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 - [2026-10-28 · `engine/audio` : `LB.audio` (contexte unique, `tone`/`noise` du Chapitre II, suspension en arrière-plan, réglages `lb-snd`/`lb-mus`), chapitres rebranchés sans changer les sons, lectures retenues](archives/decisions/2026-10-28-engine-audio.md)
 - [2026-10-28 · Chapitre II, troisième passe de retouches (`ch2/retouches-3`) : entrée de la phase III sans chute, décor de la coque ouverte, onomatopées (CLANG dans les trois phases de blocage, aucun mot en phase I), chocs d'impact distincts par forme (`SHOCK.form`)](archives/decisions/2026-10-28-ch2-retouches-3.md)
 - [2026-10-30 · Chapitre II, validations de Kevin : bouton de la phase III « Bloquer » / « Block », esquiver une illusion n'est pas une faute de série, onomatopées `CLANG` / `KRAKOOM` / `KRAAAK` validées, carte de défaite en simple texte (textes à fournir, projet Lore)](docs/decisions/2026-10-30-ch2-validations.md)
+- [2026-10-30 · entrées Lore des 28 et 29 octobre : renvoi au journal de `docs/LORE.md` §15, pas de recopie ici](docs/decisions/2026-10-30-decisions-lore-renvoi.md)
 
 ## 2026-10-26 / 27 – Refonte du lore et des textes du Chapitre I
 - Le secret (les Scellés sont d'anciens Veilleurs) n'est **jamais dit** ; un fragment par chapitre, davantage dans le premier.

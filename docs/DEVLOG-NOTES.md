@@ -18,3 +18,5 @@
 - Rien ne change à l'écran : cette session ne met à jour que de la documentation (`docs/COMMUN.md`, `docs/CH2-SPEC.md`).
 - Le lore et les textes du Chapitre II ne sont plus recopiés dans le cahier des charges : `docs/LORE.md` et `TEXTES.md` font foi.
 - Rien ne change à l'écran : la correction ne touche que la documentation du cahier des charges (textes de référence rétablis pour le test).
+- Rien ne change à l'écran : la décision porte sur la documentation (`DECISIONS.md` renvoie au journal du lore).
+- Les entrées Lore des 28 et 29 octobre se lisent dans `docs/LORE.md` §15, pas de copie dans `DECISIONS.md`.
