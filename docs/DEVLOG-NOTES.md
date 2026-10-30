@@ -9,3 +9,7 @@
 ## 2026-10-30 · docs/decisions-30-oct
 - Rien ne change à l'écran : cette session n'enregistre que des décisions (documentation).
 - À venir au Chapitre II : le bouton de la phase III s'appellera « Bloquer » / « Block », et esquiver une illusion ne cassera plus la série tant que le coup de retour n'est pas reçu.
+
+## 2026-10-30 · docs/archive-decisions
+- Rien ne change à l'écran : cette session ne déplace que de la documentation (`archives/`).
+- Les décisions en vigueur tiennent maintenant en quelques lignes dans `DECISIONS.md`, avec les trois points encore à valider en tête.
