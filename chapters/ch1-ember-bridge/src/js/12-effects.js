@@ -37,7 +37,7 @@ const CRIES=[
 CRIES.forEach(c=>c.t.forEach(s=>{ONO[s]=s}));
 let LASTCRY=-1;
 function cryVoice(c){
-  if(!prefs.sound||!AC)return;
+  const AC=LB.audio.ctx;if(!LB.audio.sound||!AC)return;
   if(AC.state!=='running')ensureAudio();
   try{
     const n=AC.currentTime,d=c.d,g=AC.createGain(),f=AC.createBiquadFilter(),lfo=AC.createOscillator(),lg=AC.createGain();
@@ -50,7 +50,7 @@ function cryVoice(c){
       o.frequency.setValueAtTime(fr*c.s0,n);o.frequency.exponentialRampToValueAtTime(fr*c.up,n+d*c.pk);o.frequency.exponentialRampToValueAtTime(fr*c.dn,n+d);
       lg.connect(o.frequency);o.connect(f);o.start(n);o.stop(n+d);
     });
-    lfo.start(n);lfo.stop(n+d);f.connect(g);g.connect(AC.destination);
+    lfo.start(n);lfo.stop(n+d);f.connect(g);g.connect(LB.audio.sfx);
   }catch(e){}
   if(c.r)noise(c.d*.7,c.v*c.r,2600,700);
 }

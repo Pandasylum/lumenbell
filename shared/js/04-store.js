@@ -14,9 +14,9 @@ LB.store={get(k,d){try{let v=localStorage.getItem(k);
 /* À appeler en tête du chapitre, avant toute lecture : id (préfixe lb-<id>-), old ({nouvelle clé:[anciennes]}),
    oldPrefix ([[début de la nouvelle clé, début de l'ancienne]], pour les records). Migre au démarrage toutes les clés
    connues (et chaque ancienne clé à préfixe présente), puis fixe la langue. */
-LB.setup=({id,old={},oldPrefix=[]})=>{LB.id=id;LB.old=old;LB.oldPrefix=oldPrefix;
+LB.setup=({id,old={},oldPrefix=[],audio})=>{LB.id=id;LB.old=old;LB.oldPrefix=oldPrefix;
   try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
     const want=Object.keys(LB.OLD_KEYS).concat(Object.keys(old));
     for(const [n,a] of oldPrefix)ks.filter(k=>k.startsWith(a)).forEach(k=>want.push(n+k.slice(a.length)));
     want.forEach(k=>LB.store.get(k))}catch(e){}
-  LB.lang.init()};
+  LB.lang.init();LB.audio.config(audio);LB.audio.load()};

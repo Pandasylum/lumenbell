@@ -162,7 +162,8 @@ function spaceStep(c,dst,t,s){
 }
 const MUS={cur:null,t:0,s:0,ctx:null,bus:{}};
 function musKind(){
-  if(!prefs.sound||!prefs.music||!AC||AC.state!=='running')return null;
+  const AC=LB.audio.ctx;
+  if(!LB.audio.sound||!LB.audio.music||!AC||AC.state!=='running')return null;
   if(!menuEl.hidden)return 'menu';
   if(paused)return null;
   if(R&&R.mode==='finale')return 'finale';
@@ -172,10 +173,10 @@ function musKind(){
 }
 function musTick(){
   try{
-    const k=musKind();
+    const k=musKind(),AC=LB.audio.ctx;
     if(MUS.ctx!==AC){
       MUS.ctx=AC;MUS.cur=null;
-      const cp=AC.createDynamicsCompressor();cp.connect(AC.destination);
+      const cp=AC.createDynamicsCompressor();cp.connect(LB.audio.mus);
       MUS.bus={};['game','menu','finale','space'].forEach(n=>{const g=AC.createGain();g.gain.value=0;g.connect(cp);MUS.bus[n]=g});
       {const sg=MUS.bus.space,d=AC.createDelay(1),fb=AC.createGain(),lp=AC.createBiquadFilter(); /* écho doux pour l'espace */
        d.delayTime.value=.6;fb.gain.value=.22;lp.type='lowpass';lp.frequency.value=800;sg.connect(d);d.connect(lp);lp.connect(fb);fb.connect(d);lp.connect(cp)}

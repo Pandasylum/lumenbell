@@ -354,12 +354,12 @@ LB.store={get(k,d){try{let v=localStorage.getItem(k);
 /* À appeler en tête du chapitre, avant toute lecture : id (préfixe lb-<id>-), old ({nouvelle clé:[anciennes]}),
    oldPrefix ([[début de la nouvelle clé, début de l'ancienne]], pour les records). Migre au démarrage toutes les clés
    connues (et chaque ancienne clé à préfixe présente), puis fixe la langue. */
-LB.setup=({id,old={},oldPrefix=[]})=>{LB.id=id;LB.old=old;LB.oldPrefix=oldPrefix;
+LB.setup=({id,old={},oldPrefix=[],audio})=>{LB.id=id;LB.old=old;LB.oldPrefix=oldPrefix;
   try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
     const want=Object.keys(LB.OLD_KEYS).concat(Object.keys(old));
     for(const [n,a] of oldPrefix)ks.filter(k=>k.startsWith(a)).forEach(k=>want.push(n+k.slice(a.length)));
     want.forEach(k=>LB.store.get(k))}catch(e){}
-  LB.lang.init()};
+  LB.lang.init();LB.audio.config(audio);LB.audio.load()};
 /* ---------- langue et texte ----------
    Choix mémorisé (lb-lang) prioritaire ; sinon la langue de l'appareil (français si elle commence par « fr »), sinon anglais.
    LB.LANGS : ordre des boutons de langue (celui du Chapitre I). */
@@ -369,6 +369,81 @@ LB.lang={cur:'en',
     const v=LB.store.get(LB.key('lang'),null);if(LB.LANGS.includes(v))l=v;return LB.lang.cur=l},
   set(l){if(!LB.LANGS.includes(l))return;LB.lang.cur=l;LB.store.set(LB.key('lang'),l)}};
 LB._=(en,fr)=>LB.lang.cur==='fr'?fr:en;
+/* ---------- audio : un seul contexte pour toute la série ----------
+   LB.audio.ctx : l'unique AudioContext (créé au premier ensure(), recréé s'il est fermé). Chaîne : sources → bus sfx / mus → master → sortie.
+   Niveaux par chapitre : LB.setup({audio:{master,sfx,mus}}), 1 par défaut. LB.audio.dest = sortie brute (musique qui a sa propre chaîne).
+   Réglages Son / Musique : lb-snd, lb-mus lus par LB.store (load, appelé par LB.setup), écrits par setSound / setMusic.
+   Arrière-plan (onglet caché, écran verrouillé, page quittée) : le contexte est suspendu, relancé au retour ou au premier geste. */
+LB.audio=(()=>{
+  let ctx=null,master=null,sfx=null,mus=null,bg=false,nb=null;
+  const lv={master:1,sfx:1,mus:1},A={sound:true,music:true,stat:{tone:0,noise:0,made:0}};
+  /* smooth : le bus musique suit en fondu (constante de temps 0,12 s, celle de l'arrêt de la musique du Chapitre I) ; sinon il prend sa valeur d'un coup (création du contexte) */
+  const apply=smooth=>{if(!ctx)return;master.gain.value=lv.master;sfx.gain.value=A.sound?lv.sfx:0;
+    const m=A.music?lv.mus:0;if(smooth)mus.gain.setTargetAtTime(m,ctx.currentTime,.12);else mus.gain.value=m};
+  function ensure(){
+    try{
+      if(bg&&!document.hidden)bg=false; /* garde-fou : l'arrière-plan ne peut pas durer quand la page est visible (un événement de retour perdu bloquerait le son) */
+      if(ctx&&ctx.state==='closed'){ctx=null;nb=null}
+      if(!ctx){
+        const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+        try{ctx=new C({latencyHint:'playback'})}catch(e){ctx=new C()}
+        try{master=ctx.createGain();master.connect(ctx.destination);sfx=ctx.createGain();sfx.connect(master);mus=ctx.createGain();mus.connect(master);apply();A.stat.made++}
+        catch(e){ctx=null;return null}
+      }
+      if(!bg&&ctx.state!=='running'&&ctx.resume)ctx.resume().catch(()=>{}); /* suspended, ou « interrupted » sur Safari */
+    }catch(e){}
+    return ctx;
+  }
+  /* off=true : le contexte est suspendu et reste coupé tant qu'on n'est pas revenu */
+  function background(off){bg=off;try{if(ctx){if(off){if(ctx.state==='running')ctx.suspend().catch(()=>{})}else ensure()}}catch(e){}}
+  /* enveloppe par défaut = celle du Chapitre II ; o={atk,end,tail} pour une enveloppe plus ancienne (Chapitre I) */
+  function tone(f,dur,type,vol,dest,when,f2,o){
+    if(!ctx||(!dest&&!A.sound))return;
+    if(ctx.state!=='running')ensure();
+    try{
+      const t=when||ctx.currentTime,atk=o&&o.atk!=null?o.atk:.006,end=o&&o.end||.0005,tail=o&&o.tail!=null?o.tail:.05;
+      const os=ctx.createOscillator(),g=ctx.createGain();
+      os.type=type||'sine';os.frequency.setValueAtTime(f,t);if(f2)os.frequency.exponentialRampToValueAtTime(f2,t+dur);
+      if(atk>0){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+atk)}else g.gain.setValueAtTime(vol,t);
+      g.gain.exponentialRampToValueAtTime(end,t+dur);
+      os.connect(g);g.connect(dest||sfx);os.start(t);os.stop(t+dur+tail);A.stat.tone++;
+    }catch(e){}
+  }
+  function noise(dur,vol,ft,ff,q,dest,when,ff2,o){
+    if(!ctx||(!dest&&!A.sound))return;
+    if(ctx.state!=='running')ensure();
+    try{
+      if(!nb){nb=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+      const t=when||ctx.currentTime,atk=o&&o.atk||0,end=o&&o.end||.0005;
+      const s=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain();
+      s.buffer=nb;s.loop=true;fl.type=ft;fl.frequency.setValueAtTime(ff,t);if(ff2)fl.frequency.exponentialRampToValueAtTime(ff2,t+dur);fl.Q.value=q||1;
+      if(atk>0){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+atk)}else g.gain.setValueAtTime(vol,t);
+      g.gain.exponentialRampToValueAtTime(end,t+dur);
+      s.connect(fl);fl.connect(g);g.connect(dest||sfx);s.start(t);s.stop(t+dur+.05);A.stat.noise++;
+    }catch(e){}
+  }
+  /* le navigateur n'autorise le son qu'après un vrai geste : on crée / relance le contexte à chacun d'eux tant qu'il ne tourne pas, et on joue un son muet pour l'amorcer */
+  function unlock(){
+    ensure();
+    try{if(ctx&&ctx.state==='running'&&!ctx.__u){ctx.__u=1;const b=ctx.createBuffer(1,1,22050),n=ctx.createBufferSource();n.buffer=b;n.connect(ctx.destination);n.start(0)}}catch(e){}
+  }
+  ['click','pointerup','mousedown','touchend','keydown'].forEach(ev=>window.addEventListener(ev,()=>{if(!ctx||ctx.state!=='running'||!ctx.__u)unlock()},true));
+  document.addEventListener('visibilitychange',()=>background(document.hidden));
+  window.addEventListener('pagehide',()=>background(true));window.addEventListener('pageshow',()=>background(document.hidden));
+  window.addEventListener('blur',()=>{if(document.hidden)background(true)});window.addEventListener('focus',()=>{if(!document.hidden)background(false)});
+  Object.assign(A,{
+    ensure,background,tone,noise,
+    config(o){Object.assign(lv,o||{});apply()},
+    load(){A.sound=LB.store.get(LB.key('snd'),'1')==='1';A.music=LB.store.get(LB.key('mus'),'1')==='1';apply()},
+    setSound(on){A.sound=!!on;LB.store.set(LB.key('snd'),A.sound?'1':'0');apply();if(A.sound)ensure()},
+    setMusic(on){A.music=!!on;LB.store.set(LB.key('mus'),A.music?'1':'0');apply(true);if(A.music)ensure()},
+    now(){return ctx?ctx.currentTime:0}
+  });
+  /* défini à part : Object.assign recopierait la valeur des accesseurs au lieu de les garder */
+  Object.defineProperties(A,{ctx:{get:()=>ctx},dest:{get:()=>ctx&&ctx.destination},sfx:{get:()=>sfx},mus:{get:()=>mus},master:{get:()=>master},
+    state:{get:()=>ctx?ctx.state:'none'},bg:{get:()=>bg}});
+  return A;
+})();
 /* Sauvegarde et langue : communes à la série (shared/, clés lb-…). Anciennes clés du Chapitre I (eb-…) lues si la nouvelle manque :
    eb-lang (langue, avec pn-lang : LB.OLD_KEYS), eb-intro, eb-end, eb-best-<mode>. */
 LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},oldPrefix:[['lb-ch1-best-','eb-best-']]});
@@ -421,7 +496,7 @@ function perfWatch(raw){
 }
 const $=id=>document.getElementById(id);
 const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live'),help:$('optHelp'),snd:$('optSnd')};
-const prefs={help:LB.store.get(LB.key('help'),'0')==='1',sound:LB.store.get(LB.key('snd'),'1')==='1',music:LB.store.get(LB.key('mus'),'1')==='1'}; /* mémorisées (lb-help, lb-snd, lb-mus) */
+const prefs={help:LB.store.get(LB.key('help'),'0')==='1'}; /* mémorisée (lb-help) ; Son et Musique : LB.audio.sound / LB.audio.music (lb-snd, lb-mus) */
 let deaths=0; // défaites depuis le choix de la difficulté (Facile : propose l'aide visuelle à la 3e)
 let paused=true,pendingLore=false;
 const LORE={
@@ -451,56 +526,15 @@ const JET_O=[[BX-30,DECK-215],[BX-100,DECK-250],[BX-110,DECK-110],[BX-60,DECK-15
 const RK=[PX+70,DECK-165],RK_S=[PX+330,-70];
 const AURA=[[-125,-206],[-100,-228],[-70,-236],[-40,-312],[-10,-312],[20,-312],[40,-306],[70,-236],[100,-228],[125,-206],[-110,-170],[110,-170],[-80,-130],[80,-130],[-70,-90],[70,-90],[-60,-14],[60,-14],[0,-216],[-95,-216],[95,-216],[-30,-180],[30,-180],[0,-150]];
 
-let G=null,AC=null;
+let G=null;
 
-/* ---------- audio ---------- */
-let bgOff=false;
-function bgAudio(off){bgOff=off;try{if(AC){if(off){if(AC.state==='running')AC.suspend().catch(()=>{})}else ensureAudio()}}catch(e){}}
-function ensureAudio(){
-  try{
-    if(AC&&AC.state==='closed')AC=null;
-    if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(C){try{AC=new C({latencyHint:"playback"})}catch(e){AC=new C()}}}
-    if(AC&&!bgOff&&AC.state!=='running'&&AC.resume)AC.resume().catch(()=>{}); /* suspended, ou « interrupted » sur Safari */
-  }catch(e){}
-}
-/* Le navigateur coupe le son quand l'onglet passe en arrière-plan ou après une inactivité : on le relance à la moindre interaction. */
-/* Déverrouillage : le navigateur n'autorise le son qu'après un vrai geste ; on crée / relance le contexte à chacun d'eux tant qu'il ne tourne pas, et on joue un son muet pour l'amorcer. */
-function unlockAudio(){
-  ensureAudio();
-  try{if(AC&&AC.state==='running'&&!AC.__u){AC.__u=1;const b=AC.createBuffer(1,1,22050),n=AC.createBufferSource();n.buffer=b;n.connect(AC.destination);n.start(0)}}catch(e){}
-}
-['click','pointerup','mousedown','touchend','keydown'].forEach(ev=>window.addEventListener(ev,()=>{if(!AC||AC.state!=='running'||!AC.__u)unlockAudio()},true));
-document.addEventListener('visibilitychange',()=>bgAudio(document.hidden));
-window.addEventListener('pagehide',()=>bgAudio(true));window.addEventListener('pageshow',()=>bgAudio(document.hidden));
-window.addEventListener('blur',()=>{if(document.hidden)bgAudio(true)});window.addEventListener('focus',()=>{if(!document.hidden)bgAudio(false)});
-function tone(f,d,type,v,slide){
-  if(!prefs.sound||!AC)return;
-  if(AC.state!=='running')ensureAudio();
-  try{
-    const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;
-    o.type=type||'sine';
-    o.frequency.setValueAtTime(f,n);
-    if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),n+d);
-    g.gain.setValueAtTime(v||.05,n);
-    g.gain.exponentialRampToValueAtTime(.0001,n+d);
-    o.connect(g);g.connect(AC.destination);
-    o.start();o.stop(n+d);
-  }catch(e){}
-}
+/* ---------- audio : tout passe par LB.audio (shared/js/12-audio.js), un seul contexte pour la série ----------
+   tone et noise gardent leur signature et leur enveloppe d'origine (E_TONE, noise ci-dessous) ; le contexte, la suspension en arrière-plan et le déverrouillage sont communs. */
+function ensureAudio(){return LB.audio.ensure()}
+const E_TONE={atk:0,end:.0001,tail:0};
+function tone(f,d,type,v,slide){LB.audio.tone(f,d,type,v||.05,null,null,slide?Math.max(30,f+slide):0,E_TONE)}
 const say=t=>{el.live.textContent=t};
-let NB=null;
-function noise(d,v,f0,f1){
-  if(!prefs.sound||!AC)return;
-  if(AC.state!=='running')ensureAudio();
-  try{
-    if(!NB){NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const a=NB.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1}
-    const n=AC.currentTime,src=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
-    src.buffer=NB;src.loop=true;f.type='bandpass';f.Q.value=.9;
-    f.frequency.setValueAtTime(f0,n);f.frequency.exponentialRampToValueAtTime(Math.max(30,f1),n+d);
-    g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(v,n+Math.min(.03,d/3));g.gain.exponentialRampToValueAtTime(.0001,n+d);
-    src.connect(f);f.connect(g);g.connect(AC.destination);src.start(n);src.stop(n+d+.05);
-  }catch(e){}
-}
+function noise(d,v,f0,f1){LB.audio.noise(d,v,'bandpass',f0,.9,null,null,Math.max(30,f1),{atk:Math.min(.03,d/3),end:.0001})}
 function footfall(big){tone(big?58:90,big?.22:.1,'sine',big?.16:.08,-30);noise(big?.16:.07,big?.1:.05,big?500:900,big?120:300)}
 function anvil(){tone(1320,.6,'triangle',.06,0);tone(1985,.4,'sine',.04,0);tone(160,.14,'square',.06,-60)}
 function forgeSparks(S,x,y,n){for(let i=0;i<(n||24);i++){const a=rand(-3.0,-.15),v=rand(160,520),L=rand(.25,.7);S.sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:900,life:L,max:L,col:i%3?'#ffd27a':(i%2?'#ffffff':'#ff9a3c'),sz:rand(2,4.5)})}}
@@ -508,7 +542,7 @@ function boom(d,v){tone(55,d,'sine',v,-20);noise(d,v*.9,900,50)}
 function whoosh(d,v,up){noise(d,v,up?400:2800,up?2800:400)}
 /* Cri de douleur du Colosse : hurlement qui monte puis s'effondre en gémissement tremblant */
 function painCry(d,v){
-  if(!prefs.sound||!AC)return;
+  const AC=LB.audio.ctx;if(!LB.audio.sound||!AC)return;
   if(AC.state!=='running')ensureAudio();
   d=d||1.7;v=v||.17;
   try{
@@ -522,12 +556,12 @@ function painCry(d,v){
       o.frequency.setValueAtTime(fr,n);o.frequency.exponentialRampToValueAtTime(fr*1.7,n+.16);o.frequency.exponentialRampToValueAtTime(fr*.42,n+d);
       lg.connect(o.frequency);o.connect(f);o.start(n);o.stop(n+d);
     });
-    f.connect(f2);f2.connect(g);g.connect(AC.destination);lfo.start(n);lfo.stop(n+d);
+    f.connect(f2);f2.connect(g);g.connect(LB.audio.sfx);lfo.start(n);lfo.stop(n+d);
   }catch(e){}
   noise(d*.6,v*.5,2400,600);
 }
 function roar(){
-  if(!prefs.sound||!AC)return;
+  const AC=LB.audio.ctx;if(!LB.audio.sound||!AC)return;
   if(AC.state!=='running')ensureAudio();
   try{
     const n=AC.currentTime,d=.9,g=AC.createGain(),f=AC.createBiquadFilter(),lfo=AC.createOscillator(),lg=AC.createGain();
@@ -539,7 +573,7 @@ function roar(){
       o.frequency.setValueAtTime(fr*1.5,n);o.frequency.exponentialRampToValueAtTime(fr*.55,n+d);
       lg.connect(o.frequency);o.connect(f);o.start(n);o.stop(n+d);
     });
-    lfo.start(n);lfo.stop(n+d);f.connect(g);g.connect(AC.destination);
+    lfo.start(n);lfo.stop(n+d);f.connect(g);g.connect(LB.audio.sfx);
   }catch(e){}
 }
 
@@ -675,7 +709,7 @@ const CRIES=[
 CRIES.forEach(c=>c.t.forEach(s=>{ONO[s]=s}));
 let LASTCRY=-1;
 function cryVoice(c){
-  if(!prefs.sound||!AC)return;
+  const AC=LB.audio.ctx;if(!LB.audio.sound||!AC)return;
   if(AC.state!=='running')ensureAudio();
   try{
     const n=AC.currentTime,d=c.d,g=AC.createGain(),f=AC.createBiquadFilter(),lfo=AC.createOscillator(),lg=AC.createGain();
@@ -688,7 +722,7 @@ function cryVoice(c){
       o.frequency.setValueAtTime(fr*c.s0,n);o.frequency.exponentialRampToValueAtTime(fr*c.up,n+d*c.pk);o.frequency.exponentialRampToValueAtTime(fr*c.dn,n+d);
       lg.connect(o.frequency);o.connect(f);o.start(n);o.stop(n+d);
     });
-    lfo.start(n);lfo.stop(n+d);f.connect(g);g.connect(AC.destination);
+    lfo.start(n);lfo.stop(n+d);f.connect(g);g.connect(LB.audio.sfx);
   }catch(e){}
   if(c.r)noise(c.d*.7,c.v*c.r,2600,700);
 }
@@ -4237,10 +4271,10 @@ cv.addEventListener('pointerdown',e=>{e.preventDefault();press()});
 el.ward.addEventListener('pointerdown',e=>{e.preventDefault();press()});
 el.ward.addEventListener('click',e=>{if(e.detail===0)press()});
 el.go.addEventListener('click',start);
-el.help.checked=prefs.help;el.snd.checked=prefs.sound;$('optMus').checked=prefs.music;
+el.help.checked=prefs.help;el.snd.checked=LB.audio.sound;$('optMus').checked=LB.audio.music;
 el.help.addEventListener('change',()=>{prefs.help=el.help.checked;LB.store.set(LB.key('help'),prefs.help?'1':'0')});
-el.snd.addEventListener('change',()=>{prefs.sound=el.snd.checked;LB.store.set(LB.key('snd'),prefs.sound?'1':'0');if(prefs.sound)ensureAudio()});
-$('optMus').addEventListener('change',()=>{prefs.music=$('optMus').checked;LB.store.set(LB.key('mus'),prefs.music?'1':'0');if(prefs.music)ensureAudio()});
+el.snd.addEventListener('change',()=>LB.audio.setSound(el.snd.checked));
+$('optMus').addEventListener('change',()=>LB.audio.setMusic($('optMus').checked));
 const pauseEl=$('pause');
 const menuEl=$('menu');
 function setPause(on){
@@ -4503,7 +4537,8 @@ function spaceStep(c,dst,t,s){
 }
 const MUS={cur:null,t:0,s:0,ctx:null,bus:{}};
 function musKind(){
-  if(!prefs.sound||!prefs.music||!AC||AC.state!=='running')return null;
+  const AC=LB.audio.ctx;
+  if(!LB.audio.sound||!LB.audio.music||!AC||AC.state!=='running')return null;
   if(!menuEl.hidden)return 'menu';
   if(paused)return null;
   if(R&&R.mode==='finale')return 'finale';
@@ -4513,10 +4548,10 @@ function musKind(){
 }
 function musTick(){
   try{
-    const k=musKind();
+    const k=musKind(),AC=LB.audio.ctx;
     if(MUS.ctx!==AC){
       MUS.ctx=AC;MUS.cur=null;
-      const cp=AC.createDynamicsCompressor();cp.connect(AC.destination);
+      const cp=AC.createDynamicsCompressor();cp.connect(LB.audio.mus);
       MUS.bus={};['game','menu','finale','space'].forEach(n=>{const g=AC.createGain();g.gain.value=0;g.connect(cp);MUS.bus[n]=g});
       {const sg=MUS.bus.space,d=AC.createDelay(1),fb=AC.createGain(),lp=AC.createBiquadFilter(); /* écho doux pour l'espace */
        d.delayTime.value=.6;fb.gain.value=.22;lp.type='lowpass';lp.frequency.value=800;sg.connect(d);d.connect(lp);lp.connect(fb);fb.connect(d);lp.connect(cp)}

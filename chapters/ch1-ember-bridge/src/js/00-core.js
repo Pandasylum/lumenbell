@@ -50,7 +50,7 @@ function perfWatch(raw){
 }
 const $=id=>document.getElementById(id);
 const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live'),help:$('optHelp'),snd:$('optSnd')};
-const prefs={help:LB.store.get(LB.key('help'),'0')==='1',sound:LB.store.get(LB.key('snd'),'1')==='1',music:LB.store.get(LB.key('mus'),'1')==='1'}; /* mémorisées (lb-help, lb-snd, lb-mus) */
+const prefs={help:LB.store.get(LB.key('help'),'0')==='1'}; /* mémorisée (lb-help) ; Son et Musique : LB.audio.sound / LB.audio.music (lb-snd, lb-mus) */
 let deaths=0; // défaites depuis le choix de la difficulté (Facile : propose l'aide visuelle à la 3e)
 let paused=true,pendingLore=false;
 const LORE={
@@ -80,5 +80,5 @@ const JET_O=[[BX-30,DECK-215],[BX-100,DECK-250],[BX-110,DECK-110],[BX-60,DECK-15
 const RK=[PX+70,DECK-165],RK_S=[PX+330,-70];
 const AURA=[[-125,-206],[-100,-228],[-70,-236],[-40,-312],[-10,-312],[20,-312],[40,-306],[70,-236],[100,-228],[125,-206],[-110,-170],[110,-170],[-80,-130],[80,-130],[-70,-90],[70,-90],[-60,-14],[60,-14],[0,-216],[-95,-216],[95,-216],[-30,-180],[30,-180],[0,-150]];
 
-let G=null,AC=null;
+let G=null;
 

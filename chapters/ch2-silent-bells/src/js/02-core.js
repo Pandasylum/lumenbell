@@ -1,8 +1,8 @@
 const $=id=>document.getElementById(id);
 /* save keys and language: common to the series (shared/, LB.store, LB.key, LB.lang). Common keys lb-lang, lb-snd, lb-mus,
    lb-help (old pn-lang, eb-lang, db-opt*: LB.OLD_KEYS); this chapter's keys lb-ch2-* (unlock, records), old db-unl, db-best-*. */
-LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']]});
-const OPT_KEY={optSnd:LB.key('snd'),optMus:LB.key('mus'),optHelp:LB.key('help')};
+LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']],audio:{master:.75,sfx:.9,mus:.3}});
+const OPT_KEY={optHelp:LB.key('help')};
 /* UNLOCK_ALL: true = the three phases are open from the start (phase track), as in Ember Bridge; the difficulties and the
    Trial are always open. false = progressive unlock: a phase opens once the previous one is cleared (key lb-ch2-unl, still
    written on every clear). Disabled for testing; idea to extend to the whole series later (common screen). */
