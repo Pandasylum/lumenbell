@@ -1,6 +1,6 @@
 # Lumenbell – Lore définitif
  
-Version consolidée du 29 octobre 2026 · Kevin
+Version consolidée du 30 octobre 2026 · Kevin
  
 Ce document ne contient que le lore **validé**. Il prime sur `docs/CH2-SPEC.md` pour tout ce qui touche au lore. Il se lit avec deux autres documents :
  
@@ -56,7 +56,7 @@ Les Veilleurs croient garder la lumière du monde ; ils gardent en réalité le 
 | Le Déclin | The Waning | Le lent affaiblissement quand plusieurs tours se taisent | Fil général |
 | La Rémanence | Afterglow | L'évaporation du Lumen une fois la Sans-Fond terrassée (animation de fin du chapitre II) : il ne retourne pas dans la lanterne, il retourne à son état principal. La couleur du lumen s’éclaircit vers le blanc en montant : le blanc est l’état principal du Lumen, montré sans être dit. | Fil général |
 | Le murmure | (à définir) | Le son de l'Umbryn, un retour au son qui fait perdre la lumière des vivants : c'est la corruption. Elle peut être consentie. Les cloches la repoussent | Secret, jamais nommé à l'écran |
-| Les Sonneurs | The Bellringers | Rang de l'ordre : ceux qui réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang pas forcément utilisé dans le jeu. « Fixer » = recharger la cloche en Lumen. | À voir |
+| Les Sonneurs | The Bellringers | Rang de l'ordre : ceux qui réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang pas forcément utilisé dans le jeu. « Fixer » = recharger la cloche en Lumen.  | À voir |
 | Les Doyens | The Doyens | Les plus anciens de l'ordre, vivants, qui connaissent la vérité et se taisent | À voir |
  
 ## 4. Histoire ancienne
@@ -81,7 +81,7 @@ Sept Veilleurs se sont enchaînés : six sous les tours du cercle, un au centre.
 | 3 · Les racines | Le Lié de racines (III, nom provisoire) | Les villages d'alentour | Racines, végétation | La berceuse du village |
 | 4 · Le givre | Le Lié de givre (IV, nom provisoire) | La mémoire de l'ordre | Gel, oubli | Les carnets de la Forge |
 | 5 · La tour vide | Le Lié de cendre (V, nom provisoire) | Une amitié | Cendre | Il a été libéré par un camarade vivant |
-| 6 · La brèche | Le Lié de la brèche (nom à définir) | [Le rempart, à confirmer] | Tué par le Roi Spectral ; sa dépouille est relevée en Nocthrys, dragon d’obsidienne | Sa lanterne éteinte à la ceinture du Roi |
+| 6 · La brèche | Le Lié de la brèche (nom à définir) | Le rempart : la dernière porte. Sa perte ouvre une brèche, l’arrivée de l’Umbryn et la fin du dernier rempart que forment les tours liées et les Liés | Tué par le Roi Spectral ; sa dépouille est relevée par le Roi lui-même en Nocthrys, dragon d’obsidienne | Sa lanterne éteinte à la ceinture du Roi |
 | 7 · Le cœur | Le Premier Lié (VII) | L'Umbryn elle-même | Il lui parle depuis si longtemps qu'il parle comme elle | Il a été le premier à dire « je tiendrai » ; il garde le blanc d'origine ; Un point de lumière blanc qui pulse sur sa lanterne : la lumière d’origine, celle qui scelle la Couronne à l’Umbryn. Il résiste encore. |
  
 ### 5.2 Les parasites
@@ -94,9 +94,11 @@ Sept Veilleurs se sont enchaînés : six sous les tours du cercle, un au centre.
 - Le Colosse de braise n'était pas totalement transformé et a été scellé avant : on n'a pas vu son parasite.
 - **Au chapitre II**, la Sans-Fond (un parasite en forme de méduse) a mangé le Lumen de la lanterne de l'Ancien de Rouille et en porte la couleur, le turquoise. Cette lueur est une copie : fixe, sans pulsation, elle ne répond ni à la cloche ni au Lumen. Le Lumen vivant, lui, pulse (la lanterne de la gardienne qui coule). Le joueur distingue ainsi la lumière vivante de la lumière imitée sans aucun texte.
 - Un parasite n'est jamais expliqué, seulement vu ; le mot lui-même n'est jamais employé à l'écran.
+- Le Roi Spectral n’est pas un parasite. Parce qu’il s’est donné de lui-même à l’Umbryn, il en tient des pouvoirs (relever la dépouille du Lié) qui le rapprochent des parasites, sans en faire un. Aucun parasite au chapitre VI
+
 ### 5.3 Le Roi Spectral
  
-Vharos, le Roi Spectral, est le principal des Doyens. Il a cédé au murmure de son plein gré et tué le Lié de la tour VI pour aider l’Umbryn ; des indices le laissent deviner, rien n’est dit. Il n’est pas l’un des sept Liés. En absorbant le Lumen de la lanterne, il se transforme, et la lanterne s’éteint. Au chapitre VI, on le scelle ou on le sacrifie.
+Vharos, le Roi Spectral, est le principal des Doyens. Il a cédé au murmure de son plein gré et tué le Lié de la tour VI pour aider l’Umbryn ; des indices le laissent deviner, rien n’est dit. Il n’est pas l’un des sept Liés. En absorbant le Lumen de la lanterne, il se transforme, et la lanterne s’éteint. Au chapitre VI, on le scelle ou on le sacrifie. Il relève lui-même la dépouille du Lié tué (Nocthrys), grâce aux pouvoirs reçus de l’Umbryn. Il est le seul Doyen à parler à l’écran (chapitre VI)
  
 ## 6. Le Lumen et ses teintes
  
@@ -133,7 +135,7 @@ Six tours en cercle, une au centre (la clé, le dénouement). Chaque lumière pe
 | --- | --- | --- | --- |
 | I | Montagne | Gardée | Le héros tient le fanal |
 | II | Phare Noyé | Perdue | La gardienne est tombée avant lui : personne pour veiller |
-| III | Racines | Gardée | Un village la tient sans savoir pourquoi : la tour tient par les vivants |
+| III | Racines | Gardée | Un village la tient sans savoir pourquoi : la tour tient par les vivants. Il en était le gardien sans le savoir ; un Sonneur reste ensuite pour veiller |
 | IV | Givre | Perdue | L'oubli : plus personne ne sait ce que la tour retient |
 | V | Tour vide | Perdue | Un serment rompu par amitié |
 | VI | La brèche | Choix : sceller (gardée) ou sacrifier (perdue) | Il n’y a pas de bon choix : sceller consume la lanterne et un Doyen devient un Lié ; sacrifier sauve le Lumen et personne ne veille |
@@ -196,8 +198,9 @@ Le Colosse de braise, premier Lié à se réveiller, atteint le pont. Le Veilleu
  
 ### Chapitre III · Racines (à écrire)
  
-La tour de la forêt, gardée : un village l'entretient sans savoir pourquoi. Fragment principal : la berceuse du village, dont les paroles restent à fixer (piste : un gardien sous la terre). Elle est **chantée** (voix), en deux parties : dans l'intro et dans l'outro. Piste retenue : sur la dernière page de l'outro (avant l'annonce du chapitre IV), on découvre que celui qui chante est un Sonneur, pendant qu'il sonne la cloche du chapitre. Le chant du village raconte une histoire ancienne qui ne semble rien dire et porte une partie de l’histoire des Flèches liées. : il ne repousse rien, c'est l'usage de la cloche qui est efficace. Teinte vert mousse tirant sur le jaune, annoncée par la fin du chapitre II. Ici, « fixer » veut dire réparer : le Sonneur injecte du Lumen dans la cloche pour la recharger. Il chante en la sonnant.
-On y montre aussi qu’une lanterne vide peut se rallumer en changeant de propriétaire, ce qui en marque l’importance (mécanisme à fixer).
+La tour de la forêt, gardée : un village l'entretient sans savoir pourquoi. Fragment principal : la berceuse du village, dont les paroles racontent l’histoire de sept vaillants unis contre l’adversité, une belle aventure dont on ne connaît pas la fin ; elle s’achève sur le plus fort, que les six acceptent de suivre à jamais (formulation à écrire à l’écriture du chapitre. Elle est **chantée** (voix), en deux parties : dans l'intro et dans l'outro. Piste retenue : sur la dernière page de l'outro (avant l'annonce du chapitre IV), on découvre que celui qui chante est un Sonneur, pendant qu'il sonne la cloche du chapitre. Le chant du village raconte une histoire ancienne qui ne semble rien dire et porte une partie de l’histoire des Flèches liées. : il ne repousse rien, c'est l'usage de la cloche qui est efficace. Teinte vert mousse tirant sur le jaune, annoncée par la fin du chapitre II. Ici, « fixer » veut dire réparer : le Sonneur injecte du Lumen dans la cloche pour la recharger. Il chante en la sonnant.
+
+La lanterne qui se rallume. La lanterne du Lié de la tour, éteinte, est rallumée par le héros : son sceptre contient un fragment du Lumen d’origine (§ 6), lié à celui de toutes les lanternes. Elle résonne ensuite à la clochette du Sonneur, comme un nouveau-né reconnaît un parent. Le Sonneur en devient le propriétaire et Veilleur de la tour : il assume son rôle et ne la quitte plus. Le village vénère et protège la tour par tradition (croyance : elle apporte prospérité et éloigne la malchance) ; la tour tient par lui sans qu’il sache pourquoi. Le Lumen n’est pas injecté par le Sonneur : c’est celui du héros qui rallume. La clochette (même modèle que celle des sceptres) ne sert qu’à la réparation
  
 ### Chapitre IV · Givre (à écrire)
  
@@ -209,9 +212,11 @@ Tour désertée, perdue. Fragment principal : deux lanternes, un seul lit. Un Ve
  
 ### Chapitre VI · La brèche (à écrire)
  
-Vharos, le Roi Spectral, principal des Doyens, a cédé au murmure de son plein gré et tué le Lié de la tour VI. Phase I : le Doyen. Entre I et II, on le voit se transformer en absorbant le Lumen de la lanterne, qui s’éteint. Phase II : Vharos. Phase III, en deux temps : Vharos sur Nocthrys, dragon d’obsidienne, la dépouille du Lié relevée au début de la phase, que l’on voit se transformer ; puis les deux côte à côte au sol, Nocthrys blessé. Fragment principal : la lanterne éteinte à sa ceinture, sans certitude sur son propriétaire. Teinte : le violet clair du Lié qui se corrompt.
-Le choix. Sceller : le Lumen lie le Roi sous la tour, où il devient le Lié de la tour VI ; la tour est gardée, la lanterne consumée, le village (déjà perdu) reste perdu ; le mensonge recommence. Sacrifier : on abat le Roi et on emporte la lanterne ; le Lumen est sauvé, la tour perdue, personne ne veille. Ni l’un ni l’autre ne dépend d’un village. Il reste sept Liés. Le Lumen sauvé ne change que le rendu de la fin. Le mode du choix reste à fixer.
- 
+Vharos, le Roi Spectral, principal des Doyens, a cédé au murmure de son plein gré et tué le Lié de la tour VI. Phase I : le Doyen. Entre I et II, on le voit se transformer en absorbant le Lumen de la lanterne, qui s’éteint. Phase II : Vharos. Phase III, en deux temps : Vharos sur Nocthrys, dragon d’obsidienne, la dépouille du Lié relevée par le Roi lui-même au début de la phase, que l’on voit se transformer ; puis les deux côte à côte au sol, Nocthrys blessé. Fragment principal : la lanterne éteinte à sa ceinture, sans certitude sur son propriétaire. Teinte : le violet clair du Lié qui se corrompt.
+Le choix. Sceller : le Lumen lie le Roi sous la tour, où il devient le Lié de la tour VI ; la tour est gardée, la lanterne consumée, le village (déjà perdu) reste perdu ; le mensonge recommence. Sacrifier : on abat le Roi et on emporte la lanterne ; le Lumen est sauvé, la tour perdue, personne ne veille. Ni l’un ni l’autre ne dépend d’un village. Il reste sept Liés. Le Lumen sauvé ne change que le rendu de la fin. 
+
+Mode du choix (secret, un seul bouton). Une fenêtre fixe de 8 secondes. Le Roi, à terre, tend sa lanterne éteinte, montrée à l’écran, sans HUD. Il dit (voix et sous-titre) : « Vas-y, achève-moi et emporte la lanterne, si tu te sens capable de la supporter. » Appuyer : sacrifier. Ne rien faire : sceller. La pause ne compte pas comme inaction. Le joueur appuie depuis six chapitres : l’inaction devient un geste conscient 
+
 ### Chapitre VII · Le cœur (à écrire)
  
 Au centre de la Couronne. Le Premier Lié et l'Umbryn, présentés ensemble : leur distinction viendra plus tard, tant que l'on comprend où cela mène. Le Premier Lié garde le blanc d'origine, l'Umbryn le dévore. Fragment principal : les sept noms sur la grande cloche, dont un effacé. Le choix final.
@@ -252,7 +257,7 @@ Un petit vocabulaire d'objets que le joueur peut recouper sans explication.
 | --- | --- | --- |
 | La chaîne | Colosse (I), amarres de l'Ancien (II) | Le serment, devenu arme |
 | L'anneau au nom effacé | Colosse (I), anneau de chaîne au poignet de l'Ancien (II) | L'identité perdue |
-| La lanterne | Tombée dans l'eau (II), éteinte sur l'Ancien (II), éteinte à la ceinture du Roi Spectral (VI), deux dans la tour vide (V), faible, orange et pulsante près des chaînes du Colosse (I) | Le Lumen d'un Veilleur, qui ne s'éteint jamais seul, vide qui se rallume (III) |
+| La lanterne | Tombée dans l'eau (II), éteinte sur l'Ancien (II), éteinte à la ceinture du Roi Spectral (VI), deux dans la tour vide (V), faible, orange et pulsante près des chaînes du Colosse (I) | Le Lumen d'un Veilleur, qui ne s'éteint jamais seul, vide qui se rallume au contact d’un Lumen lié à l’origine, puis reconnue par la clochette (III) |
 | Le bâton | Sans lanterne, au pied du Phare (II) | Un gardien disparu |
 | La cape bleue | Lambeau sur l'Ancien (II) | Un Veilleur, de la même famille que le héros |
 | La cloche | Toutes les tours | Le verrou, qui reconnaît ce qu'il tient |
@@ -347,3 +352,9 @@ Une section par date. Ajouter les nouvelles décisions en bas, avec la date.
 - Rémanence : le turquoise s’éclaircit vers le blanc (Q23). Sans-Fond : The Bottomless (Q15).
 - Le sceptre du héros contient un fragment incomplet du Lumen d’origine ; le Premier Lié est blanc total.
 
+### 30 octobre 2026
+- Q24 : Nocthrys est la dépouille du Lié de la tour VI, relevée par le Roi Spectral lui-même ; pas de parasite ; ses pouvoirs reçus de l'Umbryn le rapprochent des parasites sans en faire un.
+- Q25 : le Lié de la tour VI gardait le rempart ; sa perte ouvre la brèche (arrivée de l'Umbryn, fin du dernier rempart).
+- Q26 : la lanterne du Lié de la tour III est rallumée par le héros (Lumen lié à l'origine), résonne à la clochette du Sonneur ; le Sonneur devient Veilleur et reste à la tour.
+- Q27 : choix du chapitre VI = appuyer (sacrifier) ou ne rien faire (sceller), fenêtre de 8 s, sans garde-fou, Roi parlant avec sous-titre.
+- Q7 : le Sonneur n'a pas de nom ; paroles de la berceuse = sept vaillants ; village = tradition et croyance.
