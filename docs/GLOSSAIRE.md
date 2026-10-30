@@ -29,18 +29,18 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 
 | Terme FR | Terme EN | Nom dans le code | Règle d'usage | Source |
 |---|---|---|---|---|
-| Bloquer | Block | `T.barrier` (durée, ch1 phase I et ch2 phase II), `S.guardT` (date d'animation, ch2), `sfx.block`, `ONO.block` (ch2) | Libellé du bouton en phase I du Chapitre I, en phase II **et en phase III** du Chapitre II (même mot partout ; en phase III le geste reste le blocage tenu) | `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:31` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:119` ; `chapters/ch2-silent-bells/NOTES.md:121-122` |
+| Bloquer | Block | `T.barrier` (durée, ch1 phase I et ch2 phase II), `S.guardT` (date d'animation, ch2), `sfx.block`, `ONO.block` (ch2) | Libellé du bouton en phase I du Chapitre I, en phase II **et en phase III** du Chapitre II (même mot partout ; en phase III le geste reste le blocage tenu) | `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:31` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:119` ; `chapters/ch2-silent-bells/NOTES.md:82-83` |
 | Esquiver | Dodge | `DG.act` / `DG.rec` (durées) ; `S.dodgeT` (date d'animation, ch2) | Libellé du bouton en phase II du Chapitre I et en phase I du Chapitre II | `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:4,31` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:124` |
-| Bloquer tenu / barrage (phase III) | Held block | `R_T.guard` (durée), état tenu tant que le bouton est appuyé (ch2) | « Blocage tenu » dans le cahier des charges ; « barrage » dans les décisions. Le bouton s'appelle « Bloquer » / « Block » (tranché le 30 octobre ; À faire, `CHANGEMENTS.md` J) | `docs/CH2-SPEC.md:98` ; `archives/DECISIONS-2026-10-27-28.md#etats-veilleur` ; `chapters/ch2-silent-bells/NOTES.md:122` |
+| Bloquer tenu / barrage (phase III) | Held block | `R_T.guard` (durée), état tenu tant que le bouton est appuyé (ch2) | « Blocage tenu » dans le cahier des charges ; « barrage » dans les décisions. Le bouton s'appelle « Bloquer » / « Block » (tranché le 30 octobre ; À faire, `CHANGEMENTS.md` J) | `docs/CH2-SPEC.md:98` ; `archives/DECISIONS-2026-10-27-28.md#etats-veilleur` ; `chapters/ch2-silent-bells/NOTES.md:83` |
 | Ta garde est brisée | Your guard is broken | `12-hero-states.js:40` (ch2) | **Conservé volontairement** (tranché le 30 octobre) : texte du lecteur d'écran de la phase III uniquement, jamais affiché. Ne pas le remplacer par « bloquer » ; le bouton, lui, reste « Bloquer » / « Block » | `docs/decisions/2026-10-30-ch2-validations.md` (n° 5) ; À trancher n° 2 |
 | Garde (phase III du Chapitre I) | — | `R_T.guard` ; `drawBarrier` | Durée du blocage de la phase III : 0,333 s avec 0,06 s de grâce | `BIBLE.md:81` ; `chapters/ch1-ember-bridge/src/js/44-p3-belfry-logic.js:4` |
 | Un seul bouton | — | `#ward` (bouton) | Espace, flèche haut, Z ou W, toucher ; le même bouton bloque ou esquive selon le moment ; P pause, R recommencer | `BIBLE.md:29-30` ; `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:31` |
 | Prêt / action / récupération | — | `ready` → `act` → `recover` → `ready` ; `deny` ; `hurt` | Machine à états du Veilleur, commune aux deux chapitres. Noms de code, jamais affichés | `chapters/ch2-silent-bells/src/js/12-hero-states.js:2-4` ; `docs/COMMUN.md:27` |
 | Appui refusé | — | `deny` (0,25 s) | Seul retour : la barre de récupération sous le Veilleur, rouge pendant `deny` | `archives/DECISIONS-2026-10-27-28.md#etats-veilleur` ; `docs/decisions/2026-10-28-engine-shared.md:6` |
 | Récupération | — | `T.recovery`, `DG.rec`, `R_T.rec` (0,7 s) | Table de timing, jamais en dur | `NOTES.md:5` ; `docs/COMMUN.md:28` |
-| Grâce | — | `T.grace`, `DG.grace`, `R_T.grace` | Premières secondes de la récupération où un coup compte encore comme arrêté | `chapters/ch2-silent-bells/NOTES.md:28` |
+| Grâce | — | `T.grace`, `DG.grace`, `R_T.grace` | Premières secondes de la récupération où un coup compte encore comme arrêté | `chapters/ch2-silent-bells/NOTES.md:27` |
 | Parfait | Perfect | `perf` (ch2) | Jamais affiché à l'écran (mot d'annonce). Reste un compteur de fin au Chapitre II (« Parfaits ») | `chapters/ch2-silent-bells/src/js/72-flow.js:46` ; `tests/ch2-announce.js:13` |
-| Riposte | Riposte | `closePat`, `R_CNT` (ch2) | Vient d'une **série réussie** ; pas de fenêtre « FRAPPE ! ». Jamais affichée à l'écran | `docs/CH2-SPEC.md:37` ; `chapters/ch2-silent-bells/NOTES.md:25` ; `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:161` |
+| Riposte | Riposte | `closePat`, `R_CNT` (ch2) | Vient d'une **série réussie** ; pas de fenêtre « FRAPPE ! ». Jamais affichée à l'écran | `docs/CH2-SPEC.md:37` ; `chapters/ch2-silent-bells/NOTES.md:24` ; `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:161` |
 | Série | Series | — | Enchaînement d'attaques arrêtées (« Série bloquée », lecteur d'écran) | `archives/DECISIONS-2026-10-27-28.md#bloquer` |
 | Contre | — | — | Phase III du Chapitre I : le physique se contre à la cloche, la distance avec des éclats, l'arme et le crochet avec le rayon au sol | `BIBLE.md:60-66` |
 | Reflet (faux coup) | Reflection | `fool` (ch2) | Phase I du Chapitre II : esquiver sans mordre aux faux reflets | `docs/CH2-SPEC.md:36` ; `archives/DECISIONS-2026-10-27-28.md#etats-veilleur` ; `archives/DECISIONS-2026-10-27-28.md#deuxieme-passe` |
@@ -74,8 +74,8 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | braise | ember | — | Élément du Chapitre I, orange chaud. Minuscule pour le feu | `CLAUDE.md:18` ; `docs/LORE.md:109` |
 | Sceptre-lanterne / lanterne | — | `lanternBeam` (rayon) | Seul outil du Veilleur ; tous ses contres viennent de lui | `BIBLE.md:31` ; `docs/CH2-SPEC.md:9` ; `chapters/ch1-ember-bridge/NOTES.md:24` |
 | Cloche | bell | `ringBell` (ch1), `pHead` (ch2) | Le verrou. Au Chapitre I, la grande cloche répond, étourdit (1,3 s) et désarme | `BIBLE.md:22,64,71` ; `chapters/ch1-ember-bridge/NOTES.md:31` |
-| Cloche de tête | — | `pHead` | La cloche du Phare, portée par le boss de la phase II ; signes anguleux (`RUNES`) | `docs/CH2-SPEC.md:33` ; `chapters/ch2-silent-bells/NOTES.md:113` |
-| Couronne | Crown | `o.word` | Mot gravé en clair sur la cloche, visible après le dernier coup de la phase III | `docs/CH2-SPEC.md:33,59` ; `chapters/ch2-silent-bells/NOTES.md:113` |
+| Cloche de tête | — | `pHead` | La cloche du Phare, portée par le boss de la phase II ; signes anguleux (`RUNES`) | `docs/CH2-SPEC.md:33` ; `chapters/ch2-silent-bells/NOTES.md:98` |
+| Couronne | Crown | `o.word` | Mot gravé en clair sur la cloche, visible après le dernier coup de la phase III | `docs/CH2-SPEC.md:33,59` ; `chapters/ch2-silent-bells/NOTES.md:98` |
 | Couronne d'ancrage | The Anchor Crown | — | Cercle de six tours et une au centre. Nom secret, jamais expliqué | `BIBLE.md:20,26` ; `docs/LORE.md:46` |
 | Flèches liées | The Bound Spires | — | Ce que les Veilleurs disent de leurs tours | `BIBLE.md:22` ; `docs/LORE.md:47` ; `docs/TEXTES-CH1.md:240` |
 | Tour / flèche | tower / spire | — | Le lieu. Ne pas mélanger tour, Scellé et Couronne | `docs/LORE.md:40` |
@@ -87,9 +87,9 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Rémanence | Afterglow | — | Évaporation du Lumen à la fin de la phase III du Chapitre II, sans texte ni bruitage | lore (`docs/LORE.md:57`) ; `CHANGEMENTS.md:131-133` |
 | Masse | mace | `demonBody` | L'arme du Colosse est une masse, pas un marteau | `BIBLE.md:45,68` |
 | Rage | rage | `rages`, `LB.rage(name)` (proposé) | Aucun nom à l'écran ; nom au lecteur d'écran. Chapitre I : Râle d'agonie, Fureur, Embrasement ; Difficile : Fureur de braise, Danse des chaînes, Embrasement final | `BIBLE.md:48` ; `docs/COMMUN.md:73-74` |
-| Rages du Chapitre II | — (noms EN non définis dans les sources lues) | `storm()` (Tempête de cloches) | Échos (phase I), Nuage de rouille et Double vague (phase II), Marée montante (forme I), Tempête de cloches (forme II) | `docs/CH2-SPEC.md:104-118` ; `chapters/ch2-silent-bells/NOTES.md:129` |
-| Harpon | harpoon | `harp` | Main gauche du boss de la phase II ; le crochet à chaîne n'existe qu'au Colosse | `docs/CH2-SPEC.md:108` ; `chapters/ch2-silent-bells/NOTES.md:112` |
-| Code couleur par chapitre | — | `CH_COL` | I braise (orange chaud) ; II marée (turquoise `#4fe0cc`) ; III racine (vert mousse tirant sur le jaune) ; IV givre (bleu-blanc pâle) ; V cendre (gris argenté) ; VI ombre (violet) ; VII vide (blanc) ; héros jaune neutre | `docs/CH2-SPEC.md:72` ; `docs/LORE.md:107-117` ; `chapters/ch2-silent-bells/NOTES.md:109` |
+| Rages du Chapitre II | — (noms EN non définis dans les sources lues) | `storm()` (Tempête de cloches) | Échos (phase I), Nuage de rouille et Double vague (phase II), Marée montante (forme I), Tempête de cloches (forme II) | `docs/CH2-SPEC.md:104-118` ; `chapters/ch2-silent-bells/NOTES.md:89` |
+| Harpon | harpoon | `harp` | Main gauche du boss de la phase II ; le crochet à chaîne n'existe qu'au Colosse | `docs/CH2-SPEC.md:108` ; `chapters/ch2-silent-bells/NOTES.md:97` |
+| Code couleur par chapitre | — | `CH_COL` | I braise (orange chaud) ; II marée (turquoise `#4fe0cc`) ; III racine (vert mousse tirant sur le jaune) ; IV givre (bleu-blanc pâle) ; V cendre (gris argenté) ; VI ombre (violet) ; VII vide (blanc) ; héros jaune neutre | `docs/CH2-SPEC.md:72` ; `docs/LORE.md:107-117` ; `chapters/ch2-silent-bells/NOTES.md:94` |
 
 ## Interface
 
@@ -146,7 +146,7 @@ Incohérences entre documents, ou entre documents et code. Une ligne par point, 
 
 | # | Point | Sources en tension |
 |---|---|---|
-| 1 | ~~Bouton de la phase III du Chapitre II : « Garde » / « Guard » ou « Bloquer » / « Block »~~ **Tranché le 30 octobre : « Bloquer » / « Block »** (voir `docs/decisions/2026-10-30-ch2-validations.md`) ; application : `CHANGEMENTS.md` J | `archives/DECISIONS-2026-10-27-28.md#bloquer` ; `chapters/ch2-silent-bells/NOTES.md:123` ; `docs/COMMUN.md:47` ; `docs/CH2-SPEC.md:98` |
+| 1 | ~~Bouton de la phase III du Chapitre II : « Garde » / « Guard » ou « Bloquer » / « Block »~~ **Tranché le 30 octobre : « Bloquer » / « Block »** (voir `docs/decisions/2026-10-30-ch2-validations.md`) ; application : `CHANGEMENTS.md` J | `archives/DECISIONS-2026-10-27-28.md#bloquer` ; `chapters/ch2-silent-bells/NOTES.md:82` ; `docs/COMMUN.md:47` ; `docs/CH2-SPEC.md:98` |
 | 2 | ~~Lecteur d'écran de la phase III du Chapitre II : « Ta garde est brisée » / *Your guard is broken* (`garde` / `guard`) alors que le vocabulaire est « bloquer »~~ **Tranché le 30 octobre : « Ta garde est brisée » / *Your guard is broken* est conservé volontairement** (texte du lecteur d'écran uniquement ; le bouton reste « Bloquer » / « Block ») | `chapters/ch2-silent-bells/src/js/12-hero-states.js:40` ; `archives/DECISIONS-2026-10-27-28.md#bloquer` |
 | 3 | Bouton « Parer » / *Parry* en phase III du Chapitre I, alors que « parer » est abandonné | `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:31` ; `docs/COMMUN.md:47` ; `DEMANDES.md:64-67` |
 | 4 | Textes du Chapitre I en « paré » / « Parade réussie » / « Combo paré », libellé « Parades » des stats, code `parry`, `parries`, `DMG_PARRY` | `docs/TEXTES-CH1.md:55,61,75,177` ; `chapters/ch1-ember-bridge/src/js/44-p3-belfry-logic.js:315` ; `docs/COMMUN.md:49-52` |
@@ -163,6 +163,6 @@ Incohérences entre documents, ou entre documents et code. Une ligne par point, 
 | 15 | Sous-titres : « Respire » / « Respirer » (Facile) ; « Le Colosse déchaîné » / « Sans pitié » (Difficile) | `chapters/ch1-ember-bridge/src/js/68-texts-ui.js:7-9` ; `chapters/ch2-silent-bells/src/js/88-lang.js:7` ; `docs/COMMUN.md:65` |
 | 16 | Outil du héros : « sceptre-lanterne » (Chapitre I) ou bâton à cristal (Chapitre II, dessin) | `BIBLE.md:31` ; `docs/CH2-SPEC.md:9` ; `NOTES.md:42` ; `docs/COMMUN.md:82` |
 | 17 | Rage de la phase I du Chapitre II : « Échos » (CH2-SPEC, lecteur d'écran) ou « Écho » (DECISIONS) | `docs/CH2-SPEC.md:104` ; `archives/DECISIONS-2026-10-27-28.md#sorts` |
-| 18 | Onomatopée `BAM` du Chapitre II : `NOTES.md` du chapitre la liste (l. 26) et la retire (l. 150) | `chapters/ch2-silent-bells/NOTES.md:26,150` ; `archives/DECISIONS-2026-10-27-28.md#deuxieme-passe` |
-| 19 | Numéros de phase internes du Chapitre II différents des numéros affichés (`ORDER=[2,1,3]`) | `chapters/ch2-silent-bells/NOTES.md:6` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:112` |
+| 18 | Onomatopée `BAM` du Chapitre II : `NOTES.md` du chapitre la liste (l. 26) et la retire (l. 150) | `chapters/ch2-silent-bells/NOTES.md:25,120` ; `archives/DECISIONS-2026-10-27-28.md#deuxieme-passe` |
+| 19 | Numéros de phase internes du Chapitre II différents des numéros affichés (`ORDER=[2,1,3]`) | `chapters/ch2-silent-bells/NOTES.md:5` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:112` |
 | 20 | `CLAUDE.md` cite `GLOSSAIRE.md` à la racine ; le fichier est `docs/GLOSSAIRE.md` | `CLAUDE.md:6` ; `README.md:31` |
