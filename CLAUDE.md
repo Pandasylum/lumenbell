@@ -17,6 +17,7 @@ Jeu canvas HTML5, série de combats de boss. Lis d'abord `BIBLE.md`, `NOTES.md` 
 12. **Jamais de clés** (`*.jks`, mots de passe, base64 du keystore) dans le dépôt, les logs ou les messages.
 13. Le feu de l'élément s'écrit « braise » (minuscule) ; « Braise » désigne l'élément, pas un nom propre.
 14. Commits en français ou anglais, courts ; une branche par sujet (`engine/…`, `ch1/…`, `ch2/…`, `menu/…`), fusion vers `main` par pull request après les tests.
+15. Ne pas lire `archives/` sauf demande explicite.
 
 ## Fin de session
 Tests passés, `NOTES.md` et `DECISIONS.md` à jour, fichiers déposés sur la branche, résumé des changements.
