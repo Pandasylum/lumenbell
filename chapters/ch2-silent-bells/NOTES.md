@@ -161,7 +161,7 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - **Chocs** : `SHOCK.form` (1 = tour : `thud` + `bellHit`, étincelles ; 2 = méduse : `sfx.squelch` + `MUSIC.fx('jellyHit')`, éclaboussures translucides). `damageBoss` lit la forme en phase III.
 - **Test** : `node tests/ch2-retouches3.js` (crochets de test étendus dans `tests/ch2-lib.js`).
 - **Avancement** : fait = points 1 à 4 ; point 5 (retours du test de Kevin) vide. Reste à faire : juger au téléphone la caméra d'entrée, le décor et les deux sons de choc ; régler `HULL` et `SHOCK.form` ensuite.
-- Décisions : `docs/decisions/2026-10-28-ch2-retouches-3.md`.
+- Décisions : `archives/decisions/2026-10-28-ch2-retouches-3.md`.
 - **Mesure du bot de la phase III** (100 parties, après cette passe) : Normal 100/100, 94/100, 41/100 ; Difficile 60/100, 3/100, 0/100 (aucune logique de combat touchée : le tirage de `Math.random` change avec les nouvelles particules, d'où les écarts de `--check` à 20 parties : 17/20 une fois à 70 ms, 20/20 sur `main`).
 
 ## Audio commun (session `engine/audio`, 28 octobre)

@@ -14,7 +14,7 @@ B	Boss de la phase II : l'Ancien de Rouille	À faire	28 octobre 2026
 C	Chapitre II · Lumière du boss et de la Sans-Fond	À faire	28 octobre 2026 (mis à jour le 29)	
 D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	À faire	28 octobre 2026 (mis à jour le 29)	
 E	Veilleur · Couleur de la lanterne et des tirs	À faire (validation à l'écran d'abord)	28 octobre 2026	
-F	Documents à mettre à jour	À faire	28 octobre 2026 (mis à jour le 29)	
+F	Documents à mettre à jour	En cours (CH2-SPEC et COMMUN faits ; BIBLE, DECISIONS, LORE restent)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
 G	Chapitre I · Lanterne du Colosse de braise	À faire	29 octobre 2026	
 H	Chapitre II · Rémanence (évaporation du Lumen)	À faire	30 octobre 2026	
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
@@ -106,7 +106,7 @@ Remplacer « un fragment par chapitre » par « un fragment principal par chapit
 Ajouter : le Lumen est blanc, chaque tour a sa teinte, le héros a un jaune neutre.
 Noms : Lumenbell validé ; les autres noms sont des noms communs, risque jugé faible.
 Nom anglais du Phare Noyé : Drowned Lighthouse.
-DECISIONS.md : ajouter l'entrée ci-dessous.
+DECISIONS.md : ajouter l'entrée ci-dessous. **Couvert** : renvoi au journal du lore, décision du 30 octobre (`docs/decisions/2026-10-30-decisions-lore-renvoi.md`) ; les entrées 28-29 octobre restent dans `docs/LORE.md` §15.
 Le renommage « Roi Sombre » en « Roi Spectral » dans docs/CH2-SPEC.md (tableau des tours : « La brèche (Roi Sombre) ») et dans DECISIONS.md. La section B (« Ne pas toucher au Roi Sombre ») devient « Roi Spectral ».
 ## 2026-10-28 – Lore : consolidation et changements des chapitres I et II (Kevin)
 - Documents de lore : Lore définitif, Changements à faire, À valider.

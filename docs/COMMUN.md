@@ -1,6 +1,6 @@
 # Éléments communs entre les chapitres – audit
 
-Session `engine/audit` (28 octobre 2026). **Aucun code de jeu modifié** : ce fichier est l'inventaire de ce qui doit être identique d'un chapitre à l'autre, des écarts constatés entre le Chapitre I et le Chapitre II, d'une API commune minimale et d'un plan en sessions. Rien n'est appliqué ; chaque recommandation marquée **(à trancher)** attend l'accord de Kevin.
+Session `engine/audit` (28 octobre 2026). **Aucun code de jeu modifié** : ce fichier est l'inventaire de ce qui doit être identique d'un chapitre à l'autre, des écarts constatés entre le Chapitre I et le Chapitre II, d'une API commune minimale et d'un plan en sessions. Rien n'est appliqué ; les recommandations marquées **(à trancher)** ont été tranchées le 28 octobre : voir `docs/decisions/2026-10-28-engine-shared.md`, §1.
 
 Références : `ch1:` = `chapters/ch1-ember-bridge/src/` (fichiers découpés, numéros de ligne propres à chaque fichier) ; `ch2:` = `chapters/ch2-silent-bells/src/silent-bells.html` (numéro de ligne seul). État lu : `main` au commit `75e0f53`.
 
@@ -193,7 +193,7 @@ Décision du 28 octobre (`docs/CH2-SPEC.md:98`) : un seul geste **bloquer** (*bl
 
 1. **Référence par élément** : le Chapitre I pour ce que le joueur voit et qui a été validé (Veilleur, lanterne, menu, cinématique `CINE`, Épreuve verrouillée, écran de démarrage, onomatopées, repères de rage) ; le Chapitre II pour la mécanique et l'outillage (une seule machine à états, tables lues à la lecture, `store` avec migration, options mémorisées, tests à pas fixe, placement mesuré du titre, zones sûres).
 2. **Le chapitre ne déclare que des données** (nom, couleur, sous-titres, PV des boss, seuils de rage, scènes, cartons, attaques) et appelle les fonctions communes. Ce qui est dessiné ou joué de façon propre (boss, décors, attaques, musique de combat) reste dans le chapitre.
-3. **Pas de modules ES pour l'instant** (décision du 27 octobre) : le commun vit dans `shared/` en morceaux `.js` concaténés par le build **avant** le code du chapitre, dans la même IIFE, comme `parts.txt`. Un seul objet global dans l'IIFE : `LB`.
+3. **Pas de modules ES, un seul objet global `LB`** : voir `docs/decisions/2026-10-28-engine-shared.md`, §2, et `shared/NOTES.md`.
 4. **Reproductibilité** : chaque session commune change volontairement le `dist` des deux chapitres ; le nouveau `dist` devient la référence dans le même commit, après comparaison en image (méthode du Chapitre II, `NOTES.md` du dossier) et tests verts.
 
 ## 3. API commune minimale
@@ -255,7 +255,7 @@ Chaque session : une branche, une PR, tests verts, `NOTES.md` et `DECISIONS.md` 
 |---|---|---|---|---|
 | 0 | `engine/audit` | Ce document | tout code | — |
 | 1 | `engine/shared` | Dossier `shared/` + assemblage commun pour les deux chapitres (le Chapitre II passe lui aussi à des morceaux listés, ce qui couvre une partie de la session D `ch2/perf`) ; `LB._`, `LB.lang`, `LB.store`, `LB.key`, `FONT` ; migration du Ch. I vers `lb-…` (ferme la demande de `DEMANDES.md`) ; options Son/Musique/Aide mémorisées partout | rendu, gameplay | `keys` commun aux deux chapitres ; build reproductible des deux |
-| 2 | `engine/audio` (**faite le 28 octobre**, voir `docs/decisions/2026-10-28-engine-audio.md`) | `LB.audio` : un seul contexte, `tone`/`noise` à la signature du Ch. II, suspension en arrière-plan ; musiques et bruitages des chapitres rebranchés sans changer les sons | sons eux-mêmes | écoute sur téléphone (pause/reprise) |
+| 2 | `engine/audio` (**faite le 28 octobre**, voir `archives/decisions/2026-10-28-engine-audio.md`) | `LB.audio` : un seul contexte, `tone`/`noise` à la signature du Ch. II, suspension en arrière-plan ; musiques et bruitages des chapitres rebranchés sans changer les sons | sons eux-mêmes | écoute sur téléphone (pause/reprise) |
 | 3 | `engine/hero-states` | `LB.hero.*`, `HERO_T`, `HERO_DIFF`, `LB.diff.apply` ; les trois phases du Ch. I et du Ch. II rebranchées ; barre de récupération et lanterne rouge communes ; **vocabulaire bloquer / esquiver** (bouton, aide, stats, lecteur d'écran, noms de code) | dessin du Veilleur, attaques, timings des boss | `input` généralisé (Ch. I compris), bots Normal/Difficile du Ch. I à pas fixe avant/après |
 | 4 | `engine/watcher` | `LB.drawWatcher` et poses, lanterne, bouclier, esquives ; le Ch. II reprend le Veilleur du Ch. I (heaume, tabard, sceptre-lanterne) ; silhouettes du menu et des cinématiques | états, boss | captures déterministes de chaque pose, par chapitre |
 | 5 | `engine/cine` | `LB.cine`, `CINE_T`, `LB.title`, `TITLE_T` ; prologue et épilogue du Ch. II portés dans le module (cartons à 6-7 s, drapeau `lb-ch2-intro`, rejeu) ; intro/outro du Ch. I | scènes dessinées (étape C du Ch. II) | `title` généralisé, passage et rejeu |
@@ -266,15 +266,5 @@ Chaque session : une branche, une PR, tests verts, `NOTES.md` et `DECISIONS.md` 
 
 Ordre des dépendances : 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 ; 4 et 5 peuvent s'inverser. Les sessions de chapitre en cours (Ch. II étape C « visuels ») doivent passer **avant** la session 4 ou attendre après la session 6, pour ne pas redessiner un Veilleur ou des cinématiques qui vont être remplacés.
 
-## 5. Décisions à prendre par Kevin
-**Tranchées le 28 octobre 2026** : voir `docs/decisions/2026-10-28-engine-shared.md` (réponses et session où chacune s'applique). La session 1 `engine/shared` est faite.
-
-1. Barre de récupération : toujours visible (Ch. II) ou seulement avec l'aide (Ch. I) ?
-2. Épreuve : 4 PV pour tout le parcours et aucun soin (bible, Ch. II) ou PV de la difficulté et +1 PV entre les phases (Ch. I) ? Épreuve verrouillée par la vraie fin (Ch. I) ou ouverte ?
-3. Aide visuelle : décochée par défaut et proposée à la 3ᵉ défaite en Facile (Ch. I), ou cochée d'office en Facile (Ch. II) ? Disponible en Difficile ?
-4. Phase I du Ch. I : une attaque bloquée renvoie-t-elle à `ready` comme partout ailleurs ?
-5. Respiration du Veilleur (balancement du Ch. II) : la garder ?
-6. Typographie du titre de fin d'intro (« Lumen » coloré ou non ; sous-titre en Big Shoulders 26 px ou DM Sans 17 px) et règle du titre de fin d'outro (annonce du chapitre suivant).
-7. Ordre des boutons de langue et langue par défaut.
-8. Style du repère d'aide (barre au-dessus de la tête ou cercle qui se resserre).
-9. Sous-titre de la difficulté Difficile : commun ou par chapitre ?
+## 5. Décisions
+Tranchées le 28 octobre 2026 : voir `docs/decisions/2026-10-28-engine-shared.md`, §1.

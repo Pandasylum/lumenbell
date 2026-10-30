@@ -9,18 +9,12 @@ Décisions de Kevin, 27 octobre 2026. Elles priment sur le contenu actuel de `ch
 - Le Veilleur ne parle pas ; sa lanterne s'appelle « sceptre-lanterne » / « lanterne », jamais « bâton ».
 - Féminin de Veilleur : **Veilleure**.
 
-## Histoire du chapitre
-Le Veilleur gagne tous les combats et perd quand même la tour : la mer garde ce qu'elle prend.
-- Intro : la tour est muette ; on dit que sa gardienne veille encore.
-- Phase I (la Voix Creuse) : la gardienne est tombée avant lui, corrompue ; il n'en reste qu'un reflet. Quand le miroir qui lui tient lieu de visage explose, **une lanterne de Veilleur tombe dans l'eau, flamme turquoise, et coule en pulsant**.
-- Phase II (le Roi de Rouille) : le Lié de la tour, jamais rescellé. Il porte sur la tête la cloche du Phare. **Une ancre géante est dans la cale avant son arrivée ; il la saisit pour combattre.**
-- Phase III (le Phare Noyé, deux formes) : un parasite de l'Umbryn, la Sans-Fond, bâtit la tour avec le corps du Roi. Forme I : la tour ; forme II : la méduse à découvert (la tour éclate). À la fin, la cloche gît dans les décombres.
-- La lueur turquoise est le reste de Lumen de la gardienne, teinté par la mer ; jamais expliqué.
+Lore : voir `docs/LORE.md`, qui prime sur ce document.
 
-## Pièces du Roi → pièces de la tour (phase III)
-Le Roi peut être redessiné pour être plus esthétique, mais chaque pièce doit servir à la tour.
+## Pièces de l'Ancien → pièces de la tour (phase III)
+L'Ancien peut être redessiné pour être plus esthétique, mais chaque pièce doit servir à la tour.
 
-| Pièce du Roi (phase II) | Rôle dans la tour (phase III) |
+| Pièce de l'Ancien (phase II) | Rôle dans la tour (phase III) |
 |---|---|
 | Cloche de tête | Lanterne du sommet, la méduse brille dedans ; elle tombe quand la tour éclate |
 | Cloches du torse | Étages de la tour |
@@ -33,11 +27,13 @@ Le Roi peut être redessiné pour être plus esthétique, mais chaque pièce doi
 La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (écriture ancienne inventée, dessinée une seule fois et réutilisée) ; le mot **Couronne** (EN : **Crown**) est gravé en clair au centre, visible en gros plan dans l'outro. Le joueur peut croire que c'est lié à la tête du Roi : fausse piste voulue.
 
 ## Mécaniques
-- Phase I : esquiver sans mordre aux faux reflets (esquiver une illusion n'est pas une faute de série ; la faute n'existe que si le joueur reçoit le coup de retour, donc un dégât : validé le 30 octobre). Phase II : parer. Phase III : rester appuyé pour faire barrage, toucher pour la foudre et les pics.
+- Phase I : esquiver sans mordre aux faux reflets (esquiver une illusion n'est pas une faute de série ; la faute n'existe que si le joueur reçoit le coup de retour, donc un dégât : validé le 30 octobre). Phase II : bloquer. Phase III : rester appuyé pour faire barrage, toucher pour la foudre et les pics.
 - La riposte vient d'une **série réussie** (règle du Chapitre I), sans fenêtre « FRAPPE ! ». La contre-attaque avec jauge de fatigue (chaque attaque du boss la fait monter, point faible dévoilé, contre-attaque automatique) est **réservée à un chapitre suivant** : à ne pas implémenter, à ne pas supprimer des idées.
-- Difficultés : mêmes valeurs que le Chapitre I pour le Veilleur (PV 6/4/3, Épreuve 4 PV, fenêtres de parade ×2 / ×1 / ×0,6). PV des boss à ajuster après tests.
+- Difficultés : mêmes valeurs que le Chapitre I pour le Veilleur (PV 6/4/3, Épreuve 4 PV, fenêtres de blocage ×2 / ×1 / ×0,6). PV des boss à ajuster après tests.
 
 ## Textes validés (français ; l'anglais est à écrire dans le même esprit)
+
+Référence lue par tests/ch2-texts.js ; ne pas déplacer. Les nouveaux textes en attente sont dans CHANGEMENTS.md:A.
 **Intro** : 1. « Sur la côte, la brume ne se lève plus. » 2. « Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond. » 3. « Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend. » 4. « On dit que sa gardienne veille encore là-haut. » 5. Titre : « Chapitre II · Silent Bells ».
 
 **Phase I · La salle des reflets** (boss : la Voix Creuse) : entrée « Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur. » ; fin « L'espace d'un instant, la lanterne du Veilleur faiblit. » (c'est la lanterne du joueur qui faiblit, pas la turquoise ; la trappe, la chute de la lanterne turquoise et le miroir brisé sont montrés, pas écrits)
@@ -56,6 +52,8 @@ La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (�
 À supprimer de l'ancienne version : « Le Roi n'est plus le Roi », « Fais taire le glas », « Ne crois pas ce que tu vois », « Éteins le phare », les modes d'emploi dans les cartes de phase, l'intro « étoiles / bâton », « marais des Cloches », « lac gelé », la fonderie, « les villages avaient fondu leurs cloches ».
 
 ## Textes validés (anglais)
+
+Référence lue par tests/ch2-texts.js ; ne pas déplacer. Les nouveaux textes en attente sont dans CHANGEMENTS.md:A.
 Titres et boss : Phase I · The Mirror Hall (The Hollow Voice) ; Phase II · The Hold (The Rust King) ; Phase III · The Reefs (The Drowned Lighthouse ; forme II : The Shattered). « Crown » traduit « Couronne ». Le féminin de la gardienne n'apparaît pas en anglais (« its keeper »), il se voit à l'image.
 
 **Intro** : 1. "On the coast, the mist no longer lifts." 2. "Out at sea, the Drowned Lighthouse stands dark. No bell answers it." 3. "The ships no longer return. The fishermen say the sea keeps what it takes." 4. "They say its keeper still watches up there." 5. Title: "Chapter II · Silent Bells".
@@ -69,29 +67,14 @@ Titres et boss : Phase I · The Mirror Hall (The Hollow Voice) ; Phase II · The
 **Outro** : 1. "By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again." 2. "On it, a single word is engraved: Crown." 3. "And this time, the earth has not stopped trembling." 4. "In the heart of the forest, a Spire's light is failing." 5. "Chapter III. To be continued."
 
 ## Code couleur par chapitre
-Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III : racines, vert mousse tirant sur le jaune (distinct du turquoise). Chapitre IV : givre, bleu-blanc pâle. Le titre « à suivre » et le point de la Couronne dans le menu suivent ce code.
-
-## La Couronne et les tours (ordre définitif)
-Six tours en cercle, une au centre (la clé, le dénouement). Chaque lumière perdue fragilise le sceau et l'ancre que la Couronne représente. Trois pertes sur six. **Les pertes ne dépendent jamais de la performance** (les chapitres se rejouent à volonté).
-
-| Ch. | Tour | Sort |
-|---|---|---|
-| I | Montagne | Gardée |
-| II | Phare Noyé | Perdue |
-| III | Racines | Au choix (le village ou la tour ; le choix se rejoue à chaque passage, le dernier fait foi) ; fragment : la berceuse du village |
-| IV | Givre | Perdue ; fragment : page des carnets de la Forge (« se disent aussi les Liés »), le milieu du jeu |
-| V | Tour vide | Perdue ; fragment : deux lanternes, un seul lit |
-| VI | La brèche (le Roi Sombre) | Gardée ; fragment : sa lanterne de Veilleur éteinte à la ceinture |
-| VII | Le cœur | Dénouement |
-
-La fin : les lumières ne changent que le rendu (image, ton), jamais le choix de l'issue (cloche, rayon, éclats). Idée de menu : la Couronne (six points autour d'un septième, allumés / éteints / fragiles).
+Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III : racines, vert mousse tirant sur le jaune (distinct du turquoise). Chapitre IV : givre, bleu-blanc pâle. Chapitre V : gris argenté. Chapitre VI : violet profond. Chapitre VII : blanc. Héros : jaune neutre. Le titre « à suivre » et le point de la Couronne dans le menu suivent ce code.
 
 ## Écarts techniques constatés à l'audit (à traiter dans cet ordre)
 1. `_(fr, en)` à l'envers par rapport à Ember Bridge `_(en, fr)` : **inverser avant toute fusion**.
 2. Clés de sauvegarde `pn-…` et `db-…` : à passer en `lb-…` communes (langue, son, musique, intro vue, progression, records), avec migration des anciennes clés.
 3. Polices Google Fonts en ligne : les intégrer comme au Chapitre I (`build/fonts.css`), supprimer les `<link>` Google.
 4. Menu propre avec lien vers l'ancien artefact du Chapitre I : à remplacer par le futur menu commun.
-5. Pas de crochets de test : prévoir un test de fumée (déblocage via `localStorage` `db-unl`).
+5. ~~Pas de crochets de test : prévoir un test de fumée (déblocage via `localStorage` `db-unl`).~~ **Remplacé** par la pratique décrite dans la section « Tests » de `chapters/ch2-silent-bells/NOTES.md` (copie de test à crochets, `dist` publié sans crochet).
 
 ## Sorts et rages (décisions du 27 octobre, pour C1 puis session équilibrage)
 
@@ -103,17 +86,17 @@ Seul l'aspect change ; les valeurs (timings, fenêtres) restent celles du code j
 - Gardés : orbe, volée, cri.
 - **Rage = Échos** (trois sources, une seule vraie) ; les reflets se brisent un à un, avec un éclat qui part vers le Veilleur.
 
-### Phase II · La cale (le Roi de Rouille) : blocage
+### Phase II · La cale (l'Ancien de Rouille) : blocage
 - Gardés : ancre plongeante, balayage, glas (onde de la cloche de tête).
-- **Harpon** : la seconde main du Roi est un harpon (aller, puis retour). Le crochet à chaîne disparaît (différencier du Colosse).
+- **Harpon** : la seconde main de l'Ancien est un harpon (aller, puis retour). Le crochet à chaîne disparaît (différencier du Colosse).
 - **Vague d'eau** (remplace piétinement et pierres) : il tape du pied, la vague naît sous son pied et grandit en avançant vers le Veilleur. Au mur du fond, la cale tremble et une poutre tombe du plafond (deux chutes = deux blocages, comme les anciennes pierres).
-- **Rage = Nuage de rouille** : il secoue sa cloche, un nuage de poussière rouge descend et masque le décor (jamais le signal de blocage ; le Roi reste repérable à la lueur de sa cloche), avance, blocage au contact.
+- **Rage = Nuage de rouille** : il secoue sa cloche, un nuage de poussière rouge descend et masque le décor (jamais le signal de blocage ; l'Ancien reste repérable à la lueur de sa cloche), avance, blocage au contact.
 - **Rage = Double vague** : deux vagues décalées, la seconde plus grande, la poutre tombe après la seconde.
 
 ### Phase III · Les récifs (le Phare Noyé)
 - Gardés : faisceau, foudre.
 - **Pics de glace → pics de récif** : pointes de roche noire jaillissant du sol marin, un peu d'écume. Même timing, même effet.
-- **Vague du Roi reprise en forme I** (maintien).
+- **Vague de l'Ancien reprise en forme I** (maintien).
 - **Rage forme I = Marée montante** : la vague traverse les récifs, les pics jaillissent dans son sillage au retrait (maintenir pour la vague, tap pour les pics).
 - **Rage forme II = Tempête de cloches** : anneaux tirés en alternance depuis les deux lanternes latérales, puis cloche-piège à la fin (tap, puis maintien). L'implosion reste la finale.
 - Forme II inchangée sinon : anneaux, cloche-piège, ancre, lanternes, éclatement, reformation, implosion.
@@ -123,7 +106,7 @@ Plus de forge, de neige, de lac gelé ni d'aurore : salle des reflets (eau-miroi
 
 ## Révisions du 28 octobre (retours après test des PR #5 à #7)
 
-**Lore : la cale et le Phare.** Le Phare se dresse sur un récif, une épave est coincée dans ses fondations ; la trappe de la salle des reflets donne dans la cale de cette épave. Fin de phase II : le sol ne cède pas, c'est la coque qui s'effondre autour du Roi ; le plafond s'ouvre, la lune éclaire pour la première fois son corps de métal, et la lueur turquoise de son cœur se voit. La phase III se déroule dans la coque éventrée, à l'air libre, parmi les récifs.
+**Lore : la cale et le Phare.** Le Phare se dresse sur un récif, une épave est coincée dans ses fondations ; la trappe de la salle des reflets donne dans la cale de cette épave. Fin de phase II : le sol ne cède pas, c'est la coque qui s'effondre autour du Roi ; le plafond s'ouvre, la lune éclaire pour la première fois son corps de métal, et la lueur turquoise de son cœur se voit (dès le début de la phase II, fixe, aussi visible par les jointures). La phase III se déroule dans la coque éventrée, à l'air libre, parmi les récifs.
 
 **Indices (rien d'écrit en plus).**
 - Phase I : la trappe est visible dès le début (fermée, rouillée, enchaînée, reflétée dans l'eau), tintement sourd de cloche en dessous, rupture de la chaîne à la fin, la caméra descend par la trappe au début de la phase II (la trappe vue d'en dessous). À la fin, la lanterne du Veilleur (joueur) faiblit un instant.
