@@ -13,3 +13,7 @@
 ## 2026-10-30 · docs/archive-decisions
 - Rien ne change à l'écran : cette session ne déplace que de la documentation (`archives/`).
 - Les décisions en vigueur tiennent maintenant en quelques lignes dans `DECISIONS.md`, avec les trois points encore à valider en tête.
+
+## 2026-10-30 · docs/commun-ch2-spec
+- Rien ne change à l'écran : cette session ne met à jour que de la documentation (`docs/COMMUN.md`, `docs/CH2-SPEC.md`).
+- Le lore et les textes du Chapitre II ne sont plus recopiés dans le cahier des charges : `docs/LORE.md` et `TEXTES.md` font foi.
