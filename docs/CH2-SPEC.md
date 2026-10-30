@@ -33,7 +33,7 @@ Le Roi peut être redessiné pour être plus esthétique, mais chaque pièce doi
 La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (écriture ancienne inventée, dessinée une seule fois et réutilisée) ; le mot **Couronne** (EN : **Crown**) est gravé en clair au centre, visible en gros plan dans l'outro. Le joueur peut croire que c'est lié à la tête du Roi : fausse piste voulue.
 
 ## Mécaniques
-- Phase I : esquiver sans mordre aux faux reflets. Phase II : parer. Phase III : rester appuyé pour faire barrage, toucher pour la foudre et les pics.
+- Phase I : esquiver sans mordre aux faux reflets (esquiver une illusion n'est pas une faute de série ; la faute n'existe que si le joueur reçoit le coup de retour, donc un dégât : validé le 30 octobre). Phase II : parer. Phase III : rester appuyé pour faire barrage, toucher pour la foudre et les pics.
 - La riposte vient d'une **série réussie** (règle du Chapitre I), sans fenêtre « FRAPPE ! ». La contre-attaque avec jauge de fatigue (chaque attaque du boss la fait monter, point faible dévoilé, contre-attaque automatique) est **réservée à un chapitre suivant** : à ne pas implémenter, à ne pas supprimer des idées.
 - Difficultés : mêmes valeurs que le Chapitre I pour le Veilleur (PV 6/4/3, Épreuve 4 PV, fenêtres de parade ×2 / ×1 / ×0,6). PV des boss à ajuster après tests.
 
@@ -95,7 +95,7 @@ La fin : les lumières ne changent que le rendu (image, ton), jamais le choix de
 
 ## Sorts et rages (décisions du 27 octobre, pour C1 puis session équilibrage)
 
-**Vocabulaire (28 octobre) :** le Veilleur n'a plus d'épée, donc plus de « parade ». Un seul geste, **bloquer** (EN *block*), pour les phases où l'on faisait parer, et **esquiver** ; la phase III garde le blocage tenu (barrage). Même principe, mêmes fonctions et mêmes états que le Chapitre I (`ready` → action → `recover`). Les noms dans le code et les textes (FR/EN, lecteur d'écran, aide, difficultés) suivent.
+**Vocabulaire (28 octobre) :** le Veilleur n'a plus d'épée, donc plus de « parade ». Un seul geste, **bloquer** (EN *block*), pour les phases où l'on faisait parer, et **esquiver** ; la phase III garde le blocage tenu (barrage), avec le bouton « Bloquer » / « Block » (validé le 30 octobre ; avant : « Garde » / « Guard »). Même principe, mêmes fonctions et mêmes états que le Chapitre I (`ready` → action → `recover`). Les noms dans le code et les textes (FR/EN, lecteur d'écran, aide, difficultés) suivent.
 
 Seul l'aspect change ; les valeurs (timings, fenêtres) restent celles du code jusqu'à la session d'équilibrage.
 

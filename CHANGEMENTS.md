@@ -2,7 +2,7 @@ Lumenbell · Changements à faire (chapitres I et II)
 
 Version du 30 octobre 2026 · Kevin
 
-À l'attention de Claude. Ce document liste les modifications validées à appliquer au jeu existant. Lire d'abord BIBLE.md et le document `docs/LORE.md`. Ne rien appliquer qui ne soit pas ici : les questions encore ouvertes sont dans Lumenbell · À valider et ne doivent pas être implémentées. En cas de doute : ne pas deviner, proposer.
+À l'attention de Claude. Ce document liste les modifications validées à faire dans le jeu existant. Lire d'abord BIBLE.md et le document `docs/LORE.md`. Ne rien appliquer qui ne soit pas ici : les questions encore ouvertes sont dans Lumenbell · À valider et ne doivent pas être implémentées. En cas de doute : ne pas deviner, proposer.
 
 Suivi
 
@@ -18,6 +18,7 @@ F	Documents à mettre à jour	À faire	28 octobre 2026 (mis à jour le 29)
 G	Chapitre I · Lanterne du Colosse de braise	À faire	29 octobre 2026	
 H	Chapitre II · Rémanence (évaporation du Lumen)	À faire	30 octobre 2026	
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
+J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	À faire	30 octobre 2026	
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
 
@@ -136,6 +137,13 @@ I. Chapitre II · Pleurs avant la Voix (à tenter)
 Avant l'apparition de la Voix Creuse (phase I), ajouter un pleur étouffé dans le son. Tout le son est synthétisé : pas de fichier audio.
 Sobre et bref, sans texte : il porte la « profonde tristesse » que le texte d'entrée annonce sans la répéter à l'écran.
 À essayer : proposer deux variantes si possible ; Kevin choisit à l'écoute. Si l'essai ne convainc pas, le retirer.
+J. Chapitre II · Validations de Kevin du 30 octobre (voir docs/decisions/2026-10-30-ch2-validations.md)
+Entrées À faire, non appliquées. Elles partent plus tard, dans la session unique du chapitre.
+(a) Bouton de la phase III : « Garde » / « Guard » devient « Bloquer » / « Block » (le geste reste le blocage tenu). Libellé initial et libellés changés en cours de phase dans le code du chapitre ; lecteur d'écran : « Ta garde est brisée » / "Your guard is broken." est conservé volontairement (tranché le 30 octobre, GLOSSAIRE n° 2) : ne pas le changer. Test d'annonce : relire tests/ch2-announce.js (liste BAN, qui contient « garde brisée » / « guard broken » et ne doit pas matcher « Bloquer » / « Block »), puis régénérer TEXTES.md (node tests/ch2-texts.js --write) et relire le diff.
+(b) Règle de série sur les illusions : esquiver une illusion n'est pas une faute de série. La faute n'existe que si le joueur reçoit le coup de retour, donc un dégât. Mettre à jour fooled() et la partie 4 de tests/ch2-input.js (aujourd'hui : l'illusion esquivée casse la série, même si le retour est esquivé). Ne pas toucher à DG.backTurn ni à DG.backWin (valeurs provisoires).
+(c) Carte de défaite du Chapitre II : un simple texte, sur le modèle du Chapitre I. Certaines versions cachent un conseil, par exemple contre la Voix : « Le Veilleur n'a pas su distinguer les illusions… » (exemple d'intention, pas un texte validé). Textes à fournir (projet Lore) : ne rien rédiger ni coder avant de les recevoir.
+Non concernés : valeurs provisoires (SP, DG.backWin, HULL, SHOCK.form), Difficile du Chapitre II, onomatopées CLANG / KRAKOOM / KRAAAK (validées, rien à changer).
+
 Vérifications
 Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.
 Chercher « Drowned Beacon ».
