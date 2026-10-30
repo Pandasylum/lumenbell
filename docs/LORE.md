@@ -120,6 +120,8 @@ Vharos, le Roi Spectral, est le principal des Doyens. Il a cédé au murmure de 
 - Les lumières des tours gardées ou perdues ne changent que le rendu de la fin (image, ton), jamais le choix de l'issue. Chaque tour perdue peut retirer sa teinte au blanc de la fin, si le rendu est propre (à adapter le moment venu).
 
 ## 7. L'ordre des Veilleurs
+
+Rangs, du plus bas au plus haut : novices, Sonneurs, Veilleurs, Doyens.
  
 - **Les novices** apprennent à porter une part du Lumen dans une lanterne.
 - **Les Sonneurs** réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang de l'ordre. « Fixer » = recharger la cloche en Lumen. Rang utilisé au chapitre III.
@@ -215,7 +217,7 @@ Tour désertée, perdue. Fragment principal : deux lanternes, un seul lit. Un Ve
 Vharos, le Roi Spectral, principal des Doyens, a cédé au murmure de son plein gré et tué le Lié de la tour VI. Phase I : le Doyen. Entre I et II, on le voit se transformer en absorbant le Lumen de la lanterne, qui s’éteint. Phase II : Vharos. Phase III, en deux temps : Vharos sur Nocthrys, dragon d’obsidienne, la dépouille du Lié relevée par le Roi lui-même au début de la phase, que l’on voit se transformer ; puis les deux côte à côte au sol, Nocthrys blessé. Fragment principal : la lanterne éteinte à sa ceinture, sans certitude sur son propriétaire. Teinte : le violet clair du Lié qui se corrompt.
 Le choix. Sceller : le Lumen lie le Roi sous la tour, où il devient le Lié de la tour VI ; la tour est gardée, la lanterne consumée, le village (déjà perdu) reste perdu ; le mensonge recommence. Sacrifier : on abat le Roi et on emporte la lanterne ; le Lumen est sauvé, la tour perdue, personne ne veille. Ni l’un ni l’autre ne dépend d’un village. Il reste sept Liés. Le Lumen sauvé ne change que le rendu de la fin. 
 
-Mode du choix (secret, un seul bouton). Une fenêtre fixe de 8 secondes. Le Roi, à terre, tend sa lanterne éteinte, montrée à l’écran, sans HUD. Il dit (voix et sous-titre) : « Vas-y, achève-moi et emporte la lanterne, si tu te sens capable de la supporter. » Appuyer : sacrifier. Ne rien faire : sceller. La pause ne compte pas comme inaction. Le joueur appuie depuis six chapitres : l’inaction devient un geste conscient 
+Mode du choix (secret, un seul bouton). Une fenêtre fixe de 8 secondes. Le Roi, à terre, tend sa lanterne éteinte, montrée à l’écran, sans HUD. Il dit (voix si techniquement possible, voir Q29 ; sous-titre dans tous les cas) : « Vas-y, achève-moi et emporte la lanterne, si tu te sens capable de la supporter. » : Appuyer : sacrifier. Ne rien faire : sceller. La pause arrête le jeu et le compteur de 8 secondes. Le joueur appuie depuis six chapitres : l’inaction devient un geste conscient 
 
 ### Chapitre VII · Le cœur (à écrire)
  
@@ -356,5 +358,5 @@ Une section par date. Ajouter les nouvelles décisions en bas, avec la date.
 - Q24 : Nocthrys est la dépouille du Lié de la tour VI, relevée par le Roi Spectral lui-même ; pas de parasite ; ses pouvoirs reçus de l'Umbryn le rapprochent des parasites sans en faire un.
 - Q25 : le Lié de la tour VI gardait le rempart ; sa perte ouvre la brèche (arrivée de l'Umbryn, fin du dernier rempart).
 - Q26 : la lanterne du Lié de la tour III est rallumée par le héros (Lumen lié à l'origine), résonne à la clochette du Sonneur ; le Sonneur devient Veilleur et reste à la tour.
-- Q27 : choix du chapitre VI = appuyer (sacrifier) ou ne rien faire (sceller), fenêtre de 8 s, sans garde-fou, Roi parlant avec sous-titre.
+- Q27 : choix du chapitre VI = appuyer (sacrifier) ou ne rien faire (sceller), fenêtre de 8 s, sans garde-fou ; la pause arrête le compteur ; Roi parlant, voix si faisable (Q29), sous-titre toujours.
 - Q7 : le Sonneur n'a pas de nom ; paroles de la berceuse = sept vaillants ; village = tradition et croyance.
