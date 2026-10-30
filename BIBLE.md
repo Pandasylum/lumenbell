@@ -27,12 +27,12 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 
 ## Le Veilleur et ses règles
 - **Un seul bouton** : Espace, flèche haut, Z ou W, ou toucher l'écran. P pause, R recommencer.
-- Le même bouton bloque, esquive ou pare selon le moment : jeu de timing.
+- Le même bouton bloque ou esquive selon le moment : jeu de timing.
 - **Le sceptre-lanterne** est son seul outil ; tous ses contres viennent de lui.
-- Après un combo paré, orbe de lumière ; après un souffle paré, il fonce sur le Colosse.
+- Après un combo bloqué, orbe de lumière ; après un souffle bloqué, il fonce sur le Colosse.
 
 ## Difficultés
-| Mode | PV Veilleur | PV Colosse | Fenêtres de parade | Particularités |
+| Mode | PV Veilleur | PV Colosse | Fenêtres de blocage | Particularités |
 |---|---|---|---|---|
 | Facile | 6 | 8 | × 2 | Aides actives, jets de feu réduits |
 | Normal | 4 | 10 | × 1 | Référence de l'équilibrage |
@@ -77,5 +77,5 @@ Les noms affichés « marteau » alors que l'arme est une masse sont à corriger
 - Polices Big Shoulders Display et DM Sans (licence libre), intégrées : aucun appel à Google Fonts en version publiée.
 
 ## Réglages sensibles (ne pas toucher sans validation)
-- Fenêtre de parade du souffle de flamme : 0,2 s ; préparation du souffle phase III Normal : 0,9 s ; phase I inchangée en Normal.
+- Fenêtre de blocage du souffle de flamme : 0,2 s ; préparation du souffle phase III Normal : 0,9 s ; phase I inchangée en Normal.
 - Garde en phase III : 0,333 s avec 0,06 s de grâce.
