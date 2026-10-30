@@ -5,3 +5,7 @@
 ## 2026-10-30 · docs/audit-coherence
 - Rien ne change à l'écran : cette session ne produit qu'un rapport d'audit de la documentation (`docs/AUDIT-2026-10-30.md`).
 - Il prépare un nettoyage qui réduira d'environ 40 % ce qu'il faut relire avant chaque session.
+
+## 2026-10-30 · docs/decisions-30-oct
+- Rien ne change à l'écran : cette session n'enregistre que des décisions (documentation).
+- À venir au Chapitre II : le bouton de la phase III s'appellera « Bloquer » / « Block », et esquiver une illusion ne cassera plus la série tant que le coup de retour n'est pas reçu.

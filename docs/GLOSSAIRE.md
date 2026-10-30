@@ -5,7 +5,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 - **Colonnes** : terme FR | terme EN | nom dans le code | règle d'usage | source (`fichier:ligne`).
 - **« — »** : rien de décidé dans le dépôt (pas de nom EN, pas de nom de code).
 - **« lore »** : le terme n'a de source que dans `docs/LORE.md` (non modifié ici).
-- **Priorité des documents** : `docs/LORE.md` est la référence unique du lore ; `CHANGEMENTS.md` liste ce qui reste à appliquer au jeu. Quand le code ou un ancien document dit autre chose, la ligne est dans « À trancher » ; aucun choix n'y est proposé.
+- **Priorité des documents** : `docs/LORE.md` est la référence unique du lore ; `CHANGEMENTS.md` liste ce qui reste à faire dans le jeu. Quand le code ou un ancien document dit autre chose, la ligne est dans « À trancher » ; aucun choix n'y est proposé.
 - Les noms de code sont ceux du Chapitre I (ch1) et du Chapitre II (ch2) ; ils peuvent rester en anglais ou en l'ancien vocabulaire (`CHANGEMENTS.md:27`).
 
 ## Règles de vocabulaire à reprendre
@@ -28,9 +28,9 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 
 | Terme FR | Terme EN | Nom dans le code | Règle d'usage | Source |
 |---|---|---|---|---|
-| Bloquer | Block | `T.barrier` (durée, ch1 phase I et ch2 phase II), `S.guardT` (date d'animation, ch2), `sfx.block`, `ONO.block` (ch2) | Libellé du bouton en phase I du Chapitre I et en phase II du Chapitre II | `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:31` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:119` ; `chapters/ch2-silent-bells/NOTES.md:121-122` |
+| Bloquer | Block | `T.barrier` (durée, ch1 phase I et ch2 phase II), `S.guardT` (date d'animation, ch2), `sfx.block`, `ONO.block` (ch2) | Libellé du bouton en phase I du Chapitre I, en phase II **et en phase III** du Chapitre II (même mot partout ; en phase III le geste reste le blocage tenu) | `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:31` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:119` ; `chapters/ch2-silent-bells/NOTES.md:121-122` |
 | Esquiver | Dodge | `DG.act` / `DG.rec` (durées) ; `S.dodgeT` (date d'animation, ch2) | Libellé du bouton en phase II du Chapitre I et en phase I du Chapitre II | `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:4,31` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:124` |
-| Bloquer tenu / barrage (phase III) | Held block | `R_T.guard` (durée), état tenu tant que le bouton est appuyé (ch2) | « Blocage tenu » dans le cahier des charges ; « barrage » dans les décisions. Le libellé du bouton est à trancher (voir « Garde / Guard ») | `docs/CH2-SPEC.md:98` ; `DECISIONS.md:69` ; `chapters/ch2-silent-bells/NOTES.md:122` |
+| Bloquer tenu / barrage (phase III) | Held block | `R_T.guard` (durée), état tenu tant que le bouton est appuyé (ch2) | « Blocage tenu » dans le cahier des charges ; « barrage » dans les décisions. Le bouton s'appelle « Bloquer » / « Block » (tranché le 30 octobre ; À faire, `CHANGEMENTS.md` J) | `docs/CH2-SPEC.md:98` ; `DECISIONS.md:69` ; `chapters/ch2-silent-bells/NOTES.md:122` |
 | Garde (phase III du Chapitre I) | — | `R_T.guard` ; `drawBarrier` | Durée du blocage de la phase III : 0,333 s avec 0,06 s de grâce | `BIBLE.md:81` ; `chapters/ch1-ember-bridge/src/js/44-p3-belfry-logic.js:4` |
 | Un seul bouton | — | `#ward` (bouton) | Espace, flèche haut, Z ou W, toucher ; le même bouton bloque ou esquive selon le moment ; P pause, R recommencer | `BIBLE.md:29-30` ; `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:31` |
 | Prêt / action / récupération | — | `ready` → `act` → `recover` → `ready` ; `deny` ; `hurt` | Machine à états du Veilleur, commune aux deux chapitres. Noms de code, jamais affichés | `chapters/ch2-silent-bells/src/js/12-hero-states.js:2-4` ; `docs/COMMUN.md:27` |
@@ -144,7 +144,7 @@ Incohérences entre documents, ou entre documents et code. Une ligne par point, 
 
 | # | Point | Sources en tension |
 |---|---|---|
-| 1 | Bouton de la phase III du Chapitre II : « Garde » / « Guard » ou « Bloquer » / « Block » | `DECISIONS.md:107` ; `chapters/ch2-silent-bells/NOTES.md:123` ; `docs/COMMUN.md:47` ; `docs/CH2-SPEC.md:98` |
+| 1 | ~~Bouton de la phase III du Chapitre II : « Garde » / « Guard » ou « Bloquer » / « Block »~~ **Tranché le 30 octobre : « Bloquer » / « Block »** (voir `docs/decisions/2026-10-30-ch2-validations.md`) ; application : `CHANGEMENTS.md` J | `DECISIONS.md:107` ; `chapters/ch2-silent-bells/NOTES.md:123` ; `docs/COMMUN.md:47` ; `docs/CH2-SPEC.md:98` |
 | 2 | Lecteur d'écran de la phase III du Chapitre II : « Ta garde est brisée » / *Your guard is broken* (`garde` / `guard`) alors que le vocabulaire est « bloquer » | `chapters/ch2-silent-bells/src/js/12-hero-states.js:40` ; `DECISIONS.md:107` |
 | 3 | Bouton « Parer » / *Parry* en phase III du Chapitre I, alors que « parer » est abandonné | `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:31` ; `docs/COMMUN.md:47` ; `DEMANDES.md:64-67` |
 | 4 | Textes du Chapitre I en « paré » / « Parade réussie » / « Combo paré », libellé « Parades » des stats, code `parry`, `parries`, `DMG_PARRY` | `docs/TEXTES-CH1.md:55,61,75,177` ; `chapters/ch1-ember-bridge/src/js/44-p3-belfry-logic.js:315` ; `docs/COMMUN.md:49-52` |
