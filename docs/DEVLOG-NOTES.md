@@ -20,3 +20,7 @@
 - Rien ne change à l'écran : la correction ne touche que la documentation du cahier des charges (textes de référence rétablis pour le test).
 - Rien ne change à l'écran : la décision porte sur la documentation (`DECISIONS.md` renvoie au journal du lore).
 - Les entrées Lore des 28 et 29 octobre se lisent dans `docs/LORE.md` §15, pas de copie dans `DECISIONS.md`.
+- Rien ne change à l'écran : diagnostic de la CI de la PR #19, aucun correctif nécessaire (déjà résolu par les commits suivants).
+
+## 2026-10-30 · docs/ch2-notes-compression
+- Rien ne change à l'écran : cette session ne touche que la documentation (`chapters/ch2-silent-bells/NOTES.md` allégé) et le déclencheur du workflow de tests.
