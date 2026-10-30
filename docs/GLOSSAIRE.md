@@ -62,9 +62,10 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Les Liés | The Bound | — | Vrai nom des Scellés ; secret ; textes écrits seulement, à partir du chapitre IV | `BIBLE.md:21` ; `docs/LORE.md:42,51` |
 | Les parasites | (jamais définis) | — | Lore seulement ; jamais nommés à l'écran | lore (`docs/LORE.md:52`) |
 | L'Umbryn | The Umbryn | — | Présence ancienne endormie au centre. Secret | `BIBLE.md:21` ; `docs/LORE.md:53` |
-| Les Doyens | The Doyens | — | Plus anciens de l'ordre. Chapitre VI, pas dans le jeu | lore (`docs/LORE.md:60`) |
+| Les Doyens | The Priors | — | Plus anciens de l’ordre, vivants. Chapitre VI, pas dans le jeu | lore (docs/LORE.md) |
 | Les Sonneurs | The Bellringers | — | Rang de l'ordre, jamais un titre de boss | lore (`docs/LORE.md:59,326`) ; `CHANGEMENTS.md:54,147` |
-| Le Roi Spectral | — | — | Chapitre VI, pas dans le jeu. Ne pas toucher | lore (`docs/LORE.md:99`) ; `CHANGEMENTS.md:109` |
+| Le Roi Spectral | The Spectral King | — | Vharos, principal des Doyens ; « le Doyen » en phase I du chapitre VI, avant sa transformation. Chapitre VI, pas dans le jeu. Ne pas toucher | lore (docs/LORE.md) ; CHANGEMENTS.md |
+| Le Lié principal | — | — | Le héros à la fin (chapitre VII) : il succède au Premier Lié au centre. Il reste sept Liés. Secret, jamais dit à l’écran | lore (docs/LORE.md) |
 
 ## Éléments de jeu
 
@@ -87,9 +88,16 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Rémanence | Afterglow | — | Évaporation du Lumen à la fin de la phase III du Chapitre II, sans texte ni bruitage | lore (`docs/LORE.md:57`) ; `CHANGEMENTS.md:131-133` |
 | Masse | mace | `demonBody` | L'arme du Colosse est une masse, pas un marteau | `BIBLE.md:45,68` |
 | Rage | rage | `rages`, `LB.rage(name)` (proposé) | Aucun nom à l'écran ; nom au lecteur d'écran. Chapitre I : Râle d'agonie, Fureur, Embrasement ; Difficile : Fureur de braise, Danse des chaînes, Embrasement final | `BIBLE.md:48` ; `docs/COMMUN.md:73-74` |
+
 | Rages du Chapitre II | — (noms EN non définis dans les sources lues) | `storm()` (Tempête de cloches) | Échos (phase I), Nuage de rouille et Double vague (phase II), Marée montante (forme I), Tempête de cloches (forme II) | `docs/CH2-SPEC.md:104-118` ; `chapters/ch2-silent-bells/NOTES.md:89` |
 | Harpon | harpoon | `harp` | Main gauche du boss de la phase II ; le crochet à chaîne n'existe qu'au Colosse | `docs/CH2-SPEC.md:108` ; `chapters/ch2-silent-bells/NOTES.md:97` |
 | Code couleur par chapitre | — | `CH_COL` | I braise (orange chaud) ; II marée (turquoise `#4fe0cc`) ; III racine (vert mousse tirant sur le jaune) ; IV givre (bleu-blanc pâle) ; V cendre (gris argenté) ; VI ombre (violet) ; VII vide (blanc) ; héros jaune neutre | `docs/CH2-SPEC.md:72` ; `docs/LORE.md:107-117` ; `chapters/ch2-silent-bells/NOTES.md:94` |
+=======
+| Rages du Chapitre II | — (noms EN non définis dans les sources lues) | `storm()` (Tempête de cloches) | Échos (phase I), Nuage de rouille et Double vague (phase II), Marée montante (forme I), Tempête de cloches (forme II) | `docs/CH2-SPEC.md:104-118` ; `chapters/ch2-silent-bells/NOTES.md:129` |
+| Harpon | harpoon | `harp` | Main gauche du boss de la phase II ; le crochet à chaîne n'existe qu'au Colosse | `docs/CH2-SPEC.md:108` ; `chapters/ch2-silent-bells/NOTES.md:112` |
+| Code couleur par chapitre | — | `CH_COL` | I braise (orange chaud) ; II marée (turquoise `#4fe0cc`) ; III racine (vert mousse tirant sur le jaune) ; IV givre (bleu-blanc pâle) ; V cendre (gris argenté) ; VI ombre (violet) ; VII vide (blanc) ; héros jaune neutre | `docs/CH2-SPEC.md:72` ; `docs/LORE.md:107-117` ; `chapters/ch2-silent-bells/NOTES.md:109` |
+| Clochette | handbell | — | Catalyseur de la lumière, même modèle que celle des sceptres : elle fait résonner le Lumen, elle n’en fournit pas. Chapitre III, pas dans le jeu | lore (docs/LORE.md) |
+
 
 ## Interface
 
@@ -139,6 +147,7 @@ Seules ces onomatopées et les titres de phase s'affichent (`BIBLE.md:16`). Les 
 | « brisée » pour une chaîne ou une lanterne (« une chaîne cède », « une lanterne s'éteint ») | Formulation retenue | `DECISIONS.md` (« Refonte du lore Ch. I ») ; `docs/LORE.md:118` |
 | Nom, citation, musique ou icône tirés d'une œuvre existante | Propriété intellectuelle | `BIBLE.md:18` |
 | Texte qui explique l'image | Ce qui se déduit du combat reste déduit | `BIBLE.md:19` ; `docs/CH2-SPEC.md:7` |
+| « huitième Lié », « huitième place » | Abandonnés le 30 octobre : le héros succède au Premier Lié, il reste sept Liés | docs/LORE.md § 8, § 11 |
 
 ## À trancher
 

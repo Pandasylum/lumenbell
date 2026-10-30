@@ -82,6 +82,7 @@ Genou à terre : garder l'outro (carton 1 : le Colosse s'incline de lui-même fa
 E. Le Veilleur (commun) · Couleur de la lanterne et des tirs
 
 Décision : le Veilleur a un jaune neutre ; quand il tire, le jaune vire vers le jaune-blanc (et non plus vers le bleu-blanc, pour ne pas confondre avec le givre du chapitre IV). Le rendu est à valider à l'écran (le jaune-blanc est plus cohérent mais peut être moins beau).
+Raison de lore : le Lumen du héros est affaibli, le blanc d’origine atténué se teinte de jaune ; il reste supérieur à celui des autres et le blanc ressort dans ses tirs.
 
 À faire :
 
@@ -121,6 +122,12 @@ Le renommage « Roi Sombre » en « Roi Spectral » dans docs/CH2-SPEC.md (table
 - Chapitre I : lanterne orange faible et pulsante à côté des chaînes en fin de phase II.
 - Genou : on garde celui de l'outro ; fin de phase I sans « à genoux ».
 - Traductions anglaises du chapitre II validées.
+## 2026-10-30 – Lore : chapitre VI, Doyens, héros (Kevin)
+- Le Doyen de la phase I du chapitre VI est Vharos avant sa transformation (un seul personnage).
+- Chapitre VI : sceller = scellé de force, tour gardée par le sceau seul, au prix d’un Lumen et d’une lanterne ; sacrifier = Lumen sauvé, tour perdue, tour centrale ébranlée (rendu de la fin seulement).
+- Le héros devient le Lié principal du centre, à la place du Premier Lié : il reste sept Liés.
+- Héros : Lumen affaibli, blanc teinté de jaune ; clochette : catalyseur de la lumière.
+- Noms anglais : The Priors, The Spectral King.
 G. Chapitre I · Lanterne du Colosse de braise (validé le 29 octobre)
 Ajouter une petite lanterne de Veilleur dans le décor de la Fonderie, à côté des chaînes, visible en fin de phase II.
 Lueur orange (code couleur de la braise), faible, avec une pulsation lente : le Lumen vivant pulse. Elle est allumée : le Colosse n'est pas totalement consumé.
