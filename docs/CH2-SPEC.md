@@ -31,8 +31,40 @@ La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (�
 - La riposte vient d'une **série réussie** (règle du Chapitre I), sans fenêtre « FRAPPE ! ». La contre-attaque avec jauge de fatigue (chaque attaque du boss la fait monter, point faible dévoilé, contre-attaque automatique) est **réservée à un chapitre suivant** : à ne pas implémenter, à ne pas supprimer des idées.
 - Difficultés : mêmes valeurs que le Chapitre I pour le Veilleur (PV 6/4/3, Épreuve 4 PV, fenêtres de blocage ×2 / ×1 / ×0,6). PV des boss à ajuster après tests.
 
-## Textes
-Textes du chapitre (FR/EN) : voir `chapters/ch2-silent-bells/TEXTES.md` (généré depuis le jeu). Les nouveaux textes en attente d'application sont dans `CHANGEMENTS.md`, section A.
+## Textes validés (français ; l'anglais est à écrire dans le même esprit)
+
+Référence lue par tests/ch2-texts.js ; ne pas déplacer. Les nouveaux textes en attente sont dans CHANGEMENTS.md:A.
+**Intro** : 1. « Sur la côte, la brume ne se lève plus. » 2. « Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond. » 3. « Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend. » 4. « On dit que sa gardienne veille encore là-haut. » 5. Titre : « Chapitre II · Silent Bells ».
+
+**Phase I · La salle des reflets** (boss : la Voix Creuse) : entrée « Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur. » ; fin « L'espace d'un instant, la lanterne du Veilleur faiblit. » (c'est la lanterne du joueur qui faiblit, pas la turquoise ; la trappe, la chute de la lanterne turquoise et le miroir brisé sont montrés, pas écrits)
+
+**Phase II · La cale** (boss : le Roi de Rouille) : entrée « Sous le Phare, la coque d'un navire échoué. Elle sent le fer et le sel. » ; fin « La coque s'effondre autour du Roi. Pour la première fois, la lune se reflète sur son corps de métal. » (le sol ne cède pas : c'est le navire qui s'écroule, la lueur turquoise vient de son cœur et se voit)
+
+**Phase III · Les récifs** (boss : le Phare Noyé ; forme II : l'Éclaté) : entrée « La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif. » ; forme II « La tour éclate. Au milieu des débris, la méduse, à découvert. » ; fin « Dans les décombres, la cloche du Phare, fêlée et muette. »
+
+**Outro** (6 cartons, même construction que celui du Chapitre I : `SC` avec durées + dessins) :
+1. « Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus. »
+2. Gros plan de la cloche : « Sur celle-ci, un seul mot est gravé : Couronne. »
+3. « Et cette fois, la terre n'a pas cessé de trembler. » Image : la vallée et les tours du Chapitre I, fissures, une tour éteinte, les autres vacillent.
+4. « Au cœur de la forêt, la lumière d'une Flèche faiblit. » (indice de la tour suivante : les Racines ; la Flèche liée de la forêt commence à faiblir ; plus de lueur turquoise sous les vagues)
+5. « Chapitre III. À suivre. », titre teinté de la couleur du chapitre suivant.
+
+À supprimer de l'ancienne version : « Le Roi n'est plus le Roi », « Fais taire le glas », « Ne crois pas ce que tu vois », « Éteins le phare », les modes d'emploi dans les cartes de phase, l'intro « étoiles / bâton », « marais des Cloches », « lac gelé », la fonderie, « les villages avaient fondu leurs cloches ».
+
+## Textes validés (anglais)
+
+Référence lue par tests/ch2-texts.js ; ne pas déplacer. Les nouveaux textes en attente sont dans CHANGEMENTS.md:A.
+Titres et boss : Phase I · The Mirror Hall (The Hollow Voice) ; Phase II · The Hold (The Rust King) ; Phase III · The Reefs (The Drowned Lighthouse ; forme II : The Shattered). « Crown » traduit « Couronne ». Le féminin de la gardienne n'apparaît pas en anglais (« its keeper »), il se voit à l'image.
+
+**Intro** : 1. "On the coast, the mist no longer lifts." 2. "Out at sea, the Drowned Lighthouse stands dark. No bell answers it." 3. "The ships no longer return. The fishermen say the sea keeps what it takes." 4. "They say its keeper still watches up there." 5. Title: "Chapter II · Silent Bells".
+
+**Phase I** : entrée "At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there." ; fin "For a moment, the Watcher's lantern dims."
+
+**Phase II** : entrée "Beneath the Lighthouse, the hull of a stranded ship. It smells of iron and salt." ; fin "The hull collapses around the King. For the first time, the moon gleams on his body of metal."
+
+**Phase III** : entrée "The sea has drawn back. The ships it took sleep on the reef." ; forme II "The tower bursts. Among the debris, the jellyfish, laid bare." ; fin "In the wreckage, the Lighthouse's bell, cracked and silent."
+
+**Outro** : 1. "By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again." 2. "On it, a single word is engraved: Crown." 3. "And this time, the earth has not stopped trembling." 4. "In the heart of the forest, a Spire's light is failing." 5. "Chapter III. To be continued."
 
 ## Code couleur par chapitre
 Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III : racines, vert mousse tirant sur le jaune (distinct du turquoise). Chapitre IV : givre, bleu-blanc pâle. Chapitre V : gris argenté. Chapitre VI : violet profond. Chapitre VII : blanc. Héros : jaune neutre. Le titre « à suivre » et le point de la Couronne dans le menu suivent ce code.

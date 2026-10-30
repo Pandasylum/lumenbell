@@ -17,3 +17,4 @@
 ## 2026-10-30 · docs/commun-ch2-spec
 - Rien ne change à l'écran : cette session ne met à jour que de la documentation (`docs/COMMUN.md`, `docs/CH2-SPEC.md`).
 - Le lore et les textes du Chapitre II ne sont plus recopiés dans le cahier des charges : `docs/LORE.md` et `TEXTES.md` font foi.
+- Rien ne change à l'écran : la correction ne touche que la documentation du cahier des charges (textes de référence rétablis pour le test).
