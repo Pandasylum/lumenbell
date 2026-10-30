@@ -12,4 +12,6 @@ Décisions de Kevin du 30 octobre, enregistrées telles quelles. Documentation s
    Contexte : la carte ne gardait que « Le Veilleur est à terre. » et la note d'Épreuve, le conseil ayant été retiré (session 03). Intention : certaines versions cachent un conseil, par exemple contre la Voix : « Le Veilleur n'a pas su distinguer les illusions… ». **Textes à fournir (projet Lore)** : aucun texte de défaite n'est rédigé ici.
 
 ## Reste ouvert (non touché)
-Valeurs provisoires (`SP`, `DG.backWin`, `HULL`, `SHOCK.form`) ; Difficile du Chapitre II ; hypothèses des sessions sans surveillance ; `GLOSSAIRE #2` (phrase du lecteur d'écran de la phase III).
+Valeurs provisoires (`SP`, `DG.backWin`, `HULL`, `SHOCK.form`) ; Difficile du Chapitre II ; hypothèses des sessions sans surveillance .
+
+5. **Lecteur d'écran de la phase III : « Ta garde est brisée » / *Your guard is broken* conservé volontairement** (ajouté le 30 octobre). Contexte : `GLOSSAIRE #2` ; seul le libellé du bouton change (décision 1), la phrase lue reste telle quelle.

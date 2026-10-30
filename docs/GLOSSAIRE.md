@@ -14,6 +14,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 |---|---|
 | « braise » en minuscule (le feu de l'élément) ; « Braise » désigne l'élément, pas un nom propre | `CLAUDE.md:18` ; `DECISIONS.md:12` |
 | **Bloquer** (EN *block*) et **esquiver** (EN *dodge*) ; plus de « parer » | `docs/CH2-SPEC.md:98` ; `docs/COMMUN.md:41` ; `DECISIONS.md:104` ; `CHANGEMENTS.md:101` |
+| Exception voulue : « Ta garde est brisée » / *Your guard is broken* (lecteur d'écran de la phase III du Chapitre II, `12-hero-states.js:40`) reste tel quel, malgré « garde » / « guard ». Ne pas le remplacer par « bloquer » ; il ne s'affiche jamais à l'écran (le bouton, lui, dit « Bloquer » / « Block ») | `docs/decisions/2026-10-30-ch2-validations.md` ; `docs/GLOSSAIRE.md` (À trancher n° 2) |
 | Veilleur, féminin **Veilleure** | `docs/CH2-SPEC.md:10` ; `docs/LORE.md:128` |
 | Le Veilleur ne parle pas ; sa lanterne est « sceptre-lanterne » / « lanterne », jamais « bâton » | `BIBLE.md:15` ; `docs/CH2-SPEC.md:9` |
 | Tout texte en deux langues, `_('anglais','français')` ou `{d,en,fr}` | `CLAUDE.md:12` |
@@ -145,7 +146,7 @@ Incohérences entre documents, ou entre documents et code. Une ligne par point, 
 | # | Point | Sources en tension |
 |---|---|---|
 | 1 | ~~Bouton de la phase III du Chapitre II : « Garde » / « Guard » ou « Bloquer » / « Block »~~ **Tranché le 30 octobre : « Bloquer » / « Block »** (voir `docs/decisions/2026-10-30-ch2-validations.md`) ; application : `CHANGEMENTS.md` J | `DECISIONS.md:107` ; `chapters/ch2-silent-bells/NOTES.md:123` ; `docs/COMMUN.md:47` ; `docs/CH2-SPEC.md:98` |
-| 2 | Lecteur d'écran de la phase III du Chapitre II : « Ta garde est brisée » / *Your guard is broken* (`garde` / `guard`) alors que le vocabulaire est « bloquer » | `chapters/ch2-silent-bells/src/js/12-hero-states.js:40` ; `DECISIONS.md:107` |
+| 2 | ~~Lecteur d'écran de la phase III du Chapitre II : « Ta garde est brisée » / *Your guard is broken* (`garde` / `guard`) alors que le vocabulaire est « bloquer »~~ **Tranché le 30 octobre : « Ta garde est brisée » / *Your guard is broken* est conservé volontairement** (texte du lecteur d'écran uniquement ; le bouton reste « Bloquer » / « Block ») | `chapters/ch2-silent-bells/src/js/12-hero-states.js:40` ; `DECISIONS.md:107` |
 | 3 | Bouton « Parer » / *Parry* en phase III du Chapitre I, alors que « parer » est abandonné | `chapters/ch1-ember-bridge/src/js/36-p2-foundry-logic.js:31` ; `docs/COMMUN.md:47` ; `DEMANDES.md:64-67` |
 | 4 | Textes du Chapitre I en « paré » / « Parade réussie » / « Combo paré », libellé « Parades » des stats, code `parry`, `parries`, `DMG_PARRY` | `docs/TEXTES-CH1.md:55,61,75,177` ; `chapters/ch1-ember-bridge/src/js/44-p3-belfry-logic.js:315` ; `docs/COMMUN.md:49-52` |
 | 5 | `docs/CH2-SPEC.md` dit encore « Phase II : parer » et « fenêtres de parade » ; `BIBLE.md:35` dit déjà « Fenêtres de blocage » | `docs/CH2-SPEC.md:36,38` ; `BIBLE.md:35` ; `CHANGEMENTS.md:101` |
