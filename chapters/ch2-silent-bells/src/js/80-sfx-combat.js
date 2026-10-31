@@ -21,7 +21,6 @@ function gameUpdate(dt){
   combatSfx();
   // phase I: the muffled bell under the hatch
   if(S.phase===2&&(S.mode==='play'||(S.mode==='cine'&&S.cine&&S.cine.k==='in'))&&!S.paused){if(!S.hatchRing||gt-S.hatchRing>HATCH.toll){S.hatchRing=gt;MUSIC.fx('bellMuffled')}}
-  if(S.mode==='play'&&S.phase===1)S.parasite=S.rageN?.6+.15*Math.sin(gt*3):0;
   if(S.phase===3&&S.form===2&&(S.mode==='play'||S.mode==='ko')&&!S.paused){
     S.ecPhi+=(S.bossHp<=S.bossMax/2?1.05:.7)*dt;
   }

@@ -9,16 +9,16 @@ Suivi
 Ce document évolue à chaque mise à jour du lore. Chaque section ci-dessous a un statut. Claude met à jour le statut après avoir appliqué une section (date et lien de la PR). Une section entièrement appliquée et fusionnée est déplacée en bas du document, dans « Appliqué », pour le garder court. Une nouvelle décision qui touche l'existant devient une nouvelle section (lettre suivante, avec la date).
 
 Section	Sujet	Statut	Date	PR
-A	Chapitre II · Textes et titre de la forme II	À faire	30 octobre 2026 (mis à jour le 29)	
-B	Boss de la phase II : l'Ancien de Rouille	À faire	28 octobre 2026	
-C	Chapitre II · Lumière du boss et de la Sans-Fond	À faire	28 octobre 2026 (mis à jour le 29)	
+A	Chapitre II · Textes et titre de la forme II	En cours	30 octobre 2026 (mis à jour le 29)	branche `ch2/lore-changements` (PR à ouvrir)
+B	Boss de la phase II : l'Ancien de Rouille	En cours	28 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
+C	Chapitre II · Lumière du boss et de la Sans-Fond	En cours	28 octobre 2026 (mis à jour le 29)	branche `ch2/lore-changements` (PR à ouvrir)
 D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	À faire	28 octobre 2026 (mis à jour le 29)	
 E	Veilleur · Couleur de la lanterne et des tirs	À faire (validation à l'écran d'abord)	28 octobre 2026	
 F	Documents à mettre à jour	En cours (CH2-SPEC et COMMUN faits ; BIBLE, DECISIONS, LORE restent)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
 G	Chapitre I · Lanterne du Colosse de braise	À faire	29 octobre 2026	
-H	Chapitre II · Rémanence (évaporation du Lumen)	À faire	30 octobre 2026	
+H	Chapitre II · Rémanence (évaporation du Lumen)	En cours	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
-J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	À faire	30 octobre 2026	
+J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours (a) et (b) ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
 

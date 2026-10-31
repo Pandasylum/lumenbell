@@ -30,3 +30,8 @@
 - Les parties de l'inventaire commun déjà faites sont archivées : il reste à relire ce qui concerne les prochaines sessions moteur.
 - Rien ne change à l'écran : cette session ne corrige que des renvois de documentation (`docs/GLOSSAIRE.md`, `NOTES.md`).
 - Le Veilleur du Chapitre II reste celui de la demande ouverte dans `DEMANDES.md` : aucune puce à lire à ce sujet dans `NOTES.md`.
+
+## 2026-10-31 · ch2/lore-changements
+- Chapitre II : nouveaux textes d'entrée et de fin des trois phases, boss de la phase II nommé « L'Ancien de Rouille », bouton « Bloquer » en phase III, plus de carton à la forme II (titre « La Sans-Fond »).
+- Le cœur de l'Ancien brille d'un turquoise fixe, aussi par les jointures de l'armure ; les lueurs de la Sans-Fond ne pulsent plus ; à sa mort, la lueur s'évapore en montant vers le blanc.
+- Esquiver une illusion ne casse plus la série : seul le coup de retour reçu la casse.

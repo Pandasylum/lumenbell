@@ -39,6 +39,16 @@ function seg(x0,y0,x1,y1,w){ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x0,y0
 function limb(sx,sy,hx,hy,bend,w){const dx=hx-sx,dy=hy-sy,l=Math.hypot(dx,dy)||1;const ex=(sx+hx)/2-dy/l*bend,ey=(sy+hy)/2+dx/l*bend;
   seg(sx,sy,ex,ey,w);seg(ex,ey,hx,hy,w*.86);ell(ex,ey,w*.62,w*.62,'#1c2b24');ell(ex-1,ey-1,w*.3,w*.3,'#4a6e5e')}
 function fist(x,y){ell(x,y,13,12,'#0a110d');ell(x,y,11,10,'#2f4a3e');ell(x-3,y-3,4,3,'rgba(170,210,190,.3)')}
+/* the Rust Elder's heart (lore: the Bottomless ate the Lumen of his lantern and wears its colour; the copy does not pulse):
+   fixed turquoise from the start of phase II to the end, shown through the bars of the cage and through the seams of the armour */
+const HEART_GLOW={core:'rgba(222,253,255,1)',mid:'rgba(60,200,255,.9)',edge:'rgba(6,34,44,1)',spot:'rgba(200,250,255,.7)',spread:12,
+  vein:'rgba(111,232,255,.55)',halo:'rgba(90,220,255,.9)',haloR:110,haloA:.5,seamA:.7,seamW:2,seamGlow:.22};
+function heartSeams(br){const G=HEART_GLOW;ctx.save();ctx.globalCompositeOperation='lighter';
+  for(const [y,hw] of[[GY-140+br*.5,80],[GY-180+br,64]]){const g=ctx.createLinearGradient(-hw,0,hw,0);
+    g.addColorStop(0,'rgba(90,220,255,0)');g.addColorStop(.5,`rgba(150,240,255,${G.seamA})`);g.addColorStop(1,'rgba(90,220,255,0)');
+    ctx.strokeStyle=g;ctx.lineWidth=G.seamW;ctx.beginPath();ctx.moveTo(-hw,y);ctx.lineTo(hw,y);ctx.stroke();
+    ctx.globalAlpha=G.seamGlow;ell(0,y,hw*.8,5,'rgba(90,220,255,.9)');ctx.globalAlpha=1}
+  ctx.restore()}
 function drawBoss1(){
   const A=anim1();const X=700+A.lunge;
   if(!S.cine){S.walkLegs=A.stomp?[{dx:0,dy:0},{dx:-6,dy:A.stomp}]:null;S.bodyBob=A.stomp?-A.stomp*.12:0}
@@ -65,17 +75,17 @@ function drawBoss1(){
   // 3. the torso: three bells stacked mouth down (the tower's three floors)
   drawP('tb0',0,GY-98,0,-1);drawP('tb1',0,GY-140+br*.5,0,-1);drawP('tb2',0,GY-180+br,0,-1);
   for(const b of BARN)ell(b.x,GY+b.y+br,b.r,b.r*.8,'rgba(200,195,170,.45)');
-  // the heart behind its bars: an old lantern glow, then the parasite's cold light
-  const hp=.7+.2*Math.sin(rt*3.2)+A.toll*.4,hy=GY-166+br*.5;
+  // the heart behind its bars: the Bottomless lives in him, a fixed turquoise light (a copy of the Watcher's Lumen: it does not pulse);
+  // it also shows through the seams of the armour (HEART_GLOW)
+  const hy=GY-166+br*.5,HG=HEART_GLOW;
   ctx.save();ctx.beginPath();ctx.moveTo(-28,hy-30);jag(-28,30,hy-34,7,-8,mulberry(4));ctx.lineTo(34,hy+8);jag(34,-32,hy+26,8,8,mulberry(6));ctx.closePath();
-  const hg=ctx.createRadialGradient(0,hy,4,0,hy,46);hg.addColorStop(0,`rgba(255,232,190,${clamp(hp,0,1)})`);hg.addColorStop(.4,'rgba(214,138,72,.92)');hg.addColorStop(1,'rgba(52,22,10,1)');ctx.fillStyle=hg;ctx.fill();ctx.clip();
-  const pz=S.parasite||0,pq=.35+.65*pz;
-  ctx.save();ctx.globalCompositeOperation='lighter';const pg=ctx.createRadialGradient(Math.sin(rt*.9)*6,hy+4,1,0,hy+4,14+pz*30);pg.addColorStop(0,`rgba(200,250,255,${pq*(.6+.4*Math.sin(rt*4.3))})`);pg.addColorStop(1,'rgba(60,200,255,0)');ctx.fillStyle=pg;ctx.fillRect(-40,hy-50,80,100);
-  ctx.strokeStyle=`rgba(111,232,255,${pq*.7})`;ctx.lineWidth=1.2;for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(Math.sin(rt*.9)*6,hy+6);ctx.quadraticCurveTo(-14+k*9,hy+20,-18+k*12+Math.sin(rt*3+k)*4,hy+34);ctx.stroke()}ctx.restore();
-  if(pz>0){ctx.fillStyle=`rgba(40,180,255,${pz*.6})`;ctx.fillRect(-40,hy-50,80,100)}
+  const hg=ctx.createRadialGradient(0,hy,4,0,hy,46);hg.addColorStop(0,HG.core);hg.addColorStop(.4,HG.mid);hg.addColorStop(1,HG.edge);ctx.fillStyle=hg;ctx.fill();ctx.clip();
+  ctx.save();ctx.globalCompositeOperation='lighter';const pg=ctx.createRadialGradient(0,hy+4,1,0,hy+4,14+HG.spread);pg.addColorStop(0,HG.spot);pg.addColorStop(1,'rgba(60,200,255,0)');ctx.fillStyle=pg;ctx.fillRect(-40,hy-50,80,100);
+  ctx.strokeStyle=HG.vein;ctx.lineWidth=1.2;for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(0,hy+6);ctx.quadraticCurveTo(-14+k*9,hy+20,-18+k*12,hy+34);ctx.stroke()}ctx.restore();
   ctx.strokeStyle='#0a110d';ctx.lineWidth=6;for(const x of[-16,0,16]){ctx.beginPath();ctx.moveTo(x,hy-50);ctx.lineTo(x,hy+50);ctx.stroke()}
   ctx.restore();
-  glow(0,hy,80,'rgba(220,150,80,.7)',clamp(hp,0,1)*.45*(1-pz));if(pz>0)glow(0,hy,110,'rgba(90,220,255,.9)',pz*.7);
+  glow(0,hy,HG.haloR,HG.halo,HG.haloA);
+  heartSeams(br);
   // sea water running off the rims
   for(const d of DRIPS){const k=(rt*.6+d.o)%1;ell(d.x,GY-96+k*86,1.8,3+k*3,`rgba(170,235,225,${.6*(1-k)})`)}
   // 4. the anchor's sling: one chain from left hip to right shoulder (the tower's moorings); at the belt, a Watcher's lantern cage, unlit

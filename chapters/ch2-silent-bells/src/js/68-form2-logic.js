@@ -2,7 +2,7 @@
 function drawP(k,x,y,r,heat,sc){ctx.save();ctx.translate(x,y);ctx.rotate(r||0);if(sc)ctx.scale(sc,sc);PDRAW[k](heat==null?.85:heat);ctx.restore()}
 function tent(x0,y0,cx1,cy1,cx2,cy2,x1,y1,w,on){ctx.lineCap='round';ctx.strokeStyle='rgba(4,20,26,.9)';ctx.lineWidth=w+3;ctx.beginPath();ctx.moveTo(x0,y0);ctx.bezierCurveTo(cx1,cy1,cx2,cy2,x1,y1);ctx.stroke();
   ctx.strokeStyle=`rgba(111,232,255,${.55*on+.15})`;ctx.lineWidth=w*.45;ctx.stroke();
-  for(let d=1;d<6;d++){const t=d/6,m=1-t;ell(m*m*m*x0+3*m*m*t*cx1+3*m*t*t*cx2+t*t*t*x1,m*m*m*y0+3*m*m*t*cy1+3*m*t*t*cy2+t*t*t*y1,1.6,1.6,`rgba(200,255,255,${(.5+.5*Math.sin(rt*4-d))*on})`)}}
+  for(let d=1;d<6;d++){const t=d/6,m=1-t;ell(m*m*m*x0+3*m*m*t*cx1+3*m*t*t*cx2+t*t*t*x1,m*m*m*y0+3*m*m*t*cy1+3*m*t*t*cy2+t*t*t*y1,1.6,1.6,`rgba(200,255,255,${.5*on})`)}}
 function base(){ell(LX,GY+8,160,18,'#050e12');for(const r of RIBS){ctx.strokeStyle='#0a1418';ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(r.x,GY+4);ctx.quadraticCurveTo(r.x+r.l*10,GY-r.h,r.x+r.l*26,GY-r.h*.9);ctx.stroke()}}
 const RINGS=TOWER.map((p,i)=>p.k==='ring'?i:-1).filter(i=>i>=0);
 const SBELLS=TOWER.map((p,i)=>p.k==='sbell'?i:-1).filter(i=>i>=0);
@@ -27,7 +27,7 @@ function P3b(stage,f,b,final,rage){
 function beamFrom(ox,oy,bx,a){const g=ctx.createLinearGradient(ox,oy,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(ox-7,oy);ctx.lineTo(ox+7,oy);ctx.lineTo(bx+70,GY+16);ctx.lineTo(bx-70,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,80,11,`rgba(200,250,255,${.25*a})`)}
 function drawEclGame(){
   const T=S.ecPhi/.55,P=ecPose(T),A0=ecAnchor(T);let A=A0;
-  let J={x:LX,y:ECY+Math.sin(rt*1.1)*4,r:44*(1+Math.sin(rt*2.6)*.1)};
+  let J={x:LX,y:ECY+Math.sin(rt*1.1)*4,r:44};
   if(S.angerShown){RINGS.forEach((idx,i)=>{if(i%2){const a=-S.ecPhi*1.3+i*2*Math.PI/7;P[idx]={x:LX+Math.cos(a)*140,y:ECY+Math.sin(a)*46,r:a*.5,z:Math.sin(a)}}})}
   let reBeam=null;
   for(const th of S.threats){if(gt<th.t0)continue;

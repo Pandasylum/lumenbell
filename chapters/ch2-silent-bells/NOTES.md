@@ -50,7 +50,7 @@ Table des clés et des anciennes clés lues : `shared/NOTES.md:Clés`. Ce chapit
 ## Tests
 Descriptions : en-tête de chaque fichier et `NOTES.md:Outillage` (lancement local : `PW_CHROMIUM`, `NOTES.md:Pièges`).
 - Fichiers : `tests/ch2-texts.js`, `ch2-keys.js`, `ch2-smoke.js`, `ch2-trial.js`, `ch2-input.js`, `ch2-title.js`, `ch2-retouches3.js`, `ch2-announce.js`, `ch2-bot.js` ; outil commun `ch2-lib.js` (copie de test à crochets `build/out/ch2-test.html`, non suivie ; le `dist` publié n'a aucun crochet).
-- Numéros de phase : interne `S.phase` 2 = Phase I (la Voix Creuse), 1 = Phase II (le Roi de Rouille), 3 = Phase III (le Phare Noyé) ; `ORDER=[2,1,3]`. Le test lit `document.body.dataset.ph` (interne) et `#hdEye` (affiché).
+- Numéros de phase : interne `S.phase` 2 = Phase I (la Voix Creuse), 1 = Phase II (l'Ancien de Rouille), 3 = Phase III (le Phare Noyé) ; `ORDER=[2,1,3]`. Le test lit `document.body.dataset.ph` (interne) et `#hdEye` (affiché).
 
 ## Pièges
 - Chapitre II : `renderMenu` lit un canvas `#mc` absent du HTML et n'est jamais appelé (code mort).
@@ -125,7 +125,7 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - Bâton sans lanterne : `STAFF` (dans `bg3`). Plus de `bossBar` (transformation de la phase III).
 - Choc de la riposte : `SHOCK` (valeurs du Chapitre I), `S.hitstop` (dans `update`, le temps du jeu `gt` recule d'autant : arrêt sur image), `S.flashHit`, `S.recoil`, `S.rings`, `S.bossHurtT` ; son `sfx.thud`. Le corps du boss est décalé et incliné dans `draw()` (fonction `body`).
 - `retryPhase()` repart toujours de la forme I.
-- Illusions (règle de série validée le 30 octobre : esquiver une illusion n'est pas une faute, la faute est le coup de retour reçu ; À faire, `CHANGEMENTS.md` J) : `fooled()` lance une menace `back` réelle (`DG.backTurn`, `DG.backWin`) ; `drawOrbs` la fait passer derrière le Veilleur et durcir (pointillé qui s'efface). Test : `tests/ch2-input.js`, partie 4.
+- Illusions (règle de série validée le 30 octobre : esquiver une illusion n'est pas une faute, la faute est le coup de retour reçu ; appliquée le 31 octobre) : `fooled()` ne casse plus la série (`pat.ok`), il lance une menace `back` réelle (`DG.backTurn`, `DG.backWin`) ; `drawOrbs` la fait passer derrière le Veilleur et durcir (pointillé qui s'efface). Test : `tests/ch2-input.js`, partie 4.
 
 ## Troisième passe de retouches (28 octobre, `ch2/retouches-3`)
 - **Entrée de la phase III** : le Veilleur est déjà posé ; la caméra recule depuis lui (`CINE_P3.reveal`, `revealZ`, `revealX`, `revealY`). Plus de `whooshDown` ni de `land` dans `CSFX['3:in']`.
@@ -141,3 +141,9 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - Plus de contexte propre : `04-audio-sfx.js` est réduit à `ensureAudio`, `tone`, `noise` (renvois à `LB.audio`), `sfx`, `play` ; `60-music.js` (`MUSIC`) se branche sur `LB.audio.ctx` (sortie brute `LB.audio.dest`) et lit `LB.audio.sound` / `music` au lieu de `fxOn` / `musOn`. Niveaux déclarés dans `LB.setup` (`audio:{master:.75,sfx:.9,mus:.3}`). Cases Son / Musique : `syncAudio` (`92-events.js`) appelle `LB.audio.setSound` / `setMusic`.
 - Code mort `MUS` / `musTick` (`04-audio-sfx.js`) toujours présent, branché sur `LB.audio.mus`.
 - **Avancement** : fait = rebranchement, test `tests/audio.js`. Reste à faire : juger sur téléphone la latence des bruitages (contexte commun en `latencyHint:'playback'`) et la reprise après écran verrouillé.
+
+## Lore : `CHANGEMENTS.md` A, B, C, H, J(a), J(b) (31 octobre, `ch2/lore-changements`)
+- Textes : voir `TEXTES.md` ; plus de carton à la forme II (le combat reprend après la cinématique) ; boss affiché « L'Ancien de Rouille » / « The Rust Elder » ; forme II « La Sans-Fond » / « The Bottomless » ; bouton de la phase III « Bloquer » / « Block ». Noms de code inchangés (`drawBoss1`, `kingKneel`…).
+- Lumière : `HEART_GLOW` + `heartSeams()` (`32-boss-rust-king.js`) = cœur turquoise fixe dès la phase II, visible par les jointures ; les lueurs de la Sans-Fond (cœur de la tour, méduse, points des tentacules) ne pulsent plus. Seules pulsent la lanterne de la gardienne et la lueur au fond de l'eau de l'outro.
+- Rémanence : `evaporate()` et table `REMANENCE` (`08-effects.js`), déclenchée à la dissolution de la méduse (`ecFinale`). Les particules à `c2` passent de `c` à `c2` pendant leur vie.
+- Décisions : `docs/decisions/2026-10-31-ch2-lore-changements.md`.

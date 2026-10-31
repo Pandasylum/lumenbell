@@ -77,7 +77,7 @@ function ecFinale(tAll){
   if(ae>=1&&once('aplant')){S.shake=12;burst(Apl.x,GY,26,'#dff8ff',6,.8,.4)}
   let J=null;
   if(t<5.3){const fe=ein(clamp((t-3.6)/1.6,0,1));J={x:lerp(LX,LX-40,fe)+(conv?Math.sin(t*50)*4:0),y:lerp(ECY,GY-16,fe),r:lerp(44,18,fe)+(conv?Math.sin(t*40)*4:0)}}
-  else if(once('dis')){for(let i=0;i<4;i++)burst(LX-40,GY-16,30,'#bff6ff',3,2.5,-.04)}
+  else if(once('dis'))evaporate(LX-40,GY-16);
   const tentA=1-clamp((t-2)/.4,0,1);
   if(t>=.5)P[EHEAD]={...P[EHEAD],o:bellMarks()};
   drawEcl(P,A,J,tentA,(S.zapT&&gt-S.zapT<.09&&t<.5)?.15:on,t>-.75&&t<.6?ecGap(T):null);
@@ -210,7 +210,6 @@ function cineBoss(){
     const since=u>=1?(t-T0-N*TS):(f*TS),dip=since<.28?Math.sin(since/.28*Math.PI)*7:0;
     S.walkLegs=legs;S.bodyBob=(u<1?-lift*.25:0)+dip;const tilt=u<1?(si%2?1:-1)*.02*Math.sin(Math.PI*f):0,bob=0;
     for(let i=0;i<N;i++){if(t>=T0+(i+1)*TS&&once('st'+i)){S.shake=17;dust(30,true);const sw=i%2,fxp=700+lerp(330,0,(i+1)/N)+(sw?38:-38)-S2;burst(fxp,GY,20,'#8a7a6a',3.5,.7,.25);burst(fxp,GY,8,'#bfe9df',3,.4,.3)}}
-    S.parasite=t>4.5&&t<5.1?Math.sin((t-4.5)/.6*Math.PI)*.9:0;
     // the anchor lies on the floor of the hold until the King hauls it up by its chain and slings it on his back
     const C=CINE_P2;S.noAnchor=t<C.slung;
     if(t<C.slung){const AF=ANCHOR_FLOOR,AB={x:700+80+Math.cos(ARM_BACK)*82,y:GY-202+Math.sin(ARM_BACK)*82,a:BACK_DIR};
@@ -239,7 +238,6 @@ function cineBoss(){
     if(t>.6){const e=ein(clamp((t-.6)/.5,0,1));drawAnchorAt({x:lerp(753,878,e),y:lerp(GY-280,GY-150,e),a:lerp(2.11,1.95,e),f:e});if(e>=1&&once('an')){S.shake=10;burst(862,GY,24,'#cff7ef',6,.7,.4)}}
     // the King kneels and tolls one last time; the parasite's light shows in his heart
     const sink=eio(clamp((t-1)/.8,0,1))*45;
-    S.parasite=clamp((t-1.6)/1.4,0,1);
     if(t<1)S.shake=Math.max(S.shake,3);
     if(moon>0)moonCone(moon);
     kingKneel(sink);
@@ -265,5 +263,5 @@ function cineOverlay(){
   if(ph===1&&k==='in')title(t,6.3,PH[1].eye(),PH[1].boss(),CH_COL[2]);
   if(ph===1&&k==='out')fadeAll(clamp((t-(CINE_LEN[1].out-1.1))/.7,0,1));
   if(ph===3&&k==='in')title(t,12.3,PH[3].eye(),_('The Drowned Lighthouse','Le Phare Noyé'),CH_COL[2]);
-  if(ph===3&&k==='p2'){const shat=_('The Shattered',"L'Éclaté");title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
+  if(ph===3&&k==='p2'){const shat=_('The Bottomless','La Sans-Fond');title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
 }

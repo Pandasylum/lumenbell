@@ -53,7 +53,7 @@ function draw(){
   drawCounter();
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';
-  for(const p of S.parts){const t=gt-p.t0,k=1-t/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*t*30,p.y+p.vy*t*30+p.g*t*t*300,p.r,p.r)}
+  for(const p of S.parts){const t=gt-p.t0,k=1-t/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c2?lerpC(p.c,p.c2,t/p.life):p.c;ctx.fillRect(p.x+p.vx*t*30,p.y+p.vy*t*30+p.g*t*t*300,p.r,p.r)}
   ctx.restore();
   drawHelp();
   // pops

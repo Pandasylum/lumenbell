@@ -10,6 +10,8 @@
 // 3. joueur parfait (appui 0,06 s avant chaque impact) : aucun coup recu, phase gagnee, Normal et Difficile.
 // 4. illusions (phase I, Normal et Difficile, une orbe illusoire seule) : un joueur qui l'ignore ne prend aucun coup ; un joueur qui
 //    l'esquive puis esquive son retour non plus ; un joueur qui l'esquive et laisse passer son retour prend un coup.
+//    Regle de serie (30 octobre) : esquiver une illusion n'est pas une faute de serie (pat.ok reste vrai) ; seule la reception du coup
+//    de retour casse la serie (pat.ok faux).
 const launch=require('./launch');const {open,run}=require('./ch2-bot');
 const errs=[],PH=[[1,'I'],[2,'II'],[3,'III']],dist=H=>{const c={};H.forEach(h=>c[h]=(c[h]||0)+1);return JSON.stringify(c)};
 // PH : numeros affiches (frise) ; interne : I = 2 (la Voix), II = 1 (le Roi)
@@ -67,10 +69,11 @@ const near=(a,b)=>Math.abs(a-b)<.02;
     if(!back)back=S.threats.find(x=>x.k==='back')||null;
     if(back){end=back.ti+.15;if(mode==='esquive+retour'&&!pressedBack&&t>=back.ti-.06){pressedBack=true;T.down();T.up()}}
     T.step(1/60)}
-   return{hits:S.hits-h0,back:!!back,delay:back?+(back.ti-back.t0).toFixed(3):null}},[dk,mode]);
+   return{hits:S.hits-h0,back:!!back,clean:pat.ok,delay:back?+(back.ti-back.t0).toFixed(3):null}},[dk,mode]);
   console.log('illusion',dk.padEnd(6),mode.padEnd(15),JSON.stringify(r));
   const want=mode==='esquive seule'?1:0;
   if(r.hits!==want)errs.push('illusion '+dk+' '+mode+' : '+r.hits+' coup(s), '+want+' attendu(s)');
+  if(r.clean!==(want===0))errs.push('illusion '+dk+' '+mode+' : serie '+(r.clean?'propre':'cassee')+', '+(want===0?'propre':'cassee')+' attendue');
   if(mode==='ignore'&&r.back)errs.push('illusion '+dk+' ignoree : un retour a ete lance');
   if(mode!=='ignore'&&!r.back)errs.push('illusion '+dk+' '+mode+' : pas de retour')}
  errs.push(...perr);console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});

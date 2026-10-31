@@ -472,6 +472,10 @@ function musTick(){
 
 
 /* ---------- particles & pops ---------- */
+/* Remanence (end of phase III): the turquoise light of the Bottomless evaporates, going up and brightening towards white
+   (a particle goes from c to c2 over its life; no text, no sound). REMANENCE = number, spread, rise speed, life, colours. */
+const REMANENCE={n:60,spread:30,up:[.7,1.5],life:3.8,c:[111,232,255],c2:[255,255,255]};
+function evaporate(x,y){const R=REMANENCE;for(let i=0;i<R.n;i++)S.parts.push({x:x+(Math.random()-.5)*R.spread,y:y+(Math.random()-.5)*10,vx:(Math.random()-.5)*.14,vy:-(R.up[0]+Math.random()*(R.up[1]-R.up[0])),g:0,t0:gt,life:R.life*(.7+Math.random()*.5),c:R.c,c2:R.c2,r:1.8+Math.random()*2.4})}
 function burst(x,y,n,col,spd,life,g){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.3+Math.random())*spd;S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-(g?spd*.4:0),g:g||0,t0:gt,life:life*(.6+Math.random()*.6),c:col,r:1.5+Math.random()*2.2})}}
 /* floating text: only onomatopoeia (same words in both languages, as in Ember Bridge); no announcement words */
 /* onomatopoeia: no word on an ordinary riposte (as in Ember Bridge); the Voice only cries, by sound */
@@ -567,7 +571,7 @@ function damageBoss(n){
   const p=bossCore();if(FM)FM.tint.forEach((c,i)=>burst(p.x,p.y,FM.n[i],c,FM.spd,FM.life,FM.g));else col.forEach((c,i)=>burst(p.x,p.y,i?12:10,c,7,.7));(S.rings||(S.rings=[])).push({x:p.x,y:p.y,life:SHOCK.ringLife,c:col[2]});
   hud();
   if(S.bossHp<=0){S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
-    say([null,_('The Rust King collapses.','Le Roi de Rouille s\'effondre.'),_('The Hollow Voice\'s mirror shatters.','Le miroir de la Voix Creuse éclate.'),_('The lantern goes dark.','La lanterne s\'éteint.')][S.phase]);
+    say([null,_('The Rust Elder collapses.',"L'Ancien de Rouille s'effondre."),_('The Hollow Voice\'s mirror shatters.','Le miroir de la Voix Creuse éclate.'),_('The lantern goes dark.','La lanterne s\'éteint.')][S.phase]);
     }
 }
 function bossCore(){return S.phase===1?{x:700,y:GY-160}:S.phase===2?{x:730,y:150}:S.form===2?{x:LX,y:ECY}:{x:LX,y:LY}}
@@ -990,6 +994,16 @@ function seg(x0,y0,x1,y1,w){ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x0,y0
 function limb(sx,sy,hx,hy,bend,w){const dx=hx-sx,dy=hy-sy,l=Math.hypot(dx,dy)||1;const ex=(sx+hx)/2-dy/l*bend,ey=(sy+hy)/2+dx/l*bend;
   seg(sx,sy,ex,ey,w);seg(ex,ey,hx,hy,w*.86);ell(ex,ey,w*.62,w*.62,'#1c2b24');ell(ex-1,ey-1,w*.3,w*.3,'#4a6e5e')}
 function fist(x,y){ell(x,y,13,12,'#0a110d');ell(x,y,11,10,'#2f4a3e');ell(x-3,y-3,4,3,'rgba(170,210,190,.3)')}
+/* the Rust Elder's heart (lore: the Bottomless ate the Lumen of his lantern and wears its colour; the copy does not pulse):
+   fixed turquoise from the start of phase II to the end, shown through the bars of the cage and through the seams of the armour */
+const HEART_GLOW={core:'rgba(222,253,255,1)',mid:'rgba(60,200,255,.9)',edge:'rgba(6,34,44,1)',spot:'rgba(200,250,255,.7)',spread:12,
+  vein:'rgba(111,232,255,.55)',halo:'rgba(90,220,255,.9)',haloR:110,haloA:.5,seamA:.7,seamW:2,seamGlow:.22};
+function heartSeams(br){const G=HEART_GLOW;ctx.save();ctx.globalCompositeOperation='lighter';
+  for(const [y,hw] of[[GY-140+br*.5,80],[GY-180+br,64]]){const g=ctx.createLinearGradient(-hw,0,hw,0);
+    g.addColorStop(0,'rgba(90,220,255,0)');g.addColorStop(.5,`rgba(150,240,255,${G.seamA})`);g.addColorStop(1,'rgba(90,220,255,0)');
+    ctx.strokeStyle=g;ctx.lineWidth=G.seamW;ctx.beginPath();ctx.moveTo(-hw,y);ctx.lineTo(hw,y);ctx.stroke();
+    ctx.globalAlpha=G.seamGlow;ell(0,y,hw*.8,5,'rgba(90,220,255,.9)');ctx.globalAlpha=1}
+  ctx.restore()}
 function drawBoss1(){
   const A=anim1();const X=700+A.lunge;
   if(!S.cine){S.walkLegs=A.stomp?[{dx:0,dy:0},{dx:-6,dy:A.stomp}]:null;S.bodyBob=A.stomp?-A.stomp*.12:0}
@@ -1016,17 +1030,17 @@ function drawBoss1(){
   // 3. the torso: three bells stacked mouth down (the tower's three floors)
   drawP('tb0',0,GY-98,0,-1);drawP('tb1',0,GY-140+br*.5,0,-1);drawP('tb2',0,GY-180+br,0,-1);
   for(const b of BARN)ell(b.x,GY+b.y+br,b.r,b.r*.8,'rgba(200,195,170,.45)');
-  // the heart behind its bars: an old lantern glow, then the parasite's cold light
-  const hp=.7+.2*Math.sin(rt*3.2)+A.toll*.4,hy=GY-166+br*.5;
+  // the heart behind its bars: the Bottomless lives in him, a fixed turquoise light (a copy of the Watcher's Lumen: it does not pulse);
+  // it also shows through the seams of the armour (HEART_GLOW)
+  const hy=GY-166+br*.5,HG=HEART_GLOW;
   ctx.save();ctx.beginPath();ctx.moveTo(-28,hy-30);jag(-28,30,hy-34,7,-8,mulberry(4));ctx.lineTo(34,hy+8);jag(34,-32,hy+26,8,8,mulberry(6));ctx.closePath();
-  const hg=ctx.createRadialGradient(0,hy,4,0,hy,46);hg.addColorStop(0,`rgba(255,232,190,${clamp(hp,0,1)})`);hg.addColorStop(.4,'rgba(214,138,72,.92)');hg.addColorStop(1,'rgba(52,22,10,1)');ctx.fillStyle=hg;ctx.fill();ctx.clip();
-  const pz=S.parasite||0,pq=.35+.65*pz;
-  ctx.save();ctx.globalCompositeOperation='lighter';const pg=ctx.createRadialGradient(Math.sin(rt*.9)*6,hy+4,1,0,hy+4,14+pz*30);pg.addColorStop(0,`rgba(200,250,255,${pq*(.6+.4*Math.sin(rt*4.3))})`);pg.addColorStop(1,'rgba(60,200,255,0)');ctx.fillStyle=pg;ctx.fillRect(-40,hy-50,80,100);
-  ctx.strokeStyle=`rgba(111,232,255,${pq*.7})`;ctx.lineWidth=1.2;for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(Math.sin(rt*.9)*6,hy+6);ctx.quadraticCurveTo(-14+k*9,hy+20,-18+k*12+Math.sin(rt*3+k)*4,hy+34);ctx.stroke()}ctx.restore();
-  if(pz>0){ctx.fillStyle=`rgba(40,180,255,${pz*.6})`;ctx.fillRect(-40,hy-50,80,100)}
+  const hg=ctx.createRadialGradient(0,hy,4,0,hy,46);hg.addColorStop(0,HG.core);hg.addColorStop(.4,HG.mid);hg.addColorStop(1,HG.edge);ctx.fillStyle=hg;ctx.fill();ctx.clip();
+  ctx.save();ctx.globalCompositeOperation='lighter';const pg=ctx.createRadialGradient(0,hy+4,1,0,hy+4,14+HG.spread);pg.addColorStop(0,HG.spot);pg.addColorStop(1,'rgba(60,200,255,0)');ctx.fillStyle=pg;ctx.fillRect(-40,hy-50,80,100);
+  ctx.strokeStyle=HG.vein;ctx.lineWidth=1.2;for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(0,hy+6);ctx.quadraticCurveTo(-14+k*9,hy+20,-18+k*12,hy+34);ctx.stroke()}ctx.restore();
   ctx.strokeStyle='#0a110d';ctx.lineWidth=6;for(const x of[-16,0,16]){ctx.beginPath();ctx.moveTo(x,hy-50);ctx.lineTo(x,hy+50);ctx.stroke()}
   ctx.restore();
-  glow(0,hy,80,'rgba(220,150,80,.7)',clamp(hp,0,1)*.45*(1-pz));if(pz>0)glow(0,hy,110,'rgba(90,220,255,.9)',pz*.7);
+  glow(0,hy,HG.haloR,HG.halo,HG.haloA);
+  heartSeams(br);
   // sea water running off the rims
   for(const d of DRIPS){const k=(rt*.6+d.o)%1;ell(d.x,GY-96+k*86,1.8,3+k*3,`rgba(170,235,225,${.6*(1-k)})`)}
   // 4. the anchor's sling: one chain from left hip to right shoulder (the tower's moorings); at the belt, a Watcher's lantern cage, unlit
@@ -1213,7 +1227,7 @@ function pTb1(heat){bellBody(88,50,8);
   // heart cage: lantern glow -> cyan parasite -> cold
   const hy=-26;ctx.fillStyle='#050807';ctx.beginPath();ctx.moveTo(-28,hy-30);jag(-28,30,hy-34,7,-8,mulberry(4));ctx.lineTo(34,hy+8);jag(34,-32,hy+26,8,8,mulberry(6));ctx.closePath();ctx.fill();
   if(heat>=0&&heat<1)glow(0,hy,46,'rgba(220,150,80,.95)',1-heat);
-  if(heat>0)glow(0,hy,50,'rgba(90,220,255,.95)',heat*(.5+.2*Math.sin(rt*3)));
+  if(heat>0)glow(0,hy,50,'rgba(90,220,255,.95)',heat*.6);
   ctx.strokeStyle='#0a110d';ctx.lineWidth=6;for(const x of[-16,0,16]){ctx.beginPath();ctx.moveTo(x,hy-32);ctx.lineTo(x,hy+26);ctx.stroke()}}
 function pTb2(){bellBody(72,48,13)}
 function pRing(){ctx.fillStyle=bronze(-23,23);rrect(-23,-13,46,26,5);ctx.fill();ctx.fillStyle='#0d1712';ctx.fillRect(-23,9,46,4);ctx.fillStyle='rgba(170,230,210,.18)';ctx.fillRect(-21,-11,42,2);ell(-8,-2,4,3,'rgba(128,54,22,.5)')}
@@ -1277,7 +1291,7 @@ function drawAnchorAt(q){ctx.save();if(q.f>.8){ctx.beginPath();ctx.rect(0,0,W,GY
 function tentacle(x0,y0,x1,y1,k,on,wd){const mx=(x0+x1)/2+Math.sin(rt*2+k)*30,my=(y0+y1)/2+Math.cos(rt*1.7+k)*20;
   ctx.strokeStyle='rgba(4,20,26,.85)';ctx.lineWidth=(wd||3)+3;ctx.beginPath();ctx.moveTo(x0,y0);ctx.quadraticCurveTo(mx,my,x1,y1);ctx.stroke();
   ctx.strokeStyle=`rgba(111,232,255,${.55*on+.15})`;ctx.lineWidth=wd||3;ctx.stroke();
-  for(let d=1;d<5;d++){const t=d/5,mt=1-t;ell(mt*mt*x0+2*mt*t*mx+t*t*x1,mt*mt*y0+2*mt*t*my+t*t*y1,1.6,1.6,`rgba(200,255,255,${(.5+.5*Math.sin(rt*4-d+k))*on})`)}}
+  for(let d=1;d<5;d++){const t=d/5,mt=1-t;ell(mt*mt*x0+2*mt*t*mx+t*t*x1,mt*mt*y0+2*mt*t*my+t*t*y1,1.6,1.6,`rgba(200,255,255,${.5*on})`)}}
 function bindings(on,amt){
   // loops of tentacle wrapping the column at each joint
   ctx.save();ctx.lineCap='round';
@@ -1290,7 +1304,7 @@ function bindings(on,amt){
     const p0=[LX+side*(10+i*8),LY+16],p1=[LX+side*(60+i*6),GY-320],p2=[LX+side*(50+i*10)+sw,GY-150],p3=[LX+side*(70+i*22)+sw,GY+2];
     ctx.strokeStyle='rgba(4,20,26,.9)';ctx.lineWidth=6-i;ctx.beginPath();ctx.moveTo(...p0);ctx.bezierCurveTo(...p1,...p2,...p3);ctx.stroke();
     ctx.strokeStyle=`rgba(111,232,255,${.5*on+.1})`;ctx.lineWidth=2.2-i*.3;ctx.stroke();
-    for(let d=1;d<7;d++){const t=d/7,mt=1-t;ell(mt*mt*mt*p0[0]+3*mt*mt*t*p1[0]+3*mt*t*t*p2[0]+t*t*t*p3[0],mt*mt*mt*p0[1]+3*mt*mt*t*p1[1]+3*mt*t*t*p2[1]+t*t*t*p3[1],1.7,1.7,`rgba(200,255,255,${(.5+.5*Math.sin(rt*4-d+k))*on})`)}}
+    for(let d=1;d<7;d++){const t=d/7,mt=1-t;ell(mt*mt*mt*p0[0]+3*mt*mt*t*p1[0]+3*mt*t*t*p2[0]+t*t*t*p3[0],mt*mt*mt*p0[1]+3*mt*mt*t*p1[1]+3*mt*t*t*p2[1]+t*t*t*p3[1],1.7,1.7,`rgba(200,255,255,${.5*on})`)}}
   ctx.restore();
 }
 function jelly(x,y,r,on,t){
@@ -1314,7 +1328,7 @@ function drawBoss3(){
   drawPieces(null,.85);
   bindings(on,1);
   for(const [side,ph] of[[-1,0],[1,1.7]]){const sw=Math.sin(rt*1.8+ph);ctx.strokeStyle=`rgba(111,232,255,${.45*on+.1})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LX+side*20,LY+6);ctx.bezierCurveTo(LX+side*90,LY-30+sw*20,LX+side*140,LY+30-sw*30,LX+side*(170+sw*20),LY+80+sw*20);ctx.stroke()}
-  jelly(LX,LY,36*(Math.sin(rt*2.6)*.12+1),on,rt);
+  jelly(LX,LY,36,on,rt);
   if(B.charge>.3&&Math.sin(gt*37)>.2){ctx.save();ctx.globalCompositeOperation='lighter';bolt(LX-36,LY-10,LX+36,LY-16,(gt*13|0)/13,'rgba(220,250,255,.8)',1.5);ctx.restore()}
   if(ko>0){ctx.strokeStyle='rgba(200,250,255,.9)';ctx.lineWidth=2;for(const c of TCR){const n=Math.ceil(c.length*Math.min(1,ko*1.5));ctx.beginPath();for(let i=0;i<n;i++)i?ctx.lineTo(c[i][0],c[i][1]):ctx.moveTo(c[i][0],c[i][1]);ctx.stroke()}}
   for(let i=0;i<6;i++){const k=(rt*.05+i/6)%1;ell(LX-160+k*320,GY-6,70,14,`rgba(160,230,240,${.08*Math.sin(k*Math.PI)})`)}
@@ -1324,7 +1338,6 @@ function drawBoss3(){
 const TF_LEN=10;
 function drawTransform(){
   const t=gt-S.tfT;
-  S.parasite=clamp(t/1.8,0,1);
   if(t<2){ // the King, shaking, heart turning blue
     S.shake=Math.max(S.shake,Math.min(1,t)*4);
     ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();
@@ -1347,7 +1360,7 @@ function drawTransform(){
     if(t>8.6&&!S.tfFlash){S.tfFlash=true;S.flashT=gt;burst(LX,LY,50,'#e8fdff',9,1.2)}
   }
   const fk=gt-(S.flashT||-9);if(fk<.5){ctx.fillStyle=`rgba(220,250,255,${.55*(1-fk/.5)})`;ctx.fillRect(0,0,W,H)}
-  const cap=t<2?_('The parasite wakes in his heart','Le parasite se réveille dans son cœur'):t<3.3?_('The jellyfish bursts from the King','La méduse jaillit du corps du Roi'):t<8.6?_('Its tentacles rebuild the pieces','Ses tentacules réassemblent les morceaux'):_('The Drowned Lighthouse lights up','Le Phare Noyé s\'allume');
+  const cap=t<2?_('The parasite wakes in his heart','Le parasite se réveille dans son cœur'):t<3.3?_('The jellyfish bursts from the Elder',"La méduse jaillit du corps de l'Ancien"):t<8.6?_('Its tentacles rebuild the pieces','Ses tentacules réassemblent les morceaux'):_('The Drowned Lighthouse lights up','Le Phare Noyé s\'allume');
   if(S.tfCap!==cap){S.tfCap=cap;say(cap+'.')}
 }
 function drawBeacon(){
@@ -1447,7 +1460,7 @@ function draw(){
   drawCounter();
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';
-  for(const p of S.parts){const t=gt-p.t0,k=1-t/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*t*30,p.y+p.vy*t*30+p.g*t*t*300,p.r,p.r)}
+  for(const p of S.parts){const t=gt-p.t0,k=1-t/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c2?lerpC(p.c,p.c2,t/p.life):p.c;ctx.fillRect(p.x+p.vx*t*30,p.y+p.vy*t*30+p.g*t*t*300,p.r,p.r)}
   ctx.restore();
   drawHelp();
   // pops
@@ -1503,7 +1516,7 @@ function moonOnKing(sink,a){ctx.save();ctx.translate(700,GY);ctx.rotate(.08*sink
   for(const [hw,y,h] of[[104,-98,54],[88,-140,50],[72,-180,48]]){ctx.beginPath();ctx.moveTo(hw*.62,y-h*.98);ctx.quadraticCurveTo(hw*.7,y-h*.45,hw*.98,y-2);ctx.stroke()}
   ctx.beginPath();ctx.arc(-6,-224-40,30,-1.2,-.2);ctx.stroke();
   glow(0,-166,120,'rgba(79,224,204,.9)',.55*a);ctx.restore()}
-function kingEndStill(){bg1();hullSky(1);hullDebris(9);drawAnchorAt({x:878,y:GY-150,a:1.95,f:1});S.parasite=1;S.noAnchor=true;moonCone(1);kingKneel(45);moonOnKing(45,1);S.noAnchor=false;
+function kingEndStill(){bg1();hullSky(1);hullDebris(9);drawAnchorAt({x:878,y:GY-150,a:1.95,f:1});S.noAnchor=true;moonCone(1);kingKneel(45);moonOnKing(45,1);S.noAnchor=false;
   ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0)}
 
 /* ---------- cinematics: phase entries and exits ---------- */
@@ -1519,7 +1532,7 @@ const CINE_P1={drop:3.1,fall:.65,sink:3.2,depth:70,hatch:5.5,snap:.45,dim:3.8,di
 const CINE_P2={haul:4.0,lift:4.35,slung:4.75,desc:1.8,descD:380,collapse:1.4,collapseD:2.2,open:2.4,openD:1.4,moon:3.6};
 const CINE_P3={zoom:9.4,zoomD:2.6,zoomZ:2.1,reveal:3.2,revealZ:1.7,revealX:HX,revealY:GY-60};
 function once(k){if(S.cineDone[k])return false;S.cineDone[k]=1;return true}
-function resetCine(s){s.hatchK=0;s.hatchSnap=0;s.lampDim=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.parasite=0;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
+function resetCine(s){s.hatchK=0;s.hatchSnap=0;s.lampDim=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
 function startCine(p,k){const s=p.s;resetCine(s);if(MUSIC.cur!==s.phase)MUSIC.bed(s.phase);s.demo=false;s.parts=[];s.pops=[];s.cine={k,t0:gt};s.tfBurst=s.tfFlash=s.tfAnch=false;s.tfId=(s.tfId||0)+1;s.flashT=-9}
 function fadeAll(a,c){if(a<=0)return;ctx.fillStyle=`rgba(${c||'0,0,0'},${clamp(a,0,1)})`;ctx.fillRect(0,0,W,H)}
 /* chapter colours (docs/CH2-SPEC.md): II tide turquoise, III roots moss green leaning yellow */
@@ -1626,7 +1639,7 @@ function ecFinale(tAll){
   if(ae>=1&&once('aplant')){S.shake=12;burst(Apl.x,GY,26,'#dff8ff',6,.8,.4)}
   let J=null;
   if(t<5.3){const fe=ein(clamp((t-3.6)/1.6,0,1));J={x:lerp(LX,LX-40,fe)+(conv?Math.sin(t*50)*4:0),y:lerp(ECY,GY-16,fe),r:lerp(44,18,fe)+(conv?Math.sin(t*40)*4:0)}}
-  else if(once('dis')){for(let i=0;i<4;i++)burst(LX-40,GY-16,30,'#bff6ff',3,2.5,-.04)}
+  else if(once('dis'))evaporate(LX-40,GY-16);
   const tentA=1-clamp((t-2)/.4,0,1);
   if(t>=.5)P[EHEAD]={...P[EHEAD],o:bellMarks()};
   drawEcl(P,A,J,tentA,(S.zapT&&gt-S.zapT<.09&&t<.5)?.15:on,t>-.75&&t<.6?ecGap(T):null);
@@ -1759,7 +1772,6 @@ function cineBoss(){
     const since=u>=1?(t-T0-N*TS):(f*TS),dip=since<.28?Math.sin(since/.28*Math.PI)*7:0;
     S.walkLegs=legs;S.bodyBob=(u<1?-lift*.25:0)+dip;const tilt=u<1?(si%2?1:-1)*.02*Math.sin(Math.PI*f):0,bob=0;
     for(let i=0;i<N;i++){if(t>=T0+(i+1)*TS&&once('st'+i)){S.shake=17;dust(30,true);const sw=i%2,fxp=700+lerp(330,0,(i+1)/N)+(sw?38:-38)-S2;burst(fxp,GY,20,'#8a7a6a',3.5,.7,.25);burst(fxp,GY,8,'#bfe9df',3,.4,.3)}}
-    S.parasite=t>4.5&&t<5.1?Math.sin((t-4.5)/.6*Math.PI)*.9:0;
     // the anchor lies on the floor of the hold until the King hauls it up by its chain and slings it on his back
     const C=CINE_P2;S.noAnchor=t<C.slung;
     if(t<C.slung){const AF=ANCHOR_FLOOR,AB={x:700+80+Math.cos(ARM_BACK)*82,y:GY-202+Math.sin(ARM_BACK)*82,a:BACK_DIR};
@@ -1788,7 +1800,6 @@ function cineBoss(){
     if(t>.6){const e=ein(clamp((t-.6)/.5,0,1));drawAnchorAt({x:lerp(753,878,e),y:lerp(GY-280,GY-150,e),a:lerp(2.11,1.95,e),f:e});if(e>=1&&once('an')){S.shake=10;burst(862,GY,24,'#cff7ef',6,.7,.4)}}
     // the King kneels and tolls one last time; the parasite's light shows in his heart
     const sink=eio(clamp((t-1)/.8,0,1))*45;
-    S.parasite=clamp((t-1.6)/1.4,0,1);
     if(t<1)S.shake=Math.max(S.shake,3);
     if(moon>0)moonCone(moon);
     kingKneel(sink);
@@ -1814,7 +1825,7 @@ function cineOverlay(){
   if(ph===1&&k==='in')title(t,6.3,PH[1].eye(),PH[1].boss(),CH_COL[2]);
   if(ph===1&&k==='out')fadeAll(clamp((t-(CINE_LEN[1].out-1.1))/.7,0,1));
   if(ph===3&&k==='in')title(t,12.3,PH[3].eye(),_('The Drowned Lighthouse','Le Phare Noyé'),CH_COL[2]);
-  if(ph===3&&k==='p2'){const shat=_('The Shattered',"L'Éclaté");title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
+  if(ph===3&&k==='p2'){const shat=_('The Bottomless','La Sans-Fond');title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
 }
 /* ---------- music & ambience (procedural, Web Audio) ---------- */
 const MUSIC=(()=>{
@@ -2053,21 +2064,20 @@ const gpOf=id=>ORDER.indexOf(id)+1;
 /* phase texts (docs/CH2-SPEC.md): eye = phase title, boss = name (card title), desc = entry panel, end = end panel */
 const PH=[null,
  {eye:()=>_('Phase II · The Hold','Phase II · La cale'),
-  desc:()=>_('Beneath the Lighthouse, the hull of a stranded ship. It smells of iron and salt.',"Sous le Phare, la coque d'un navire échoué. Elle sent le fer et le sel."),
-  end:()=>_('The hull collapses around the King. For the first time, the moon gleams on his body of metal.',"La coque s'effondre autour du Roi. Pour la première fois, la lune se reflète sur son corps de métal."),
-  head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust King','Le Roi de Rouille'),btn:()=>_('Block','Bloquer'),
-  aria:()=>_("The Watcher facing the Rust King, a colossus of bells armed with an anchor","Le Veilleur face au Roi de Rouille, un colosse de cloches armé d'une ancre")},
+  desc:()=>_('Beneath the Lighthouse, the hull of a stranded ship. The iron, eaten away by salt, seems to have lain here for centuries.',"Sous le Phare, la coque d'un navire échoué. Le fer rongé par le sel semble reposer ici depuis des siècles."),
+  end:()=>_('The ship collapses around the Elder. The moon gleams on his armor, but nothing answers his light.',"Le navire s'effondre autour de l'Ancien. La lune se reflète sur son armure, mais rien ne répond à sa lumière."),
+  head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust Elder',"L'Ancien de Rouille"),btn:()=>_('Block','Bloquer'),
+  aria:()=>_("The Watcher facing the Rust Elder, a colossus of bells armed with an anchor","Le Veilleur face à l'Ancien de Rouille, un colosse de cloches armé d'une ancre")},
  {eye:()=>_('Phase I · The Mirror Hall','Phase I · La salle des reflets'),
-  desc:()=>_("At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there.","Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur."),
-  end:()=>_("For a moment, the Watcher's lantern dims.","L'espace d'un instant, la lanterne du Veilleur faiblit."),
+  desc:()=>_("A strange heaviness settles over the foot of the Lighthouse. Crystalline sounds ring out across the vastness. Among these suspended echoes, a voice drifts through the air, steeped in deep sorrow.","Une étrange pesanteur enveloppe le pied du Phare. Des sonorités cristallines résonnent dans l'immensité. Parmi ces échos suspendus, une voix flotte dans l'air, empreinte d'une profonde tristesse."),
+  end:()=>_("The Voice fades in a last murmur, familiar to the Watcher.","La Voix s'éteint dans un dernier murmure, familier au Veilleur."),
   head:()=>_('Phase I of III · The Mirror Hall','Phase I sur III · La salle des reflets'),boss:()=>_('The Hollow Voice','La Voix Creuse'),btn:()=>_('Dodge','Esquiver'),
   aria:()=>_('The Watcher facing the Hollow Voice, a figure with a cracked mirror face','Le Veilleur face à la Voix Creuse, une silhouette au visage de miroir fêlé')},
  {eye:()=>_('Phase III · The Reefs','Phase III · Les récifs'),
-  desc:()=>_('The sea has drawn back. The ships it took sleep on the reef.',"La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif."),
-  form2:()=>_("The tower bursts. Among the debris, the jellyfish, laid bare.","La tour éclate. Au milieu des débris, la méduse, à découvert."),
-  end:()=>_("In the wreckage, the Lighthouse's bell, cracked and silent.","Dans les décombres, la cloche du Phare, fêlée et muette."),
-  head:()=>_('Phase III of III · The Reefs','Phase III sur III · Les récifs'),boss:()=>S.form===2?_('The Shattered',"L'Éclaté"):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Guard','Garde'),
-  aria:()=>_("The Watcher on the reefs facing the Drowned Lighthouse, a tower made of the King's body, crowned by an electric jellyfish","Le Veilleur sur les récifs face au Phare Noyé, une tour faite du corps du Roi et couronnée d'une méduse électrique")}
+  desc:()=>_('The sea has drawn back. The ships it took sleep on the reef, their wrecks given over to a presence that knows neither rest nor forgetting.',"La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif, leurs carcasses livrées à une présence qui ne connaît ni repos ni oubli."),
+  end:()=>_("In the wreckage lies the Lighthouse's bell, cracked and silent.","Dans les décombres gît la cloche du Phare, fêlée et muette."),
+  head:()=>_('Phase III of III · The Reefs','Phase III sur III · Les récifs'),boss:()=>S.form===2?_('The Bottomless','La Sans-Fond'):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Block','Bloquer'),
+  aria:()=>_("The Watcher on the reefs facing the Drowned Lighthouse, a tower made of the Elder's body, crowned by an electric jellyfish","Le Veilleur sur les récifs face au Phare Noyé, une tour faite du corps de l'Ancien et couronnée d'une méduse électrique")}
 ];
 function pips(el,n,max,marks){if(el.children.length!==max){el.innerHTML='';for(let i=0;i<max;i++)el.appendChild(document.createElement('span'))}[...el.children].forEach((s,i)=>{s.classList.toggle('on',i<n);s.classList.toggle('mark',!!marks&&marks.includes(i))})}
 function hud(){
@@ -2153,8 +2163,9 @@ function P2(stage,f,b,final,rage){
   pick(stage?p1:p0)();return T;
 }
 /* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and
-   comes back as a real attack once he can dodge again (action + recovery + DG.backWin); the series is no longer clean */
-function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
+   comes back as a real attack once he can dodge again (action + recovery + DG.backWin). Dodging a reflection is not a fault:
+   the series stays clean unless the Watcher takes the returning blow (the 'hit' branches of update() set pat.ok=false) */
+function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
   const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}
 function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
 function drawOrbs(){
@@ -2322,7 +2333,7 @@ function drawBeaconFx(){
 function drawP(k,x,y,r,heat,sc){ctx.save();ctx.translate(x,y);ctx.rotate(r||0);if(sc)ctx.scale(sc,sc);PDRAW[k](heat==null?.85:heat);ctx.restore()}
 function tent(x0,y0,cx1,cy1,cx2,cy2,x1,y1,w,on){ctx.lineCap='round';ctx.strokeStyle='rgba(4,20,26,.9)';ctx.lineWidth=w+3;ctx.beginPath();ctx.moveTo(x0,y0);ctx.bezierCurveTo(cx1,cy1,cx2,cy2,x1,y1);ctx.stroke();
   ctx.strokeStyle=`rgba(111,232,255,${.55*on+.15})`;ctx.lineWidth=w*.45;ctx.stroke();
-  for(let d=1;d<6;d++){const t=d/6,m=1-t;ell(m*m*m*x0+3*m*m*t*cx1+3*m*t*t*cx2+t*t*t*x1,m*m*m*y0+3*m*m*t*cy1+3*m*t*t*cy2+t*t*t*y1,1.6,1.6,`rgba(200,255,255,${(.5+.5*Math.sin(rt*4-d))*on})`)}}
+  for(let d=1;d<6;d++){const t=d/6,m=1-t;ell(m*m*m*x0+3*m*m*t*cx1+3*m*t*t*cx2+t*t*t*x1,m*m*m*y0+3*m*m*t*cy1+3*m*t*t*cy2+t*t*t*y1,1.6,1.6,`rgba(200,255,255,${.5*on})`)}}
 function base(){ell(LX,GY+8,160,18,'#050e12');for(const r of RIBS){ctx.strokeStyle='#0a1418';ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(r.x,GY+4);ctx.quadraticCurveTo(r.x+r.l*10,GY-r.h,r.x+r.l*26,GY-r.h*.9);ctx.stroke()}}
 const RINGS=TOWER.map((p,i)=>p.k==='ring'?i:-1).filter(i=>i>=0);
 const SBELLS=TOWER.map((p,i)=>p.k==='sbell'?i:-1).filter(i=>i>=0);
@@ -2347,7 +2358,7 @@ function P3b(stage,f,b,final,rage){
 function beamFrom(ox,oy,bx,a){const g=ctx.createLinearGradient(ox,oy,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(ox-7,oy);ctx.lineTo(ox+7,oy);ctx.lineTo(bx+70,GY+16);ctx.lineTo(bx-70,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,80,11,`rgba(200,250,255,${.25*a})`)}
 function drawEclGame(){
   const T=S.ecPhi/.55,P=ecPose(T),A0=ecAnchor(T);let A=A0;
-  let J={x:LX,y:ECY+Math.sin(rt*1.1)*4,r:44*(1+Math.sin(rt*2.6)*.1)};
+  let J={x:LX,y:ECY+Math.sin(rt*1.1)*4,r:44};
   if(S.angerShown){RINGS.forEach((idx,i)=>{if(i%2){const a=-S.ecPhi*1.3+i*2*Math.PI/7;P[idx]={x:LX+Math.cos(a)*140,y:ECY+Math.sin(a)*46,r:a*.5,z:Math.sin(a)}}})}
   let reBeam=null;
   for(const th of S.threats){if(gt<th.t0)continue;
@@ -2431,7 +2442,7 @@ function playCine(id,k,cb){
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
@@ -2440,9 +2451,7 @@ function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:
 function beginPlay(){hideCard();S.mode='play';S.paused=false;S.nextAt=gt+1.1;setTheme(S.phase);try{$('ward').focus({preventScroll:true})}catch(e){};hud();say(PH[S.phase].head())}
 function phaseCleared(){
   MUSIC.stop();const id=S.phase;
-  if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();S.mode='card';hud();
-      showCard({eye:PH[3].eye(),title:PH[3].boss(),desc:PH[3].form2(),
-        go:_('Continue','Continuer'),onGo:beginPlay})});return}
+  if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();hud();beginPlay()});return}
   LB.store.set(LB.key('unl'),String(Math.max(+LB.store.get(LB.key('unl'),1),Math.min(3,gpOf(id)+1))));
   if(id===3){playCine(3,'out',()=>clearedCard(3));return}
   playCine(id,'out',()=>clearedCard(id));
@@ -2576,7 +2585,6 @@ function gameUpdate(dt){
   combatSfx();
   // phase I: the muffled bell under the hatch
   if(S.phase===2&&(S.mode==='play'||(S.mode==='cine'&&S.cine&&S.cine.k==='in'))&&!S.paused){if(!S.hatchRing||gt-S.hatchRing>HATCH.toll){S.hatchRing=gt;MUSIC.fx('bellMuffled')}}
-  if(S.mode==='play'&&S.phase===1)S.parasite=S.rageN?.6+.15*Math.sin(gt*3):0;
   if(S.phase===3&&S.form===2&&(S.mode==='play'||S.mode==='ko')&&!S.paused){
     S.ecPhi+=(S.bossHp<=S.bossMax/2?1.05:.7)*dt;
   }
