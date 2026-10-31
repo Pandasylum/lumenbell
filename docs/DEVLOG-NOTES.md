@@ -24,3 +24,7 @@
 
 ## 2026-10-30 · docs/ch2-notes-compression
 - Rien ne change à l'écran : cette session ne touche que la documentation (`chapters/ch2-silent-bells/NOTES.md` allégé) et le déclencheur du workflow de tests.
+
+## 2026-10-31 · docs/rangement-final
+- Rien ne change à l'écran : cette session ne range que de la documentation (`archives/`, liens du `README.md`, `ROADMAP.md`, `docs/COMMUN.md`).
+- Les parties de l'inventaire commun déjà faites sont archivées : il reste à relire ce qui concerne les prochaines sessions moteur.

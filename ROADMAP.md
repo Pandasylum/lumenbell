@@ -2,15 +2,16 @@
 
 ## Fait
 - Chapitre I – Ember Bridge v1.0 (itch.io + APK/AAB).
+- Découpage de la source du Chapitre I en fichiers.
+- Import de Silent Bells, build et test dédiés (tag `ch2-import`).
+- Chapitre II : harmonisation avec Ember Bridge (A technique, B gameplay et textes, C visuels), nouveaux sorts codés.
+- Audit des éléments communs (`docs/COMMUN.md`), vocabulaire unique bloquer / esquiver (`docs/GLOSSAIRE.md`).
+- Code commun `shared/` (langue, clés `lb-…` avec migration depuis `eb-…`, audio) et source du Chapitre II en morceaux.
 
 ## Prochaines étapes
-1. Fait : découpage de la source du Chapitre I en fichiers.
-2. Fait : import de Silent Bells, build et test dédiés (tag `ch2-import`).
-3. Fait : Chapitre II, harmonisation avec Ember Bridge (`docs/CH2-SPEC.md`) : A technique, B gameplay et textes, C visuels.
 4. Test sur téléphone (ressenti, lisibilité, fluidité).
-5. D · optimisation et découpage du Chapitre II (`ch2/perf`) : mesure des images par seconde, poids, minification, source en plusieurs fichiers, build identique à chaque étape, comme pour le Chapitre I.
-6. Moteur commun (`engine/`, `shared/`) : boucle, entrées, audio, langues, sauvegarde, difficultés, **un seul Veilleur dessiné et animé pour tous les chapitres** (poses de garde, pas de côté, coup reçu, victoire ; demande à écrire dans `DEMANDES.md` par la session C1) ; migration des clés `eb-…` du Chapitre I vers `lb-…`.
-7. Fait : audit des éléments communs (`docs/COMMUN.md`). Vocabulaire unique : bloquer / esquiver.
+5. D · optimisation du Chapitre II (`ch2/perf`) : mesure des images par seconde, poids, minification ; build identique à chaque étape, comme pour le Chapitre I.
+6. Moteur commun (`engine/`, suite) : boucle, entrées, difficultés, **un seul Veilleur dessiné et animé pour tous les chapitres** (poses de garde, pas de côté, coup reçu, victoire ; voir `DEMANDES.md`). Plan en sessions : `docs/COMMUN.md` §4.
 8. Menu : **une seule fonction de menu pour les 7 chapitres** (boutons au même endroit, mêmes polices, même position des textes — nom du jeu en grand, nom du chapitre en dessous en petit —, mêmes durées), alimentée par une table par chapitre (nom, couleur, sous-titre) ; écran titre commun, choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres.
 9. Plus tard : modules ES, Google Play, iOS ; chapitre III (Racines).
 
