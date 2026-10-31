@@ -28,3 +28,5 @@
 ## 2026-10-31 · docs/rangement-final
 - Rien ne change à l'écran : cette session ne range que de la documentation (`archives/`, liens du `README.md`, `ROADMAP.md`, `docs/COMMUN.md`).
 - Les parties de l'inventaire commun déjà faites sont archivées : il reste à relire ce qui concerne les prochaines sessions moteur.
+- Rien ne change à l'écran : cette session ne corrige que des renvois de documentation (`docs/GLOSSAIRE.md`, `NOTES.md`).
+- Le Veilleur du Chapitre II reste celui de la demande ouverte dans `DEMANDES.md` : aucune puce à lire à ce sujet dans `NOTES.md`.
