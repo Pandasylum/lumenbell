@@ -52,6 +52,9 @@ Descriptions : en-tête de chaque fichier et `NOTES.md:Outillage` (lancement loc
 - Fichiers : `tests/ch2-texts.js`, `ch2-keys.js`, `ch2-smoke.js`, `ch2-trial.js`, `ch2-input.js`, `ch2-title.js`, `ch2-retouches3.js`, `ch2-announce.js`, `ch2-bot.js` ; outil commun `ch2-lib.js` (copie de test à crochets `build/out/ch2-test.html`, non suivie ; le `dist` publié n'a aucun crochet).
 - Numéros de phase : interne `S.phase` 2 = Phase I (la Voix Creuse), 1 = Phase II (le Roi de Rouille), 3 = Phase III (le Phare Noyé) ; `ORDER=[2,1,3]`. Le test lit `document.body.dataset.ph` (interne) et `#hdEye` (affiché).
 
+## Pièges
+- Chapitre II : `renderMenu` lit un canvas `#mc` absent du HTML et n'est jamais appelé (code mort).
+
 ## Mesures des états du Veilleur (27 octobre, `node tests/ch2-input.js`)
 | Cas | Résultat |
 |---|---|
