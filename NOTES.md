@@ -41,7 +41,7 @@
 - **Éléments communs** : inventaire des écarts entre chapitres, API commune proposée et plan des sessions moteur dans `docs/COMMUN.md` (audit du 28 octobre 2026). À lire avant toute session `engine/…` ou `menu/…`.
 - **Tables `T` et `DG` inversées d'un chapitre à l'autre** : au Chapitre I, `T` = blocage (phase I) et `DG` = esquive (phase II) ; au Chapitre II, `T` = parade de la phase II (le Roi) et `DG` = esquive de la phase I (la Voix). Toujours vérifier la phase avant de régler une valeur.
 - **Musique du Chapitre II muette sur téléphone** (régression du 28 octobre) : correctifs et test `tests/audio.js` en place, à confirmer sur téléphone. Détail : `archives/decisions/2026-10-28-engine-audio.md`.
-- Le Veilleur du Chapitre II n'est pas celui du Chapitre I (pas de heaume ni de tabard, bâton à cristal au lieu du sceptre-lanterne), malgré le commentaire « same skin as Ember Bridge ». Prévu dans la session `engine/watcher`.
+- Veilleur du Chapitre II différent de celui du Chapitre I : voir `DEMANDES.md` (« un seul Veilleur pour toute la série »). Texte intégral : [archives](archives/NOTES-outillage-pieges.md#veilleur-ch2).
 - Le workflow Android cherche l'`index.html` à un chemin explicite (`chapters/ch1-ember-bridge/dist/index.html`), pas par `find`.
 
 ## Fonctionnement des sessions

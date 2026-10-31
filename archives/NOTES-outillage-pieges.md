@@ -10,3 +10,7 @@ Texte déplacé ou remplacé le 31 octobre 2026, sans réécriture.
 <a id="barre-recuperation"></a>
 ## Pièges : barre de récupération (puce déjà retirée de `NOTES.md` avant cette session)
 Tranchée le 28 octobre 2026 (toujours visible) : `docs/decisions/2026-10-28-engine-shared.md`, §1 n° 1. Le texte de la puce n'est plus dans le dépôt courant ; il reste dans l'historique git.
+
+<a id="veilleur-ch2"></a>
+## Pièges : Veilleur du Chapitre II (puce retirée de `NOTES.md` le 31 octobre 2026, couverte par `DEMANDES.md`)
+- Le Veilleur du Chapitre II n'est pas celui du Chapitre I (pas de heaume ni de tabard, bâton à cristal au lieu du sceptre-lanterne), malgré le commentaire « same skin as Ember Bridge ». Prévu dans la session `engine/watcher`.
