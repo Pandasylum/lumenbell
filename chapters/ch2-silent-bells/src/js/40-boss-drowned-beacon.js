@@ -19,7 +19,7 @@ function pTb1(heat){bellBody(88,50,8);
   // heart cage: lantern glow -> cyan parasite -> cold
   const hy=-26;ctx.fillStyle='#050807';ctx.beginPath();ctx.moveTo(-28,hy-30);jag(-28,30,hy-34,7,-8,mulberry(4));ctx.lineTo(34,hy+8);jag(34,-32,hy+26,8,8,mulberry(6));ctx.closePath();ctx.fill();
   if(heat>=0&&heat<1)glow(0,hy,46,'rgba(220,150,80,.95)',1-heat);
-  if(heat>0)glow(0,hy,50,'rgba(90,220,255,.95)',heat*(.5+.2*Math.sin(rt*3)));
+  if(heat>0)glow(0,hy,50,'rgba(90,220,255,.95)',heat*.6);
   ctx.strokeStyle='#0a110d';ctx.lineWidth=6;for(const x of[-16,0,16]){ctx.beginPath();ctx.moveTo(x,hy-32);ctx.lineTo(x,hy+26);ctx.stroke()}}
 function pTb2(){bellBody(72,48,13)}
 function pRing(){ctx.fillStyle=bronze(-23,23);rrect(-23,-13,46,26,5);ctx.fill();ctx.fillStyle='#0d1712';ctx.fillRect(-23,9,46,4);ctx.fillStyle='rgba(170,230,210,.18)';ctx.fillRect(-21,-11,42,2);ell(-8,-2,4,3,'rgba(128,54,22,.5)')}
@@ -83,7 +83,7 @@ function drawAnchorAt(q){ctx.save();if(q.f>.8){ctx.beginPath();ctx.rect(0,0,W,GY
 function tentacle(x0,y0,x1,y1,k,on,wd){const mx=(x0+x1)/2+Math.sin(rt*2+k)*30,my=(y0+y1)/2+Math.cos(rt*1.7+k)*20;
   ctx.strokeStyle='rgba(4,20,26,.85)';ctx.lineWidth=(wd||3)+3;ctx.beginPath();ctx.moveTo(x0,y0);ctx.quadraticCurveTo(mx,my,x1,y1);ctx.stroke();
   ctx.strokeStyle=`rgba(111,232,255,${.55*on+.15})`;ctx.lineWidth=wd||3;ctx.stroke();
-  for(let d=1;d<5;d++){const t=d/5,mt=1-t;ell(mt*mt*x0+2*mt*t*mx+t*t*x1,mt*mt*y0+2*mt*t*my+t*t*y1,1.6,1.6,`rgba(200,255,255,${(.5+.5*Math.sin(rt*4-d+k))*on})`)}}
+  for(let d=1;d<5;d++){const t=d/5,mt=1-t;ell(mt*mt*x0+2*mt*t*mx+t*t*x1,mt*mt*y0+2*mt*t*my+t*t*y1,1.6,1.6,`rgba(200,255,255,${.5*on})`)}}
 function bindings(on,amt){
   // loops of tentacle wrapping the column at each joint
   ctx.save();ctx.lineCap='round';
@@ -96,7 +96,7 @@ function bindings(on,amt){
     const p0=[LX+side*(10+i*8),LY+16],p1=[LX+side*(60+i*6),GY-320],p2=[LX+side*(50+i*10)+sw,GY-150],p3=[LX+side*(70+i*22)+sw,GY+2];
     ctx.strokeStyle='rgba(4,20,26,.9)';ctx.lineWidth=6-i;ctx.beginPath();ctx.moveTo(...p0);ctx.bezierCurveTo(...p1,...p2,...p3);ctx.stroke();
     ctx.strokeStyle=`rgba(111,232,255,${.5*on+.1})`;ctx.lineWidth=2.2-i*.3;ctx.stroke();
-    for(let d=1;d<7;d++){const t=d/7,mt=1-t;ell(mt*mt*mt*p0[0]+3*mt*mt*t*p1[0]+3*mt*t*t*p2[0]+t*t*t*p3[0],mt*mt*mt*p0[1]+3*mt*mt*t*p1[1]+3*mt*t*t*p2[1]+t*t*t*p3[1],1.7,1.7,`rgba(200,255,255,${(.5+.5*Math.sin(rt*4-d+k))*on})`)}}
+    for(let d=1;d<7;d++){const t=d/7,mt=1-t;ell(mt*mt*mt*p0[0]+3*mt*mt*t*p1[0]+3*mt*t*t*p2[0]+t*t*t*p3[0],mt*mt*mt*p0[1]+3*mt*mt*t*p1[1]+3*mt*t*t*p2[1]+t*t*t*p3[1],1.7,1.7,`rgba(200,255,255,${.5*on})`)}}
   ctx.restore();
 }
 function jelly(x,y,r,on,t){
@@ -120,7 +120,7 @@ function drawBoss3(){
   drawPieces(null,.85);
   bindings(on,1);
   for(const [side,ph] of[[-1,0],[1,1.7]]){const sw=Math.sin(rt*1.8+ph);ctx.strokeStyle=`rgba(111,232,255,${.45*on+.1})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LX+side*20,LY+6);ctx.bezierCurveTo(LX+side*90,LY-30+sw*20,LX+side*140,LY+30-sw*30,LX+side*(170+sw*20),LY+80+sw*20);ctx.stroke()}
-  jelly(LX,LY,36*(Math.sin(rt*2.6)*.12+1),on,rt);
+  jelly(LX,LY,36,on,rt);
   if(B.charge>.3&&Math.sin(gt*37)>.2){ctx.save();ctx.globalCompositeOperation='lighter';bolt(LX-36,LY-10,LX+36,LY-16,(gt*13|0)/13,'rgba(220,250,255,.8)',1.5);ctx.restore()}
   if(ko>0){ctx.strokeStyle='rgba(200,250,255,.9)';ctx.lineWidth=2;for(const c of TCR){const n=Math.ceil(c.length*Math.min(1,ko*1.5));ctx.beginPath();for(let i=0;i<n;i++)i?ctx.lineTo(c[i][0],c[i][1]):ctx.moveTo(c[i][0],c[i][1]);ctx.stroke()}}
   for(let i=0;i<6;i++){const k=(rt*.05+i/6)%1;ell(LX-160+k*320,GY-6,70,14,`rgba(160,230,240,${.08*Math.sin(k*Math.PI)})`)}
@@ -130,7 +130,6 @@ function drawBoss3(){
 const TF_LEN=10;
 function drawTransform(){
   const t=gt-S.tfT;
-  S.parasite=clamp(t/1.8,0,1);
   if(t<2){ // the King, shaking, heart turning blue
     S.shake=Math.max(S.shake,Math.min(1,t)*4);
     ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();
@@ -153,7 +152,7 @@ function drawTransform(){
     if(t>8.6&&!S.tfFlash){S.tfFlash=true;S.flashT=gt;burst(LX,LY,50,'#e8fdff',9,1.2)}
   }
   const fk=gt-(S.flashT||-9);if(fk<.5){ctx.fillStyle=`rgba(220,250,255,${.55*(1-fk/.5)})`;ctx.fillRect(0,0,W,H)}
-  const cap=t<2?_('The parasite wakes in his heart','Le parasite se réveille dans son cœur'):t<3.3?_('The jellyfish bursts from the King','La méduse jaillit du corps du Roi'):t<8.6?_('Its tentacles rebuild the pieces','Ses tentacules réassemblent les morceaux'):_('The Drowned Lighthouse lights up','Le Phare Noyé s\'allume');
+  const cap=t<2?_('The parasite wakes in his heart','Le parasite se réveille dans son cœur'):t<3.3?_('The jellyfish bursts from the Elder',"La méduse jaillit du corps de l'Ancien"):t<8.6?_('Its tentacles rebuild the pieces','Ses tentacules réassemblent les morceaux'):_('The Drowned Lighthouse lights up','Le Phare Noyé s\'allume');
   if(S.tfCap!==cap){S.tfCap=cap;say(cap+'.')}
 }
 function drawBeacon(){

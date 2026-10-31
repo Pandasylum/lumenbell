@@ -17,7 +17,7 @@ function playCine(id,k,cb){
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,parasite:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
@@ -26,9 +26,7 @@ function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:
 function beginPlay(){hideCard();S.mode='play';S.paused=false;S.nextAt=gt+1.1;setTheme(S.phase);try{$('ward').focus({preventScroll:true})}catch(e){};hud();say(PH[S.phase].head())}
 function phaseCleared(){
   MUSIC.stop();const id=S.phase;
-  if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();S.mode='card';hud();
-      showCard({eye:PH[3].eye(),title:PH[3].boss(),desc:PH[3].form2(),
-        go:_('Continue','Continuer'),onGo:beginPlay})});return}
+  if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();hud();beginPlay()});return}
   LB.store.set(LB.key('unl'),String(Math.max(+LB.store.get(LB.key('unl'),1),Math.min(3,gpOf(id)+1))));
   if(id===3){playCine(3,'out',()=>clearedCard(3));return}
   playCine(id,'out',()=>clearedCard(id));

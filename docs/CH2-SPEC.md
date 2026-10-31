@@ -36,11 +36,11 @@ La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (�
 Référence lue par tests/ch2-texts.js ; ne pas déplacer. Les nouveaux textes en attente sont dans CHANGEMENTS.md:A.
 **Intro** : 1. « Sur la côte, la brume ne se lève plus. » 2. « Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond. » 3. « Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend. » 4. « On dit que sa gardienne veille encore là-haut. » 5. Titre : « Chapitre II · Silent Bells ».
 
-**Phase I · La salle des reflets** (boss : la Voix Creuse) : entrée « Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur. » ; fin « L'espace d'un instant, la lanterne du Veilleur faiblit. » (c'est la lanterne du joueur qui faiblit, pas la turquoise ; la trappe, la chute de la lanterne turquoise et le miroir brisé sont montrés, pas écrits)
+**Phase I · La salle des reflets** (boss : la Voix Creuse) : entrée « Une étrange pesanteur enveloppe le pied du Phare. Des sonorités cristallines résonnent dans l'immensité. Parmi ces échos suspendus, une voix flotte dans l'air, empreinte d'une profonde tristesse. » ; fin « La Voix s'éteint dans un dernier murmure, familier au Veilleur. » (l'animation de la lanterne du Veilleur qui faiblit, la trappe, la chute de la lanterne turquoise et le miroir brisé sont montrés, pas écrits)
 
-**Phase II · La cale** (boss : le Roi de Rouille) : entrée « Sous le Phare, la coque d'un navire échoué. Elle sent le fer et le sel. » ; fin « La coque s'effondre autour du Roi. Pour la première fois, la lune se reflète sur son corps de métal. » (le sol ne cède pas : c'est le navire qui s'écroule, la lueur turquoise vient de son cœur et se voit)
+**Phase II · La cale** (boss : l'Ancien de Rouille) : entrée « Sous le Phare, la coque d'un navire échoué. Le fer rongé par le sel semble reposer ici depuis des siècles. » ; fin « Le navire s'effondre autour de l'Ancien. La lune se reflète sur son armure, mais rien ne répond à sa lumière. » (le sol ne cède pas : c'est le navire qui s'écroule, la lueur turquoise vient de son cœur et se voit)
 
-**Phase III · Les récifs** (boss : le Phare Noyé ; forme II : l'Éclaté) : entrée « La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif. » ; forme II « La tour éclate. Au milieu des débris, la méduse, à découvert. » ; fin « Dans les décombres, la cloche du Phare, fêlée et muette. »
+**Phase III · Les récifs** (boss : le Phare Noyé ; forme II : la Sans-Fond, sans carton) : entrée « La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif, leurs carcasses livrées à une présence qui ne connaît ni repos ni oubli. » ; fin « Dans les décombres gît la cloche du Phare, fêlée et muette. »
 
 **Outro** (6 cartons, même construction que celui du Chapitre I : `SC` avec durées + dessins) :
 1. « Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus. »
@@ -54,15 +54,15 @@ Référence lue par tests/ch2-texts.js ; ne pas déplacer. Les nouveaux textes e
 ## Textes validés (anglais)
 
 Référence lue par tests/ch2-texts.js ; ne pas déplacer. Les nouveaux textes en attente sont dans CHANGEMENTS.md:A.
-Titres et boss : Phase I · The Mirror Hall (The Hollow Voice) ; Phase II · The Hold (The Rust King) ; Phase III · The Reefs (The Drowned Lighthouse ; forme II : The Shattered). « Crown » traduit « Couronne ». Le féminin de la gardienne n'apparaît pas en anglais (« its keeper »), il se voit à l'image.
+Titres et boss : Phase I · The Mirror Hall (The Hollow Voice) ; Phase II · The Hold (The Rust Elder) ; Phase III · The Reefs (The Drowned Lighthouse ; forme II : The Bottomless). « Crown » traduit « Couronne ». Le féminin de la gardienne n'apparaît pas en anglais (« its keeper »), il se voit à l'image.
 
 **Intro** : 1. "On the coast, the mist no longer lifts." 2. "Out at sea, the Drowned Lighthouse stands dark. No bell answers it." 3. "The ships no longer return. The fishermen say the sea keeps what it takes." 4. "They say its keeper still watches up there." 5. Title: "Chapter II · Silent Bells".
 
-**Phase I** : entrée "At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there." ; fin "For a moment, the Watcher's lantern dims."
+**Phase I** : entrée "A strange heaviness settles over the foot of the Lighthouse. Crystalline sounds ring out across the vastness. Among these suspended echoes, a voice drifts through the air, steeped in deep sorrow." ; fin "The Voice fades in a last murmur, familiar to the Watcher."
 
-**Phase II** : entrée "Beneath the Lighthouse, the hull of a stranded ship. It smells of iron and salt." ; fin "The hull collapses around the King. For the first time, the moon gleams on his body of metal."
+**Phase II** : entrée "Beneath the Lighthouse, the hull of a stranded ship. The iron, eaten away by salt, seems to have lain here for centuries." ; fin "The ship collapses around the Elder. The moon gleams on his armor, but nothing answers his light."
 
-**Phase III** : entrée "The sea has drawn back. The ships it took sleep on the reef." ; forme II "The tower bursts. Among the debris, the jellyfish, laid bare." ; fin "In the wreckage, the Lighthouse's bell, cracked and silent."
+**Phase III** : entrée "The sea has drawn back. The ships it took sleep on the reef, their wrecks given over to a presence that knows neither rest nor forgetting." ; fin "In the wreckage lies the Lighthouse's bell, cracked and silent."
 
 **Outro** : 1. "By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again." 2. "On it, a single word is engraved: Crown." 3. "And this time, the earth has not stopped trembling." 4. "In the heart of the forest, a Spire's light is failing." 5. "Chapter III. To be continued."
 

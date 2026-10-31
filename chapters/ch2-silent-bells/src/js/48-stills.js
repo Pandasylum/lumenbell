@@ -37,6 +37,6 @@ function moonOnKing(sink,a){ctx.save();ctx.translate(700,GY);ctx.rotate(.08*sink
   for(const [hw,y,h] of[[104,-98,54],[88,-140,50],[72,-180,48]]){ctx.beginPath();ctx.moveTo(hw*.62,y-h*.98);ctx.quadraticCurveTo(hw*.7,y-h*.45,hw*.98,y-2);ctx.stroke()}
   ctx.beginPath();ctx.arc(-6,-224-40,30,-1.2,-.2);ctx.stroke();
   glow(0,-166,120,'rgba(79,224,204,.9)',.55*a);ctx.restore()}
-function kingEndStill(){bg1();hullSky(1);hullDebris(9);drawAnchorAt({x:878,y:GY-150,a:1.95,f:1});S.parasite=1;S.noAnchor=true;moonCone(1);kingKneel(45);moonOnKing(45,1);S.noAnchor=false;
+function kingEndStill(){bg1();hullSky(1);hullDebris(9);drawAnchorAt({x:878,y:GY-150,a:1.95,f:1});S.noAnchor=true;moonCone(1);kingKneel(45);moonOnKing(45,1);S.noAnchor=false;
   ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0)}
 

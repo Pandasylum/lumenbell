@@ -31,7 +31,7 @@ function testPage(){const h=fs.readFileSync(DIST,'utf8');if(h.split(END).length!
 // entre " " de la section anglaise (meme ordre), hors ligne « À supprimer » ; titres de phase et noms de boss (listes ci-dessous,
 // recopiees du cahier des charges, qui les donne hors guillemets).
 const TITLES=[['Phase I · The Mirror Hall','Phase I · La salle des reflets'],['Phase II · The Hold','Phase II · La cale'],['Phase III · The Reefs','Phase III · Les récifs']];
-const BOSSES=[['The Hollow Voice','La Voix Creuse'],['The Rust King','Le Roi de Rouille'],['The Drowned Lighthouse','Le Phare Noyé'],['The Shattered',"L'Éclaté"]];
+const BOSSES=[['The Hollow Voice','La Voix Creuse'],['The Rust Elder',"L'Ancien de Rouille"],['The Drowned Lighthouse','Le Phare Noyé'],['The Bottomless','La Sans-Fond']];
 function specTexts(){const md=fs.readFileSync(path.join(ROOT,'docs/CH2-SPEC.md'),'utf8');
  const sec=(a,b)=>{const i=md.indexOf(a),j=md.indexOf(b,i);if(i<0||j<0)throw new Error('section introuvable: '+a);return md.slice(i,j)};
  const fr=sec('## Textes validés (français','## Textes validés (anglais)').split('\n').filter(l=>!l.startsWith('À supprimer')).join('\n');

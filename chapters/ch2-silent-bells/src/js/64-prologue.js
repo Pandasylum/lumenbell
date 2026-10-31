@@ -114,21 +114,20 @@ const gpOf=id=>ORDER.indexOf(id)+1;
 /* phase texts (docs/CH2-SPEC.md): eye = phase title, boss = name (card title), desc = entry panel, end = end panel */
 const PH=[null,
  {eye:()=>_('Phase II · The Hold','Phase II · La cale'),
-  desc:()=>_('Beneath the Lighthouse, the hull of a stranded ship. It smells of iron and salt.',"Sous le Phare, la coque d'un navire échoué. Elle sent le fer et le sel."),
-  end:()=>_('The hull collapses around the King. For the first time, the moon gleams on his body of metal.',"La coque s'effondre autour du Roi. Pour la première fois, la lune se reflète sur son corps de métal."),
-  head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust King','Le Roi de Rouille'),btn:()=>_('Block','Bloquer'),
-  aria:()=>_("The Watcher facing the Rust King, a colossus of bells armed with an anchor","Le Veilleur face au Roi de Rouille, un colosse de cloches armé d'une ancre")},
+  desc:()=>_('Beneath the Lighthouse, the hull of a stranded ship. The iron, eaten away by salt, seems to have lain here for centuries.',"Sous le Phare, la coque d'un navire échoué. Le fer rongé par le sel semble reposer ici depuis des siècles."),
+  end:()=>_('The ship collapses around the Elder. The moon gleams on his armor, but nothing answers his light.',"Le navire s'effondre autour de l'Ancien. La lune se reflète sur son armure, mais rien ne répond à sa lumière."),
+  head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust Elder',"L'Ancien de Rouille"),btn:()=>_('Block','Bloquer'),
+  aria:()=>_("The Watcher facing the Rust Elder, a colossus of bells armed with an anchor","Le Veilleur face à l'Ancien de Rouille, un colosse de cloches armé d'une ancre")},
  {eye:()=>_('Phase I · The Mirror Hall','Phase I · La salle des reflets'),
-  desc:()=>_("At the foot of the Lighthouse, the water is a mirror. A voice answers the Watcher there.","Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur."),
-  end:()=>_("For a moment, the Watcher's lantern dims.","L'espace d'un instant, la lanterne du Veilleur faiblit."),
+  desc:()=>_("A strange heaviness settles over the foot of the Lighthouse. Crystalline sounds ring out across the vastness. Among these suspended echoes, a voice drifts through the air, steeped in deep sorrow.","Une étrange pesanteur enveloppe le pied du Phare. Des sonorités cristallines résonnent dans l'immensité. Parmi ces échos suspendus, une voix flotte dans l'air, empreinte d'une profonde tristesse."),
+  end:()=>_("The Voice fades in a last murmur, familiar to the Watcher.","La Voix s'éteint dans un dernier murmure, familier au Veilleur."),
   head:()=>_('Phase I of III · The Mirror Hall','Phase I sur III · La salle des reflets'),boss:()=>_('The Hollow Voice','La Voix Creuse'),btn:()=>_('Dodge','Esquiver'),
   aria:()=>_('The Watcher facing the Hollow Voice, a figure with a cracked mirror face','Le Veilleur face à la Voix Creuse, une silhouette au visage de miroir fêlé')},
  {eye:()=>_('Phase III · The Reefs','Phase III · Les récifs'),
-  desc:()=>_('The sea has drawn back. The ships it took sleep on the reef.',"La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif."),
-  form2:()=>_("The tower bursts. Among the debris, the jellyfish, laid bare.","La tour éclate. Au milieu des débris, la méduse, à découvert."),
-  end:()=>_("In the wreckage, the Lighthouse's bell, cracked and silent.","Dans les décombres, la cloche du Phare, fêlée et muette."),
-  head:()=>_('Phase III of III · The Reefs','Phase III sur III · Les récifs'),boss:()=>S.form===2?_('The Shattered',"L'Éclaté"):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Guard','Garde'),
-  aria:()=>_("The Watcher on the reefs facing the Drowned Lighthouse, a tower made of the King's body, crowned by an electric jellyfish","Le Veilleur sur les récifs face au Phare Noyé, une tour faite du corps du Roi et couronnée d'une méduse électrique")}
+  desc:()=>_('The sea has drawn back. The ships it took sleep on the reef, their wrecks given over to a presence that knows neither rest nor forgetting.',"La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif, leurs carcasses livrées à une présence qui ne connaît ni repos ni oubli."),
+  end:()=>_("In the wreckage lies the Lighthouse's bell, cracked and silent.","Dans les décombres gît la cloche du Phare, fêlée et muette."),
+  head:()=>_('Phase III of III · The Reefs','Phase III sur III · Les récifs'),boss:()=>S.form===2?_('The Bottomless','La Sans-Fond'):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Block','Bloquer'),
+  aria:()=>_("The Watcher on the reefs facing the Drowned Lighthouse, a tower made of the Elder's body, crowned by an electric jellyfish","Le Veilleur sur les récifs face au Phare Noyé, une tour faite du corps de l'Ancien et couronnée d'une méduse électrique")}
 ];
 function pips(el,n,max,marks){if(el.children.length!==max){el.innerHTML='';for(let i=0;i<max;i++)el.appendChild(document.createElement('span'))}[...el.children].forEach((s,i)=>{s.classList.toggle('on',i<n);s.classList.toggle('mark',!!marks&&marks.includes(i))})}
 function hud(){
@@ -214,8 +213,9 @@ function P2(stage,f,b,final,rage){
   pick(stage?p1:p0)();return T;
 }
 /* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and
-   comes back as a real attack once he can dodge again (action + recovery + DG.backWin); the series is no longer clean */
-function fooled(th){th.done=true;th.res='fooled';th.okT=gt;th.pat.ok=false;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
+   comes back as a real attack once he can dodge again (action + recovery + DG.backWin). Dodging a reflection is not a fault:
+   the series stays clean unless the Watcher takes the returning blow (the 'hit' branches of update() set pat.ok=false) */
+function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
   const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}
 function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
 function drawOrbs(){

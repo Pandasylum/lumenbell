@@ -1,4 +1,8 @@
 /* ---------- particles & pops ---------- */
+/* Remanence (end of phase III): the turquoise light of the Bottomless evaporates, going up and brightening towards white
+   (a particle goes from c to c2 over its life; no text, no sound). REMANENCE = number, spread, rise speed, life, colours. */
+const REMANENCE={n:60,spread:30,up:[.7,1.5],life:3.8,c:[111,232,255],c2:[255,255,255]};
+function evaporate(x,y){const R=REMANENCE;for(let i=0;i<R.n;i++)S.parts.push({x:x+(Math.random()-.5)*R.spread,y:y+(Math.random()-.5)*10,vx:(Math.random()-.5)*.14,vy:-(R.up[0]+Math.random()*(R.up[1]-R.up[0])),g:0,t0:gt,life:R.life*(.7+Math.random()*.5),c:R.c,c2:R.c2,r:1.8+Math.random()*2.4})}
 function burst(x,y,n,col,spd,life,g){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.3+Math.random())*spd;S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-(g?spd*.4:0),g:g||0,t0:gt,life:life*(.6+Math.random()*.6),c:col,r:1.5+Math.random()*2.2})}}
 /* floating text: only onomatopoeia (same words in both languages, as in Ember Bridge); no announcement words */
 /* onomatopoeia: no word on an ordinary riposte (as in Ember Bridge); the Voice only cries, by sound */
