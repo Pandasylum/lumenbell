@@ -73,3 +73,4 @@
 - Ils apparaissent quand la méduse s'installe dans la lanterne, volent en éclats avec la tour au passage à la Sans-Fond et reviennent quand la tour se reforme. Rien d'autre ne change.
 - 2e passe : faisceaux, foudre et anneaux de la Tempête de cloches jaillissent maintenant des deux lanternes latérales du sommet, et non plus de la méduse ou du ciel.
 - À l'entrée de la phase III, les deux lanternes gisent sur la plage, au centre, à l'écart l'une de l'autre ; une tentacule vient les chercher pour couronner la tour.
+- Sans-Fond : les deux lanternes ne sont plus cachées derrière la méduse ; les tentacules du haut les brandissent, et faisceaux et anneaux en partent.

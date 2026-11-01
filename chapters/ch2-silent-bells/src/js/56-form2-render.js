@@ -14,20 +14,26 @@ function ecPose(T){let ri=0,si=0,bi=0;return TOWER.map(p=>{
 function ecAnchor(T){const a=T*.4;return{x:LX+Math.cos(a)*190,y:ECY+72+Math.sin(a)*46,a:a+2,sc:.7,z:Math.sin(a)}}
 function ecGap(T){const a=T*.55+12*Math.PI/7;return{x:LX+Math.cos(a)*112,y:ECY+Math.sin(a)*36}}
 function drawAnchorQ(q){ctx.save();if(q.clip){ctx.beginPath();ctx.rect(0,0,W,GY+6);ctx.clip()}ctx.translate(q.x,q.y);ctx.scale(q.sc,q.sc);drawAnchor(0,0,Math.cos(q.a),Math.sin(q.a),0);ctx.restore()}
-/* LQ: poses of the two side lanterns (default: around the jellyfish, scaled by its radius) */
-function drawEcl(P,A,J,tentA,on,gapQ,LQ){
-  base();
+/* LQ: poses of the two side lanterns around the jellyfish (default: scaled by its radius); sw (default 1): in form II the lanterns
+   and the shoulder bells swap places (they look alike): the lanterns are held up high by the upper tentacles, where the shoulder
+   bells were, and the shoulder bells sit by the jellyfish. 0 = no swap (tower), in between = on the way */
+function drawEcl(P,A,J,tentA,on,gapQ,LQ,sw){
+  base();if(sw==null)sw=1;
+  const L0=LQ||(J?lampPoses(J.x,J.y,J.r/36):null),D={};let Ld=L0;
+  if(L0&&sw>0){Ld=L0.map((l,k)=>{const a=P[SBELLS[k]];return{x:lerp(l.x,a.x,sw),y:lerp(l.y,a.y,sw),r:lerp(l.r,a.r,sw)}});
+    SBELLS.forEach((i,k)=>{const a=P[i],l=L0[k];D[i]={...a,x:lerp(a.x,l.x,sw),y:lerp(a.y,l.y,sw),r:lerp(a.r,l.r,sw),z:sw>.5?-.01:a.z}})}
+  const Q=i=>D[i]||P[i];
   if(J)glow(J.x,J.y,260,'rgba(90,220,255,.55)',.6*on+.05);
   const link=(x,y,front)=>{if(!J||tentA<=0)return;ctx.save();ctx.globalAlpha=tentA;tent(J.x,J.y,(J.x+x)/2,J.y+(front?30:-40),(J.x+x)/2,y,x,y,3,front?.9:.6);ctx.restore()};
-  const order=P.map((q,i)=>i).sort((a,b)=>P[a].z-P[b].z);
-  const piece=i=>{const q=P[i],k=TOWER[i].k;if(q.hide)return;if(!FIXED(k))link(q.x,q.y,q.z>=0);ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);if(q.sc)ctx.scale(q.sc,q.sc);PDRAW[k](.85,q.o);ctx.restore()};
-  order.filter(i=>P[i].z<0).forEach(piece);
+  const order=P.map((q,i)=>i).sort((a,b)=>Q(a).z-Q(b).z);
+  const piece=i=>{const q=Q(i),k=TOWER[i].k;if(q.hide)return;if(!FIXED(k)&&!D[i])link(q.x,q.y,q.z>=0);ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);if(q.sc)ctx.scale(q.sc,q.sc);PDRAW[k](.85,q.o);ctx.restore()};
+  order.filter(i=>Q(i).z<0).forEach(piece);
   if(A&&A.z<0){link(A.x,A.y,false);drawAnchorQ(A)}
-  if(LQ||J)drawLamps(LQ||lampPoses(J.x,J.y,J.r/36),1);
+  if(Ld){SBELLS.forEach((i,k)=>{if(D[i]&&!P[i].hide)link(P[i].x,P[i].y,P[i].z>=0)});drawLamps(Ld,1)}
   if(J){jelly(J.x,J.y,J.r,on,rt);
     for(let k=0;k<8;k++){const a=k/8*Math.PI*2+rt*.3;ctx.save();ctx.globalAlpha=Math.max(.25,tentA);tent(J.x,J.y+10,J.x+Math.cos(a)*60,J.y+40+Math.sin(a)*30,J.x+Math.cos(a)*90,J.y+90,J.x+Math.cos(a)*100+Math.sin(rt*2+k)*14,J.y+140,3,.8*on);ctx.restore()}}
   if(gapQ){ctx.save();ctx.globalCompositeOperation='lighter';glow(gapQ.x,gapQ.y,60,'rgba(255,255,255,.9)',.8);ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(gapQ.x,gapQ.y,22+Math.sin(rt*10)*3,0,Math.PI*2);ctx.stroke();ctx.restore()}
-  order.filter(i=>P[i].z>=0).forEach(piece);
+  order.filter(i=>Q(i).z>=0).forEach(piece);
   if(A&&A.z>=0){link(A.x,A.y,true);drawAnchorQ(A)}
 }
 function drawEclIdle(T){drawEcl(ecPose(T),ecAnchor(T),{x:LX,y:ECY+Math.sin(T*1.1)*4,r:44*(1+Math.sin(T*2.6)*.1)},1,1,null)}
@@ -62,7 +68,7 @@ function ecTransition(t){
   const A={x:lerp(Ah.x,A0.x,gl),y:lerp(Ah.y,A0.y,gl),a:lerp(Ah.a,A0.a,gl),sc:lerp(Ah.sc,A0.sc,gl),z:gl>.5?A0.z:1,clip:ay<.25};
   if(t>=2.4&&once('yank')){burst(LX+118,GY,26,'#dff8ff',6,.8,.4);S.shake=12}
   const J={x:LX,y:lerp(LY,ECY,eio(clamp((t-2.1)/1.2,0,1))),r:lerp(36,44,sc)};
-  drawEcl(P,A,J,1,1,null,lampPoses(J.x,J.y,J.r/36,sc*(1-gl)));
+  drawEcl(P,A,J,1,1,null,lampPoses(J.x,J.y,J.r/36,sc*(1-gl)),gl);
 }
 function ecFinale(tAll){
   const OFF=2.2,t=tAll-OFF;
