@@ -1,21 +1,22 @@
 /* ---------- Epilogue (docs/CH2-SPEC.md, outro) ---------- */
-const EPI_LEN=19;
-/* outro cartons: [start, end, text] in seconds; carton 5 is the title, tinted with the next chapter's colour.
-   Shots (EPI_SHOTS, start times): 1 morning, the Lighthouse mute; 2 close-up of the bell, the word engraved; 3 the valley
-   of Chapter I, the earth trembling, one tower going dark; 4 the forest, the Spire's light failing (and the title over it).
-   No glow under the waves any more (revisions of 28 October): the only light left is the forest Spire's. */
-const ECAPF=()=>[[.4,4.2,_('By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again.','Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus.')],
-  [4.4,8.2,_('On it, a single word is engraved: Crown.','Sur celle-ci, un seul mot est gravé : Couronne.')],
-  [8.4,12.2,_('And this time, the earth has not stopped trembling.',"Et cette fois, la terre n'a pas cessé de trembler.")],
-  [12.4,15.8,_("In the heart of the forest, a Spire's light is failing.","Au cœur de la forêt, la lumière d'une Flèche faiblit.")]];
-const EPI_TITLE=16.2;
-const EPI_SHOTS=[0,4.3,8.3,12.3];
+/* outro in the series frame (LB.cine), carton durations in CINE_D.outro (6 to 7 s, as in Chapter I). Cartons 1 to 4 have one
+   shot each: 1 morning, the Lighthouse mute; 2 close-up of the bell, the word engraved; 3 the valley of Chapter I, the earth
+   trembling, one tower going dark; 4 the forest, the Spire's light failing. Carton 5 announces the next chapter over the same
+   forest: its caption is tinted with Chapter III's colour (CH_COL[3]). No glow under the waves any more (revisions of
+   28 October): the only light left is the forest Spire's. Times inside a shot are counted from the shot's start (EPI_SHOTS). */
+const ECAP_TXT=()=>[_('By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again.','Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus.'),
+  _('On it, a single word is engraved: Crown.','Sur celle-ci, un seul mot est gravé : Couronne.'),
+  _('And this time, the earth has not stopped trembling.',"Et cette fois, la terre n'a pas cessé de trembler."),
+  _("In the heart of the forest, a Spire's light is failing.","Au cœur de la forêt, la lumière d'une Flèche faiblit."),
+  _('Chapter III. To be continued.','Chapitre III. À suivre.')];
+const EPI_SHOTS=CINE_D.outro.slice(0,3).reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of shots 1 to 4
+const EPI_TITLE=EPI_SHOTS[3]+CINE_D.outro[3];   // carton 5 (next chapter)
 /* shot 4: the forest Spire (x, top), its light fading from SPIRE.a0 to SPIRE.a1 over the shot, with flickers */
 const SPIRE={x:500,top:170,a0:.9,a1:.25,fade:6};
 /* shot 3: the valley's towers (x, height); TOWER_OUT goes dark at EPI_DARK; the earth cracks along VCRACKS */
-const VTOW=[[150,150],[300,110],[470,170],[640,120],[800,140]],TOWER_OUT=3,EPI_DARK=9.6;
-const VCRACKS=(()=>{const R=mulberry(808);return[...Array(5)].map((_,i)=>{const pts=[];let x=80+i*190,y=430;for(let k=0;k<7;k++){pts.push([x,y]);x+=(R()-.5)*60;y+=14+R()*10}return{pts,t0:8.9+i*.45}})})();
-const EFXL=[[.2,'swell'],[4.3,'glints'],[8.3,'rumble'],[9.6,'crackRun'],[10.4,'rumble'],[12.3,'glints'],[14.6,'heart'],[16.8,'sting']];
+const VTOW=[[150,150],[300,110],[470,170],[640,120],[800,140]],TOWER_OUT=3,EPI_DARK=EPI_SHOTS[2]+1.3;
+const VCRACKS=(()=>{const R=mulberry(808);return[...Array(5)].map((_,i)=>{const pts=[];let x=80+i*190,y=430;for(let k=0;k<7;k++){pts.push([x,y]);x+=(R()-.5)*60;y+=14+R()*10}return{pts,t0:EPI_SHOTS[2]+.6+i*.45}})})();
+const EFXL=[[.2,'swell'],[EPI_SHOTS[1],'glints'],[EPI_SHOTS[2],'rumble'],[EPI_DARK,'crackRun'],[EPI_SHOTS[2]+2.1,'rumble'],[EPI_SHOTS[3],'glints'],[EPI_SHOTS[3]+2.3,'heart'],[EPI_TITLE+.6,'sting']];
 function drawEpilogue(t){
   const shot=EPI_SHOTS.filter(s=>t>=s).length-1,ts=t-EPI_SHOTS[shot];
   ctx.save();
@@ -55,14 +56,13 @@ function drawEpilogue(t){
       ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
     mist(420,4,.08,6)}
   ctx.restore();
-  for(const s of EPI_SHOTS.slice(1)){const d=Math.abs(t-s);if(d<.3)fadeAll(1-d/.3)}
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
-  for(const c of ECAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0)caption(c[2],a)}
-  title(t,EPI_TITLE,'',_('Chapter III. To be continued.','Chapitre III. À suivre.'),CH_COL[3],CH_COL[3]);
-  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-(EPI_LEN-.8))/.8,0,1));
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
 }
-function playEpilogue(cb){MUSIC.stop();MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();setTheme(4);$('skip').hidden=false;$('hdEye').textContent=_('Epilogue','Épilogue')}
+/* the epilogue in the series frame; no "seen" flag: it follows the victory every time */
+const EPI=LB.cine.create({scenes:()=>CINE_D.outro.map((d,i)=>({d,txt:()=>ECAP_TXT()[i],col:i===4?CH_COL[3]:'',draw:cineScene(drawEpilogue)})),
+  onTick:t=>{if(!$('menu').hidden)gt=S.epT0+t}});
+function playEpilogue(cb){MUSIC.stop();MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();setTheme(4);$('skip').hidden=true;$('hdEye').textContent=_('Epilogue','Épilogue');EPI.play(endEpilogue)}
 function endEpilogue(){if(S.mode!=='epilogue')return;const cb=S.epCb;S.epCb=null;$('skip').hidden=true;S.mode='card';cb&&cb()}
 
 

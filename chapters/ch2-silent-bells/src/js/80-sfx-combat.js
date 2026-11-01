@@ -16,8 +16,6 @@ function counterFx(){MUSIC.fx([null,'impactLight','throw','thunder'][S.phase])}
 /* ---------- per-frame game logic on top of the engine ---------- */
 function gameUpdate(dt){
   if(S.mode==='cine'&&S.cine&&gt-S.cine.t0>=CINE_LEN[S.phase][S.cine.k])endCine();
-  if(S.mode==='prologue'&&gt-S.proT0>=PRO_LEN)endPrologue();
-  if(S.mode==='epilogue'&&gt-S.epT0>=EPI_LEN)endEpilogue();
   combatSfx();
   // phase I: the muffled bell under the hatch
   if(S.phase===2&&(S.mode==='play'||(S.mode==='cine'&&S.cine&&S.cine.k==='in'))&&!S.paused){if(!S.hatchRing||gt-S.hatchRing>HATCH.toll){S.hatchRing=gt;MUSIC.fx('bellMuffled')}}

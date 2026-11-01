@@ -6,7 +6,7 @@ ward.addEventListener('pointerdown',e=>{e.preventDefault();try{ward.setPointerCa
 ward.addEventListener('pointerup',up);ward.addEventListener('pointercancel',up);ward.addEventListener('lostpointercapture',up);ward.addEventListener('contextmenu',e=>e.preventDefault());
 cvm.addEventListener('pointerdown',e=>{if(S.mode!=='play')return;e.preventDefault();try{cvm.setPointerCapture(e.pointerId)}catch(_e){}down()});
 cvm.addEventListener('pointerup',up);cvm.addEventListener('pointercancel',up);cvm.addEventListener('lostpointercapture',up);
-function skip(){if(S.mode==='prologue')endPrologue();else if(S.mode==='epilogue')endEpilogue();else if(S.mode==='cine')endCine()}
+function skip(){if(S.mode==='prologue'||S.mode==='epilogue')LB.cine.skip();else if(S.mode==='cine')endCine()}
 $('skip').addEventListener('click',skip);
 document.addEventListener('keydown',e=>{
   const k=e.key;if(!$('menu').hidden)return;

@@ -6,3 +6,4 @@ js/08-lang.js
 js/12-audio.js
 js/16-hero.js
 js/20-watcher.js
+js/24-cine.js

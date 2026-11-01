@@ -28,9 +28,8 @@ function drawHelp(){
 let last=performance.now();
 function draw(){
   ctx.setTransform(SC,0,0,SC,0,0);
-  if(S.mode==='epilogue'){ctx.save();drawEpilogue(gt-S.epT0);ctx.restore();return}
+  if(S.mode==='epilogue'||S.mode==='prologue'){ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);return}   // drawn by LB.cine in its own frame (72-flow.js)
   if(S.mode==='card'&&S.still){ctx.save();drawStill(S.still);ctx.restore();const vs=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vs.addColorStop(0,'rgba(0,0,0,0)');vs.addColorStop(1,'rgba(0,0,0,.55)');ctx.fillStyle=vs;ctx.fillRect(0,0,W,H);return}
-  if(S.mode==='prologue'){ctx.save();drawPrologue(gt-S.proT0);ctx.restore();const vg0=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vg0.addColorStop(0,'rgba(0,0,0,0)');vg0.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=vg0;ctx.fillRect(0,0,W,H);return}
   ctx.save();
   if(S.shake>.3)ctx.translate((Math.random()-.5)*S.shake,(Math.random()-.5)*S.shake);
   const ph=S.phase;

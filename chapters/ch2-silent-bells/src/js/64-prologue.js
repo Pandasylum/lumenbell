@@ -1,18 +1,18 @@
 /* ---------- Prologue: the silent coast (docs/CH2-SPEC.md, intro) ---------- */
-/* intro rhythm, as in Ember Bridge (76-cine-intro.js): one shot per carton, 6 to 7 s each (PRO_T.cap); each carton
-   fades in PRO_T.lead after its shot starts and out PRO_T.lead before it ends, fades of PRO_T.fade; a dip to black of
-   PRO_T.fade on each side of a cut; then the title shot (PRO_T.title). Shots: A the coast in the mist, B the dark
-   Lighthouse out at sea, C the beach with the boats that no longer go out, D the Lighthouse's top, a faint glimmer up
-   there; E (title) the Watcher comes onto the shore. */
-const PRO_T={cap:[6,7,7,7],title:4.6,lead:.5,fade:.5,walk:1.4,titleAt:.6};
-const PRO_SHOTS=PRO_T.cap.reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of A, B, C, D, E
-const PRO_TITLE=PRO_SHOTS[4]+PRO_T.titleAt,PRO_LEN=PRO_SHOTS[4]+PRO_T.title;
+/* intro in the series frame (LB.cine, shared/js/24-cine.js, as in Ember Bridge): one shot per carton, durations in CINE_D
+   (6 to 7 s, as in Chapter I); the module fades each carton in and out (LB.CINE_T.fade), shows the caption under the image
+   and the Skip button; then the title shot (no caption). Shots: A the coast in the mist, B the dark Lighthouse out at sea,
+   C the beach with the boats that no longer go out, D the Lighthouse's top, a faint glimmer up there; E (title) the
+   Watcher comes onto the shore. */
+/* carton durations of this chapter (s): intro A to E, outro (epilogue) 1 to 5 */
+const CINE_D={intro:[6,7,7,7,6],outro:[7,6,6,7,7]};
+const PRO_T={walk:1.4,titleAt:.6};
+const PRO_SHOTS=CINE_D.intro.slice(0,4).reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of A, B, C, D, E
+const PRO_TITLE=PRO_SHOTS[4]+PRO_T.titleAt;
 const PCAP_TXT=()=>[_('On the coast, the mist no longer lifts.','Sur la côte, la brume ne se lève plus.'),
   _('Out at sea, the Drowned Lighthouse stands dark. No bell answers it.','Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond.'),
   _('The ships no longer return. The fishermen say the sea keeps what it takes.',"Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend."),
   _('They say its keeper still watches up there.','On dit que sa gardienne veille encore là-haut.')];
-/* intro cartons: [start, end, text] in seconds */
-const PCAPF=()=>PCAP_TXT().map((s,i)=>[PRO_SHOTS[i]+PRO_T.lead,PRO_SHOTS[i+1]-PRO_T.lead,s]);
 const PSFX=[[0,'swell'],[PRO_SHOTS[1],'rumble'],[PRO_SHOTS[2],'swell'],[PRO_SHOTS[3],'glints'],[PRO_SHOTS[4]+PRO_T.walk,'land'],[PRO_TITLE+.4,'sting']];
 /* ---- pieces of the coast, shared by the intro and the outro ---- */
 function skyGrad(top,bot,y1){const g=ctx.createLinearGradient(0,0,0,y1);g.addColorStop(0,top);g.addColorStop(1,bot);ctx.fillStyle=g;ctx.fillRect(-40,-40,W+80,y1+40)}
@@ -84,14 +84,10 @@ function drawPrologue(t){
     LB.drawWatcher(ctx,hx,GY,walk<1?'walk':'idle',walk<1?t:rt);   // the Watcher of the series (shared/js/20-watcher.js)
     if(ts>=PRO_T.walk&&once('land'))burst(W/2-60,GY,14,'#9fb6a0',3,.7,.3)}}
   ctx.restore();
-  // cuts between shots: a short dip to black
-  for(const s of PRO_SHOTS.slice(1,4)){const d=Math.abs(t-s);if(d<PRO_T.fade)fadeAll(1-d/PRO_T.fade)}
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
-  // text
-  for(const c of PCAPF()){const a=clamp((t-c[0])/PRO_T.fade,0,1)*(1-clamp((t-c[1]+PRO_T.fade)/PRO_T.fade,0,1));if(a>0)caption(c[2],a)}
-  seriesTitle(t,PRO_TITLE,'Lumenbell',_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),CH_COL[2]);
-  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-(PRO_LEN-.7))/.7,0,1));
+  // the series title (LB.title, as in Chapter I); captions, fades and cuts are the frame's (LB.cine)
+  LB.title(ctx,t,PRO_TITLE,{col:CH_COL[2],sub:_('Chapter II · Silent Bells','Chapitre II · Silent Bells')});
   PSFX.forEach((c,i)=>{if(t>=c[0]&&once('pfx'+i))MUSIC.fx(c[1])});
 }
 function lerpC(a,b,k){return`rgb(${a.map((v,i)=>Math.round(lerp(v,b[i],k))).join(',')})`}

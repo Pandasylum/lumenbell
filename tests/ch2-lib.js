@@ -4,7 +4,8 @@
 // - lit(a)       : valeur d'un argument s'il est une chaine litterale simple (sinon null)
 // - testPage()   : copie de test de dist/index.html (build/out/ch2-test.html) avec crochets window.__t et sans
 //                  boucle requestAnimationFrame : le test fait avancer le temps lui-meme (pas fixe). Le dist publie
-//                  n'a aucun crochet ; seule cette copie, non suivie par git, en a.
+//                  n'a aucun crochet ; seule cette copie, non suivie par git, en a. Le prologue et l'epilogue (LB.cine) y passent
+//                  en mode manuel (LB.cine.manual) : step(dt, dessiner) les fait avancer au meme pas que le jeu.
 const fs=require('fs'),path=require('path');
 const ROOT=path.resolve(__dirname,'..');
 const DIST=process.env.CH2_DIST||path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html');   // CH2_DIST=<fichier> : comparer avec un autre dist (avant / apres)
@@ -21,10 +22,11 @@ function calls(code){const out=[];const re=/(?<![\w$.])_\(/g;let m;
  return out}
 function lit(a){if(!/^(['"`])[\s\S]*\1$/.test(a)||(a[0]==='`'&&a.includes('${')))return null;try{return Function('return '+a)()}catch(e){return null}}
 const END='S.d=DIFFS.normal;S.phase=2;applyLang();requestAnimationFrame(loop);';
-const HOOK='S.d=DIFFS.normal;S.phase=2;applyLang();\n'+
+const HOOK='S.d=DIFFS.normal;S.phase=2;applyLang();if(LB.cine)LB.cine.manual=true;\n'+
  'window.__t={LB,get S(){return S},get gt(){return gt},DIFFS,CINE_LEN,PRO_TITLE,down,up,startRun,jumpPhase,SHOCK,MUSIC,sfx,damageBoss,success,HULL,CINE_P3,ONO,'+
+ 'PRO:typeof PRO!=="undefined"?PRO:null,EPI:typeof EPI!=="undefined"?EPI:null,'+
  'playPrologue,playEpilogue,go(){onGo&&onGo()},step(dt,drawIt){rt+=dt;if(!S.paused&&["play","ko","dead","cine","prologue","epilogue"].includes(S.mode))gt+=dt;'+
- 'update(dt);gameUpdate(dt);if(drawIt){ctx=ctxMain;SC=SCm;draw()}}};';
+ 'update(dt);gameUpdate(dt);if(drawIt){ctx=ctxMain;SC=SCm;draw()}if(LB.cine)LB.cine.step(dt,!!drawIt)}};';
 function testPage(){const h=fs.readFileSync(DIST,'utf8');if(h.split(END).length!==2)throw new Error('fin du script introuvable dans dist');
  const out=process.env.CH2_TEST_OUT||path.join(ROOT,'build/out/ch2-test.html');fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,h.replace(END,HOOK));return out}
 // Textes valides du cahier des charges (docs/CH2-SPEC.md), mot pour mot : phrases entre « » de la section francaise et

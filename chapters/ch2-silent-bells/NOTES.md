@@ -31,8 +31,8 @@
 
 ## Textes (étape B)
 - Source : `docs/CH2-SPEC.md`. Cartes : sourcil = titre de phase, titre = nom du boss, texte = panneau d'entrée (`PH[id].desc`) ou de fin (`PH[id].end`), forme II (`PH[3].form2`). Fin de phase III : carte « Phase III terminée » entre la cinématique de fin et l'outro ; victoire : « Chapitre II · Silent Bells » + records.
-- Intro (`PCAPF`, `PRO_TITLE`) et outro (`ECAPF`, `EPI_TITLE`) : tables [début, fin, texte] en secondes. Titre de l'intro (`seriesTitle`, table `SERIES_T`) : « Lumenbell » en grand, « Chapitre II · Silent Bells » en dessous, en petit et en turquoise ; la ligne du dessous est placée d'après la boîte mesurée du grand titre (aucun chevauchement, vérifié par `tests/ch2-title.js` de 360 px au bureau). Carton 6 de l'outro : « Chapitre III. À suivre. » teinté `CH_COL[3]`.
-- `caption()` coupe en deux lignes une légende trop large (espace le plus proche du milieu).
+- Intro (`PCAP_TXT`, durées `CINE_D.intro`, titre `PRO_TITLE`) et outro (`ECAP_TXT`, durées `CINE_D.outro`) : cartons du cadre commun `LB.cine` (voir plus bas). Titre de l'intro : `LB.title` (« LUMEN » turquoise + « BELL » crème, chapitre dessous en Big Shoulders crème, comme au Chapitre I ; vérifié par `tests/title.js` de 360 px au bureau). Carton 5 de l'outro : « Chapitre III. À suivre. », légende teintée `CH_COL[3]`.
+- `seriesTitle`, `SERIES_T` et `caption()` (légende dessinée dans le canvas) ont été retirés le 1er novembre : la légende est celle du module, en HTML sous l'image.
 - Menu : « Chapitre II · Silent Bells » au-dessus de « Lumenbell » ; sous-titre, accroche et mode d'emploi retirés. Titre de page : « Lumenbell · Silent Bells » (le build coupe sur cette ligne).
 - **Liste de référence** : `TEXTES.md` (dans ce dossier), régénérée par `node tests/ch2-texts.js --write`. Toute modification de texte doit la mettre à jour dans le même commit (relire le diff).
 - Phrases pour le lecteur d'écran seulement (`say`, `aria`) : descriptives, hors cahier des charges, à relire si besoin (lignes 1 à 12 et 44 à 55 de `TEXTES.md`).
@@ -42,14 +42,14 @@
 
 ## Clés de sauvegarde
 Table des clés et des anciennes clés lues : `shared/NOTES.md:Clés`. Ce chapitre déclare seulement `LB.setup({id:'ch2', old:{'lb-ch2-unl':['db-unl']}, oldPrefix:[['lb-ch2-best-','db-best-']]})` dans `js/02-core.js`.
-- Pas de drapeau « intro vue » dans ce chapitre (le prologue se passe par Entrée). S'il en faut un : `LB.key('intro')` = `lb-ch2-intro`.
+- Drapeau « intro vue » : `lb-ch2-intro` (1er novembre, `engine/cine`) ; le prologue n'est joué qu'au premier lancement d'une partie, puis seulement par `PRO.replay` / `replayPrologue()` (bouton du menu : session 6).
 
 ## `<head>`
 - Repris dans les styles du jeu : `html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}` (zones sûres, utiles sur téléphone avec `viewport-fit=cover`). Le reste de l'enveloppe (`color-scheme:light`, `box-sizing`, police et fond du `body`, `[hidden]`, `img`) était écrasé par les styles du jeu ; `scroll-padding-top` ne servait pas (pas d'ancres).
 
 ## Tests
 Descriptions : en-tête de chaque fichier et `NOTES.md:Outillage` (lancement local : `PW_CHROMIUM`, `NOTES.md:Pièges`).
-- Fichiers : `tests/ch2-texts.js`, `ch2-keys.js`, `ch2-smoke.js`, `ch2-trial.js`, `ch2-input.js`, `ch2-title.js`, `ch2-retouches3.js`, `ch2-announce.js`, `ch2-bot.js` ; outil commun `ch2-lib.js` (copie de test à crochets `build/out/ch2-test.html`, non suivie ; le `dist` publié n'a aucun crochet).
+- Fichiers : `tests/ch2-texts.js`, `ch2-keys.js`, `ch2-smoke.js`, `ch2-trial.js`, `ch2-input.js`, `ch2-title.js` (lance `title.js`, les deux chapitres), `cine.js` (passage et drapeau, les deux chapitres), `ch2-retouches3.js`, `ch2-announce.js`, `ch2-bot.js` ; outil commun `ch2-lib.js` (copie de test à crochets `build/out/ch2-test.html`, non suivie ; le `dist` publié n'a aucun crochet).
 - Numéros de phase : interne `S.phase` 2 = Phase I (la Voix Creuse), 1 = Phase II (l'Ancien de Rouille), 3 = Phase III (le Phare Noyé) ; `ORDER=[2,1,3]`. Le test lit `document.body.dataset.ph` (interne) et `#hdEye` (affiché).
 
 ## Pièges
@@ -168,3 +168,11 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - **Forme II** (retour de Kevin du 1er novembre) : les lanternes et les cloches d'épaule échangent leurs places (elles se ressemblent, la tour éclatée ne change pas) : les lanternes sont tenues en haut par les tentacules, aux poses `P[SBELLS[…]]`, hors de la partie cachée ; les cloches d'épaule se placent près de la méduse (`drawEcl`, 8e paramètre `sw` : 1 = échangées, 0 = tour). Échange progressif à l'éclatement (`sw = gl`) et à la reformation (`sw = 1 - k`). Faisceaux latéraux `lbeam` et anneaux `sring` partent de `P[SBELLS[th.side]]`, donc des lanternes (les anneaux alternent, `side = i % 2`). À la fin, chaque pièce tombe à la place de l'autre ; le fond fixe `drawStill` suit le même échange.
 - Rien ne change dans la logique : temps, tables, zones de coup, tirages aléatoires (aucun `burst` ajouté).
 - **Écart avec 2b75101** : dans cette version, la forme I ne tirait pas depuis les blocs (faisceau et crépitement partaient de la méduse, la foudre du ciel) ; seule la forme II tirait depuis les lanternes latérales (alors les cloches d'épaule).
+
+## Prologue et épilogue dans le cadre commun (session `engine/cine`, 1er novembre)
+- `PRO` (`72-flow.js`, drapeau `lb-ch2-intro`) et `EPI` (`76-epilogue.js`, sans drapeau) sont des `LB.cine.create` : canvas plein écran au-dessus de la page, légende HTML sous l'image, bouton « Passer › » du module (le `#skip` du jeu ne sert plus qu'aux cinématiques de phase), Échap / Entrée / **Espace** passent (Espace restait bloqué ici). `S.mode` reste `prologue` / `epilogue` pendant la lecture ; `draw()` ne peint alors que du noir sous la boîte ; la fin vient du module (`endPrologue`, `endEpilogue`), plus de `PRO_LEN` / `EPI_LEN`.
+- **Durées** : table `CINE_D` (`64-prologue.js`) : intro `[6, 7, 7, 7, 6]` (A à D + plan du titre ; avant `[6, 7, 7, 7]` + 4,6 s), outro `[7, 6, 6, 7, 7]` (avant ≈ 4 s par carton, 19 s en tout ; maintenant 33 s). `PRO_SHOTS` et `EPI_SHOTS` en découlent ; les temps internes de l'épilogue (tour qui s'éteint `EPI_DARK`, fissures `VCRACKS`, sons `EFXL`, carton 5 `EPI_TITLE`) sont comptés depuis le début de leur plan, comme avant.
+- **Cadre retiré des scènes** : creux au noir entre les plans, fondus de début et de fin, légendes dessinées, grand titre « Chapitre III. À suivre. » dessiné sur la forêt (devenu la légende teintée du carton 5). Les plans eux-mêmes (`PRO_SHOTS`, `EPI_SHOTS`, Phare, village, vallée, forêt, Veilleur, particules, sons) sont inchangés ; le carton 5 de l'épilogue reprend le plan de la forêt.
+- `cineScene(fn, vignette)` (`72-flow.js`) dessine un plan dans le canvas du module (`ctx` échangé le temps du dessin)  ; le temps du jeu `gt` (particules) avance avec la boucle du jeu comme avant, et ne suit le temps du module (`onTick`) que si la boucle est arrêtée (menu ouvert, rejeu).
+- Copie de test (`tests/ch2-lib.js`) : `LB.cine.manual = true`, `step(dt, dessiner)` fait aussi avancer `LB.cine` ; `__t.PRO`, `__t.EPI`.
+- `tests/ch2-smoke.js` : passe le prologue par Échap avant de cliquer la frise (le prologue couvre maintenant l'en-tête).

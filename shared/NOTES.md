@@ -14,6 +14,7 @@
 | `js/12-audio.js` | `LB.audio` : contexte unique, `tone`, `noise`, réglages Son / Musique, suspension en arrière-plan |
 | `js/16-hero.js` | `LB.HERO_T`, `LB.HERO_DIFF`, `LB.diff` (`apply`, `use`, `cur`), `LB.hero` (`create`, `press`, `release`, `step`, `stops`, `stopped`, `hurt`, `perfect`, `dur`), `LB.drawRecoveryBar`, `LB.DENY_COL` |
 | `js/20-watcher.js` | `LB.WATCHER_T`, `LB.WATCHER_POSES`, `LB.drawWatcher`, `LB.drawWatcherBody`, `LB.drawLantern`, `LB.drawScepter`, `LB.lanternBeam`, `LB.drawBlock`, `LB.watcherLanternCol`, `LB.WATCHER_SIL`, `LB.drawWatcherSil` |
+| `js/24-cine.js` | `LB.CINE_T`, `LB.CINE_CSS`, `LB.cine` (`create`, `mount`, `step`, `skip`, `active`, `manual`), `LB.TITLE_T`, `LB.title`, `LB.rgba` |
 | `svg/watcher-menu.svg` | Silhouette du Veilleur des menus (hors `parts.txt` : insérée dans la page par `build/assemble.py`, ligne `@svg watcher-menu.svg <encre>`, `{ink}` = encre du décor) |
 
 ## Clés de sauvegarde
@@ -58,11 +59,22 @@
 - **Silhouettes** : `opt.flat` (lointaine, aplats), `opt.ink` (contre-jour de dos), `LB.drawWatcherSil(ctx, encre, {sway, k, r, s})` (intro), fragment `svg/watcher-menu.svg` (menus).
 - **Piège** : le dessin ne doit jamais tirer `Math.random` (les bots et les captures comptent sur la graine).
 
+## Cinématiques (`LB.cine`, `LB.title`, session `engine/cine`, 1er novembre)
+- **Un seul cadre** pour l'intro et l'outro des deux chapitres, celui du Chapitre I : canvas 960 × 540 en plein écran (`#cine`, `#cineC`), légende HTML sous l'image (`#cineCap`), bouton « Passer › » en bas à droite (`#cineSkip`, classes `btn ghost` du chapitre, donc sa couleur). Boîte et style (`LB.CINE_CSS`) créés par `LB.cine.mount()` au premier `create` : plus de copie dans la page du Chapitre I.
+- `LB.cine.create({key, scenes, onStart, onTick, onEnd})` → `{play(done), replay(done), seen(), playing(), skip(), step(dt, dessiner)}`. Cartons `{d, en, fr, draw}` ; au lieu de `en`/`fr`, `txt()` peut rendre le texte déjà traduit (Chapitre II : ses appels `_()` restent dans le chapitre, relus par `tests/ch2-texts.js`) ; `col` teinte la légende (annonce du chapitre suivant) ; `enter(st)` au début du carton ; `cue:[[p, fn]]` une fois quand l'avancement du carton dépasse `p`. `draw(p, t, lt, st, cx)`.
+- **Table `LB.CINE_T`** : fondu au noir de 0,8 s à chaque bout d'un carton, légende qui apparaît 0,5 s après le début du carton en 0,6 s (et s'efface de même), durée minimale d'un carton 6 s, pas borné à 0,1 s, touches qui passent (Échap, Entrée, Espace). La durée de chaque carton est dans la table du chapitre (Chapitre I : `SC[i].d` ; Chapitre II : `CINE_D`).
+- **Drapeau** : `key` → `LB.key(key)` (`lb-ch1-intro`, `lb-ch2-intro`), écrit à la fin ou au passage. `play` ne regarde pas le drapeau (le chapitre décide avec `seen()`) ; `replay` = `play` (rejeu depuis un menu). Sans `key` (outros), aucun drapeau. `testSeen` (copie de test du Chapitre I) : drapeau jamais lu.
+- **Clavier** : un seul écouteur `keydown` en capture sur `window`, posé au premier `create` ; pendant la lecture il avale toutes les touches (rien n'arrive au jeu) et passe sur Échap, Entrée, Espace.
+- **Horloge** : `requestAnimationFrame` propre au module. `LB.cine.manual = true` (copies de test à crochets) : plus de rAF, `LB.cine.step(dt, dessiner)` fait avancer la lecture en cours.
+- **`LB.title(ctx, t, t0, {col, sub})`** (`LB.TITLE_T`) : « LUMEN » couleur du chapitre + « BELL » crème `#f0e8df`, 96 px, halo de la couleur du chapitre (opacité 0,85, flou 30), espacement 4 px ; ligne du chapitre en Big Shoulders 26 px crème (opacité 0,88), espacement 3 px, en capitales. Apparition en 1,75 s à partir de `t0`. Ligne de base du nom y = 118, du chapitre y = 160, plus bas si les boîtes mesurées l'exigent (8 unités d'écart au moins avec une police de repli) ; nom réduit s'il dépasse 840 unités.
+- Le Chapitre I passe ses scènes, sons (`cue`, `enter`) et ses durées : il est identique au pixel. Le Chapitre II dessine ses plans dans le canvas du module (`cineScene`, `72-flow.js` : `ctx` échangé le temps du dessin ; temps du jeu `gt` calé sur celui du module seulement quand la boucle du jeu est arrêtée, menu ouvert).
+
 ## Tests
 - `tests/audio.js` (CI) : contexte unique sur les deux `dist` et sur les copies de test, suspension / reprise (onglet caché, `pagehide` / `pageshow`, focus en arrière-plan), bruitages par `LB.audio.tone` / `noise`, musiques sur le contexte commun, réglages `lb-snd` / `lb-mus` relus ; `errs []` attendu.
 - `tests/keys.js` (CI) : clés communes et migration sur les deux `dist`, langue par défaut, clés `eb-…` du Chapitre I, aide mémorisée, écriture dans les seules `lb-…`, choix vu d'un chapitre à l'autre.
 - `tests/visual-shots.js` : captures déterministes des deux chapitres, comparaison au pixel (voir `NOTES.md` racine) ; depuis le 31 octobre, aussi un appui refusé et la barre de récupération avec l'aide cochée puis décochée ; depuis le 1er novembre, `--poses` (planches de toutes les poses de `LB.drawWatcher`, identiques d'un chapitre à l'autre, et poses en scène) et `--no-breath` (respiration neutralisée).
+- `tests/title.js` (titre de fin d'intro des deux chapitres, de 360 px au bureau ; `ch2-title.js` le lance) et `tests/cine.js` (passage par Échap, Entrée, Espace, bouton ; drapeau vu / non vu ; outro sans drapeau ; rejeu) ; `tests/visual-shots.js --cine` : cartons à instants fixes.
 - `tests/input.js` (états du Veilleur des deux chapitres) et `tests/ch1-bot.js` (bots du Chapitre I à pas fixe, avant / après sur la même graine).
 
 ## À venir (plan de `docs/COMMUN.md` § 4)
-~~`LB.hero` et `HERO_T` (3)~~ fait le 31 octobre, ~~`LB.drawWatcher` (4)~~ fait le 1er novembre, `LB.cine` et `LB.title` (5), menu, HUD, cartes, entrées (6).
+~~`LB.hero` et `HERO_T` (3)~~ fait le 31 octobre, ~~`LB.drawWatcher` (4)~~ fait le 1er novembre, ~~`LB.cine` et `LB.title` (5)~~ fait le 1er novembre, menu, HUD, cartes, entrées (6 ; bouton « ▶ Intro » du Chapitre II, `DEMANDES.md`).

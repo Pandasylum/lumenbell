@@ -41,10 +41,10 @@ pg.on('console',m=>{if(m.type()==='error')errs.push('console: '+m.text())});
 pg.on('requestfailed',r=>errs.push('requestfailed: '+r.url()));
 await pg.goto('file://'+FILE);await pg.waitForTimeout(500);
 const st=()=>pg.evaluate(()=>({ph:document.body.dataset.ph,eye:document.getElementById('hdEye').textContent,
- menu:!document.getElementById('menu').hidden,card:!document.getElementById('ov').hidden,skip:!document.getElementById('skip').hidden,
+ menu:!document.getElementById('menu').hidden,card:!document.getElementById('ov').hidden,skip:!document.getElementById('skip').hidden||!!document.getElementById('cine')&&!document.getElementById('cine').hidden,
  ward:document.getElementById('ward').textContent,boss:document.getElementById('nmB').textContent,hp:document.getElementById('hpPn').textContent,
  locked:[...document.querySelectorAll('#phases button')].map(x=>x.disabled?1:0).join('')}));
-// passe prologue et cinematique (Entree) jusqu'a la carte de phase
+// passe prologue (cadre commun LB.cine, #cine) et cinematique (Entree) jusqu'a la carte de phase
 const toCard=async lbl=>{for(let i=0;i<40;i++){const s=await st();if(s.card)return s;if(s.skip)await pg.keyboard.press('Enter');await pg.waitForTimeout(250)}errs.push(lbl+': carte de phase jamais affichee');return st()};
 const play=async(lbl,ph,hp)=>{let s=await toCard(lbl);
  await pg.click('#go');await pg.waitForTimeout(300);
@@ -73,7 +73,8 @@ for(const [dk,hp] of [['normal',4],['hard',3]]){
  if(await pg.evaluate(()=>localStorage.length))errs.push('sans cle : localStorage non vide');
  const s0=await st();console.log('sans cle, menu',JSON.stringify(s0));if(s0.locked!=='000')errs.push('sans cle : frise verrouillee '+s0.locked);
  for(const [dk,gp,ph,hp] of [['normal',3,3,4],['hard',2,1,3],['easy',3,3,6]]){
-  await pg.click('[data-diff='+dk+']');await pg.waitForTimeout(300);           // menu -> prologue
+  await pg.click('[data-diff='+dk+']');await pg.waitForTimeout(300);           // menu -> prologue (premiere partie seulement : lb-ch2-intro)
+  if(await pg.evaluate(()=>!document.getElementById('cine').hidden)){await pg.keyboard.press('Escape');await pg.waitForTimeout(200)}   // le prologue couvre l'ecran (cadre commun) : le passer
   await pg.click('#phases button[data-ph="'+gp+'"]');await pg.waitForTimeout(300); // frise, sans finir le niveau precedent
   await play('sans cle '+dk+' phase '+['','I','II','III'][gp]+' directe',ph,hp);
   await pg.click('#menuBtn');await pg.waitForTimeout(300)}
