@@ -21,7 +21,7 @@
 | `js/12-effects.js` | Étincelles, onomatopées (`ONO`, `ONOSZ`), cris du Colosse (`CRIES`, `MEGA`), `float` |
 | `js/16-p1-bridge-logic.js` | Phase I : logique du combat, rages, `bossStep`, `hud`, `step` |
 | `js/20-p1-bridge-decor.js` | Phase I : calques statiques du pont (`buildStatic`) |
-| `js/24-hero-draw.js` | Veilleur : `drawWizard`, lanterne, sceptre, `lanternBeam` |
+| `js/24-hero-draw.js` | Raccourci `lanternBeam` ; le Veilleur (corps, sceptre-lanterne, poses, bouclier) est dans `shared/js/20-watcher.js` (`LB.drawWatcher`) |
 | `js/28-boss-body.js` | Colosse : chaîne, enclumes, masse rangée, **`demonBody`** (silhouette validée, partagée) |
 | `js/32-p1-bridge-render.js` | Phase I : poses, attaques, effets, aides, `render` |
 | `js/36-p2-foundry-logic.js` | Phase II : `Q`, `DG`, attaques, `lakeY`, `qEnd`, `qStep` |
@@ -60,3 +60,9 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 ## Audio commun (session `engine/audio`, 28 octobre)
 - Le contexte audio, `bgAudio` / `unlockAudio` et les réglages Son / Musique sont passés à `LB.audio` (`shared/js/12-audio.js`). `tone(f,d,type,v,slide)` et `noise(d,v,f0,f1)` restent ici, avec leur enveloppe d'origine, et appellent `LB.audio.tone` / `noise` ; la musique (`64-audio-music.js`) se branche sur le bus `LB.audio.mus`. `prefs` ne garde que `help`.
 - **Avancement** : fait = rebranchement, test `tests/audio.js`. Reste à faire : écoute sur téléphone (pause / reprise, contexte en `playback`).
+
+## Veilleur dessiné commun (session `engine/watcher`, 1er novembre)
+- `drawWizard`, `drawLantern`, `drawScepter` n'existent plus ici : `drawPlayer` (phase I), `drawHero2` (phase II), `drawHero3` (phase III), `drawBarrier` (`LB.drawBlock`), l'outro (`watcher` : `opt.flat` ; Veilleur de dos face au phare : `opt.ink`) et l'intro (`LB.drawWatcherSil`) appellent le module commun. Chaque phase garde sa chorégraphie (`heroPose`, `heroPose3`, `heroFin`, `heroFlee`, estoc, prise) et la passe en options : bâton planté (`staff`) en phase I, corps réduit (`body:{dy:44,s:.8}`) et sceptre (`sa`, `L:80`) en phase II, sceptre (`sa`, `L:76`) en phase III.
+- **Respiration** au repos seulement (pose `idle`) : phase I hors intro et hors prise, phase III en combat ; pas en phase II (chute, pans au vent inchangés).
+- Menu : la silhouette du Veilleur vient de `shared/svg/watcher-menu.svg` (ligne `@svg` de `page/body.html`).
+- Preuve d'identité : `tests/visual-shots.js --no-breath` contre `main` : 126/126 identiques.

@@ -16,11 +16,8 @@ const OUTRO=(()=>{
   const poly=(p,col)=>{cx.fillStyle=col;cx.beginPath();p.forEach((q,i)=>i?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1]));cx.closePath();cx.fill()};
   function sky(t,top,bot,hz){const g=cx.createLinearGradient(0,0,0,hz);g.addColorStop(0,top);g.addColorStop(1,bot);cx.fillStyle=g;cx.fillRect(0,0,960,hz);for(const s of STR){if(s.y>hz-10)continue;cx.globalAlpha=.3+.6*Math.abs(Math.sin(t*.8+s.p));cx.fillStyle='#eef2ff';cx.fillRect(s.x,s.y,s.r,s.r)}cx.globalAlpha=1}
   function snow(t,a){cx.fillStyle='rgba(240,246,255,'+a+')';for(const f of SNW){const y=(f.y+t*f.v)%540,x=(f.x+Math.sin(t+f.y)*14+960)%960;cx.fillRect(x,y,f.s,f.s)}}
-  function lant(x,y,s,g){cx.save();cx.translate(x,y);cx.scale(s,s);const rg=cx.createRadialGradient(0,0,1,0,0,42);rg.addColorStop(0,'rgba(255,236,180,'+(.55*g)+')');rg.addColorStop(1,'rgba(255,200,110,0)');cx.fillStyle=rg;cx.beginPath();cx.arc(0,0,42,0,6.283);cx.fill();poly([[-9,-12],[0,-20],[9,-12]],'#6b5036');cx.fillStyle='#ffd27a';cx.fillRect(-8,-12,16,22);cx.strokeStyle='#6b5036';cx.lineWidth=2;cx.strokeRect(-8,-12,16,22);cx.lineWidth=1.2;cx.beginPath();cx.moveTo(-3,-12);cx.lineTo(-3,10);cx.moveTo(3,-12);cx.lineTo(3,10);cx.stroke();cx.fillStyle='#4a3a2a';cx.fillRect(-10,10,20,4);cx.restore()}
-  function watcher(x,y,s,bob){cx.save();cx.translate(x,y-bob);cx.scale(s,s);poly([[-16,-92],[-34,0],[34,0],[16,-92]],'#2a3550');cx.fillStyle='#c9b98a';cx.fillRect(-8,-88,16,82);
-    for(const sx of[-1,1]){cx.fillStyle='#5d6f96';cx.beginPath();cx.ellipse(sx*15,-89,13,7,0,0,6.283);cx.fill()}
-    cx.fillStyle='#5d6f96';cx.beginPath();cx.moveTo(-15,-92);cx.quadraticCurveTo(-19,-127,1,-128);cx.quadraticCurveTo(20,-127,18,-92);cx.closePath();cx.fill();cx.fillStyle='#bfeaff';cx.fillRect(-1,-109,18,5);
-    cx.strokeStyle='#8a7a9a';cx.lineWidth=4;cx.beginPath();cx.moveTo(26,-2);cx.lineTo(30,-140);cx.stroke();cx.restore();lant(x+30*s,y-bob+(-152)*s,s,1)}
+  /* le Veilleur commun, en silhouette lointaine (LB.drawWatcher, opt.flat) */
+  function watcher(x,y,s,bob){LB.drawWatcher(cx,x,y,'walk',0,{flat:true,dx:0,dy:-bob,scale:s})}
   function bell(x,y,s,a){cx.save();cx.translate(x,y);cx.rotate(a);cx.scale(s,s);const bg=cx.createLinearGradient(-60,0,60,0);bg.addColorStop(0,'#7a5524');bg.addColorStop(.45,'#d9a24c');bg.addColorStop(1,'#6b4a1a');cx.fillStyle=bg;cx.beginPath();cx.moveTo(-26,14);cx.quadraticCurveTo(-36,50,-60,108);cx.lineTo(60,108);cx.quadraticCurveTo(36,50,26,14);cx.closePath();cx.fill();cx.strokeStyle='rgba(255,226,150,.6)';cx.lineWidth=2;cx.beginPath();cx.moveTo(-40,84);cx.lineTo(40,84);cx.stroke();cx.restore()}
   function tower(x,top,w,lit){w*=2.2;cx.fillStyle='#141a3a';poly([[x-w/2,top],[x+w/2,top],[x+w*.75,540],[x-w*.75,540]],'#141a3a');cx.fillRect(x-w/2-3,top-4,w+6,5);poly([[x-w/2-4,top-4],[x,top-4-w*1.1],[x+w/2+4,top-4]],'#141a3a');cx.fillStyle='#0a0e24';cx.fillRect(x-w*.22,top+3,w*.44,w*.5);const r=10+22*lit,g=cx.createRadialGradient(x,top+10,1,x,top+10,r);g.addColorStop(0,'rgba(255,215,130,'+(.25+.6*lit)+')');g.addColorStop(1,'rgba(255,200,110,0)');cx.fillStyle=g;cx.beginPath();cx.arc(x,top+10,r,0,6.283);cx.fill();cx.fillStyle=lit>.1?'#ffd27a':'#6a5a3a';cx.fillRect(x-2,top+7,4,6)}
   function sStatue(p,t){
@@ -71,10 +68,7 @@ const OUTRO=(()=>{
     cx.fillStyle=on?'#aaffeb':'#1a2440';cx.fillRect(-4,-69,8,6);cx.restore();
     /* au premier plan, depuis le Clocher, le Veilleur de dos regarde le phare */
     cx.fillStyle='#232a4a';cx.fillRect(0,470,960,70);for(let x=0;x<960;x+=110){cx.fillRect(x+14,446,58,26)}cx.fillStyle='rgba(10,14,34,.45)';for(let x=0;x<960;x+=60)cx.fillRect(x,500,2,40);cx.fillRect(0,500,960,2);cx.fillStyle='rgba(235,243,255,.55)';for(let x=0;x<960;x+=110){cx.fillRect(x+14,444,58,3)}cx.fillRect(0,468,960,3);
-    {const wx=250,wy=468,c0='#070a18';cx.fillStyle=c0;cx.beginPath();cx.moveTo(wx-16,wy-92);cx.lineTo(wx-30,wy);cx.lineTo(wx+30,wy);cx.lineTo(wx+16,wy-92);cx.closePath();cx.fill();
-     for(const sx of[-1,1]){cx.beginPath();cx.ellipse(wx+sx*15,wy-89,13,7,0,0,6.283);cx.fill()}
-     cx.beginPath();cx.moveTo(wx-15,wy-92);cx.quadraticCurveTo(wx-18,wy-126,wx,wy-127);cx.quadraticCurveTo(wx+18,wy-126,wx+15,wy-92);cx.closePath();cx.fill();
-     cx.strokeStyle=c0;cx.lineWidth=4;cx.beginPath();cx.moveTo(wx+24,wy-2);cx.lineTo(wx+30,wy-132);cx.stroke();lant(wx+31,wy-146,.85,.9+.1*Math.sin(t*3))}
+    LB.drawWatcher(cx,250,468,'idle',t,{ink:'#070a18',dx:0,dy:0,lamp:.9+.1*Math.sin(t*3)});
     if(!st.muted&&s>3.2){st.muted=1;tone(147,2.4,'sine',.05,-20)}}
   function sDawn(p,t,s){
     const HZ=300,g=cx.createLinearGradient(0,0,0,HZ);g.addColorStop(0,'#1a2246');g.addColorStop(1,'#d9a07a');cx.fillStyle=g;cx.fillRect(0,0,960,HZ);

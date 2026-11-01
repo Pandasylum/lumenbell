@@ -2,14 +2,14 @@
    left it, never the start of the fight ---------- */
 function drawStill(id){
   if(id===2){S.hatchK=1;S.hatchSnap=1;bg2();const vp=voicePos(0),q=lanternPos(60,vp.x,vp.y-96);keeperLantern(q.x,q.y,q.a,rt);
-    ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0);mirrorFloor();
+    ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,'idle',{},0);mirrorFloor();
     ctx.save();ctx.globalCompositeOperation='lighter';glow(q.x,q.y,70,'rgba(79,224,204,.9)',.4+.2*Math.sin(rt*3.4));ctx.restore()}
   else if(id===1)kingEndStill();
   else{bg3();base();const O=ecPose(0);
     TOWER.forEach((p,i)=>{if(FIXED(p.k)){const o=O[i];drawP(p.k,o.x,o.y,o.r)}else if(i!==EHEAD){const F=EFALL[i];drawP(p.k,F.x,F.y,F.r)}});
     drawAnchorQ({x:LX+135,y:GY-120,a:1.78,sc:1,clip:true});
     ctx.save();ctx.translate(BELL_REST.x,BELL_REST.y);ctx.rotate(BELL_REST.r);pHead(.85,bellMarks());ctx.restore();
-    const hx=BELL_REST.x-78;ell(hx,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(hx,GY,0,-1.42,0)}}
+    const hx=BELL_REST.x-78;ell(hx,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(hx,GY,'idle',{},0)}}
 /* ---- phase II end: the hull collapsing, the opened deck, the moon ---- */
 /* debris of the hull falling around the King (planks of the deck and broken frames): x, start delay, size, spin, rest pose */
 const DEBRIS=(()=>{const R=mulberry(313);return[...Array(14)].map((_,i)=>{const side=i%3===2;return{x:side?(R()<.5?40+R()*120:820+R()*120):360+R()*560,d:i*.11+R()*.2,w:side?18:60+R()*70,h:side?110+R()*60:12+R()*6,r0:(R()-.5)*.6,spin:(R()-.5)*3,rx:0,ry:GY-(side?20:7),rr:side?(R()<.5?-1.35:1.35):(R()-.5)*.25,frame:side}})})();
@@ -38,5 +38,5 @@ function moonOnKing(sink,a){ctx.save();ctx.translate(700,GY);ctx.rotate(.08*sink
   ctx.beginPath();ctx.arc(-6,-224-40,30,-1.2,-.2);ctx.stroke();
   glow(0,-166,120,'rgba(79,224,204,.9)',.55*a);ctx.restore()}
 function kingEndStill(){bg1();hullSky(1);hullDebris(9);drawAnchorAt({x:878,y:GY-150,a:1.95,f:1});S.noAnchor=true;moonCone(1);kingKneel(45);moonOnKing(45,1);S.noAnchor=false;
-  ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,0,-1.42,0)}
+  ell(HX,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(HX,GY,'idle',{},0)}
 

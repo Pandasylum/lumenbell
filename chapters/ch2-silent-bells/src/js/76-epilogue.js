@@ -27,7 +27,7 @@ function drawEpilogue(t){
     ctx.fillStyle='#0a1114';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,GY-6);ctx.quadraticCurveTo(300,GY-20,560,GY+4);ctx.quadraticCurveTo(620,GY+40,680,H);ctx.fill();
     for(const [x,y,r,k] of[[400,GY-4,.4,'ring'],[460,GY-2,-.3,'seg'],[250,GY-6,.2,'ring']])drawP(k,x,y,r);
     drawP('head',330,GY-6,-.28,.85);
-    proHero(220,GY,0,-1.42,1,0)}
+    LB.drawWatcher(ctx,220,GY,'idle',rt)}
   else if(shot===1){ // close-up of the bell: the signs, the crack, the word
     const g=ctx.createRadialGradient(W/2,H*.45,40,W/2,H*.45,520);g.addColorStop(0,'#2a3a3c');g.addColorStop(1,'#05090a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#070c0d';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,380);ctx.quadraticCurveTo(480,350,W,390);ctx.lineTo(W,H);ctx.fill();

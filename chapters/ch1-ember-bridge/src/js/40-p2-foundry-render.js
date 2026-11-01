@@ -316,27 +316,13 @@ function qBeamTarget(c){return c.k==='head'?[Q.bx,Q.by-92]:c.k==='beam'?[Q.bx-30
 function qBeamAl(c){const t=c.t;if(c.k==='stab')return t>=.28&&t<.62?(t<.35?(t-.28)/.07:1-(t-.35)/.27):0;if(c.k==='head')return t>=.48&&t<.85?(t<.55?(t-.48)/.07:1-(t-.55)/.3):0;if(c.k==='final')return t>=1.45&&t<3.5?Math.min(1,(t-1.45)/.1)*(t<3.2?1:1-(t-3.2)/.3):0;return 0}
 function qSwordTip(){const h=heroPose();return[h.x+WH[0]+Math.cos(h.sa)*80,h.y+WH[1]+Math.sin(h.sa)*80]}
 function drawHero2(){
-  const h=heroPose(),t=Q.time;
-  ctx.save();ctx.translate(h.x,h.y);ctx.rotate(h.rot);
-  if(h.glow>0){
-    const r=70+60*h.glow;
-    const g=ctx.createRadialGradient(0,-10,6,0,-10,r);
-    g.addColorStop(0,'rgba(255,255,255,'+(.7*h.glow)+')');g.addColorStop(.5,'rgba(150,220,255,'+(.3*h.glow)+')');g.addColorStop(1,'rgba(111,211,255,0)');
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,-10,r,0,6.283);ctx.fill();
-  }
-  ctx.save();ctx.translate(0,44);ctx.scale(.8,.8);drawWizard({fl:3*Math.sin(t*14)});ctx.restore();
-  qlimb([18.5,-18.5],WH,9,'#2a3550');ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(18.5,-18.5,5.2,0,6.283);ctx.fill();
-  ctx.save();ctx.translate(WH[0],WH[1]);ctx.rotate(h.sa);
+  const h=heroPose(),t=Q.time,p=Q.pl,c=Q.cn;
+  /* le Veilleur commun (LB.drawWatcher), corps réduit pendant la chute dans le puits ; la phase donne sa géométrie */
   const c2=Q.cn,hitk=c2?qBeamAl(c2):0;
-  drawScepter(80,Math.max(.35,h.glow,hitk),Q.pl.deny>0?LB.DENY_COL:h.glow>0||hitk>0?'#fff4d6':'#ffd27a');
-  if(h.glow>0){
-    const gr=36*h.glow,og=ctx.createRadialGradient(80,0,0,80,0,gr*2);
-    og.addColorStop(0,'rgba(255,255,255,1)');og.addColorStop(.4,'rgba(190,234,255,.7)');og.addColorStop(1,'rgba(111,211,255,0)');
-    ctx.fillStyle=og;ctx.beginPath();ctx.arc(80,0,gr*2,0,6.283);ctx.fill();
-  }
-  ctx.restore();
-  ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(WH[0],WH[1],5,0,6.283);ctx.fill();
-  ctx.restore();
+  const pose=c?'counter':p.s==='act'?'dodgeDown':p.s==='hurt'?'hurt':p.s==='down'?'fall':'idle';
+  LB.drawWatcher(ctx,h.x,h.y,pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:1,breath:false,fl:3*Math.sin(t*14),
+    body:{dy:44,s:.8},shoulder:[18.5,-18.5],armR:5.2,hand:WH,sa:h.sa,L:80,aura:h.glow,
+    glow:Math.max(.35,h.glow,hitk),lanternCol:Q.pl.deny>0?LB.DENY_COL:h.glow>0||hitk>0?'#fff4d6':'#ffd27a'});
 }
 function drawFx2(){
   const S=R||Q;

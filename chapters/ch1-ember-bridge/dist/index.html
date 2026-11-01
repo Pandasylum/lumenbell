@@ -520,6 +520,255 @@ LB.drawRecoveryBar=(ctx,x,y,p)=>{
   ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y+8,62,6);ctx.fillStyle='#6fd3ff';ctx.fillRect(x-30,y+9,60*k,4)};
 /* Lanterne rouge pendant un appui refusé (couleur de la lanterne du Chapitre I) */
 LB.DENY_COL='#ff6b6b';
+/* ---------- LB.drawWatcher : le Veilleur dessiné, commun à toute la série (session engine/watcher, 1er novembre 2026) ----------
+   Un seul Veilleur, celui du Chapitre I : heaume à visière, manteau d'ordre, tabard à l'emblème de la lanterne, sceptre-lanterne
+   avec sa petite cloche. Repère du Veilleur : origine aux pieds, x vers l'adversaire, y vers le bas ; manteau de -94 à 0,
+   épaule (23, -78), main au repos (26, -62).
+   LB.drawWatcher(ctx, x, y, pose, t, opt) : pose = nom de LB.WATCHER_POSES ; t = horloge du chapitre (s), pour la respiration
+   et la marche ; opt.k = avancement de la pose (0 à 1, 1 par défaut ; secondes écoulées pour fall).
+   La pose donne la géométrie ; tout champ de opt la remplace (un chapitre qui chorégraphie lui-même une riposte ou une
+   cinématique passe ses valeurs) :
+     dx, dy        décalage des pieds ;  rot, rot2  rotations (rot2 après rot) ;  sx, sy  échelle (après les rotations)
+     scale         échelle d'ensemble (cinématiques, silhouettes lointaines)
+     body          {dy, s} : sous-repère du corps seul (le bras et le sceptre restent à l'échelle 1 : phase II du Chapitre I)
+     shoulder, armR, hand   épaule, rayon de l'épaule, main
+     sceptre, trois façons de le tenir :
+       staff  [sb, st]  bâton tenu dans la main, du talon sb à la lanterne st (au repos, garde)
+       sa, L           sceptre dans le repère de la main, angle sa, lanterne à la distance L (sceptre levé, contres)
+       staffA          angle du bâton, la main suit (cinématiques du Chapitre II, ex-heroShape) ; up = levée (0 à 1)
+     glow          intensité de la lanterne (0 à 1) ; lanternCol  couleur du verre (sinon : lit ? allumée : repos)
+     lamp          intensité de la lanterne pour les cinématiques (0 à 1, 1 par défaut : verre et halo s'éteignent)
+     aura          halo autour du Veilleur et boule au bout du sceptre (contres de la phase II du Chapitre I)
+     beam          {len, w, al} : rayon court au bout du sceptre (mode sa)
+     white         Veilleur blanc (vrai) ou voile blanc (0 à 1) ;  fl  pans du manteau (sinon respiration ou 0)
+     breath        respiration (balancement et pans, décision n° 5 du 28 octobre) : vraie par défaut pour idle seulement
+     staffAlpha    opacité du sceptre (0 à 1)
+     flat          silhouette lointaine (aplats, lanterne simple) ;  ink  contre-jour de dos, d'une seule encre
+     inFrame(ctx, g)  dessin du chapitre dans le repère du Veilleur, après lui (rayon d'un contre, anneau de prise)
+   Renvoie {lx, ly} : centre de la lanterne dans le repère de l'appelant (départ des tirs). */
+LB.WATCHER_T={
+  breath:{bob:1.2,bobF:2,fl:1.5,flF:4},            /* respiration : balancement (px, appliqué à moitié) et pans (px), fréquences (rad/s) */
+  walk:{bob:4,f:9.8},                               /* marche : rebond (px), fréquence */
+  raise:.08,                                        /* montée du sceptre (s) au début d'une garde */
+  block:{ramp:.07,fade:.45},                        /* bouclier : apparition (s), affaiblissement sur la durée de l'action */
+  lantern:{idle:'#ffd27a',lit:'#fff4d6',recover:'#c9a85a',dark:[58,48,34]}
+};
+(function(){
+  const W=LB.WATCHER_T,PI=Math.PI,cl=v=>v<0?0:v>1?1:v;
+  const es=t=>t*t*(3-2*t);   /* lissage du Chapitre I */
+  /* géométries du Chapitre I (repère du Veilleur) ; k = avancement de la pose, o = options */
+  const staffIdle=()=>({staff:[[26,-2],[30,-140]],hand:[26,-62]});
+  const staffUp=r=>({staff:[[26,-2-58*r],[30+18*r,-140-26*r]],hand:[26,-62-6*r]});
+  LB.WATCHER_POSES={
+    /* debout, lanterne au bout du bâton planté (phase I du Chapitre I) ; respire */
+    idle:k=>Object.assign(staffIdle(),{glow:.25}),
+    /* garde : la lanterne monte et s'embrase (blocage de la phase I) ; k = montée (0 à 1) */
+    block:k=>Object.assign(staffUp(k),{glow:1,lit:1}),
+    /* pas de côté (esquive de la phase I du Chapitre II) : recul et inclinaison ; k = amplitude */
+    dodgeSide:k=>Object.assign(staffIdle(),{dx:-48*k,rot:-.18*k,glow:.25}),
+    /* plongée d'esquive (phase II du Chapitre I) : chute, recul, tour complet ; k = avancement de l'action, o.drop = profondeur */
+    dodgeDown:(k,o)=>{const off=k<.27?es(k/.27):k<.73?1:1-es((k-.73)/.27);
+      return{hand:[34,-8],sa:-.12,L:80,body:{dy:44,s:.8},shoulder:[18.5,-18.5],armR:5.2,dy:(o.drop||0)*off,dx:-20*off,rot:-6.283*es(k),glow:.35}},
+    /* garde tenue (phase III du Chapitre II) : sceptre levé, lanterne allumée */
+    hold:k=>({hand:[28,-94],sa:-1.5,L:76,glow:1,lit:1}),
+    /* sceptre levé (garde de la phase III du Chapitre I, appel de la cloche, cinématiques) ; k = levée */
+    raise:k=>({hand:[28,-62-32*k],sa:-.45-1.05*k,L:76,glow:k>0?1:.3,lit:k>0?1:0}),
+    /* coup reçu : plié, sceptre baissé ; k = intensité */
+    hurt:k=>({hand:[28,-62],sa:-.45+1.05*k,L:76,rot:.12*k,sy:1-.18*k,glow:.3}),
+    /* à terre (défaite, prise relâchée) */
+    down:k=>Object.assign(staffIdle(),{rot2:.12,sy:.82,glow:.25}),
+    /* appel de la lumière (orbe, cloche) : comme la garde, lanterne allumée */
+    cast:k=>Object.assign(staffUp(1),{glow:1,lit:1}),
+    /* riposte : estoc du sceptre, lanterne en avant ; k = poussée */
+    counter:k=>{const hand=[28+24*k,-60];return{hand,staff:[[hand[0]-34,hand[1]+6],[hand[0]+34,hand[1]-6]],glow:.6+.4*k,lit:1}},
+    /* victoire : sceptre brandi au-dessus de la tête */
+    victory:k=>({hand:[26,-100],sa:-1.45,L:76,glow:1,lit:1}),
+    /* chute (fin de la phase II du Chapitre I) ; k = secondes écoulées */
+    fall:k=>({hand:[34,-8],sa:-.12,L:80,body:{dy:44,s:.8},shoulder:[18.5,-18.5],armR:5.2,dx:-k*40,dy:k*140,rot:-k*5,glow:.35}),
+    /* marche (arrivée sur le Clocher, prologue) : sceptre tenu devant, rebond des pas */
+    walk:(k,o,t)=>({hand:[30,-68],sa:-.3,L:76,dy:-Math.abs(Math.sin(t*W.walk.f))*W.walk.bob,glow:.25})
+  };
+  /* corps : heaume, manteau, tabard, ceinture, épaulières (ex-drawWizard du Chapitre I) */
+  function box(c,x,y,w,h,f,s){c.fillStyle=f;c.fillRect(x,y,w,h);if(s){c.strokeStyle=s;c.lineWidth=2;c.strokeRect(x,y,w,h)}}
+  function poly(c,pts,f,s){c.beginPath();pts.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();
+    c.fillStyle=f;c.fill();if(s){c.strokeStyle=s;c.lineWidth=2;c.stroke()}}
+  LB.drawWatcherBody=(c,o)=>{
+    const ctx=c,Wh=!!o.white,fl=o.fl||0;
+    const cg=ctx.createLinearGradient(0,-96,0,0);if(Wh){cg.addColorStop(0,'#ffffff');cg.addColorStop(1,'#cfd7f2')}else{cg.addColorStop(0,'#3c4a6e');cg.addColorStop(1,'#1e2538')}
+    ctx.beginPath();
+    ctx.moveTo(-16,-92);ctx.quadraticCurveTo(-26,-50,-34,0);
+    ctx.lineTo(-23,-5+fl);ctx.lineTo(-12,1-fl);ctx.lineTo(0,-5+fl);ctx.lineTo(12,1-fl);ctx.lineTo(23,-5+fl);ctx.lineTo(34,0);
+    ctx.quadraticCurveTo(26,-50,16,-92);ctx.closePath();
+    ctx.fillStyle=cg;ctx.fill();ctx.strokeStyle=Wh?'#8f9bc4':'#121726';ctx.lineWidth=2;ctx.stroke();
+    /* tabard */
+    ctx.beginPath();ctx.moveTo(-8,-88);ctx.lineTo(8,-88);ctx.lineTo(9,-8+fl*.4);ctx.lineTo(0,-2);ctx.lineTo(-9,-8+fl*.4);ctx.closePath();
+    ctx.fillStyle=Wh?'#eef0f8':'#c9b98a';ctx.fill();ctx.strokeStyle=Wh?'#b9c2e0':'#8a7a5a';ctx.lineWidth=1.2;ctx.stroke();
+    ctx.strokeStyle=Wh?'#9aa6cc':'#6b5036';ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.arc(0,-64,5,0,6.283);ctx.stroke();ctx.beginPath();ctx.moveTo(0,-73);ctx.lineTo(0,-69);ctx.stroke();
+    /* ceinture */
+    box(ctx,-27,-44,54,6,Wh?'#d6dcef':'#4a3a2a',Wh?'#aab3d4':'#2a1e14');
+    /* épaulières */
+    for(const sx of[-1,1]){ctx.beginPath();ctx.ellipse(sx*15,-89,13,7,0,0,6.283);ctx.fillStyle=Wh?'#f2f5ff':'#5d6f96';ctx.fill();ctx.strokeStyle=Wh?'#8f9bc4':'#161b2b';ctx.lineWidth=1.5;ctx.stroke()}
+    /* cape du heaume (nuque) */
+    poly(ctx,[[-12,-112],[-28,-92],[-10,-94]],Wh?'#dfe5fa':'#2a3550');
+    /* heaume */
+    ctx.beginPath();ctx.moveTo(-15,-92);ctx.quadraticCurveTo(-19,-127,1,-128);ctx.quadraticCurveTo(20,-127,18,-92);ctx.closePath();
+    ctx.fillStyle=Wh?'#f2f5ff':'#5d6f96';ctx.fill();ctx.strokeStyle=Wh?'#8f9bc4':'#161b2b';ctx.lineWidth=2;ctx.stroke();
+    ctx.strokeStyle=Wh?'#e8dfc0':'#c9b98a';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-12,-119);ctx.quadraticCurveTo(1,-133,15,-119);ctx.stroke();
+    ctx.strokeStyle=Wh?'#aab3d4':'#3a4a70';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-5,-99);ctx.lineTo(-5,-92);ctx.stroke();
+    ctx.fillStyle=Wh?'#ffffff':'#bfeaff';ctx.fillRect(-1,-109,18,5);
+  };
+  /* verre éteint : mélange de la couleur vers W.lantern.dark (lamp = 1 : couleur intacte) */
+  function dim(col,lamp){if(!(lamp<1))return col;const h=col.replace('#',''),n=parseInt(h.length===3?h.replace(/./g,'$&$&'):h,16),a=[n>>16&255,n>>8&255,n&255],d=W.lantern.dark,k=Math.max(0,lamp);
+    return'rgb('+a.map((v,i)=>Math.round(d[i]+(v-d[i])*k)).join(',')+')'}
+  /* lanterne : x, y = centre de la lumière ; ang oriente le haut ; g = intensité du halo (0 à 1) ; lamp = intensité de cinématique */
+  LB.drawLantern=(c,x,y,g,col,ang,lamp)=>{
+    const ctx=c,lp=lamp==null?1:lamp;
+    ctx.save();ctx.translate(x,y);ctx.rotate(ang||0);
+    const gl=Math.max(0,g)*(lp<1?Math.max(0,lp):1),rr=16+30*gl;
+    if(lp>0){const rg=ctx.createRadialGradient(0,0,2,0,0,rr);
+      rg.addColorStop(0,'rgba(255,245,215,'+(.35+.5*gl)*(lp<1?lp:1)+')');rg.addColorStop(.5,'rgba(150,220,255,'+(.12+.25*gl)*(lp<1?lp:1)+')');rg.addColorStop(1,'rgba(111,211,255,0)');
+      ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,rr,0,6.283);ctx.fill()}
+    poly(ctx,[[-9,-12],[0,-20],[9,-12]],'#6b5036');
+    ctx.strokeStyle='#8a7a9a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-23,3,0,6.283);ctx.stroke();
+    ctx.fillStyle=dim(col||W.lantern.idle,lp);ctx.fillRect(-8,-12,16,22);
+    ctx.strokeStyle='#6b5036';ctx.lineWidth=2;ctx.strokeRect(-8,-12,16,22);
+    ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(-3,-12);ctx.lineTo(-3,10);ctx.moveTo(3,-12);ctx.lineTo(3,10);ctx.stroke();
+    box(ctx,-10,10,20,4,'#4a3a2a','#2a1e14');
+    /* petite cloche */
+    ctx.strokeStyle='#8a7a9a';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(10,12);ctx.lineTo(14,16);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(10,26);ctx.quadraticCurveTo(10,16,14.5,16);ctx.quadraticCurveTo(19,16,19,26);ctx.closePath();
+    ctx.fillStyle='#b8a46a';ctx.fill();ctx.strokeStyle='#6b5036';ctx.lineWidth=1;ctx.stroke();
+    ctx.restore();
+  };
+  /* sceptre dans le repère de la main (axe x = direction du sceptre), lanterne au bout, à la distance L */
+  LB.drawScepter=(c,L,g,col,lamp)=>{
+    c.save();c.lineCap='round';c.strokeStyle='#8a7a9a';c.lineWidth=4;
+    c.beginPath();c.moveTo(-18,0);c.lineTo(L-14,0);c.stroke();
+    c.fillStyle='#6b5036';c.beginPath();c.arc(-18,0,3,0,6.283);c.fill();
+    c.restore();
+    LB.drawLantern(c,L,0,g,col,PI/2,lamp);
+  };
+  /* éclat de lanterne : rayon court entre deux points */
+  LB.lanternBeam=(c,A,B,w,al)=>{
+    c.save();c.lineCap='round';c.shadowColor='#6fd3ff';c.shadowBlur=24;
+    c.strokeStyle='rgba(111,211,255,'+(.5*al)+')';c.lineWidth=w*1.8;c.beginPath();c.moveTo(A[0],A[1]);c.lineTo(B[0],B[1]);c.stroke();
+    c.strokeStyle='rgba(255,255,255,'+al+')';c.lineWidth=w*.55;c.beginPath();c.moveTo(A[0],A[1]);c.lineTo(B[0],B[1]);c.stroke();
+    c.shadowBlur=0;c.fillStyle='rgba(235,250,255,'+(.8*al)+')';c.beginPath();c.arc(B[0],B[1],w*.9,0,6.283);c.fill();
+    c.restore();
+  };
+  /* bouclier de lumière (ellipse bleue du Chapitre I) devant le Veilleur : x, y = ses pieds ; t = temps écoulé dans l'action,
+     act = durée de l'action (il s'affaiblit sur toute l'action) ; o.plain : sans contour ni lignes (garde de la phase III) */
+  LB.drawBlock=(c,x,y,t,act,o)=>{
+    const B=W.block,ramp=cl(t/B.ramp),a=(1-B.fade*t/act)*ramp,cx=x+82,cy=y-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
+    c.save();c.globalAlpha=a;
+    const g=c.createRadialGradient(cx-18,cy,6,cx,cy,ry);
+    g.addColorStop(0,'rgba(111,211,255,.06)');g.addColorStop(.7,'rgba(111,211,255,.2)');g.addColorStop(1,'rgba(191,234,255,.5)');
+    c.fillStyle=g;c.shadowColor='#6fd3ff';c.shadowBlur=24;
+    c.beginPath();c.ellipse(cx,cy,rx,ry,0,0,6.283);c.fill();
+    if(!(o&&o.plain)){
+      c.shadowBlur=0;c.strokeStyle='#cdeeff';c.lineWidth=3;c.stroke();
+      c.lineWidth=1;c.strokeStyle='rgba(205,238,255,.5)';
+      for(const k of[.66,.33]){c.beginPath();c.ellipse(cx,cy,rx*k,ry,0,0,6.283);c.stroke()}
+    }
+    c.restore();
+  };
+  /* couleur du verre selon l'état du Veilleur (LB.hero) : rouge pendant un appui refusé, allumée, en récupération, au repos */
+  LB.watcherLanternCol=(p,lit)=>p&&p.deny>0?LB.DENY_COL:lit?W.lantern.lit:p&&p.s==='recover'?W.lantern.recover:W.lantern.idle;
+  function limb(c,a,b,w,col){c.strokeStyle=col;c.lineWidth=w;c.lineCap='round';c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke()}
+  /* lanterne simple des cinématiques lointaines : x, y = centre, s = échelle, g = intensité du halo */
+  function flatLant(c,x,y,s,g){const P=(p,col)=>{c.fillStyle=col;c.beginPath();p.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.fill()};
+    c.save();c.translate(x,y);c.scale(s,s);const rg=c.createRadialGradient(0,0,1,0,0,42);rg.addColorStop(0,'rgba(255,236,180,'+(.55*g)+')');rg.addColorStop(1,'rgba(255,200,110,0)');c.fillStyle=rg;c.beginPath();c.arc(0,0,42,0,6.283);c.fill();P([[-9,-12],[0,-20],[9,-12]],'#6b5036');c.fillStyle='#ffd27a';c.fillRect(-8,-12,16,22);c.strokeStyle='#6b5036';c.lineWidth=2;c.strokeRect(-8,-12,16,22);c.lineWidth=1.2;c.beginPath();c.moveTo(-3,-12);c.lineTo(-3,10);c.moveTo(3,-12);c.lineTo(3,10);c.stroke();c.fillStyle='#4a3a2a';c.fillRect(-10,10,20,4);c.restore()}
+  /* silhouette lointaine des cinématiques (outro du Chapitre I) : aplats sans contour, lanterne simple */
+  function flat(c,x,y,s,lamp){
+    const P=(p,col)=>{c.fillStyle=col;c.beginPath();p.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.fill()};
+    c.save();c.translate(x,y);c.scale(s,s);P([[-16,-92],[-34,0],[34,0],[16,-92]],'#2a3550');c.fillStyle='#c9b98a';c.fillRect(-8,-88,16,82);
+    for(const sx of[-1,1]){c.fillStyle='#5d6f96';c.beginPath();c.ellipse(sx*15,-89,13,7,0,0,6.283);c.fill()}
+    c.fillStyle='#5d6f96';c.beginPath();c.moveTo(-15,-92);c.quadraticCurveTo(-19,-127,1,-128);c.quadraticCurveTo(20,-127,18,-92);c.closePath();c.fill();c.fillStyle='#bfeaff';c.fillRect(-1,-109,18,5);
+    c.strokeStyle='#8a7a9a';c.lineWidth=4;c.beginPath();c.moveTo(26,-2);c.lineTo(30,-140);c.stroke();c.restore();flatLant(c,x+30*s,y+(-152)*s,s,lamp);
+    return{lx:x+30*s,ly:y+(-152)*s};
+  }
+  /* contre-jour, de dos (outro du Chapitre I : le Veilleur regarde le phare) : une seule encre, lanterne simple */
+  function back(c,x,y,ink,lamp){
+    c.fillStyle=ink;c.beginPath();c.moveTo(x-16,y-92);c.lineTo(x-30,y);c.lineTo(x+30,y);c.lineTo(x+16,y-92);c.closePath();c.fill();
+    for(const sx of[-1,1]){c.beginPath();c.ellipse(x+sx*15,y-89,13,7,0,0,6.283);c.fill()}
+    c.beginPath();c.moveTo(x-15,y-92);c.quadraticCurveTo(x-18,y-126,x,y-127);c.quadraticCurveTo(x+18,y-126,x+15,y-92);c.closePath();c.fill();
+    c.strokeStyle=ink;c.lineWidth=4;c.beginPath();c.moveTo(x+24,y-2);c.lineTo(x+30,y-132);c.stroke();flatLant(c,x+31,y-146,.85,lamp);
+    return{lx:x+31,ly:y-146};
+  }
+  LB.drawWatcher=(c,x,y,pose,t,opt)=>{
+    const o=opt||{},k=o.k==null?1:o.k,P=LB.WATCHER_POSES[pose]||LB.WATCHER_POSES.idle,g=Object.assign({},P(k,o,t||0));
+    for(const n in o)if(o[n]!==undefined&&n!=='k')g[n]=o[n];
+    if(o.sa!=null||o.staffA!=null)g.staff=undefined;if(o.staff)g.sa=undefined;   /* la façon de tenir le sceptre donnée par le chapitre l'emporte */
+    const X=x+(g.dx||0),Y=y+(g.dy||0);
+    if(o.flat)return flat(c,X,Y,g.scale||1,g.lamp==null?1:g.lamp);
+    if(o.ink)return back(c,X,Y,o.ink,g.lamp==null?1:g.lamp);
+    /* sceptre tenu par son angle (Chapitre II) : la main suit, le bâton passe dans la main */
+    if(g.staffA!=null&&!o.staff&&o.sa==null){const A=g.staffA,up=cl((-1.42-A)/.45),dx=Math.cos(A),dy=Math.sin(A),h=[26+dx*4,-62-6*up];
+      g.hand=o.hand||h;g.staff=[[g.hand[0]-dx*60,g.hand[1]-dy*60],[g.hand[0]+dx*80,g.hand[1]+dy*80]];g.sa=undefined;
+      if(o.glow==null)g.glow=up>.3?1:.25;if(o.lit==null)g.lit=up>.3?1:0}
+    const br=W.breath,breathe=o.breath!=null?o.breath:pose==='idle',bob=breathe?Math.sin((t||0)*br.bobF)*br.bob*.5:0;
+    const fl=o.fl!=null?o.fl:breathe?Math.sin((t||0)*br.flF)*br.fl:0;
+    const col=g.lanternCol||(g.lit?W.lantern.lit:W.lantern.idle),glow=g.glow==null?.25:g.glow,lamp=g.lamp==null?1:g.lamp;
+    const sh=g.shoulder||[23,-78],hand=g.hand||[26,-62],sc=g.scale||1;
+    c.save();c.translate(X,Y);
+    if(g.rot)c.rotate(g.rot);if(g.rot2)c.rotate(g.rot2);
+    const sx=(g.sx==null?1:g.sx)*sc,sy=(g.sy==null?1:g.sy)*sc;if(sx!==1||sy!==1)c.scale(sx,sy);
+    const au=g.aura||0;
+    if(au>0){const r=70+60*au,gr=c.createRadialGradient(0,-10,6,0,-10,r);
+      gr.addColorStop(0,'rgba(255,255,255,'+(.7*au)+')');gr.addColorStop(.5,'rgba(150,220,255,'+(.3*au)+')');gr.addColorStop(1,'rgba(111,211,255,0)');
+      c.fillStyle=gr;c.beginPath();c.arc(0,-10,r,0,6.283);c.fill()}
+    if(bob)c.translate(0,bob);
+    /* corps (voile blanc : une seconde couche, opacité white) */
+    const body=w=>{if(g.body){c.save();c.translate(0,g.body.dy||0);c.scale(g.body.s||1,g.body.s||1);LB.drawWatcherBody(c,{fl,white:w});c.restore()}else LB.drawWatcherBody(c,{fl,white:w})};
+    const wv=g.white;if(wv===true||wv===1)body(true);else{body(false);if(wv>0){c.save();c.globalAlpha*=wv;body(true);c.restore()}}
+    /* bras */
+    limb(c,sh,hand,9,'#2a3550');c.fillStyle='#2a3550';c.beginPath();c.arc(sh[0],sh[1],g.armR||6.5,0,6.283);c.fill();
+    const sa=g.staffAlpha==null?1:g.staffAlpha;if(sa<1){c.save();c.globalAlpha*=Math.max(0,sa)}
+    let L=null;
+    if(g.staff){
+      /* bâton tenu : talon, main, lanterne au sommet */
+      const [sb,st]=g.staff;
+      c.strokeStyle='#8a7a9a';c.lineWidth=4;c.beginPath();c.moveTo(sb[0],sb[1]);c.lineTo(st[0],st[1]);c.stroke();
+      c.fillStyle='#cdb69a';c.beginPath();c.arc(hand[0],hand[1],5,0,6.283);c.fill();
+      LB.drawLantern(c,st[0],st[1],glow,col,Math.atan2(st[1]-sb[1],st[0]-sb[0])+PI/2,lamp);
+      L=st;
+    }else{
+      /* sceptre dans la main, angle sa */
+      const Ln=g.L||76,a=g.sa==null?-.45:g.sa;
+      c.save();c.translate(hand[0],hand[1]);c.rotate(a);
+      LB.drawScepter(c,Ln,glow,col,lamp);
+      if(au>0){const gr=36*au,og=c.createRadialGradient(Ln,0,0,Ln,0,gr*2);
+        og.addColorStop(0,'rgba(255,255,255,1)');og.addColorStop(.4,'rgba(190,234,255,.7)');og.addColorStop(1,'rgba(111,211,255,0)');
+        c.fillStyle=og;c.beginPath();c.arc(Ln,0,gr*2,0,6.283);c.fill()}
+      if(g.beam&&g.beam.al>0){c.save();c.globalCompositeOperation='lighter';LB.lanternBeam(c,[Ln+8,0],[Ln+8+g.beam.len,0],g.beam.w,g.beam.al);c.restore()}
+      c.restore();
+      c.fillStyle='#cdb69a';c.beginPath();c.arc(hand[0],hand[1],5,0,6.283);c.fill();
+      L=[hand[0]+Math.cos(a)*Ln,hand[1]+Math.sin(a)*Ln];
+    }
+    if(sa<1)c.restore();
+    if(o.inFrame)o.inFrame(c,g);
+    c.restore();
+    /* centre de la lanterne dans le repère de l'appelant */
+    const ly0=L[1]+bob,r=(g.rot||0)+(g.rot2||0),cs=Math.cos(r),sn=Math.sin(r),u=L[0]*sx,v=ly0*sy;
+    return{lx:X+u*cs-v*sn,ly:Y+u*sn+v*cs};
+  };
+})();
+/* Silhouette du Veilleur des menus et des cinématiques (même tracé dans tous les chapitres) : le corps (chemin SVG, repère
+   de l'écran 960 × 540, pieds en y = 455), repris par le fragment shared/svg/watcher-menu.svg des menus. drawWatcherSil la
+   dessine sur un canvas : corps (sway = balancement, cisaillement depuis les pieds), bâton, halo (k, r, s = second arrêt), toit,
+   socle et verre de la lanterne, dans l'encre ink. */
+LB.WATCHER_SIL={body:'M205 455 L215 392 Q205 380 213 366 Q222 354 234 366 Q242 380 232 392 L242 455Z'};
+LB.drawWatcherSil=(c,ink,o)=>{
+  if(!LB.WATCHER_SIL.path)LB.WATCHER_SIL.path=new Path2D(LB.WATCHER_SIL.body);
+  c.fillStyle=ink;
+  if(o.sway!=null){c.save();c.translate(225,455);c.transform(1,0,o.sway,1,0,0);c.translate(-225,-455);c.fill(LB.WATCHER_SIL.path);c.restore()}
+  else c.fill(LB.WATCHER_SIL.path);
+  c.strokeStyle=ink;c.lineWidth=4;c.beginPath();c.moveTo(250,455);c.lineTo(250,334);c.stroke();
+  const k=o.k,g=c.createRadialGradient(250,323,0,250,323,o.r*k);g.addColorStop(0,'rgba(255,240,200,.95)');g.addColorStop(o.s,'rgba(255,200,110,.45)');g.addColorStop(1,'rgba(255,190,90,0)');c.fillStyle=g;c.fillRect(190,263,120,120);
+  c.fillStyle=ink;c.beginPath();c.moveTo(242,314);c.lineTo(250,306);c.lineTo(258,314);c.closePath();c.fill();c.fillRect(241,331,18,4);
+  c.fillStyle='#ffd27a';c.fillRect(243,314,14,17);c.fillStyle=ink;c.fillRect(247,314,1.5,17);c.fillRect(251.5,314,1.5,17);
+};
 /* Sauvegarde et langue : communes à la série (shared/, clés lb-…). Anciennes clés du Chapitre I (eb-…) lues si la nouvelle manque :
    eb-lang (langue, avec pn-lang : LB.OLD_KEYS), eb-intro, eb-end, eb-best-<mode>. */
 LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},oldPrefix:[['lb-ch1-best-','eb-best-']]});
@@ -1234,68 +1483,10 @@ function buildStatic(){
 }
 
 /* ---------- drawing helpers ---------- */
-function drawWizard(o){
-  const W=!!o.white;
-  /* Le Veilleur : heaume à visière, manteau d'ordre, tabard à l'emblème de la lanterne */
-  const cg=ctx.createLinearGradient(0,-96,0,0);if(W){cg.addColorStop(0,'#ffffff');cg.addColorStop(1,'#cfd7f2')}else{cg.addColorStop(0,'#3c4a6e');cg.addColorStop(1,'#1e2538')}
-  ctx.beginPath();
-  ctx.moveTo(-16,-92);ctx.quadraticCurveTo(-26,-50,-34,0);
-  ctx.lineTo(-23,-5+o.fl);ctx.lineTo(-12,1-o.fl);ctx.lineTo(0,-5+o.fl);ctx.lineTo(12,1-o.fl);ctx.lineTo(23,-5+o.fl);ctx.lineTo(34,0);
-  ctx.quadraticCurveTo(26,-50,16,-92);ctx.closePath();
-  ctx.fillStyle=cg;ctx.fill();ctx.strokeStyle=W?'#8f9bc4':'#121726';ctx.lineWidth=2;ctx.stroke();
-  /* tabard */
-  ctx.beginPath();ctx.moveTo(-8,-88);ctx.lineTo(8,-88);ctx.lineTo(9,-8+o.fl*.4);ctx.lineTo(0,-2);ctx.lineTo(-9,-8+o.fl*.4);ctx.closePath();
-  ctx.fillStyle=W?'#eef0f8':'#c9b98a';ctx.fill();ctx.strokeStyle=W?'#b9c2e0':'#8a7a5a';ctx.lineWidth=1.2;ctx.stroke();
-  ctx.strokeStyle=W?'#9aa6cc':'#6b5036';ctx.lineWidth=1.8;
-  ctx.beginPath();ctx.arc(0,-64,5,0,6.283);ctx.stroke();ctx.beginPath();ctx.moveTo(0,-73);ctx.lineTo(0,-69);ctx.stroke();
-  /* ceinture */
-  box(-27,-44,54,6,W?'#d6dcef':'#4a3a2a',W?'#aab3d4':'#2a1e14');
-  /* épaulières */
-  for(const sx of[-1,1]){ctx.beginPath();ctx.ellipse(sx*15,-89,13,7,0,0,6.283);ctx.fillStyle=W?'#f2f5ff':'#5d6f96';ctx.fill();ctx.strokeStyle=W?'#8f9bc4':'#161b2b';ctx.lineWidth=1.5;ctx.stroke()}
-  /* cape du heaume (nuque) */
-  poly([[-12,-112],[-28,-92],[-10,-94]],W?'#dfe5fa':'#2a3550');
-  /* heaume */
-  ctx.beginPath();ctx.moveTo(-15,-92);ctx.quadraticCurveTo(-19,-127,1,-128);ctx.quadraticCurveTo(20,-127,18,-92);ctx.closePath();
-  ctx.fillStyle=W?'#f2f5ff':'#5d6f96';ctx.fill();ctx.strokeStyle=W?'#8f9bc4':'#161b2b';ctx.lineWidth=2;ctx.stroke();
-  ctx.strokeStyle=W?'#e8dfc0':'#c9b98a';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-12,-119);ctx.quadraticCurveTo(1,-133,15,-119);ctx.stroke();
-  ctx.strokeStyle=W?'#aab3d4':'#3a4a70';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-5,-99);ctx.lineTo(-5,-92);ctx.stroke();
-  ctx.fillStyle=W?'#ffffff':'#bfeaff';ctx.fillRect(-1,-109,18,5);
-}
-/* Lanterne-sceptre : x,y = centre de la lumière ; ang oriente le haut de la lanterne ; g = intensité (0 à 1) */
-function drawLantern(x,y,g,col,ang){
-  ctx.save();ctx.translate(x,y);ctx.rotate(ang||0);
-  const gl=Math.max(0,g),rr=16+30*gl;
-  const rg=ctx.createRadialGradient(0,0,2,0,0,rr);
-  rg.addColorStop(0,'rgba(255,245,215,'+(.35+.5*gl)+')');rg.addColorStop(.5,'rgba(150,220,255,'+(.12+.25*gl)+')');rg.addColorStop(1,'rgba(111,211,255,0)');
-  ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,rr,0,6.283);ctx.fill();
-  poly([[-9,-12],[0,-20],[9,-12]],'#6b5036');
-  ctx.strokeStyle='#8a7a9a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-23,3,0,6.283);ctx.stroke();
-  ctx.fillStyle=col||'#ffd27a';ctx.fillRect(-8,-12,16,22);
-  ctx.strokeStyle='#6b5036';ctx.lineWidth=2;ctx.strokeRect(-8,-12,16,22);
-  ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(-3,-12);ctx.lineTo(-3,10);ctx.moveTo(3,-12);ctx.lineTo(3,10);ctx.stroke();
-  box(-10,10,20,4,'#4a3a2a','#2a1e14');
-  /* petite cloche */
-  ctx.strokeStyle='#8a7a9a';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(10,12);ctx.lineTo(14,16);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(10,26);ctx.quadraticCurveTo(10,16,14.5,16);ctx.quadraticCurveTo(19,16,19,26);ctx.closePath();
-  ctx.fillStyle='#b8a46a';ctx.fill();ctx.strokeStyle='#6b5036';ctx.lineWidth=1;ctx.stroke();
-  ctx.restore();
-}
-/* Sceptre dans le repère de la main (axe x = direction du sceptre), lanterne au bout, à la distance L */
-function drawScepter(L,g,col){
-  ctx.save();ctx.lineCap='round';ctx.strokeStyle='#8a7a9a';ctx.lineWidth=4;
-  ctx.beginPath();ctx.moveTo(-18,0);ctx.lineTo(L-14,0);ctx.stroke();
-  ctx.fillStyle='#6b5036';ctx.beginPath();ctx.arc(-18,0,3,0,6.283);ctx.fill();
-  ctx.restore();
-  drawLantern(L,0,g,col,Math.PI/2);
-}
+/* Le Veilleur (corps, sceptre-lanterne, poses, bouclier, éclats) est commun à la série : shared/js/20-watcher.js
+   (LB.drawWatcher, LB.WATCHER_POSES, LB.drawBlock). Les phases ne gardent que leur chorégraphie (positions, contres, finale). */
 /* Éclat de lanterne : rayon court entre deux points */
-function lanternBeam(A,B,w,al){
-  ctx.save();ctx.lineCap='round';ctx.shadowColor='#6fd3ff';ctx.shadowBlur=24;
-  ctx.strokeStyle='rgba(111,211,255,'+(.5*al)+')';ctx.lineWidth=w*1.8;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();
-  ctx.strokeStyle='rgba(255,255,255,'+al+')';ctx.lineWidth=w*.55;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();
-  ctx.shadowBlur=0;ctx.fillStyle='rgba(235,250,255,'+(.8*al)+')';ctx.beginPath();ctx.arc(B[0],B[1],w*.9,0,6.283);ctx.fill();
-  ctx.restore();
-}
+const lanternBeam=(A,B,w,al)=>LB.lanternBeam(ctx,A,B,w,al);
 function bodyChain(t,hk){
   hk=hk||0;if(hk>=1)return;
   ctx.save();ctx.lineCap='round';
@@ -1675,46 +1866,33 @@ function drawPlayer(){
   ctx.fillStyle='rgba(0,0,0,.38)';
   ctx.beginPath();ctx.ellipse(p.x,DECK+1,30*(1-lift/400),5,0,0,6.283);ctx.fill();
 
-  ctx.save();ctx.translate(p.x,DECK-lift-(G.ib||0));
-  if(G.mode==='intro')ctx.scale(G.sx,1);
-  if(lift>0||p.s==='grabbed')ctx.rotate(.42*lift/LIFT_MAX+(p.s==='grabbed'?Math.sin(G.time*22)*.03:0));
-  if(p.s==='down'||p.s==='hurt'){ctx.rotate(.12);ctx.scale(1,.82)}
-
-  drawWizard({fl:0});
-
-  const dashing=p.s==='dash'||p.s==='stab'||p.s==='back';
+  /* le Veilleur commun (LB.drawWatcher) ; la phase donne sa géométrie : bâton planté, garde, estoc */
+  const dashing=p.s==='dash'||p.s==='stab'||p.s==='back',low=p.s==='down'||p.s==='hurt';
   const thrust=p.s==='stab'?(p.t<.1?es(p.t/.1):p.t<.22?1:1-clamp01((p.t-.22)/.08)):0;
   const hand=dashing?[28+24*thrust,-60]:[26,-62-6*r],sb=dashing?[hand[0]-34,hand[1]+6]:[26,-2-58*r],st=dashing?[hand[0]+34,hand[1]-6]:[30+18*r,-140-26*r];
-  ctx.lineCap='round';
-  ctx.strokeStyle='#2a3550';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(23,-78);ctx.lineTo(hand[0],hand[1]);ctx.stroke();ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(23,-78,6.5,0,6.283);ctx.fill();
-  ctx.strokeStyle='#8a7a9a';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(sb[0],sb[1]);ctx.lineTo(st[0],st[1]);ctx.stroke();
-  ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(hand[0],hand[1],5,0,6.283);ctx.fill();
-  const cc=p.deny>0?LB.DENY_COL:up?'#fff4d6':(p.s==='recover'?'#c9a85a':'#ffd27a');
-  drawLantern(st[0],st[1],up?1:dashing?.6+.4*thrust:.25,cc,Math.atan2(st[1]-sb[1],st[0]-sb[0])+Math.PI/2);
-  if(dashing&&thrust>0){const A=[st[0]+8,st[1]],Z=[BX-62-p.x,-58+lift+(G.ib||0)];lanternBeam(A,lerp2(A,Z,thrust),12+10*thrust,thrust)}
-
-  const b=G.boss;
-  if((b.s==='lift'&&b.t>=.12)||b.s==='hold'||b.s==='slam'){
-    ctx.save();ctx.shadowColor='#ff7a2b';ctx.shadowBlur=10;
-    ctx.strokeStyle='#ff9a3c';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(0,-58,27,7,0,0,6.283);ctx.stroke();
-    ctx.restore();
-  }
-  ctx.restore();
+  const pose=up?(p.s==='act'?'block':'cast'):dashing?'counter':low?(p.s==='down'?'down':'hurt'):'idle';
+  const b=G.boss,ring=(b.s==='lift'&&b.t>=.12)||b.s==='hold'||b.s==='slam';
+  LB.drawWatcher(ctx,p.x,DECK-lift-(G.ib||0),pose,G.time,{
+    dx:0,dy:0,sx:G.mode==='intro'?G.sx:1,
+    rot:lift>0||p.s==='grabbed'?.42*lift/LIFT_MAX+(p.s==='grabbed'?Math.sin(G.time*22)*.03:0):0,
+    rot2:low?.12:0,sy:low?.82:1,
+    breath:pose==='idle'&&G.mode!=='intro'&&lift<=0&&p.s!=='grabbed',
+    hand,staff:[sb,st],glow:up?1:dashing?.6+.4*thrust:.25,
+    lanternCol:p.deny>0?LB.DENY_COL:up?'#fff4d6':(p.s==='recover'?'#c9a85a':'#ffd27a'),
+    inFrame:()=>{
+      if(dashing&&thrust>0){const A=[st[0]+8,st[1]],Z=[BX-62-p.x,-58+lift+(G.ib||0)];lanternBeam(A,lerp2(A,Z,thrust),12+10*thrust,thrust)}
+      if(ring){
+        ctx.save();ctx.shadowColor='#ff7a2b';ctx.shadowBlur=10;
+        ctx.strokeStyle='#ff9a3c';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(0,-58,27,7,0,0,6.283);ctx.stroke();
+        ctx.restore();
+      }
+    }
+  });
 }
 
 function drawBarrier(){
   const p=G.pl;if(p.s!=='act')return;
-  const ramp=clamp01(p.t/.07),a=(1-.45*p.t/HD('block').act)*ramp;
-  const cx=PX+82,cy=DECK-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
-  ctx.save();ctx.globalAlpha=a;
-  const g=ctx.createRadialGradient(cx-18,cy,6,cx,cy,ry);
-  g.addColorStop(0,'rgba(111,211,255,.06)');g.addColorStop(.7,'rgba(111,211,255,.2)');g.addColorStop(1,'rgba(191,234,255,.5)');
-  ctx.fillStyle=g;ctx.shadowColor='#6fd3ff';ctx.shadowBlur=24;
-  ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,6.283);ctx.fill();
-  ctx.shadowBlur=0;ctx.strokeStyle='#cdeeff';ctx.lineWidth=3;ctx.stroke();
-  ctx.lineWidth=1;ctx.strokeStyle='rgba(205,238,255,.5)';
-  for(const k of[.66,.33]){ctx.beginPath();ctx.ellipse(cx,cy,rx*k,ry,0,0,6.283);ctx.stroke()}
-  ctx.restore();
+  LB.drawBlock(ctx,PX,DECK,p.t,HD('block').act);
 }
 
 /* Repère de timing discret (Normal) : petite barre au-dessus du Veilleur, orange tant que le blocage n'est pas ouvert puis bleue pendant la fenêtre. */
@@ -2620,27 +2798,13 @@ function qBeamTarget(c){return c.k==='head'?[Q.bx,Q.by-92]:c.k==='beam'?[Q.bx-30
 function qBeamAl(c){const t=c.t;if(c.k==='stab')return t>=.28&&t<.62?(t<.35?(t-.28)/.07:1-(t-.35)/.27):0;if(c.k==='head')return t>=.48&&t<.85?(t<.55?(t-.48)/.07:1-(t-.55)/.3):0;if(c.k==='final')return t>=1.45&&t<3.5?Math.min(1,(t-1.45)/.1)*(t<3.2?1:1-(t-3.2)/.3):0;return 0}
 function qSwordTip(){const h=heroPose();return[h.x+WH[0]+Math.cos(h.sa)*80,h.y+WH[1]+Math.sin(h.sa)*80]}
 function drawHero2(){
-  const h=heroPose(),t=Q.time;
-  ctx.save();ctx.translate(h.x,h.y);ctx.rotate(h.rot);
-  if(h.glow>0){
-    const r=70+60*h.glow;
-    const g=ctx.createRadialGradient(0,-10,6,0,-10,r);
-    g.addColorStop(0,'rgba(255,255,255,'+(.7*h.glow)+')');g.addColorStop(.5,'rgba(150,220,255,'+(.3*h.glow)+')');g.addColorStop(1,'rgba(111,211,255,0)');
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,-10,r,0,6.283);ctx.fill();
-  }
-  ctx.save();ctx.translate(0,44);ctx.scale(.8,.8);drawWizard({fl:3*Math.sin(t*14)});ctx.restore();
-  qlimb([18.5,-18.5],WH,9,'#2a3550');ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(18.5,-18.5,5.2,0,6.283);ctx.fill();
-  ctx.save();ctx.translate(WH[0],WH[1]);ctx.rotate(h.sa);
+  const h=heroPose(),t=Q.time,p=Q.pl,c=Q.cn;
+  /* le Veilleur commun (LB.drawWatcher), corps réduit pendant la chute dans le puits ; la phase donne sa géométrie */
   const c2=Q.cn,hitk=c2?qBeamAl(c2):0;
-  drawScepter(80,Math.max(.35,h.glow,hitk),Q.pl.deny>0?LB.DENY_COL:h.glow>0||hitk>0?'#fff4d6':'#ffd27a');
-  if(h.glow>0){
-    const gr=36*h.glow,og=ctx.createRadialGradient(80,0,0,80,0,gr*2);
-    og.addColorStop(0,'rgba(255,255,255,1)');og.addColorStop(.4,'rgba(190,234,255,.7)');og.addColorStop(1,'rgba(111,211,255,0)');
-    ctx.fillStyle=og;ctx.beginPath();ctx.arc(80,0,gr*2,0,6.283);ctx.fill();
-  }
-  ctx.restore();
-  ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(WH[0],WH[1],5,0,6.283);ctx.fill();
-  ctx.restore();
+  const pose=c?'counter':p.s==='act'?'dodgeDown':p.s==='hurt'?'hurt':p.s==='down'?'fall':'idle';
+  LB.drawWatcher(ctx,h.x,h.y,pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:1,breath:false,fl:3*Math.sin(t*14),
+    body:{dy:44,s:.8},shoulder:[18.5,-18.5],armR:5.2,hand:WH,sa:h.sa,L:80,aura:h.glow,
+    glow:Math.max(.35,h.glow,hitk),lanternCol:Q.pl.deny>0?LB.DENY_COL:h.glow>0||hitk>0?'#fff4d6':'#ffd27a'});
 }
 function drawFx2(){
   const S=R||Q;
@@ -3894,25 +4058,16 @@ function drawHero3(){
   const p=R.pl,h=heroPose3(),t=R.time;
   const hf=heroFlip();if(hf){ctx.save();ctx.translate(h.x,0);ctx.scale(-1,1);ctx.translate(-h.x,0)}
   if(!h.y)ctx.fillStyle='rgba(0,0,0,.35)',ctx.beginPath(),ctx.ellipse(h.x,DECK+2,30,5,0,0,6.283),ctx.fill();
-  ctx.save();ctx.translate(h.x,DECK+(h.y||0));ctx.rotate(h.rot);ctx.scale(1,h.sy);
-  drawWizard({fl:0});
-  qlimb([23,-78],h.hand,9,'#2a3550');ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(23,-78,6.5,0,6.283);ctx.fill();
-  ctx.save();ctx.translate(h.hand[0],h.hand[1]);ctx.rotate(h.sa);
+  /* le Veilleur commun (LB.drawWatcher) ; la phase donne sa géométrie : sceptre en main, garde levée, contres, finale */
   const c3=R.cn,hk3=c3&&(c3.k==='bat'||c3.k==='plant')?Math.max(0,1-Math.abs(c3.t-(c3.k==='bat'?.24:.32))/.16):0;
-  drawScepter(76,p.s==='act'?1:Math.max(.3,h.glow||0,hk3),p.deny>0?LB.DENY_COL:p.s==='recover'?'#c9a85a':(p.s==='act'||h.glow>0||hk3>0)?'#fff4d6':'#ffd27a');
-  if(hk3>0){ctx.save();ctx.globalCompositeOperation='lighter';lanternBeam([84,0],[84+48*hk3,0],14,hk3);ctx.restore()}
-  ctx.restore();
-  ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(h.hand[0],h.hand[1],5,0,6.283);ctx.fill();
-  ctx.restore();
-  if(p.s==='act'){
-    const a=1-.45*p.t/HD('block').act,ramp=clamp01(p.t/.07),cx=PX+82,cy=DECK-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
-    ctx.save();ctx.globalAlpha=a*ramp;
-    const g=ctx.createRadialGradient(cx-18,cy,6,cx,cy,ry);
-    g.addColorStop(0,'rgba(111,211,255,.06)');g.addColorStop(.7,'rgba(111,211,255,.2)');g.addColorStop(1,'rgba(191,234,255,.5)');
-    ctx.fillStyle=g;ctx.shadowColor='#6fd3ff';ctx.shadowBlur=24;
-    ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,6.283);ctx.fill();
-    ctx.restore();
-  }
+  const play=R.mode==='play',low=p.s==='down'||p.s==='hurt';
+  const pose=R.mode==='intro'?'walk':R.mode==='finale'?'victory':!play?'idle':c3?'cast':p.s==='act'?'raise':low?(p.s==='down'?'down':'hurt'):'idle';
+  LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:h.sy,
+    breath:pose==='idle'&&play,hand:h.hand,sa:h.sa,L:76,
+    glow:p.s==='act'?1:Math.max(.3,h.glow||0,hk3),
+    lanternCol:p.deny>0?LB.DENY_COL:p.s==='recover'?'#c9a85a':(p.s==='act'||h.glow>0||hk3>0)?'#fff4d6':'#ffd27a',
+    beam:hk3>0?{len:48*hk3,w:14,al:hk3}:null});
+  if(p.s==='act')LB.drawBlock(ctx,PX,DECK,p.t,HD('block').act,{plain:true});
   if(hf)ctx.restore();
 }
 function drawBombs(a){
@@ -4692,7 +4847,6 @@ const CINE=(()=>{
   const K=Math.min(2,COARSE?1.25:(window.devicePixelRatio||1));cvs.width=960*K;cvs.height=540*K;
   const P=d=>new Path2D(d);
   const BRIDGE=P('M0 455 L960 455 L960 475 L900 475 Q860 475 860 505 L860 540 L760 540 L760 505 Q760 475 720 475 L560 475 Q520 475 520 505 L520 540 L420 540 L420 505 Q420 475 380 475 L200 475 Q160 475 160 505 L160 540 L60 540 L60 505 Q60 475 0 475Z');
-  const WATCH=P('M205 455 L215 392 Q205 380 213 366 Q222 354 234 366 Q242 380 232 392 L242 455Z');
   const COLOS=P('M640 455 L650 330 L615 300 L640 270 L625 215 L660 245 L690 205 L720 245 L760 215 L750 270 L785 300 L745 335 L760 455Z M655 215 L630 150 L668 200Z M745 210 L772 148 L735 198Z M615 300 L540 360 L560 372 L630 330Z M785 300 L850 270 L860 290 L790 330Z');
   const FAR=P('M0 400 L90 300 L160 350 L260 240 L350 340 L450 270 L560 350 L650 250 L760 340 L860 280 L960 360 L960 540 L0 540Z');
   const NEAR=P('M0 450 L120 380 L220 430 L340 360 L470 440 L600 370 L730 440 L850 380 L960 430 L960 540 L0 540Z');
@@ -4747,11 +4901,7 @@ const CINE=(()=>{
     cx.fillStyle='rgba(241,227,207,.2)';cx.beginPath();cx.arc(170,110,34,0,6.283);cx.fill();
     cx.fillStyle='#1a0b10';cx.fill(FAR);glow(470,.75+.15*Math.sin(t*2.4),600);
     cx.fillStyle='#07050a';cx.fill(BRIDGE);
-    cx.save();cx.translate(225,455);cx.transform(1,0,Math.sin(t*1.6)*.035,1,0,0);cx.translate(-225,-455);cx.fill(WATCH);cx.restore();
-    cx.strokeStyle='#07050a';cx.lineWidth=4;cx.beginPath();cx.moveTo(250,455);cx.lineTo(250,334);cx.stroke();
-    const k=.7+.3*Math.sin(t*3.2),g=cx.createRadialGradient(250,323,0,250,323,46*k);g.addColorStop(0,'rgba(255,240,200,.95)');g.addColorStop(.3,'rgba(255,200,110,.45)');g.addColorStop(1,'rgba(255,190,90,0)');cx.fillStyle=g;cx.fillRect(190,263,120,120);
-    cx.fillStyle='#07050a';cx.beginPath();cx.moveTo(242,314);cx.lineTo(250,306);cx.lineTo(258,314);cx.closePath();cx.fill();cx.fillRect(241,331,18,4);
-    cx.fillStyle='#ffd27a';cx.fillRect(243,314,14,17);cx.fillStyle='#07050a';cx.fillRect(247,314,1.5,17);cx.fillRect(251.5,314,1.5,17);
+    LB.drawWatcherSil(cx,'#07050a',{sway:Math.sin(t*1.6)*.035,k:.7+.3*Math.sin(t*3.2),r:46,s:.3});
     embers(t,1);cx.restore();
   }
   function sWake(p,t){
@@ -4777,11 +4927,8 @@ const CINE=(()=>{
     sky('#08060d','#2a0f14','#7a2a10');stars(t,.9);
     cx.fillStyle='rgba(241,227,207,.16)';cx.beginPath();cx.arc(170,110,34,0,6.283);cx.fill();
     cx.fillStyle='#1a0b10';cx.fill(FAR);glow(470,.75+.15*Math.sin(t*2.2),620);
-    cx.fillStyle='#07050a';cx.fill(BRIDGE);cx.fill(WATCH);cx.fill(COLOS);
-    cx.strokeStyle='#07050a';cx.lineWidth=4;cx.beginPath();cx.moveTo(250,455);cx.lineTo(250,334);cx.stroke();
-    const k=.75+.25*Math.sin(t*3.1),g=cx.createRadialGradient(250,323,0,250,323,40*k);g.addColorStop(0,'rgba(255,240,200,.95)');g.addColorStop(.35,'rgba(255,200,110,.45)');g.addColorStop(1,'rgba(255,190,90,0)');cx.fillStyle=g;cx.fillRect(190,263,120,120);
-    cx.fillStyle='#07050a';cx.beginPath();cx.moveTo(242,314);cx.lineTo(250,306);cx.lineTo(258,314);cx.closePath();cx.fill();cx.fillRect(241,331,18,4);
-    cx.fillStyle='#ffd27a';cx.fillRect(243,314,14,17);cx.fillStyle='#07050a';cx.fillRect(247,314,1.5,17);cx.fillRect(251.5,314,1.5,17);
+    cx.fillStyle='#07050a';cx.fill(BRIDGE);cx.fill(COLOS);
+    LB.drawWatcherSil(cx,'#07050a',{k:.75+.25*Math.sin(t*3.1),r:40,s:.35});
     cx.fillStyle='#ffd27a';cx.shadowColor='#ffb347';cx.shadowBlur=16;cx.beginPath();cx.arc(690,232,4,0,6.283);cx.arc(722,232,4,0,6.283);cx.fill();cx.shadowBlur=0;
     const lg=cx.createRadialGradient(705,330,0,705,330,40);lg.addColorStop(0,'rgba(255,122,43,.5)');lg.addColorStop(1,'rgba(255,122,43,0)');cx.fillStyle=lg;cx.fillRect(660,290,90,80);
     embers(t,1);cx.restore();
@@ -4840,11 +4987,8 @@ const OUTRO=(()=>{
   const poly=(p,col)=>{cx.fillStyle=col;cx.beginPath();p.forEach((q,i)=>i?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1]));cx.closePath();cx.fill()};
   function sky(t,top,bot,hz){const g=cx.createLinearGradient(0,0,0,hz);g.addColorStop(0,top);g.addColorStop(1,bot);cx.fillStyle=g;cx.fillRect(0,0,960,hz);for(const s of STR){if(s.y>hz-10)continue;cx.globalAlpha=.3+.6*Math.abs(Math.sin(t*.8+s.p));cx.fillStyle='#eef2ff';cx.fillRect(s.x,s.y,s.r,s.r)}cx.globalAlpha=1}
   function snow(t,a){cx.fillStyle='rgba(240,246,255,'+a+')';for(const f of SNW){const y=(f.y+t*f.v)%540,x=(f.x+Math.sin(t+f.y)*14+960)%960;cx.fillRect(x,y,f.s,f.s)}}
-  function lant(x,y,s,g){cx.save();cx.translate(x,y);cx.scale(s,s);const rg=cx.createRadialGradient(0,0,1,0,0,42);rg.addColorStop(0,'rgba(255,236,180,'+(.55*g)+')');rg.addColorStop(1,'rgba(255,200,110,0)');cx.fillStyle=rg;cx.beginPath();cx.arc(0,0,42,0,6.283);cx.fill();poly([[-9,-12],[0,-20],[9,-12]],'#6b5036');cx.fillStyle='#ffd27a';cx.fillRect(-8,-12,16,22);cx.strokeStyle='#6b5036';cx.lineWidth=2;cx.strokeRect(-8,-12,16,22);cx.lineWidth=1.2;cx.beginPath();cx.moveTo(-3,-12);cx.lineTo(-3,10);cx.moveTo(3,-12);cx.lineTo(3,10);cx.stroke();cx.fillStyle='#4a3a2a';cx.fillRect(-10,10,20,4);cx.restore()}
-  function watcher(x,y,s,bob){cx.save();cx.translate(x,y-bob);cx.scale(s,s);poly([[-16,-92],[-34,0],[34,0],[16,-92]],'#2a3550');cx.fillStyle='#c9b98a';cx.fillRect(-8,-88,16,82);
-    for(const sx of[-1,1]){cx.fillStyle='#5d6f96';cx.beginPath();cx.ellipse(sx*15,-89,13,7,0,0,6.283);cx.fill()}
-    cx.fillStyle='#5d6f96';cx.beginPath();cx.moveTo(-15,-92);cx.quadraticCurveTo(-19,-127,1,-128);cx.quadraticCurveTo(20,-127,18,-92);cx.closePath();cx.fill();cx.fillStyle='#bfeaff';cx.fillRect(-1,-109,18,5);
-    cx.strokeStyle='#8a7a9a';cx.lineWidth=4;cx.beginPath();cx.moveTo(26,-2);cx.lineTo(30,-140);cx.stroke();cx.restore();lant(x+30*s,y-bob+(-152)*s,s,1)}
+  /* le Veilleur commun, en silhouette lointaine (LB.drawWatcher, opt.flat) */
+  function watcher(x,y,s,bob){LB.drawWatcher(cx,x,y,'walk',0,{flat:true,dx:0,dy:-bob,scale:s})}
   function bell(x,y,s,a){cx.save();cx.translate(x,y);cx.rotate(a);cx.scale(s,s);const bg=cx.createLinearGradient(-60,0,60,0);bg.addColorStop(0,'#7a5524');bg.addColorStop(.45,'#d9a24c');bg.addColorStop(1,'#6b4a1a');cx.fillStyle=bg;cx.beginPath();cx.moveTo(-26,14);cx.quadraticCurveTo(-36,50,-60,108);cx.lineTo(60,108);cx.quadraticCurveTo(36,50,26,14);cx.closePath();cx.fill();cx.strokeStyle='rgba(255,226,150,.6)';cx.lineWidth=2;cx.beginPath();cx.moveTo(-40,84);cx.lineTo(40,84);cx.stroke();cx.restore()}
   function tower(x,top,w,lit){w*=2.2;cx.fillStyle='#141a3a';poly([[x-w/2,top],[x+w/2,top],[x+w*.75,540],[x-w*.75,540]],'#141a3a');cx.fillRect(x-w/2-3,top-4,w+6,5);poly([[x-w/2-4,top-4],[x,top-4-w*1.1],[x+w/2+4,top-4]],'#141a3a');cx.fillStyle='#0a0e24';cx.fillRect(x-w*.22,top+3,w*.44,w*.5);const r=10+22*lit,g=cx.createRadialGradient(x,top+10,1,x,top+10,r);g.addColorStop(0,'rgba(255,215,130,'+(.25+.6*lit)+')');g.addColorStop(1,'rgba(255,200,110,0)');cx.fillStyle=g;cx.beginPath();cx.arc(x,top+10,r,0,6.283);cx.fill();cx.fillStyle=lit>.1?'#ffd27a':'#6a5a3a';cx.fillRect(x-2,top+7,4,6)}
   function sStatue(p,t){
@@ -4895,10 +5039,7 @@ const OUTRO=(()=>{
     cx.fillStyle=on?'#aaffeb':'#1a2440';cx.fillRect(-4,-69,8,6);cx.restore();
     /* au premier plan, depuis le Clocher, le Veilleur de dos regarde le phare */
     cx.fillStyle='#232a4a';cx.fillRect(0,470,960,70);for(let x=0;x<960;x+=110){cx.fillRect(x+14,446,58,26)}cx.fillStyle='rgba(10,14,34,.45)';for(let x=0;x<960;x+=60)cx.fillRect(x,500,2,40);cx.fillRect(0,500,960,2);cx.fillStyle='rgba(235,243,255,.55)';for(let x=0;x<960;x+=110){cx.fillRect(x+14,444,58,3)}cx.fillRect(0,468,960,3);
-    {const wx=250,wy=468,c0='#070a18';cx.fillStyle=c0;cx.beginPath();cx.moveTo(wx-16,wy-92);cx.lineTo(wx-30,wy);cx.lineTo(wx+30,wy);cx.lineTo(wx+16,wy-92);cx.closePath();cx.fill();
-     for(const sx of[-1,1]){cx.beginPath();cx.ellipse(wx+sx*15,wy-89,13,7,0,0,6.283);cx.fill()}
-     cx.beginPath();cx.moveTo(wx-15,wy-92);cx.quadraticCurveTo(wx-18,wy-126,wx,wy-127);cx.quadraticCurveTo(wx+18,wy-126,wx+15,wy-92);cx.closePath();cx.fill();
-     cx.strokeStyle=c0;cx.lineWidth=4;cx.beginPath();cx.moveTo(wx+24,wy-2);cx.lineTo(wx+30,wy-132);cx.stroke();lant(wx+31,wy-146,.85,.9+.1*Math.sin(t*3))}
+    LB.drawWatcher(cx,250,468,'idle',t,{ink:'#070a18',dx:0,dy:0,lamp:.9+.1*Math.sin(t*3)});
     if(!st.muted&&s>3.2){st.muted=1;tone(147,2.4,'sine',.05,-20)}}
   function sDawn(p,t,s){
     const HZ=300,g=cx.createLinearGradient(0,0,0,HZ);g.addColorStop(0,'#1a2246');g.addColorStop(1,'#d9a07a');cx.fillStyle=g;cx.fillRect(0,0,960,HZ);
