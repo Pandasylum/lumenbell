@@ -23,6 +23,8 @@ L'Ancien peut être redessiné pour être plus esthétique, mais chaque pièce d
 | Ancre | Plantée au pied de la tour, elle l'amarre |
 | Chaînes | Amarres vers les récifs |
 
+Les deux lanternes latérales du sommet sont des pièces propres à la tour, trouvées aux sols, sans équivalent chez l'Ancien.
+
 ## La cloche
 La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (écriture ancienne inventée, dessinée une seule fois et réutilisée) ; le mot **Couronne** (EN : **Crown**) est gravé en clair au centre, visible en gros plan dans l'outro. Le joueur peut croire que c'est lié à la tête du Roi : fausse piste voulue.
 

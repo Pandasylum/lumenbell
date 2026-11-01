@@ -222,7 +222,7 @@ Ne pas toucher aux timings.
 
 À ne pas faire : modifier la silhouette du Colosse, ou toucher au Chapitre I.
 
-Statut : en cours, branche `ch2/phare-v1` (1er novembre). Comparaison faite par Kevin : les « 2 lampes en haut » sont les deux blocs sombres qui encadrent la méduse dans `2b75101`, supprimés par `0bad679`. Seul ce sommet est restauré (formes I et II) ; planche avant / après : `build/out/phare-v1/comparaison-phase3.png` (non suivie). Écart signalé, non tranché : voir `chapters/ch2-silent-bells/NOTES.md`, « Phare Noyé : sommet d'avant C1 ».
+Statut : en cours, branche `ch2/phare-v1` (1er novembre). Comparaison faite par Kevin : les « 2 lampes en haut » sont les deux blocs sombres qui encadrent la méduse dans `2b75101`, supprimés par `0bad679`. Seul ce sommet est restauré (formes I et II) ; planche avant / après : `build/out/phare-v1/comparaison-phase3.png` (non suivie). Écart tranché par Kevin le 1er novembre : les deux blocs sont des lanternes latérales propres à la tour (phrase ajoutée sous le tableau de `docs/CH2-SPEC.md`). 2e passe : les lumières de la tour (faisceau, foudre, crépitement de charge, anneaux de la tempête) partent des deux lanternes, en formes I et II ; les deux pièces attendent dans un coin à l'entrée du combat et servent à la construction. Planche : `build/out/phare-v2/comparaison-tirs.png` (non suivie). Détails : `chapters/ch2-silent-bells/NOTES.md`, « Lanternes latérales ».
 
 Vérifications
 Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.

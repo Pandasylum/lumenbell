@@ -14,7 +14,8 @@ function ecPose(T){let ri=0,si=0,bi=0;return TOWER.map(p=>{
 function ecAnchor(T){const a=T*.4;return{x:LX+Math.cos(a)*190,y:ECY+72+Math.sin(a)*46,a:a+2,sc:.7,z:Math.sin(a)}}
 function ecGap(T){const a=T*.55+12*Math.PI/7;return{x:LX+Math.cos(a)*112,y:ECY+Math.sin(a)*36}}
 function drawAnchorQ(q){ctx.save();if(q.clip){ctx.beginPath();ctx.rect(0,0,W,GY+6);ctx.clip()}ctx.translate(q.x,q.y);ctx.scale(q.sc,q.sc);drawAnchor(0,0,Math.cos(q.a),Math.sin(q.a),0);ctx.restore()}
-function drawEcl(P,A,J,tentA,on,gapQ){
+/* LQ: poses of the two side lanterns (default: around the jellyfish, scaled by its radius) */
+function drawEcl(P,A,J,tentA,on,gapQ,LQ){
   base();
   if(J)glow(J.x,J.y,260,'rgba(90,220,255,.55)',.6*on+.05);
   const link=(x,y,front)=>{if(!J||tentA<=0)return;ctx.save();ctx.globalAlpha=tentA;tent(J.x,J.y,(J.x+x)/2,J.y+(front?30:-40),(J.x+x)/2,y,x,y,3,front?.9:.6);ctx.restore()};
@@ -22,6 +23,7 @@ function drawEcl(P,A,J,tentA,on,gapQ){
   const piece=i=>{const q=P[i],k=TOWER[i].k;if(q.hide)return;if(!FIXED(k))link(q.x,q.y,q.z>=0);ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);if(q.sc)ctx.scale(q.sc,q.sc);PDRAW[k](.85,q.o);ctx.restore()};
   order.filter(i=>P[i].z<0).forEach(piece);
   if(A&&A.z<0){link(A.x,A.y,false);drawAnchorQ(A)}
+  if(LQ||J)drawLamps(LQ||lampPoses(J.x,J.y,J.r/36),1);
   if(J){jelly(J.x,J.y,J.r,on,rt);
     for(let k=0;k<8;k++){const a=k/8*Math.PI*2+rt*.3;ctx.save();ctx.globalAlpha=Math.max(.25,tentA);tent(J.x,J.y+10,J.x+Math.cos(a)*60,J.y+40+Math.sin(a)*30,J.x+Math.cos(a)*90,J.y+90,J.x+Math.cos(a)*100+Math.sin(rt*2+k)*14,J.y+140,3,.8*on);ctx.restore()}}
   if(gapQ){ctx.save();ctx.globalCompositeOperation='lighter';glow(gapQ.x,gapQ.y,60,'rgba(255,255,255,.9)',.8);ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(gapQ.x,gapQ.y,22+Math.sin(rt*10)*3,0,Math.PI*2);ctx.stroke();ctx.restore()}
@@ -60,8 +62,7 @@ function ecTransition(t){
   const A={x:lerp(Ah.x,A0.x,gl),y:lerp(Ah.y,A0.y,gl),a:lerp(Ah.a,A0.a,gl),sc:lerp(Ah.sc,A0.sc,gl),z:gl>.5?A0.z:1,clip:ay<.25};
   if(t>=2.4&&once('yank')){burst(LX+118,GY,26,'#dff8ff',6,.8,.4);S.shake=12}
   const J={x:LX,y:lerp(LY,ECY,eio(clamp((t-2.1)/1.2,0,1))),r:lerp(36,44,sc)};
-  lamps(J.x,J.y,1-gl,sc);
-  drawEcl(P,A,J,1,1,null);
+  drawEcl(P,A,J,1,1,null,lampPoses(J.x,J.y,J.r/36,sc*(1-gl)));
 }
 function ecFinale(tAll){
   const OFF=2.2,t=tAll-OFF;
@@ -81,7 +82,9 @@ function ecFinale(tAll){
   else if(once('dis'))evaporate(LX-40,GY-16);
   const tentA=1-clamp((t-2)/.4,0,1);
   if(t>=.5)P[EHEAD]={...P[EHEAD],o:bellMarks()};
-  drawEcl(P,A,J,tentA,(S.zapT&&gt-S.zapT<.09&&t<.5)?.15:on,t>-.75&&t<.6?ecGap(T):null);
+  const lfe=clamp((t-EFALL[EHEAD].ft)/.5,0,1),LA=lampPoses(J?J.x:LX,J?J.y:ECY,J?J.r/36:1);
+  const LQ=lfe<=0?LA:LAMP_REST.map((R,i)=>({x:lerp(LA[i].x,R.x,lfe),y:lerp(LA[i].y,R.y,ein(lfe)),r:lerp(LA[i].r,R.r,lfe)}));
+  drawEcl(P,A,J,tentA,(S.zapT&&gt-S.zapT<.09&&t<.5)?.15:on,t>-.75&&t<.6?ecGap(T):null,LQ);
   ecFinisher(tAll,T,P);
   if(t>=.5&&once('hit')){S.flashT=gt;S.shake=26;burst(LX,ECY,70,'#ffffff',11,1.2);burst(LX,ECY,40,'#9fe4ff',8,1);pop(ONO.final,'#ffffff',LX,ECY-150)}
   S.heroDX=lerp(0,BELL_REST.x-HX-78,eio(clamp((t-6.4)/1.6,0,1)));
@@ -249,7 +252,7 @@ function cineBoss(){
     return}
   /* ===== Drowned Beacon (Phase III) ===== */
   if(ph===3&&k==='in'){
-    if(t<1.5){ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();S.heroDY=0}
+    if(t<1.5){drawLamps(LAMP_FLOOR,1);ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();S.heroDY=0}
     else if(t<11.5){S.heroDY=0;S.tfT=S.cine.t0+1.5;drawTransform()}
     else{drawBoss3();const s=clamp((t-11.7)/1.4,0,1);if(s>0&&s<1){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*s,.8);ctx.restore()}}
     return}

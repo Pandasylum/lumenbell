@@ -7,6 +7,7 @@ function drawStill(id){
   else if(id===1)kingEndStill();
   else{bg3();base();const O=ecPose(0);
     TOWER.forEach((p,i)=>{if(FIXED(p.k)){const o=O[i];drawP(p.k,o.x,o.y,o.r)}else if(i!==EHEAD){const F=EFALL[i];drawP(p.k,F.x,F.y,F.r)}});
+    drawLamps(LAMP_REST,1);
     drawAnchorQ({x:LX+135,y:GY-120,a:1.78,sc:1,clip:true});
     ctx.save();ctx.translate(BELL_REST.x,BELL_REST.y);ctx.rotate(BELL_REST.r);pHead(.85,bellMarks());ctx.restore();
     const hx=BELL_REST.x-78;ell(hx,GY+2,30,6,'rgba(0,0,0,.45)');heroShape(hx,GY,'idle',{},0)}}
