@@ -41,7 +41,7 @@ function headHit(){
   G.bhp=Math.max(0,G.bhp-DMG_BLOCK);G.recoil=1;G.shake=reduce?0:13;G.hitstop=.11;G.flash=.4;thud(1.2);ring(HEAD[0],HEAD[1]);
   burst(HEAD[0],HEAD[1],22,['#ffffff','#ffc15a','#ff7a2b']);
   tone(170,.25,'square',.08,-110);
-  if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('The Colossus is on his knees. Phase I cleared.','Le Colosse est à genoux. Phase I terminée.'))}
+  if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('Phase I cleared.','Phase I terminée.'))}
   else{b.s='stagger';b.t=0;b.stagT=0}
 }
 function slamHit(){
@@ -126,7 +126,7 @@ function orbHit(){
   ring(ORB_T[0],ORB_T[1]);
   burst(ORB_T[0],ORB_T[1],36,['#ffffff','#fff2b8','#bfeaff','#ffc15a']);
   tone(660,.5,'sine',.08,500);tone(200,.3,'square',.06,-120);thud(1.3);cry1(true);
-  if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('The Colossus is on his knees. Phase I cleared.','Le Colosse est à genoux. Phase I terminée.'))}
+  if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('Phase I cleared.','Phase I terminée.'))}
   else{b.s='hurt';b.t=0;b.hurtT=1.1;say(_('Orb of light, dead center.','Orbe de lumière en plein cœur.'))}
 }
 function dblTell(){tone(1100,.08,'square',.045,-200);setTimeout(()=>tone(1100,.08,'square',.045,-200),110)}
@@ -172,7 +172,7 @@ function legHit(){
   burst(BX-62,DECK-58,26,['#ffc15a','#ff7a2b','#ffffff']);
   tone(220,.25,'square',.08,-120);tone(90,.3,'sawtooth',.06,-40);cry1(false);
   for(let i=0;i<26;i++){const L=rand(.4,.9);G.sparks.push({x:BX-62+rand(-14,14),y:DECK-58,vx:rand(-120,60),vy:-rand(160,420),g:-40,life:L,max:L,col:['#ffc15a','#ff7a2b','#fff2b8'][i%3],sz:rand(4,9)})}
-  if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('The Colossus is on his knees. Phase I cleared.','Le Colosse est à genoux. Phase I terminée.'))}
+  if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('Phase I cleared.','Phase I terminée.'))}
   else{b.s='hurt';b.t=0;b.hurtT=1;say(_(`The lantern flares: the Colossus's leg goes dark.`,`La lanterne éclate : la jambe du Colosse noircit.`))}
 }
 /* j = jet de feu, b = souffle, r = rocher. Normal : jets (+ rocher à 1 PV). Difficile : séquences propres à chaque rage. */

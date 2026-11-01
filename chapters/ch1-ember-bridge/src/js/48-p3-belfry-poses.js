@@ -119,7 +119,6 @@ function heroX3(){
 }
 function heroPose3(){
   if(R.mode==='finale')return heroFin();
-  if(R.mode==='flee'||R.mode==='fake')return heroFlee();
   if(R.mode==='intro'){
     const T=R.t;
     /* il arrive en marchant ; au choc du Colosse, il lève sa lanterne qui s'embrase */
@@ -353,6 +352,5 @@ function bossPose3(){
     }
   }
   if(R.mode==='finale')finBoss(o);
-  if(R.mode==='flee'||R.mode==='fake')fleeBoss(o);
   return o;
 }

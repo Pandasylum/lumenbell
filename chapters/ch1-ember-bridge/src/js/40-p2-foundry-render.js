@@ -11,8 +11,8 @@ function qflame(x,y,w,h,ph,col){
   ctx.quadraticCurveTo(x+Math.sin(t*8+ph)*w*.6-w*.2,y-h*.55,x+Math.sin(t*6+ph)*w*.5,y-h);
   ctx.quadraticCurveTo(x+Math.sin(t*7+ph)*w*.4+w*.2,y-h*.5,x+w,y);ctx.closePath();ctx.fill();
 }
-/* Phase II : le puits de la Fonderie, sous le pont. Tout défile vers le haut pendant la chute. */
-function qScrollY(base,period,sp){return ((base-Q.scroll*sp)%period+period)%period-60}
+/* Phase II : le fond de la Fonderie, sous le pont (1er novembre : plus de chute, le décor ne défile plus). */
+function qScrollY(base,period){return (base%period+period)%period-60}
 function qGear(x,y,r,a,col){
   ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.fillStyle=col;
   for(let i=0;i<10;i++){ctx.rotate(.628);ctx.fillRect(-r*.14,-r-8,r*.28,14)}
@@ -26,22 +26,22 @@ function qBackground(){
   const lg=ctx.createRadialGradient(W/2,H+60,20,W/2,H+60,620);
   lg.addColorStop(0,'rgba(255,120,30,'+(.65*pulse)+')');lg.addColorStop(.5,'rgba(210,60,20,'+(.24*pulse)+')');lg.addColorStop(1,'rgba(120,20,10,0)');
   ctx.fillStyle=lg;ctx.fillRect(0,0,W,H);
-  /* fond : engrenages et chaînes (parallaxe lente) */
+  /* fond : engrenages et chaînes */
   for(const [bx,base,r,dir] of [[150,80,70,1],[820,330,90,-1],[470,520,60,1]]){
-    qGear(bx,qScrollY(base,700,.25),r,Q.time*.4*dir,'#1a0f10');
+    qGear(bx,qScrollY(base,700),r,Q.time*.4*dir,'#1a0f10');
   }
   ctx.strokeStyle='#22151a';ctx.lineWidth=4;
   for(const cx of [260,380,600,700]){
-    const o=(Q.scroll*.3)%24;
-    for(let y=-24+((cx*7)%24)-o;y<H+24;y+=24){ctx.beginPath();ctx.ellipse(cx,y,4,8,0,0,6.283);ctx.stroke()}
+    for(let y=-24+((cx*7)%24);y<QLAKE+8;y+=24){ctx.beginPath();ctx.ellipse(cx,y,4,8,0,0,6.283);ctx.stroke()}
   }
-  /* plan moyen : creusets et coulées de métal */
-  for(const [cx,base,side] of [[210,140,1],[750,460,-1],[330,600,1]]){
-    const y=qScrollY(base,760,.6);
+  qHood();
+  /* plan moyen : creusets et coulées de métal, qui tombent dans la lave */
+  for(const [cx,base,side] of [[430,140,1],[750,460,-1]]){
+    const y=qScrollY(base,760);
     ctx.fillStyle='#2b1a14';ctx.beginPath();ctx.moveTo(cx-26,y);ctx.lineTo(cx+26,y);ctx.lineTo(cx+20,y+30);ctx.lineTo(cx-20,y+30);ctx.closePath();ctx.fill();
     ctx.fillStyle='#ffc15a';ctx.fillRect(cx-20,y+2,40,4);
     const lx=cx+side*26;
-    ctx.strokeStyle='rgba(255,154,60,.9)';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(cx+side*18,y+4);ctx.quadraticCurveTo(lx+side*10,y+4,lx+side*10,y+40);ctx.lineTo(lx+side*10,H+60);ctx.stroke();
+    ctx.strokeStyle='rgba(255,154,60,.9)';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(cx+side*18,y+4);ctx.quadraticCurveTo(lx+side*10,y+4,lx+side*10,y+40);ctx.lineTo(lx+side*10,QLAKE+10);ctx.stroke();
     ctx.strokeStyle='rgba(255,230,160,.9)';ctx.lineWidth=2;ctx.stroke();
   }
   /* parois de fer rivetées */
@@ -49,13 +49,13 @@ function qBackground(){
     const w=78,x0=side<0?0:W-w;
     ctx.fillStyle='#1e1312';ctx.fillRect(x0,0,w,H);
     ctx.fillStyle='#2c1c18';ctx.fillRect(side<0?w-8:W-w,0,8,H);
-    const o=(Q.scroll)%90;
+    const o=0;
     for(let y=-90-o;y<H+90;y+=90){
       ctx.fillStyle='#120a0a';ctx.fillRect(x0,y,w,4);
       ctx.fillStyle='#4a3430';
       for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(x0+14+i*24,y+14,3,0,6.283);ctx.fill();ctx.beginPath();ctx.arc(x0+14+i*24,y+76,3,0,6.283);ctx.fill()}
     }
-    const ov=(Q.scroll)%270;
+    const ov=0;
     for(let y=60-ov;y<H+270;y+=270){
       ctx.fillStyle='#0c0606';ctx.fillRect(x0+18,y+30,w-36,20);
       ctx.fillStyle='rgba(255,122,43,'+(.55+.25*Math.sin(Q.time*6+y))+')';
@@ -64,15 +64,20 @@ function qBackground(){
     ctx.strokeStyle='#3b2a24';ctx.lineWidth=10;
     const px=side<0?w+14:W-w-14;ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,H);ctx.stroke();
     ctx.strokeStyle='#5a4038';ctx.lineWidth=3;
-    for(let y=-60-((Q.scroll*1.1)%160);y<H+60;y+=160){ctx.beginPath();ctx.moveTo(px-9,y);ctx.lineTo(px+9,y);ctx.stroke()}
+    for(let y=-60;y<H+60;y+=160){ctx.beginPath();ctx.moveTo(px-9,y);ctx.lineTo(px+9,y);ctx.stroke()}
   }
-  ctx.save();ctx.lineCap='round';
-  for(const s of Q.streaks){
-    ctx.strokeStyle='rgba(255,170,90,'+(.1+s.l/200)+')';ctx.lineWidth=1.4;
-    ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x,s.y+s.l*(Q.speed/320));ctx.stroke();
-  }
+  /* Q.streaks et Q.debris (traits et débris de la chute) ne sont plus dessinés ; leur mise à jour reste dans qStep (même suite aléatoire) */
+}
+/* hotte du grand four, au-dessus du lac : la cheminée par où le Colosse s'envole à la fin */
+function qHood(){
+  ctx.save();
+  const g=ctx.createLinearGradient(0,0,0,170);g.addColorStop(0,'#0a0506');g.addColorStop(1,'#1c0e0b');
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(600,0);ctx.lineTo(840,0);ctx.lineTo(905,150);ctx.lineTo(535,150);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(10,5,5,.7)';ctx.lineWidth=1.5;
+  for(let r=1;r<6;r++){const y=r*25,a=y/150;ctx.beginPath();ctx.moveTo(600-65*a,y);ctx.lineTo(840+65*a,y);ctx.stroke()}
+  ctx.fillStyle='#120909';ctx.fillRect(525,146,390,12);
+  ctx.fillStyle='rgba(255,140,60,'+(.35+.1*Math.sin(Q.time*2.1))+')';ctx.fillRect(525,156,390,2);
   ctx.restore();
-  for(const d of Q.debris)qrock(d.x,d.y,d.r,d.a,false);
 }
 function qrock(x,y,r,rot,hot){
   ctx.save();ctx.translate(x,y);ctx.rotate(rot);
@@ -304,10 +309,12 @@ function heroPose(){
   }else if(p.s==='hurt'){
     const u=Math.min(1,p.t/p.rd);x-=34*(1-u);rot=-.35*(1-u);
   }else if(p.s==='down'){
-    x-=p.t*40;y+=p.t*140;rot=-p.t*5;
+    /* défaite : le Veilleur s'effondre du bloc sur le rebord (DG.drop plus bas) */
+    x-=Math.min(p.t,.8)*40;y+=Math.min(DG.drop,p.t*140);rot=-Math.min(1.45,p.t*5);
   }
   if(p.oy&&!c){x+=p.ox;y+=p.oy}
-  if(Q.mode==='lake'&&Q.landed){sa=-1.15;glow=Q.erupt?.8:.35;rot=0}
+  /* fin : le Veilleur revient debout sur son bloc et regarde le Colosse plonger, puis s'envoler */
+  if(Q.mode==='lake'){const e=es(clamp01(Q.lt/.6));x+=(Q.hx-x)*e;y+=(Q.hy-y)*e;sa=-1.15;glow=Q.erupt?.8:.35;rot=0}
   return{x,y,rot,sa,glow};
 }
 const WH=[34,-8];
@@ -397,14 +404,28 @@ function drawHints2(){
   }
   LB.drawRecoveryBar(ctx,QH[0],QH[1]+44,p); /* barre de récupération sous les pieds : repère d'aide, jamais rouge (la lanterne l'est) */
 }
+/* lave, rebord, bloc du pont tombé, chaînes, équerres, anneau et lanterne : visibles pendant tout le combat (sections G et K) */
+function qLantern(x,y){
+  /* petite lanterne de Veilleur posée sur le rebord : lueur orange de la braise, faible, pulsation lente (section G) */
+  const pu=.5+.5*Math.sin(Q.time*1.3),gy=y-17;
+  ctx.save();
+  const hg=ctx.createRadialGradient(x,gy,1,x,gy,30);hg.addColorStop(0,'rgba(255,122,43,'+(.16+.12*pu)+')');hg.addColorStop(1,'rgba(255,122,43,0)');
+  ctx.fillStyle=hg;ctx.beginPath();ctx.arc(x,gy,30,0,6.283);ctx.fill();
+  ctx.fillStyle='#3a2a20';ctx.fillRect(x-8,y-4,16,4);
+  ctx.fillStyle='rgba(255,'+Math.round(122+40*pu)+',43,'+(.55+.25*pu)+')';ctx.fillRect(x-6,y-22,12,18);
+  ctx.strokeStyle='#4a3a2a';ctx.lineWidth=1.6;ctx.strokeRect(x-6,y-22,12,18);
+  ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x-2,y-22);ctx.lineTo(x-2,y-4);ctx.moveTo(x+2,y-22);ctx.lineTo(x+2,y-4);ctx.stroke();
+  ctx.fillStyle='#4a3a2a';ctx.beginPath();ctx.moveTo(x-7,y-22);ctx.lineTo(x,y-28);ctx.lineTo(x+7,y-22);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#6e5c54';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x,y-31,2.5,0,6.283);ctx.stroke();
+  ctx.restore();
+}
 function drawLake(front){
-  if(Q.mode!=='lake')return;
-  const sy=lakeY();
-  if(sy>=H)return;
+  const sy=QLAKE;
   ctx.save();
   if(front){
-    ctx.beginPath();ctx.rect(0,sy,W,H-sy);ctx.clip();
-    ctx.fillStyle='rgba(255,110,30,.45)';ctx.fillRect(0,sy,W,H-sy);
+    /* le Colosse englouti : la lave passe devant lui (côté lac seulement) */
+    if(Q.mode==='lake'&&Q.splash){ctx.beginPath();ctx.rect(QEDGE,sy,W-QEDGE,H-sy);ctx.clip();
+      ctx.fillStyle='rgba(255,110,30,.7)';ctx.fillRect(QEDGE,sy,W-QEDGE,H-sy)}
   }else{
     const g=ctx.createLinearGradient(0,sy,0,H);g.addColorStop(0,'#ffd27a');g.addColorStop(.25,'#ff7a2b');g.addColorStop(1,'#5a1408');
     ctx.fillStyle=g;
@@ -413,8 +434,7 @@ function drawLake(front){
     ctx.lineTo(W,H);ctx.closePath();ctx.fill();
     const rg=ctx.createLinearGradient(0,sy-120,0,sy);rg.addColorStop(0,'rgba(255,160,60,0)');rg.addColorStop(1,'rgba(255,160,60,.5)');
     ctx.fillStyle=rg;ctx.fillRect(0,sy-120,W,120);
-    /* passerelle de fer, accrochée à la paroi gauche */
-    const cy=sy-40,x0=70,x1=390;
+    const cy=QFLOOR;
     /* un pan de mur de pierre derrière le rebord de gauche */
     {const wg=ctx.createLinearGradient(0,cy-170,0,cy+20);wg.addColorStop(0,'#1c1412');wg.addColorStop(1,'#3a2820');
       ctx.fillStyle=wg;ctx.beginPath();ctx.moveTo(0,cy-170);ctx.lineTo(120,cy-170);ctx.lineTo(136,cy-120);ctx.lineTo(140,cy-40);ctx.lineTo(146,cy+20);ctx.lineTo(0,cy+20);ctx.closePath();ctx.fill();
@@ -423,18 +443,20 @@ function drawLake(front){
         for(let c=(r%2)*22;c<140;c+=44){ctx.beginPath();ctx.moveTo(c,yy);ctx.lineTo(c,yy+27);ctx.stroke()}}
       const lg=ctx.createLinearGradient(0,cy-60,0,cy+10);lg.addColorStop(0,'rgba(255,120,40,0)');lg.addColorStop(1,'rgba(255,130,50,.28)');
       ctx.fillStyle=lg;ctx.fillRect(0,cy-60,140,70)}
-    ctx.strokeStyle='#2c1c18';ctx.lineWidth=4;
-    for(let x=x0;x<x1-20;x+=40){ctx.beginPath();ctx.moveTo(x,cy+12);ctx.lineTo(x+20,cy+30);ctx.lineTo(x+40,cy+12);ctx.stroke()}
-    ctx.fillStyle='#1e1312';ctx.fillRect(x0,cy,x1-x0,12);ctx.fillRect(x0,cy+26,x1-x0-20,6);
-    ctx.fillStyle='rgba(255,150,60,.55)';ctx.fillRect(x0,cy+10,x1-x0,2);
-    ctx.fillStyle='#4a3430';for(let x=x0+10;x<x1;x+=26){ctx.beginPath();ctx.arc(x,cy+6,2.5,0,6.283);ctx.fill()}
-    ctx.strokeStyle='#3b2a24';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x1-12,cy);ctx.lineTo(x1-60,cy-260);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x0+150,cy);ctx.lineTo(x0+150,cy-40);ctx.lineTo(x1-8,cy-40);ctx.stroke();
     /* le rebord de terre et de roche, au pied du mur, qui descend jusqu'à la lave */
-    {const tg=ctx.createLinearGradient(0,cy,0,cy+110);tg.addColorStop(0,'#4a352a');tg.addColorStop(1,'#1a100d');
-      ctx.fillStyle=tg;ctx.beginPath();ctx.moveTo(0,cy-3);ctx.lineTo(48,cy-4);ctx.lineTo(96,cy-1);ctx.lineTo(134,cy+3);ctx.lineTo(152,cy+16);ctx.lineTo(142,cy+44);ctx.lineTo(126,cy+78);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
-      ctx.strokeStyle='rgba(255,160,70,.45)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,cy-3);ctx.lineTo(48,cy-4);ctx.lineTo(96,cy-1);ctx.lineTo(134,cy+3);ctx.stroke();
-      ctx.fillStyle='rgba(20,10,8,.55)';for(const [qx,qy,qr] of [[22,cy+14,5],[60,cy+24,4],[96,cy+12,6],[40,cy+44,5],[88,cy+50,4],[118,cy+36,3]]){ctx.beginPath();ctx.arc(qx,qy,qr,0,6.283);ctx.fill()}}
+    {const tg=ctx.createLinearGradient(0,cy,0,H);tg.addColorStop(0,'#4a352a');tg.addColorStop(1,'#1a100d');
+      ctx.fillStyle=tg;ctx.beginPath();ctx.moveTo(0,cy-3);ctx.lineTo(120,cy-4);ctx.lineTo(240,cy-1);ctx.lineTo(QEDGE-26,cy+1);ctx.lineTo(QEDGE,cy+12);ctx.lineTo(QEDGE+12,sy+8);ctx.lineTo(QEDGE+20,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(255,160,70,.45)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,cy-3);ctx.lineTo(120,cy-4);ctx.lineTo(240,cy-1);ctx.lineTo(QEDGE-26,cy+1);ctx.lineTo(QEDGE,cy+12);ctx.lineTo(QEDGE+12,sy+8);ctx.stroke();
+      ctx.fillStyle='rgba(20,10,8,.55)';for(const [qx,qy,qr] of [[22,cy+20,5],[60,cy+34,4],[180,cy+18,6],[250,cy+40,5],[300,cy+26,4],[140,cy+60,3]]){ctx.beginPath();ctx.arc(qx,qy,qr,0,6.283);ctx.fill()}}
+    /* un bloc du pont, tombé sur le rebord : le Veilleur s'y tient (sa plongée d'esquive le pose devant, sur le rebord) */
+    {const x0=QH[0]-52,x1=QH[0]+64,top=QH[1]+44;
+      const bg=ctx.createLinearGradient(0,top,0,cy);bg.addColorStop(0,'#5a4a44');bg.addColorStop(1,'#2e2320');
+      ctx.fillStyle=bg;ctx.beginPath();ctx.moveTo(x0+4,top);ctx.lineTo(x1-6,top-2);ctx.lineTo(x1,top+8);ctx.lineTo(x1+3,cy);ctx.lineTo(x0-4,cy);ctx.lineTo(x0,top+10);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(12,8,7,.7)';ctx.lineWidth=1.5;
+      for(const yy of [top+36,top+73]){ctx.beginPath();ctx.moveTo(x0-1,yy);ctx.lineTo(x1+1,yy);ctx.stroke()}
+      for(const [xx,y0] of [[x0+50,top],[x0+28,top+36],[x0+80,top+36],[x0+56,top+73]]){ctx.beginPath();ctx.moveTo(xx,y0);ctx.lineTo(xx,y0+36);ctx.stroke()}
+      ctx.strokeStyle='rgba(255,170,90,.4)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0+4,top);ctx.lineTo(x1-6,top-2);ctx.lineTo(x1,top+8);ctx.stroke();
+      ctx.strokeStyle='rgba(8,5,4,.8)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x1-14,top);ctx.lineTo(x1-22,top+14);ctx.lineTo(x1-16,top+26);ctx.stroke()}
     /* une chaîne d'homme rompue, boulonnée au mur, et l'anneau de fer tombé sur le rebord */
     {const bx=98,by=cy-112;
       ctx.lineCap='round';
@@ -463,6 +485,7 @@ function drawLake(front){
       ctx.strokeStyle='rgba(255,170,70,.6)';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(rx,ry+.5,9,.3,2.9);ctx.stroke();
       ctx.strokeStyle='rgba(255,236,190,'+(.35+.25*Math.sin(Q.time*2.2))+')';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(rx,ry,9,3.6,4.5);ctx.stroke();
       ctx.lineCap='butt'}
+    qLantern(150,cy-2);
   }
   ctx.restore();
 }
@@ -474,8 +497,10 @@ function renderQ(){
   if(Q.shake>0&&!reduce)ctx.translate(rand(-1,1)*Q.shake,rand(-1,1)*Q.shake);
   qBackground();
   drawLake(false);
+  ctx.save();ctx.translate(0,qDive());
   drawBoss2();
   drawHits2();
+  ctx.restore();
   drawHero2();
   drawCnFx();
   drawLake(true);

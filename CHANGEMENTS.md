@@ -12,15 +12,15 @@ Section	Sujet	Statut	Date	PR
 A	Chapitre II · Textes et titre de la forme II	En cours	30 octobre 2026 (mis à jour le 29)	branche `ch2/lore-changements` (PR à ouvrir)
 B	Boss de la phase II : l'Ancien de Rouille	En cours	28 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 C	Chapitre II · Lumière du boss et de la Sans-Fond	En cours	28 octobre 2026 (mis à jour le 29)	branche `ch2/lore-changements` (PR à ouvrir)
-D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	À faire	28 octobre 2026 (mis à jour le 29)	
+D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	En cours	28 octobre 2026 (mis à jour le 29)	branche `ch1/foundry-floor` (PR à ouvrir)
 E	Veilleur · Couleur de la lanterne et des tirs	À faire (validation à l'écran d'abord)	28 octobre 2026	
 F	Documents à mettre à jour	En cours (CH2-SPEC et COMMUN faits ; BIBLE, DECISIONS, LORE restent)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
-G	Chapitre I · Lanterne du Colosse de braise	À faire	29 octobre 2026	
+G	Chapitre I · Lanterne du Colosse de braise	En cours	29 octobre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
 H	Chapitre II · Rémanence (évaporation du Lumen)	En cours	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
 J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours (a) et (b) ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
-K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	À faire	1er novembre 2026	
-L	Chapitre I · Fausse fin de Facile supprimée	À faire	1er novembre 2026	
+K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
+L	Chapitre I · Fausse fin de Facile supprimée	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
 M	Chapitre II · Phare Noyé : tour d'avant C1	En cours (sommet restauré, validation à l'écran de Kevin attendue)	1er novembre 2026	branche `ch2/phare-v1` (PR à ouvrir)
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
@@ -179,7 +179,7 @@ Après :
 - Ne pas toucher : carte d'entrée (`00-core.js:57`), `36-p2:300` (transition), `36-p2:211`, `16-p1:319`.
 
 Raison : plus de chute ; aucun impact sur le lore ; texte lecteur d'écran uniquement.
-Statut : à appliquer (session `ch1/foundry-floor`). Lanterne visible pendant tout le combat de la phase II : voir section G.
+Statut : en cours, branche `ch1/foundry-floor` (PR à ouvrir). Lanterne visible pendant tout le combat de la phase II : voir section G.
 
 L. Chapitre I · Fausse fin de Facile supprimée (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-idees-validees.md` § b)
 
@@ -201,7 +201,7 @@ Après :
 - Le libellé « Retour au menu » / "Back to menu" (ligne 322) ne doit rester que s'il sert encore à la vraie fin.
 - La logique `R.mode === 'fake'` (`44-p3-belfry-logic.js` lignes 212 et 375, `08-state.js` ligne 24, `48-p3-belfry-poses.js` lignes 122 et 356, `56-p3-belfry-render.js` ligne 540) est à retirer ou à adapter pour que la vraie fin s'affiche dans toutes les difficultés. Le comportement de chaque ligne est à relire avant le codage.
 
-Statut : à appliquer (session `ch1/foundry-floor`). Sans effet sur les autres textes.
+Statut : en cours, branche `ch1/foundry-floor` (PR à ouvrir). Sans effet sur les autres textes.
 
 M. Chapitre II · Phare Noyé : tour d'avant C1 (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-idees-validees.md` § e)
 
