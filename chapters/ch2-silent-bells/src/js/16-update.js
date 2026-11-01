@@ -12,13 +12,13 @@ function update(dt){
       if(th.done)continue;
       if(th.hold){
         if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
-        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;if(S.pl.s==='act'){S.pl.s='ready';S.pl.t=0}}
+        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;if(S.pl.s==='act')LB.hero.stopped(S.pl)}
         continue;
       }
       if(gt>=th.ti){
         th.done=true;th.okT=gt;const p=S.pl;
         if(th.real===false){if(p.s==='act'&&aimedAt(th))fooled(th);else{th.res='pass';burst(HX+20,GY-70,10,'#a49bbd',3,.5);play('fool')}}
-        else if(stops(th)){success(th,p.s==='act'&&gt-p.at<=PT().perf);p.s='ready';p.t=0}
+        else if(stops(th)){success(th,LB.hero.perfect(p,gt));LB.hero.stopped(p)}
         else{th.res='hit';th.pat.ok=false;hurt(th);if(S.mode!=='play')break}
       }
     }

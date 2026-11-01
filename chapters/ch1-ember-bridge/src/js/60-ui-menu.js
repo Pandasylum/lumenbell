@@ -76,7 +76,7 @@ $('mResume').addEventListener('click',()=>{hideMenu();try{if(!el.ov.hidden)el.go
 (function(){const sv=document.querySelector('.mscene');function fit(){const r=innerWidth/innerHeight;sv.setAttribute('preserveAspectRatio',r<1.2?'xMidYMax meet':'xMidYMax slice')}fit();addEventListener('resize',fit)})();
 (function(){const w=$('mEmbers');for(let i=0;i<26;i++){const e=document.createElement('i');e.className='mem';e.style.left=(Math.random()*100)+'%';e.style.setProperty('--dx',((Math.random()-.5)*160)+'px');e.style.animationDuration=(5+Math.random()*7)+'s';e.style.animationDelay=(-Math.random()*10)+'s';const z=2+Math.random()*3;e.style.width=e.style.height=z+'px';w.appendChild(e)}})();
 /* Épreuve du feu : Normal jouable, Difficile en attente de la phase III Difficile. */
-const BASEW={barrier:T.barrier,flwin:T.flwin,dodge:DG.act,guard:R_T.guard,breath:BRW,rec:T.recovery,drec:DG.rec,rrec:R_T.rec};
+const BASEW={flwin:T.flwin,breath:BRW}; /* fenêtres courtes du souffle (phases I et III), réglage d'attaque ; l'action et la récupération du Veilleur sont dans LB.hero */
 const BASET=Object.assign({},T);
 function restartRun(){
   RUN.n++;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};resetRetryLabel();
@@ -84,10 +84,9 @@ function restartRun(){
   goPhase(1);
 }
 function applyDiff(name){
-  const d=DIFFS[name]||DIFFS.normal,m=d.m,fm=d.fm||m,rm=d.rm||1;
-  DIFF=d;RUN.on=!!d.trial;RUN.max=d.php;RUN.cur=d.php;RUN.n=1;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};RUN.name=name;resetRetryLabel();try{$('retryBtn').disabled=false;$('phases').style.display=RUN.on?'none':''}catch(e){}Object.assign(T,BASET,d.t||{});
-  T.barrier=BASEW.barrier*m;T.flwin=BASEW.flwin*fm;DG.act=BASEW.dodge*m;R_T.guard=BASEW.guard*m;BRW=BASEW.breath*fm;
-  T.recovery=BASEW.rec*rm;DG.rec=BASEW.drec*rm;R_T.rec=BASEW.rrec*rm;
+  const d=DIFFS[name]||DIFFS.normal,fm=d.fm||d.m;
+  DIFF=LB.diff.use(d);RUN.on=!!d.trial;RUN.max=d.hp;RUN.cur=d.hp;RUN.n=1;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};RUN.name=name;resetRetryLabel();try{$('retryBtn').disabled=false;$('phases').style.display=RUN.on?'none':''}catch(e){}Object.assign(T,BASET,d.t||{});
+  T.flwin=BASEW.flwin*fm;BRW=BASEW.breath*fm;
   document.querySelectorAll('#phases button').forEach((b,i)=>{b.disabled=!!d.trial;b.title=d.trial?_('Not available in the trial','Indisponible dans l\'épreuve'):''});
   lastP=lastB=-1;
   prefs.help=el.help.checked=!d.noHelp&&LB.store.get(LB.key('help'),'0')==='1';deaths=0; /* aide mémorisée (lb-help), toujours coupée là où elle est masquée */tries=[0,0,0,0];cntS=null;
@@ -97,7 +96,7 @@ function trialMenu(on){updBest();$('mphM').hidden=on;$('mphT').hidden=!on;$('tri
 $('mBackT').addEventListener('click',()=>trialMenu(false));
 document.querySelectorAll('#menu .mph button').forEach(b=>b.addEventListener('click',()=>{
   if(b.disabled||!b.dataset.diff)return;
-  if(b.dataset.diff==='trial'&&!endSeen()){b.blur();return} /* verrouillée : aucun message, le cadenas suffit */
+  if(b.dataset.diff==='trial'&&!trialOpen()){b.blur();return} /* verrouillée : aucun message, le cadenas suffit */
   if(b.dataset.diff==='trial'){trialMenu(true);return}
   applyDiff(b.dataset.diff);
   document.querySelectorAll('#menu .mph button').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));

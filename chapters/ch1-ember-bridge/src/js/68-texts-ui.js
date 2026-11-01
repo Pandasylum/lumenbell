@@ -15,7 +15,7 @@ const UIT=[
  ['#trialNote li:nth-child(2)','You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'],
  ['#trialNote li:nth-child(3)','A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'],
  ['#trialNote li:nth-child(4)','One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run."],
- ['#menu .how','One button: block, dodge, parry. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver, parer. Espace, flèche haut ou toucher l'écran. P pour la pause."],
+ ['#menu .how','One button: block, dodge. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause."],
  ['.fsm span','Fullscreen','Plein écran'],['#introBtn','▶ Intro','▶ Intro'],['#outroBtn','▶ Outro','▶ Outro'],['#cineSkip','Skip ›','Passer ›'],['#pause h2','Fight paused','Combat en pause'],['#pResume','Resume','Reprendre'],
  ['#go2','Enable visual help',"Activer l'aide visuelle"],
  ['#retryBtn','Retry','Réessayer'],

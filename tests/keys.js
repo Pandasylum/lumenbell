@@ -31,7 +31,8 @@ const CH1=[
   keys:{'lb-lang':'fr','lb-ch1-intro':'1','lb-ch1-end':'1','lb-ch1-best-tn':'123.4','lb-ch1-best-th':'99.5','eb-intro':'1','eb-end':'1','eb-best-tn':'123.4'}},
  {nom:'ch1 nouvelles cles prioritaires',set:{'lb-ch1-end':'1','eb-end':'0','lb-ch1-best-tn':'60','eb-best-tn':'123.4'},
   want:{trial:'false',outro:true,bestTn:'🏆 1:00.0'},keys:{'lb-ch1-best-tn':'60','lb-ch1-end':'1','eb-best-tn':'123.4'}},
- {nom:'ch1 aucune cle',set:{},want:{trial:'true',outro:false},keys:{'lb-ch1-end':null,'lb-ch1-intro':null,'lb-ch1-best-tn':null}},
+ {nom:'ch1 aucune cle',set:{},want:{trial:'false',outro:false},   // Epreuve du feu ouverte pendant les tests (TRIAL_OPEN, 31 octobre) : plus verrouillee sans la vraie fin ; pour la verrouiller : TRIAL_OPEN=false et trial:'true'
+ keys:{'lb-ch1-end':null,'lb-ch1-intro':null,'lb-ch1-best-tn':null}},
 ];
 const state=ch=>()=>{const q=s=>document.querySelector(s),o={lang:document.documentElement.lang,snd:q('#optSnd').checked,mus:q('#optMus').checked,help:q('#optHelp').checked};
  if(q('#gate')){const t=q('#mphM [data-diff=trial]');o.trial=t.getAttribute('aria-disabled');o.outro=!q('#outroBtn').hidden;

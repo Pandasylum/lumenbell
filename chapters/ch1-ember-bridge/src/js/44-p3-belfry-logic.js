@@ -1,7 +1,8 @@
 /* ================= PHASE III : le Clocher ================= */
 let R=null;
 const GUARD=[PX+116,DECK-76];
-const R_T={guard:.333,rec:.7,grace:.06,down:.55,stun:.55};
+/* Phase III : down = étourdissement d'un coup, min = plancher quand un autre coup suit, lasso = étourdissement du crochet, stun = étourdissement du Colosse (s). Durées de l'action, de la récupération et de la grâce : LB.HERO_T.block. */
+const R_T={down:.55,min:.22,lasso:1.1,stun:.55};
 const RATK={
   greatsword:{hits:[{k:'gs',at:.75},{k:'gs',at:1.4},{k:'gs',at:2.05}],cn:'plant',get name(){return _('War hammer','Marteau de guerre')}},
   avalanche:{hits:[{k:'ice',at:.9},{k:'ice',at:1.2},{k:'ice',at:1.5},{k:'ice',at:1.8},{k:'ice',at:2.1}],cn:'bat',get name(){return _('Ember hail','Grêle de braise')}},
@@ -39,25 +40,23 @@ const SPSTARS=Array.from({length:230},()=>({x:rand(0,W),y:rand(0,H),r:rand(.4,2)
 const STARS=Array.from({length:80},()=>({x:rand(0,W),y:rand(0,250),r:rand(.5,1.6),p:rand(0,6.28)}));
 const FLAKES=Array.from({length:160},()=>({x:rand(0,W),y:rand(0,H),v:rand(60,170),s:rand(1,3),ph:rand(0,6.28)}));
 function rNew(){
-  return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.rbhp,parries:0,taken:0,
-    pl:{s:'ready',t:0,deny:0,downT:.55},boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
+  return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.rbhp,blocks:0,taken:0,
+    pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
     sparks:[],floats:[],rings:[],exps:[],fbs:[],melts:[],steam:[],
     shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,bx:BX,
     rage:0,u5:false,u55:false,u1:false,healed:false,cycle:1,stacked:0,cut:0,fall:[],fin:null,st:0,ibn:-1,introHx:-20,iclash:false,roared:false};
 }
 function beginP3(noLore){
-  if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=Math.min(RUN.max,Q.php+1);RUN.st[2]={p:Q.parries,h:Q.taken}}
+  if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=Math.min(RUN.max,Q.php+DIFF.heal);RUN.st[2]={p:Q.dodges,h:Q.taken}}
   Q=null;R=rNew();el.ov.classList.remove('clear');setPhaseUI(3);lastP=-1;lastB=-1;
   el.ov.hidden=true;if(!noLore)showLore(3);
-  say(_('Phase III. The Bell Tower. The button raises your guard to parry.','Phase III. Le Clocher. Le bouton lève ta garde pour parer.'));
+  say(_('Phase III. The Bell Tower. The button raises your guard to block.','Phase III. Le Clocher. Le bouton lève ta garde pour bloquer.'));
   hud();
 }
 function rPress(){
   if(R.mode!=='play')return;
   ensureAudio();
-  const p=R.pl;
-  if(p.s==='ready'){p.s='guard';p.t=0;tone(520,.14,'triangle',.05,320)}
-  else if(p.s==='guard'||p.s==='recover')p.deny=.25;
+  if(LB.hero.press(R.pl,'block'))tone(520,.14,'triangle',.05,320)
 }
 function rPickFrom(pool){
   let k=pool[Math.floor(Math.random()*pool.length)];
@@ -153,8 +152,7 @@ function rMelt(x){
 const HTXT={fire:_('BURNED!','BRÛLÉ !'),fall:_('CRUSHED!','ÉCRASÉ !'),stab:_('RAMMED!','PERCUTÉ !'),bomb:_('EXPLOSION!','EXPLOSION !'),ram:_('CRUSHED!','ÉCRASÉ !'),stomp:_('CRUSHED!','ÉCRASÉ !'),rock:_('CRUSHED!','ÉCRASÉ !'),geyser:_('BURNED!','BRÛLÉ !'),breath:_('BURNED!','BRÛLÉ !'),wave:_('BURNED!','BRÛLÉ !'),blast:_('EXPLOSION!','EXPLOSION !'),whip:_('HOOKED!','ACCROCHÉ !'),claw:_('CLAWED!','GRIFFÉ !')};
 function rResolve(h){
   const p=R.pl,a=R.atk;
-  const win=h.k==='breath'?BRW:R_T.guard;
-  const ok=(p.s==='guard'&&p.t<=win+.002)||(p.s==='recover'&&p.t<R_T.grace);
+  const ok=LB.hero.stops(p,h.k==='breath'?{win:BRW}:null); /* fenêtre courte du souffle : réglage de l'attaque */
   h.ok=ok;
   const gx=heroFlip()?PX-116:GUARD[0];
   const bi=h.k==='bomb'?a.hits.filter(x=>x.k==='bomb').indexOf(h):0;
@@ -162,11 +160,11 @@ function rResolve(h){
   if(h.k==='gs'||h.k==='stab'){anvil();forgeSparks(R,ok?gx:PX+20,ok?GUARD[1]:DECK-70,ok?16:10)}
   if(h.k==='bomb'){const P=bombPos(bi);qBurst(P[0],P[1]-10,22,['#ffffff','#ffc15a','#ff7a2b']);R.shake=reduce?0:Math.max(R.shake,8);boom(.4,.1)}
   if(ok){
-    R.parries++;R.hitstop=(h.k==='gs'||h.k==='stab')?.04:.08;R.flash=.3;R.shake=Math.max(R.shake,reduce?0:5);thud(.4);
+    R.blocks++;R.hitstop=(h.k==='gs'||h.k==='stab')?.04:.08;R.flash=.3;R.shake=Math.max(R.shake,reduce?0:5);thud(.4);
     qRing(gx,GUARD[1]);qBurst(gx,GUARD[1],26,['#bfeaff','#6fd3ff','#ffffff','#ffc15a']);
-    qFloat(_('PARRY!','PARADE !'),gx-30,GUARD[1]-110,'#bfeaff');
+    qFloat('CLANG',gx-30,GUARD[1]-110,'#bfeaff');
     tone(880,.28,'square',.05,-260);tone(1400,.2,'sine',.04);
-    p.s='ready';p.t=0;
+    LB.hero.stopped(p);
     rMelt(px);
     for(let i=0;i<8;i++)R.steam.push({x:px+rand(-24,24),y:DECK-4,vx:rand(-20,20),vy:-rand(40,110),life:rand(.6,1.1),max:1.1,s:rand(8,20)});
   }else{
@@ -176,10 +174,10 @@ function rResolve(h){
     qFloat(HTXT[h.k]||_('HIT!','TOUCHÉ !'),PX-30,DECK-190,'#ff8a6b');
     tone(90,.3,'sawtooth',.1,-40);
     rMelt(px);
-    /* enchaînement : l'étourdissement s'arrête assez tôt pour pouvoir parer le coup suivant */
-    const nx=a.hits.find(x=>!x.done&&x!==h),gap=nx?nx.at-a.t:99,base=h.k==='whip'?1.1:R_T.down;
-    p.s='down';p.t=0;p.downT=Math.min(base,Math.max(.22,gap-.2));p.lasso=h.k==='whip';
-    if(R.php<=0){R.mode='lost';R.endIn=1.3;say(_('Struck down atop the tower. Defeat.','Terrassé au sommet du Clocher. Défaite.'))}
+    /* enchaînement : l'étourdissement s'arrête assez tôt pour pouvoir bloquer le coup suivant */
+    const nx=a.hits.find(x=>!x.done&&x!==h),gap=nx?nx.at-a.t:99;
+    LB.hero.hurt(p,gap,{dur:h.k==='whip'?R_T.lasso:R_T.down,min:R_T.min});p.lasso=h.k==='whip';
+    if(R.php<=0){p.s='down';R.mode='lost';R.endIn=1.3;say(_('Struck down atop the tower. Defeat.','Terrassé au sommet du Clocher. Défaite.'))}
     else say(_('Hit.','Touché.'));
   }
 }
@@ -188,7 +186,7 @@ function rAtkEnd(){
   if(a.chain&&a.chain.length&&R.mode==='play'){rLaunch(a.chain[0],{chain:a.chain.slice(1),fixed:a.fixed,carry:{miss:a.miss,ult:a.ult,lv:a.lv}});return}
   if(a.miss===0){
     R.cn={k:a.ult?'bolt':RATK[a.kind].cn,t:0,hit:false,lv:a.lv||0};b.s='cn';b.t=0;R.pl.s='counter';R.pl.t=0;
-    tone(300,.4,'triangle',.05,300);say(a.ult?_('Combo parried. The Watcher rings the great bell!','Combo paré. Le Veilleur fait sonner la grande cloche !'):_('Perfect parry. Riposte!','Parade parfaite. Riposte !'));
+    tone(300,.4,'triangle',.05,300);say(a.ult?_('Combo blocked. The Watcher rings the great bell!','Combo bloqué. Le Veilleur fait sonner la grande cloche !'):_('Perfect block. Riposte!','Blocage parfait. Riposte !'));
   }else{b.s='fail';b.t=0}
 }
 function startFinale(){
@@ -312,7 +310,7 @@ function runTable(){
   const a=RUN.st[1]||{p:0,h:0},b=RUN.st[2]||{p:0,h:0};
   const C=[[_('Total time','Temps total'),fmtT(tot)],[_('Hits taken','Coups subis'),a.h+b.h+R.taken],[_('Attempts','Essais'),RUN.n],
     [_('Phase I','Phase I'),fmtT(RUN.pt[0])],[_('Phase II','Phase II'),fmtT(RUN.pt[1])],[_('Phase III','Phase III'),fmtT(RUN.pt[2])],
-    [_('Parries','Parades'),a.p+R.parries],[_('Dodges','Esquives'),b.p],[rec?_('New record!','Nouveau record !'):_('Best time','Meilleur temps'),fmtT(best),rec]];
+    [_('Blocks','Blocages'),a.p+R.blocks],[_('Dodges','Esquives'),b.p],[rec?_('New record!','Nouveau record !'):_('Best time','Meilleur temps'),fmtT(best),rec]];
   return C.map(c=>'<div'+(c[2]?' class="rec"':'')+'><small>'+c[0]+'</small><b>'+c[1]+'</b></div>').join('');
 }
 function rEnd(){
@@ -330,7 +328,7 @@ function rEnd(){
   el.ov.classList.toggle('clear',sp);
   el.eye.textContent=sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III');
   el.title.textContent=sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.');
-  el.stats.textContent=_('Parries ','Parades ')+R.parries+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3);
+  el.stats.textContent=_('Blocks ','Blocages ')+R.blocks+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3);
   el.stats.hidden=false;
   el.desc.textContent=sp?_(`The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while.`,`Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps.`):win?_(`The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch.`,`Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore.`):_(`Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again.`,`La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus.`);
   el.go.textContent=sp?_('Back to menu','Retour au menu'):win?_('Replay from Phase I','Rejouer depuis la phase I'):_('Retry Phase III','Réessayer la phase III');
@@ -377,7 +375,7 @@ function rStep(dt){
   if(R.mode==='fake'){hud();return}
   if(R.mode==='space'){R.st+=dt;
     if(R.st>4.6&&!R.cardShown&&!R.outro){R.cardShown=true;rEnd()}hud();return}
-  const p=R.pl;p.t+=dt;p.deny=Math.max(0,p.deny-dt);
+  const p=R.pl;LB.hero.step(p,dt,{gesture:'block'});
   if(R.mode==='intro'){
     /* Entrée : le Veilleur arrive par la cheminée, lanterne en main ; le Colosse se pose en vol au sommet du Clocher */
     const T=R.t;
@@ -393,9 +391,6 @@ function rStep(dt){
     if(T>=3.8){R.mode='play';R.boss.wait=.7;R.bx=BX}
     hud();return;
   }
-  if(p.s==='guard'&&p.t>=R_T.guard){p.s='recover';p.t=0}
-  else if(p.s==='recover'&&p.t>=R_T.rec){p.s='ready';p.t=0}
-  else if(p.s==='down'&&R.mode==='play'&&p.t>=(p.downT||R_T.down)){p.s='ready';p.t=0}
   if(R.mode==='play'||R.mode==='won')rBoss(dt);
   hud();
 }

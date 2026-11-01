@@ -7,27 +7,28 @@ function liftAmt(){
   if(b.s==='slam')return LIFT_MAX*(1-ei(clamp01(b.t/.16)));
   return 0;
 }
-/* Le bouclier est levé (ou vient juste de retomber : tolérance de 0,06 s). */
-function blocked(){const p=G.pl;return p.s==='barrier'||(p.s==='recover'&&p.t<.06)}
+/* Le bouclier est levé (ou vient juste de retomber : grâce du geste, LB.HERO_T.block). */
+function blocked(){return LB.hero.stops(G.pl)}
 function resolveStrike(){
   const p=G.pl,b=G.boss;
   const warded=blocked();
-  if(warded&&b.dbl){ /* chaîne double : premier coup paré, le second arrive 0,5 s plus tard */
+  if(warded&&b.dbl){ /* chaîne double : premier coup bloqué, le second arrive 0,5 s plus tard */
     b.dbl=false;b.sk=.32;
-    parrySuccess(BAR[0],BAR[1]);
+    blockSuccess(BAR[0],BAR[1]);
     b.s='rewind';b.t=0;
-    say(_('First hit parried.','Premier coup paré.'));
+    say(_('First hit blocked.','Premier coup bloqué.'));
     return;
   }
   b.dbl=false;b.sk=0;
   if(warded){
+    LB.hero.stopped(p); /* une attaque bloquée renvoie à ready, comme partout (décision du 28 octobre) */
     if(b.combo)startComboFlame('head');else{b.s='rebound';b.t=0}
-    G.parries++;G.hitstop=.08;G.flash=.35;G.shake=Math.max(G.shake,reduce?0:5);thud(.4);
+    G.blocks++;G.hitstop=.08;G.flash=.35;G.shake=Math.max(G.shake,reduce?0:5);thud(.4);
     ring(BAR[0],BAR[1]);
     burst(BAR[0],BAR[1],26,['#bfeaff','#6fd3ff','#ffffff']);
-    float(_('PARRY!','PARADE !'),BAR[0]-30,BAR[1]-110,'#bfeaff');
+    float('CLANG',BAR[0]-30,BAR[1]-110,'#bfeaff');
     tone(880,.28,'square',.05,-260);tone(1400,.2,'sine',.04);
-    say(_('Parry successful.','Parade réussie.'));
+    say(_('Block successful.','Blocage réussi.'));
   }else{
     b.s='lift';b.t=0;p.s='grabbed';p.t=0;
     float(_('HOOKED!','ACCROCHÉ !'),PX,DECK-190,'#ff8a6b');
@@ -37,7 +38,7 @@ function resolveStrike(){
 }
 function headHit(){
   const b=G.boss;
-  G.bhp=Math.max(0,G.bhp-DMG_PARRY);G.recoil=1;G.shake=reduce?0:13;G.hitstop=.11;G.flash=.4;thud(1.2);ring(HEAD[0],HEAD[1]);
+  G.bhp=Math.max(0,G.bhp-DMG_BLOCK);G.recoil=1;G.shake=reduce?0:13;G.hitstop=.11;G.flash=.4;thud(1.2);ring(HEAD[0],HEAD[1]);
   burst(HEAD[0],HEAD[1],22,['#ffffff','#ffc15a','#ff7a2b']);
   tone(170,.25,'square',.08,-110);
   if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('The Colossus is on his knees. Phase I cleared.','Le Colosse est à genoux. Phase I terminée.'))}
@@ -56,7 +57,7 @@ function startAttack(){
   const kinds=['whip','sword','flame'];
   let k=a.last===''?'whip':kinds[Math.floor(Math.random()*3)];
   if(k===a.last&&a.n>=2){const o=kinds.filter(x=>x!==k);k=o[Math.floor(Math.random()*2)]}
-  /* Difficile : un crochet ou un marteau peut être suivi de souffles sans respiration ; le contre n'arrive qu'après les avoir parés. */
+  /* Difficile : un crochet ou un marteau peut être suivi de souffles sans respiration ; le contre n'arrive qu'après les avoir bloqués. */
   let combo=false;
   if(DIFF.hard&&k!=='flame'){
     const c=DIFF.chain.find(x=>G.bhp<=x[0]);
@@ -77,13 +78,13 @@ function startAttack(){
   }
   if(k==='whip'&&b.dbl)a.plain=0;
 }
-function parrySuccess(x,y){
+function blockSuccess(x,y){
   const p=G.pl;
-  G.parries++;G.hitstop=.08;G.flash=.35;G.shake=Math.max(G.shake,reduce?0:5);thud(.4);
+  G.blocks++;G.hitstop=.08;G.flash=.35;G.shake=Math.max(G.shake,reduce?0:5);thud(.4);
   ring(x,y);burst(x,y,26,['#bfeaff','#6fd3ff','#ffffff']);
-  float(_('PARRY!','PARADE !'),x-30,y-110,'#bfeaff');
+  float('CLANG',x-30,y-110,'#bfeaff');
   tone(880,.28,'square',.05,-260);tone(1400,.2,'sine',.04);
-  p.s='ready';p.t=0;
+  LB.hero.stopped(p);
 }
 function resolveSword(n){
   const b=G.boss,p=G.pl,pt=n===2?VHIT:BAR;
@@ -92,17 +93,17 @@ function resolveSword(n){
   G.sw['p'+n]=warded;
   G.kick=warded?1:0;
   if(warded){
-    parrySuccess(pt[0],pt[1]);
-    say([_('First','Premier'),_('Second','Second'),_('Third','Troisième')][n-1]+_(' hit parried.',' coup paré.'));
+    blockSuccess(pt[0],pt[1]);
+    say([_('First','Premier'),_('Second','Second'),_('Third','Troisième')][n-1]+_(' hit blocked.',' coup bloqué.'));
   }else{
     G.php=Math.max(0,G.php-DMG_SWORD);G.grabs++;
     G.shake=reduce?0:13;G.hurt=.3;G.hitstop=.07;thud(1);
     burst(PX+10,DECK-70,16,['#ffc15a','#ff7a2b','#ffffff']);dust(PX,DECK);
     float(_('HIT!','COUP !'),PX,DECK-190,'#ff8a6b');
     tone(90,.3,'sine',.12,-40);
-    p.s='down';p.t=0;p.downT=n<(DIFF.hard?3:2)?.3:.55; /* un coup suit : on se relève assez vite pour parer */
+    LB.hero.hurt(p,99,{dur:n<(DIFF.hard?3:2)?T.hitSw:T.hitSwLast}); /* un coup suit : on se relève assez vite pour bloquer */
     say(_(`Struck by the hammer.`,`Frappé par le marteau.`));
-    if(G.php<=0){G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
+    if(G.php<=0){p.s='down';G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
   }
   const last=DIFF.hard?3:2;
   if(n===1){b.s='swgap';b.t=0}
@@ -111,13 +112,13 @@ function resolveSword(n){
     if(b.combo)startComboFlame('orb');else startOrb();
   }else{b.s='swrec';b.t=0}
 }
-/* Combo paré : le Veilleur lance l'orbe de lumière. */
+/* Combo bloqué : le Veilleur lance l'orbe de lumière. */
 function startOrb(){
   const b=G.boss,p=G.pl;
   b.s='orb';b.t=0;p.s='cast';p.t=0;
-  float(DIFF.hard?_('TRIPLE PARRY!','TRIPLE PARADE !'):_('DOUBLE PARRY!','DOUBLE PARADE !'),PX+150,DECK-250,'#ffffff');
+  float('CLANG',PX+150,DECK-250,'#ffffff');
   tone(400,.6,'sine',.05,400);
-  say(_('Combo parried. The Watcher hurls an orb of light.','Combo paré. Le Veilleur lance une orbe de lumière.'));
+  say(_('Combo blocked. The Watcher hurls an orb of light.','Combo bloqué. Le Veilleur lance une orbe de lumière.'));
 }
 function orbHit(){
   const b=G.boss;
@@ -129,40 +130,40 @@ function orbHit(){
   else{b.s='hurt';b.t=0;b.hurtT=1.1;say(_('Orb of light, dead center.','Orbe de lumière en plein cœur.'))}
 }
 function dblTell(){tone(1100,.08,'square',.045,-200);setTimeout(()=>tone(1100,.08,'square',.045,-200),110)}
-/* Après un crochet ou un marteau paré : deux souffles sans respiration ; le contre (pend) n'est donné qu'une fois les deux parés. */
+/* Après un crochet ou un marteau bloqué : deux souffles sans respiration ; le contre (pend) n'est donné qu'une fois les deux bloqués. */
 function startComboFlame(pend){
   const b=G.boss,p=G.pl;
   b.pend=pend;b.s='fl_in';b.t=0;b.fli=.35;b.dbf=true;b.second=false;
-  p.s='ready';p.t=0;
+  LB.hero.stopped(p);
   chainTell();
-  say(pend==='head'?_('Hit parried. Flames follow!','Coup paré. Des souffles enchaînent !'):_('Combo parried. Flames follow!','Combo paré. Des souffles enchaînent !'));
+  say(pend==='head'?_('Hit blocked. Flames follow!','Coup bloqué. Des souffles enchaînent !'):_('Combo blocked. Flames follow!','Combo bloqué. Des souffles enchaînent !'));
 }
 function chainTell(){tone(1500,.14,'square',.05,-800);tone(950,.24,'sawtooth',.04,-350);G.flash=Math.max(G.flash,.2)}
 function resolveFlame(){
   const b=G.boss,p=G.pl;
-  const warded=p.s==='barrier'&&p.t<=T.flwin+.03;
-  if(warded&&b.dbf&&!b.second){ /* premier souffle paré : le second arrive 0,3 s plus tard */
+  const warded=LB.hero.stops(p,{win:T.flwin+.03,grace:0}); /* fenêtre courte du souffle : réglage de l'attaque, sans grâce */
+  if(warded&&b.dbf&&!b.second){ /* premier souffle bloqué : le second arrive 0,3 s plus tard */
     b.second=true;b.s='fl_in';b.t=0;b.fli=.3;
-    parrySuccess(BAR[0],BAR[1]);chainTell();
-    say(_('Breath parried. A second breath is coming!','Souffle paré. Un second souffle arrive !'));
+    blockSuccess(BAR[0],BAR[1]);chainTell();
+    say(_('Breath blocked. A second breath is coming!','Souffle bloqué. Un second souffle arrive !'));
     return;
   }
   b.dbf=false;
   b.pend=null;
   if(warded){
-    parrySuccess(BAR[0],BAR[1]);
+    blockSuccess(BAR[0],BAR[1]);
     p.s='dash';p.t=0;b.s='fl_stab';b.t=0;
     tone(500,.3,'sawtooth',.05,300);
-    say(_('Breath parried. The Watcher rushes the Colossus.','Souffle paré. Le Veilleur fonce sur le Colosse.'));
+    say(_('Breath blocked. The Watcher rushes the Colossus.','Souffle bloqué. Le Veilleur fonce sur le Colosse.'));
   }else{
     G.php=Math.max(0,G.php-DMG_FLAME);G.grabs++;
     G.shake=reduce?0:13;G.hurt=.4;G.hitstop=.08;thud(1.2);
     burst(PX+10,DECK-70,24,['#ffc15a','#ff7a2b','#ff4d1a']);
     float(_('BURNED!','BRÛLÉ !'),PX,DECK-190,'#ff8a6b');
     tone(120,.5,'sawtooth',.1,-60);
-    p.s='down';p.t=0;p.downT=.9;b.s='fl_rec';b.t=0;
+    LB.hero.hurt(p,99,{dur:T.hitFl});b.s='fl_rec';b.t=0;
     say(_('Burned by the flame breath.','Brûlé par le souffle de flamme.'));
-    if(G.php<=0){G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
+    if(G.php<=0){p.s='down';G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
   }
 }
 function legHit(){
@@ -192,9 +193,9 @@ function hurtPlayer(label){
   burst(PX+10,DECK-70,22,['#ffc15a','#ff7a2b','#ff4d1a']);dust(PX,DECK);
   float(ono(label)||'BAM',PX,DECK-190,'#ff8a6b');
   tone(110,.4,'sawtooth',.1,-60);
-  p.s='down';p.t=0;p.downT=.55;
+  LB.hero.hurt(p,99,{dur:T.hitFy});
   say(_('Hit.','Touché.'));
-  if(G.php<=0){G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
+  if(G.php<=0){p.s='down';G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
 }
 /* Étape suivante de la fureur (ou fin). */
 function fyEnter(c){
@@ -215,15 +216,15 @@ function resolveJet(){
   const warded=blocked();
   F.ok[F.i]=warded;
   G.jf={o:JET_O[F.i%4],t:.22};
-  if(warded){parrySuccess(BAR[0],BAR[1])}
+  if(warded){blockSuccess(BAR[0],BAR[1])}
   else{F.miss++;hurtPlayer(_('BURNED!','BRÛLÉ !'))}
   fyDone();
 }
 function resolveFuryBreath(){
   const p=G.pl,F=G.fy;
-  const warded=p.s==='barrier'&&p.t<=T.flwin+.03;
+  const warded=LB.hero.stops(p,{win:T.flwin+.03,grace:0});
   F.ok[F.i]=warded;
-  if(warded){parrySuccess(BAR[0],BAR[1]);float(_('PARRIED!','PARÉ !'),BAR[0]+60,BAR[1]-170,'#ffd166')}
+  if(warded){blockSuccess(BAR[0],BAR[1]);float('CLANG',BAR[0]+60,BAR[1]-170,'#ffd166')}
   else{F.miss++;burst(PX+10,DECK-70,24,['#ffc15a','#ff7a2b','#ff4d1a']);hurtPlayer(_('BURNED!','BRÛLÉ !'))}
   fyDone();
 }
@@ -232,7 +233,7 @@ function resolveRock(){
   const warded=blocked();
   F.ok[F.i]=warded;
   burst(RK[0],RK[1],warded?20:34,['#ff9a3c','#ffc15a','#6b5a63','#ffffff']);
-  if(warded){parrySuccess(RK[0],RK[1]);say(_('Rock parried.','Rocher paré.'))}
+  if(warded){blockSuccess(RK[0],RK[1]);say(_('Rock blocked.','Rocher bloqué.'))}
   else{F.miss++;hurtPlayer(_('CRUSHED!','ÉCRASÉ !'))}
   fyDone();
 }
@@ -241,7 +242,7 @@ function endFury(){
   if(G.mode!=='play'||F.miss>0){b.s='fy_fail';b.t=0;return}
   if(F.lvl===5||F.lvl===6){
     b.s='fy_cast';b.t=0;p.s='ring';p.t=0;p.fired=false;
-    say(_('Fury parried. The Watcher raises his lantern.','Fureur parée. Le Veilleur lève sa lanterne.'));
+    say(_('Fury blocked. The Watcher raises his lantern.','Fureur bloquée. Le Veilleur lève sa lanterne.'));
   }else startFinal();
 }
 function startFinal(){
@@ -333,7 +334,7 @@ function trStr(ph){const n=RUN.on?RUN.n:(tries[ph]||1);return ' · '+(n>1?_('Att
 function hud(){
   const S=R||Q||G;
   if(S!==cntS&&S.mode==='play'){cntS=S;tries[R?3:Q?2:1]++}
-  if(S.php!==lastP){pips(el.hpP,S.php,DIFF.php,[]);$('hpPn').textContent=S.php+'/'+DIFF.php;lastP=S.php}
+  if(S.php!==lastP){pips(el.hpP,S.php,DIFF.hp,[]);$('hpPn').textContent=S.php+'/'+DIFF.hp;lastP=S.php}
   const bmax=S===R?DIFF.rbhp:DIFF.bhp,bk=S===G?1:S===R?3:2;
   if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;pips(el.hpB,S.bhp,bmax,S===G?DIFF.mk1:S===R?DIFF.mkR:DIFF.mk);$('hpBn').textContent=S.bhp+'/'+bmax;lastB=S.bhp}
 }
@@ -346,10 +347,8 @@ function step(dt){
   G.shake=Math.max(0,G.shake-dt*45);G.flash=Math.max(0,G.flash-dt*2.2);G.hurt=Math.max(0,G.hurt-dt*1.6);G.recoil=Math.max(0,G.recoil-dt*3.5);G.kick=Math.max(0,G.kick-dt*5);G.wound=Math.max(0,G.wound-dt*.5);
   if(G.endIn>0){G.endIn-=dt;if(G.endIn<=0){if(G.mode==='won'&&G.p2&&RUN.on)beginP2(true);else showEnd()}}
   if(G.hitstop>0){G.hitstop-=dt;return}
-  const p=G.pl;p.t+=dt;p.deny=Math.max(0,p.deny-dt);
-  if(p.s==='barrier'&&p.t>=T.barrier){p.s='recover';p.t=0}
-  else if(p.s==='recover'&&p.t>=T.recovery){p.s='ready';p.t=0}
-  else if(p.s==='down'&&G.mode==='play'&&p.t>=(p.downT||.9)){p.s='ready';p.t=0}
+  const p=G.pl;LB.hero.step(p,dt,{gesture:'block'}); /* ready / action / récupération / coup reçu : LB.hero ; le reste (prise, riposte, coup de lanterne) est animation */
+  if(p.s==='down'&&G.mode==='play'&&p.t>=(p.downT||.9)){p.s='ready';p.t=0}
   else if(p.s==='cast'&&p.t>=T.cast+T.orb){p.s='ready';p.t=0}
   else if(p.s==='dash'&&p.t>=T.dash){p.s='stab';p.t=0}
   else if(p.s==='stab'&&p.t>=.3){p.s='back';p.t=0}

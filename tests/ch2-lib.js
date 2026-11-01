@@ -7,7 +7,7 @@
 //                  n'a aucun crochet ; seule cette copie, non suivie par git, en a.
 const fs=require('fs'),path=require('path');
 const ROOT=path.resolve(__dirname,'..');
-const DIST=path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html');
+const DIST=process.env.CH2_DIST||path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html');   // CH2_DIST=<fichier> : comparer avec un autre dist (avant / apres)
 function script(h){const m=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)];if(m.length!==1)throw new Error('scripts: '+m.length);return m[0][1]}
 function calls(code){const out=[];const re=/(?<![\w$.])_\(/g;let m;
  const parse=i=>{const args=[];let d=0,st=i;
@@ -26,7 +26,7 @@ const HOOK='S.d=DIFFS.normal;S.phase=2;applyLang();\n'+
  'go(){onGo&&onGo()},step(dt,drawIt){rt+=dt;if(!S.paused&&["play","ko","dead","cine","prologue","epilogue"].includes(S.mode))gt+=dt;'+
  'update(dt);gameUpdate(dt);if(drawIt){ctx=ctxMain;SC=SCm;draw()}}};';
 function testPage(){const h=fs.readFileSync(DIST,'utf8');if(h.split(END).length!==2)throw new Error('fin du script introuvable dans dist');
- const out=path.join(ROOT,'build/out/ch2-test.html');fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,h.replace(END,HOOK));return out}
+ const out=process.env.CH2_TEST_OUT||path.join(ROOT,'build/out/ch2-test.html');fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,h.replace(END,HOOK));return out}
 // Textes valides du cahier des charges (docs/CH2-SPEC.md), mot pour mot : phrases entre « » de la section francaise et
 // entre " " de la section anglaise (meme ordre), hors ligne « À supprimer » ; titres de phase et noms de boss (listes ci-dessous,
 // recopiees du cahier des charges, qui les donne hors guillemets).

@@ -12,18 +12,19 @@ const _=LB._;
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
-/* Difficulty, same values as Ember Bridge for the Watcher: hp = Watcher HP (6 / 4 / 3, trial 4 for the whole run);
-   m = multiplier of the Watcher's action (block, side step, held block: x2 / x1 / x0.6) and rm of his recovery (x1.2 in Hard),
-   as applyDiff() in Ember Bridge; sp = attack speed; boss = boss HP (kept from the import until playtests);
-   heal = HP refilled between phases; u = boss HP at which a rage starts (one in Easy and Normal, two in Hard, as in
-   Ember Bridge, where Normal raged at 5 of 10 HP and Hard at 10 and 5 of 14: same proportions here). */
+/* Difficulty. The Watcher's own settings (hp = HP 6 / 4 / 3, trial 4 at the start and +1 between phases, capped at 4; m = multiplier of his action,
+   x2 / x1 / x0.6; rm = of his recovery, x1.2 in Hard) are LB.HERO_DIFF (shared/js/16-hero.js), merged into each entry by
+   LB.diff.apply (the trial entries 'tn' / 'th' take the base difficulty of Normal / Hard); sp = attack speed; boss = boss HP
+   (kept from the import until playtests); heal = HP refilled between phases (true = all, a number = that many, capped at the starting HP); u = boss HP at which a rage starts (one in Easy and
+   Normal, two in Hard, as in Ember Bridge, where Normal raged at 5 of 10 HP and Hard at 10 and 5 of 14: same proportions here). */
 const DIFFS={
-  easy:{hp:6,m:2,rm:1,sp:.85,boss:6,u:[3],heal:true,fr:'Facile',en:'Easy'},
-  normal:{hp:4,m:1,rm:1,sp:1,boss:8,u:[4],heal:true,fr:'Normal',en:'Normal'},
-  hard:{hp:3,m:.6,rm:1.2,sp:1.18,boss:10,u:[7,4],heal:true,fr:'Difficile',en:'Hard'},
-  tn:{hp:4,m:1,rm:1,sp:1,boss:8,u:[4],heal:false,trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{hp:4,m:.6,rm:1.2,sp:1.18,boss:10,u:[7,4],heal:false,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  easy:{sp:.85,boss:6,u:[3],heal:true,fr:'Facile',en:'Easy'},
+  normal:{sp:1,boss:8,u:[4],heal:true,fr:'Normal',en:'Normal'},
+  hard:{sp:1.18,boss:10,u:[7,4],heal:true,fr:'Difficile',en:'Hard'},
+  tn:{sp:1,boss:8,u:[4],trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
+  th:{sp:1.18,boss:10,u:[7,4],trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
+for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const eio=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2, eout=t=>1-Math.pow(1-t,3), ein=t=>t*t*t;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -35,8 +36,8 @@ let ctx=document.createElement('canvas').getContext('2d');let SC=1;const hasFilt
 /* ---------- state ---------- */
 let gt=0,rt=0;
 let S=fresh('normal');S.mode='menu';
-function fresh(dk){const d=DIFFS[dk];return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.boss,bossMax:d.boss,
-  threats:[],pat:null,nextAt:0,cnt:null,pl:newPl(),held:false,guardT:-9,okT:-9,hurtT:-9,dodgeT:-9,foolT:-9,holding:false,stam:1,broken:0,
+function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.boss,bossMax:d.boss,
+  threats:[],pat:null,nextAt:0,cnt:null,pl:newPl(),held:false,guardT:-9,okT:-9,hurtT:-9,dodgeT:-9,foolT:-9,holding:false,broken:0,
   hits:0,perfects:0,runT:0,full:true,parts:[],pops:[],shake:0,bossFlash:-9,koT:0,deadT:0,deadShown:false,lastK:''}}
 
 function say(t){$('live').textContent=t}

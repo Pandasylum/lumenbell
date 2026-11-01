@@ -35,3 +35,8 @@
 - Chapitre II : nouveaux textes d'entrée et de fin des trois phases, boss de la phase II nommé « L'Ancien de Rouille », bouton « Bloquer » en phase III, plus de carton à la forme II (titre « La Sans-Fond »).
 - Le cœur de l'Ancien brille d'un turquoise fixe, aussi par les jointures de l'armure ; les lueurs de la Sans-Fond ne pulsent plus ; à sa mort, la lueur s'évapore en montant vers le blanc.
 - Esquiver une illusion ne casse plus la série : seul le coup de retour reçu la casse.
+
+## 2026-10-31 · engine/hero-states
+- Un appui refusé fait passer la lanterne du Veilleur au rouge, dans les trois phases des deux chapitres ; la barre de récupération sous ses pieds n'apparaît plus que si l'aide est cochée (au Chapitre II, elle ne s'affiche plus d'office).
+- Chapitre I : le bouton dit « Bloquer » aussi en phase III ; fin de partie « Blocages » ; une attaque bloquée au pont rend la main tout de suite (à sentir en phase I, au pont, après un coup simple bloqué) ; l'Épreuve du feu est ouverte, à 4 PV sans soin entre les phases.
+- L'Épreuve du feu rend 1 PV à chaque changement de phase (jamais au-delà de 4), dans les deux chapitres.

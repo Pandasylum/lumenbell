@@ -3,30 +3,36 @@
 LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},oldPrefix:[['lb-ch1-best-','eb-best-']]});
 const _=LB._;
 const W=960,H=540,DECK=410,PX=250,BX=730;
-/* Difficulté. php/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de parade et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
+/* Difficulté. hp/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de blocage et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
    jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; mk1/mk : repères sur la jauge du Colosse (phase I / phases II-III) ;
    noHelp : pas d'aide visuelle (case masquée) ;
    easy : aides et allègements, repères en cercle, fausse fin ;
-   hard : attaques en plus (double fouet, épée à 3 coups, souffles enchaînés, rages à séquences) ; fm : fenêtre du souffle ; rm : récupération après parade ;
+   hard : attaques en plus (double fouet, épée à 3 coups, souffles enchaînés, rages à séquences) ; fm : fenêtre du souffle ; rm : récupération après blocage ;
    t : durées de la phase I remplacées ; waitMin/waitMax : pause entre attaques ; chain : [PV, chance] d'un souffle enchaîné ; rbhp/ru/mkR : PV du Colosse, PV de la première rage et repères de la jauge en phase III ; u2 : PV de la rage en deux temps (phase III Difficile) ; q2/rages : phase II Difficile (attaques à 4 griffes, 5 vagues, boulette de feu, cris avec éboulement, balayage de queue). */
 const DIFFS={
-  easy:{php:6,bhp:8,m:2,u:4,jets:2,easy:true,fury:{4:5,1:1},mk1:[0,3],mk:[0,3]},
-  normal:{php:4,bhp:10,m:1,u:5,jets:4,easy:false,fury:{5:5,1:1},mk1:[0,4],mk:[0,4]},
-  hard:{php:3,bhp:14,m:.6,fm:1,rm:1.2,u:10,jets:4,easy:false,hard:true,noHelp:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},mk1:[0,4,9],mk:[0,4,9],rbhp:12,ru:8,mkR:[0,4,7],
+  easy:{bhp:8,u:4,jets:2,easy:true,fury:{4:5,1:1},mk1:[0,3],mk:[0,3]},
+  normal:{bhp:10,u:5,jets:4,easy:false,fury:{5:5,1:1},mk1:[0,4],mk:[0,4]},
+  hard:{bhp:14,fm:1,u:10,jets:4,easy:false,hard:true,noHelp:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},mk1:[0,4,9],mk:[0,4,9],rbhp:12,ru:8,mkR:[0,4,7],
         t:{windup:.5,strike:.42,sw1w:.75,sw1:.26,swgap:.22,sw2w:.15,sw2:.26,sw3g:.27,sw3w:.34,sw3:.26,fli:.5,stagger:.6,swrec:.65,flrec:.65,fyt:.36,fyg:.05},waitMin:.5,waitMax:.9,chain:[[5,.75],[10,.4]]}
 };
 /* Phase III : PV du Colosse (rbhp), PV de la première rage (ru) et repères de la jauge (mkR) ; par défaut identiques aux autres phases */
 for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u;d.mkR=d.mkR||d.mk}
 DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true,noHelp:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
-/* Épreuve du feu : les 3 phases d'affilée, PV conservés entre les phases, une mort = retour à la phase I. */
+/* PV du Veilleur (hp), multiplicateurs m et rm : LB.HERO_DIFF (shared/js/16-hero.js), fusionnés ici ; l'Épreuve (tn, th) prend 4 PV au départ et +1 PV entre les phases (heal) */
+for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
+/* Épreuve du feu ouverte pendant les tests (décision du 28 octobre) ; false rétablit le verrou par la vraie fin (84-loop.js) */
+const TRIAL_OPEN=true;
+/* Épreuve du feu : les 3 phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : les 4 PV de départ, RUN.max), une mort = retour à la phase I. */
 const RUN={on:false,max:4,cur:4,n:1,t:0,pt:[0,0,0],st:{},name:'tn'};
-function startHP(){return RUN.on?RUN.cur:DIFF.php}
-let DIFF=DIFFS.normal,BRW=.2;
+function startHP(){return RUN.on?RUN.cur:DIFF.hp}
+let DIFF=LB.diff.use(DIFFS.normal),BRW=.2;
 const RKX=[PX+330,PX+190,PX+440];
-const T={windup:.75,strike:0.5,barrier:0.333,recovery:0.7,rebound:0.42,stagger:.75,sw1w:.9,sw1:.3,swgap:.45,sw2w:.4,sw2:.3,swrec:.8,cast:.5,orb:.45,fli:.6,flo:.25,flwin:.2,flrec:.8,dash:.28,back:.5,ringAt:.5};
+const T={windup:.75,strike:0.5,rebound:0.42,stagger:.75,sw1w:.9,sw1:.3,swgap:.45,sw2w:.4,sw2:.3,swrec:.8,cast:.5,orb:.45,fli:.6,flo:.25,flwin:.2,flrec:.8,dash:.28,back:.5,ringAt:.5};
 T.sw3g=.32;T.sw3w=.4;T.sw3=.3;
 T.fyt=.45;T.fyg=.15; /* fureur : annonce d'un jet, pause entre deux jets */
-const DMG_GRAB=1,DMG_PARRY=1,DMG_SWORD=1,DMG_ORB=1,DMG_FLAME=1,DMG_STAB=1,LIFT_MAX=170;
+T.hitSw=.3;T.hitSwLast=.55;T.hitFl=.9;T.hitFy=.55; /* phase I : étourdissement fixe après un coup de marteau (non dernier / dernier), un souffle, une fureur ; le Veilleur a le temps de bloquer le coup suivant */
+const HD=g=>LB.hero.dur(g); /* durées du Veilleur (action, récupération, grâce) pour la difficulté en cours */
+const DMG_GRAB=1,DMG_BLOCK=1,DMG_SWORD=1,DMG_ORB=1,DMG_FLAME=1,DMG_STAB=1,LIFT_MAX=170;
 const DISPLAY=LB.FONT.display;
 
 const cv=document.getElementById('c');let ctx=cv.getContext('2d');

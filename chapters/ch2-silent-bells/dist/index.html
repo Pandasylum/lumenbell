@@ -250,7 +250,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
           <button type="button" data-diff="easy"><b>Facile</b><span>Respirer</span></button>
           <button type="button" data-diff="normal"><b>Normal</b><span>Le vrai combat</span></button>
           <button type="button" data-diff="hard"><b>Difficile</b><span>Sans pitié</span></button>
-          <button type="button" data-diff="trial"><b>Épreuve</b><span>Sans soin</span></button>
+          <button type="button" data-diff="trial"><b>Épreuve</b><span>Tu récupères 1 PV entre les phases.</span></button>
         </div>
         <div class="mph" id="mphT" role="group" aria-label="Épreuve" hidden>
           <button type="button" data-diff="tn"><b>Normal</b><span>4 PV au total</span></button>
@@ -387,6 +387,82 @@ LB.audio=(()=>{
     state:{get:()=>ctx?ctx.state:'none'},bg:{get:()=>bg}});
   return A;
 })();
+/* ---------- LB.hero : la machine à états du Veilleur, commune aux deux chapitres (session engine/hero-states) ----------
+   ready -> act -> recover -> ready. Un appui n'agit qu'en ready ; pendant l'action ou la récupération il ne lance rien et ne fait que
+   poser deny (la lanterne du Veilleur passe au rouge, dessin du chapitre). Chaque attaque est jugée à son impact : elle est arrêtée
+   si le Veilleur est en action à cet instant, ou dans la grâce (grace) de sa récupération ; une attaque arrêtée le renvoie à ready
+   (LB.hero.stopped), de sorte qu'une série s'enchaîne. Un coup reçu (hurt) étourdit le Veilleur, raccourci pour qu'il puisse arrêter
+   l'attaque suivante : min(base, max(min, écart − marge)).
+   Gestes : block (bloquer, tapoter), dodge (esquiver), hold (bloquer tenu : la garde dure tant que le bouton est tenu, avec une
+   endurance drain / regen par seconde ; épuisée, récupération broken). L'action dure act × m, la récupération rec × rm (m, rm :
+   difficulté, LB.diff.cur) ; un arrêt appuyé moins de perf × m avant l'impact est parfait.
+   Réglages propres à une attaque (fenêtre courte du souffle, marge de plus en Difficile) : jamais ici, le chapitre les passe à
+   LB.hero.stops(p, {win, grace, graceAdd}) et LB.hero.hurt(p, écart, {dur, min}). Noms d'état gardés (p.s, p.t, p.rd, p.rk, p.deny,
+   p.at) : lus par le dessin et par les tests. Durées en secondes, reprises telles quelles des deux chapitres. */
+LB.HERO_T={
+  block:{act:.333,rec:.7,grace:.06,perf:.08},
+  dodge:{act:.333,rec:.7,grace:.05,perf:.08},
+  hold:{act:.333,rec:.7,grace:.06,perf:.08,drain:.36,regen:.38,broken:.9},
+  deny:.25,                                         /* appui refusé : durée du retour rouge */
+  hurt:{base:{block:.38,dodge:.38,hold:.55},min:.14,margin:.2}
+};
+/* Difficulté du Veilleur : PV (hp), multiplicateurs de l'action (m) et de la récupération (rm). trial : Épreuve, 4 PV au départ, +1 PV entre les
+   phases (heal) dans la limite des 4 PV de départ (décision du 31 octobre, qui remplace « aucun soin ») ; elle s'ajoute à la difficulté de base (m et rm de Normal ou de Difficile). */
+LB.HERO_DIFF={
+  easy:{hp:6,m:2,rm:1},
+  normal:{hp:4,m:1,rm:1},
+  hard:{hp:3,m:.6,rm:1.2},
+  trial:{hp:4,heal:1}
+};
+LB.diff={
+  cur:null,
+  /* difficulté du chapitre (ses propres réglages) + celle du Veilleur ; chap.trial ajoute les règles de l'Épreuve */
+  apply(name,chap){const out=Object.assign({},chap||{},LB.HERO_DIFF[name]);if(chap&&chap.trial)Object.assign(out,LB.HERO_DIFF.trial);return out},
+  /* difficulté en cours (lue par LB.hero pour m et rm) : le chapitre l'appelle à chaque choix de difficulté */
+  use(d){return LB.diff.cur=d}
+};
+LB.diff.cur=LB.diff.apply('normal');
+LB.hero={
+  create(){return{s:'ready',t:0,deny:0,at:-9,rd:0,rk:'',g:'block',held:false,stam:1}},
+  /* durées du geste g pour la difficulté en cours */
+  dur(g){const H=LB.HERO_T[g||'block'],d=LB.diff.cur,m=d.m,rm=d.rm||1;
+    return{act:H.act*m,rec:H.rec*rm,grace:H.grace,perf:H.perf*m,hurt:LB.HERO_T.hurt.base[g||'block'],broken:H.broken,drain:H.drain,regen:H.regen}},
+  /* appui : en ready, lance l'action (renvoie vrai, `now` = date de l'appui pour le parfait) ; sinon deny */
+  press(p,g,now){p.held=true;
+    if(p.s==='ready'){p.s='act';p.t=0;p.at=now!=null?now:0;p.g=g||'block';return true}
+    if(p.s==='act'||p.s==='recover')p.deny=LB.HERO_T.deny;
+    return false},
+  release(p){p.held=false},
+  /* avance d'un pas ; renvoie 'broken' quand la garde tenue vient de s'épuiser, sinon '' */
+  step(p,dt,o){o=o||{};const g=o.gesture||p.g||'block',H=LB.HERO_T[g],c=LB.hero.dur(g),hold=g==='hold',held=hold&&(o.held!==undefined?o.held:p.held);let ev='';
+    p.t+=dt;p.deny=Math.max(0,p.deny-dt);
+    if(p.s==='act'){
+      if(held&&p.t>c.act){p.stam-=dt*H.drain;if(p.stam<=0){p.stam=0;p.s='recover';p.t=0;p.rd=c.broken;p.rk='broken';ev='broken'}}
+      else if(p.t>=c.act){p.s='recover';p.t=0;p.rd=c.rec;p.rk='act'}
+    }else if((p.s==='recover'||p.s==='hurt')&&p.t>=p.rd){p.s='ready';p.t=0}
+    if(hold&&!(p.s==='act'&&held))p.stam=Math.min(1,p.stam+dt*H.regen);
+    return ev},
+  /* l'attaque qui tombe maintenant est-elle arrêtée ? o : nombre = fenêtre propre à l'attaque (s, après le début de l'action) ou
+     {win, grace, graceAdd} ; sans o : durée de l'action et grâce du geste */
+  stops(p,o){o=typeof o==='number'?{win:o}:(o||{});const c=LB.hero.dur(p.g),win=o.win!=null?o.win:c.act,gr=o.grace!=null?o.grace:c.grace+(o.graceAdd||0);
+    return(p.s==='act'&&p.t<=win+.002)||(p.s==='recover'&&p.rk==='act'&&p.t<gr)},
+  /* attaque arrêtée : retour à ready */
+  stopped(p){p.s='ready';p.t=0},
+  /* l'arrêt est-il parfait (appui moins de perf avant l'impact) ? à appeler avant stopped ; now = date courante du chapitre */
+  perfect(p,now){return p.s==='act'&&(now!=null?now-p.at:p.t)<=LB.hero.dur(p.g).perf},
+  /* coup reçu : étourdissement raccourci pour pouvoir arrêter l'attaque suivante (écart = secondes avant elle, 99 sans suivante) ;
+     o : {dur, min, margin} propres à l'attaque ou au chapitre ; renvoie la durée */
+  hurt(p,gap,o){o=o||{};const T=LB.HERO_T.hurt,base=o.dur!=null?o.dur:T.base[o.g||p.g||'block'],min=o.min!=null?o.min:T.min,mg=o.margin!=null?o.margin:T.margin;
+    p.s='hurt';p.t=0;p.rd=Math.min(base,Math.max(min,(gap==null?99:gap)-mg));p.rk='';return p.rd}
+};
+/* Barre de récupération sous les pieds du Veilleur (x, y = pieds) : repère d'aide, dessinée seulement si la case « Aide » est cochée
+   (le chapitre appelle LB.drawRecoveryBar derrière cette case). Jamais rouge : le seul retour d'un appui refusé est la lanterne. */
+LB.drawRecoveryBar=(ctx,x,y,p)=>{
+  if(p.s!=='recover'||!(p.rd>0))return;
+  const k=Math.max(0,Math.min(1,p.t/p.rd));
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y+8,62,6);ctx.fillStyle='#6fd3ff';ctx.fillRect(x-30,y+9,60*k,4)};
+/* Lanterne rouge pendant un appui refusé (couleur de la lanterne du Chapitre I) */
+LB.DENY_COL='#ff6b6b';
 const $=id=>document.getElementById(id);
 /* save keys and language: common to the series (shared/, LB.store, LB.key, LB.lang). Common keys lb-lang, lb-snd, lb-mus,
    lb-help (old pn-lang, eb-lang, db-opt*: LB.OLD_KEYS); this chapter's keys lb-ch2-* (unlock, records), old db-unl, db-best-*. */
@@ -401,18 +477,19 @@ const _=LB._;
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
-/* Difficulty, same values as Ember Bridge for the Watcher: hp = Watcher HP (6 / 4 / 3, trial 4 for the whole run);
-   m = multiplier of the Watcher's action (block, side step, held block: x2 / x1 / x0.6) and rm of his recovery (x1.2 in Hard),
-   as applyDiff() in Ember Bridge; sp = attack speed; boss = boss HP (kept from the import until playtests);
-   heal = HP refilled between phases; u = boss HP at which a rage starts (one in Easy and Normal, two in Hard, as in
-   Ember Bridge, where Normal raged at 5 of 10 HP and Hard at 10 and 5 of 14: same proportions here). */
+/* Difficulty. The Watcher's own settings (hp = HP 6 / 4 / 3, trial 4 at the start and +1 between phases, capped at 4; m = multiplier of his action,
+   x2 / x1 / x0.6; rm = of his recovery, x1.2 in Hard) are LB.HERO_DIFF (shared/js/16-hero.js), merged into each entry by
+   LB.diff.apply (the trial entries 'tn' / 'th' take the base difficulty of Normal / Hard); sp = attack speed; boss = boss HP
+   (kept from the import until playtests); heal = HP refilled between phases (true = all, a number = that many, capped at the starting HP); u = boss HP at which a rage starts (one in Easy and
+   Normal, two in Hard, as in Ember Bridge, where Normal raged at 5 of 10 HP and Hard at 10 and 5 of 14: same proportions here). */
 const DIFFS={
-  easy:{hp:6,m:2,rm:1,sp:.85,boss:6,u:[3],heal:true,fr:'Facile',en:'Easy'},
-  normal:{hp:4,m:1,rm:1,sp:1,boss:8,u:[4],heal:true,fr:'Normal',en:'Normal'},
-  hard:{hp:3,m:.6,rm:1.2,sp:1.18,boss:10,u:[7,4],heal:true,fr:'Difficile',en:'Hard'},
-  tn:{hp:4,m:1,rm:1,sp:1,boss:8,u:[4],heal:false,trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{hp:4,m:.6,rm:1.2,sp:1.18,boss:10,u:[7,4],heal:false,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  easy:{sp:.85,boss:6,u:[3],heal:true,fr:'Facile',en:'Easy'},
+  normal:{sp:1,boss:8,u:[4],heal:true,fr:'Normal',en:'Normal'},
+  hard:{sp:1.18,boss:10,u:[7,4],heal:true,fr:'Difficile',en:'Hard'},
+  tn:{sp:1,boss:8,u:[4],trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
+  th:{sp:1.18,boss:10,u:[7,4],trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
+for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const eio=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2, eout=t=>1-Math.pow(1-t,3), ein=t=>t*t*t;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -424,8 +501,8 @@ let ctx=document.createElement('canvas').getContext('2d');let SC=1;const hasFilt
 /* ---------- state ---------- */
 let gt=0,rt=0;
 let S=fresh('normal');S.mode='menu';
-function fresh(dk){const d=DIFFS[dk];return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.boss,bossMax:d.boss,
-  threats:[],pat:null,nextAt:0,cnt:null,pl:newPl(),held:false,guardT:-9,okT:-9,hurtT:-9,dodgeT:-9,foolT:-9,holding:false,stam:1,broken:0,
+function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.boss,bossMax:d.boss,
+  threats:[],pat:null,nextAt:0,cnt:null,pl:newPl(),held:false,guardT:-9,okT:-9,hurtT:-9,dodgeT:-9,foolT:-9,holding:false,broken:0,
   hits:0,perfects:0,runT:0,full:true,parts:[],pops:[],shake:0,bossFlash:-9,koT:0,deadT:0,deadShown:false,lastK:''}}
 
 function say(t){$('live').textContent=t}
@@ -485,49 +562,36 @@ function pop(txt,col,x,y){S.pops.push({txt,c:col,x:x||HX+10,y:y||GY-150,t0:gt})}
 /* ---------- patterns ---------- */
 function sched(list){const pat={ths:list,ok:true,perf:0,nReal:list.filter(t=>t.real!==false&&!t.hold).length};list.forEach(th=>{if(th.real===undefined)th.real=true;th.pat=pat;S.threats.push(th)});S.pat=pat;return pat}
 
-/* ---------- input: the Watcher's states, as in Ember Bridge ---------- */
+/* ---------- input: the Watcher's states, shared with Ember Bridge (LB.hero, shared/js/16-hero.js) ---------- */
 /* ready -> action -> recover -> ready. A press only acts in ready; during the action or the recovery it starts nothing and
-   only sets deny (the recovery bar turns red). Each attack is settled at its impact: it is stopped if the Watcher is in his
+   only sets deny (the Watcher's lantern turns red). Each attack is settled at its impact: it is stopped if the Watcher is in his
    action then, or within `grace` of his recovery; a stopped attack sends him back to ready, so a series can be chained.
-   Durations in seconds, base values from Ember Bridge: the action lasts base x m, the recovery base x rm (DIFFS).
-   T = block (phase II, the King, T.barrier / T.recovery), DG = side step (phase I, the Voice, DG.act / DG.rec),
-   R_T = guard (phase III, R_T.guard / R_T.rec; the guard lasts as long as the button is held, against the beams, and wears
-   the stamina out: drain / regen per second, broken = recovery when it runs out; a beam blocked to its end counts as a
-   stopped attack). hurt / down = stun after a hit, cut short so that the next attack can still be stopped (one hit per
-   mistake); backTurn / backWin = a reflection dodged turns round behind the Watcher (backTurn s) and comes back as a real
-   attack after the action + the recovery + backWin s (PROVISIONAL), so it can be dodged again; perf = a stop pressed this close before impact is perfect
-   (x m); deny = red bar after a refused press. */
-const T={barrier:.333,recovery:.7,grace:.06,hurt:.38,perf:.08,deny:.25};
-const DG={act:.333,rec:.7,grace:.05,hurt:.38,perf:.08,backTurn:.35,backWin:.45,deny:.25};
-const R_T={guard:.333,rec:.7,grace:.06,down:.55,perf:.08,broken:.9,drain:.36,regen:.38,deny:.25};
-function newPl(){return{s:'ready',t:0,deny:0,at:-9,rd:0,rk:''}}
-/* durations for the current phase and difficulty */
-function PT(){const d=S.d,m=d.m,rm=d.rm||1;
-  if(S.phase===1)return{act:T.barrier*m,rec:T.recovery*rm,grace:T.grace,hurt:T.hurt,perf:T.perf*m,deny:T.deny};
-  if(S.phase===2)return{act:DG.act*m,rec:DG.rec*rm,grace:DG.grace,hurt:DG.hurt,perf:DG.perf*m,deny:DG.deny};
-  return{act:R_T.guard*m,rec:R_T.rec*rm,grace:R_T.grace,hurt:R_T.down,perf:R_T.perf*m,deny:R_T.deny,broken:R_T.broken}}
+   Durations (HERO_T) and difficulty (m, rm) are in LB: action = base x m, recovery = base x rm. The gesture depends on the phase:
+   block (phase II, the King), dodge (phase I, the Voice), hold (phase III: the guard lasts as long as the button is held, against
+   the beams, and wears the stamina out; a beam blocked to its end counts as a stopped attack). The stun after a hit is cut short
+   so that the next attack can still be stopped (one hit per mistake). Only the reflections' return is chapter-specific:
+   backTurn / backWin = a reflection dodged turns round behind the Watcher (backTurn s) and comes back as a real attack after
+   the action + the recovery + backWin s (PROVISIONAL), so it can be dodged again. */
+const DG={backTurn:.35,backWin:.45};
+const GESTURE={1:'block',2:'dodge',3:'hold'};   // internal phase number -> gesture (1 the King, 2 the Voice, 3 the Lighthouse)
+const gest=()=>GESTURE[S.phase];
+function newPl(){return LB.hero.create()}
+/* durations for the current phase and difficulty (act, rec, grace, perf, hurt, broken) */
+function PT(){return LB.hero.dur(gest())}
 function down(){
   if(S.mode!=='play'||S.paused)return;
   ensureAudio();
   $('ward').classList.add('down');S.held=true;
-  const p=S.pl;
   // the animation dates (guardT, dodgeT) only move when an action starts, never on a refused press
-  if(p.s==='ready'){p.s='act';p.t=0;p.at=gt;S.guardT=gt;if(S.phase===2)S.dodgeT=gt;if(S.phase===3)play('shield')}
-  else if(p.s==='act'||p.s==='recover')p.deny=PT().deny;
+  if(LB.hero.press(S.pl,gest(),gt)){S.guardT=gt;if(S.phase===2)S.dodgeT=gt;if(S.phase===3)play('shield')}
 }
-function up(){S.held=false;$('ward').classList.remove('down')}
-function recover(p,d,k){p.s='recover';p.t=0;p.rd=d;p.rk=k}
-/* is the attack stopped at its impact? */
-function stops(th){const p=S.pl,c=PT(),gr=c.grace+(th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0);return(p.s==='act'&&p.t<=c.act+.002)||(p.s==='recover'&&p.rk==='act'&&p.t<gr)}
+function up(){S.held=false;LB.hero.release(S.pl);$('ward').classList.remove('down')}
+/* is the attack stopped at its impact? (a shard of the rain gets a wider grace in Hard) */
+function stops(th){return LB.hero.stops(S.pl,{graceAdd:th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0})}
 /* the Watcher's state over time (phase III: the guard is held while the button is down) */
 function plStep(dt){
-  const p=S.pl,c=PT();p.t+=dt;p.deny=Math.max(0,p.deny-dt);
-  const held=S.phase===3&&S.held;
-  if(p.s==='act'){
-    if(held&&p.t>c.act){S.stam-=dt*R_T.drain;if(S.stam<=0){S.stam=0;recover(p,c.broken,'broken');S.broken=gt+c.broken;say(_('Your guard is broken.','Ta garde est brisée.'))}}
-    else if(p.t>=c.act)recover(p,c.rec,'act');
-  }else if((p.s==='recover'||p.s==='hurt')&&p.t>=p.rd){p.s='ready';p.t=0}
-  if(S.phase===3&&!(p.s==='act'&&held))S.stam=Math.min(1,S.stam+dt*R_T.regen);
+  const p=S.pl;
+  if(LB.hero.step(p,dt,{gesture:gest(),held:S.held})==='broken'){S.broken=gt+PT().broken;say(_('Your guard is broken.','Ta garde est brisée.'))}
   S.holding=S.phase===3&&p.s==='act';
 }
 
@@ -542,9 +606,9 @@ function success(th,perfect){
 function hurt(th){
   if(S.mode!=='play')return;
   S.hp=Math.max(0,S.hp-1);S.hits++;S.hurtT=gt;S.shake=12;
-  // stun, cut short so that the next attack can still be stopped (Ember Bridge: min(base, max(.14, gap - .2)))
+  // stun, cut short so that the next attack can still be stopped (LB.hero.hurt: min(base, max(.14, gap - .2)))
   {let nx=99;for(const o of S.threats)if(o!==th&&!o.done&&o.real!==false){const at=o.hold?o.ta:o.ti;if(at!=null&&at>gt)nx=Math.min(nx,at-gt)}
-   const p=S.pl;p.s='hurt';p.t=0;p.rd=Math.min(th&&th.k==='shard'?RAIN.hurt:PT().hurt,Math.max(.14,nx-.2));p.rk=''}
+   LB.hero.hurt(S.pl,nx,{g:gest(),dur:th&&th.k==='shard'?RAIN.hurt:undefined})}
   if(th&&th.k==='rafter')pop(ONO.crush,'#ff8a6b',HX-30,GY-190);
   burst(HX,GY-70,18,'#ff6a5a',5,.55);play('hurt');MUSIC.fx('chunk');hud();
   if(S.hp<=0){S.mode='dead';S.deadT=gt;S.holding=false;say(_('The Watcher falls. Defeat.','Le Veilleur tombe. Défaite.'))}
@@ -590,13 +654,13 @@ function update(dt){
       if(th.done)continue;
       if(th.hold){
         if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
-        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;if(S.pl.s==='act'){S.pl.s='ready';S.pl.t=0}}
+        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;if(S.pl.s==='act')LB.hero.stopped(S.pl)}
         continue;
       }
       if(gt>=th.ti){
         th.done=true;th.okT=gt;const p=S.pl;
         if(th.real===false){if(p.s==='act'&&aimedAt(th))fooled(th);else{th.res='pass';burst(HX+20,GY-70,10,'#a49bbd',3,.5);play('fool')}}
-        else if(stops(th)){success(th,p.s==='act'&&gt-p.at<=PT().perf);p.s='ready';p.t=0}
+        else if(stops(th)){success(th,LB.hero.perfect(p,gt));LB.hero.stopped(p)}
         else{th.res='hit';th.pat.ok=false;hurt(th);if(S.mode!=='play')break}
       }
     }
@@ -906,14 +970,13 @@ function drawHero(){
   heroShape(x,y,lean,staffA,tint);
   // ph1 barrier arc
   if(guard>0){ctx.save();ctx.globalAlpha=guard;ctx.strokeStyle='#7fd6ff';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x+26,y-70,58,-1.15,1.15);ctx.stroke();ctx.globalAlpha=guard*.25;ctx.lineWidth=12;ctx.stroke();ctx.restore()}
-  if(dome){const flick=S.stam<.25?(Math.sin(gt*40)>0?.5:1):1;ctx.save();ctx.globalAlpha=.9*flick;
+  if(dome){const flick=S.pl.stam<.25?(Math.sin(gt*40)>0?.5:1):1;ctx.save();ctx.globalAlpha=.9*flick;
     const g=ctx.createRadialGradient(x,y-40,10,x,y-40,82);g.addColorStop(0,'rgba(127,214,255,0)');g.addColorStop(.8,'rgba(127,214,255,.14)');g.addColorStop(1,'rgba(180,240,255,.4)');
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,92,Math.PI,0);ctx.fill();ctx.strokeStyle='#bff0ff';ctx.lineWidth=2.5;ctx.stroke();ctx.restore()}
-  // recovery bar under the Watcher, red while a press is refused (Ember Bridge)
-  {const p=S.pl;if(S.mode==='play'&&!S.cine&&p&&(p.s==='recover'||p.deny>0)){const k=p.s==='recover'?p.t/p.rd:1;
-    ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y+8,62,6);ctx.fillStyle=p.deny>0?'#ff5252':'#6fd3ff';ctx.fillRect(x-30,y+9,60*clamp(k,0,1),4)}}
+  // recovery bar under the Watcher: a help cue, only with the Help box ticked (the lantern turns red for a refused press)
+  if(S.mode==='play'&&!S.cine&&$('optHelp').checked)LB.drawRecoveryBar(ctx,x,y,S.pl);
   // stamina bar
-  if(ph===3&&S.mode==='play'&&!S.cine){const w=60;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-w/2,y-150,w,6);ctx.fillStyle=gt<S.broken?'#ff8a7a':S.stam<.3?'#ffd27a':'#7fd6ff';ctx.fillRect(x-w/2,y-150,w*S.stam,6)}
+  if(ph===3&&S.mode==='play'&&!S.cine){const w=60;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-w/2,y-150,w,6);ctx.fillStyle=gt<S.broken?'#ff8a7a':S.pl.stam<.3?'#ffd27a':'#7fd6ff';ctx.fillRect(x-w/2,y-150,w*S.pl.stam,6)}
 }
 /* the Watcher, same skin as Ember Bridge */
 function wizPoly(pts,f,s){ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.fillStyle=f;ctx.fill();if(s){ctx.strokeStyle=s;ctx.lineWidth=2;ctx.stroke()}}
@@ -947,6 +1010,7 @@ function heroShape(x,y,lean,staffA,tint){
   const lit=up>.3||S.holding;
   const dm=S.lampDim||0;   // the lantern dims (end of phase I), 0..1
   ctx.save();ctx.translate(st[0],st[1]);ctx.rotate(staffA+Math.PI/2);ctx.shadowColor=lit?'#6fd3ff':'#2d6f8f';ctx.shadowBlur=(lit?22:8)*(1-dm);ctx.fillStyle=dm>0?lerpC(lit?[216,244,255]:[127,198,230],[38,58,70],dm):lit?'#d8f4ff':'#7fc6e6';
+  if(S.mode==='play'&&S.pl.deny>0){ctx.shadowColor=LB.DENY_COL;ctx.fillStyle=LB.DENY_COL}   // refused press: the lantern turns red
   ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(8,0);ctx.lineTo(0,10);ctx.lineTo(-8,0);ctx.closePath();ctx.fill();ctx.restore();
   ctx.restore();
   const c=Math.cos(lean),s=Math.sin(lean);S.orbX=x+st[0]*c-st[1]*s;S.orbY=y+st[0]*s+st[1]*c;
@@ -2442,9 +2506,10 @@ function playCine(id,k,cb){
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,stam:1,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
-  S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
+  S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
+ resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
 }
 function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:P.boss(),desc:P.desc(),go:_('Start','Commencer'),onGo:beginPlay})}
@@ -2611,7 +2676,7 @@ function applyLang(){
   document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
   $('mEye').textContent=_('Chapter II · Silent Bells','Chapitre II · Silent Bells');
   const M=[['easy',_('Easy','Facile'),_('Breathe','Respirer')],['normal',_('Normal','Normal'),_('The real fight','Le vrai combat')],['hard',_('Hard','Difficile'),_('No mercy','Sans pitié')],
-    ['trial',_('Trial','Épreuve'),_('No healing','Sans soin')],['tn',_('Normal','Normal'),_('4 HP total','4 PV au total')],['th',_('Hard','Difficile'),_('4 HP total','4 PV au total')]];
+    ['trial',_('Trial','Épreuve'),_('You recover 1 life between phases.','Tu récupères 1 PV entre les phases.')],['tn',_('Normal','Normal'),_('4 HP total','4 PV au total')],['th',_('Hard','Difficile'),_('4 HP total','4 PV au total')]];
   for(const m of M){const b=document.querySelector(`[data-diff="${m[0]}"]`);b.querySelector('b').textContent=m[1];b.querySelector('span').textContent=m[2]}
   $('mBackT').querySelector('b').textContent=_('‹ Back','‹ Retour');$('mBackT').querySelector('span').textContent=_('Difficulties','Difficultés');
   $('mResume').textContent=_('Resume','Reprendre');$('pResume').textContent=_('Resume','Reprendre');$('pTitle').textContent=_('Fight paused','Combat en pause');

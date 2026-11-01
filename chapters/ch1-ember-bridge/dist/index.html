@@ -294,14 +294,14 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
         </div>
         <div class="mph" id="mphT" role="group" aria-label="Trial by Fire" hidden>
           <button type="button" data-diff="tn"><b>Normal</b><span>4 lives</span></button>
-          <button type="button" data-diff="th"><b>Hard</b><span>3 lives</span></button>
+          <button type="button" data-diff="th"><b>Hard</b><span>4 lives</span></button>
           <button type="button" id="mBackT"><b>‹ Back</b><span>Difficulties</span></button>
         </div>
         <div class="tnote" id="trialNote" hidden>
           <b>Trial by Fire</b>
           <ul><li>The three phases in a row, with no pause and no visual help.</li><li>You recover 1 life between phases.</li><li>A single death sends you back to Phase I.</li><li>One stats table at the end of the run.</li></ul>
         </div>
-        <p class="how">One button: block, dodge, parry. Space, up arrow or tap the screen. P to pause.</p>
+        <p class="how">One button: block, dodge. Space, up arrow or tap the screen. P to pause.</p>
         <p class="ver" aria-label="Version 1.0.0">v1.0.0</p>
         <div class="mfoot"><button type="button" class="mlink" id="mNext" aria-disabled="true"><span class="nm"></span> <small class="soon"></small></button></div>
       </div>
@@ -444,35 +444,117 @@ LB.audio=(()=>{
     state:{get:()=>ctx?ctx.state:'none'},bg:{get:()=>bg}});
   return A;
 })();
+/* ---------- LB.hero : la machine à états du Veilleur, commune aux deux chapitres (session engine/hero-states) ----------
+   ready -> act -> recover -> ready. Un appui n'agit qu'en ready ; pendant l'action ou la récupération il ne lance rien et ne fait que
+   poser deny (la lanterne du Veilleur passe au rouge, dessin du chapitre). Chaque attaque est jugée à son impact : elle est arrêtée
+   si le Veilleur est en action à cet instant, ou dans la grâce (grace) de sa récupération ; une attaque arrêtée le renvoie à ready
+   (LB.hero.stopped), de sorte qu'une série s'enchaîne. Un coup reçu (hurt) étourdit le Veilleur, raccourci pour qu'il puisse arrêter
+   l'attaque suivante : min(base, max(min, écart − marge)).
+   Gestes : block (bloquer, tapoter), dodge (esquiver), hold (bloquer tenu : la garde dure tant que le bouton est tenu, avec une
+   endurance drain / regen par seconde ; épuisée, récupération broken). L'action dure act × m, la récupération rec × rm (m, rm :
+   difficulté, LB.diff.cur) ; un arrêt appuyé moins de perf × m avant l'impact est parfait.
+   Réglages propres à une attaque (fenêtre courte du souffle, marge de plus en Difficile) : jamais ici, le chapitre les passe à
+   LB.hero.stops(p, {win, grace, graceAdd}) et LB.hero.hurt(p, écart, {dur, min}). Noms d'état gardés (p.s, p.t, p.rd, p.rk, p.deny,
+   p.at) : lus par le dessin et par les tests. Durées en secondes, reprises telles quelles des deux chapitres. */
+LB.HERO_T={
+  block:{act:.333,rec:.7,grace:.06,perf:.08},
+  dodge:{act:.333,rec:.7,grace:.05,perf:.08},
+  hold:{act:.333,rec:.7,grace:.06,perf:.08,drain:.36,regen:.38,broken:.9},
+  deny:.25,                                         /* appui refusé : durée du retour rouge */
+  hurt:{base:{block:.38,dodge:.38,hold:.55},min:.14,margin:.2}
+};
+/* Difficulté du Veilleur : PV (hp), multiplicateurs de l'action (m) et de la récupération (rm). trial : Épreuve, 4 PV au départ, +1 PV entre les
+   phases (heal) dans la limite des 4 PV de départ (décision du 31 octobre, qui remplace « aucun soin ») ; elle s'ajoute à la difficulté de base (m et rm de Normal ou de Difficile). */
+LB.HERO_DIFF={
+  easy:{hp:6,m:2,rm:1},
+  normal:{hp:4,m:1,rm:1},
+  hard:{hp:3,m:.6,rm:1.2},
+  trial:{hp:4,heal:1}
+};
+LB.diff={
+  cur:null,
+  /* difficulté du chapitre (ses propres réglages) + celle du Veilleur ; chap.trial ajoute les règles de l'Épreuve */
+  apply(name,chap){const out=Object.assign({},chap||{},LB.HERO_DIFF[name]);if(chap&&chap.trial)Object.assign(out,LB.HERO_DIFF.trial);return out},
+  /* difficulté en cours (lue par LB.hero pour m et rm) : le chapitre l'appelle à chaque choix de difficulté */
+  use(d){return LB.diff.cur=d}
+};
+LB.diff.cur=LB.diff.apply('normal');
+LB.hero={
+  create(){return{s:'ready',t:0,deny:0,at:-9,rd:0,rk:'',g:'block',held:false,stam:1}},
+  /* durées du geste g pour la difficulté en cours */
+  dur(g){const H=LB.HERO_T[g||'block'],d=LB.diff.cur,m=d.m,rm=d.rm||1;
+    return{act:H.act*m,rec:H.rec*rm,grace:H.grace,perf:H.perf*m,hurt:LB.HERO_T.hurt.base[g||'block'],broken:H.broken,drain:H.drain,regen:H.regen}},
+  /* appui : en ready, lance l'action (renvoie vrai, `now` = date de l'appui pour le parfait) ; sinon deny */
+  press(p,g,now){p.held=true;
+    if(p.s==='ready'){p.s='act';p.t=0;p.at=now!=null?now:0;p.g=g||'block';return true}
+    if(p.s==='act'||p.s==='recover')p.deny=LB.HERO_T.deny;
+    return false},
+  release(p){p.held=false},
+  /* avance d'un pas ; renvoie 'broken' quand la garde tenue vient de s'épuiser, sinon '' */
+  step(p,dt,o){o=o||{};const g=o.gesture||p.g||'block',H=LB.HERO_T[g],c=LB.hero.dur(g),hold=g==='hold',held=hold&&(o.held!==undefined?o.held:p.held);let ev='';
+    p.t+=dt;p.deny=Math.max(0,p.deny-dt);
+    if(p.s==='act'){
+      if(held&&p.t>c.act){p.stam-=dt*H.drain;if(p.stam<=0){p.stam=0;p.s='recover';p.t=0;p.rd=c.broken;p.rk='broken';ev='broken'}}
+      else if(p.t>=c.act){p.s='recover';p.t=0;p.rd=c.rec;p.rk='act'}
+    }else if((p.s==='recover'||p.s==='hurt')&&p.t>=p.rd){p.s='ready';p.t=0}
+    if(hold&&!(p.s==='act'&&held))p.stam=Math.min(1,p.stam+dt*H.regen);
+    return ev},
+  /* l'attaque qui tombe maintenant est-elle arrêtée ? o : nombre = fenêtre propre à l'attaque (s, après le début de l'action) ou
+     {win, grace, graceAdd} ; sans o : durée de l'action et grâce du geste */
+  stops(p,o){o=typeof o==='number'?{win:o}:(o||{});const c=LB.hero.dur(p.g),win=o.win!=null?o.win:c.act,gr=o.grace!=null?o.grace:c.grace+(o.graceAdd||0);
+    return(p.s==='act'&&p.t<=win+.002)||(p.s==='recover'&&p.rk==='act'&&p.t<gr)},
+  /* attaque arrêtée : retour à ready */
+  stopped(p){p.s='ready';p.t=0},
+  /* l'arrêt est-il parfait (appui moins de perf avant l'impact) ? à appeler avant stopped ; now = date courante du chapitre */
+  perfect(p,now){return p.s==='act'&&(now!=null?now-p.at:p.t)<=LB.hero.dur(p.g).perf},
+  /* coup reçu : étourdissement raccourci pour pouvoir arrêter l'attaque suivante (écart = secondes avant elle, 99 sans suivante) ;
+     o : {dur, min, margin} propres à l'attaque ou au chapitre ; renvoie la durée */
+  hurt(p,gap,o){o=o||{};const T=LB.HERO_T.hurt,base=o.dur!=null?o.dur:T.base[o.g||p.g||'block'],min=o.min!=null?o.min:T.min,mg=o.margin!=null?o.margin:T.margin;
+    p.s='hurt';p.t=0;p.rd=Math.min(base,Math.max(min,(gap==null?99:gap)-mg));p.rk='';return p.rd}
+};
+/* Barre de récupération sous les pieds du Veilleur (x, y = pieds) : repère d'aide, dessinée seulement si la case « Aide » est cochée
+   (le chapitre appelle LB.drawRecoveryBar derrière cette case). Jamais rouge : le seul retour d'un appui refusé est la lanterne. */
+LB.drawRecoveryBar=(ctx,x,y,p)=>{
+  if(p.s!=='recover'||!(p.rd>0))return;
+  const k=Math.max(0,Math.min(1,p.t/p.rd));
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y+8,62,6);ctx.fillStyle='#6fd3ff';ctx.fillRect(x-30,y+9,60*k,4)};
+/* Lanterne rouge pendant un appui refusé (couleur de la lanterne du Chapitre I) */
+LB.DENY_COL='#ff6b6b';
 /* Sauvegarde et langue : communes à la série (shared/, clés lb-…). Anciennes clés du Chapitre I (eb-…) lues si la nouvelle manque :
    eb-lang (langue, avec pn-lang : LB.OLD_KEYS), eb-intro, eb-end, eb-best-<mode>. */
 LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},oldPrefix:[['lb-ch1-best-','eb-best-']]});
 const _=LB._;
 const W=960,H=540,DECK=410,PX=250,BX=730;
-/* Difficulté. php/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de parade et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
+/* Difficulté. hp/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de blocage et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
    jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; mk1/mk : repères sur la jauge du Colosse (phase I / phases II-III) ;
    noHelp : pas d'aide visuelle (case masquée) ;
    easy : aides et allègements, repères en cercle, fausse fin ;
-   hard : attaques en plus (double fouet, épée à 3 coups, souffles enchaînés, rages à séquences) ; fm : fenêtre du souffle ; rm : récupération après parade ;
+   hard : attaques en plus (double fouet, épée à 3 coups, souffles enchaînés, rages à séquences) ; fm : fenêtre du souffle ; rm : récupération après blocage ;
    t : durées de la phase I remplacées ; waitMin/waitMax : pause entre attaques ; chain : [PV, chance] d'un souffle enchaîné ; rbhp/ru/mkR : PV du Colosse, PV de la première rage et repères de la jauge en phase III ; u2 : PV de la rage en deux temps (phase III Difficile) ; q2/rages : phase II Difficile (attaques à 4 griffes, 5 vagues, boulette de feu, cris avec éboulement, balayage de queue). */
 const DIFFS={
-  easy:{php:6,bhp:8,m:2,u:4,jets:2,easy:true,fury:{4:5,1:1},mk1:[0,3],mk:[0,3]},
-  normal:{php:4,bhp:10,m:1,u:5,jets:4,easy:false,fury:{5:5,1:1},mk1:[0,4],mk:[0,4]},
-  hard:{php:3,bhp:14,m:.6,fm:1,rm:1.2,u:10,jets:4,easy:false,hard:true,noHelp:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},mk1:[0,4,9],mk:[0,4,9],rbhp:12,ru:8,mkR:[0,4,7],
+  easy:{bhp:8,u:4,jets:2,easy:true,fury:{4:5,1:1},mk1:[0,3],mk:[0,3]},
+  normal:{bhp:10,u:5,jets:4,easy:false,fury:{5:5,1:1},mk1:[0,4],mk:[0,4]},
+  hard:{bhp:14,fm:1,u:10,jets:4,easy:false,hard:true,noHelp:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},mk1:[0,4,9],mk:[0,4,9],rbhp:12,ru:8,mkR:[0,4,7],
         t:{windup:.5,strike:.42,sw1w:.75,sw1:.26,swgap:.22,sw2w:.15,sw2:.26,sw3g:.27,sw3w:.34,sw3:.26,fli:.5,stagger:.6,swrec:.65,flrec:.65,fyt:.36,fyg:.05},waitMin:.5,waitMax:.9,chain:[[5,.75],[10,.4]]}
 };
 /* Phase III : PV du Colosse (rbhp), PV de la première rage (ru) et repères de la jauge (mkR) ; par défaut identiques aux autres phases */
 for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u;d.mkR=d.mkR||d.mk}
 DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true,noHelp:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
-/* Épreuve du feu : les 3 phases d'affilée, PV conservés entre les phases, une mort = retour à la phase I. */
+/* PV du Veilleur (hp), multiplicateurs m et rm : LB.HERO_DIFF (shared/js/16-hero.js), fusionnés ici ; l'Épreuve (tn, th) prend 4 PV au départ et +1 PV entre les phases (heal) */
+for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
+/* Épreuve du feu ouverte pendant les tests (décision du 28 octobre) ; false rétablit le verrou par la vraie fin (84-loop.js) */
+const TRIAL_OPEN=true;
+/* Épreuve du feu : les 3 phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : les 4 PV de départ, RUN.max), une mort = retour à la phase I. */
 const RUN={on:false,max:4,cur:4,n:1,t:0,pt:[0,0,0],st:{},name:'tn'};
-function startHP(){return RUN.on?RUN.cur:DIFF.php}
-let DIFF=DIFFS.normal,BRW=.2;
+function startHP(){return RUN.on?RUN.cur:DIFF.hp}
+let DIFF=LB.diff.use(DIFFS.normal),BRW=.2;
 const RKX=[PX+330,PX+190,PX+440];
-const T={windup:.75,strike:0.5,barrier:0.333,recovery:0.7,rebound:0.42,stagger:.75,sw1w:.9,sw1:.3,swgap:.45,sw2w:.4,sw2:.3,swrec:.8,cast:.5,orb:.45,fli:.6,flo:.25,flwin:.2,flrec:.8,dash:.28,back:.5,ringAt:.5};
+const T={windup:.75,strike:0.5,rebound:0.42,stagger:.75,sw1w:.9,sw1:.3,swgap:.45,sw2w:.4,sw2:.3,swrec:.8,cast:.5,orb:.45,fli:.6,flo:.25,flwin:.2,flrec:.8,dash:.28,back:.5,ringAt:.5};
 T.sw3g=.32;T.sw3w=.4;T.sw3=.3;
 T.fyt=.45;T.fyg=.15; /* fureur : annonce d'un jet, pause entre deux jets */
-const DMG_GRAB=1,DMG_PARRY=1,DMG_SWORD=1,DMG_ORB=1,DMG_FLAME=1,DMG_STAB=1,LIFT_MAX=170;
+T.hitSw=.3;T.hitSwLast=.55;T.hitFl=.9;T.hitFy=.55; /* phase I : étourdissement fixe après un coup de marteau (non dernier / dernier), un souffle, une fureur ; le Veilleur a le temps de bloquer le coup suivant */
+const HD=g=>LB.hero.dur(g); /* durées du Veilleur (action, récupération, grâce) pour la difficulté en cours */
+const DMG_GRAB=1,DMG_BLOCK=1,DMG_SWORD=1,DMG_ORB=1,DMG_FLAME=1,DMG_STAB=1,LIFT_MAX=170;
 const DISPLAY=LB.FONT.display;
 
 const cv=document.getElementById('c');let ctx=cv.getContext('2d');
@@ -581,8 +663,8 @@ function roar(){
 function makeEmbers(){return Array.from({length:70},()=>({x:rand(0,W),y:rand(0,H),v:rand(14,48),s:rand(1,2.6),ph:rand(0,6.28)}))}
 function newGame(){
   const emb=G?G.embers:makeEmbers();
-  G={mode:'title',time:0,php:startHP(),bhp:DIFF.bhp,parries:0,grabs:0,
-     boss:{s:'idle',t:0,wait:1.5},pl:{s:'ready',t:0,deny:0,x:PX},
+  G={mode:'title',time:0,php:startHP(),bhp:DIFF.bhp,blocks:0,grabs:0,
+     boss:{s:'idle',t:0,wait:1.5},pl:Object.assign(LB.hero.create(),{x:PX}),
      sparks:[],rings:[],floats:[],trail:[],swTrail:[],sw:{p1:false,p2:false,p3:false},atk:{last:'',n:0,plain:0},kick:0,wound:0,p2:false,fy:null,jf:null,fin:null,ringFx:null,embers:emb,
      shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0};
 }
@@ -643,16 +725,14 @@ function press(){
   if(G.mode==='title'){start();return}
   if(G.mode!=='play')return;
   ensureAudio();
-  const p=G.pl;
-  if(p.s==='ready'){p.s='barrier';p.t=0;tone(520,.14,'triangle',.05,320)}
-  else if(p.s==='barrier'||p.s==='recover'){p.deny=.25}
+  if(LB.hero.press(G.pl,'block'))tone(520,.14,'triangle',.05,320)
 }
 /* Facile : à la 3e défaite, la carte propose d'activer l'aide visuelle. */
 function deathCard(){
   if(RUN.on){el.go.textContent=_('Start over from Phase I','Reprendre à la phase I');el.desc.textContent+=_(' In the trial, one death sends you back to the very beginning, at full health.'," Dans l'épreuve, une mort te renvoie au tout début, en pleine forme.");return}
   if(!DIFF.easy||prefs.help)return;
   if(++deaths===3){
-    el.desc.textContent+=_(` Visual cues can help you find the right moment to parry.`,` Des repères visuels peuvent t'aider à choisir le bon moment pour parer.`);
+    el.desc.textContent+=_(` Visual cues can help you find the right moment to block.`,` Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer.`);
     el.go2.hidden=false;
   }
 }
@@ -661,7 +741,7 @@ function showEnd(){
   const win=G.mode==='won';
   el.eye.textContent=win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite');
   el.title.textContent=win?(G.p2?_('Phase I cleared','Phase I terminée'):_('The Colossus drops to one knee.','Le Colosse plie un genou.')):_('Crushed on the stone.','Écrasé sur la pierre.');
-  el.stats.textContent=_('Parries ','Parades ')+G.parries+_(' · Hits taken ',' · Coups subis ')+G.grabs+trStr(1);
+  el.stats.textContent=_('Blocks ','Blocages ')+G.blocks+_(' · Hits taken ',' · Coups subis ')+G.grabs+trStr(1);
   el.stats.hidden=false;
   el.desc.textContent=win?(G.p2?_('The Colossus smashes the bridge and dives through the breach into the foundry beneath the arch, as if he knew the way.',"Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin."):_(`Phase II will open with its upcoming attacks.`,`La phase II s'ouvrira avec ses prochaines attaques.`)):_(`The lantern rolls across the stones of the bridge and goes out. Nothing holds the Colossus back now: the road to the valleys lies open.`,`La lanterne roule sur les pierres du pont et s'éteint. Plus rien ne retient le Colosse : la route des vallées est ouverte.`);
   el.go.textContent=win?(G.p2?_('Start Phase II','Lancer la phase II'):_('Replay Phase I','Rejouer la phase I')):_('Retry','Réessayer');
@@ -674,7 +754,7 @@ function showEnd(){
 function burst(x,y,n,cols){for(let i=0;i<n;i++){const a=rand(0,6.283),v=rand(80,360),L=rand(.3,.7);G.sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,g:520,life:L,max:L,col:cols[i%cols.length],sz:rand(2,5)})}}
 function dust(x,y){for(let i=0;i<18;i++){const d=Math.random()<.5?-1:1,L=rand(.4,.8);G.sparks.push({x:x+rand(-20,20),y:y-2,vx:d*rand(40,220),vy:-rand(20,120),g:260,life:L,max:L,col:'#9a8a9e',sz:rand(3,6)})}}
 function ring(x,y){G.rings.push({x,y,life:.35,max:.35})}
-/* Texte flottant : seules les onomatopées (coups, cris) et les titres de phase s'affichent ; tout mot d'annonce (PARADE, ORBE, TOUCHÉ…) est supprimé pour garder un ton sombre. */
+/* Texte flottant : seules les onomatopées (coups, cris) et les titres de phase s'affichent ; tout mot d'annonce (BLOCAGE, ORBE, TOUCHÉ…) est supprimé pour garder un ton sombre. */
 const ONO={};
 (function(){
   const add=(v,list)=>list.forEach(k=>{ONO[k]=v});
@@ -684,7 +764,7 @@ const ONO={};
   add('BOOM',['EXPLOSION!','EXPLOSION !','BOOM!','BOUM !']);
   add('CHAK',['HOOKED!','ACCROCHÉ !']);
   add('SKRAAT',['CLAWED!','GRIFFÉ !']);
-  add('CLANG',['PARRY!','PARADE !','PARRIED!','PARÉ !','DOUBLE PARRY!','DOUBLE PARADE !','TRIPLE PARRY!','TRIPLE PARADE !','DISARMED!','DÉSARMÉ !']);
+  add('CLANG',['DISARMED!','DÉSARMÉ !']);
   add('THUNK',['STUCK!','PLANTÉ !']);
   add('KRAKOOM',['FINAL BLOW!','COUP ULTIME !']);
   add('CRAAAC',['WING SHATTERED!','AILE BRISÉE !']);
@@ -752,27 +832,28 @@ function liftAmt(){
   if(b.s==='slam')return LIFT_MAX*(1-ei(clamp01(b.t/.16)));
   return 0;
 }
-/* Le bouclier est levé (ou vient juste de retomber : tolérance de 0,06 s). */
-function blocked(){const p=G.pl;return p.s==='barrier'||(p.s==='recover'&&p.t<.06)}
+/* Le bouclier est levé (ou vient juste de retomber : grâce du geste, LB.HERO_T.block). */
+function blocked(){return LB.hero.stops(G.pl)}
 function resolveStrike(){
   const p=G.pl,b=G.boss;
   const warded=blocked();
-  if(warded&&b.dbl){ /* chaîne double : premier coup paré, le second arrive 0,5 s plus tard */
+  if(warded&&b.dbl){ /* chaîne double : premier coup bloqué, le second arrive 0,5 s plus tard */
     b.dbl=false;b.sk=.32;
-    parrySuccess(BAR[0],BAR[1]);
+    blockSuccess(BAR[0],BAR[1]);
     b.s='rewind';b.t=0;
-    say(_('First hit parried.','Premier coup paré.'));
+    say(_('First hit blocked.','Premier coup bloqué.'));
     return;
   }
   b.dbl=false;b.sk=0;
   if(warded){
+    LB.hero.stopped(p); /* une attaque bloquée renvoie à ready, comme partout (décision du 28 octobre) */
     if(b.combo)startComboFlame('head');else{b.s='rebound';b.t=0}
-    G.parries++;G.hitstop=.08;G.flash=.35;G.shake=Math.max(G.shake,reduce?0:5);thud(.4);
+    G.blocks++;G.hitstop=.08;G.flash=.35;G.shake=Math.max(G.shake,reduce?0:5);thud(.4);
     ring(BAR[0],BAR[1]);
     burst(BAR[0],BAR[1],26,['#bfeaff','#6fd3ff','#ffffff']);
-    float(_('PARRY!','PARADE !'),BAR[0]-30,BAR[1]-110,'#bfeaff');
+    float('CLANG',BAR[0]-30,BAR[1]-110,'#bfeaff');
     tone(880,.28,'square',.05,-260);tone(1400,.2,'sine',.04);
-    say(_('Parry successful.','Parade réussie.'));
+    say(_('Block successful.','Blocage réussi.'));
   }else{
     b.s='lift';b.t=0;p.s='grabbed';p.t=0;
     float(_('HOOKED!','ACCROCHÉ !'),PX,DECK-190,'#ff8a6b');
@@ -782,7 +863,7 @@ function resolveStrike(){
 }
 function headHit(){
   const b=G.boss;
-  G.bhp=Math.max(0,G.bhp-DMG_PARRY);G.recoil=1;G.shake=reduce?0:13;G.hitstop=.11;G.flash=.4;thud(1.2);ring(HEAD[0],HEAD[1]);
+  G.bhp=Math.max(0,G.bhp-DMG_BLOCK);G.recoil=1;G.shake=reduce?0:13;G.hitstop=.11;G.flash=.4;thud(1.2);ring(HEAD[0],HEAD[1]);
   burst(HEAD[0],HEAD[1],22,['#ffffff','#ffc15a','#ff7a2b']);
   tone(170,.25,'square',.08,-110);
   if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('The Colossus is on his knees. Phase I cleared.','Le Colosse est à genoux. Phase I terminée.'))}
@@ -801,7 +882,7 @@ function startAttack(){
   const kinds=['whip','sword','flame'];
   let k=a.last===''?'whip':kinds[Math.floor(Math.random()*3)];
   if(k===a.last&&a.n>=2){const o=kinds.filter(x=>x!==k);k=o[Math.floor(Math.random()*2)]}
-  /* Difficile : un crochet ou un marteau peut être suivi de souffles sans respiration ; le contre n'arrive qu'après les avoir parés. */
+  /* Difficile : un crochet ou un marteau peut être suivi de souffles sans respiration ; le contre n'arrive qu'après les avoir bloqués. */
   let combo=false;
   if(DIFF.hard&&k!=='flame'){
     const c=DIFF.chain.find(x=>G.bhp<=x[0]);
@@ -822,13 +903,13 @@ function startAttack(){
   }
   if(k==='whip'&&b.dbl)a.plain=0;
 }
-function parrySuccess(x,y){
+function blockSuccess(x,y){
   const p=G.pl;
-  G.parries++;G.hitstop=.08;G.flash=.35;G.shake=Math.max(G.shake,reduce?0:5);thud(.4);
+  G.blocks++;G.hitstop=.08;G.flash=.35;G.shake=Math.max(G.shake,reduce?0:5);thud(.4);
   ring(x,y);burst(x,y,26,['#bfeaff','#6fd3ff','#ffffff']);
-  float(_('PARRY!','PARADE !'),x-30,y-110,'#bfeaff');
+  float('CLANG',x-30,y-110,'#bfeaff');
   tone(880,.28,'square',.05,-260);tone(1400,.2,'sine',.04);
-  p.s='ready';p.t=0;
+  LB.hero.stopped(p);
 }
 function resolveSword(n){
   const b=G.boss,p=G.pl,pt=n===2?VHIT:BAR;
@@ -837,17 +918,17 @@ function resolveSword(n){
   G.sw['p'+n]=warded;
   G.kick=warded?1:0;
   if(warded){
-    parrySuccess(pt[0],pt[1]);
-    say([_('First','Premier'),_('Second','Second'),_('Third','Troisième')][n-1]+_(' hit parried.',' coup paré.'));
+    blockSuccess(pt[0],pt[1]);
+    say([_('First','Premier'),_('Second','Second'),_('Third','Troisième')][n-1]+_(' hit blocked.',' coup bloqué.'));
   }else{
     G.php=Math.max(0,G.php-DMG_SWORD);G.grabs++;
     G.shake=reduce?0:13;G.hurt=.3;G.hitstop=.07;thud(1);
     burst(PX+10,DECK-70,16,['#ffc15a','#ff7a2b','#ffffff']);dust(PX,DECK);
     float(_('HIT!','COUP !'),PX,DECK-190,'#ff8a6b');
     tone(90,.3,'sine',.12,-40);
-    p.s='down';p.t=0;p.downT=n<(DIFF.hard?3:2)?.3:.55; /* un coup suit : on se relève assez vite pour parer */
+    LB.hero.hurt(p,99,{dur:n<(DIFF.hard?3:2)?T.hitSw:T.hitSwLast}); /* un coup suit : on se relève assez vite pour bloquer */
     say(_(`Struck by the hammer.`,`Frappé par le marteau.`));
-    if(G.php<=0){G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
+    if(G.php<=0){p.s='down';G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
   }
   const last=DIFF.hard?3:2;
   if(n===1){b.s='swgap';b.t=0}
@@ -856,13 +937,13 @@ function resolveSword(n){
     if(b.combo)startComboFlame('orb');else startOrb();
   }else{b.s='swrec';b.t=0}
 }
-/* Combo paré : le Veilleur lance l'orbe de lumière. */
+/* Combo bloqué : le Veilleur lance l'orbe de lumière. */
 function startOrb(){
   const b=G.boss,p=G.pl;
   b.s='orb';b.t=0;p.s='cast';p.t=0;
-  float(DIFF.hard?_('TRIPLE PARRY!','TRIPLE PARADE !'):_('DOUBLE PARRY!','DOUBLE PARADE !'),PX+150,DECK-250,'#ffffff');
+  float('CLANG',PX+150,DECK-250,'#ffffff');
   tone(400,.6,'sine',.05,400);
-  say(_('Combo parried. The Watcher hurls an orb of light.','Combo paré. Le Veilleur lance une orbe de lumière.'));
+  say(_('Combo blocked. The Watcher hurls an orb of light.','Combo bloqué. Le Veilleur lance une orbe de lumière.'));
 }
 function orbHit(){
   const b=G.boss;
@@ -874,40 +955,40 @@ function orbHit(){
   else{b.s='hurt';b.t=0;b.hurtT=1.1;say(_('Orb of light, dead center.','Orbe de lumière en plein cœur.'))}
 }
 function dblTell(){tone(1100,.08,'square',.045,-200);setTimeout(()=>tone(1100,.08,'square',.045,-200),110)}
-/* Après un crochet ou un marteau paré : deux souffles sans respiration ; le contre (pend) n'est donné qu'une fois les deux parés. */
+/* Après un crochet ou un marteau bloqué : deux souffles sans respiration ; le contre (pend) n'est donné qu'une fois les deux bloqués. */
 function startComboFlame(pend){
   const b=G.boss,p=G.pl;
   b.pend=pend;b.s='fl_in';b.t=0;b.fli=.35;b.dbf=true;b.second=false;
-  p.s='ready';p.t=0;
+  LB.hero.stopped(p);
   chainTell();
-  say(pend==='head'?_('Hit parried. Flames follow!','Coup paré. Des souffles enchaînent !'):_('Combo parried. Flames follow!','Combo paré. Des souffles enchaînent !'));
+  say(pend==='head'?_('Hit blocked. Flames follow!','Coup bloqué. Des souffles enchaînent !'):_('Combo blocked. Flames follow!','Combo bloqué. Des souffles enchaînent !'));
 }
 function chainTell(){tone(1500,.14,'square',.05,-800);tone(950,.24,'sawtooth',.04,-350);G.flash=Math.max(G.flash,.2)}
 function resolveFlame(){
   const b=G.boss,p=G.pl;
-  const warded=p.s==='barrier'&&p.t<=T.flwin+.03;
-  if(warded&&b.dbf&&!b.second){ /* premier souffle paré : le second arrive 0,3 s plus tard */
+  const warded=LB.hero.stops(p,{win:T.flwin+.03,grace:0}); /* fenêtre courte du souffle : réglage de l'attaque, sans grâce */
+  if(warded&&b.dbf&&!b.second){ /* premier souffle bloqué : le second arrive 0,3 s plus tard */
     b.second=true;b.s='fl_in';b.t=0;b.fli=.3;
-    parrySuccess(BAR[0],BAR[1]);chainTell();
-    say(_('Breath parried. A second breath is coming!','Souffle paré. Un second souffle arrive !'));
+    blockSuccess(BAR[0],BAR[1]);chainTell();
+    say(_('Breath blocked. A second breath is coming!','Souffle bloqué. Un second souffle arrive !'));
     return;
   }
   b.dbf=false;
   b.pend=null;
   if(warded){
-    parrySuccess(BAR[0],BAR[1]);
+    blockSuccess(BAR[0],BAR[1]);
     p.s='dash';p.t=0;b.s='fl_stab';b.t=0;
     tone(500,.3,'sawtooth',.05,300);
-    say(_('Breath parried. The Watcher rushes the Colossus.','Souffle paré. Le Veilleur fonce sur le Colosse.'));
+    say(_('Breath blocked. The Watcher rushes the Colossus.','Souffle bloqué. Le Veilleur fonce sur le Colosse.'));
   }else{
     G.php=Math.max(0,G.php-DMG_FLAME);G.grabs++;
     G.shake=reduce?0:13;G.hurt=.4;G.hitstop=.08;thud(1.2);
     burst(PX+10,DECK-70,24,['#ffc15a','#ff7a2b','#ff4d1a']);
     float(_('BURNED!','BRÛLÉ !'),PX,DECK-190,'#ff8a6b');
     tone(120,.5,'sawtooth',.1,-60);
-    p.s='down';p.t=0;p.downT=.9;b.s='fl_rec';b.t=0;
+    LB.hero.hurt(p,99,{dur:T.hitFl});b.s='fl_rec';b.t=0;
     say(_('Burned by the flame breath.','Brûlé par le souffle de flamme.'));
-    if(G.php<=0){G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
+    if(G.php<=0){p.s='down';G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
   }
 }
 function legHit(){
@@ -937,9 +1018,9 @@ function hurtPlayer(label){
   burst(PX+10,DECK-70,22,['#ffc15a','#ff7a2b','#ff4d1a']);dust(PX,DECK);
   float(ono(label)||'BAM',PX,DECK-190,'#ff8a6b');
   tone(110,.4,'sawtooth',.1,-60);
-  p.s='down';p.t=0;p.downT=.55;
+  LB.hero.hurt(p,99,{dur:T.hitFy});
   say(_('Hit.','Touché.'));
-  if(G.php<=0){G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
+  if(G.php<=0){p.s='down';G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
 }
 /* Étape suivante de la fureur (ou fin). */
 function fyEnter(c){
@@ -960,15 +1041,15 @@ function resolveJet(){
   const warded=blocked();
   F.ok[F.i]=warded;
   G.jf={o:JET_O[F.i%4],t:.22};
-  if(warded){parrySuccess(BAR[0],BAR[1])}
+  if(warded){blockSuccess(BAR[0],BAR[1])}
   else{F.miss++;hurtPlayer(_('BURNED!','BRÛLÉ !'))}
   fyDone();
 }
 function resolveFuryBreath(){
   const p=G.pl,F=G.fy;
-  const warded=p.s==='barrier'&&p.t<=T.flwin+.03;
+  const warded=LB.hero.stops(p,{win:T.flwin+.03,grace:0});
   F.ok[F.i]=warded;
-  if(warded){parrySuccess(BAR[0],BAR[1]);float(_('PARRIED!','PARÉ !'),BAR[0]+60,BAR[1]-170,'#ffd166')}
+  if(warded){blockSuccess(BAR[0],BAR[1]);float('CLANG',BAR[0]+60,BAR[1]-170,'#ffd166')}
   else{F.miss++;burst(PX+10,DECK-70,24,['#ffc15a','#ff7a2b','#ff4d1a']);hurtPlayer(_('BURNED!','BRÛLÉ !'))}
   fyDone();
 }
@@ -977,7 +1058,7 @@ function resolveRock(){
   const warded=blocked();
   F.ok[F.i]=warded;
   burst(RK[0],RK[1],warded?20:34,['#ff9a3c','#ffc15a','#6b5a63','#ffffff']);
-  if(warded){parrySuccess(RK[0],RK[1]);say(_('Rock parried.','Rocher paré.'))}
+  if(warded){blockSuccess(RK[0],RK[1]);say(_('Rock blocked.','Rocher bloqué.'))}
   else{F.miss++;hurtPlayer(_('CRUSHED!','ÉCRASÉ !'))}
   fyDone();
 }
@@ -986,7 +1067,7 @@ function endFury(){
   if(G.mode!=='play'||F.miss>0){b.s='fy_fail';b.t=0;return}
   if(F.lvl===5||F.lvl===6){
     b.s='fy_cast';b.t=0;p.s='ring';p.t=0;p.fired=false;
-    say(_('Fury parried. The Watcher raises his lantern.','Fureur parée. Le Veilleur lève sa lanterne.'));
+    say(_('Fury blocked. The Watcher raises his lantern.','Fureur bloquée. Le Veilleur lève sa lanterne.'));
   }else startFinal();
 }
 function startFinal(){
@@ -1078,7 +1159,7 @@ function trStr(ph){const n=RUN.on?RUN.n:(tries[ph]||1);return ' · '+(n>1?_('Att
 function hud(){
   const S=R||Q||G;
   if(S!==cntS&&S.mode==='play'){cntS=S;tries[R?3:Q?2:1]++}
-  if(S.php!==lastP){pips(el.hpP,S.php,DIFF.php,[]);$('hpPn').textContent=S.php+'/'+DIFF.php;lastP=S.php}
+  if(S.php!==lastP){pips(el.hpP,S.php,DIFF.hp,[]);$('hpPn').textContent=S.php+'/'+DIFF.hp;lastP=S.php}
   const bmax=S===R?DIFF.rbhp:DIFF.bhp,bk=S===G?1:S===R?3:2;
   if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;pips(el.hpB,S.bhp,bmax,S===G?DIFF.mk1:S===R?DIFF.mkR:DIFF.mk);$('hpBn').textContent=S.bhp+'/'+bmax;lastB=S.bhp}
 }
@@ -1091,10 +1172,8 @@ function step(dt){
   G.shake=Math.max(0,G.shake-dt*45);G.flash=Math.max(0,G.flash-dt*2.2);G.hurt=Math.max(0,G.hurt-dt*1.6);G.recoil=Math.max(0,G.recoil-dt*3.5);G.kick=Math.max(0,G.kick-dt*5);G.wound=Math.max(0,G.wound-dt*.5);
   if(G.endIn>0){G.endIn-=dt;if(G.endIn<=0){if(G.mode==='won'&&G.p2&&RUN.on)beginP2(true);else showEnd()}}
   if(G.hitstop>0){G.hitstop-=dt;return}
-  const p=G.pl;p.t+=dt;p.deny=Math.max(0,p.deny-dt);
-  if(p.s==='barrier'&&p.t>=T.barrier){p.s='recover';p.t=0}
-  else if(p.s==='recover'&&p.t>=T.recovery){p.s='ready';p.t=0}
-  else if(p.s==='down'&&G.mode==='play'&&p.t>=(p.downT||.9)){p.s='ready';p.t=0}
+  const p=G.pl;LB.hero.step(p,dt,{gesture:'block'}); /* ready / action / récupération / coup reçu : LB.hero ; le reste (prise, riposte, coup de lanterne) est animation */
+  if(p.s==='down'&&G.mode==='play'&&p.t>=(p.downT||.9)){p.s='ready';p.t=0}
   else if(p.s==='cast'&&p.t>=T.cast+T.orb){p.s='ready';p.t=0}
   else if(p.s==='dash'&&p.t>=T.dash){p.s='stab';p.t=0}
   else if(p.s==='stab'&&p.t>=.3){p.s='back';p.t=0}
@@ -1591,7 +1670,7 @@ function drawBoss(){
 }
 
 function drawPlayer(){
-  const p=G.pl,lift=liftAmt(),up=p.s==='barrier'||p.s==='cast'||p.s==='ring'||p.s==='final';
+  const p=G.pl,lift=liftAmt(),up=p.s==='act'||p.s==='cast'||p.s==='ring'||p.s==='final';
   let r=up?clamp01(p.t/.08):0;
   ctx.fillStyle='rgba(0,0,0,.38)';
   ctx.beginPath();ctx.ellipse(p.x,DECK+1,30*(1-lift/400),5,0,0,6.283);ctx.fill();
@@ -1599,7 +1678,7 @@ function drawPlayer(){
   ctx.save();ctx.translate(p.x,DECK-lift-(G.ib||0));
   if(G.mode==='intro')ctx.scale(G.sx,1);
   if(lift>0||p.s==='grabbed')ctx.rotate(.42*lift/LIFT_MAX+(p.s==='grabbed'?Math.sin(G.time*22)*.03:0));
-  if(p.s==='down'){ctx.rotate(.12);ctx.scale(1,.82)}
+  if(p.s==='down'||p.s==='hurt'){ctx.rotate(.12);ctx.scale(1,.82)}
 
   drawWizard({fl:0});
 
@@ -1610,7 +1689,7 @@ function drawPlayer(){
   ctx.strokeStyle='#2a3550';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(23,-78);ctx.lineTo(hand[0],hand[1]);ctx.stroke();ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(23,-78,6.5,0,6.283);ctx.fill();
   ctx.strokeStyle='#8a7a9a';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(sb[0],sb[1]);ctx.lineTo(st[0],st[1]);ctx.stroke();
   ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(hand[0],hand[1],5,0,6.283);ctx.fill();
-  const cc=p.deny>0?'#ff6b6b':up?'#fff4d6':(p.s==='recover'?'#c9a85a':'#ffd27a');
+  const cc=p.deny>0?LB.DENY_COL:up?'#fff4d6':(p.s==='recover'?'#c9a85a':'#ffd27a');
   drawLantern(st[0],st[1],up?1:dashing?.6+.4*thrust:.25,cc,Math.atan2(st[1]-sb[1],st[0]-sb[0])+Math.PI/2);
   if(dashing&&thrust>0){const A=[st[0]+8,st[1]],Z=[BX-62-p.x,-58+lift+(G.ib||0)];lanternBeam(A,lerp2(A,Z,thrust),12+10*thrust,thrust)}
 
@@ -1624,8 +1703,8 @@ function drawPlayer(){
 }
 
 function drawBarrier(){
-  const p=G.pl;if(p.s!=='barrier')return;
-  const ramp=clamp01(p.t/.07),a=(1-.45*p.t/T.barrier)*ramp;
+  const p=G.pl;if(p.s!=='act')return;
+  const ramp=clamp01(p.t/.07),a=(1-.45*p.t/HD('block').act)*ramp;
   const cx=PX+82,cy=DECK-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
   ctx.save();ctx.globalAlpha=a;
   const g=ctx.createRadialGradient(cx-18,cy,6,cx,cy,ry);
@@ -1638,7 +1717,7 @@ function drawBarrier(){
   ctx.restore();
 }
 
-/* Repère de timing discret (Normal) : petite barre au-dessus du Veilleur, orange tant que la parade n'est pas ouverte puis bleue pendant la fenêtre. */
+/* Repère de timing discret (Normal) : petite barre au-dessus du Veilleur, orange tant que le blocage n'est pas ouvert puis bleue pendant la fenêtre. */
 function hintBar(cx,y,k,blue){
   const w=68,h=6,x=cx-w/2;
   ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(x-1,y-1,w+2,h+2);
@@ -1648,7 +1727,7 @@ const HINT_LEAD=.8; // durée d'approche affichée avant l'ouverture de la fenê
 function drawHints(){
   if(G.mode!=='play'||!prefs.help)return;
   const b=G.boss,p=G.pl;
-  /* repère de timing : barre au-dessus de la tête, ou en Facile un cercle qui se resserre autour du Veilleur (bleu = fenêtre de parade) */
+  /* repère de timing : barre au-dessus de la tête, ou en Facile un cercle qui se resserre autour du Veilleur (bleu = fenêtre de blocage) */
   const cue=(k,blue)=>{
     if(DIFF.easy){
       const r=blue?40+22*clamp01(k):110-48*clamp01(k);
@@ -1663,8 +1742,8 @@ function drawHints(){
     if(b.s!=='swgap'&&b.s!=='sw3g'){
       const tl=wait+strike;
       const ela=b.s.endsWith('w')?b.t:wait+b.t;
-      const rem=Math.max(0,tl-ela),inWin=rem<=T.barrier;
-      const k=inWin?rem/T.barrier:ela/(tl-T.barrier);
+      const rem=Math.max(0,tl-ela),inWin=rem<=HD('block').act;
+      const k=inWin?rem/HD('block').act:ela/(tl-HD('block').act);
       cue(k,inWin);
     }
     const nsw=DIFF.hard?3:2;
@@ -1686,8 +1765,8 @@ function drawHints(){
     if(b.s==='fy_t'||b.s==='fy_j'||b.s==='rk_t'||b.s==='rk_j'){
       const rk=b.s==='rk_t'||b.s==='rk_j',t1=rk?.5:T.fyt,tl=t1+(rk?.55:.3);
       const ela=(b.s==='fy_t'||b.s==='rk_t')?b.t:t1+b.t;
-      const rem=Math.max(0,tl-ela),inWin=rem<=T.barrier;
-      const k=inWin?rem/T.barrier:ela/(tl-T.barrier);
+      const rem=Math.max(0,tl-ela),inWin=rem<=HD('block').act;
+      const k=inWin?rem/HD('block').act:ela/(tl-HD('block').act);
       cue(k,inWin);
     }
     for(let i=0;i<n;i++){
@@ -1703,11 +1782,7 @@ function drawHints(){
     const col=b.s==='windup'?'rgba(255,122,43,.85)':'#6fd3ff';
     cue(k,b.s==='strike');
   }
-  if(p.s==='recover'||p.deny>0){
-    const k=p.s==='recover'?p.t/T.recovery:1;
-    ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(PX-31,DECK+8,62,6);
-    ctx.fillStyle=p.deny>0?'#ff5252':'#6fd3ff';ctx.fillRect(PX-30,DECK+9,60*clamp01(k),4);
-  }
+  LB.drawRecoveryBar(ctx,PX,DECK,p); /* barre de récupération : repère d'aide, jamais rouge (la lanterne l'est) */
 }
 
 function drawFx(){
@@ -1926,7 +2001,8 @@ function render(){
 /* ================= PHASE II : la Fonderie ================= */
 let Q=null;
 const QH=[250,300],QB=[705,285];
-const DG={act:.333,rec:.7,grace:.05,hurt:.38,drop:110};
+/* Phase II : plongée de l'esquive (px) ; fall = étourdissement d'un débris (s) ; wide = marge d'esquive en plus en Difficile contre chute et rocher (s). Durées de l'action, de la récupération et de la grâce : LB.HERO_T.dodge. */
+const DG={drop:110,fall:.14,wide:.13};
 const QA={
   claws:{hits:[{k:'clawA',at:.9},{k:'clawB',at:1.65}],cn:'stab',get name(){return _('Claw strikes','Coups de griffe')}},
   wings:{hits:[{k:'wave',at:1.0},{k:'wave',at:1.7},{k:'wave',at:2.4}],cn:'head',get name(){return _(`Wing strike`,`Coup d'ailes`)}},
@@ -1939,8 +2015,8 @@ const QAH={
 };
 const ROCKP=Array.from({length:9},(_,i)=>{const a=i/9*6.283;return[Math.cos(a)*(.75+((i*37)%5)/10),Math.sin(a)*(.75+((i*53)%5)/10)]});
 function qNew(){
-  return{mode:'intro',t:0,time:0,lt:0,php:startHP(),bhp:DIFF.bhp,parries:0,taken:0,scroll:0,speed:900,
-    pl:{s:'ready',t:0,deny:0},boss:{s:'idle',t:0,wait:.6,dur:1,after:''},atk:null,cn:null,chain:null,chainMiss:false,
+  return{mode:'intro',t:0,time:0,lt:0,php:startHP(),bhp:DIFF.bhp,dodges:0,taken:0,scroll:0,speed:900,
+    pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.6,dur:1,after:''},atk:null,cn:null,chain:null,chainMiss:false,
     enraged:false,rn:0,rage2:false,last:'',n:0,sparks:[],floats:[],rings:[],exps:[],fbs:[],
     streaks:Array.from({length:40},()=>({x:rand(0,W),y:rand(0,H),v:rand(500,1000),l:rand(16,56)})),
     debris:Array.from({length:7},()=>({x:rand(60,W-60),y:rand(0,H),v:rand(180,420),r:rand(8,24),a:rand(0,6),w:rand(-3,3)})),
@@ -1953,11 +2029,11 @@ function setPhaseUI(n){
     if(i===n-1)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
   });
   $('hdEye').textContent=n===1?_('Phase I of III · On the bridge','Phase I sur III · Sur le pont'):n===2?_('Phase II of III · The Foundry','Phase II sur III · La Fonderie'):_('Phase III of III · The Bell Tower','Phase III sur III · Le Clocher');
-  el.ward.textContent=n===1?_('Block','Bloquer'):n===2?_('Dodge','Esquiver'):_('Parry','Parer');
+  el.ward.textContent=n===1?_('Block','Bloquer'):n===2?_('Dodge','Esquiver'):_('Block','Bloquer');
   cv.setAttribute('aria-label',n===1?_('Arena: the Watcher faces the Ember Colossus on a stone bridge','Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre'):n===2?_('Arena: the Watcher and the winged Ember Colossus fall down the Foundry shaft','Arène du combat : le Veilleur et le Colosse de braise ailé tombent dans le puits de la Fonderie'):_('Arena: the Watcher faces the Ember Colossus atop the snowy Watchers\' Bell Tower','Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs'));
 }
 function beginP2(noLore){
-  if(RUN.on&&G&&G.mode==='won'){RUN.cur=Math.min(RUN.max,G.php+1);RUN.st[1]={p:G.parries,h:G.grabs}}
+  if(RUN.on&&G&&G.mode==='won'){RUN.cur=Math.min(RUN.max,G.php+DIFF.heal);RUN.st[1]={p:G.blocks,h:G.grabs}}
   R=null;Q=qNew();setPhaseUI(2);lastP=-1;lastB=-1;
   el.ov.hidden=true;if(!noLore)showLore(2);
   say(_('Phase II. The Watcher and the Colossus fall into the Foundry. The button now dodges.','Phase II. Le Veilleur et le Colosse tombent dans la Fonderie. Le bouton sert maintenant à esquiver.'));
@@ -1977,9 +2053,7 @@ function qRing(x,y){(R||Q).rings.push({x,y,life:.35,max:.35})}
 function qPress(){
   if(Q.mode!=='play')return;
   ensureAudio();
-  const p=Q.pl;
-  if(p.s==='ready'){p.s='dodge';p.t=0;tone(420,.16,'triangle',.05,-200)}
-  else if(p.s==='dodge'||p.s==='recover')p.deny=.25;
+  if(LB.hero.press(Q.pl,'dodge'))tone(420,.16,'triangle',.05,-200)
 }
 function qPick(){
   const kinds=['claws','wings','rocks'];
@@ -2036,12 +2110,11 @@ function qRoar(label,n){
 function qResolve(h){
   const p=Q.pl,a=Q.atk;
   /* Difficile : les rochers (cris et attaque) laissent une marge de plus pour esquiver, car leur rythme est irrégulier */
-  const gr=DIFF.hard&&(h.k==='fall'||h.k==='rock')?DG.grace+.13:DG.grace;
-  const ok=p.s==='dodge'||(p.s==='recover'&&p.t<gr);
+  const ok=LB.hero.stops(p,{graceAdd:DIFF.hard&&(h.k==='fall'||h.k==='rock')?DG.wide:0});
   h.ok=ok;
   if(ok){
-    Q.parries++;Q.flash=Math.max(Q.flash,.15);
-    {const u=p.s==='dodge'?p.t/DG.act:1,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);p.ox=-20*off;p.oy=DG.drop*off;p.s='ready';p.t=0}
+    Q.dodges++;Q.flash=Math.max(Q.flash,.15);
+    {const u=p.s==='act'?p.t/HD('dodge').act:1,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);p.ox=-20*off;p.oy=DG.drop*off;LB.hero.stopped(p)}
     qBurst(QH[0],QH[1]+DG.drop*.6,14,['#bfeaff','#ffffff','#6fd3ff']);
     tone(900,.18,'square',.04,-300);
   }else{
@@ -2058,8 +2131,8 @@ function qHurt(k){
   if(Q.php<=0){p.s='down';p.t=0;Q.mode='lost';Q.endIn=1.3;say(_('You are swept away by the fall. Defeat.','Tu es emporté par la chute. Défaite.'))}
   else{
     /* enchaînement : l'étourdissement s'arrête assez tôt pour esquiver le coup suivant */
-    const a=Q.atk,nx=a&&a.hits.find(x=>!x.done),gap=nx?nx.at-a.t:99,base=k==='fall'?.14:DG.hurt;
-    p.s='hurt';p.t=0;p.hs=Math.min(base,Math.max(.14,gap-.2));say(_('Hit.','Touché.'))
+    const a=Q.atk,nx=a&&a.hits.find(x=>!x.done),gap=nx?nx.at-a.t:99;
+    LB.hero.hurt(p,gap,{g:'dodge',dur:k==='fall'?DG.fall:undefined});say(_('Hit.','Touché.'))
   }
 }
 function qAtkStep(dt){
@@ -2168,7 +2241,7 @@ function qEnd(){
   if(win&&RUN.on){setTimeout(()=>beginP3(true),0);return} /* épreuve : pas de carte entre les phases */
   el.eye.textContent=win?_('Transition','Transition'):_('Defeat · Phase II','Défaite · Phase II');
   el.title.textContent=win?_('Phase II cleared','Phase II terminée'):_('Swept away by the fall.','Emporté par la chute.');
-  el.stats.textContent=_('Dodges ','Esquives ')+Q.parries+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2);
+  el.stats.textContent=_('Dodges ','Esquives ')+Q.dodges+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2);
   el.stats.hidden=false;
   el.desc.textContent=win?_('The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney.',"Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée."):_(`Nothing holds the Watcher anymore. He vanishes into the depths of the Foundry, and his light goes out with him.`,`Rien ne retient plus le Veilleur. Il disparaît dans les profondeurs de la Fonderie, et sa lumière s'éteint avec lui.`);
   el.go.textContent=win?_('Start Phase III','Lancer la phase III'):_('Retry Phase II','Réessayer la phase II');
@@ -2190,7 +2263,7 @@ function qStep(dt){
   if(Q.endIn>0){Q.endIn-=dt;if(Q.endIn<=0)qEnd()}
   qLayout();
   if(Q.hitstop>0){Q.hitstop-=dt;hud();return}
-  const p=Q.pl;p.t+=dt;p.deny=Math.max(0,p.deny-dt);
+  const p=Q.pl;LB.hero.step(p,dt,{gesture:'dodge'});
   if(p.oy){p.oy*=Math.max(0,1-dt*14);p.ox*=Math.max(0,1-dt*14);if(p.oy<1)p.oy=p.ox=0}
   if(Q.mode==='intro'){
     Q.speed=320+580*(1-clamp01(Q.t/2.6));
@@ -2202,9 +2275,6 @@ function qStep(dt){
     hud();return;
   }
   if(Q.mode!=='lake'){Q.speed=320}
-  if(p.s==='dodge'&&p.t>=DG.act){p.s='recover';p.t=0}
-  else if(p.s==='recover'&&p.t>=DG.rec){p.s='ready';p.t=0}
-  else if(p.s==='hurt'&&p.t>=(p.hs||DG.hurt)){p.s='ready';p.t=0}
   if(Q.mode==='play')qBoss(dt);
   if(Q.mode==='lake'){
     Q.lt+=dt;
@@ -2532,11 +2602,11 @@ function heroPose(){
       else{const u=es(clamp01((t-1.1)/.45));x+=50*u;y-=20*u;glow=t<1.55?1:Math.max(.5,1-(t-1.55)/3)}
     }
     const tgt=qBeamTarget(c);if(tgt)sa=Math.atan2(tgt[1]-(y+WH[1]),tgt[0]-(x+WH[0]));else sa=-.7;
-  }else if(p.s==='dodge'){
-    const u=p.t/DG.act,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);
+  }else if(p.s==='act'){
+    const u=p.t/HD('dodge').act,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);
     y+=DG.drop*off;x-=20*off;rot=-6.283*es(u);
   }else if(p.s==='hurt'){
-    const u=Math.min(1,p.t/(p.hs||DG.hurt));x-=34*(1-u);rot=-.35*(1-u);
+    const u=Math.min(1,p.t/p.rd);x-=34*(1-u);rot=-.35*(1-u);
   }else if(p.s==='down'){
     x-=p.t*40;y+=p.t*140;rot=-p.t*5;
   }
@@ -2562,7 +2632,7 @@ function drawHero2(){
   qlimb([18.5,-18.5],WH,9,'#2a3550');ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(18.5,-18.5,5.2,0,6.283);ctx.fill();
   ctx.save();ctx.translate(WH[0],WH[1]);ctx.rotate(h.sa);
   const c2=Q.cn,hitk=c2?qBeamAl(c2):0;
-  drawScepter(80,Math.max(.35,h.glow,hitk),h.glow>0||hitk>0?'#fff4d6':'#ffd27a');
+  drawScepter(80,Math.max(.35,h.glow,hitk),Q.pl.deny>0?LB.DENY_COL:h.glow>0||hitk>0?'#fff4d6':'#ffd27a');
   if(h.glow>0){
     const gr=36*h.glow,og=ctx.createRadialGradient(80,0,0,80,0,gr*2);
     og.addColorStop(0,'rgba(255,255,255,1)');og.addColorStop(.4,'rgba(190,234,255,.7)');og.addColorStop(1,'rgba(111,211,255,0)');
@@ -2635,17 +2705,15 @@ function drawHints2(){
     const h=a.hits.find(x=>!x.done);
     if(h){
       const tt=h.at-a.t;
-      if(!DIFF.easy){if(tt>0&&tt<=DG.act+HINT_LEAD)hintBar(QH[0],QH[1]-95,tt<=DG.act?tt/DG.act:1-(tt-DG.act)/HINT_LEAD,tt<=DG.act)}
-      else if(tt<=DG.act&&tt>0){
+      const act=HD('dodge').act;
+      if(!DIFF.easy){if(tt>0&&tt<=act+HINT_LEAD)hintBar(QH[0],QH[1]-95,tt<=act?tt/act:1-(tt-act)/HINT_LEAD,tt<=act)}
+      else if(tt<=act&&tt>0){
         ctx.strokeStyle='rgba(111,211,255,.9)';ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(QH[0],QH[1]-10,70-20*(1-tt/DG.act),0,6.283);ctx.stroke();
+        ctx.beginPath();ctx.arc(QH[0],QH[1]-10,70-20*(1-tt/act),0,6.283);ctx.stroke();
       }
     }
   }
-  if(p.s==='recover'){
-    ctx.strokeStyle='rgba(166,154,147,.8)';ctx.lineWidth=3;
-    ctx.beginPath();ctx.arc(QH[0],QH[1]-10,78,-1.57,-1.57+6.283*(p.t/DG.rec));ctx.stroke();
-  }
+  LB.drawRecoveryBar(ctx,QH[0],QH[1]+44,p); /* barre de récupération sous les pieds : repère d'aide, jamais rouge (la lanterne l'est) */
 }
 function drawLake(front){
   if(Q.mode!=='lake')return;
@@ -2744,7 +2812,8 @@ function renderQ(){
 /* ================= PHASE III : le Clocher ================= */
 let R=null;
 const GUARD=[PX+116,DECK-76];
-const R_T={guard:.333,rec:.7,grace:.06,down:.55,stun:.55};
+/* Phase III : down = étourdissement d'un coup, min = plancher quand un autre coup suit, lasso = étourdissement du crochet, stun = étourdissement du Colosse (s). Durées de l'action, de la récupération et de la grâce : LB.HERO_T.block. */
+const R_T={down:.55,min:.22,lasso:1.1,stun:.55};
 const RATK={
   greatsword:{hits:[{k:'gs',at:.75},{k:'gs',at:1.4},{k:'gs',at:2.05}],cn:'plant',get name(){return _('War hammer','Marteau de guerre')}},
   avalanche:{hits:[{k:'ice',at:.9},{k:'ice',at:1.2},{k:'ice',at:1.5},{k:'ice',at:1.8},{k:'ice',at:2.1}],cn:'bat',get name(){return _('Ember hail','Grêle de braise')}},
@@ -2782,25 +2851,23 @@ const SPSTARS=Array.from({length:230},()=>({x:rand(0,W),y:rand(0,H),r:rand(.4,2)
 const STARS=Array.from({length:80},()=>({x:rand(0,W),y:rand(0,250),r:rand(.5,1.6),p:rand(0,6.28)}));
 const FLAKES=Array.from({length:160},()=>({x:rand(0,W),y:rand(0,H),v:rand(60,170),s:rand(1,3),ph:rand(0,6.28)}));
 function rNew(){
-  return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.rbhp,parries:0,taken:0,
-    pl:{s:'ready',t:0,deny:0,downT:.55},boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
+  return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.rbhp,blocks:0,taken:0,
+    pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
     sparks:[],floats:[],rings:[],exps:[],fbs:[],melts:[],steam:[],
     shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,bx:BX,
     rage:0,u5:false,u55:false,u1:false,healed:false,cycle:1,stacked:0,cut:0,fall:[],fin:null,st:0,ibn:-1,introHx:-20,iclash:false,roared:false};
 }
 function beginP3(noLore){
-  if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=Math.min(RUN.max,Q.php+1);RUN.st[2]={p:Q.parries,h:Q.taken}}
+  if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=Math.min(RUN.max,Q.php+DIFF.heal);RUN.st[2]={p:Q.dodges,h:Q.taken}}
   Q=null;R=rNew();el.ov.classList.remove('clear');setPhaseUI(3);lastP=-1;lastB=-1;
   el.ov.hidden=true;if(!noLore)showLore(3);
-  say(_('Phase III. The Bell Tower. The button raises your guard to parry.','Phase III. Le Clocher. Le bouton lève ta garde pour parer.'));
+  say(_('Phase III. The Bell Tower. The button raises your guard to block.','Phase III. Le Clocher. Le bouton lève ta garde pour bloquer.'));
   hud();
 }
 function rPress(){
   if(R.mode!=='play')return;
   ensureAudio();
-  const p=R.pl;
-  if(p.s==='ready'){p.s='guard';p.t=0;tone(520,.14,'triangle',.05,320)}
-  else if(p.s==='guard'||p.s==='recover')p.deny=.25;
+  if(LB.hero.press(R.pl,'block'))tone(520,.14,'triangle',.05,320)
 }
 function rPickFrom(pool){
   let k=pool[Math.floor(Math.random()*pool.length)];
@@ -2896,8 +2963,7 @@ function rMelt(x){
 const HTXT={fire:_('BURNED!','BRÛLÉ !'),fall:_('CRUSHED!','ÉCRASÉ !'),stab:_('RAMMED!','PERCUTÉ !'),bomb:_('EXPLOSION!','EXPLOSION !'),ram:_('CRUSHED!','ÉCRASÉ !'),stomp:_('CRUSHED!','ÉCRASÉ !'),rock:_('CRUSHED!','ÉCRASÉ !'),geyser:_('BURNED!','BRÛLÉ !'),breath:_('BURNED!','BRÛLÉ !'),wave:_('BURNED!','BRÛLÉ !'),blast:_('EXPLOSION!','EXPLOSION !'),whip:_('HOOKED!','ACCROCHÉ !'),claw:_('CLAWED!','GRIFFÉ !')};
 function rResolve(h){
   const p=R.pl,a=R.atk;
-  const win=h.k==='breath'?BRW:R_T.guard;
-  const ok=(p.s==='guard'&&p.t<=win+.002)||(p.s==='recover'&&p.t<R_T.grace);
+  const ok=LB.hero.stops(p,h.k==='breath'?{win:BRW}:null); /* fenêtre courte du souffle : réglage de l'attaque */
   h.ok=ok;
   const gx=heroFlip()?PX-116:GUARD[0];
   const bi=h.k==='bomb'?a.hits.filter(x=>x.k==='bomb').indexOf(h):0;
@@ -2905,11 +2971,11 @@ function rResolve(h){
   if(h.k==='gs'||h.k==='stab'){anvil();forgeSparks(R,ok?gx:PX+20,ok?GUARD[1]:DECK-70,ok?16:10)}
   if(h.k==='bomb'){const P=bombPos(bi);qBurst(P[0],P[1]-10,22,['#ffffff','#ffc15a','#ff7a2b']);R.shake=reduce?0:Math.max(R.shake,8);boom(.4,.1)}
   if(ok){
-    R.parries++;R.hitstop=(h.k==='gs'||h.k==='stab')?.04:.08;R.flash=.3;R.shake=Math.max(R.shake,reduce?0:5);thud(.4);
+    R.blocks++;R.hitstop=(h.k==='gs'||h.k==='stab')?.04:.08;R.flash=.3;R.shake=Math.max(R.shake,reduce?0:5);thud(.4);
     qRing(gx,GUARD[1]);qBurst(gx,GUARD[1],26,['#bfeaff','#6fd3ff','#ffffff','#ffc15a']);
-    qFloat(_('PARRY!','PARADE !'),gx-30,GUARD[1]-110,'#bfeaff');
+    qFloat('CLANG',gx-30,GUARD[1]-110,'#bfeaff');
     tone(880,.28,'square',.05,-260);tone(1400,.2,'sine',.04);
-    p.s='ready';p.t=0;
+    LB.hero.stopped(p);
     rMelt(px);
     for(let i=0;i<8;i++)R.steam.push({x:px+rand(-24,24),y:DECK-4,vx:rand(-20,20),vy:-rand(40,110),life:rand(.6,1.1),max:1.1,s:rand(8,20)});
   }else{
@@ -2919,10 +2985,10 @@ function rResolve(h){
     qFloat(HTXT[h.k]||_('HIT!','TOUCHÉ !'),PX-30,DECK-190,'#ff8a6b');
     tone(90,.3,'sawtooth',.1,-40);
     rMelt(px);
-    /* enchaînement : l'étourdissement s'arrête assez tôt pour pouvoir parer le coup suivant */
-    const nx=a.hits.find(x=>!x.done&&x!==h),gap=nx?nx.at-a.t:99,base=h.k==='whip'?1.1:R_T.down;
-    p.s='down';p.t=0;p.downT=Math.min(base,Math.max(.22,gap-.2));p.lasso=h.k==='whip';
-    if(R.php<=0){R.mode='lost';R.endIn=1.3;say(_('Struck down atop the tower. Defeat.','Terrassé au sommet du Clocher. Défaite.'))}
+    /* enchaînement : l'étourdissement s'arrête assez tôt pour pouvoir bloquer le coup suivant */
+    const nx=a.hits.find(x=>!x.done&&x!==h),gap=nx?nx.at-a.t:99;
+    LB.hero.hurt(p,gap,{dur:h.k==='whip'?R_T.lasso:R_T.down,min:R_T.min});p.lasso=h.k==='whip';
+    if(R.php<=0){p.s='down';R.mode='lost';R.endIn=1.3;say(_('Struck down atop the tower. Defeat.','Terrassé au sommet du Clocher. Défaite.'))}
     else say(_('Hit.','Touché.'));
   }
 }
@@ -2931,7 +2997,7 @@ function rAtkEnd(){
   if(a.chain&&a.chain.length&&R.mode==='play'){rLaunch(a.chain[0],{chain:a.chain.slice(1),fixed:a.fixed,carry:{miss:a.miss,ult:a.ult,lv:a.lv}});return}
   if(a.miss===0){
     R.cn={k:a.ult?'bolt':RATK[a.kind].cn,t:0,hit:false,lv:a.lv||0};b.s='cn';b.t=0;R.pl.s='counter';R.pl.t=0;
-    tone(300,.4,'triangle',.05,300);say(a.ult?_('Combo parried. The Watcher rings the great bell!','Combo paré. Le Veilleur fait sonner la grande cloche !'):_('Perfect parry. Riposte!','Parade parfaite. Riposte !'));
+    tone(300,.4,'triangle',.05,300);say(a.ult?_('Combo blocked. The Watcher rings the great bell!','Combo bloqué. Le Veilleur fait sonner la grande cloche !'):_('Perfect block. Riposte!','Blocage parfait. Riposte !'));
   }else{b.s='fail';b.t=0}
 }
 function startFinale(){
@@ -3055,7 +3121,7 @@ function runTable(){
   const a=RUN.st[1]||{p:0,h:0},b=RUN.st[2]||{p:0,h:0};
   const C=[[_('Total time','Temps total'),fmtT(tot)],[_('Hits taken','Coups subis'),a.h+b.h+R.taken],[_('Attempts','Essais'),RUN.n],
     [_('Phase I','Phase I'),fmtT(RUN.pt[0])],[_('Phase II','Phase II'),fmtT(RUN.pt[1])],[_('Phase III','Phase III'),fmtT(RUN.pt[2])],
-    [_('Parries','Parades'),a.p+R.parries],[_('Dodges','Esquives'),b.p],[rec?_('New record!','Nouveau record !'):_('Best time','Meilleur temps'),fmtT(best),rec]];
+    [_('Blocks','Blocages'),a.p+R.blocks],[_('Dodges','Esquives'),b.p],[rec?_('New record!','Nouveau record !'):_('Best time','Meilleur temps'),fmtT(best),rec]];
   return C.map(c=>'<div'+(c[2]?' class="rec"':'')+'><small>'+c[0]+'</small><b>'+c[1]+'</b></div>').join('');
 }
 function rEnd(){
@@ -3073,7 +3139,7 @@ function rEnd(){
   el.ov.classList.toggle('clear',sp);
   el.eye.textContent=sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III');
   el.title.textContent=sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.');
-  el.stats.textContent=_('Parries ','Parades ')+R.parries+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3);
+  el.stats.textContent=_('Blocks ','Blocages ')+R.blocks+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3);
   el.stats.hidden=false;
   el.desc.textContent=sp?_(`The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while.`,`Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps.`):win?_(`The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch.`,`Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore.`):_(`Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again.`,`La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus.`);
   el.go.textContent=sp?_('Back to menu','Retour au menu'):win?_('Replay from Phase I','Rejouer depuis la phase I'):_('Retry Phase III','Réessayer la phase III');
@@ -3120,7 +3186,7 @@ function rStep(dt){
   if(R.mode==='fake'){hud();return}
   if(R.mode==='space'){R.st+=dt;
     if(R.st>4.6&&!R.cardShown&&!R.outro){R.cardShown=true;rEnd()}hud();return}
-  const p=R.pl;p.t+=dt;p.deny=Math.max(0,p.deny-dt);
+  const p=R.pl;LB.hero.step(p,dt,{gesture:'block'});
   if(R.mode==='intro'){
     /* Entrée : le Veilleur arrive par la cheminée, lanterne en main ; le Colosse se pose en vol au sommet du Clocher */
     const T=R.t;
@@ -3136,9 +3202,6 @@ function rStep(dt){
     if(T>=3.8){R.mode='play';R.boss.wait=.7;R.bx=BX}
     hud();return;
   }
-  if(p.s==='guard'&&p.t>=R_T.guard){p.s='recover';p.t=0}
-  else if(p.s==='recover'&&p.t>=R_T.rec){p.s='ready';p.t=0}
-  else if(p.s==='down'&&R.mode==='play'&&p.t>=(p.downT||R_T.down)){p.s='ready';p.t=0}
   if(R.mode==='play'||R.mode==='won')rBoss(dt);
   hud();
 }
@@ -3327,8 +3390,8 @@ function heroX3(){
     if(t<.65)return tx;
     return tx+(PX-tx)*es(clamp01((t-.65)/.5));
   }
-  if(p.s==='down'&&p.lasso){const d=p.downT||1.1,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));return PX+46*k}
-  if(p.s==='down')return PX-24*(1-clamp01(p.t/.5));
+  if((p.s==='down'||p.s==='hurt')&&p.lasso){const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));return PX+46*k}
+  if(p.s==='down'||p.s==='hurt')return PX-24*(1-clamp01(p.t/.5));
   return PX;
 }
 function heroPose3(){
@@ -3363,12 +3426,12 @@ function heroPose3(){
       sy=.82;hand=[34,-34];sa=0;rot=.05;
       if(t>.65){const v=es(clamp01((t-.65)/.5));sy=.82+.18*v;hand=[34-6*v,-34-28*v];sa=-.45*v;rot=.05*(1-v)}
     }
-  }else if(p.s==='guard'){
+  }else if(p.s==='act'){
     const r=clamp01(p.t/.08);hand=[28,-62-32*r];sa=-.45-1.05*r;glow=1;
-  }else if(p.s==='down'&&p.lasso){
-    const d=p.downT||1.1,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));
+  }else if((p.s==='down'||p.s==='hurt')&&p.lasso){
+    const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));
     rot=-1.45*k;hand=[24,-34];sa=.7;
-  }else if(p.s==='down'){rot=.12;sy=.82;sa=.6}
+  }else if(p.s==='down'||p.s==='hurt'){rot=.12;sy=.82;sa=.6}
   return{x,hand,sa,rot,sy,glow};
 }
 /* Masse de braise du Colosse, dans le repère de la main : manche le long de l'axe x, tête à pointes au bout (portée L) */
@@ -3670,9 +3733,9 @@ function r3Ground(){
   const lg=ctx.createRadialGradient(bx,DECK,10,bx,DECK,300);
   lg.addColorStop(0,'rgba(255,130,40,'+(.55*pulse)+')');lg.addColorStop(1,'rgba(255,90,30,0)');
   ctx.fillStyle=lg;ctx.fillRect(0,DECK-120,W,H-DECK+120);
-  const wet=Math.min(1,.35+R.parries*.08);
+  const wet=Math.min(1,.35+R.blocks*.08);
   ctx.fillStyle='rgba(30,50,90,'+(.5*wet)+')';
-  ctx.beginPath();ctx.ellipse(bx,DECK+12,130+R.parries*6,14,0,0,6.283);ctx.fill();
+  ctx.beginPath();ctx.ellipse(bx,DECK+12,130+R.blocks*6,14,0,0,6.283);ctx.fill();
   ctx.fillStyle='rgba(255,140,50,'+(.25*pulse)+')';
   ctx.beginPath();ctx.ellipse(bx,DECK+10,90,9,0,0,6.283);ctx.fill();
   /* neige fondue à l'impact : une tache humide qui sèche et disparaît en quelques secondes */
@@ -3836,13 +3899,13 @@ function drawHero3(){
   qlimb([23,-78],h.hand,9,'#2a3550');ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(23,-78,6.5,0,6.283);ctx.fill();
   ctx.save();ctx.translate(h.hand[0],h.hand[1]);ctx.rotate(h.sa);
   const c3=R.cn,hk3=c3&&(c3.k==='bat'||c3.k==='plant')?Math.max(0,1-Math.abs(c3.t-(c3.k==='bat'?.24:.32))/.16):0;
-  drawScepter(76,p.s==='guard'?1:Math.max(.3,h.glow||0,hk3),p.s==='recover'?'#c9a85a':(p.s==='guard'||h.glow>0||hk3>0)?'#fff4d6':'#ffd27a');
+  drawScepter(76,p.s==='act'?1:Math.max(.3,h.glow||0,hk3),p.deny>0?LB.DENY_COL:p.s==='recover'?'#c9a85a':(p.s==='act'||h.glow>0||hk3>0)?'#fff4d6':'#ffd27a');
   if(hk3>0){ctx.save();ctx.globalCompositeOperation='lighter';lanternBeam([84,0],[84+48*hk3,0],14,hk3);ctx.restore()}
   ctx.restore();
   ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(h.hand[0],h.hand[1],5,0,6.283);ctx.fill();
   ctx.restore();
-  if(p.s==='guard'){
-    const a=1-.45*p.t/R_T.guard,ramp=clamp01(p.t/.07),cx=PX+82,cy=DECK-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
+  if(p.s==='act'){
+    const a=1-.45*p.t/HD('block').act,ramp=clamp01(p.t/.07),cx=PX+82,cy=DECK-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
     ctx.save();ctx.globalAlpha=a*ramp;
     const g=ctx.createRadialGradient(cx-18,cy,6,cx,cy,ry);
     g.addColorStop(0,'rgba(111,211,255,.06)');g.addColorStop(.7,'rgba(111,211,255,.2)');g.addColorStop(1,'rgba(191,234,255,.5)');
@@ -4192,17 +4255,15 @@ function drawHints3(){
     const h=a.hits.find(x=>!x.done);
     if(h){
       const tt=h.at-a.t;
-      if(!DIFF.easy){if(tt>0&&tt<=R_T.guard+HINT_LEAD)hintBar(PX,DECK-206,tt<=R_T.guard?tt/R_T.guard:1-(tt-R_T.guard)/HINT_LEAD,tt<=R_T.guard)}
-      else if(tt<=R_T.guard&&tt>0){
+      const act=HD('block').act;
+      if(!DIFF.easy){if(tt>0&&tt<=act+HINT_LEAD)hintBar(PX,DECK-206,tt<=act?tt/act:1-(tt-act)/HINT_LEAD,tt<=act)}
+      else if(tt<=act&&tt>0){
         ctx.strokeStyle='rgba(111,211,255,.9)';ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(GUARD[0],GUARD[1],60-20*(1-tt/R_T.guard),0,6.283);ctx.stroke();
+        ctx.beginPath();ctx.arc(GUARD[0],GUARD[1],60-20*(1-tt/act),0,6.283);ctx.stroke();
       }
     }
   }
-  if(p.s==='recover'){
-    ctx.strokeStyle='rgba(166,154,147,.8)';ctx.lineWidth=3;
-    ctx.beginPath();ctx.arc(PX,DECK-130,24,-1.57,-1.57+6.283*(p.t/R_T.rec));ctx.stroke();
-  }
+  LB.drawRecoveryBar(ctx,PX,DECK,p); /* barre de récupération sous les pieds : repère d'aide, jamais rouge (la lanterne l'est) */
 }
 function renderR(){
   if(R.mode==='space'){renderSpace();return}
@@ -4323,7 +4384,7 @@ $('mResume').addEventListener('click',()=>{hideMenu();try{if(!el.ov.hidden)el.go
 (function(){const sv=document.querySelector('.mscene');function fit(){const r=innerWidth/innerHeight;sv.setAttribute('preserveAspectRatio',r<1.2?'xMidYMax meet':'xMidYMax slice')}fit();addEventListener('resize',fit)})();
 (function(){const w=$('mEmbers');for(let i=0;i<26;i++){const e=document.createElement('i');e.className='mem';e.style.left=(Math.random()*100)+'%';e.style.setProperty('--dx',((Math.random()-.5)*160)+'px');e.style.animationDuration=(5+Math.random()*7)+'s';e.style.animationDelay=(-Math.random()*10)+'s';const z=2+Math.random()*3;e.style.width=e.style.height=z+'px';w.appendChild(e)}})();
 /* Épreuve du feu : Normal jouable, Difficile en attente de la phase III Difficile. */
-const BASEW={barrier:T.barrier,flwin:T.flwin,dodge:DG.act,guard:R_T.guard,breath:BRW,rec:T.recovery,drec:DG.rec,rrec:R_T.rec};
+const BASEW={flwin:T.flwin,breath:BRW}; /* fenêtres courtes du souffle (phases I et III), réglage d'attaque ; l'action et la récupération du Veilleur sont dans LB.hero */
 const BASET=Object.assign({},T);
 function restartRun(){
   RUN.n++;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};resetRetryLabel();
@@ -4331,10 +4392,9 @@ function restartRun(){
   goPhase(1);
 }
 function applyDiff(name){
-  const d=DIFFS[name]||DIFFS.normal,m=d.m,fm=d.fm||m,rm=d.rm||1;
-  DIFF=d;RUN.on=!!d.trial;RUN.max=d.php;RUN.cur=d.php;RUN.n=1;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};RUN.name=name;resetRetryLabel();try{$('retryBtn').disabled=false;$('phases').style.display=RUN.on?'none':''}catch(e){}Object.assign(T,BASET,d.t||{});
-  T.barrier=BASEW.barrier*m;T.flwin=BASEW.flwin*fm;DG.act=BASEW.dodge*m;R_T.guard=BASEW.guard*m;BRW=BASEW.breath*fm;
-  T.recovery=BASEW.rec*rm;DG.rec=BASEW.drec*rm;R_T.rec=BASEW.rrec*rm;
+  const d=DIFFS[name]||DIFFS.normal,fm=d.fm||d.m;
+  DIFF=LB.diff.use(d);RUN.on=!!d.trial;RUN.max=d.hp;RUN.cur=d.hp;RUN.n=1;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};RUN.name=name;resetRetryLabel();try{$('retryBtn').disabled=false;$('phases').style.display=RUN.on?'none':''}catch(e){}Object.assign(T,BASET,d.t||{});
+  T.flwin=BASEW.flwin*fm;BRW=BASEW.breath*fm;
   document.querySelectorAll('#phases button').forEach((b,i)=>{b.disabled=!!d.trial;b.title=d.trial?_('Not available in the trial','Indisponible dans l\'épreuve'):''});
   lastP=lastB=-1;
   prefs.help=el.help.checked=!d.noHelp&&LB.store.get(LB.key('help'),'0')==='1';deaths=0; /* aide mémorisée (lb-help), toujours coupée là où elle est masquée */tries=[0,0,0,0];cntS=null;
@@ -4344,7 +4404,7 @@ function trialMenu(on){updBest();$('mphM').hidden=on;$('mphT').hidden=!on;$('tri
 $('mBackT').addEventListener('click',()=>trialMenu(false));
 document.querySelectorAll('#menu .mph button').forEach(b=>b.addEventListener('click',()=>{
   if(b.disabled||!b.dataset.diff)return;
-  if(b.dataset.diff==='trial'&&!endSeen()){b.blur();return} /* verrouillée : aucun message, le cadenas suffit */
+  if(b.dataset.diff==='trial'&&!trialOpen()){b.blur();return} /* verrouillée : aucun message, le cadenas suffit */
   if(b.dataset.diff==='trial'){trialMenu(true);return}
   applyDiff(b.dataset.diff);
   document.querySelectorAll('#menu .mph button').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));
@@ -4597,7 +4657,7 @@ const UIT=[
  ['#trialNote li:nth-child(2)','You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'],
  ['#trialNote li:nth-child(3)','A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'],
  ['#trialNote li:nth-child(4)','One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run."],
- ['#menu .how','One button: block, dodge, parry. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver, parer. Espace, flèche haut ou toucher l'écran. P pour la pause."],
+ ['#menu .how','One button: block, dodge. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause."],
  ['.fsm span','Fullscreen','Plein écran'],['#introBtn','▶ Intro','▶ Intro'],['#outroBtn','▶ Outro','▶ Outro'],['#cineSkip','Skip ›','Passer ›'],['#pause h2','Fight paused','Combat en pause'],['#pResume','Resume','Reprendre'],
  ['#go2','Enable visual help',"Activer l'aide visuelle"],
  ['#retryBtn','Retry','Réessayer'],
@@ -4883,12 +4943,13 @@ $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();OUTRO.play(()=
 
 /* Chapitre II : verrouillé tant que la vraie fin n'a pas été vue (mémorisé dans le navigateur, quand c'est possible) */
 function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
+function trialOpen(){return TRIAL_OPEN||endSeen()} /* TRIAL_OPEN : 00-core.js */
 /* Épreuve du feu : meilleur temps affiché sous chaque difficulté (mémorisé dans le navigateur) */
 function updBest(){for(const n of ['tn','th']){const sp=document.querySelector('#mphT [data-diff='+n+'] span');if(!sp)continue;const v=parseFloat(LB.store.get(LB.key('best-'+n),'0'))||0;sp.textContent=v?'🏆 '+fmtT(v):_('No record yet','Pas encore de record')}}
-function updNext(){const b=$('mNext'),ok=endSeen();try{$('outroBtn').hidden=!ok}catch(e){}
-  const tb=document.querySelector('#mphM [data-diff=trial]');tb.setAttribute('aria-disabled',String(!ok)); /* Épreuve du feu : débloquée par la vraie fin */
-  tb.querySelector('b').textContent=ok?_('Trial by Fire','Épreuve du feu'):_('🔒 Trial by Fire','🔒 Épreuve du feu');
-  tb.querySelector('span').textContent=ok?_('Ultimate challenge','Challenge ultime'):_('To unlock','À débloquer');b.classList.toggle('lock',!ok);
+function updNext(){const b=$('mNext'),ok=endSeen(),tok=trialOpen();try{$('outroBtn').hidden=!ok}catch(e){}
+  const tb=document.querySelector('#mphM [data-diff=trial]');tb.setAttribute('aria-disabled',String(!tok)); /* Épreuve du feu : ouverte pendant les tests, sinon débloquée par la vraie fin */
+  tb.querySelector('b').textContent=tok?_('Trial by Fire','Épreuve du feu'):_('🔒 Trial by Fire','🔒 Épreuve du feu');
+  tb.querySelector('span').textContent=tok?_('Ultimate challenge','Challenge ultime'):_('To unlock','À débloquer');b.classList.toggle('lock',!ok);
   b.querySelector('.nm').textContent=ok?_('Chapter II · Silent Bells','Chapitre II · Silent Bells'):_('🔒 Chapter II','🔒 Chapitre II');
   b.querySelector('.soon').textContent=_('Coming soon','À venir')}
 $('mNext').addEventListener('click',e=>e.currentTarget.blur()); /* Chapitre II : « À venir » suffit, aucun message */

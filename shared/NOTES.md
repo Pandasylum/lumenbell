@@ -12,6 +12,7 @@
 | `js/04-store.js` | `LB.COMMON`, `LB.OLD_KEYS`, `LB.key(nom)`, `LB.store.get(clé, défaut)` / `LB.store.set(clé, valeur)`, `LB.setup({id, old, oldPrefix})` |
 | `js/08-lang.js` | `LB.LANGS` (ordre des boutons : EN, FR), `LB.lang.cur`, `LB.lang.init()`, `LB.lang.set(l)`, `LB._(en, fr)` |
 | `js/12-audio.js` | `LB.audio` : contexte unique, `tone`, `noise`, réglages Son / Musique, suspension en arrière-plan |
+| `js/16-hero.js` | `LB.HERO_T`, `LB.HERO_DIFF`, `LB.diff` (`apply`, `use`, `cur`), `LB.hero` (`create`, `press`, `release`, `step`, `stops`, `stopped`, `hurt`, `perfect`, `dur`), `LB.drawRecoveryBar`, `LB.DENY_COL` |
 
 ## Clés de sauvegarde
 - `LB.key('lang'|'snd'|'mus'|'help')` → `lb-lang`, `lb-snd`, `lb-mus`, `lb-help` (communes à la série) ; tout autre nom → `lb-<id>-<nom>` (`lb-ch1-intro`, `lb-ch2-unl`…).
@@ -37,10 +38,19 @@
 - `LB.audio.now()`, `.state`, `.bg`, `.stat` (compteurs `tone`, `noise`, `made`, pour les tests).
 - Les chapitres n'ont plus ni `AudioContext` ni `.destination` (contrôlé par `tests/audio.js`).
 
+## Veilleur (`LB.hero`, session `engine/hero-states`, 31 octobre)
+- **Une seule machine** pour les trois phases des deux chapitres : `ready` → `act` → `recover` → `ready`, `hurt` (étourdissement), `deny` (appui refusé, 0,25 s). Un appui n'agit qu'en `ready` ; pendant l'action ou la récupération il ne fait que poser `deny`. L'attaque est jugée à l'impact (`stops`) : arrêtée si le Veilleur est en action ou dans la grâce de sa récupération, ce qui le renvoie à `ready` (`stopped`).
+- **Gestes** (`LB.HERO_T`) : `block` (grâce 0,06 s), `dodge` (0,05 s), `hold` (0,06 s ; garde tenue tant que le bouton l'est, endurance `drain` / `regen`, `broken` 0,9 s). Action 0,333 s × `m`, récupération 0,7 s × `rm`, parfait 0,08 s × `m`. `LB.HERO_DIFF` : `easy` {6 PV, m 2}, `normal` {4, 1}, `hard` {3, 0,6, rm 1,2}, `trial` {4 PV, +1 PV entre les phases, plafond 4}. Phases : Chapitre I = `block`, `dodge`, `block` ; Chapitre II = `dodge` (phase I), `block` (phase II), `hold` (phase III).
+- **Difficulté** : `LB.diff.apply(nom, difficultéDuChapitre)` fusionne (le chapitre le fait une fois pour chaque entrée de `DIFFS` ; l'Épreuve prend la base de Normal ou de Difficile) ; `LB.diff.use(d)` fixe celle que lit `LB.hero` (appelé au choix de difficulté : `applyDiff` au Chapitre I, `fresh` au Chapitre II).
+- **Réglages d'attaque** (jamais dans le Veilleur) : `stops(p, {win, grace, graceAdd})` (fenêtre courte du souffle, marge de plus en Difficile, pluie de bris) ; `hurt(p, écart, {dur, min, g})` (étourdissement propre à l'attaque ou au chapitre).
+- **Dessin** (laissé aux chapitres) : la lanterne passe au rouge `LB.DENY_COL` quand `p.deny > 0` (une ligne par dessin) ; `LB.drawRecoveryBar(ctx, x, y_pieds, p)` ne se dessine que pendant `recover` et que le chapitre n'appelle que si la case « Aide » est cochée. Les chapitres lisent `p.s`, `p.t`, `p.rd`, `p.rk`, `p.deny`, `p.stam`.
+- Un état d'animation propre au chapitre (prise, riposte, coup de lanterne, mort `down`) n'est pas dans `LB.hero` : `step` ne le touche pas.
+
 ## Tests
 - `tests/audio.js` (CI) : contexte unique sur les deux `dist` et sur les copies de test, suspension / reprise (onglet caché, `pagehide` / `pageshow`, focus en arrière-plan), bruitages par `LB.audio.tone` / `noise`, musiques sur le contexte commun, réglages `lb-snd` / `lb-mus` relus ; `errs []` attendu.
 - `tests/keys.js` (CI) : clés communes et migration sur les deux `dist`, langue par défaut, clés `eb-…` du Chapitre I, aide mémorisée, écriture dans les seules `lb-…`, choix vu d'un chapitre à l'autre.
-- `tests/visual-shots.js` : captures déterministes des deux chapitres, comparaison au pixel (voir `NOTES.md` racine).
+- `tests/visual-shots.js` : captures déterministes des deux chapitres, comparaison au pixel (voir `NOTES.md` racine) ; depuis le 31 octobre, aussi un appui refusé et la barre de récupération avec l'aide cochée puis décochée.
+- `tests/input.js` (états du Veilleur des deux chapitres) et `tests/ch1-bot.js` (bots du Chapitre I à pas fixe, avant / après sur la même graine).
 
 ## À venir (plan de `docs/COMMUN.md` § 4)
-`LB.hero` et `HERO_T` (3), `LB.drawWatcher` (4), `LB.cine` et `LB.title` (5), menu, HUD, cartes, entrées (6).
+~~`LB.hero` et `HERO_T` (3)~~ fait le 31 octobre, `LB.drawWatcher` (4), `LB.cine` et `LB.title` (5), menu, HUD, cartes, entrées (6).

@@ -298,11 +298,11 @@ function heroPose(){
       else{const u=es(clamp01((t-1.1)/.45));x+=50*u;y-=20*u;glow=t<1.55?1:Math.max(.5,1-(t-1.55)/3)}
     }
     const tgt=qBeamTarget(c);if(tgt)sa=Math.atan2(tgt[1]-(y+WH[1]),tgt[0]-(x+WH[0]));else sa=-.7;
-  }else if(p.s==='dodge'){
-    const u=p.t/DG.act,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);
+  }else if(p.s==='act'){
+    const u=p.t/HD('dodge').act,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);
     y+=DG.drop*off;x-=20*off;rot=-6.283*es(u);
   }else if(p.s==='hurt'){
-    const u=Math.min(1,p.t/(p.hs||DG.hurt));x-=34*(1-u);rot=-.35*(1-u);
+    const u=Math.min(1,p.t/p.rd);x-=34*(1-u);rot=-.35*(1-u);
   }else if(p.s==='down'){
     x-=p.t*40;y+=p.t*140;rot=-p.t*5;
   }
@@ -328,7 +328,7 @@ function drawHero2(){
   qlimb([18.5,-18.5],WH,9,'#2a3550');ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(18.5,-18.5,5.2,0,6.283);ctx.fill();
   ctx.save();ctx.translate(WH[0],WH[1]);ctx.rotate(h.sa);
   const c2=Q.cn,hitk=c2?qBeamAl(c2):0;
-  drawScepter(80,Math.max(.35,h.glow,hitk),h.glow>0||hitk>0?'#fff4d6':'#ffd27a');
+  drawScepter(80,Math.max(.35,h.glow,hitk),Q.pl.deny>0?LB.DENY_COL:h.glow>0||hitk>0?'#fff4d6':'#ffd27a');
   if(h.glow>0){
     const gr=36*h.glow,og=ctx.createRadialGradient(80,0,0,80,0,gr*2);
     og.addColorStop(0,'rgba(255,255,255,1)');og.addColorStop(.4,'rgba(190,234,255,.7)');og.addColorStop(1,'rgba(111,211,255,0)');
@@ -401,17 +401,15 @@ function drawHints2(){
     const h=a.hits.find(x=>!x.done);
     if(h){
       const tt=h.at-a.t;
-      if(!DIFF.easy){if(tt>0&&tt<=DG.act+HINT_LEAD)hintBar(QH[0],QH[1]-95,tt<=DG.act?tt/DG.act:1-(tt-DG.act)/HINT_LEAD,tt<=DG.act)}
-      else if(tt<=DG.act&&tt>0){
+      const act=HD('dodge').act;
+      if(!DIFF.easy){if(tt>0&&tt<=act+HINT_LEAD)hintBar(QH[0],QH[1]-95,tt<=act?tt/act:1-(tt-act)/HINT_LEAD,tt<=act)}
+      else if(tt<=act&&tt>0){
         ctx.strokeStyle='rgba(111,211,255,.9)';ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(QH[0],QH[1]-10,70-20*(1-tt/DG.act),0,6.283);ctx.stroke();
+        ctx.beginPath();ctx.arc(QH[0],QH[1]-10,70-20*(1-tt/act),0,6.283);ctx.stroke();
       }
     }
   }
-  if(p.s==='recover'){
-    ctx.strokeStyle='rgba(166,154,147,.8)';ctx.lineWidth=3;
-    ctx.beginPath();ctx.arc(QH[0],QH[1]-10,78,-1.57,-1.57+6.283*(p.t/DG.rec));ctx.stroke();
-  }
+  LB.drawRecoveryBar(ctx,QH[0],QH[1]+44,p); /* barre de récupération sous les pieds : repère d'aide, jamais rouge (la lanterne l'est) */
 }
 function drawLake(front){
   if(Q.mode!=='lake')return;

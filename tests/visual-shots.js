@@ -5,7 +5,7 @@
 // Determinisme (methode du Chapitre II, NOTES.md) : requestAnimationFrame, performance.now et Date.now remplaces par un pas
 // fixe de 1/60 s avance par le test, Math.random a graine fixe, AudioContext absent, animations CSS coupees, souris en (0, 0).
 // Parcours pilote par le DOM seulement (le dist n'a pas de crochets) : menu, cinematique d'intro, carte, trois instants de
-// chaque phase, pause ; FR et EN a 1100 x 760, FR a 390 x 844 ; plus un menu avec les anciennes cles du chapitre (migration).
+// chaque phase, appui refuse et barre de recuperation (aide cochee puis decochee), pause ; FR et EN a 1100 x 760, FR a 390 x 844 ; plus un menu avec les anciennes cles du chapitre (migration).
 const fs=require('fs'),path=require('path');const launch=require('./launch');
 const ROOT=path.resolve(__dirname,'..');
 const STEP=1000/60;
@@ -42,6 +42,15 @@ async function shots(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await
    await click('#go');await adv(90);await shot('p'+(ph+1)+'-a');
    await adv(150);await pg.keyboard.press('Space');await adv(12);await shot('p'+(ph+1)+'-b');
    await adv(200);await shot('p'+(ph+1)+'-c');
+   // appui refuse (lanterne rouge) et barre de recuperation (repere d'aide, case cochee) : Normal, bureau, anglais
+   if(nm==='desk'&&lang==='en'){
+    await pg.evaluate(()=>{const o=document.getElementById('optHelp');if(o&&!o.checked)o.click()});
+    await pg.keyboard.press('Space');await adv(8);await pg.keyboard.press('Space');await adv(3);await shot('p'+(ph+1)+'-deny-act');
+    await adv(28);await shot('p'+(ph+1)+'-recover-help');
+    await pg.keyboard.press('Space');await adv(3);await shot('p'+(ph+1)+'-deny-recover-help');
+    await pg.evaluate(()=>{const o=document.getElementById('optHelp');if(o&&o.checked)o.click()});
+    await adv(3);await shot('p'+(ph+1)+'-recover-nohelp');
+   }
   }
   await pg.keyboard.press('p');await adv(20);await shot('pause');
   await ctx.close()}

@@ -140,7 +140,7 @@ const CHAPTER={
 | Table | Contenu |
 |---|---|
 | `HERO_T` | par geste : `block:{act:.333,rec:.7,grace:.06,perf:.08}`, `dodge:{act:.333,rec:.7,grace:.05,perf:.08,fool:.6}`, `hold:{act:.333,rec:.7,grace:.06,perf:.08,drain:.36,regen:.38,broken:.9}` ; `deny:.25` ; `hurt:{base:.38,min:.14,margin:.2}` |
-| `HERO_DIFF` | `easy:{hp:6,m:2,rm:1}`, `normal:{hp:4,m:1,rm:1}`, `hard:{hp:3,m:.6,rm:1.2}`, `trial:{hp:4,heal:0}` (**T**) |
+| `HERO_DIFF` | `easy:{hp:6,m:2,rm:1}`, `normal:{hp:4,m:1,rm:1}`, `hard:{hp:3,m:.6,rm:1.2}`, `trial:{hp:4,heal:1}` (décision du 31 octobre : +1 PV entre les phases, plafond 4 PV ; remplace « aucun soin ») |
 | `CINE_T` | fondu 0,8 s, apparition de la légende 0,5 s + 0,6 s, durée minimale d'un carton 6 s |
 | `TITLE_T` | `size:96, sub:…, gap:22, y:.36` (placement mesuré du Ch. II) |
 | `MENU_T` | durées des particules et des scintillements, remontée du titre (`-9vh`, `-4vh` en paysage bas) |
@@ -175,7 +175,7 @@ Chaque session : une branche, une PR, tests verts, `NOTES.md` et `DECISIONS.md` 
 | # | Branche | Périmètre | Ne touche pas | Tests ajoutés |
 |---|---|---|---|---|
 | 0 à 2 | `engine/audit`, `engine/shared`, `engine/audio` | **Faites** (27–28 octobre) : voir `docs/decisions/2026-10-28-engine-shared.md` et `archives/decisions/2026-10-28-engine-audio.md` | — | — |
-| 3 | `engine/hero-states` | `LB.hero.*`, `HERO_T`, `HERO_DIFF`, `LB.diff.apply` ; les trois phases du Ch. I et du Ch. II rebranchées ; barre de récupération et lanterne rouge communes ; **vocabulaire bloquer / esquiver** (bouton, aide, stats, lecteur d'écran, noms de code) | dessin du Veilleur, attaques, timings des boss | `input` généralisé (Ch. I compris), bots Normal/Difficile du Ch. I à pas fixe avant/après |
+| 3 (**faite le 31 octobre**, voir `docs/decisions/2026-10-31-engine-hero-states.md`) | `engine/hero-states` (publiée : `engine/hero-states-2`) | `LB.hero.*`, `HERO_T`, `HERO_DIFF`, `LB.diff.apply` ; les trois phases du Ch. I et du Ch. II rebranchées ; barre de récupération et lanterne rouge communes ; **vocabulaire bloquer / esquiver** (bouton, aide, stats, lecteur d'écran, noms de code) | dessin du Veilleur, attaques, timings des boss | `input` généralisé (Ch. I compris), bots Normal/Difficile du Ch. I à pas fixe avant/après |
 | 4 | `engine/watcher` | `LB.drawWatcher` et poses, lanterne, bouclier, esquives ; le Ch. II reprend le Veilleur du Ch. I (heaume, tabard, sceptre-lanterne) ; silhouettes du menu et des cinématiques | états, boss | captures déterministes de chaque pose, par chapitre |
 | 5 | `engine/cine` | `LB.cine`, `CINE_T`, `LB.title`, `TITLE_T` ; prologue et épilogue du Ch. II portés dans le module (cartons à 6-7 s, drapeau `lb-ch2-intro`, rejeu) ; intro/outro du Ch. I | scènes dessinées (étape C du Ch. II) | `title` généralisé, passage et rejeu |
 | 6 | `menu/common` | `LB.menu`, `LB.gate`, `LB.card`, `LB.pause`, `LB.input`, HUD (`LB.hud`, repères de rage calculés, nom du boss), aide (`LB.cue`), plein écran, `MENU_T` ; les deux menus alimentés par `CHAPTER` ; Épreuve selon la décision prise | choix du chapitre (Couronne) | `menu-title` généralisé, `announce` généralisé, `trial` généralisé |
@@ -186,3 +186,5 @@ Chaque session : une branche, une PR, tests verts, `NOTES.md` et `DECISIONS.md` 
 Ordre des dépendances : 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 ; 4 et 5 peuvent s'inverser. Les sessions de chapitre en cours (Ch. II étape C « visuels ») doivent passer **avant** la session 4 ou attendre après la session 6, pour ne pas redessiner un Veilleur ou des cinématiques qui vont être remplacés.
 
 Les décisions ouvertes à l'origine de l'audit sont toutes tranchées : `docs/decisions/2026-10-28-engine-shared.md`, §1.
+
+Mise à jour du 31 octobre 2026 (session 3 faite) : la décision n° 1 (barre de récupération toujours visible, seul retour d'un appui refusé) est **remplacée** par la décision de Kevin du 31 octobre : la lanterne du Veilleur passe au rouge pendant `deny` (seul retour), la barre n'est plus qu'un repère d'aide (case « Aide » cochée). Voir `docs/decisions/2026-10-31-engine-hero-states.md`. Les lignes « Barre de récupération » et « Retour d'un appui refusé » du § 1.1 restent l'état de l'audit du 28 octobre.

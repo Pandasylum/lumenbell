@@ -2,8 +2,8 @@
 function makeEmbers(){return Array.from({length:70},()=>({x:rand(0,W),y:rand(0,H),v:rand(14,48),s:rand(1,2.6),ph:rand(0,6.28)}))}
 function newGame(){
   const emb=G?G.embers:makeEmbers();
-  G={mode:'title',time:0,php:startHP(),bhp:DIFF.bhp,parries:0,grabs:0,
-     boss:{s:'idle',t:0,wait:1.5},pl:{s:'ready',t:0,deny:0,x:PX},
+  G={mode:'title',time:0,php:startHP(),bhp:DIFF.bhp,blocks:0,grabs:0,
+     boss:{s:'idle',t:0,wait:1.5},pl:Object.assign(LB.hero.create(),{x:PX}),
      sparks:[],rings:[],floats:[],trail:[],swTrail:[],sw:{p1:false,p2:false,p3:false},atk:{last:'',n:0,plain:0},kick:0,wound:0,p2:false,fy:null,jf:null,fin:null,ringFx:null,embers:emb,
      shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0};
 }
@@ -64,16 +64,14 @@ function press(){
   if(G.mode==='title'){start();return}
   if(G.mode!=='play')return;
   ensureAudio();
-  const p=G.pl;
-  if(p.s==='ready'){p.s='barrier';p.t=0;tone(520,.14,'triangle',.05,320)}
-  else if(p.s==='barrier'||p.s==='recover'){p.deny=.25}
+  if(LB.hero.press(G.pl,'block'))tone(520,.14,'triangle',.05,320)
 }
 /* Facile : à la 3e défaite, la carte propose d'activer l'aide visuelle. */
 function deathCard(){
   if(RUN.on){el.go.textContent=_('Start over from Phase I','Reprendre à la phase I');el.desc.textContent+=_(' In the trial, one death sends you back to the very beginning, at full health.'," Dans l'épreuve, une mort te renvoie au tout début, en pleine forme.");return}
   if(!DIFF.easy||prefs.help)return;
   if(++deaths===3){
-    el.desc.textContent+=_(` Visual cues can help you find the right moment to parry.`,` Des repères visuels peuvent t'aider à choisir le bon moment pour parer.`);
+    el.desc.textContent+=_(` Visual cues can help you find the right moment to block.`,` Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer.`);
     el.go2.hidden=false;
   }
 }
@@ -82,7 +80,7 @@ function showEnd(){
   const win=G.mode==='won';
   el.eye.textContent=win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite');
   el.title.textContent=win?(G.p2?_('Phase I cleared','Phase I terminée'):_('The Colossus drops to one knee.','Le Colosse plie un genou.')):_('Crushed on the stone.','Écrasé sur la pierre.');
-  el.stats.textContent=_('Parries ','Parades ')+G.parries+_(' · Hits taken ',' · Coups subis ')+G.grabs+trStr(1);
+  el.stats.textContent=_('Blocks ','Blocages ')+G.blocks+_(' · Hits taken ',' · Coups subis ')+G.grabs+trStr(1);
   el.stats.hidden=false;
   el.desc.textContent=win?(G.p2?_('The Colossus smashes the bridge and dives through the breach into the foundry beneath the arch, as if he knew the way.',"Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin."):_(`Phase II will open with its upcoming attacks.`,`La phase II s'ouvrira avec ses prochaines attaques.`)):_(`The lantern rolls across the stones of the bridge and goes out. Nothing holds the Colossus back now: the road to the valleys lies open.`,`La lanterne roule sur les pierres du pont et s'éteint. Plus rien ne retient le Colosse : la route des vallées est ouverte.`);
   el.go.textContent=win?(G.p2?_('Start Phase II','Lancer la phase II'):_('Replay Phase I','Rejouer la phase I')):_('Retry','Réessayer');

@@ -113,8 +113,8 @@ function heroX3(){
     if(t<.65)return tx;
     return tx+(PX-tx)*es(clamp01((t-.65)/.5));
   }
-  if(p.s==='down'&&p.lasso){const d=p.downT||1.1,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));return PX+46*k}
-  if(p.s==='down')return PX-24*(1-clamp01(p.t/.5));
+  if((p.s==='down'||p.s==='hurt')&&p.lasso){const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));return PX+46*k}
+  if(p.s==='down'||p.s==='hurt')return PX-24*(1-clamp01(p.t/.5));
   return PX;
 }
 function heroPose3(){
@@ -149,12 +149,12 @@ function heroPose3(){
       sy=.82;hand=[34,-34];sa=0;rot=.05;
       if(t>.65){const v=es(clamp01((t-.65)/.5));sy=.82+.18*v;hand=[34-6*v,-34-28*v];sa=-.45*v;rot=.05*(1-v)}
     }
-  }else if(p.s==='guard'){
+  }else if(p.s==='act'){
     const r=clamp01(p.t/.08);hand=[28,-62-32*r];sa=-.45-1.05*r;glow=1;
-  }else if(p.s==='down'&&p.lasso){
-    const d=p.downT||1.1,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));
+  }else if((p.s==='down'||p.s==='hurt')&&p.lasso){
+    const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));
     rot=-1.45*k;hand=[24,-34];sa=.7;
-  }else if(p.s==='down'){rot=.12;sy=.82;sa=.6}
+  }else if(p.s==='down'||p.s==='hurt'){rot=.12;sy=.82;sa=.6}
   return{x,hand,sa,rot,sy,glow};
 }
 /* Masse de braise du Colosse, dans le repère de la main : manche le long de l'axe x, tête à pointes au bout (portée L) */

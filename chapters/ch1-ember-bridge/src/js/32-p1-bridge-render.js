@@ -260,7 +260,7 @@ function drawBoss(){
 }
 
 function drawPlayer(){
-  const p=G.pl,lift=liftAmt(),up=p.s==='barrier'||p.s==='cast'||p.s==='ring'||p.s==='final';
+  const p=G.pl,lift=liftAmt(),up=p.s==='act'||p.s==='cast'||p.s==='ring'||p.s==='final';
   let r=up?clamp01(p.t/.08):0;
   ctx.fillStyle='rgba(0,0,0,.38)';
   ctx.beginPath();ctx.ellipse(p.x,DECK+1,30*(1-lift/400),5,0,0,6.283);ctx.fill();
@@ -268,7 +268,7 @@ function drawPlayer(){
   ctx.save();ctx.translate(p.x,DECK-lift-(G.ib||0));
   if(G.mode==='intro')ctx.scale(G.sx,1);
   if(lift>0||p.s==='grabbed')ctx.rotate(.42*lift/LIFT_MAX+(p.s==='grabbed'?Math.sin(G.time*22)*.03:0));
-  if(p.s==='down'){ctx.rotate(.12);ctx.scale(1,.82)}
+  if(p.s==='down'||p.s==='hurt'){ctx.rotate(.12);ctx.scale(1,.82)}
 
   drawWizard({fl:0});
 
@@ -279,7 +279,7 @@ function drawPlayer(){
   ctx.strokeStyle='#2a3550';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(23,-78);ctx.lineTo(hand[0],hand[1]);ctx.stroke();ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(23,-78,6.5,0,6.283);ctx.fill();
   ctx.strokeStyle='#8a7a9a';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(sb[0],sb[1]);ctx.lineTo(st[0],st[1]);ctx.stroke();
   ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(hand[0],hand[1],5,0,6.283);ctx.fill();
-  const cc=p.deny>0?'#ff6b6b':up?'#fff4d6':(p.s==='recover'?'#c9a85a':'#ffd27a');
+  const cc=p.deny>0?LB.DENY_COL:up?'#fff4d6':(p.s==='recover'?'#c9a85a':'#ffd27a');
   drawLantern(st[0],st[1],up?1:dashing?.6+.4*thrust:.25,cc,Math.atan2(st[1]-sb[1],st[0]-sb[0])+Math.PI/2);
   if(dashing&&thrust>0){const A=[st[0]+8,st[1]],Z=[BX-62-p.x,-58+lift+(G.ib||0)];lanternBeam(A,lerp2(A,Z,thrust),12+10*thrust,thrust)}
 
@@ -293,8 +293,8 @@ function drawPlayer(){
 }
 
 function drawBarrier(){
-  const p=G.pl;if(p.s!=='barrier')return;
-  const ramp=clamp01(p.t/.07),a=(1-.45*p.t/T.barrier)*ramp;
+  const p=G.pl;if(p.s!=='act')return;
+  const ramp=clamp01(p.t/.07),a=(1-.45*p.t/HD('block').act)*ramp;
   const cx=PX+82,cy=DECK-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
   ctx.save();ctx.globalAlpha=a;
   const g=ctx.createRadialGradient(cx-18,cy,6,cx,cy,ry);
@@ -307,7 +307,7 @@ function drawBarrier(){
   ctx.restore();
 }
 
-/* Repère de timing discret (Normal) : petite barre au-dessus du Veilleur, orange tant que la parade n'est pas ouverte puis bleue pendant la fenêtre. */
+/* Repère de timing discret (Normal) : petite barre au-dessus du Veilleur, orange tant que le blocage n'est pas ouvert puis bleue pendant la fenêtre. */
 function hintBar(cx,y,k,blue){
   const w=68,h=6,x=cx-w/2;
   ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(x-1,y-1,w+2,h+2);
@@ -317,7 +317,7 @@ const HINT_LEAD=.8; // durée d'approche affichée avant l'ouverture de la fenê
 function drawHints(){
   if(G.mode!=='play'||!prefs.help)return;
   const b=G.boss,p=G.pl;
-  /* repère de timing : barre au-dessus de la tête, ou en Facile un cercle qui se resserre autour du Veilleur (bleu = fenêtre de parade) */
+  /* repère de timing : barre au-dessus de la tête, ou en Facile un cercle qui se resserre autour du Veilleur (bleu = fenêtre de blocage) */
   const cue=(k,blue)=>{
     if(DIFF.easy){
       const r=blue?40+22*clamp01(k):110-48*clamp01(k);
@@ -332,8 +332,8 @@ function drawHints(){
     if(b.s!=='swgap'&&b.s!=='sw3g'){
       const tl=wait+strike;
       const ela=b.s.endsWith('w')?b.t:wait+b.t;
-      const rem=Math.max(0,tl-ela),inWin=rem<=T.barrier;
-      const k=inWin?rem/T.barrier:ela/(tl-T.barrier);
+      const rem=Math.max(0,tl-ela),inWin=rem<=HD('block').act;
+      const k=inWin?rem/HD('block').act:ela/(tl-HD('block').act);
       cue(k,inWin);
     }
     const nsw=DIFF.hard?3:2;
@@ -355,8 +355,8 @@ function drawHints(){
     if(b.s==='fy_t'||b.s==='fy_j'||b.s==='rk_t'||b.s==='rk_j'){
       const rk=b.s==='rk_t'||b.s==='rk_j',t1=rk?.5:T.fyt,tl=t1+(rk?.55:.3);
       const ela=(b.s==='fy_t'||b.s==='rk_t')?b.t:t1+b.t;
-      const rem=Math.max(0,tl-ela),inWin=rem<=T.barrier;
-      const k=inWin?rem/T.barrier:ela/(tl-T.barrier);
+      const rem=Math.max(0,tl-ela),inWin=rem<=HD('block').act;
+      const k=inWin?rem/HD('block').act:ela/(tl-HD('block').act);
       cue(k,inWin);
     }
     for(let i=0;i<n;i++){
@@ -372,11 +372,7 @@ function drawHints(){
     const col=b.s==='windup'?'rgba(255,122,43,.85)':'#6fd3ff';
     cue(k,b.s==='strike');
   }
-  if(p.s==='recover'||p.deny>0){
-    const k=p.s==='recover'?p.t/T.recovery:1;
-    ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(PX-31,DECK+8,62,6);
-    ctx.fillStyle=p.deny>0?'#ff5252':'#6fd3ff';ctx.fillRect(PX-30,DECK+9,60*clamp01(k),4);
-  }
+  LB.drawRecoveryBar(ctx,PX,DECK,p); /* barre de récupération : repère d'aide, jamais rouge (la lanterne l'est) */
 }
 
 function drawFx(){

@@ -143,13 +143,13 @@ function drawHero3(){
   qlimb([23,-78],h.hand,9,'#2a3550');ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(23,-78,6.5,0,6.283);ctx.fill();
   ctx.save();ctx.translate(h.hand[0],h.hand[1]);ctx.rotate(h.sa);
   const c3=R.cn,hk3=c3&&(c3.k==='bat'||c3.k==='plant')?Math.max(0,1-Math.abs(c3.t-(c3.k==='bat'?.24:.32))/.16):0;
-  drawScepter(76,p.s==='guard'?1:Math.max(.3,h.glow||0,hk3),p.s==='recover'?'#c9a85a':(p.s==='guard'||h.glow>0||hk3>0)?'#fff4d6':'#ffd27a');
+  drawScepter(76,p.s==='act'?1:Math.max(.3,h.glow||0,hk3),p.deny>0?LB.DENY_COL:p.s==='recover'?'#c9a85a':(p.s==='act'||h.glow>0||hk3>0)?'#fff4d6':'#ffd27a');
   if(hk3>0){ctx.save();ctx.globalCompositeOperation='lighter';lanternBeam([84,0],[84+48*hk3,0],14,hk3);ctx.restore()}
   ctx.restore();
   ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(h.hand[0],h.hand[1],5,0,6.283);ctx.fill();
   ctx.restore();
-  if(p.s==='guard'){
-    const a=1-.45*p.t/R_T.guard,ramp=clamp01(p.t/.07),cx=PX+82,cy=DECK-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
+  if(p.s==='act'){
+    const a=1-.45*p.t/HD('block').act,ramp=clamp01(p.t/.07),cx=PX+82,cy=DECK-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
     ctx.save();ctx.globalAlpha=a*ramp;
     const g=ctx.createRadialGradient(cx-18,cy,6,cx,cy,ry);
     g.addColorStop(0,'rgba(111,211,255,.06)');g.addColorStop(.7,'rgba(111,211,255,.2)');g.addColorStop(1,'rgba(191,234,255,.5)');
@@ -499,17 +499,15 @@ function drawHints3(){
     const h=a.hits.find(x=>!x.done);
     if(h){
       const tt=h.at-a.t;
-      if(!DIFF.easy){if(tt>0&&tt<=R_T.guard+HINT_LEAD)hintBar(PX,DECK-206,tt<=R_T.guard?tt/R_T.guard:1-(tt-R_T.guard)/HINT_LEAD,tt<=R_T.guard)}
-      else if(tt<=R_T.guard&&tt>0){
+      const act=HD('block').act;
+      if(!DIFF.easy){if(tt>0&&tt<=act+HINT_LEAD)hintBar(PX,DECK-206,tt<=act?tt/act:1-(tt-act)/HINT_LEAD,tt<=act)}
+      else if(tt<=act&&tt>0){
         ctx.strokeStyle='rgba(111,211,255,.9)';ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(GUARD[0],GUARD[1],60-20*(1-tt/R_T.guard),0,6.283);ctx.stroke();
+        ctx.beginPath();ctx.arc(GUARD[0],GUARD[1],60-20*(1-tt/act),0,6.283);ctx.stroke();
       }
     }
   }
-  if(p.s==='recover'){
-    ctx.strokeStyle='rgba(166,154,147,.8)';ctx.lineWidth=3;
-    ctx.beginPath();ctx.arc(PX,DECK-130,24,-1.57,-1.57+6.283*(p.t/R_T.rec));ctx.stroke();
-  }
+  LB.drawRecoveryBar(ctx,PX,DECK,p); /* barre de récupération sous les pieds : repère d'aide, jamais rouge (la lanterne l'est) */
 }
 function renderR(){
   if(R.mode==='space'){renderSpace();return}

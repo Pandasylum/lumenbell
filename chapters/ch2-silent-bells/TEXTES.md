@@ -96,7 +96,7 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 90 | Hard | Difficile |
 | 91 | No mercy | Sans pitié |
 | 92 | Trial | Épreuve |
-| 93 | No healing | Sans soin |
+| 93 | You recover 1 life between phases. | Tu récupères 1 PV entre les phases. |
 | 94 | Normal | Normal |
 | 95 | 4 HP total | 4 PV au total |
 | 96 | Hard | Difficile |
