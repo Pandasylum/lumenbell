@@ -41,7 +41,28 @@ function pSeg(){seg(-24,0,24,0,20)}
 function pFist(){fist(0,0)}
 /* the harpoon in the King's left hand: origin at the grip, tip pointing down (+y) */
 function pHarp(){harpoon(0,72,Math.PI/2,112)}
-const PDRAW={tb0:pTb0,tb1:pTb1,tb2:pTb2,ring:pRing,sbell:pSmallBell,head:pHead,seg:pSeg,fist:pFist,harp:pHarp};
+/* the two dark blocks framing the jellyfish at the top of the tower (restored from 2b75101, CHANGEMENTS M): the drawing of the
+   shoulder bells of that version, laid on their side, crown towards the jellyfish. Tower only: the Elder never draws them
+   (his shoulders stay pSmallBell), so they are not in TOWER (no index, no pose, no sound, no threat changes) */
+function pLamp(){ctx.fillStyle=bronze(-34,34);ctx.beginPath();ctx.moveTo(-34,0);ctx.quadraticCurveTo(-30,-46,0,-50);ctx.quadraticCurveTo(30,-46,34,0);ctx.closePath();ctx.fill();ctx.fillStyle='#0d1712';ctx.fillRect(-36,-4,72,6);
+  ctx.strokeStyle='rgba(255,140,60,.4)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(-8,-44);ctx.lineTo(-2,-26);ctx.lineTo(-12,-12);ctx.stroke()}
+const PDRAW={tb0:pTb0,tb1:pTb1,tb2:pTb2,ring:pRing,sbell:pSmallBell,head:pHead,seg:pSeg,fist:pFist,harp:pHarp,lamp:pLamp};
+/* the two side lanterns (decision of Kevin, 1 November): pieces of the tower only, found on the reef, with no counterpart in the
+   Elder. LAMPS: where they sit around the jellyfish in its lantern (70 px to each side, 24 px below it, as in 2b75101); the
+   point (x, y) of a pose is the middle of the mouth, where the tower's lights leave from. Index 0 = left, 1 = right */
+const LAMPS=[-1,1].map(s=>({x:s*70,y:24,r:-s*Math.PI/2}));
+/* lying on the reef between the Watcher and the tower, apart from each other, at the start of phase III, until the construction takes them */
+const LAMP_FLOOR=[{x:400,y:GY-34,r:Math.PI/2},{x:560,y:GY-34,r:-Math.PI/2}];
+/* where they lie once the Bottomless is dead (end cinematic and its still) */
+const LAMP_REST=[{x:LX-380,y:GY-34,r:Math.PI/2},{x:LX+185,y:GY-34,r:-Math.PI/2}];
+/* poses around a jellyfish at (jx, jy); k = scale of the offsets (jellyfish radius / 36); spread = flung out (0 = in place) */
+function lampPoses(jx,jy,k,spread){const sp=spread||0;return LAMPS.map(l=>{const s=Math.sign(l.x);return{x:jx+l.x*(k||1)+s*95*sp,y:jy+l.y*(k||1)-30*sp,r:l.r+s*.6*sp,s}})}
+function drawLamps(Q,a){if(a<=0)return;ctx.save();ctx.globalAlpha*=a;for(const q of Q){ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);PDRAW.lamp();ctx.restore()}ctx.restore()}
+function lamps(jx,jy,a,spread){drawLamps(lampPoses(jx,jy,1,spread),a)}
+/* construction: carried from the corner to the summit with the head bell's and the anchor's own times (no new timing) */
+function lampFly(t){const H=TOWER.find(p=>p.k==='head'),E=lampPoses(LX,LY,1);
+  return LAMP_FLOOR.map((F,i)=>{const t0=i?ANCH.t:H.t,d=H.d,e=eio(clamp((t-t0)/d,0,1));
+    return{x:lerp(F.x,E[i].x,e),y:lerp(F.y,E[i].y,e)-Math.sin(Math.PI*e)*H.lift,r:lerp(F.r,E[i].r,e),s:E[i].s,t0,d}})}
 /* pieces that stay on the reef when the tower bursts (the three torso bells, the right fist, the planted harpoon) */
 const FIXED=k=>k==='fist'||k==='harp'||k.startsWith('tb');
 /* start pose = standing King (centered on LX); end pose = the tower, from the reef up:
@@ -117,11 +138,11 @@ function drawBoss3(){
   glow(LX,LY,190+B.charge*90,'rgba(90,220,255,.5)',(.4+B.charge*.5)*on);
   ctx.save();if(hasFilter&&gt-S.bossFlash<.15)ctx.filter='brightness(1.9)';
   moorings(1);drawAnchorAt(anchorPose(null));
-  drawPieces(null,.85);
+  drawPieces(null,.85);lamps(LX,LY,1);
   bindings(on,1);
   for(const [side,ph] of[[-1,0],[1,1.7]]){const sw=Math.sin(rt*1.8+ph);ctx.strokeStyle=`rgba(111,232,255,${.45*on+.1})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LX+side*20,LY+6);ctx.bezierCurveTo(LX+side*90,LY-30+sw*20,LX+side*140,LY+30-sw*30,LX+side*(170+sw*20),LY+80+sw*20);ctx.stroke()}
   jelly(LX,LY,36,on,rt);
-  if(B.charge>.3&&Math.sin(gt*37)>.2){ctx.save();ctx.globalCompositeOperation='lighter';bolt(LX-36,LY-10,LX+36,LY-16,(gt*13|0)/13,'rgba(220,250,255,.8)',1.5);ctx.restore()}
+  if(B.charge>.3&&Math.sin(gt*37)>.2){ctx.save();ctx.globalCompositeOperation='lighter';lampPoses(LX,LY,1).forEach((q,i)=>bolt(q.x,q.y,q.x+q.s*40,q.y-24,(gt*13|0)/13+i*.5,'rgba(220,250,255,.8)',1.5));ctx.restore()}
   if(ko>0){ctx.strokeStyle='rgba(200,250,255,.9)';ctx.lineWidth=2;for(const c of TCR){const n=Math.ceil(c.length*Math.min(1,ko*1.5));ctx.beginPath();for(let i=0;i<n;i++)i?ctx.lineTo(c[i][0],c[i][1]):ctx.moveTo(c[i][0],c[i][1]);ctx.stroke()}}
   for(let i=0;i<6;i++){const k=(rt*.05+i/6)%1;ell(LX-160+k*320,GY-6,70,14,`rgba(160,230,240,${.08*Math.sin(k*Math.PI)})`)}
   ctx.restore();
@@ -131,6 +152,7 @@ const TF_LEN=10;
 function drawTransform(){
   const t=gt-S.tfT;
   if(t<2){ // the King, shaking, heart turning blue
+    drawLamps(LAMP_FLOOR,1);
     S.shake=Math.max(S.shake,Math.min(1,t)*4);
     ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();
   }else{
@@ -142,9 +164,11 @@ function drawTransform(){
     const aq=anchorPose(t);drawAnchorAt(aq);
     if(aq.f>.98&&!S.tfAnch){S.tfAnch=true;S.shake=10;burst(aq.x-40,GY,26,'#dff8ff',6,.8,.4)}
     const qs=drawPieces(t,.85);
+    const lq=lampFly(t);drawLamps(lq,1);
     // tentacles reaching for each piece while it moves (and holding it while it waits)
     TOWER.forEach((p,i)=>{const q=qs[i];const holding=t<p.t+(p.d||.9)+.15&&t>2.4;if(holding)tentacle(hx,hy+10,q.x,q.y-10,i,1,2.4)});
     if(t<ANCH.t+ANCH.d+.15&&t>2.4)tentacle(hx,hy+10,aq.x,aq.y,99,1,3);
+    lq.forEach((q,i)=>{if(t<q.t0+q.d+.15&&t>2.4)tentacle(hx,hy+10,q.x,q.y,50+i,1,2.4)});
     // place-impact sparks
     TOWER.forEach((p,i)=>{const f=clamp((t-p.t)/(p.d||.9),0,1);if(f>=1&&!p['_d'+S.tfId]){p['_d'+S.tfId]=1;burst(qs[i].x,qs[i].y,10,'#9ff2ff',4,.5)}});
     bindings(1,clamp((t-7.8)/.8,0,1));
@@ -163,17 +187,17 @@ function drawBeacon(){
       else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D,bx=940-1000*s;drawWave(bx,96,1);if(Math.abs(bx-HX)<90&&S.holding)burst(HX+30+(Math.random()-.5)*60,GY-80-Math.random()*60,2,'#e6f8f2',4,.4)}
       else{const q=(gt-th.ts-th.D)/1;ctx.save();ctx.globalAlpha=1-q;ctx.scale(-1,1);drawWave(-lerp(-60,700,eio(q)),40*(1-q*.5),1);ctx.restore()}}
     if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D+.1){
-      let bx;if(gt<th.ts){bx=th.dir<0?940:-60;const k=(gt-th.t0)/(th.ts-th.t0);ctx.save();ctx.globalAlpha=.12+.25*k;beamShape(bx,.6);ctx.restore();continue}
+      let bx;if(gt<th.ts){bx=th.dir<0?940:-60;const k=(gt-th.t0)/(th.ts-th.t0);ctx.save();ctx.globalAlpha=.12+.25*k;beamShape(bx,.6,th.dir<0?1:-1);ctx.restore();continue}
       const s=(gt-th.ts)/th.D;bx=th.dir<0?940-1000*s:-60+1000*s;
-      ctx.save();ctx.globalCompositeOperation='lighter';beamShape(bx,1);ctx.restore();
+      ctx.save();ctx.globalCompositeOperation='lighter';beamShape(bx,1,th.dir<0?1:-1);ctx.restore();
       if(Math.abs(bx-HX)<90&&S.holding){burst(HX+(Math.random()-.5)*120,GY-60-Math.random()*40,1,'#e8fdff',3,.3)}
     }
-    if(th.k==='bolt'&&gt>=th.t0){
+    if(th.k==='bolt'&&gt>=th.t0){const o=lampPoses(LX,LY,1)[th.seed<.5?0:1];
       if(!th.done){const k=clamp((th.ti-gt)/(th.ti-th.t0),0,1);ctx.strokeStyle=`rgba(180,250,255,${.85-k*.4})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(HX,GY,24+60*k,6+14*k,0,0,Math.PI*2);ctx.stroke();
-        glow(LX,LY,60,'rgba(200,250,255,.9)',k<.25?.8:0)}
+        glow(o.x,o.y,60,'rgba(200,250,255,.9)',k<.25?.8:0)}
       else if(gt-th.okT<.22){ctx.save();ctx.globalCompositeOperation='lighter';
-        if(th.res==='ok'){bolt(HX+40,0,HX+6,GY-150,th.seed,'rgba(220,250,255,.95)',4);bolt(HX+6,GY-150,HX-140,GY-260,th.seed+.3,'rgba(160,240,255,.8)',2.5)}
-        else bolt(HX+40,0,HX,GY-40,th.seed,'rgba(220,250,255,.95)',4);
+        if(th.res==='ok'){bolt(o.x,o.y,HX+6,GY-150,th.seed,'rgba(220,250,255,.95)',4);bolt(HX+6,GY-150,HX-140,GY-260,th.seed+.3,'rgba(160,240,255,.8)',2.5)}
+        else bolt(o.x,o.y,HX,GY-40,th.seed,'rgba(220,250,255,.95)',4);
         ctx.restore()}
     }
     if(th.k==='spike'&&gt>=th.t0){
@@ -195,5 +219,6 @@ function reefSpikes(x,k,a){if(a<=0)return;ctx.save();ctx.globalAlpha*=a;
     ctx.fillStyle='#0b1214';ctx.fill();ctx.strokeStyle='rgba(120,220,205,.45)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(bx-2,GY+4-h*.6);ctx.lineTo(bx+1,GY+4-h);ctx.stroke();
     ell(bx+1,GY+4-h,3.5,2,'rgba(230,248,244,.85)');ell(bx-5,GY+2,6,2.5,'rgba(230,248,244,.5)')}
   ctx.restore()}
-function beamShape(bx,a){const g=ctx.createLinearGradient(LX,LY,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(LX-9,LY);ctx.lineTo(LX+9,LY);ctx.lineTo(bx+80,GY+16);ctx.lineTo(bx-80,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,90,12,`rgba(200,250,255,${.25*a})`)}
+/* the tower's sweeping beam, from the mouth of a side lantern (side: 1 = right, the default, -1 = left) */
+function beamShape(bx,a,side){const o=lampPoses(LX,LY,1)[side<0?0:1],g=ctx.createLinearGradient(o.x,o.y,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(o.x,o.y-9);ctx.lineTo(o.x,o.y+9);ctx.lineTo(bx+80,GY+16);ctx.lineTo(bx-80,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,90,12,`rgba(200,250,255,${.25*a})`)}
 

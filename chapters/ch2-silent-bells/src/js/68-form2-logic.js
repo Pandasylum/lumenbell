@@ -29,11 +29,11 @@ function drawEclGame(){
   const T=S.ecPhi/.55,P=ecPose(T),A0=ecAnchor(T);let A=A0;
   let J={x:LX,y:ECY+Math.sin(rt*1.1)*4,r:44};
   if(S.angerShown){RINGS.forEach((idx,i)=>{if(i%2){const a=-S.ecPhi*1.3+i*2*Math.PI/7;P[idx]={x:LX+Math.cos(a)*140,y:ECY+Math.sin(a)*46,r:a*.5,z:Math.sin(a)}}})}
-  let reBeam=null;
+  let reBeam=null,sw=1;
   for(const th of S.threats){if(gt<th.t0)continue;
     if(th.k==='reform'){const d=S.threats.find(x=>x.k==='disp'&&x.t0===th.ts+th.D);const end=d?d.ti:th.ts+th.D+.5;
       const k=gt<th.tr?eio(clamp((gt-th.t0)/(th.tr-th.t0),0,1)):gt<end-.3?1:1-ein(clamp((gt-(end-.3))/.3,0,1));
-      if(gt<end+.05){TOWER.forEach((p,i)=>{const e=p.e;P[i]={x:lerp(P[i].x,e.x,k),y:lerp(P[i].y,e.y,k),r:lerp(P[i].r,e.r,k),z:lerp(P[i].z||0,0,k),sc:P[i].sc}});A={x:lerp(A.x,LX+118,k),y:lerp(A.y,GY-150,k),a:lerp(A.a,1.78,k),sc:lerp(A.sc,1,k),z:-2.5,clip:k>.9};J={x:LX,y:lerp(J.y,LY,k),r:lerp(J.r,36,k)};
+      if(gt<end+.05){TOWER.forEach((p,i)=>{const e=p.e;P[i]={x:lerp(P[i].x,e.x,k),y:lerp(P[i].y,e.y,k),r:lerp(P[i].r,e.r,k),z:lerp(P[i].z||0,0,k),sc:P[i].sc}});A={x:lerp(A.x,LX+118,k),y:lerp(A.y,GY-150,k),a:lerp(A.a,1.78,k),sc:lerp(A.sc,1,k),z:-2.5,clip:k>.9};J={x:LX,y:lerp(J.y,LY,k),r:lerp(J.r,36,k)};sw=1-k;
         if(gt>=th.ts&&gt<=th.ts+th.D)reBeam=(gt-th.ts)/th.D;
         if(k>.95&&!th.sf){th.sf=1;MUSIC.fx('clank');MUSIC.fx('ignite')}}}
     if(th.k==='disp'&&th.done&&!th.sf){th.sf=1;S.shake=12;burst(LX,GY-200,40,'#9ff2ff',8,.9);MUSIC.fx('bellCascade')}
@@ -72,14 +72,15 @@ function drawEclGame(){
     else if(th.k==='lbeam')beams.push(th);
     else if(th.k==='sring')srings.push(th);
   }
-  drawEcl(P,A,J,1,on,null);
+  drawEcl(P,A,J,1,on,null,null,sw);
   if(reBeam!=null){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*reBeam,1);ctx.restore()}
   ctx.save();ctx.globalCompositeOperation='lighter';
+  // side beams and storm rings leave from the side lanterns, held where the shoulder bells were (P[SBELLS], see drawEcl)
   for(const th of beams){const o=P[SBELLS[th.side]];
     if(gt<th.ts){const k=(gt-th.t0)/(th.ts-th.t0);glow(o.x,o.y,60,'rgba(110,235,255,.9)',.4+.5*k);beamFrom(o.x,o.y,940,.12+.25*k)}
     else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D;beamFrom(o.x,o.y,940-1000*s,1);glow(o.x,o.y,70,'rgba(200,250,255,.9)',.8)}}
   for(const t of tells)glow(t[0],t[1],46,'rgba(200,250,255,.95)',.9*t[2]);
-  // rings of the bell storm, from the side lanterns
+  // rings of the bell storm, from the two side lanterns in turn (th.side alternates)
   for(const th of srings){const o=P[SBELLS[th.side]];
     if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);glow(o.x,o.y,56,'rgba(110,235,255,.9)',.3+.6*k);ctx.strokeStyle=`rgba(220,252,255,${k})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(o.x,o.y,30-18*k,0,Math.PI*2);ctx.stroke();continue}
     let x,y,a=1,rr=16;

@@ -22,9 +22,9 @@ J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, car
 
 K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
 L	Chapitre I · Fausse fin de Facile supprimée	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
+
 M	Chapitre II · Phare Noyé : tour d'avant C1	À faire (validation à l'écran d'abord)	1er novembre 2026	
 N	Chapitre I · Phase II : esquive en pas de côté, contres au sol	En cours	1er novembre 2026	branche `ch1/dodge-side` (PR à ouvrir)
-
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
 
@@ -223,7 +223,7 @@ Ne pas toucher aux timings.
 
 À ne pas faire : modifier la silhouette du Colosse, ou toucher au Chapitre I.
 
-Statut : à faire (validation à l'écran d'abord), session `ch2/phare-v1`.
+Statut : en cours, branche `ch2/phare-v1` (1er novembre). Comparaison faite par Kevin : les « 2 lampes en haut » sont les deux blocs sombres qui encadrent la méduse dans `2b75101`, supprimés par `0bad679`. Seul ce sommet est restauré (formes I et II) ; planche avant / après : `build/out/phare-v1/comparaison-phase3.png` (non suivie). Écart tranché par Kevin le 1er novembre : les deux blocs sont des lanternes latérales propres à la tour (phrase ajoutée sous le tableau de `docs/CH2-SPEC.md`). 2e passe : les lumières de la tour (faisceau, foudre, crépitement de charge, anneaux de la tempête) partent des deux lanternes, en formes I et II ; les deux pièces attendent sur la plage, au centre et séparées, à l'entrée du combat et servent à la construction. Planche : `build/out/phare-v2/comparaison-tirs.png` (non suivie). Détails : `chapters/ch2-silent-bells/NOTES.md`, « Lanternes latérales ».
 
 N. Chapitre I · Phase II : esquive en pas de côté, contres au sol (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-ch1-esquive-pas-de-cote.md`)
 

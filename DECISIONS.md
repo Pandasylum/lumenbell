@@ -92,3 +92,8 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 
 ## 2026-10-28 – Chapitre II · deuxième passe de retouches (branche `ch2/retouches`)
 - `BAM` retiré ; choc de la riposte repris du Chapitre I (`SHOCK`) ; défaite en forme II : retour à la forme I de la phase III ; l'illusion esquivée revient (`DG.backWin` provisoire, `DG.fool` retiré). Esquiver une illusion n'est pas une faute de série (validé le 30 octobre, `CHANGEMENTS.md` J). *(Texte intégral : [archives/DECISIONS-2026-10-27-28.md](archives/DECISIONS-2026-10-27-28.md#deuxieme-passe).)*
+
+## 2026-11-01 – Chapitre II · sommet du Phare Noyé d'avant C1 (branche `ch2/phare-v1`, `CHANGEMENTS.md` M)
+- Les deux blocs sombres qui encadrent la méduse (`2b75101`) reviennent au sommet de la tour, en forme I (et dans les passages où la tour est entière). Pièce propre à la tour (`PDRAW.lamp`, `LAMPS`), hors de `TOWER` : balcons, Ancien, sons, menaces et timings inchangés. À valider à l'écran par Kevin ; écart avec le tableau des pièces signalé (les blocs ne viennent d'aucune pièce de l'Ancien).
+- 2e passe (Kevin) : les deux blocs sont des « lanternes latérales » propres à la tour, trouvées au sol, sans équivalent chez l'Ancien ; bronze actuel gardé. Les lumières de la tour (faisceau, foudre, crépitement, anneaux de la tempête) partent d'elles, en formes I et II ; elles attendent dans un coin à l'entrée du combat et servent à la construction. Seule l'origine visuelle change.
+- Retour de Kevin : en forme II, lanternes et cloches d'épaule échangent leurs places (lanternes tenues en haut par les tentacules, hors de la partie cachée) ; les faisceaux partent des lanternes dans les deux formes.
