@@ -231,6 +231,7 @@ Décisions :
 - L'esquive de la phase II devient le pas de côté du Chapitre II (pose `dodgeSide`, 0,38 s, image rémanente) à la place de la plongée `dodgeDown` ; le Veilleur reste sur son bloc, sans toucher le vide ni la lave.
 - Contre sur la tête du Colosse : le Veilleur reste au sol ; seul le rayon s'oriente vers la tête.
 - Finish (COUP ULTIME) : le Veilleur reste au sol ; seul le rayon vise.
+- Estoc (contre `stab`) : déplacement dessiné raccourci (60 → 28 px, comme le Finish) pour que le Veilleur reste sur son bloc ; ni timing, ni dégâts, ni cible ne changent.
 
 Rendu seulement : aucun timing ni réglage d'équilibrage ne change. `DG.drop` reste (rebord, défaite) ; la pose `dodgeDown` reste dans le module commun. Aucun texte affiché ne change ; aucun texte de lecteur d'écran ne décrivait un plongeon.
 

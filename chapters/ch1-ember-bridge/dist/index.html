@@ -2774,8 +2774,8 @@ function heroPose(){
   if(c){
     const t=c.t;
     if(c.k==='stab'){
-      /* pas en avant, rayon droit sur le torse */
-      const adv=t<.3?eo(t/.3):t<.7?1:1-es(clamp01((t-.7)/.45));x+=60*adv;y+=-6*adv;rot=-.04*adv;
+      /* pas en avant (28 px, 1er novembre : la robe reste sur le bloc), rayon droit sur le torse */
+      const adv=t<.3?eo(t/.3):t<.7?1:1-es(clamp01((t-.7)/.45));x+=28*adv;rot=-.04*adv;
     }else if(c.k==='head'){
       /* le Veilleur reste sur son bloc : seul son rayon monte vers la tête (1er novembre) */
       glow=t>=.3&&t<.85?.6:0;
