@@ -18,6 +18,7 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 - [2026-10-30 · entrées Lore des 28 et 29 octobre : renvoi au journal de `docs/LORE.md` §15, pas de recopie ici](docs/decisions/2026-10-30-decisions-lore-renvoi.md)
 - [2026-10-31 · `engine/hero-states` : une seule machine à états du Veilleur (`LB.hero`, `HERO_T`, `HERO_DIFF`), lanterne rouge pour un appui refusé et barre de récupération réduite à l'aide (remplace le n° 1 du 28 octobre), Épreuve à 4 PV sans soin et ouverte, coup bloqué → `ready` en phase I, vocabulaire bloquer / esquiver au Chapitre I ; **Épreuve : +1 PV entre les phases, plafond 4, deux chapitres (décision du soir, remplace « aucun soin »)**](docs/decisions/2026-10-31-engine-hero-states.md)
 - 2026-10-30 · voix : berceuse du chapitre III en chant formantique sans paroles intelligibles (paroles écrites) ; voix du Roi Spectral (VI) enregistrée puis modulée, seule exception à « tout synthétisé »
+- [2026-11-01 · menus : nom de l'Épreuve dans tous les menus (« Épreuve du feu », « Épreuve de l'eau », « Épreuve de la terre ») et sous-titres communs à tous les chapitres (Respire, À la loyale, Sans pitié, Challenge ultime) ; ferme À trancher 14 et 15 et la décision 9 du 28 octobre (session `menu/common`)](docs/decisions/2026-11-01-menus-epreuve-sous-titres.md)
 
 ## 2026-10-26 / 27 – Refonte du lore et des textes du Chapitre I
 - Le secret (les Scellés sont d'anciens Veilleurs) n'est **jamais dit** ; un fragment par chapitre, davantage dans le premier.
