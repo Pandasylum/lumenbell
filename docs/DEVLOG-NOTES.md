@@ -56,7 +56,7 @@
 ## 2026-11-01 · docs/idees-validees
 - Rien ne change encore à l'écran : cette session ne note que les idées validées par Kevin (`docs/decisions/2026-11-01-idees-validees.md`) et les met au plan (`CHANGEMENTS.md` L et M, `ROADMAP.md`).
 - À venir : la fausse fin de Facile disparaît, la vraie fin s'affiche dans toutes les difficultés ; le nom affiché devient « LumenBell ».
-- À venir : la tour du Phare Noyé (Chapitre II) retrouvera sa forme d'avant, après validation à l'écran.
+- À venir : le sommet de la tour du Phare Noyé (Chapitre II) retrouvera ses deux blocs sombres d'avant, après validation à l'écran.
 
 ## 2026-11-01 · docs/decisions-foundry-floor
 - Rien ne change encore à l'écran : la décision est actée, le codage viendra dans la session `ch1/foundry-floor`.

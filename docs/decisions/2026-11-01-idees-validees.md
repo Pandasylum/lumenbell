@@ -28,15 +28,14 @@ Décisions de Kevin du 1er novembre 2026. Cette session ne code rien et ne touch
 
 - Application : session `ch2/cinematics`, après `engine/cine`.
 
-## e. Phare Noyé (Chapitre II, phase III) : tour d'avant C1
+## e. Phare Noyé (Chapitre II, phase III) : sommet de la tour d'avant C1
 
-- Forme visuelle de la tour (formes I et II) restaurée depuis la version d'avant C1, référencée comme le commit `2b75101` (« les 2 lampes en haut »).
-- **Validation à l'écran d'abord** : une comparaison en images (actuel / version d'avant C1) est produite avant toute modification.
+- Le sommet de la tour (formes I et II) retrouve les deux blocs sombres encadrant la méduse, tels que dans le commit `2b75101` (27 octobre, avant C1). Ces blocs ont été supprimés par `0bad679` (PR #5).
+- **Périmètre : sommet seulement.** Le reste de la tour (pièces de l'Ancien → tour, étages, balcons, amarres) reste celui de C1.
+- Étape 1 (comparaison en images) déjà faite par Kevin.
 - Conservés tels quels :
   - lueurs turquoise fixes, sans pulsation (`CHANGEMENTS.md` section C) ;
   - textes (section A) ;
   - Rémanence (section H) ;
   - titre de la forme II, « La Sans-Fond ».
-- **Référence à vérifier** : le commit `2b75101` est le commit « états du Veilleur comme au Chapitre I » (27 octobre). Son message ne parle ni de lampes ni de la tour. La bonne version d'avant C1 reste à identifier avant la comparaison.
-- **À signaler sans trancher** : si la version d'avant C1 contredit le tableau « Pièces de l'Ancien → pièces de la tour » de `docs/CH2-SPEC.md`, la session `ch2/phare-v1` le signale à Kevin.
 - Application : session `ch2/phare-v1`. Suivi dans `CHANGEMENTS.md` section M.
