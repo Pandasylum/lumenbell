@@ -23,6 +23,7 @@ J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, car
 K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
 L	Chapitre I · Fausse fin de Facile supprimée	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
 M	Chapitre II · Phare Noyé : tour d'avant C1	À faire (validation à l'écran d'abord)	1er novembre 2026	
+N	Chapitre I · Phase II : esquive en pas de côté, contres au sol	En cours	1er novembre 2026	branche `ch1/dodge-side` (PR à ouvrir)
 
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
@@ -223,6 +224,19 @@ Ne pas toucher aux timings.
 À ne pas faire : modifier la silhouette du Colosse, ou toucher au Chapitre I.
 
 Statut : à faire (validation à l'écran d'abord), session `ch2/phare-v1`.
+
+N. Chapitre I · Phase II : esquive en pas de côté, contres au sol (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-ch1-esquive-pas-de-cote.md`)
+
+Décisions :
+- L'esquive de la phase II devient le pas de côté du Chapitre II (pose `dodgeSide`, 0,38 s, image rémanente) à la place de la plongée `dodgeDown` ; le Veilleur reste sur son bloc, sans toucher le vide ni la lave.
+- Contre sur la tête du Colosse : le Veilleur reste au sol ; seul le rayon s'oriente vers la tête.
+- Finish (COUP ULTIME) : le Veilleur reste au sol ; seul le rayon vise.
+
+Rendu seulement : aucun timing ni réglage d'équilibrage ne change. `DG.drop` reste (rebord, défaite) ; la pose `dodgeDown` reste dans le module commun. Aucun texte affiché ne change ; aucun texte de lecteur d'écran ne décrivait un plongeon.
+
+Referme le point « Plongée d'esquive » de `docs/decisions/2026-11-01-ch1-foundry-floor-application.md`.
+
+Statut : en cours, branche `ch1/dodge-side` (PR à ouvrir).
 
 Vérifications
 Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.

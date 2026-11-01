@@ -1,9 +1,10 @@
 /* ================= PHASE II : la Fonderie ================= */
 let Q=null;
 const QH=[250,300],QB=[705,285];
-/* Phase II : plongée de l'esquive (px) ; fall = étourdissement d'un débris (s) ; wide = marge d'esquive en plus en Difficile contre chute et rocher (s). Durées de l'action, de la récupération et de la grâce : LB.HERO_T.dodge. */
-const DG={drop:110,fall:.14,wide:.13};
-/* Phase II au fond de la Fonderie (1er novembre) : le Veilleur se tient sur un bloc du pont tombé sur le rebord ; la plongée d'esquive (DG.drop) le pose sur le rebord, devant le bloc. QFLOOR = rebord, QLAKE = surface de la lave, QEDGE = bord du rebord côté lave (px). */
+/* Phase II : drop = hauteur du bloc au-dessus du rebord (px : rebord QFLOOR, chute de la défaite) ; fall = étourdissement d'un débris (s) ; wide = marge d'esquive en plus en Difficile contre chute et rocher (s). Durées de l'action, de la récupération et de la grâce : LB.HERO_T.dodge.
+   side = pas de côté de l'esquive (dessin seulement, pose dodgeSide comme au Chapitre II) : dur = durée de la pose (s), dx = recul (px, vers la gauche ; limité par le bloc : la robe reste sur sa face du haut), rot = inclinaison (rad, autour des pieds), ghost = durée de l'image rémanente (s), gx = son écart (px, vers sa place de départ), ga = son opacité. */
+const DG={drop:110,fall:.14,wide:.13,side:{dur:.38,dx:-18,rot:-.18,ghost:.3,gx:19,ga:.25}};
+/* Phase II au fond de la Fonderie (1er novembre) : le Veilleur se tient sur un bloc du pont tombé sur le rebord, DG.drop au-dessus ; son esquive est un pas de côté sur le bloc (DG.side, 1er novembre), il n'en descend qu'à la défaite. QFLOOR = rebord, QLAKE = surface de la lave, QEDGE = bord du rebord côté lave (px). */
 const QFLOOR=QH[1]+44+DG.drop,QLAKE=QFLOOR+16,QEDGE=350;
 const QA={
   claws:{hits:[{k:'clawA',at:.9},{k:'clawB',at:1.65}],cn:'stab',get name(){return _('Claw strikes','Coups de griffe')}},
@@ -22,7 +23,7 @@ function qNew(){
     enraged:false,rn:0,rage2:false,last:'',n:0,sparks:[],floats:[],rings:[],exps:[],fbs:[],
     streaks:Array.from({length:40},()=>({x:rand(0,W),y:rand(0,H),v:rand(500,1000),l:rand(16,56)})),
     debris:Array.from({length:7},()=>({x:rand(60,W-60),y:rand(0,H),v:rand(180,420),r:rand(8,24),a:rand(0,6),w:rand(-3,3)})),
-    shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,wo:0,bx:QB[0],by:QB[1],hx:QH[0],hy:QH[1],dropY:0,splash:0,ended:false,wing:false,fn:0};
+    shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,wo:0,bx:QB[0],by:QB[1],hx:QH[0],hy:QH[1],dropY:0,splash:0,sideT:-9,ended:false,wing:false,fn:0};
 }
 function setPhaseUI(n){
   try{$('retryBtn').disabled=false;$('phases').style.display=RUN.on?'none':''}catch(e){}
@@ -55,7 +56,7 @@ function qRing(x,y){(R||Q).rings.push({x,y,life:.35,max:.35})}
 function qPress(){
   if(Q.mode!=='play')return;
   ensureAudio();
-  if(LB.hero.press(Q.pl,'dodge'))tone(420,.16,'triangle',.05,-200)
+  if(LB.hero.press(Q.pl,'dodge')){Q.sideT=Q.time;tone(420,.16,'triangle',.05,-200)}
 }
 function qPick(){
   const kinds=['claws','wings','rocks'];
@@ -116,8 +117,9 @@ function qResolve(h){
   h.ok=ok;
   if(ok){
     Q.dodges++;Q.flash=Math.max(Q.flash,.15);
-    {const u=p.s==='act'?p.t/HD('dodge').act:1,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);p.ox=-20*off;p.oy=DG.drop*off;LB.hero.stopped(p)}
-    qBurst(QH[0],QH[1]+DG.drop*.6,14,['#bfeaff','#ffffff','#6fd3ff']);
+    if(p.s==='act')Q.sideT=Q.time-p.t; /* le pas de côté continue après l'arrêt (dessin seulement) */
+    LB.hero.stopped(p);
+    qBurst(QH[0]+DG.side.dx,QH[1]-10,14,['#bfeaff','#ffffff','#6fd3ff']);
     tone(900,.18,'square',.04,-300);
   }else{
     a.miss++;
@@ -125,7 +127,7 @@ function qResolve(h){
   }
 }
 function qHurt(k){
-  const p=Q.pl;
+  const p=Q.pl;Q.sideT=-9; /* un coup reçu interrompt le pas de côté (dessin seulement) */
   Q.php=Math.max(0,Q.php-1);Q.taken++;Q.shake=reduce?0:13;Q.hurt=.35;Q.hitstop=.07;thud(1);
   qBurst(QH[0],QH[1],26,['#ff8a4a','#ffc15a','#ff5252']);
   qFloat(k==='rock'||k==='fall'?_('CRUSHED!','ÉCRASÉ !'):_('HIT!','TOUCHÉ !'),QH[0]-30,QH[1]-120,'#ff8a6b');
@@ -267,7 +269,6 @@ function qStep(dt){
   qLayout();
   if(Q.hitstop>0){Q.hitstop-=dt;hud();return}
   const p=Q.pl;LB.hero.step(p,dt,{gesture:'dodge'});
-  if(p.oy){p.oy*=Math.max(0,1-dt*14);p.ox*=Math.max(0,1-dt*14);if(p.oy<1)p.oy=p.ox=0}
   if(Q.mode==='intro'){
     Q.speed=320+580*(1-clamp01(Q.t/2.6));
     Q.wo=es(clamp01((Q.t-1.0)/1.0));
