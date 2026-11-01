@@ -78,3 +78,6 @@
 - Chapitre I, phase II : l'esquive est un pas de côté rapide sur le bloc, avec une image rémanente, comme au Chapitre II ; le Veilleur ne plonge plus du rocher.
 - Quand le rayon frappe la tête du Colosse, et pendant le coup ultime, le Veilleur reste debout sur son bloc : seul le rayon monte vers sa cible.
 - Pendant l'estoc, le Veilleur avance un peu moins et ne quitte plus son bloc.
+## 2026-11-01 · engine/lantern-color
+- Rien ne change à l'écran : session de relevé. Des images avant / après (lanterne jaune neutre, tirs jaune-blanc au lieu de bleu-blanc) sont prêtes à être validées par Kevin.
+- Si la palette est validée : la lanterne et ses tirs seront jaune-blanc dans les deux chapitres, le bleu-blanc restera réservé au bouclier et au givre.

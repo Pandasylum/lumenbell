@@ -13,7 +13,7 @@ A	Chapitre II · Textes et titre de la forme II	En cours	30 octobre 2026 (mis à
 B	Boss de la phase II : l'Ancien de Rouille	En cours	28 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 C	Chapitre II · Lumière du boss et de la Sans-Fond	En cours	28 octobre 2026 (mis à jour le 29)	branche `ch2/lore-changements` (PR à ouvrir)
 D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	En cours	28 octobre 2026 (mis à jour le 29)	branche `ch1/foundry-floor` (PR à ouvrir)
-E	Veilleur · Couleur de la lanterne et des tirs	À faire (validation à l'écran d'abord)	28 octobre 2026	
+E	Veilleur · Couleur de la lanterne et des tirs	En cours (images à valider)	1er novembre 2026	
 F	Documents à mettre à jour	En cours (CH2-SPEC et COMMUN faits ; BIBLE, DECISIONS, LORE restent)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
 G	Chapitre I · Lanterne du Colosse de braise	En cours	29 octobre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
 H	Chapitre II · Rémanence (évaporation du Lumen)	En cours	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
