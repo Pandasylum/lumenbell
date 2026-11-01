@@ -20,6 +20,8 @@ H	Chapitre II · Rémanence (évaporation du Lumen)	En cours	30 octobre 2026	bra
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
 J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours (a) et (b) ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	À faire	1er novembre 2026	
+L	Chapitre I · Fausse fin de Facile supprimée	À faire	1er novembre 2026	
+M	Chapitre II · Phare Noyé : tour d'avant C1	À faire (validation à l'écran d'abord)	1er novembre 2026	
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
 
@@ -178,6 +180,49 @@ Après :
 
 Raison : plus de chute ; aucun impact sur le lore ; texte lecteur d'écran uniquement.
 Statut : à appliquer (session `ch1/foundry-floor`). Lanterne visible pendant tout le combat de la phase II : voir section G.
+
+L. Chapitre I · Fausse fin de Facile supprimée (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-idees-validees.md` § b)
+
+Décision : la fausse fin disparaît. La vraie fin s'affiche dans toutes les difficultés, Facile compris. Raison : Facile ne doit pas bloquer la suite (la vraie fin déverrouille l'Épreuve du feu et le Chapitre II).
+
+Entrée : fin de partie en mode `fake` (`R.mode`), code dans `src/js/44-p3-belfry-logic.js` lignes 318 à 321. Textes repérés dans `docs/TEXTES-CH1.md` lignes 191 à 193.
+- Avant (EN, ligne 320, titre d'œil) : "The End?"
+- Avant (FR, ligne 320, titre d'œil) : « Fin ? »
+- Avant (EN, ligne 320, titre) : "He has fled."
+- Avant (FR, ligne 320, titre) : « Il s'est enfui. »
+- Avant (EN, ligne 321, corps) : "The great bell rings alone in the night. Far out at sea, nothing answers. Somewhere, the Colossus's fire still burns. Replay the whole fight in Normal to discover the true ending."
+- Avant (FR, ligne 321, corps) : « La grande cloche sonne seule dans la nuit. Au large, rien ne répond. Quelque part, le feu du Colosse brûle encore. Refais tout le combat en Normal pour connaître la vraie fin. »
+
+Après :
+- Ces six textes sont supprimés. Aucun texte de remplacement.
+- La vraie fin s'affiche dans toutes les difficultés.
+
+À vérifier pendant l'application (non tranché ici) :
+- Le libellé « Retour au menu » / "Back to menu" (ligne 322) ne doit rester que s'il sert encore à la vraie fin.
+- La logique `R.mode === 'fake'` (`44-p3-belfry-logic.js` lignes 212 et 375, `08-state.js` ligne 24, `48-p3-belfry-poses.js` lignes 122 et 356, `56-p3-belfry-render.js` ligne 540) est à retirer ou à adapter pour que la vraie fin s'affiche dans toutes les difficultés. Le comportement de chaque ligne est à relire avant le codage.
+
+Statut : à appliquer (session `ch1/foundry-floor`). Sans effet sur les autres textes.
+
+M. Chapitre II · Phare Noyé : tour d'avant C1 (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-idees-validees.md` § e)
+
+Décision : la forme visuelle de la tour (formes I et II) revient à la version d'avant C1, référencée comme le commit `2b75101` (« les 2 lampes en haut »).
+
+Cible : `chapters/ch2-silent-bells/src/js/40-boss-drowned-beacon.js` (`drawBeacon`, `TOWER`, `PDRAW`).
+
+À faire :
+- Produire d'abord une comparaison en images : version actuelle / version d'avant C1, forme I et forme II.
+- Ne rien changer sans validation de Kevin à l'écran.
+
+Référence à vérifier avant la comparaison : le commit `2b75101` est le commit « états du Veilleur comme au Chapitre I » (27 octobre). Son message ne mentionne ni lampes ni tour. La bonne version d'avant C1 est à identifier.
+
+Conservés tels quels : lueurs turquoise fixes sans pulsation (section C), textes (section A), Rémanence (section H), titre de la forme II « La Sans-Fond ».
+Ne pas toucher aux timings.
+
+À signaler sans trancher : si la version d'avant C1 contredit le tableau « Pièces de l'Ancien → pièces de la tour » de `docs/CH2-SPEC.md`, le signaler à Kevin.
+
+À ne pas faire : modifier la silhouette du Colosse, ou toucher au Chapitre I.
+
+Statut : à faire (validation à l'écran d'abord), session `ch2/phare-v1`.
 
 Vérifications
 Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.
