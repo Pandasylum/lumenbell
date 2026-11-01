@@ -52,3 +52,8 @@
 ## 2026-11-01 · engine/watcher
 - Chapitre II : le Veilleur porte maintenant le heaume, le tabard et le sceptre-lanterne à petite cloche du Chapitre I, en combat, au prologue, à l'épilogue et dans le menu (fini le bâton à cristal et l'œil turquoise) ; son blocage montre le bouclier bleu du Chapitre I.
 - Chapitre I : au repos, sur le pont et au Clocher, le Veilleur respire (léger balancement, pans du manteau) ; rien d'autre ne change.
+
+## 2026-11-01 · docs/decisions-foundry-floor
+- Rien ne change encore à l'écran : la décision est actée, le codage viendra dans la session `ch1/foundry-floor`.
+- Chapitre I : le combat de la phase II se jouera au fond de la Fonderie, sur une plateforme au bord de la lave ; plus de chute ni de passerelle. Le Colosse vole au-dessus de la lave et s'envole par la cheminée après le grand four.
+- La petite lanterne orange du Colosse restera visible pendant tout le combat de la phase II, et plus seulement en fin de phase.

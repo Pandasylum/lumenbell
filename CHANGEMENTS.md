@@ -19,6 +19,7 @@ G	Chapitre I · Lanterne du Colosse de braise	À faire	29 octobre 2026
 H	Chapitre II · Rémanence (évaporation du Lumen)	En cours	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
 J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours (a) et (b) ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
+K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	À faire	1er novembre 2026	
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
 
@@ -129,10 +130,9 @@ Le renommage « Roi Sombre » en « Roi Spectral » dans docs/CH2-SPEC.md (table
 - Héros : Lumen affaibli, blanc teinté de jaune ; clochette : catalyseur de la lumière.
 - Noms anglais : The Priors, The Spectral King.
 G. Chapitre I · Lanterne du Colosse de braise (validé le 29 octobre)
-Ajouter une petite lanterne de Veilleur dans le décor de la Fonderie, à côté des chaînes, visible en fin de phase II.
+Ajouter une petite lanterne de Veilleur dans le décor de la Fonderie, à côté des chaînes, visible pendant tout le combat de la phase II.
 Lueur orange (code couleur de la braise), faible, avec une pulsation lente : le Lumen vivant pulse. Elle est allumée : le Colosse n'est pas totalement consumé.
 Elle n'apparaît pas dans l'outro. Ce sont de simples indices : pas de texte, pas de bruitage, pas de zoom.
-Laisser l'image de la cinématique de fin de phase II à peine plus longue (environ 1 s), pour laisser le temps de la comprendre.
 Emplacement exact et forme : à choisir (près des équerres et des chaînes, lisible sur la cinématique) et à signaler dans la PR.
 Ne pas toucher à la silhouette du Colosse (validée) : la lanterne est un élément de décor, pas de son équipement.
 H. Chapitre II · Rémanence : évaporation du Lumen (validé le 29 octobre)
@@ -150,12 +150,40 @@ Entrées À faire, non appliquées. Elles partent plus tard, dans la session uni
 (b) Règle de série sur les illusions : esquiver une illusion n'est pas une faute de série. La faute n'existe que si le joueur reçoit le coup de retour, donc un dégât. Mettre à jour fooled() et la partie 4 de tests/ch2-input.js (aujourd'hui : l'illusion esquivée casse la série, même si le retour est esquivé). Ne pas toucher à DG.backTurn ni à DG.backWin (valeurs provisoires).
 (c) Carte de défaite du Chapitre II : un simple texte, sur le modèle du Chapitre I. Certaines versions cachent un conseil, par exemple contre la Voix : « Le Veilleur n'a pas su distinguer les illusions… » (exemple d'intention, pas un texte validé). Textes à fournir (projet Lore) : ne rien rédiger ni coder avant de les recevoir.
 Non concernés : valeurs provisoires (SP, DG.backWin, HULL, SHOCK.form), Difficile du Chapitre II, onomatopées CLANG / KRAKOOM / KRAAAK (validées, rien à changer).
+K. Chapitre I · Phase II au fond de la Fonderie (plus de chute) (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-ch1-foundry-floor.md`)
+
+Le combat de la phase II se joue au fond de la Fonderie : le Veilleur suit le Colosse par la brèche et combat sur une plateforme au bord de la lave ; le Colosse vole au-dessus de la lave. Plus de chute, plus de scène de passerelle. Fin de phase II : le grand four engloutit le Colosse, qui s'envole par la cheminée. Toutes les mécaniques restent, esquive comprise. Aucun impact sur le lore.
+Textes lecteur d'écran uniquement (jamais affichés), en anglais et en français.
+
+Entrée : textes d'origine (`36-p2-foundry-logic.js`, ligne 32, 38, 133, 238, et carte de défaite).
+- Avant (EN, ligne 32) : "Arena: … fall down the Foundry shaft"
+- Avant (FR, ligne 32) : « …tombent dans le puits de la Fonderie »
+- Avant (EN, ligne 38) : "Phase II. The Watcher and the Colossus fall into the Foundry…"
+- Avant (FR, ligne 38) : « Phase II. Le Veilleur et le Colosse tombent dans la Fonderie… »
+- Avant (EN, ligne 133) : "You are swept away by the fall. Defeat."
+- Avant (FR, ligne 133) : « Tu es emporté par la chute. Défaite. »
+- Avant (EN, ligne 238, passerelle) : "The Watcher catches himself on a catwalk, above the molten metal."
+- Avant (FR, ligne 238, passerelle) : « Le Veilleur se rattrape sur une passerelle, au-dessus du métal en fusion. »
+- Avant (EN, carte de défaite) : "Swept away by the fall." / "Nothing holds the Watcher anymore. He vanishes into the depths of the Foundry, and his light goes out with him."
+- Avant (FR, carte de défaite) : « Emporté par la chute. » / « Rien ne retient plus le Veilleur. Il disparaît dans les profondeurs de la Fonderie, et sa lumière s'éteint avec lui. »
+
+Après :
+- Carte de défaite, titre : "Struck down at the bottom of the Foundry." / « Terrassé au fond de la Fonderie. »
+- Carte de défaite, corps : "The Watcher collapses at the bottom of the Foundry, and his light goes out with him." / « Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui. »
+- Ligne 32 : "Arena: the Watcher and the winged Ember Colossus face each other at the bottom of the Foundry" / « Arène du combat : le Veilleur et le Colosse de braise ailé s'affrontent au fond de la Fonderie »
+- Ligne 38 : "Phase II. The Foundry. The button now dodges." / « Phase II. La Fonderie. Le bouton sert maintenant à esquiver. »
+- Ligne 133 : "Struck down at the bottom of the Foundry. Defeat." / « Terrassé au fond de la Fonderie. Défaite. »
+- Ligne 238 (passerelle) : supprimée.
+- Ne pas toucher : carte d'entrée (`00-core.js:57`), `36-p2:300` (transition), `36-p2:211`, `16-p1:319`.
+
+Raison : plus de chute ; aucun impact sur le lore ; texte lecteur d'écran uniquement.
+Statut : à appliquer (session `ch1/foundry-floor`). Lanterne visible pendant tout le combat de la phase II : voir section G.
 
 Vérifications
 Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.
 Chercher « Drowned Beacon ».
 Vérifier qu'aucun mot d'annonce n'a été ajouté (tests/ch2-announce.js).
-Vérifier visuellement : cœur turquoise fixe visible par les jointures (phase II), lanterne orange du Colosse près des chaînes (chapitre I, fin de phase II), absence de pulsation sur les lueurs de la Sans-Fond, absence de carton à la forme II, durées de lecture des nouveaux cartons.
+Vérifier visuellement : cœur turquoise fixe visible par les jointures (phase II), lanterne orange du Colosse près des chaînes (chapitre I, pendant la phase II), absence de pulsation sur les lueurs de la Sans-Fond, absence de carton à la forme II, durées de lecture des nouveaux cartons.
 À ne pas faire
 Ne pas ajouter d'indice de parasite au chapitre I : la lanterne du Colosse (section G) suffit.
 Ne pas implémenter le choix du chapitre VI, ni les chapitres III à VII.

@@ -1,6 +1,6 @@
 # Lumenbell – Lore définitif
  
-Version consolidée du 30 octobre 2026 · Kevin
+Version consolidée du 1er novembre 2026 · Kevin
  
 Ce document ne contient que le lore **validé**. Il prime sur `docs/CH2-SPEC.md` pour tout ce qui touche au lore. Il se lit avec deux autres documents :
  
@@ -174,7 +174,7 @@ Le Colosse de braise, premier Lié à se réveiller, atteint le pont. Le Veilleu
 | La cloche du Phare Noyé reste muette (fin) | Le premier verrou qui cède. Les « profondeurs » lui ont imposé le silence |
 | « Depuis mille hivers… », « une fonderie oubliée de tous, même de ceux qui veillent », « un ordre qui protège les Flèches liées » (intro) | Le pont couvre un secret plus ancien que l'ordre officiel |
 | « Une chaîne cède sous la montagne » ; « comme s'il en connaissait le chemin » | Le Colosse est libéré d'un lien ; le passé du héros reste ouvert |
-| Chaînes trop grandes pour une main d'homme (phase II) ; mur avec deux équerres scellées, l'une avec une chaîne d'homme rompue, l'autre vide ; anneau de fer au sol, sans un mot ; en fin de phase II, à côté des chaînes, une petite lanterne à la lueur orange faible qui pulse lentement | Le Lié a grandi avec le temps ; la chaîne d'homme rompue est celle de son serment ; l'anneau porte un nom perdu ; la lanterne encore allumée dit qu'il n'est pas totalement consumé : il résiste |
+| Chaînes trop grandes pour une main d'homme (phase II) ; mur avec deux équerres scellées, l'une avec une chaîne d'homme rompue, l'autre vide ; anneau de fer au sol, sans un mot ; pendant tout le combat de la phase II, à côté des chaînes, une petite lanterne à la lueur orange faible qui pulse lentement | Le Lié a grandi avec le temps ; la chaîne d'homme rompue est celle de son serment ; l'anneau porte un nom perdu ; la lanterne encore allumée dit qu'il n'est pas totalement consumé : il résiste |
 | « Un écho du passé résonne » ; la cloche sonne seule avant l'arrivée du Colosse (phase III) ; le Colosse s'incline face à la cloche (outro) ; anneau gravé d'un nom effacé dans sa main ouverte | La cloche reconnaît le Colosse ; il s'incline de lui-même, nom effacé |
 | « Sous chaque tour, la pierre a tremblé » ; « les Flèches liées ont répondu » (outro) | Sous chaque tour, un Lié sent la cloche. Double sens de « liées » (§ 3) : les tours pour les Veilleurs, les anciens Veilleurs pour qui sait |
 | Le Veilleur ne parle pas ; le sceptre-lanterne est son seul outil | Il porte un fragment du Lumen, une clé |
@@ -372,3 +372,7 @@ Héros : devient le Lié principal du centre, à la place du Premier Lié ; il r
 Noms anglais : The Priors (Doyens), The Spectral King. Vharos et Nocthrys inchangés.
 Précision pour l'usage du Voix pour le Roi : voix enregistrée puis modulée
 Précision pour le chant du chapitre III : synthétisé, sans mots intelligibles ; ses paroles s’écrivent à l’écran.
+
+### 1er novembre 2026
+- Chapitre I, phase II : le combat se joue au fond de la Fonderie, plus de chute ni de scène de passerelle ; fin = le grand four engloutit le Colosse, qui s'envole par la cheminée. Aucun impact sur le lore.
+- Chapitre I : la lanterne orange du Colosse est visible pendant tout le combat de la phase II (avant : fin de phase II seulement).
