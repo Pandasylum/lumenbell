@@ -45,3 +45,6 @@
 - Rien ne change encore à l'écran : la décision est actée, le codage viendra dans la session `menu/common`.
 - Les menus diront « Épreuve du feu » (Chapitre I), « Épreuve de l'eau » (II) et « Épreuve de la terre » (III).
 - Les sous-titres seront les mêmes dans tous les chapitres : Respire, À la loyale, Sans pitié, Challenge ultime.
+
+## 2026-11-01 · ci/skip-docs-only
+- Rien ne change à l'écran : les modifications de documentation seule n'attendent plus la CI complète.
