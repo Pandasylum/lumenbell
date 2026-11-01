@@ -1,7 +1,8 @@
 /* ================= PHASE II : la Fonderie ================= */
 let Q=null;
 const QH=[250,300],QB=[705,285];
-const DG={act:.333,rec:.7,grace:.05,hurt:.38,drop:110};
+/* Phase II : plongée de l'esquive (px) ; fall = étourdissement d'un débris (s) ; wide = marge d'esquive en plus en Difficile contre chute et rocher (s). Durées de l'action, de la récupération et de la grâce : LB.HERO_T.dodge. */
+const DG={drop:110,fall:.14,wide:.13};
 const QA={
   claws:{hits:[{k:'clawA',at:.9},{k:'clawB',at:1.65}],cn:'stab',get name(){return _('Claw strikes','Coups de griffe')}},
   wings:{hits:[{k:'wave',at:1.0},{k:'wave',at:1.7},{k:'wave',at:2.4}],cn:'head',get name(){return _(`Wing strike`,`Coup d'ailes`)}},
@@ -14,8 +15,8 @@ const QAH={
 };
 const ROCKP=Array.from({length:9},(_,i)=>{const a=i/9*6.283;return[Math.cos(a)*(.75+((i*37)%5)/10),Math.sin(a)*(.75+((i*53)%5)/10)]});
 function qNew(){
-  return{mode:'intro',t:0,time:0,lt:0,php:startHP(),bhp:DIFF.bhp,parries:0,taken:0,scroll:0,speed:900,
-    pl:{s:'ready',t:0,deny:0},boss:{s:'idle',t:0,wait:.6,dur:1,after:''},atk:null,cn:null,chain:null,chainMiss:false,
+  return{mode:'intro',t:0,time:0,lt:0,php:startHP(),bhp:DIFF.bhp,dodges:0,taken:0,scroll:0,speed:900,
+    pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.6,dur:1,after:''},atk:null,cn:null,chain:null,chainMiss:false,
     enraged:false,rn:0,rage2:false,last:'',n:0,sparks:[],floats:[],rings:[],exps:[],fbs:[],
     streaks:Array.from({length:40},()=>({x:rand(0,W),y:rand(0,H),v:rand(500,1000),l:rand(16,56)})),
     debris:Array.from({length:7},()=>({x:rand(60,W-60),y:rand(0,H),v:rand(180,420),r:rand(8,24),a:rand(0,6),w:rand(-3,3)})),
@@ -28,11 +29,11 @@ function setPhaseUI(n){
     if(i===n-1)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
   });
   $('hdEye').textContent=n===1?_('Phase I of III · On the bridge','Phase I sur III · Sur le pont'):n===2?_('Phase II of III · The Foundry','Phase II sur III · La Fonderie'):_('Phase III of III · The Bell Tower','Phase III sur III · Le Clocher');
-  el.ward.textContent=n===1?_('Block','Bloquer'):n===2?_('Dodge','Esquiver'):_('Parry','Parer');
+  el.ward.textContent=n===1?_('Block','Bloquer'):n===2?_('Dodge','Esquiver'):_('Block','Bloquer');
   cv.setAttribute('aria-label',n===1?_('Arena: the Watcher faces the Ember Colossus on a stone bridge','Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre'):n===2?_('Arena: the Watcher and the winged Ember Colossus fall down the Foundry shaft','Arène du combat : le Veilleur et le Colosse de braise ailé tombent dans le puits de la Fonderie'):_('Arena: the Watcher faces the Ember Colossus atop the snowy Watchers\' Bell Tower','Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs'));
 }
 function beginP2(noLore){
-  if(RUN.on&&G&&G.mode==='won'){RUN.cur=Math.min(RUN.max,G.php+1);RUN.st[1]={p:G.parries,h:G.grabs}}
+  if(RUN.on&&G&&G.mode==='won'){RUN.cur=Math.min(RUN.max,G.php+DIFF.heal);RUN.st[1]={p:G.blocks,h:G.grabs}}
   R=null;Q=qNew();setPhaseUI(2);lastP=-1;lastB=-1;
   el.ov.hidden=true;if(!noLore)showLore(2);
   say(_('Phase II. The Watcher and the Colossus fall into the Foundry. The button now dodges.','Phase II. Le Veilleur et le Colosse tombent dans la Fonderie. Le bouton sert maintenant à esquiver.'));
@@ -52,9 +53,7 @@ function qRing(x,y){(R||Q).rings.push({x,y,life:.35,max:.35})}
 function qPress(){
   if(Q.mode!=='play')return;
   ensureAudio();
-  const p=Q.pl;
-  if(p.s==='ready'){p.s='dodge';p.t=0;tone(420,.16,'triangle',.05,-200)}
-  else if(p.s==='dodge'||p.s==='recover')p.deny=.25;
+  if(LB.hero.press(Q.pl,'dodge'))tone(420,.16,'triangle',.05,-200)
 }
 function qPick(){
   const kinds=['claws','wings','rocks'];
@@ -111,12 +110,11 @@ function qRoar(label,n){
 function qResolve(h){
   const p=Q.pl,a=Q.atk;
   /* Difficile : les rochers (cris et attaque) laissent une marge de plus pour esquiver, car leur rythme est irrégulier */
-  const gr=DIFF.hard&&(h.k==='fall'||h.k==='rock')?DG.grace+.13:DG.grace;
-  const ok=p.s==='dodge'||(p.s==='recover'&&p.t<gr);
+  const ok=LB.hero.stops(p,{graceAdd:DIFF.hard&&(h.k==='fall'||h.k==='rock')?DG.wide:0});
   h.ok=ok;
   if(ok){
-    Q.parries++;Q.flash=Math.max(Q.flash,.15);
-    {const u=p.s==='dodge'?p.t/DG.act:1,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);p.ox=-20*off;p.oy=DG.drop*off;p.s='ready';p.t=0}
+    Q.dodges++;Q.flash=Math.max(Q.flash,.15);
+    {const u=p.s==='act'?p.t/HD('dodge').act:1,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);p.ox=-20*off;p.oy=DG.drop*off;LB.hero.stopped(p)}
     qBurst(QH[0],QH[1]+DG.drop*.6,14,['#bfeaff','#ffffff','#6fd3ff']);
     tone(900,.18,'square',.04,-300);
   }else{
@@ -133,8 +131,8 @@ function qHurt(k){
   if(Q.php<=0){p.s='down';p.t=0;Q.mode='lost';Q.endIn=1.3;say(_('You are swept away by the fall. Defeat.','Tu es emporté par la chute. Défaite.'))}
   else{
     /* enchaînement : l'étourdissement s'arrête assez tôt pour esquiver le coup suivant */
-    const a=Q.atk,nx=a&&a.hits.find(x=>!x.done),gap=nx?nx.at-a.t:99,base=k==='fall'?.14:DG.hurt;
-    p.s='hurt';p.t=0;p.hs=Math.min(base,Math.max(.14,gap-.2));say(_('Hit.','Touché.'))
+    const a=Q.atk,nx=a&&a.hits.find(x=>!x.done),gap=nx?nx.at-a.t:99;
+    LB.hero.hurt(p,gap,{g:'dodge',dur:k==='fall'?DG.fall:undefined});say(_('Hit.','Touché.'))
   }
 }
 function qAtkStep(dt){
@@ -243,7 +241,7 @@ function qEnd(){
   if(win&&RUN.on){setTimeout(()=>beginP3(true),0);return} /* épreuve : pas de carte entre les phases */
   el.eye.textContent=win?_('Transition','Transition'):_('Defeat · Phase II','Défaite · Phase II');
   el.title.textContent=win?_('Phase II cleared','Phase II terminée'):_('Swept away by the fall.','Emporté par la chute.');
-  el.stats.textContent=_('Dodges ','Esquives ')+Q.parries+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2);
+  el.stats.textContent=_('Dodges ','Esquives ')+Q.dodges+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2);
   el.stats.hidden=false;
   el.desc.textContent=win?_('The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney.',"Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée."):_(`Nothing holds the Watcher anymore. He vanishes into the depths of the Foundry, and his light goes out with him.`,`Rien ne retient plus le Veilleur. Il disparaît dans les profondeurs de la Fonderie, et sa lumière s'éteint avec lui.`);
   el.go.textContent=win?_('Start Phase III','Lancer la phase III'):_('Retry Phase II','Réessayer la phase II');
@@ -265,7 +263,7 @@ function qStep(dt){
   if(Q.endIn>0){Q.endIn-=dt;if(Q.endIn<=0)qEnd()}
   qLayout();
   if(Q.hitstop>0){Q.hitstop-=dt;hud();return}
-  const p=Q.pl;p.t+=dt;p.deny=Math.max(0,p.deny-dt);
+  const p=Q.pl;LB.hero.step(p,dt,{gesture:'dodge'});
   if(p.oy){p.oy*=Math.max(0,1-dt*14);p.ox*=Math.max(0,1-dt*14);if(p.oy<1)p.oy=p.ox=0}
   if(Q.mode==='intro'){
     Q.speed=320+580*(1-clamp01(Q.t/2.6));
@@ -277,9 +275,6 @@ function qStep(dt){
     hud();return;
   }
   if(Q.mode!=='lake'){Q.speed=320}
-  if(p.s==='dodge'&&p.t>=DG.act){p.s='recover';p.t=0}
-  else if(p.s==='recover'&&p.t>=DG.rec){p.s='ready';p.t=0}
-  else if(p.s==='hurt'&&p.t>=(p.hs||DG.hurt)){p.s='ready';p.t=0}
   if(Q.mode==='play')qBoss(dt);
   if(Q.mode==='lake'){
     Q.lt+=dt;

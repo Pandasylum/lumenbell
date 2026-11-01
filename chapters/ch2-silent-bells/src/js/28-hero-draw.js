@@ -20,14 +20,13 @@ function drawHero(){
   heroShape(x,y,lean,staffA,tint);
   // ph1 barrier arc
   if(guard>0){ctx.save();ctx.globalAlpha=guard;ctx.strokeStyle='#7fd6ff';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x+26,y-70,58,-1.15,1.15);ctx.stroke();ctx.globalAlpha=guard*.25;ctx.lineWidth=12;ctx.stroke();ctx.restore()}
-  if(dome){const flick=S.stam<.25?(Math.sin(gt*40)>0?.5:1):1;ctx.save();ctx.globalAlpha=.9*flick;
+  if(dome){const flick=S.pl.stam<.25?(Math.sin(gt*40)>0?.5:1):1;ctx.save();ctx.globalAlpha=.9*flick;
     const g=ctx.createRadialGradient(x,y-40,10,x,y-40,82);g.addColorStop(0,'rgba(127,214,255,0)');g.addColorStop(.8,'rgba(127,214,255,.14)');g.addColorStop(1,'rgba(180,240,255,.4)');
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,92,Math.PI,0);ctx.fill();ctx.strokeStyle='#bff0ff';ctx.lineWidth=2.5;ctx.stroke();ctx.restore()}
-  // recovery bar under the Watcher, red while a press is refused (Ember Bridge)
-  {const p=S.pl;if(S.mode==='play'&&!S.cine&&p&&(p.s==='recover'||p.deny>0)){const k=p.s==='recover'?p.t/p.rd:1;
-    ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y+8,62,6);ctx.fillStyle=p.deny>0?'#ff5252':'#6fd3ff';ctx.fillRect(x-30,y+9,60*clamp(k,0,1),4)}}
+  // recovery bar under the Watcher: a help cue, only with the Help box ticked (the lantern turns red for a refused press)
+  if(S.mode==='play'&&!S.cine&&$('optHelp').checked)LB.drawRecoveryBar(ctx,x,y,S.pl);
   // stamina bar
-  if(ph===3&&S.mode==='play'&&!S.cine){const w=60;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-w/2,y-150,w,6);ctx.fillStyle=gt<S.broken?'#ff8a7a':S.stam<.3?'#ffd27a':'#7fd6ff';ctx.fillRect(x-w/2,y-150,w*S.stam,6)}
+  if(ph===3&&S.mode==='play'&&!S.cine){const w=60;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-w/2,y-150,w,6);ctx.fillStyle=gt<S.broken?'#ff8a7a':S.pl.stam<.3?'#ffd27a':'#7fd6ff';ctx.fillRect(x-w/2,y-150,w*S.pl.stam,6)}
 }
 /* the Watcher, same skin as Ember Bridge */
 function wizPoly(pts,f,s){ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.fillStyle=f;ctx.fill();if(s){ctx.strokeStyle=s;ctx.lineWidth=2;ctx.stroke()}}
@@ -61,6 +60,7 @@ function heroShape(x,y,lean,staffA,tint){
   const lit=up>.3||S.holding;
   const dm=S.lampDim||0;   // the lantern dims (end of phase I), 0..1
   ctx.save();ctx.translate(st[0],st[1]);ctx.rotate(staffA+Math.PI/2);ctx.shadowColor=lit?'#6fd3ff':'#2d6f8f';ctx.shadowBlur=(lit?22:8)*(1-dm);ctx.fillStyle=dm>0?lerpC(lit?[216,244,255]:[127,198,230],[38,58,70],dm):lit?'#d8f4ff':'#7fc6e6';
+  if(S.mode==='play'&&S.pl.deny>0){ctx.shadowColor=LB.DENY_COL;ctx.fillStyle=LB.DENY_COL}   // refused press: the lantern turns red
   ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(8,0);ctx.lineTo(0,10);ctx.lineTo(-8,0);ctx.closePath();ctx.fill();ctx.restore();
   ctx.restore();
   const c=Math.cos(lean),s=Math.sin(lean);S.orbX=x+st[0]*c-st[1]*s;S.orbY=y+st[0]*s+st[1]*c;

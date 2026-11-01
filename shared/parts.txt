@@ -4,3 +4,4 @@ js/00-lb.js
 js/04-store.js
 js/08-lang.js
 js/12-audio.js
+js/16-hero.js

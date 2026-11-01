@@ -98,9 +98,9 @@ function r3Ground(){
   const lg=ctx.createRadialGradient(bx,DECK,10,bx,DECK,300);
   lg.addColorStop(0,'rgba(255,130,40,'+(.55*pulse)+')');lg.addColorStop(1,'rgba(255,90,30,0)');
   ctx.fillStyle=lg;ctx.fillRect(0,DECK-120,W,H-DECK+120);
-  const wet=Math.min(1,.35+R.parries*.08);
+  const wet=Math.min(1,.35+R.blocks*.08);
   ctx.fillStyle='rgba(30,50,90,'+(.5*wet)+')';
-  ctx.beginPath();ctx.ellipse(bx,DECK+12,130+R.parries*6,14,0,0,6.283);ctx.fill();
+  ctx.beginPath();ctx.ellipse(bx,DECK+12,130+R.blocks*6,14,0,0,6.283);ctx.fill();
   ctx.fillStyle='rgba(255,140,50,'+(.25*pulse)+')';
   ctx.beginPath();ctx.ellipse(bx,DECK+10,90,9,0,0,6.283);ctx.fill();
   /* neige fondue à l'impact : une tache humide qui sèche et disparaît en quelques secondes */
