@@ -197,7 +197,7 @@ function rDamage(k,c){
   if(k==='bolt'){
     const tg=[R.bx-20,DECK-230];
     R.recoil=1;R.shake=reduce?0:16;R.hitstop=.12;R.flash=.5;thud(1.6);
-    qBurst(tg[0],tg[1],40,['#ffffff','#bfeaff','#6fd3ff','#ffc15a']);
+    qBurst(tg[0],tg[1],40,['#ffffff','#fff0b0','#ffd966','#ffc15a']);
     qFlameBurst(tg[0],tg[1],1.5,true);R.shake=reduce?0:20;
     tone(90,.6,'sawtooth',.14,-40);tone(1200,.3,'sine',.07,-600);
     if(R.healed&&R.hornAt==null){R.hornAt=R.time;R.hornX=R.bx;noise(.3,.22,5000,900);tone(900,.25,'square',.06,-600);qBurst(R.bx+105,DECK-340,16,['#ffc15a','#ff7a2b','#ffffff'])}
@@ -218,7 +218,7 @@ function rDamage(k,c){
   R.bhp=Math.max(0,R.bhp-1);R.recoil=1;R.shake=reduce?0:13;R.hitstop=.11;R.flash=.4;thud(1.2);
   if(k==='bell')R.dizzy=R.time+1.3;
   const tg=k==='slide'?[R.bx-62,DECK-58]:k==='plant'?[R.bx-60,DECK-26]:[R.bx-30,DECK-170];
-  qBurst(tg[0],tg[1],32,['#ffffff','#bfeaff','#ffc15a']);qRing(tg[0],tg[1]);
+  qBurst(tg[0],tg[1],32,['#ffffff','#fff0b0','#ffc15a']);qRing(tg[0],tg[1]);
   /* Pas de mot : l'effet se voit et s'entend, propre à chaque contre (cloche, éclats, rayon au sol). */
   R.flash=.6;qRing(tg[0],tg[1]);
   if(k==='bell'){ringBell(.55);tone(70,.9,'sine',.12,-20)}

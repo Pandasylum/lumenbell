@@ -71,7 +71,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 
 | Terme FR | Terme EN | Nom dans le code | Règle d'usage | Source |
 |---|---|---|---|---|
-| Lumen | The Lumen | — | Flamme que porte chaque Veilleur dans sa lanterne. Sa vraie couleur est le blanc ; le héros a un jaune neutre | `BIBLE.md:22` ; `docs/LORE.md:48,117` |
+| Lumen | The Lumen | — | Flamme que porte chaque Veilleur dans sa lanterne. Sa vraie couleur est le blanc ; le héros a un jaune neutre (lanterne au repos `#ffe066`, allumée `#fffbe3`, en récupération `#a88f4a`, rouge de `deny` `#ff6b6b`) et ses tirs virent au jaune-blanc, cœur `#fffaee` (`LB.WATCHER_T.lantern`) | `BIBLE.md:22` ; `docs/LORE.md:48,117` ; `docs/decisions/2026-11-01-lanterne-couleur-releve.md` |
 | braise | ember | — | Élément du Chapitre I, orange chaud. Minuscule pour le feu | `CLAUDE.md:18` ; `docs/LORE.md:109` |
 | Sceptre-lanterne / lanterne | — | `lanternBeam` (rayon) | Seul outil du Veilleur ; tous ses contres viennent de lui | `BIBLE.md:31` ; `docs/CH2-SPEC.md:9` ; `chapters/ch1-ember-bridge/NOTES.md:24` |
 | Cloche | bell | `ringBell` (ch1), `pHead` (ch2) | Le verrou. Au Chapitre I, la grande cloche répond, étourdit (1,3 s) et désarme | `BIBLE.md:22,64,71` ; `chapters/ch1-ember-bridge/NOTES.md:31` |
