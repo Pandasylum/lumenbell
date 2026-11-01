@@ -84,3 +84,8 @@
 ## 2026-11-01 · engine/lantern-color (application)
 - La lanterne du Veilleur est d'un jaune neutre ; quand il tire, orbe, éclats, rayon et foudre virent au jaune-blanc à cœur presque blanc, plus au bleu-blanc. Le bouclier et la garde restent bleus.
 - Chapitre I, phase II : la lanterne prend l'ambre de récupération, comme dans les deux autres phases.
+## 2026-11-01 · engine/cine
+- Chapitre II : le prologue et l'épilogue s'ouvrent en plein écran comme au Chapitre I, la phrase sous l'image, chaque carton reste 6 à 7 s, et « Chapitre III. À suivre. » s'affiche en vert mousse.
+- Chapitre II : le titre de fin d'intro devient celui du Chapitre I (« LUMEN » turquoise, « BELL » crème), et le prologue ne se rejoue plus à chaque partie ; Espace le passe aussi.
+- Chapitre I : rien ne change à l'écran.
+- Chapitre II : un bouton « ▶ Intro » en haut à gauche du menu rejoue le prologue, comme au Chapitre I.

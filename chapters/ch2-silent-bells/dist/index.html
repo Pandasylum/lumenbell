@@ -116,6 +116,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .mph button b{font-family:var(--font-display);font-weight:800;font-size:18px;line-height:1;color:var(--teal);text-transform:uppercase;letter-spacing:.05em}
 .mph button span{font-size:12px;color:var(--muted)}
 .mph button:hover{border-color:var(--teal);background:rgba(79,224,204,.12)}
+#introBtn{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(6,9,14,.6)}   /* rejeu du prologue (comme au Chapitre I) */
 .langs{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:3}
 .langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(6,9,14,.6);border:1px solid rgba(236,230,220,.3);border-radius:4px;cursor:pointer}
 .langs button[aria-pressed="true"]{border-color:var(--teal);background:rgba(79,224,204,.22)}
@@ -244,6 +245,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
         <g opacity=".12"><ellipse cx="715" cy="470" rx="90" ry="8" fill="#9ff2ff" class="lava"/></g>
       </svg>
       <div class="mem-wrap" id="mSnow" aria-hidden="true"></div>
+      <button type="button" class="mbtn" id="introBtn">▶ Intro</button>
       <div class="langs" id="langs" role="group" aria-label="Langue"><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="fr" aria-pressed="true">FR</button></div>
       <div class="mcard">
         <p class="eyebrow" id="mEye">Chapitre II · Silent Bells</p>
@@ -714,6 +716,114 @@ LB.drawWatcherSil=(c,ink,o)=>{
   const k=o.k,g=c.createRadialGradient(250,323,0,250,323,o.r*k);g.addColorStop(0,'rgba(255,240,200,.95)');g.addColorStop(o.s,'rgba(255,200,110,.45)');g.addColorStop(1,'rgba(255,190,90,0)');c.fillStyle=g;c.fillRect(190,263,120,120);
   c.fillStyle=ink;c.beginPath();c.moveTo(242,314);c.lineTo(250,306);c.lineTo(258,314);c.closePath();c.fill();c.fillRect(241,331,18,4);
   c.fillStyle='#ffd27a';c.fillRect(243,314,14,17);c.fillStyle=ink;c.fillRect(247,314,1.5,17);c.fillRect(251.5,314,1.5,17);
+};
+/* ---------- LB.cine : intro et outro des chapitres (session engine/cine, 1er novembre 2026) ----------
+   Le cadre commun des cinématiques : canvas dédié 960 x 540 en plein écran (#cineC), légende HTML dessous (#cineCap),
+   bouton « Passer » (#cineSkip), cartons enchaînés avec un fondu au noir à chaque bout, Échap / Entrée / Espace passent.
+   Le chapitre ne donne que ses scènes : LB.cine.create({key, scenes, onStart, onTick, onEnd}) → {play(done), replay(done),
+   seen(), playing(), skip()}.
+   - scenes : tableau (ou fonction qui le rend au moment de jouer) de cartons {d, en, fr, draw} ; à la place de en/fr, txt()
+     peut rendre le texte déjà traduit (le Chapitre II garde ainsi sa fonction de texte, relue par tests/ch2-texts.js) ; col = couleur de la
+     légende (annonce du chapitre suivant) ; enter(st) au début du carton ; cue = [[p, fn], …] : fn une seule fois quand
+     l'avancement p du carton dépasse le seuil. draw(p, t, lt, st, cx) : p avancement du carton (0 à 1), t temps depuis le
+     début, lt temps dans le carton, st état de la lecture (drapeaux libres), cx contexte du canvas (repère 960 x 540).
+   - key : drapeau « vue » (LB.key(key), par ex. lb-ch1-intro), écrit à la fin ou au passage ; sans key, aucun drapeau.
+     testSeen : la copie de test du Chapitre I le pose pour ne jamais lire le drapeau (intro considérée vue).
+   - play ne regarde pas le drapeau : c'est le chapitre qui décide (seen()) ; replay = play (rejeu depuis un menu).
+   - Durées : LB.CINE_T (fondu, légende, durée minimale d'un carton) ; la durée de chaque carton est dans la table du chapitre.
+   - Horloge : requestAnimationFrame (pas borné à dtMax). LB.cine.manual = true (copies de test) : plus de rAF, le test
+     appelle LB.cine.step(dt, dessiner).
+   - Le cadre (boîte, légende, bouton) est créé ici avec son style (LB.CINE_CSS) ; le bouton prend la classe « btn ghost »
+     du chapitre (sa couleur). Le dessin ne doit jamais tirer Math.random hors des scènes qui le faisaient déjà. */
+LB.CINE_T={fade:.8,capIn:.5,capFade:.6,min:6,dtMax:.1,keys:['Escape','Enter',' ']};
+LB.CINE_CSS='.cine{position:fixed;inset:0;z-index:120;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:12px}\n'+
+ '.cine[hidden]{display:none}\n'+
+ '.cbox{width:min(100%,calc((100dvh - 120px)*16/9));aspect-ratio:16/9}\n'+
+ '.cbox canvas{display:block;width:100%;height:100%}\n'+
+ '.ccap{margin:0;min-height:3.2em;max-width:min(760px,100%);text-align:center;color:var(--fg);font-size:clamp(15px,2.4vw,22px);line-height:1.45;text-wrap:balance;opacity:0}\n'+
+ '#cineSkip{position:absolute;right:14px;bottom:14px;padding:8px 18px;font-size:15px;min-height:40px}\n';
+LB.cine=(()=>{
+  const T=LB.CINE_T,c01=v=>v<0?0:v>1?1:v;
+  let box=null,cvs=null,cx=null,cap=null,sk=null,K=1,cur=null;
+  function mount(){
+    if(box)return{cx,K};
+    const st=document.createElement('style');st.textContent=LB.CINE_CSS;document.head.appendChild(st);
+    box=document.createElement('div');box.className='cine';box.id='cine';box.hidden=true;
+    box.innerHTML='<div class="cbox"><canvas id="cineC" aria-hidden="true"></canvas></div><p class="ccap" id="cineCap" aria-live="polite"></p><button type="button" class="btn ghost" id="cineSkip">Skip ›</button>';
+    document.body.appendChild(box);
+    cvs=box.querySelector('canvas');cap=box.querySelector('.ccap');sk=box.querySelector('button');cx=cvs.getContext('2d');
+    const coarse=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
+    K=Math.min(2,coarse?1.25:(window.devicePixelRatio||1));cvs.width=960*K;cvs.height=540*K;
+    sk.addEventListener('click',()=>{if(cur)cur.skip()});
+    window.addEventListener('keydown',e=>{if(!cur)return;e.stopImmediatePropagation();e.preventDefault();if(T.keys.includes(e.key))cur.skip()},true);
+    return{cx,K};
+  }
+  function create(o){
+    mount();
+    const key=o.key?LB.key(o.key):null;
+    let seen=o.testSeen?true:key?LB.store.get(key,'0')==='1':false,st=null;
+    const dur=s=>Math.max(T.min,s.d);
+    function advance(dt){
+      st.t+=dt;if(o.onTick)o.onTick(st.t,dt);
+      const sc=st.sc;let acc=0,i=0;for(;i<sc.length;i++){if(st.t<acc+dur(sc[i]))break;acc+=dur(sc[i])}
+      if(i>=sc.length){finish();return false}
+      const s=sc[i],d=dur(s),lt=st.t-acc;st.lt=lt;st.p=lt/d;st.al=Math.min(1,lt/T.fade,(d-lt)/T.fade);
+      if(st.i!==i){st.i=i;cap.textContent=s.txt?s.txt():LB._(s.en,s.fr);cap.style.color=s.col||'';if(s.enter)s.enter(st)}
+      if(s.cue)s.cue.forEach(([at,fn],k)=>{const n='cue'+i+'-'+k;if(!st[n]&&st.p>at){st[n]=1;fn(st)}});
+      cap.style.opacity=String(c01(Math.min(lt-T.capIn,d-T.capIn-lt)/T.capFade));
+      return true;
+    }
+    function render(){
+      cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1;cx.fillStyle='#000';cx.fillRect(0,0,960,540);
+      st.sc[st.i].draw(st.p,st.t,st.lt,st,cx);
+      cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1-st.al;cx.fillStyle='#000';cx.fillRect(0,0,960,540);cx.globalAlpha=1;
+    }
+    function frame(now){
+      if(!st)return;
+      const dt=Math.min(T.dtMax,(now-st.last)/1000);st.last=now;
+      if(!advance(dt))return;
+      render();st.raf=requestAnimationFrame(frame);
+    }
+    function finish(){
+      if(!st)return;const d=st.done;cancelAnimationFrame(st.raf);st=null;cur=null;box.hidden=true;
+      if(key){seen=true;LB.store.set(key,'1')}
+      try{o.onEnd&&o.onEnd()}catch(e){}
+      try{d&&d()}catch(e){}
+    }
+    function play(done){
+      if(st||cur)return;LB.audio.ensure();cvs.width=960*K;cvs.height=540*K;
+      sk.textContent=LB._('Skip ›','Passer ›');cap.textContent='';cap.style.opacity='0';cap.style.color='';
+      box.hidden=false;st={t:0,i:-1,last:performance.now(),done,raf:0,sc:typeof o.scenes==='function'?o.scenes():o.scenes};cur=self;
+      if(o.onStart)o.onStart(st);
+      try{sk.focus({preventScroll:true})}catch(e){}
+      if(!LB.cine.manual)st.raf=requestAnimationFrame(frame);
+    }
+    const self={play,replay:play,seen:()=>seen,playing:()=>!!st,skip:finish,
+      step(dt,draw){if(st&&advance(dt)&&draw!==false)render()}};
+    return self;
+  }
+  return{create,mount,manual:false,active:()=>cur,skip:()=>{if(cur)cur.skip()},step:(dt,draw)=>{if(cur)cur.step(dt,draw)}};
+})();
+
+/* ---------- LB.title : titre de fin d'intro (décision n° 6 du 28 octobre : comme au Chapitre I) ----------
+   « LUMEN » couleur du chapitre + « BELL » crème, 96 px, halo de la couleur du chapitre ; ligne du chapitre en Big Shoulders
+   26 px crème dessous. LB.title(ctx, t, t0, {col, sub}) : apparaît en TITLE_T.in secondes à partir de t0. Placement :
+   le nom a sa ligne de base à y ; la ligne du chapitre à y + subDy, plus bas si les boîtes mesurées (measureText)
+   l'exigent pour garder gap entre les deux (police de repli plus haute) ; nom réduit s'il dépasse maxW. */
+LB.TITLE_T={in:1.75,size:96,sub:26,y:118,subDy:42,gap:8,maxW:840,ls:4,subLs:3,glow:.85,blur:30,cream:'#f0e8df',subCol:'rgba(240,232,223,.88)'};
+LB.rgba=(hex,a)=>'rgba('+[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)).join(',')+','+a+')';
+LB.title=(c,t,t0,o)=>{
+  const T=LB.TITLE_T,a=(t-t0)/T.in,ta=a<0?0:a>1?1:a;if(!(ta>0))return;
+  c.save();c.globalAlpha=ta;c.shadowColor=LB.rgba(o.col,T.glow);c.shadowBlur=T.blur;c.textAlign='left';
+  const ls=c.letterSpacing!==undefined,font=s=>'800 '+s+'px '+LB.FONT.display;
+  c.font=font(T.size);if(ls)c.letterSpacing=T.ls+'px';
+  let w1=c.measureText('LUMEN').width,w2=c.measureText('BELL').width;
+  if(w1+w2>T.maxW){c.font=font(Math.floor(T.size*T.maxW/(w1+w2)));w1=c.measureText('LUMEN').width;w2=c.measureText('BELL').width}
+  const x0=480-(w1+w2)/2,desc=c.measureText('LUMENBELL').actualBoundingBoxDescent||0;
+  c.fillStyle=o.col;c.fillText('LUMEN',x0,T.y);c.fillStyle=T.cream;c.fillText('BELL',x0+w1,T.y);
+  c.shadowBlur=0;c.textAlign='center';if(ls)c.letterSpacing=T.subLs+'px';c.fillStyle=T.subCol;c.font='700 '+T.sub+'px '+LB.FONT.display;
+  const U=o.sub.toUpperCase(),asc=c.measureText(U).actualBoundingBoxAscent||T.sub*.72;
+  c.fillText(U,480,Math.max(T.y+T.subDy,T.y+desc+T.gap+asc));c.restore();
 };
 const $=id=>document.getElementById(id);
 /* save keys and language: common to the series (shared/, LB.store, LB.key, LB.lang). Common keys lb-lang, lb-snd, lb-mus,
@@ -1751,9 +1861,8 @@ function drawHelp(){
 let last=performance.now();
 function draw(){
   ctx.setTransform(SC,0,0,SC,0,0);
-  if(S.mode==='epilogue'){ctx.save();drawEpilogue(gt-S.epT0);ctx.restore();return}
+  if(S.mode==='epilogue'||S.mode==='prologue'){ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);return}   // drawn by LB.cine in its own frame (72-flow.js)
   if(S.mode==='card'&&S.still){ctx.save();drawStill(S.still);ctx.restore();const vs=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vs.addColorStop(0,'rgba(0,0,0,0)');vs.addColorStop(1,'rgba(0,0,0,.55)');ctx.fillStyle=vs;ctx.fillRect(0,0,W,H);return}
-  if(S.mode==='prologue'){ctx.save();drawPrologue(gt-S.proT0);ctx.restore();const vg0=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);vg0.addColorStop(0,'rgba(0,0,0,0)');vg0.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=vg0;ctx.fillRect(0,0,W,H);return}
   ctx.save();
   if(S.shake>.3)ctx.translate((Math.random()-.5)*S.shake,(Math.random()-.5)*S.shake);
   const ph=S.phase;
@@ -1858,20 +1967,6 @@ function title(t,t0,eye,name,col,ncol){if(t<t0)return;const a=clamp((t-t0)/.5,0,
   ctx.font='700 16px '+LB.FONT.body;ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,H*.42-46+(1-a)*8);
   ctx.font='800 64px '+LB.FONT.display;{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px ${LB.FONT.display}`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
   ctx.fillStyle=col;ctx.fillRect(W/2-60*a,H*.42+18,120*a,3);ctx.restore()}
-/* end of the intro: the series name large, the chapter below it, small, in the chapter colour (as in Ember Bridge).
-   Vertical layout from the measured glyph boxes, so the two lines never touch whatever the font fallback. */
-const SERIES_T={size:96,sub:17,gap:22,y:.36};   // y: baseline of the name (fraction of the height), above the Watcher's lantern
-function seriesTitle(t,t0,name,sub,col){if(t<t0)return;const a=clamp((t-t0)/.5,0,1),dy=(1-a)*8;ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
-  const N=name.toUpperCase(),U=sub.toUpperCase().split('').join(String.fromCharCode(8202));
-  ctx.font=`800 ${SERIES_T.size}px ${LB.FONT.display}`;{const mw=ctx.measureText(N).width;if(mw>W-120)ctx.font=`800 ${Math.floor(SERIES_T.size*(W-120)/mw)}px ${LB.FONT.display}`}
-  const mN=ctx.measureText(N),yN=H*SERIES_T.y+dy;
-  ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(N,W/2+3,yN+3);ctx.fillStyle='#f4eee4';ctx.fillText(N,W/2,yN);
-  ctx.font=`700 ${SERIES_T.sub}px ${LB.FONT.body}`;const mS=ctx.measureText(U),yS=yN+(mN.actualBoundingBoxDescent||0)+3+SERIES_T.gap+(mS.actualBoundingBoxAscent||SERIES_T.sub*.72);
-  ctx.fillStyle=col;ctx.fillText(U,W/2,yS);ctx.fillRect(W/2-60*a,yS+(mS.actualBoundingBoxDescent||4)+12,120*a,3);ctx.restore()}
-function caption(txt,a){if(a<=0)return;ctx.save();ctx.globalAlpha=clamp(a,0,1);ctx.textAlign='center';ctx.font='italic 500 22px '+LB.FONT.body;
-  // too wide for the screen: two lines, cut at the space nearest the middle
-  let L=[txt];if(ctx.measureText(txt).width>W-120){let c=-1;for(let i=0;i<txt.length;i++)if(txt[i]===' '&&(c<0||Math.abs(i-txt.length/2)<Math.abs(c-txt.length/2)))c=i;if(c>0)L=[txt.slice(0,c),txt.slice(c+1)]}
-  L.forEach((l,i)=>{const y=H*.78+(i-(L.length-1)/2)*28;ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(l,W/2+2,y+2);ctx.fillStyle='#efe7ff';ctx.fillText(l,W/2,y)});ctx.restore()}
 const FALL=(()=>{const R=mulberry(91);let rank=0;const ids=TOWER.map((p,i)=>i).filter(i=>!FIXED(TOWER[i].k)).sort((a,b)=>TOWER[a].e.y-TOWER[b].e.y);
   const out={};ids.forEach(i=>{const p=TOWER[i],dir=rank%2?1:-1;let x=clamp(p.e.x+dir*(50+rank*20)+(R()-.5)*20,380,945),y=GY-13,r=(R()-.5)*.5;
     if(p.k==='sbell'){y=GY-34;r=dir*Math.PI/2}else if(p.k==='seg'){y=GY-10;r=(R()-.5)*.3}else if(p.k==='head'){x=470;y=GY-38;r=-Math.PI/2}
@@ -2276,20 +2371,20 @@ const MUSIC=(()=>{
   return{play,stop,fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
 })();
 /* ---------- Prologue: the silent coast (docs/CH2-SPEC.md, intro) ---------- */
-/* intro rhythm, as in Ember Bridge (76-cine-intro.js): one shot per carton, 6 to 7 s each (PRO_T.cap); each carton
-   fades in PRO_T.lead after its shot starts and out PRO_T.lead before it ends, fades of PRO_T.fade; a dip to black of
-   PRO_T.fade on each side of a cut; then the title shot (PRO_T.title). Shots: A the coast in the mist, B the dark
-   Lighthouse out at sea, C the beach with the boats that no longer go out, D the Lighthouse's top, a faint glimmer up
-   there; E (title) the Watcher comes onto the shore. */
-const PRO_T={cap:[6,7,7,7],title:4.6,lead:.5,fade:.5,walk:1.4,titleAt:.6};
-const PRO_SHOTS=PRO_T.cap.reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of A, B, C, D, E
-const PRO_TITLE=PRO_SHOTS[4]+PRO_T.titleAt,PRO_LEN=PRO_SHOTS[4]+PRO_T.title;
+/* intro in the series frame (LB.cine, shared/js/24-cine.js, as in Ember Bridge): one shot per carton, durations in CINE_D
+   (6 to 7 s, as in Chapter I); the module fades each carton in and out (LB.CINE_T.fade), shows the caption under the image
+   and the Skip button; then the title shot (no caption). Shots: A the coast in the mist, B the dark Lighthouse out at sea,
+   C the beach with the boats that no longer go out, D the Lighthouse's top, a faint glimmer up there; E (title) the
+   Watcher comes onto the shore. */
+/* carton durations of this chapter (s): intro A to E, outro (epilogue) 1 to 5 */
+const CINE_D={intro:[6,7,7,7,6],outro:[7,6,6,7,7]};
+const PRO_T={walk:1.4,titleAt:.6};
+const PRO_SHOTS=CINE_D.intro.slice(0,4).reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of A, B, C, D, E
+const PRO_TITLE=PRO_SHOTS[4]+PRO_T.titleAt;
 const PCAP_TXT=()=>[_('On the coast, the mist no longer lifts.','Sur la côte, la brume ne se lève plus.'),
   _('Out at sea, the Drowned Lighthouse stands dark. No bell answers it.','Au large, le Phare Noyé se dresse, éteint. Aucune cloche ne lui répond.'),
   _('The ships no longer return. The fishermen say the sea keeps what it takes.',"Les navires ne reviennent plus. Les pêcheurs disent que la mer garde ce qu'elle prend."),
   _('They say its keeper still watches up there.','On dit que sa gardienne veille encore là-haut.')];
-/* intro cartons: [start, end, text] in seconds */
-const PCAPF=()=>PCAP_TXT().map((s,i)=>[PRO_SHOTS[i]+PRO_T.lead,PRO_SHOTS[i+1]-PRO_T.lead,s]);
 const PSFX=[[0,'swell'],[PRO_SHOTS[1],'rumble'],[PRO_SHOTS[2],'swell'],[PRO_SHOTS[3],'glints'],[PRO_SHOTS[4]+PRO_T.walk,'land'],[PRO_TITLE+.4,'sting']];
 /* ---- pieces of the coast, shared by the intro and the outro ---- */
 function skyGrad(top,bot,y1){const g=ctx.createLinearGradient(0,0,0,y1);g.addColorStop(0,top);g.addColorStop(1,bot);ctx.fillStyle=g;ctx.fillRect(-40,-40,W+80,y1+40)}
@@ -2361,14 +2456,10 @@ function drawPrologue(t){
     LB.drawWatcher(ctx,hx,GY,walk<1?'walk':'idle',walk<1?t:rt);   // the Watcher of the series (shared/js/20-watcher.js)
     if(ts>=PRO_T.walk&&once('land'))burst(W/2-60,GY,14,'#9fb6a0',3,.7,.3)}}
   ctx.restore();
-  // cuts between shots: a short dip to black
-  for(const s of PRO_SHOTS.slice(1,4)){const d=Math.abs(t-s);if(d<PRO_T.fade)fadeAll(1-d/PRO_T.fade)}
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
-  // text
-  for(const c of PCAPF()){const a=clamp((t-c[0])/PRO_T.fade,0,1)*(1-clamp((t-c[1]+PRO_T.fade)/PRO_T.fade,0,1));if(a>0)caption(c[2],a)}
-  seriesTitle(t,PRO_TITLE,'Lumenbell',_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),CH_COL[2]);
-  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-(PRO_LEN-.7))/.7,0,1));
+  // the series title (LB.title, as in Chapter I); captions, fades and cuts are the frame's (LB.cine)
+  LB.title(ctx,t,PRO_TITLE,{col:CH_COL[2],sub:_('Chapter II · Silent Bells','Chapitre II · Silent Bells')});
   PSFX.forEach((c,i)=>{if(t>=c[0]&&once('pfx'+i))MUSIC.fx(c[1])});
 }
 function lerpC(a,b,k){return`rgb(${a.map((v,i)=>Math.round(lerp(v,b[i],k))).join(',')})`}
@@ -2755,8 +2846,21 @@ function playCine(id,k,cb){
   hideCard();hud();if($('optMus').checked)MUSIC.bed(id);$('skip').hidden=false;
 }
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
+/* intro and outro in the series frame (LB.cine, shared/js/24-cine.js): the chapter draws the shot in the module's canvas
+   (ctx swapped for the draw), the module draws the frame (cartons, fades, caption, Skip). Game time (gt, particles) runs
+   with the game loop as before; only when the loop is stopped (menu open, replay) does it follow the module's time. */
+function cineScene(fn,vig){return(p,t,lt,st,cx)=>{const g=ctx;ctx=cx;try{ctx.save();fn(t);ctx.restore();
+  if(vig){const v=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=v;ctx.fillRect(0,0,W,H)}}finally{ctx=g}}}
+/* the prologue: played once (flag lb-ch2-intro, written at the end or on Skip), then only by PRO.replay */
+const PRO=LB.cine.create({key:'intro',scenes:()=>CINE_D.intro.map((d,i)=>({d,txt:()=>i<4?PCAP_TXT()[i]:'',draw:cineScene(drawPrologue,true)})),
+  onTick:t=>{if(!$('menu').hidden)gt=S.proT0+t}});   // menu open (replay): the game loop is stopped, game time follows the module's
+function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=true;$('hdEye').textContent='Prologue';PRO.play(endPrologue)}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
+/* replay from the menu (button ▶ Intro, as in Chapter I): the prologue plays over the menu even if seen; the game state
+   (mode, game time, particles, a paused fight) is left as it was and restored at the end */
+function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
+  S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if($('optMus').checked)MUSIC.bed(2);
+  PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
 function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
@@ -2797,7 +2901,7 @@ function startRun(dk,noPro){
   S=fresh(dk);S.full=true;S.phase=2;S.form=1;S.cineDone={};
   $('optHelp').checked=dk==='easy'?true:DIFFS[dk].trial?false:$('optHelp').checked;$('optHelp').disabled=!!DIFFS[dk].trial;
   hideMenu();hud();
-  if(noPro)enterPhase(2,{first:true});else playPrologue(()=>enterPhase(2,{first:true}));
+  if(noPro||PRO.seen())enterPhase(2,{first:true});else playPrologue(()=>enterPhase(2,{first:true}));
 }
 function jumpPhase(gp){if(S.d.trial||S.mode==='menu')return;const id=ORDER[gp-1],dk=S.dk;$('pause').hidden=true;S=fresh(dk);S.full=false;S.cineDone={};enterPhase(id,{first:true})}
 function showMenu(){
@@ -2811,23 +2915,24 @@ function hideMenu(){$('menu').hidden=true}
 function setPause(p){if(S.mode!=='play')return;S.paused=p;$('pause').hidden=!p;if(p){up();MUSIC.stop();try{$('pResume').focus({preventScroll:true})}catch(e){}}else setTheme(S.phase)}
 
 /* ---------- Epilogue (docs/CH2-SPEC.md, outro) ---------- */
-const EPI_LEN=19;
-/* outro cartons: [start, end, text] in seconds; carton 5 is the title, tinted with the next chapter's colour.
-   Shots (EPI_SHOTS, start times): 1 morning, the Lighthouse mute; 2 close-up of the bell, the word engraved; 3 the valley
-   of Chapter I, the earth trembling, one tower going dark; 4 the forest, the Spire's light failing (and the title over it).
-   No glow under the waves any more (revisions of 28 October): the only light left is the forest Spire's. */
-const ECAPF=()=>[[.4,4.2,_('By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again.','Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus.')],
-  [4.4,8.2,_('On it, a single word is engraved: Crown.','Sur celle-ci, un seul mot est gravé : Couronne.')],
-  [8.4,12.2,_('And this time, the earth has not stopped trembling.',"Et cette fois, la terre n'a pas cessé de trembler.")],
-  [12.4,15.8,_("In the heart of the forest, a Spire's light is failing.","Au cœur de la forêt, la lumière d'une Flèche faiblit.")]];
-const EPI_TITLE=16.2;
-const EPI_SHOTS=[0,4.3,8.3,12.3];
+/* outro in the series frame (LB.cine), carton durations in CINE_D.outro (6 to 7 s, as in Chapter I). Cartons 1 to 4 have one
+   shot each: 1 morning, the Lighthouse mute; 2 close-up of the bell, the word engraved; 3 the valley of Chapter I, the earth
+   trembling, one tower going dark; 4 the forest, the Spire's light failing. Carton 5 announces the next chapter over the same
+   forest: its caption is tinted with Chapter III's colour (CH_COL[3]). No glow under the waves any more (revisions of
+   28 October): the only light left is the forest Spire's. Times inside a shot are counted from the shot's start (EPI_SHOTS). */
+const ECAP_TXT=()=>[_('By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again.','Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus.'),
+  _('On it, a single word is engraved: Crown.','Sur celle-ci, un seul mot est gravé : Couronne.'),
+  _('And this time, the earth has not stopped trembling.',"Et cette fois, la terre n'a pas cessé de trembler."),
+  _("In the heart of the forest, a Spire's light is failing.","Au cœur de la forêt, la lumière d'une Flèche faiblit."),
+  _('Chapter III. To be continued.','Chapitre III. À suivre.')];
+const EPI_SHOTS=CINE_D.outro.slice(0,3).reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of shots 1 to 4
+const EPI_TITLE=EPI_SHOTS[3]+CINE_D.outro[3];   // carton 5 (next chapter)
 /* shot 4: the forest Spire (x, top), its light fading from SPIRE.a0 to SPIRE.a1 over the shot, with flickers */
 const SPIRE={x:500,top:170,a0:.9,a1:.25,fade:6};
 /* shot 3: the valley's towers (x, height); TOWER_OUT goes dark at EPI_DARK; the earth cracks along VCRACKS */
-const VTOW=[[150,150],[300,110],[470,170],[640,120],[800,140]],TOWER_OUT=3,EPI_DARK=9.6;
-const VCRACKS=(()=>{const R=mulberry(808);return[...Array(5)].map((_,i)=>{const pts=[];let x=80+i*190,y=430;for(let k=0;k<7;k++){pts.push([x,y]);x+=(R()-.5)*60;y+=14+R()*10}return{pts,t0:8.9+i*.45}})})();
-const EFXL=[[.2,'swell'],[4.3,'glints'],[8.3,'rumble'],[9.6,'crackRun'],[10.4,'rumble'],[12.3,'glints'],[14.6,'heart'],[16.8,'sting']];
+const VTOW=[[150,150],[300,110],[470,170],[640,120],[800,140]],TOWER_OUT=3,EPI_DARK=EPI_SHOTS[2]+1.3;
+const VCRACKS=(()=>{const R=mulberry(808);return[...Array(5)].map((_,i)=>{const pts=[];let x=80+i*190,y=430;for(let k=0;k<7;k++){pts.push([x,y]);x+=(R()-.5)*60;y+=14+R()*10}return{pts,t0:EPI_SHOTS[2]+.6+i*.45}})})();
+const EFXL=[[.2,'swell'],[EPI_SHOTS[1],'glints'],[EPI_SHOTS[2],'rumble'],[EPI_DARK,'crackRun'],[EPI_SHOTS[2]+2.1,'rumble'],[EPI_SHOTS[3],'glints'],[EPI_SHOTS[3]+2.3,'heart'],[EPI_TITLE+.6,'sting']];
 function drawEpilogue(t){
   const shot=EPI_SHOTS.filter(s=>t>=s).length-1,ts=t-EPI_SHOTS[shot];
   ctx.save();
@@ -2867,14 +2972,13 @@ function drawEpilogue(t){
       ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
     mist(420,4,.08,6)}
   ctx.restore();
-  for(const s of EPI_SHOTS.slice(1)){const d=Math.abs(t-s);if(d<.3)fadeAll(1-d/.3)}
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
-  for(const c of ECAPF()){const a=clamp((t-c[0])/.4,0,1)*(1-clamp((t-c[1]+.4)/.4,0,1));if(a>0)caption(c[2],a)}
-  title(t,EPI_TITLE,'',_('Chapter III. To be continued.','Chapitre III. À suivre.'),CH_COL[3],CH_COL[3]);
-  fadeAll(1-clamp(t/.8,0,1));fadeAll(clamp((t-(EPI_LEN-.8))/.8,0,1));
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
 }
-function playEpilogue(cb){MUSIC.stop();MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();setTheme(4);$('skip').hidden=false;$('hdEye').textContent=_('Epilogue','Épilogue')}
+/* the epilogue in the series frame; no "seen" flag: it follows the victory every time */
+const EPI=LB.cine.create({scenes:()=>CINE_D.outro.map((d,i)=>({d,txt:()=>ECAP_TXT()[i],col:i===4?CH_COL[3]:'',draw:cineScene(drawEpilogue)})),
+  onTick:t=>{if(!$('menu').hidden)gt=S.epT0+t}});
+function playEpilogue(cb){MUSIC.stop();MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();setTheme(4);$('skip').hidden=true;$('hdEye').textContent=_('Epilogue','Épilogue');EPI.play(endEpilogue)}
 function endEpilogue(){if(S.mode!=='epilogue')return;const cb=S.epCb;S.epCb=null;$('skip').hidden=true;S.mode='card';cb&&cb()}
 
 
@@ -2896,8 +3000,6 @@ function counterFx(){MUSIC.fx([null,'impactLight','throw','thunder'][S.phase])}
 /* ---------- per-frame game logic on top of the engine ---------- */
 function gameUpdate(dt){
   if(S.mode==='cine'&&S.cine&&gt-S.cine.t0>=CINE_LEN[S.phase][S.cine.k])endCine();
-  if(S.mode==='prologue'&&gt-S.proT0>=PRO_LEN)endPrologue();
-  if(S.mode==='epilogue'&&gt-S.epT0>=EPI_LEN)endEpilogue();
   combatSfx();
   // phase I: the muffled bell under the hatch
   if(S.phase===2&&(S.mode==='play'||(S.mode==='cine'&&S.cine&&S.cine.k==='in'))&&!S.paused){if(!S.hatchRing||gt-S.hatchRing>HATCH.toll){S.hatchRing=gt;MUSIC.fx('bellMuffled')}}
@@ -2946,7 +3048,7 @@ ward.addEventListener('pointerdown',e=>{e.preventDefault();try{ward.setPointerCa
 ward.addEventListener('pointerup',up);ward.addEventListener('pointercancel',up);ward.addEventListener('lostpointercapture',up);ward.addEventListener('contextmenu',e=>e.preventDefault());
 cvm.addEventListener('pointerdown',e=>{if(S.mode!=='play')return;e.preventDefault();try{cvm.setPointerCapture(e.pointerId)}catch(_e){}down()});
 cvm.addEventListener('pointerup',up);cvm.addEventListener('pointercancel',up);cvm.addEventListener('lostpointercapture',up);
-function skip(){if(S.mode==='prologue')endPrologue();else if(S.mode==='epilogue')endEpilogue();else if(S.mode==='cine')endCine()}
+function skip(){if(S.mode==='prologue'||S.mode==='epilogue')LB.cine.skip();else if(S.mode==='cine')endCine()}
 $('skip').addEventListener('click',skip);
 document.addEventListener('keydown',e=>{
   const k=e.key;if(!$('menu').hidden)return;
@@ -2968,6 +3070,7 @@ $('menuBtn').addEventListener('click',showMenu);
 $('mResume').addEventListener('click',()=>{hideMenu();MUSIC.stop();if(S.mode==='play')setPause(false);else if(S.mode==='card'&&lastCard)showCard(lastCard)});
 document.querySelectorAll('#phases button').forEach(b=>b.addEventListener('click',()=>jumpPhase(+b.dataset.ph)));
 document.querySelectorAll('[data-diff]').forEach(b=>b.addEventListener('click',()=>{ensureAudio();const dk=b.dataset.diff;if(dk==='trial'){$('mphM').hidden=true;$('mphT').hidden=false;return}startRun(dk)}));
+$('introBtn').addEventListener('click',e=>{e.currentTarget.blur();ensureAudio();replayPrologue()});
 $('mBackT').addEventListener('click',()=>{$('mphM').hidden=false;$('mphT').hidden=true});
 document.querySelectorAll('#langs button').forEach(b=>b.addEventListener('click',()=>{LB.lang.set(b.dataset.lang);applyLang()}));
 $('optSnd').checked=LB.audio.sound;$('optMus').checked=LB.audio.music;$('optHelp').checked=LB.store.get(OPT_KEY.optHelp,'0')==='1';

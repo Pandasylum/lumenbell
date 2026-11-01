@@ -201,12 +201,6 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .mlink small{font-size:11px;letter-spacing:.12em;color:var(--muted);border:1px solid var(--line);padding:1px 6px}
 #introBtn{position:absolute;top:56px;left:12px;z-index:3;background:rgba(10,7,16,.6)}
 #outroBtn{position:absolute;top:100px;left:12px;z-index:3;background:rgba(10,7,16,.6)}
-.cine{position:fixed;inset:0;z-index:120;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:12px}
-.cine[hidden]{display:none}
-.cbox{width:min(100%,calc((100dvh - 120px)*16/9));aspect-ratio:16/9}
-.cbox canvas{display:block;width:100%;height:100%}
-.ccap{margin:0;min-height:3.2em;max-width:min(760px,100%);text-align:center;color:var(--fg);font-size:clamp(15px,2.4vw,22px);line-height:1.45;text-wrap:balance;opacity:0}
-#cineSkip{position:absolute;right:14px;bottom:14px;padding:8px 18px;font-size:15px;min-height:40px}
 .langs{position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:3}
 .langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(241,227,207,.3);border-radius:4px;cursor:pointer}
 .langs button[aria-pressed="true"]{border-color:var(--ember);background:rgba(255,122,43,.22);color:#fff}
@@ -329,7 +323,6 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 
   <p class="sr" id="live" aria-live="polite"></p>
 </main>
-<div class="cine" id="cine" hidden><div class="cbox"><canvas id="cineC" aria-hidden="true"></canvas></div><p class="ccap" id="cineCap" aria-live="polite"></p><button type="button" class="btn ghost" id="cineSkip">Skip ›</button></div>
 
 <script>
 (()=>{
@@ -768,6 +761,114 @@ LB.drawWatcherSil=(c,ink,o)=>{
   const k=o.k,g=c.createRadialGradient(250,323,0,250,323,o.r*k);g.addColorStop(0,'rgba(255,240,200,.95)');g.addColorStop(o.s,'rgba(255,200,110,.45)');g.addColorStop(1,'rgba(255,190,90,0)');c.fillStyle=g;c.fillRect(190,263,120,120);
   c.fillStyle=ink;c.beginPath();c.moveTo(242,314);c.lineTo(250,306);c.lineTo(258,314);c.closePath();c.fill();c.fillRect(241,331,18,4);
   c.fillStyle='#ffd27a';c.fillRect(243,314,14,17);c.fillStyle=ink;c.fillRect(247,314,1.5,17);c.fillRect(251.5,314,1.5,17);
+};
+/* ---------- LB.cine : intro et outro des chapitres (session engine/cine, 1er novembre 2026) ----------
+   Le cadre commun des cinématiques : canvas dédié 960 x 540 en plein écran (#cineC), légende HTML dessous (#cineCap),
+   bouton « Passer » (#cineSkip), cartons enchaînés avec un fondu au noir à chaque bout, Échap / Entrée / Espace passent.
+   Le chapitre ne donne que ses scènes : LB.cine.create({key, scenes, onStart, onTick, onEnd}) → {play(done), replay(done),
+   seen(), playing(), skip()}.
+   - scenes : tableau (ou fonction qui le rend au moment de jouer) de cartons {d, en, fr, draw} ; à la place de en/fr, txt()
+     peut rendre le texte déjà traduit (le Chapitre II garde ainsi sa fonction de texte, relue par tests/ch2-texts.js) ; col = couleur de la
+     légende (annonce du chapitre suivant) ; enter(st) au début du carton ; cue = [[p, fn], …] : fn une seule fois quand
+     l'avancement p du carton dépasse le seuil. draw(p, t, lt, st, cx) : p avancement du carton (0 à 1), t temps depuis le
+     début, lt temps dans le carton, st état de la lecture (drapeaux libres), cx contexte du canvas (repère 960 x 540).
+   - key : drapeau « vue » (LB.key(key), par ex. lb-ch1-intro), écrit à la fin ou au passage ; sans key, aucun drapeau.
+     testSeen : la copie de test du Chapitre I le pose pour ne jamais lire le drapeau (intro considérée vue).
+   - play ne regarde pas le drapeau : c'est le chapitre qui décide (seen()) ; replay = play (rejeu depuis un menu).
+   - Durées : LB.CINE_T (fondu, légende, durée minimale d'un carton) ; la durée de chaque carton est dans la table du chapitre.
+   - Horloge : requestAnimationFrame (pas borné à dtMax). LB.cine.manual = true (copies de test) : plus de rAF, le test
+     appelle LB.cine.step(dt, dessiner).
+   - Le cadre (boîte, légende, bouton) est créé ici avec son style (LB.CINE_CSS) ; le bouton prend la classe « btn ghost »
+     du chapitre (sa couleur). Le dessin ne doit jamais tirer Math.random hors des scènes qui le faisaient déjà. */
+LB.CINE_T={fade:.8,capIn:.5,capFade:.6,min:6,dtMax:.1,keys:['Escape','Enter',' ']};
+LB.CINE_CSS='.cine{position:fixed;inset:0;z-index:120;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:12px}\n'+
+ '.cine[hidden]{display:none}\n'+
+ '.cbox{width:min(100%,calc((100dvh - 120px)*16/9));aspect-ratio:16/9}\n'+
+ '.cbox canvas{display:block;width:100%;height:100%}\n'+
+ '.ccap{margin:0;min-height:3.2em;max-width:min(760px,100%);text-align:center;color:var(--fg);font-size:clamp(15px,2.4vw,22px);line-height:1.45;text-wrap:balance;opacity:0}\n'+
+ '#cineSkip{position:absolute;right:14px;bottom:14px;padding:8px 18px;font-size:15px;min-height:40px}\n';
+LB.cine=(()=>{
+  const T=LB.CINE_T,c01=v=>v<0?0:v>1?1:v;
+  let box=null,cvs=null,cx=null,cap=null,sk=null,K=1,cur=null;
+  function mount(){
+    if(box)return{cx,K};
+    const st=document.createElement('style');st.textContent=LB.CINE_CSS;document.head.appendChild(st);
+    box=document.createElement('div');box.className='cine';box.id='cine';box.hidden=true;
+    box.innerHTML='<div class="cbox"><canvas id="cineC" aria-hidden="true"></canvas></div><p class="ccap" id="cineCap" aria-live="polite"></p><button type="button" class="btn ghost" id="cineSkip">Skip ›</button>';
+    document.body.appendChild(box);
+    cvs=box.querySelector('canvas');cap=box.querySelector('.ccap');sk=box.querySelector('button');cx=cvs.getContext('2d');
+    const coarse=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
+    K=Math.min(2,coarse?1.25:(window.devicePixelRatio||1));cvs.width=960*K;cvs.height=540*K;
+    sk.addEventListener('click',()=>{if(cur)cur.skip()});
+    window.addEventListener('keydown',e=>{if(!cur)return;e.stopImmediatePropagation();e.preventDefault();if(T.keys.includes(e.key))cur.skip()},true);
+    return{cx,K};
+  }
+  function create(o){
+    mount();
+    const key=o.key?LB.key(o.key):null;
+    let seen=o.testSeen?true:key?LB.store.get(key,'0')==='1':false,st=null;
+    const dur=s=>Math.max(T.min,s.d);
+    function advance(dt){
+      st.t+=dt;if(o.onTick)o.onTick(st.t,dt);
+      const sc=st.sc;let acc=0,i=0;for(;i<sc.length;i++){if(st.t<acc+dur(sc[i]))break;acc+=dur(sc[i])}
+      if(i>=sc.length){finish();return false}
+      const s=sc[i],d=dur(s),lt=st.t-acc;st.lt=lt;st.p=lt/d;st.al=Math.min(1,lt/T.fade,(d-lt)/T.fade);
+      if(st.i!==i){st.i=i;cap.textContent=s.txt?s.txt():LB._(s.en,s.fr);cap.style.color=s.col||'';if(s.enter)s.enter(st)}
+      if(s.cue)s.cue.forEach(([at,fn],k)=>{const n='cue'+i+'-'+k;if(!st[n]&&st.p>at){st[n]=1;fn(st)}});
+      cap.style.opacity=String(c01(Math.min(lt-T.capIn,d-T.capIn-lt)/T.capFade));
+      return true;
+    }
+    function render(){
+      cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1;cx.fillStyle='#000';cx.fillRect(0,0,960,540);
+      st.sc[st.i].draw(st.p,st.t,st.lt,st,cx);
+      cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1-st.al;cx.fillStyle='#000';cx.fillRect(0,0,960,540);cx.globalAlpha=1;
+    }
+    function frame(now){
+      if(!st)return;
+      const dt=Math.min(T.dtMax,(now-st.last)/1000);st.last=now;
+      if(!advance(dt))return;
+      render();st.raf=requestAnimationFrame(frame);
+    }
+    function finish(){
+      if(!st)return;const d=st.done;cancelAnimationFrame(st.raf);st=null;cur=null;box.hidden=true;
+      if(key){seen=true;LB.store.set(key,'1')}
+      try{o.onEnd&&o.onEnd()}catch(e){}
+      try{d&&d()}catch(e){}
+    }
+    function play(done){
+      if(st||cur)return;LB.audio.ensure();cvs.width=960*K;cvs.height=540*K;
+      sk.textContent=LB._('Skip ›','Passer ›');cap.textContent='';cap.style.opacity='0';cap.style.color='';
+      box.hidden=false;st={t:0,i:-1,last:performance.now(),done,raf:0,sc:typeof o.scenes==='function'?o.scenes():o.scenes};cur=self;
+      if(o.onStart)o.onStart(st);
+      try{sk.focus({preventScroll:true})}catch(e){}
+      if(!LB.cine.manual)st.raf=requestAnimationFrame(frame);
+    }
+    const self={play,replay:play,seen:()=>seen,playing:()=>!!st,skip:finish,
+      step(dt,draw){if(st&&advance(dt)&&draw!==false)render()}};
+    return self;
+  }
+  return{create,mount,manual:false,active:()=>cur,skip:()=>{if(cur)cur.skip()},step:(dt,draw)=>{if(cur)cur.step(dt,draw)}};
+})();
+
+/* ---------- LB.title : titre de fin d'intro (décision n° 6 du 28 octobre : comme au Chapitre I) ----------
+   « LUMEN » couleur du chapitre + « BELL » crème, 96 px, halo de la couleur du chapitre ; ligne du chapitre en Big Shoulders
+   26 px crème dessous. LB.title(ctx, t, t0, {col, sub}) : apparaît en TITLE_T.in secondes à partir de t0. Placement :
+   le nom a sa ligne de base à y ; la ligne du chapitre à y + subDy, plus bas si les boîtes mesurées (measureText)
+   l'exigent pour garder gap entre les deux (police de repli plus haute) ; nom réduit s'il dépasse maxW. */
+LB.TITLE_T={in:1.75,size:96,sub:26,y:118,subDy:42,gap:8,maxW:840,ls:4,subLs:3,glow:.85,blur:30,cream:'#f0e8df',subCol:'rgba(240,232,223,.88)'};
+LB.rgba=(hex,a)=>'rgba('+[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)).join(',')+','+a+')';
+LB.title=(c,t,t0,o)=>{
+  const T=LB.TITLE_T,a=(t-t0)/T.in,ta=a<0?0:a>1?1:a;if(!(ta>0))return;
+  c.save();c.globalAlpha=ta;c.shadowColor=LB.rgba(o.col,T.glow);c.shadowBlur=T.blur;c.textAlign='left';
+  const ls=c.letterSpacing!==undefined,font=s=>'800 '+s+'px '+LB.FONT.display;
+  c.font=font(T.size);if(ls)c.letterSpacing=T.ls+'px';
+  let w1=c.measureText('LUMEN').width,w2=c.measureText('BELL').width;
+  if(w1+w2>T.maxW){c.font=font(Math.floor(T.size*T.maxW/(w1+w2)));w1=c.measureText('LUMEN').width;w2=c.measureText('BELL').width}
+  const x0=480-(w1+w2)/2,desc=c.measureText('LUMENBELL').actualBoundingBoxDescent||0;
+  c.fillStyle=o.col;c.fillText('LUMEN',x0,T.y);c.fillStyle=T.cream;c.fillText('BELL',x0+w1,T.y);
+  c.shadowBlur=0;c.textAlign='center';if(ls)c.letterSpacing=T.subLs+'px';c.fillStyle=T.subCol;c.font='700 '+T.sub+'px '+LB.FONT.display;
+  const U=o.sub.toUpperCase(),asc=c.measureText(U).actualBoundingBoxAscent||T.sub*.72;
+  c.fillText(U,480,Math.max(T.y+T.subDy,T.y+desc+T.gap+asc));c.restore();
 };
 /* Sauvegarde et langue : communes à la série (shared/, clés lb-…). Anciennes clés du Chapitre I (eb-…) lues si la nouvelle manque :
    eb-lang (langue, avec pn-lang : LB.OLD_KEYS), eb-intro, eb-end, eb-best-<mode>. */
@@ -4828,10 +4929,9 @@ hud();
 el.ov.hidden=true;
 showMenu(false);
 /* écran de démarrage : un clic obligatoire, qui débloque le son et lance la musique du menu */
-/* ---------- cinématique d'introduction (canvas dédié, passable) ---------- */
+/* ---------- cinématique d'introduction (cadre commun LB.cine, shared/js/24-cine.js ; drapeau « vue » lb-ch1-intro) ---------- */
 const CINE=(()=>{
-  const box=$('cine'),cvs=$('cineC'),cap=$('cineCap'),sk=$('cineSkip'),cx=cvs.getContext('2d');
-  const K=Math.min(2,COARSE?1.25:(window.devicePixelRatio||1));cvs.width=960*K;cvs.height=540*K;
+  const cx=LB.cine.mount().cx;
   const P=d=>new Path2D(d);
   const BRIDGE=P('M0 455 L960 455 L960 475 L900 475 Q860 475 860 505 L860 540 L760 540 L760 505 Q760 475 720 475 L560 475 Q520 475 520 505 L520 540 L420 540 L420 505 Q420 475 380 475 L200 475 Q160 475 160 505 L160 540 L60 540 L60 505 Q60 475 0 475Z');
   const COLOS=P('M640 455 L650 330 L615 300 L640 270 L625 215 L660 245 L690 205 L720 245 L760 215 L750 270 L785 300 L745 335 L760 455Z M655 215 L630 150 L668 200Z M745 210 L772 148 L735 198Z M615 300 L540 360 L560 372 L630 330Z M785 300 L850 270 L860 290 L790 330Z');
@@ -4849,8 +4949,6 @@ const CINE=(()=>{
     {d:7,en:'Tonight, a chain gives way beneath the mountain. The Ember Colossus climbs toward the light.',fr:"Cette nuit, une chaîne cède sous la montagne. Le Colosse de braise remonte vers la lumière."},
     {d:7,en:'If the Watcher falls, the fire will reach the villages.',fr:'Si le Veilleur tombe, le feu atteindra les villages.'}
   ];
-  let st=null,seen=false; /* vue une fois (Passer ou fin) : mémorisé dans le navigateur quand c'est possible, sinon jusqu'au prochain chargement */
-  seen=LB.store.get(LB.key('intro'),'0')==='1';
   function sky(top,mid,bot){const g=cx.createLinearGradient(0,0,0,540);g.addColorStop(0,top);g.addColorStop(.6,mid);g.addColorStop(1,bot);cx.fillStyle=g;cx.fillRect(0,0,960,540)}
   function stars(t,a){cx.fillStyle='#f1e3cf';for(const s of STARS){cx.globalAlpha=a*(.35+.35*Math.sin(t*1.3+s.p));cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.283);cx.fill()}cx.globalAlpha=1}
   function embers(t,k){cx.fillStyle='#ffb060';for(const e of EMB){const y=540-((e.p+t*e.v)%580),x=e.x+Math.sin(t*.8+e.ph)*16;cx.globalAlpha=k*clamp01(Math.min(1,(540-y)/90))*clamp01(y/120+.2);cx.beginPath();cx.arc(x,y,e.s,0,6.283);cx.fill()}cx.globalAlpha=1}
@@ -4909,7 +5007,7 @@ const CINE=(()=>{
     cx.shadowBlur=0;embers(t,1.1);cx.restore();
     if(p>.45&&p<.62){cx.fillStyle='rgba(255,230,190,'+(.55*(1-(p-.45)/.17))+')';cx.fillRect(0,0,960,540)}
   }
-  function sFace(p,t){
+  function sFace(p,t,lt){
     cx.save();cam(1.55-.55*p,480,330);
     sky('#08060d','#2a0f14','#7a2a10');stars(t,.9);
     cx.fillStyle='rgba(241,227,207,.16)';cx.beginPath();cx.arc(170,110,34,0,6.283);cx.fill();
@@ -4919,47 +5017,17 @@ const CINE=(()=>{
     cx.fillStyle='#ffd27a';cx.shadowColor='#ffb347';cx.shadowBlur=16;cx.beginPath();cx.arc(690,232,4,0,6.283);cx.arc(722,232,4,0,6.283);cx.fill();cx.shadowBlur=0;
     const lg=cx.createRadialGradient(705,330,0,705,330,40);lg.addColorStop(0,'rgba(255,122,43,.5)');lg.addColorStop(1,'rgba(255,122,43,0)');cx.fillStyle=lg;cx.fillRect(660,290,90,80);
     embers(t,1);cx.restore();
-    const ta=clamp01((p-.5)/.25);
-    if(ta>0){cx.save();cx.globalAlpha=ta;cx.textAlign='center';cx.fillStyle='#f0e8df';cx.shadowColor='rgba(255,122,43,.85)';cx.shadowBlur=30;cx.font='800 96px '+DISPLAY;cx.textAlign='left';if(cx.letterSpacing!==undefined)cx.letterSpacing='4px';const w1=cx.measureText('LUMEN').width,w2=cx.measureText('BELL').width,x0=480-(w1+w2)/2;cx.fillStyle='#ff7a2b';cx.fillText('LUMEN',x0,118);cx.fillStyle='#f0e8df';cx.fillText('BELL',x0+w1,118);cx.shadowBlur=0;cx.textAlign='center';if(cx.letterSpacing!==undefined)cx.letterSpacing='3px';cx.fillStyle='rgba(240,232,223,.88)';cx.font='700 26px '+DISPLAY;cx.fillText(_('CHAPTER I · EMBER BRIDGE','CHAPITRE I · EMBER BRIDGE'),480,160);cx.restore()}
+    LB.title(cx,lt,SC[4].d/2,{col:'#ff7a2b',sub:_('CHAPTER I · EMBER BRIDGE','CHAPITRE I · EMBER BRIDGE')});   /* titre commun (LB.title), à mi-carton */
   }
   const DRAW=[sMnt,sVal,sBridge,sWake,sFace];
-  function frame(now){
-    if(!st)return;
-    const dt=Math.min(.1,(now-st.last)/1000);st.last=now;st.t+=dt;
-    let acc=0,i=0;for(;i<SC.length;i++){if(st.t<acc+SC[i].d)break;acc+=SC[i].d}
-    if(i>=SC.length){finish();return}
-    const s=SC[i],lt=st.t-acc,p=lt/s.d,al=Math.min(1,lt/.8,(s.d-lt)/.8);
-    if(st.i!==i){st.i=i;cap.textContent=_(s.en,s.fr);
-      if(i===3)st.roar=false}
-    if(i===3&&!st.roar&&p>.45){st.roar=true;boom(1.2,.12);roar()}
-    if(i===2&&!st.chime&&p>.3){st.chime=true;tone(660,.9,'sine',.04,200);tone(990,1.1,'sine',.025,0)}
-    cap.style.opacity=String(clamp01(Math.min(lt-.5,s.d-.5-lt)/.6));
-    cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1;cx.fillStyle='#000';cx.fillRect(0,0,960,540);
-    DRAW[i](p,st.t);
-    cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1-al;cx.fillStyle='#000';cx.fillRect(0,0,960,540);cx.globalAlpha=1;
-    st.raf=requestAnimationFrame(frame);
-  }
-  function finish(){
-    if(!st)return;const d=st.done;cancelAnimationFrame(st.raf);st=null;box.hidden=true;
-    seen=true;LB.store.set(LB.key('intro'),'1');
-    try{d&&d()}catch(e){}
-  }
-  function play(done){
-    if(st)return;ensureAudio();
-    sk.textContent=_('Skip ›','Passer ›');cap.textContent='';cap.style.opacity='0';
-    box.hidden=false;st={t:0,i:-1,last:performance.now(),done,raf:0};
-    try{sk.focus({preventScroll:true})}catch(e){}
-    st.raf=requestAnimationFrame(frame);
-  }
-  sk.addEventListener('click',finish);
-  window.addEventListener('keydown',e=>{if(!st)return;e.stopImmediatePropagation();e.preventDefault();if(e.key==='Escape'||e.key==='Enter'||e.key===' ')finish()},true);
-  return{play,seen:()=>seen};
+  /* sons du carton : la braise qui s'ouvre (carton 4), le tintement de la lanterne (carton 3) */
+  const CUE={2:[[.3,()=>{tone(660,.9,'sine',.04,200);tone(990,1.1,'sine',.025,0)}]],3:[[.45,()=>{boom(1.2,.12);roar()}]]};
+  return LB.cine.create({key:'intro',scenes:SC.map((s,i)=>Object.assign({draw:DRAW[i],cue:CUE[i]},s))});
 })();
 $('introBtn').addEventListener('click',e=>{e.currentTarget.blur();CINE.play(()=>{})});
 /* Outro de la vraie fin : le lore après la bataille, jusqu'au lien avec Silent Bells. Rejouable depuis le menu une fois débloquée. */
 const OUTRO=(()=>{
-  const box=$('cine'),cvs=$('cineC'),cap=$('cineCap'),sk=$('cineSkip'),cx=cvs.getContext('2d');
-  let st=null;
+  const cx=LB.cine.mount().cx;   /* cadre commun LB.cine (shared/js/24-cine.js) ; pas de drapeau : rejouée depuis le menu */
   const STR=Array.from({length:140},()=>({x:rand(0,960),y:rand(0,330),r:rand(.4,1.8),p:rand(0,6.3)}));
   const SNW=Array.from({length:90},()=>({x:rand(0,960),y:rand(0,540),v:rand(30,80),s:rand(1,3)}));
   const BUB=Array.from({length:34},(v,i)=>({x:rand(0,960),o:rand(0,340),r:rand(1.5,4)}));
@@ -5011,13 +5079,13 @@ const OUTRO=(()=>{
     for(let i=0;i<14;i++){const x=120+i*55+(i%3)*8,y=410+(i%4)*22,on=Math.sin(t*.7+i*1.7)>-.6;cx.fillStyle='#0d1229';cx.fillRect(x,y,34,24);poly([[x-4,y],[x+17,y-16],[x+38,y]],'#0d1229');if(on){cx.fillStyle='rgba(255,210,120,.85)';cx.fillRect(x+12,y+8,8,8)}
       cx.fillStyle='rgba(150,160,190,.18)';for(let k=0;k<3;k++){const yy=y-18-((t*14+k*20+x)%60);cx.beginPath();cx.arc(x+28+Math.sin(t+k+x)*4,yy,3+k,0,6.283);cx.fill()}}
     cx.fillStyle='rgba(255,255,255,.12)';cx.fillRect(0,390+Math.sin(t)*2,960,1)}
-  function sTowers(p,t,s){
+  function sTowers(p,t,s,st){
     sky(t,'#04061a','#1c2650',330);poly([[0,330],[90,250],[170,300],[260,210],[360,290],[470,230],[560,300],[690,200],[800,290],[900,240],[960,280],[960,540],[0,540]],'#1a2148');poly([[0,420],[150,370],[300,410],[480,360],[640,400],[800,370],[960,410],[960,540],[0,540]],'#121835');
     const T=[[260,212,14],[690,202,12],[470,232,10],[900,242,9],[90,252,9],[360,292,8]];
     T.forEach((q,i)=>{const at=.5+i*.75,lit=clamp01((s-at)/.4);tower(q[0],q[1],q[2],lit);
       if(s>=at&&!st['tw'+i]){st['tw'+i]=1;tone([392,440,330,494,294,523][i],1.6,'sine',.05,0)}
       if(s>at&&s<at+2){const u=(s-at)/2;cx.strokeStyle='rgba(255,230,170,'+(1-u)+')';cx.lineWidth=2;cx.beginPath();cx.arc(q[0],q[1]+10,10+70*u,0,6.283);cx.stroke()}})}
-  function sSea(p,t,s){
+  function sSea(p,t,s,st){
     const HZ=318;sky(t,'#03050f','#1c2a4a',HZ);cx.fillStyle='#eef2ff';cx.beginPath();cx.arc(200,90,16,0,6.283);cx.fill();
     const sg=cx.createLinearGradient(0,HZ,0,540);sg.addColorStop(0,'#16223e');sg.addColorStop(1,'#04070f');cx.fillStyle=sg;cx.fillRect(0,HZ,960,540-HZ);
     cx.strokeStyle='rgba(200,215,255,.1)';cx.lineWidth=1.5;for(let i=0;i<12;i++){const y=HZ+10+i*i*1.4,o=(t*(10+i*2)+i*90)%960;cx.beginPath();cx.moveTo(o-160,y);cx.lineTo(o-90,y);cx.stroke()}
@@ -5041,31 +5109,9 @@ const OUTRO=(()=>{
     const yb=300+es(clamp01(s/4))*80;bell(480,yb-120,.7,Math.sin(t*.8)*.12);const k=.5+.5*Math.sin(t*2),gg=cx.createRadialGradient(480,yb,2,480,yb,120);gg.addColorStop(0,'rgba(120,255,225,'+(.25*k)+')');gg.addColorStop(1,'rgba(80,200,220,0)');cx.fillStyle=gg;cx.fillRect(300,yb-140,360,280);
     const a=clamp01((s-1)/1.5);cx.globalAlpha=a;cx.fillStyle='#e8f6ff';cx.textAlign='center';cx.font='700 22px '+DISPLAY;cx.fillText(_('LUMENBELL · CHAPTER II','LUMENBELL · CHAPITRE II'),480,118);cx.font='800 62px '+DISPLAY;cx.fillText('SILENT BELLS',480,182);cx.globalAlpha=1;cx.textAlign='start'}
   const DRAW=[sStatue,sValley,sTowers,sSea,sDawn,sTitle];
-  function frame(now){
-    if(!st)return;
-    const dt=Math.min(.1,(now-st.last)/1000);st.last=now;st.t+=dt;
-    let acc=0,i=0;for(;i<SC.length;i++){if(st.t<acc+SC[i].d)break;acc+=SC[i].d}
-    if(i>=SC.length){finish();return}
-    const s=SC[i],lt=st.t-acc,p=lt/s.d,al=Math.min(1,lt/.8,(s.d-lt)/.8);
-    if(st.i!==i){st.i=i;cap.textContent=_(s.en,s.fr);if(i===0){tone(196,3,'sine',.07,0);tone(392,2.2,'sine',.03,0)}}
-    cap.style.opacity=String(clamp01(Math.min(lt-.5,s.d-.5-lt)/.6));
-    cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1;cx.fillStyle='#000';cx.fillRect(0,0,960,540);
-    DRAW[i](p,st.t,lt);
-    cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1-al;cx.fillStyle='#000';cx.fillRect(0,0,960,540);cx.globalAlpha=1;
-    st.raf=requestAnimationFrame(frame);
-  }
-  const K=Math.min(2,COARSE?1.25:(window.devicePixelRatio||1));
-  function finish(){if(!st)return;const d=st.done;cancelAnimationFrame(st.raf);st=null;box.hidden=true;try{d&&d()}catch(e){}}
-  function play(done){
-    if(st)return;ensureAudio();cvs.width=960*K;cvs.height=540*K;
-    sk.textContent=_('Skip ›','Passer ›');cap.textContent='';cap.style.opacity='0';
-    box.hidden=false;st={t:0,i:-1,last:performance.now(),done,raf:0};
-    try{sk.focus({preventScroll:true})}catch(e){}
-    st.raf=requestAnimationFrame(frame);
-  }
-  sk.addEventListener('click',()=>{if(st)finish()});
-  window.addEventListener('keydown',e=>{if(!st)return;e.stopImmediatePropagation();e.preventDefault();if(e.key==='Escape'||e.key==='Enter'||e.key===' ')finish()},true);
-  return{play,playing:()=>!!st};
+  /* premier carton : la cloche qui s'est tue */
+  const ENTER={0:()=>{tone(196,3,'sine',.07,0);tone(392,2.2,'sine',.03,0)}};
+  return LB.cine.create({scenes:SC.map((s,i)=>Object.assign({draw:DRAW[i],enter:ENTER[i]},s))});
 })();
 $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();OUTRO.play(()=>{})});
 

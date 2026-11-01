@@ -8,6 +8,9 @@
 //        au repos, garde, coup recu, riposte ; phase II plongee, chute ; phase III arrivee, garde, finale ; outro), Chapitre II (les
 //        trois gestes, coup recu, ripostes, defaite, lanterne qui faiblit, prologue, epilogue). Copies de test a crochets : par
 //        defaut build/out/test.html (python3 build/build_test.py) et la copie fabriquee par ch2-lib.js depuis le dist du Chapitre II.
+//   node visual-shots.js --cine <dossier> [ch1.html] [ch2test.html]   cartons des intros et outros des deux chapitres a instants
+//        fixes (CINE_AT, secondes) : Chapitre I par le DOM du dist (intro depuis Normal, outro par le bouton du menu), Chapitre II par
+//        la copie de test a crochets (ch2-lib.js ; CH2_DIST / CH2_TEST_OUT pour un autre dist). Comparer ensuite avec --compare.
 //   --no-breath (avec une capture) : respiration neutralisee (LB.WATCHER_T.breath a zero, par remplacement de texte dans une copie)
 //        pour prouver qu'un chapitre est identique au pixel hors respiration.
 // Determinisme (methode du Chapitre II, NOTES.md) : requestAnimationFrame, performance.now et Date.now remplaces par un pas
@@ -158,9 +161,39 @@ async function poses(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await
   }
   await ctx.close()}
  await b.close();return errs}
+/* cartons des intros et outros a instants fixes (secondes depuis le debut) : Chapitre I par le DOM (dist, menu puis Normal ;
+   outro par le bouton du menu, lb-ch1-end pose), Chapitre II par la copie de test a crochets (startRun, playEpilogue, pas fixe) */
+const CINE_AT={ch1:{intro:[1,3,5.6,9,16,22.5,24,28,31,32.5,33.6],outro:[2,8,12,20,28,31,36,41,44,46.2]},
+               ch2:{intro:[2,5.8,9,16,23,28.5,30,31.5,32.6],outro:[2,6,10,15,20,24,28,31,32.6]}};
+async function cineShots(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await launch();const errs=[];
+ for(const ch of ['ch1','ch2'])for(const [nm,w,h,lang] of SIZES)for(const k of ['intro','outro']){
+  const ctx=await b.newContext({viewport:{width:w,height:h},locale:lang==='fr'?'fr-FR':'en-US',reducedMotion:'reduce'});
+  await ctx.addInitScript(CLOCK,1234);
+  if(ch==='ch1'&&k==='outro')await ctx.addInitScript(()=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem('lb-ch1-end','1')}});
+  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' '+k+': '+e.message));
+  await pg.goto('file://'+files[ch]);
+  const tag=ch+'-'+k+'-'+nm+'-'+lang;
+  const shot=async t=>{await pg.mouse.move(0,0);await pg.waitForTimeout(40);await pg.screenshot({path:path.join(dir,tag+'-'+String(t).replace('.','_')+'s.png'),animations:'disabled'})};
+  const click=s=>pg.evaluate(s=>{const e=document.querySelector(s);if(!e)throw new Error('absent: '+s);e.click()},s);
+  let now=0;
+  if(ch==='ch1'){
+   const adv=n=>pg.evaluate(n=>window.__adv(n),n);
+   await adv(30);await click('#gateBtn');await click('#langs button[data-lang='+lang+']');await adv(30);
+   await click(k==='intro'?'#mphM [data-diff=normal]':'#outroBtn');
+   for(const t of CINE_AT.ch1[k]){await adv(Math.round((t-now)*60));now=Math.round(t*60)/60;await shot(t)}
+  }else{
+   await pg.evaluate(l=>{document.querySelector('#langs button[data-lang='+l+']').click();const T=window.__t;if(T.LB.cine)T.LB.cine.manual=true},lang);
+   await pg.evaluate(k=>{const T=window.__t;if(k==='intro')T.startRun('normal',false);else T.playEpilogue(()=>{})},k);
+   for(const t of CINE_AT.ch2[k]){const n=Math.round((t-now)*60)-1;await pg.evaluate(n=>{for(let i=0;i<n;i++)window.__t.step(1/60,false);window.__t.step(1/60,true)},n);now=Math.round(t*60)/60;await shot(t)}
+  }
+  await ctx.close()}
+ await b.close();return errs}
 (async()=>{const a=process.argv.slice(2);
  if(a[0]==='--compare'){const d=await compare(a[1],a[2]);process.exitCode=d.length?1:0;return}
  const nb=a.includes('--no-breath');const A=a.filter(x=>x!=='--no-breath');
+ if(A[0]==='--cine'){if(!A[1])throw new Error('usage : node visual-shots.js --cine <dossier> [ch1.html] [ch2test.html]');
+  const files={ch1:path.resolve(A[2]||path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')),ch2:path.resolve(A[3]||require('./ch2-lib').testPage())};
+  const errs=await cineShots(path.resolve(A[1]),files);console.log('errs',errs);process.exitCode=errs.length?1:0;return}
  if(A[0]==='--poses'){if(!A[1])throw new Error('usage : node visual-shots.js --poses <dossier> [ch1test.html] [ch2test.html]');
   const files={ch1:path.resolve(A[2]||path.join(ROOT,'build/out/test.html')),ch2:path.resolve(A[3]||require('./ch2-lib').testPage())};
   const errs=await poses(path.resolve(A[1]),files);console.log('errs',errs);process.exitCode=errs.length?1:0;return}

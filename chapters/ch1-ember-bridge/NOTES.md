@@ -13,7 +13,7 @@
 |---|---|
 | `page/head.html` | `<title>`, metas, liens Google Fonts (retirés par `build.py`), `<style>` ouvrant |
 | `page/style.css` | Tout le CSS (entre `<style>` et `</style>`) |
-| `page/body.html` | `</style>`, balisage HTML (menu, overlay `#ovDesc`, pause, cinématique), `<script>` ouvrant |
+| `page/body.html` | `</style>`, balisage HTML (menu, overlay `#ovDesc`, pause), `<script>` ouvrant ; la boîte de cinématique `#cine` est créée par `LB.cine` |
 | `js/00-open.js` | Ouverture de l'IIFE (suivie, dans `parts.txt`, de `@shared` : le code commun `shared/`, objet `LB`) |
 | `js/00-core.js` | `LB.setup` (clés `lb-ch1-…`, anciennes `eb-…`), `_ = LB._`, constantes, `DIFFS`, `RUN`, `T`, canvas, `el`, `LORE`, utilitaires, repères géométriques |
 | `js/04-audio-sfx.js` | `ensureAudio` (= `LB.audio.ensure`), `tone` et `noise` (enveloppe d'origine, via `LB.audio.tone`/`noise`), bruitages, cris (`painCry`, `roar`). Le contexte, la suspension en arrière-plan et le déverrouillage sont dans `shared/js/12-audio.js` |
@@ -34,8 +34,8 @@
 | `js/64-audio-music.js` | Musique synthétisée : combat, menu, finale, outro, `MUS`, `musTick` |
 | `js/68-texts-ui.js` | Textes d'interface (`UIT`, `UIA`), `applyLang`, boutons de langue |
 | `js/72-boot.js` | Démarrage (`buildStatic`, `newGame`, `showMenu`) |
-| `js/76-cine-intro.js` | Cinématique d'intro (`CINE`, cartons `SC`, `DRAW`) |
-| `js/80-cine-outro.js` | Outro de la vraie fin (`OUTRO`) |
+| `js/76-cine-intro.js` | Cinématique d'intro : scènes `DRAW`, cartons `SC` (durées), sons `CUE`, titre `LB.title` ; cadre `LB.cine` (`CINE`, drapeau `lb-ch1-intro`) |
+| `js/80-cine-outro.js` | Outro de la vraie fin : scènes, cartons `SC`, son `ENTER` ; cadre `LB.cine` (`OUTRO`, sans drapeau) |
 | `js/84-loop.js` | Chapitre II verrouillé, record de l'Épreuve, écran de démarrage, boucle `frame`, **fermeture de l'IIFE** |
 | `page/end.html` | `</script>` |
 
@@ -44,7 +44,7 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 ## Pièges du découpage
 - **L'ordre de `parts.txt` est l'ordre d'exécution.** Une seule IIFE : déplacer un morceau peut casser une `const` utilisée avant sa déclaration (TDZ) même si le build « passe ». Ne pas réordonner sans raison.
 - **Chaque morceau finit par un saut de ligne**, et tout fichier de `src/` doit être listé dans `parts.txt` : `assemble.py` refuse sinon (erreur claire plutôt que JS collé ou fichier ignoré).
-- **Ancrages des scripts de build** : `build.py` cherche `<style>`/`</style>` et les 3 liens Google Fonts (`page/`) ; `build_test.py` cherche `requestAnimationFrame(frame);\n})();` (fin de `84-loop.js`), `seen=false; /*` et la lecture `seen=LB.store.get(LB.key('intro'),'0')==='1';`. Ne pas modifier ces lignes sans adapter les scripts.
+- **Ancrages des scripts de build** : `build.py` cherche `<style>`/`</style>` et les 3 liens Google Fonts (`page/`) ; `build_test.py` cherche `requestAnimationFrame(frame);\n})();` (fin de `84-loop.js`) et `LB.cine.create({key:'intro',` (`76-cine-intro.js`, pour y ajouter `testSeen:true`). Ne pas modifier ces lignes sans adapter les scripts.
 - Le texte d'ouverture de la phase I existe deux fois : `#ovDesc` dans `page/body.html` et `CARD1` dans `js/60-ui-menu.js`.
 - `js/72-boot.js` finit par un commentaire « écran de démarrage » qui décrit en fait le code de `84-loop.js` : laissé tel quel pour rester octet pour octet identique.
 - Les coupes sont faites sur les commentaires de section (`/* ---------- … */`) ; la ligne vide qui précède reste à la fin du morceau précédent.
@@ -74,3 +74,8 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 - **Défaite** : le Veilleur tombe du bloc sur le rebord (`DG.drop` plus bas) et reste couché ; plus de chute dans le vide.
 - **Esquive** (session `ch1/dodge-side`, 1er novembre) : pas de côté du Chapitre II (pose `dodgeSide`, image rémanente) sur le bloc, à la place de la plongée ; réglages de dessin dans `DG.side` (0,38 s, recul de 18 px vers la gauche, limité par le bloc, inclinaison autour des pieds). La pose suit l'appui (`Q.sideT`, `qSideK`) ; un arrêt réussi ne la coupe pas, un coup reçu l'interrompt. `p.ox`/`p.oy` (décalage figé de la plongée) n'existent plus. `DG.drop` reste (rebord, défaite) ; `dodgeDown` reste dans le module commun, inutilisée. Contre sur la tête et Finish : le Veilleur reste au sol, seul le rayon vise. Estoc : pas en avant de 28 px (au lieu de 60) et sans saut, pour rester sur le bloc ; les dégâts ne dépendent pas de la position du Veilleur. Voir `docs/decisions/2026-11-01-ch1-esquive-pas-de-cote.md` (à valider : amplitude du pas de côté réduite par la largeur du bloc).
 - **Facile** : plus de fuite ni de fausse fin (`R.mode` `flee`/`fake`, `FLEE`, `heroFlee`, `fleeBoss` supprimés). À 1 PV, la foudre mène directement à la vraie fin (`startFinale`), sans seconde vie ; `rEnd` (mode `space`) écrit `lb-ch1-end` et déverrouille l'Épreuve du feu et le Chapitre II comme en Normal.
+
+## Cinématiques communes (session `engine/cine`, 1er novembre)
+- L'intro (`CINE`) et l'outro (`OUTRO`) passent par `LB.cine` (`shared/js/24-cine.js`) : boîte, canvas, légende, bouton « Passer », fondus, clavier et drapeau `lb-ch1-intro` sont dans le module ; le chapitre ne garde que ses scènes (`DRAW`), ses cartons et durées (`SC`), ses sons (`CUE` : tintement du carton 3, braise et rugissement du carton 4 ; `ENTER` de l'outro) et le titre `LB.title` (« LUMEN » `#ff7a2b`, mi-carton 5). Les dessins de l'outro reçoivent l'état de lecture (`sTowers`, `sSea` : quatrième argument `st`).
+- Le style et le balisage de `#cine` ont quitté `page/style.css` et `page/body.html` (créés par le module, mêmes règles). `UIT` garde `#cineSkip` (sans effet tant que la boîte n'existe pas).
+- Preuve : `tests/visual-shots.js` (126/126 hors Chapitre II) et `--cine` (63/63 cartons du Chapitre I, titre compris) identiques au pixel contre `main`.

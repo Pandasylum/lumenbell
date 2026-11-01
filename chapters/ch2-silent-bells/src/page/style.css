@@ -107,6 +107,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .mph button b{font-family:var(--font-display);font-weight:800;font-size:18px;line-height:1;color:var(--teal);text-transform:uppercase;letter-spacing:.05em}
 .mph button span{font-size:12px;color:var(--muted)}
 .mph button:hover{border-color:var(--teal);background:rgba(79,224,204,.12)}
+#introBtn{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(6,9,14,.6)}   /* rejeu du prologue (comme au Chapitre I) */
 .langs{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:3}
 .langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(6,9,14,.6);border:1px solid rgba(236,230,220,.3);border-radius:4px;cursor:pointer}
 .langs button[aria-pressed="true"]{border-color:var(--teal);background:rgba(79,224,204,.22)}

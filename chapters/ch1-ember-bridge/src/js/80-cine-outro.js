@@ -1,7 +1,6 @@
 /* Outro de la vraie fin : le lore après la bataille, jusqu'au lien avec Silent Bells. Rejouable depuis le menu une fois débloquée. */
 const OUTRO=(()=>{
-  const box=$('cine'),cvs=$('cineC'),cap=$('cineCap'),sk=$('cineSkip'),cx=cvs.getContext('2d');
-  let st=null;
+  const cx=LB.cine.mount().cx;   /* cadre commun LB.cine (shared/js/24-cine.js) ; pas de drapeau : rejouée depuis le menu */
   const STR=Array.from({length:140},()=>({x:rand(0,960),y:rand(0,330),r:rand(.4,1.8),p:rand(0,6.3)}));
   const SNW=Array.from({length:90},()=>({x:rand(0,960),y:rand(0,540),v:rand(30,80),s:rand(1,3)}));
   const BUB=Array.from({length:34},(v,i)=>({x:rand(0,960),o:rand(0,340),r:rand(1.5,4)}));
@@ -53,13 +52,13 @@ const OUTRO=(()=>{
     for(let i=0;i<14;i++){const x=120+i*55+(i%3)*8,y=410+(i%4)*22,on=Math.sin(t*.7+i*1.7)>-.6;cx.fillStyle='#0d1229';cx.fillRect(x,y,34,24);poly([[x-4,y],[x+17,y-16],[x+38,y]],'#0d1229');if(on){cx.fillStyle='rgba(255,210,120,.85)';cx.fillRect(x+12,y+8,8,8)}
       cx.fillStyle='rgba(150,160,190,.18)';for(let k=0;k<3;k++){const yy=y-18-((t*14+k*20+x)%60);cx.beginPath();cx.arc(x+28+Math.sin(t+k+x)*4,yy,3+k,0,6.283);cx.fill()}}
     cx.fillStyle='rgba(255,255,255,.12)';cx.fillRect(0,390+Math.sin(t)*2,960,1)}
-  function sTowers(p,t,s){
+  function sTowers(p,t,s,st){
     sky(t,'#04061a','#1c2650',330);poly([[0,330],[90,250],[170,300],[260,210],[360,290],[470,230],[560,300],[690,200],[800,290],[900,240],[960,280],[960,540],[0,540]],'#1a2148');poly([[0,420],[150,370],[300,410],[480,360],[640,400],[800,370],[960,410],[960,540],[0,540]],'#121835');
     const T=[[260,212,14],[690,202,12],[470,232,10],[900,242,9],[90,252,9],[360,292,8]];
     T.forEach((q,i)=>{const at=.5+i*.75,lit=clamp01((s-at)/.4);tower(q[0],q[1],q[2],lit);
       if(s>=at&&!st['tw'+i]){st['tw'+i]=1;tone([392,440,330,494,294,523][i],1.6,'sine',.05,0)}
       if(s>at&&s<at+2){const u=(s-at)/2;cx.strokeStyle='rgba(255,230,170,'+(1-u)+')';cx.lineWidth=2;cx.beginPath();cx.arc(q[0],q[1]+10,10+70*u,0,6.283);cx.stroke()}})}
-  function sSea(p,t,s){
+  function sSea(p,t,s,st){
     const HZ=318;sky(t,'#03050f','#1c2a4a',HZ);cx.fillStyle='#eef2ff';cx.beginPath();cx.arc(200,90,16,0,6.283);cx.fill();
     const sg=cx.createLinearGradient(0,HZ,0,540);sg.addColorStop(0,'#16223e');sg.addColorStop(1,'#04070f');cx.fillStyle=sg;cx.fillRect(0,HZ,960,540-HZ);
     cx.strokeStyle='rgba(200,215,255,.1)';cx.lineWidth=1.5;for(let i=0;i<12;i++){const y=HZ+10+i*i*1.4,o=(t*(10+i*2)+i*90)%960;cx.beginPath();cx.moveTo(o-160,y);cx.lineTo(o-90,y);cx.stroke()}
@@ -83,31 +82,9 @@ const OUTRO=(()=>{
     const yb=300+es(clamp01(s/4))*80;bell(480,yb-120,.7,Math.sin(t*.8)*.12);const k=.5+.5*Math.sin(t*2),gg=cx.createRadialGradient(480,yb,2,480,yb,120);gg.addColorStop(0,'rgba(120,255,225,'+(.25*k)+')');gg.addColorStop(1,'rgba(80,200,220,0)');cx.fillStyle=gg;cx.fillRect(300,yb-140,360,280);
     const a=clamp01((s-1)/1.5);cx.globalAlpha=a;cx.fillStyle='#e8f6ff';cx.textAlign='center';cx.font='700 22px '+DISPLAY;cx.fillText(_('LUMENBELL · CHAPTER II','LUMENBELL · CHAPITRE II'),480,118);cx.font='800 62px '+DISPLAY;cx.fillText('SILENT BELLS',480,182);cx.globalAlpha=1;cx.textAlign='start'}
   const DRAW=[sStatue,sValley,sTowers,sSea,sDawn,sTitle];
-  function frame(now){
-    if(!st)return;
-    const dt=Math.min(.1,(now-st.last)/1000);st.last=now;st.t+=dt;
-    let acc=0,i=0;for(;i<SC.length;i++){if(st.t<acc+SC[i].d)break;acc+=SC[i].d}
-    if(i>=SC.length){finish();return}
-    const s=SC[i],lt=st.t-acc,p=lt/s.d,al=Math.min(1,lt/.8,(s.d-lt)/.8);
-    if(st.i!==i){st.i=i;cap.textContent=_(s.en,s.fr);if(i===0){tone(196,3,'sine',.07,0);tone(392,2.2,'sine',.03,0)}}
-    cap.style.opacity=String(clamp01(Math.min(lt-.5,s.d-.5-lt)/.6));
-    cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1;cx.fillStyle='#000';cx.fillRect(0,0,960,540);
-    DRAW[i](p,st.t,lt);
-    cx.setTransform(K,0,0,K,0,0);cx.globalAlpha=1-al;cx.fillStyle='#000';cx.fillRect(0,0,960,540);cx.globalAlpha=1;
-    st.raf=requestAnimationFrame(frame);
-  }
-  const K=Math.min(2,COARSE?1.25:(window.devicePixelRatio||1));
-  function finish(){if(!st)return;const d=st.done;cancelAnimationFrame(st.raf);st=null;box.hidden=true;try{d&&d()}catch(e){}}
-  function play(done){
-    if(st)return;ensureAudio();cvs.width=960*K;cvs.height=540*K;
-    sk.textContent=_('Skip ›','Passer ›');cap.textContent='';cap.style.opacity='0';
-    box.hidden=false;st={t:0,i:-1,last:performance.now(),done,raf:0};
-    try{sk.focus({preventScroll:true})}catch(e){}
-    st.raf=requestAnimationFrame(frame);
-  }
-  sk.addEventListener('click',()=>{if(st)finish()});
-  window.addEventListener('keydown',e=>{if(!st)return;e.stopImmediatePropagation();e.preventDefault();if(e.key==='Escape'||e.key==='Enter'||e.key===' ')finish()},true);
-  return{play,playing:()=>!!st};
+  /* premier carton : la cloche qui s'est tue */
+  const ENTER={0:()=>{tone(196,3,'sine',.07,0);tone(392,2.2,'sine',.03,0)}};
+  return LB.cine.create({scenes:SC.map((s,i)=>Object.assign({draw:DRAW[i],enter:ENTER[i]},s))});
 })();
 $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();OUTRO.play(()=>{})});
 

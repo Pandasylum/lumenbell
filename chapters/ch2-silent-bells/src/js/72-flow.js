@@ -15,8 +15,21 @@ function playCine(id,k,cb){
   hideCard();hud();if($('optMus').checked)MUSIC.bed(id);$('skip').hidden=false;
 }
 function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=false;$('hdEye').textContent='Prologue'}
+/* intro and outro in the series frame (LB.cine, shared/js/24-cine.js): the chapter draws the shot in the module's canvas
+   (ctx swapped for the draw), the module draws the frame (cartons, fades, caption, Skip). Game time (gt, particles) runs
+   with the game loop as before; only when the loop is stopped (menu open, replay) does it follow the module's time. */
+function cineScene(fn,vig){return(p,t,lt,st,cx)=>{const g=ctx;ctx=cx;try{ctx.save();fn(t);ctx.restore();
+  if(vig){const v=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=v;ctx.fillRect(0,0,W,H)}}finally{ctx=g}}}
+/* the prologue: played once (flag lb-ch2-intro, written at the end or on Skip), then only by PRO.replay */
+const PRO=LB.cine.create({key:'intro',scenes:()=>CINE_D.intro.map((d,i)=>({d,txt:()=>i<4?PCAP_TXT()[i]:'',draw:cineScene(drawPrologue,true)})),
+  onTick:t=>{if(!$('menu').hidden)gt=S.proT0+t}});   // menu open (replay): the game loop is stopped, game time follows the module's
+function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=true;$('hdEye').textContent='Prologue';PRO.play(endPrologue)}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
+/* replay from the menu (button ▶ Intro, as in Chapter I): the prologue plays over the menu even if seen; the game state
+   (mode, game time, particles, a paused fight) is left as it was and restored at the end */
+function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
+  S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if($('optMus').checked)MUSIC.bed(2);
+  PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
 function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
@@ -57,7 +70,7 @@ function startRun(dk,noPro){
   S=fresh(dk);S.full=true;S.phase=2;S.form=1;S.cineDone={};
   $('optHelp').checked=dk==='easy'?true:DIFFS[dk].trial?false:$('optHelp').checked;$('optHelp').disabled=!!DIFFS[dk].trial;
   hideMenu();hud();
-  if(noPro)enterPhase(2,{first:true});else playPrologue(()=>enterPhase(2,{first:true}));
+  if(noPro||PRO.seen())enterPhase(2,{first:true});else playPrologue(()=>enterPhase(2,{first:true}));
 }
 function jumpPhase(gp){if(S.d.trial||S.mode==='menu')return;const id=ORDER[gp-1],dk=S.dk;$('pause').hidden=true;S=fresh(dk);S.full=false;S.cineDone={};enterPhase(id,{first:true})}
 function showMenu(){
