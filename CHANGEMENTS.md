@@ -21,7 +21,7 @@ I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026
 J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours (a) et (b) ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	À faire	1er novembre 2026	
 L	Chapitre I · Fausse fin de Facile supprimée	À faire	1er novembre 2026	
-M	Chapitre II · Phare Noyé : tour d'avant C1	À faire (validation à l'écran d'abord)	1er novembre 2026	
+M	Chapitre II · Phare Noyé : tour d'avant C1	En cours (sommet restauré, validation à l'écran de Kevin attendue)	1er novembre 2026	branche `ch2/phare-v1` (PR à ouvrir)
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
 
@@ -222,7 +222,7 @@ Ne pas toucher aux timings.
 
 À ne pas faire : modifier la silhouette du Colosse, ou toucher au Chapitre I.
 
-Statut : à faire (validation à l'écran d'abord), session `ch2/phare-v1`.
+Statut : en cours, branche `ch2/phare-v1` (1er novembre). Comparaison faite par Kevin : les « 2 lampes en haut » sont les deux blocs sombres qui encadrent la méduse dans `2b75101`, supprimés par `0bad679`. Seul ce sommet est restauré (formes I et II) ; planche avant / après : `build/out/phare-v1/comparaison-phase3.png` (non suivie). Écart signalé, non tranché : voir `chapters/ch2-silent-bells/NOTES.md`, « Phare Noyé : sommet d'avant C1 ».
 
 Vérifications
 Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.

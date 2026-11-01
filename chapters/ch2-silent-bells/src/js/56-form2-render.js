@@ -45,7 +45,7 @@ function ecTransition(t){
     const on=t<.4?1-t/.4:t<1.6?(t>1.3&&Math.sin(t*40)>.6?.3:0):1;
     if(t<.6)S.shake=Math.max(S.shake,2);
     base();ctx.save();ctx.translate(LX,GY);ctx.rotate(lean);ctx.translate(-LX,-GY);
-    moorings(1);drawAnchorAt(anchorPose(null));drawPieces(null,.85);bindings(on,1);jelly(LX,LY,36*(t>1.6?1.15:1),on,rt);ctx.restore();
+    moorings(1);drawAnchorAt(anchorPose(null));drawPieces(null,.85);lamps(LX,LY,1);bindings(on,1);jelly(LX,LY,36*(t>1.6?1.15:1),on,rt);ctx.restore();
     if(t>=1&&once('pebble'))burst(LX+30,GY-210,14,'#8a7a6a',4,1,.4);
     if(t>=1.6&&once('relight')){S.flashT=gt;S.shake=6;burst(LX,LY,24,'#bff6ff',6,.6)}
     return}
@@ -60,6 +60,7 @@ function ecTransition(t){
   const A={x:lerp(Ah.x,A0.x,gl),y:lerp(Ah.y,A0.y,gl),a:lerp(Ah.a,A0.a,gl),sc:lerp(Ah.sc,A0.sc,gl),z:gl>.5?A0.z:1,clip:ay<.25};
   if(t>=2.4&&once('yank')){burst(LX+118,GY,26,'#dff8ff',6,.8,.4);S.shake=12}
   const J={x:LX,y:lerp(LY,ECY,eio(clamp((t-2.1)/1.2,0,1))),r:lerp(36,44,sc)};
+  lamps(J.x,J.y,1-gl,sc);
   drawEcl(P,A,J,1,1,null);
 }
 function ecFinale(tAll){

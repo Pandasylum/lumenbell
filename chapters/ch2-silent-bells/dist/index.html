@@ -1540,7 +1540,18 @@ function pSeg(){seg(-24,0,24,0,20)}
 function pFist(){fist(0,0)}
 /* the harpoon in the King's left hand: origin at the grip, tip pointing down (+y) */
 function pHarp(){harpoon(0,72,Math.PI/2,112)}
-const PDRAW={tb0:pTb0,tb1:pTb1,tb2:pTb2,ring:pRing,sbell:pSmallBell,head:pHead,seg:pSeg,fist:pFist,harp:pHarp};
+/* the two dark blocks framing the jellyfish at the top of the tower (restored from 2b75101, CHANGEMENTS M): the drawing of the
+   shoulder bells of that version, laid on their side, crown towards the jellyfish. Tower only: the Elder never draws them
+   (his shoulders stay pSmallBell), so they are not in TOWER (no index, no pose, no sound, no threat changes) */
+function pLamp(){ctx.fillStyle=bronze(-34,34);ctx.beginPath();ctx.moveTo(-34,0);ctx.quadraticCurveTo(-30,-46,0,-50);ctx.quadraticCurveTo(30,-46,34,0);ctx.closePath();ctx.fill();ctx.fillStyle='#0d1712';ctx.fillRect(-36,-4,72,6);
+  ctx.strokeStyle='rgba(255,140,60,.4)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(-8,-44);ctx.lineTo(-2,-26);ctx.lineTo(-12,-12);ctx.stroke()}
+const PDRAW={tb0:pTb0,tb1:pTb1,tb2:pTb2,ring:pRing,sbell:pSmallBell,head:pHead,seg:pSeg,fist:pFist,harp:pHarp,lamp:pLamp};
+/* where the two blocks sit, relative to the jellyfish in its lantern (as in 2b75101: 70 px to each side, 24 px below it) */
+const LAMPS=[-1,1].map(s=>({x:s*70,y:24,r:-s*Math.PI/2}));
+/* draws them around a lantern centre (jx, jy); a = opacity, spread = how far they are flung out (0 = in place) */
+function lamps(jx,jy,a,spread){if(a<=0)return;ctx.save();ctx.globalAlpha*=a;
+  for(const l of LAMPS){const s=Math.sign(l.x),k=spread||0;ctx.save();ctx.translate(jx+l.x+s*95*k,jy+l.y-30*k);ctx.rotate(l.r+s*.6*k);PDRAW.lamp();ctx.restore()}
+  ctx.restore()}
 /* pieces that stay on the reef when the tower bursts (the three torso bells, the right fist, the planted harpoon) */
 const FIXED=k=>k==='fist'||k==='harp'||k.startsWith('tb');
 /* start pose = standing King (centered on LX); end pose = the tower, from the reef up:
@@ -1616,7 +1627,7 @@ function drawBoss3(){
   glow(LX,LY,190+B.charge*90,'rgba(90,220,255,.5)',(.4+B.charge*.5)*on);
   ctx.save();if(hasFilter&&gt-S.bossFlash<.15)ctx.filter='brightness(1.9)';
   moorings(1);drawAnchorAt(anchorPose(null));
-  drawPieces(null,.85);
+  drawPieces(null,.85);lamps(LX,LY,1);
   bindings(on,1);
   for(const [side,ph] of[[-1,0],[1,1.7]]){const sw=Math.sin(rt*1.8+ph);ctx.strokeStyle=`rgba(111,232,255,${.45*on+.1})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LX+side*20,LY+6);ctx.bezierCurveTo(LX+side*90,LY-30+sw*20,LX+side*140,LY+30-sw*30,LX+side*(170+sw*20),LY+80+sw*20);ctx.stroke()}
   jelly(LX,LY,36,on,rt);
@@ -1641,6 +1652,7 @@ function drawTransform(){
     const aq=anchorPose(t);drawAnchorAt(aq);
     if(aq.f>.98&&!S.tfAnch){S.tfAnch=true;S.shake=10;burst(aq.x-40,GY,26,'#dff8ff',6,.8,.4)}
     const qs=drawPieces(t,.85);
+    lamps(LX,LY,down);
     // tentacles reaching for each piece while it moves (and holding it while it waits)
     TOWER.forEach((p,i)=>{const q=qs[i];const holding=t<p.t+(p.d||.9)+.15&&t>2.4;if(holding)tentacle(hx,hy+10,q.x,q.y-10,i,1,2.4)});
     if(t<ANCH.t+ANCH.d+.15&&t>2.4)tentacle(hx,hy+10,aq.x,aq.y,99,1,3);
@@ -1898,7 +1910,7 @@ function ecTransition(t){
     const on=t<.4?1-t/.4:t<1.6?(t>1.3&&Math.sin(t*40)>.6?.3:0):1;
     if(t<.6)S.shake=Math.max(S.shake,2);
     base();ctx.save();ctx.translate(LX,GY);ctx.rotate(lean);ctx.translate(-LX,-GY);
-    moorings(1);drawAnchorAt(anchorPose(null));drawPieces(null,.85);bindings(on,1);jelly(LX,LY,36*(t>1.6?1.15:1),on,rt);ctx.restore();
+    moorings(1);drawAnchorAt(anchorPose(null));drawPieces(null,.85);lamps(LX,LY,1);bindings(on,1);jelly(LX,LY,36*(t>1.6?1.15:1),on,rt);ctx.restore();
     if(t>=1&&once('pebble'))burst(LX+30,GY-210,14,'#8a7a6a',4,1,.4);
     if(t>=1.6&&once('relight')){S.flashT=gt;S.shake=6;burst(LX,LY,24,'#bff6ff',6,.6)}
     return}
@@ -1913,6 +1925,7 @@ function ecTransition(t){
   const A={x:lerp(Ah.x,A0.x,gl),y:lerp(Ah.y,A0.y,gl),a:lerp(Ah.a,A0.a,gl),sc:lerp(Ah.sc,A0.sc,gl),z:gl>.5?A0.z:1,clip:ay<.25};
   if(t>=2.4&&once('yank')){burst(LX+118,GY,26,'#dff8ff',6,.8,.4);S.shake=12}
   const J={x:LX,y:lerp(LY,ECY,eio(clamp((t-2.1)/1.2,0,1))),r:lerp(36,44,sc)};
+  lamps(J.x,J.y,1-gl,sc);
   drawEcl(P,A,J,1,1,null);
 }
 function ecFinale(tAll){
@@ -2638,11 +2651,11 @@ function drawEclGame(){
   const T=S.ecPhi/.55,P=ecPose(T),A0=ecAnchor(T);let A=A0;
   let J={x:LX,y:ECY+Math.sin(rt*1.1)*4,r:44};
   if(S.angerShown){RINGS.forEach((idx,i)=>{if(i%2){const a=-S.ecPhi*1.3+i*2*Math.PI/7;P[idx]={x:LX+Math.cos(a)*140,y:ECY+Math.sin(a)*46,r:a*.5,z:Math.sin(a)}}})}
-  let reBeam=null;
+  let reBeam=null,lampA=0;
   for(const th of S.threats){if(gt<th.t0)continue;
     if(th.k==='reform'){const d=S.threats.find(x=>x.k==='disp'&&x.t0===th.ts+th.D);const end=d?d.ti:th.ts+th.D+.5;
       const k=gt<th.tr?eio(clamp((gt-th.t0)/(th.tr-th.t0),0,1)):gt<end-.3?1:1-ein(clamp((gt-(end-.3))/.3,0,1));
-      if(gt<end+.05){TOWER.forEach((p,i)=>{const e=p.e;P[i]={x:lerp(P[i].x,e.x,k),y:lerp(P[i].y,e.y,k),r:lerp(P[i].r,e.r,k),z:lerp(P[i].z||0,0,k),sc:P[i].sc}});A={x:lerp(A.x,LX+118,k),y:lerp(A.y,GY-150,k),a:lerp(A.a,1.78,k),sc:lerp(A.sc,1,k),z:-2.5,clip:k>.9};J={x:LX,y:lerp(J.y,LY,k),r:lerp(J.r,36,k)};
+      if(gt<end+.05){TOWER.forEach((p,i)=>{const e=p.e;P[i]={x:lerp(P[i].x,e.x,k),y:lerp(P[i].y,e.y,k),r:lerp(P[i].r,e.r,k),z:lerp(P[i].z||0,0,k),sc:P[i].sc}});A={x:lerp(A.x,LX+118,k),y:lerp(A.y,GY-150,k),a:lerp(A.a,1.78,k),sc:lerp(A.sc,1,k),z:-2.5,clip:k>.9};J={x:LX,y:lerp(J.y,LY,k),r:lerp(J.r,36,k)};lampA=k;
         if(gt>=th.ts&&gt<=th.ts+th.D)reBeam=(gt-th.ts)/th.D;
         if(k>.95&&!th.sf){th.sf=1;MUSIC.fx('clank');MUSIC.fx('ignite')}}}
     if(th.k==='disp'&&th.done&&!th.sf){th.sf=1;S.shake=12;burst(LX,GY-200,40,'#9ff2ff',8,.9);MUSIC.fx('bellCascade')}
@@ -2681,6 +2694,7 @@ function drawEclGame(){
     else if(th.k==='lbeam')beams.push(th);
     else if(th.k==='sring')srings.push(th);
   }
+  lamps(J.x,J.y,lampA);
   drawEcl(P,A,J,1,on,null);
   if(reBeam!=null){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*reBeam,1);ctx.restore()}
   ctx.save();ctx.globalCompositeOperation='lighter';

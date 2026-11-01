@@ -41,7 +41,18 @@ function pSeg(){seg(-24,0,24,0,20)}
 function pFist(){fist(0,0)}
 /* the harpoon in the King's left hand: origin at the grip, tip pointing down (+y) */
 function pHarp(){harpoon(0,72,Math.PI/2,112)}
-const PDRAW={tb0:pTb0,tb1:pTb1,tb2:pTb2,ring:pRing,sbell:pSmallBell,head:pHead,seg:pSeg,fist:pFist,harp:pHarp};
+/* the two dark blocks framing the jellyfish at the top of the tower (restored from 2b75101, CHANGEMENTS M): the drawing of the
+   shoulder bells of that version, laid on their side, crown towards the jellyfish. Tower only: the Elder never draws them
+   (his shoulders stay pSmallBell), so they are not in TOWER (no index, no pose, no sound, no threat changes) */
+function pLamp(){ctx.fillStyle=bronze(-34,34);ctx.beginPath();ctx.moveTo(-34,0);ctx.quadraticCurveTo(-30,-46,0,-50);ctx.quadraticCurveTo(30,-46,34,0);ctx.closePath();ctx.fill();ctx.fillStyle='#0d1712';ctx.fillRect(-36,-4,72,6);
+  ctx.strokeStyle='rgba(255,140,60,.4)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(-8,-44);ctx.lineTo(-2,-26);ctx.lineTo(-12,-12);ctx.stroke()}
+const PDRAW={tb0:pTb0,tb1:pTb1,tb2:pTb2,ring:pRing,sbell:pSmallBell,head:pHead,seg:pSeg,fist:pFist,harp:pHarp,lamp:pLamp};
+/* where the two blocks sit, relative to the jellyfish in its lantern (as in 2b75101: 70 px to each side, 24 px below it) */
+const LAMPS=[-1,1].map(s=>({x:s*70,y:24,r:-s*Math.PI/2}));
+/* draws them around a lantern centre (jx, jy); a = opacity, spread = how far they are flung out (0 = in place) */
+function lamps(jx,jy,a,spread){if(a<=0)return;ctx.save();ctx.globalAlpha*=a;
+  for(const l of LAMPS){const s=Math.sign(l.x),k=spread||0;ctx.save();ctx.translate(jx+l.x+s*95*k,jy+l.y-30*k);ctx.rotate(l.r+s*.6*k);PDRAW.lamp();ctx.restore()}
+  ctx.restore()}
 /* pieces that stay on the reef when the tower bursts (the three torso bells, the right fist, the planted harpoon) */
 const FIXED=k=>k==='fist'||k==='harp'||k.startsWith('tb');
 /* start pose = standing King (centered on LX); end pose = the tower, from the reef up:
@@ -117,7 +128,7 @@ function drawBoss3(){
   glow(LX,LY,190+B.charge*90,'rgba(90,220,255,.5)',(.4+B.charge*.5)*on);
   ctx.save();if(hasFilter&&gt-S.bossFlash<.15)ctx.filter='brightness(1.9)';
   moorings(1);drawAnchorAt(anchorPose(null));
-  drawPieces(null,.85);
+  drawPieces(null,.85);lamps(LX,LY,1);
   bindings(on,1);
   for(const [side,ph] of[[-1,0],[1,1.7]]){const sw=Math.sin(rt*1.8+ph);ctx.strokeStyle=`rgba(111,232,255,${.45*on+.1})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LX+side*20,LY+6);ctx.bezierCurveTo(LX+side*90,LY-30+sw*20,LX+side*140,LY+30-sw*30,LX+side*(170+sw*20),LY+80+sw*20);ctx.stroke()}
   jelly(LX,LY,36,on,rt);
@@ -142,6 +153,7 @@ function drawTransform(){
     const aq=anchorPose(t);drawAnchorAt(aq);
     if(aq.f>.98&&!S.tfAnch){S.tfAnch=true;S.shake=10;burst(aq.x-40,GY,26,'#dff8ff',6,.8,.4)}
     const qs=drawPieces(t,.85);
+    lamps(LX,LY,down);
     // tentacles reaching for each piece while it moves (and holding it while it waits)
     TOWER.forEach((p,i)=>{const q=qs[i];const holding=t<p.t+(p.d||.9)+.15&&t>2.4;if(holding)tentacle(hx,hy+10,q.x,q.y-10,i,1,2.4)});
     if(t<ANCH.t+ANCH.d+.15&&t>2.4)tentacle(hx,hy+10,aq.x,aq.y,99,1,3);
