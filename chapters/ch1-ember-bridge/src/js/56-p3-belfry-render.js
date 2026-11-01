@@ -536,8 +536,6 @@ function renderR(){
   if(R.mode==='intro')fade=1-clamp01(R.t/.8);
   if(R.mode==='won'&&R.boss.t>1.6)fade=clamp01((R.boss.t-1.6)/1.2)*.6;
   if(R.mode==='finale')fade=clamp01((R.fin.t-FIN.fade)/1.1);
-  if(R.mode==='flee')fade=clamp01((R.fl.t-FLEE.fade)/1);
-  if(R.mode==='fake')fade=1;
   if(fade>0){ctx.fillStyle='rgba(0,0,0,'+fade+')';ctx.fillRect(0,0,W,H)}
 }
 
