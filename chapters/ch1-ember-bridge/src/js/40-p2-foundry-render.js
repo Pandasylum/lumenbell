@@ -292,32 +292,34 @@ function heroPose(){
       /* pas en avant, rayon droit sur le torse */
       const adv=t<.3?eo(t/.3):t<.7?1:1-es(clamp01((t-.7)/.45));x+=60*adv;y+=-6*adv;rot=-.04*adv;
     }else if(c.k==='head'){
-      /* le Veilleur s'élève et frappe la tête d'un rayon plongeant */
-      const up=t<.45?es(t/.45):t<.85?1:1-es(clamp01((t-.85)/.55));y-=120*up;x+=30*up;
+      /* le Veilleur reste sur son bloc : seul son rayon monte vers la tête (1er novembre) */
       glow=t>=.3&&t<.85?.6:0;
     }else if(c.k==='beam'){
       glow=clamp01(t/.75);
       if(t>1.3)glow=Math.max(0,1-(t-1.3)/.3);
     }else if(c.k==='final'){
-      if(t<1.1){glow=t/1.1;y-=14*Math.sin(t*6)}
-      else{const u=es(clamp01((t-1.1)/.45));x+=50*u;y-=20*u;glow=t<1.55?1:Math.max(.5,1-(t-1.55)/3)}
+      /* coup ultime : le Veilleur reste au sol, un pas en avant sur son bloc ; seul le rayon vise (1er novembre) */
+      if(t<1.1){glow=t/1.1}
+      else{const u=es(clamp01((t-1.1)/.45));x+=28*u;glow=t<1.55?1:Math.max(.5,1-(t-1.55)/3)}
     }
     const tgt=qBeamTarget(c);if(tgt)sa=Math.atan2(tgt[1]-(y+WH[1]),tgt[0]-(x+WH[0]));else sa=-.7;
-  }else if(p.s==='act'){
-    const u=p.t/HD('dodge').act,off=u<.27?es(u/.27):u<.73?1:1-es((u-.73)/.27);
-    y+=DG.drop*off;x-=20*off;rot=-6.283*es(u);
+  }else if(qSideK()>0){
+    /* esquive : pas de côté sur le bloc (pose dodgeSide du Chapitre II), inclinaison autour des pieds (corps décalé de 44 px) */
+    const k=qSideK(),r=DG.side.rot*k;x+=DG.side.dx*k+44*Math.sin(r);y+=44-44*Math.cos(r);rot=r;
   }else if(p.s==='hurt'){
     const u=Math.min(1,p.t/p.rd);x-=34*(1-u);rot=-.35*(1-u);
   }else if(p.s==='down'){
     /* défaite : le Veilleur s'effondre du bloc sur le rebord (DG.drop plus bas) */
     x-=Math.min(p.t,.8)*40;y+=Math.min(DG.drop,p.t*140);rot=-Math.min(1.45,p.t*5);
   }
-  if(p.oy&&!c){x+=p.ox;y+=p.oy}
   /* fin : le Veilleur revient debout sur son bloc et regarde le Colosse plonger, puis s'envoler */
   if(Q.mode==='lake'){const e=es(clamp01(Q.lt/.6));x+=(Q.hx-x)*e;y+=(Q.hy-y)*e;sa=-1.15;glow=Q.erupt?.8:.35;rot=0}
   return{x,y,rot,sa,glow};
 }
 const WH=[34,-8];
+/* avancement du pas de côté (0 à 1 à 0, sur DG.side.dur depuis l'appui) ; 0 hors esquive, pendant un coup reçu, un contre ou la défaite */
+function qSideAge(){const p=Q.pl;return p.s==='act'?p.t:Q.time-Q.sideT}
+function qSideK(){const p=Q.pl,g=qSideAge();return Q.cn||p.s==='hurt'||p.s==='down'||Q.mode==='lake'||g<0||g>=DG.side.dur?0:Math.sin(Math.PI*g/DG.side.dur)}
 function qBeamTarget(c){return c.k==='head'?[Q.bx,Q.by-92]:c.k==='beam'?[Q.bx-30,Q.by-4]:c.k==='final'?[Q.bx-20,Q.by-4]:[Q.bx-30,Q.by-4]}
 /* intensité du rayon de contre (phase II) à l'instant t */
 function qBeamAl(c){const t=c.t;if(c.k==='stab')return t>=.28&&t<.62?(t<.35?(t-.28)/.07:1-(t-.35)/.27):0;if(c.k==='head')return t>=.48&&t<.85?(t<.55?(t-.48)/.07:1-(t-.55)/.3):0;if(c.k==='final')return t>=1.45&&t<3.5?Math.min(1,(t-1.45)/.1)*(t<3.2?1:1-(t-3.2)/.3):0;return 0}
@@ -326,10 +328,13 @@ function drawHero2(){
   const h=heroPose(),t=Q.time,p=Q.pl,c=Q.cn;
   /* le Veilleur commun (LB.drawWatcher), corps réduit pendant la chute dans le puits ; la phase donne sa géométrie */
   const c2=Q.cn,hitk=c2?qBeamAl(c2):0;
-  const pose=c?'counter':p.s==='act'?'dodgeDown':p.s==='hurt'?'hurt':p.s==='down'?'fall':'idle';
-  LB.drawWatcher(ctx,h.x,h.y,pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:1,breath:false,fl:3*Math.sin(t*14),
+  const sk=qSideK(),pose=c?'counter':sk>0?'dodgeSide':p.s==='hurt'?'hurt':p.s==='down'?'fall':'idle';
+  const opt={k:sk,dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:1,breath:false,fl:3*Math.sin(t*14),
     body:{dy:44,s:.8},shoulder:[18.5,-18.5],armR:5.2,hand:WH,sa:h.sa,L:80,aura:h.glow,
-    glow:Math.max(.35,h.glow,hitk),lanternCol:Q.pl.deny>0?LB.DENY_COL:h.glow>0||hitk>0?'#fff4d6':'#ffd27a'});
+    glow:Math.max(.35,h.glow,hitk),lanternCol:Q.pl.deny>0?LB.DENY_COL:h.glow>0||hitk>0?'#fff4d6':'#ffd27a'};
+  /* image rémanente du pas de côté, vers sa place de départ, comme au Chapitre II */
+  if(sk>0&&qSideAge()<DG.side.ghost){ctx.save();ctx.globalAlpha=DG.side.ga;LB.drawWatcher(ctx,h.x+DG.side.gx,h.y,pose,t,Object.assign({},opt,{aura:0}));ctx.restore()}
+  LB.drawWatcher(ctx,h.x,h.y,pose,t,opt);
 }
 function drawFx2(){
   const S=R||Q;
@@ -448,7 +453,7 @@ function drawLake(front){
       ctx.fillStyle=tg;ctx.beginPath();ctx.moveTo(0,cy-3);ctx.lineTo(120,cy-4);ctx.lineTo(240,cy-1);ctx.lineTo(QEDGE-26,cy+1);ctx.lineTo(QEDGE,cy+12);ctx.lineTo(QEDGE+12,sy+8);ctx.lineTo(QEDGE+20,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
       ctx.strokeStyle='rgba(255,160,70,.45)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,cy-3);ctx.lineTo(120,cy-4);ctx.lineTo(240,cy-1);ctx.lineTo(QEDGE-26,cy+1);ctx.lineTo(QEDGE,cy+12);ctx.lineTo(QEDGE+12,sy+8);ctx.stroke();
       ctx.fillStyle='rgba(20,10,8,.55)';for(const [qx,qy,qr] of [[22,cy+20,5],[60,cy+34,4],[180,cy+18,6],[250,cy+40,5],[300,cy+26,4],[140,cy+60,3]]){ctx.beginPath();ctx.arc(qx,qy,qr,0,6.283);ctx.fill()}}
-    /* un bloc du pont, tombé sur le rebord : le Veilleur s'y tient (sa plongée d'esquive le pose devant, sur le rebord) */
+    /* un bloc du pont, tombé sur le rebord : le Veilleur s'y tient (son pas de côté d'esquive reste dessus) */
     {const x0=QH[0]-52,x1=QH[0]+64,top=QH[1]+44;
       const bg=ctx.createLinearGradient(0,top,0,cy);bg.addColorStop(0,'#5a4a44');bg.addColorStop(1,'#2e2320');
       ctx.fillStyle=bg;ctx.beginPath();ctx.moveTo(x0+4,top);ctx.lineTo(x1-6,top-2);ctx.lineTo(x1,top+8);ctx.lineTo(x1+3,cy);ctx.lineTo(x0-4,cy);ctx.lineTo(x0,top+10);ctx.closePath();ctx.fill();

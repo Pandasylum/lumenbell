@@ -19,9 +19,12 @@ G	Chapitre I · Lanterne du Colosse de braise	En cours	29 octobre 2026	branche `
 H	Chapitre II · Rémanence (évaporation du Lumen)	En cours	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
 J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours (a) et (b) ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
+
 K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
 L	Chapitre I · Fausse fin de Facile supprimée	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
-M	Chapitre II · Phare Noyé : tour d'avant C1	En cours (sommet restauré, validation à l'écran de Kevin attendue)	1er novembre 2026	branche `ch2/phare-v1` (PR à ouvrir)
+
+M	Chapitre II · Phare Noyé : tour d'avant C1	À faire (validation à l'écran d'abord)	1er novembre 2026	
+N	Chapitre I · Phase II : esquive en pas de côté, contres au sol	En cours	1er novembre 2026	branche `ch1/dodge-side` (PR à ouvrir)
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
 
@@ -203,26 +206,37 @@ Après :
 
 Statut : en cours, branche `ch1/foundry-floor` (PR à ouvrir). Sans effet sur les autres textes.
 
-M. Chapitre II · Phare Noyé : tour d'avant C1 (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-idees-validees.md` § e)
+M. Chapitre II · Phare Noyé : sommet d'avant C1 (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-idees-validees.md` § e)
 
-Décision : la forme visuelle de la tour (formes I et II) revient à la version d'avant C1, référencée comme le commit `2b75101` (« les 2 lampes en haut »).
+Décision : le sommet de la tour (formes I et II) retrouve les deux blocs sombres encadrant la méduse, tels que dans le commit `2b75101` (27 octobre, avant C1). Ces blocs ont été supprimés par `0bad679` (PR #5).
+
+Périmètre : sommet seulement. Le reste de la tour (pièces de l'Ancien → tour, étages, balcons, amarres) reste celui de C1.
 
 Cible : `chapters/ch2-silent-bells/src/js/40-boss-drowned-beacon.js` (`drawBeacon`, `TOWER`, `PDRAW`).
 
 À faire :
-- Produire d'abord une comparaison en images : version actuelle / version d'avant C1, forme I et forme II.
-- Ne rien changer sans validation de Kevin à l'écran.
-
-Référence à vérifier avant la comparaison : le commit `2b75101` est le commit « états du Veilleur comme au Chapitre I » (27 octobre). Son message ne mentionne ni lampes ni tour. La bonne version d'avant C1 est à identifier.
+- Étape 1, comparaison en images (actuel / avant C1) : déjà faite par Kevin.
+- Ne rien changer au-delà du sommet.
 
 Conservés tels quels : lueurs turquoise fixes sans pulsation (section C), textes (section A), Rémanence (section H), titre de la forme II « La Sans-Fond ».
 Ne pas toucher aux timings.
 
-À signaler sans trancher : si la version d'avant C1 contredit le tableau « Pièces de l'Ancien → pièces de la tour » de `docs/CH2-SPEC.md`, le signaler à Kevin.
-
 À ne pas faire : modifier la silhouette du Colosse, ou toucher au Chapitre I.
 
 Statut : en cours, branche `ch2/phare-v1` (1er novembre). Comparaison faite par Kevin : les « 2 lampes en haut » sont les deux blocs sombres qui encadrent la méduse dans `2b75101`, supprimés par `0bad679`. Seul ce sommet est restauré (formes I et II) ; planche avant / après : `build/out/phare-v1/comparaison-phase3.png` (non suivie). Écart tranché par Kevin le 1er novembre : les deux blocs sont des lanternes latérales propres à la tour (phrase ajoutée sous le tableau de `docs/CH2-SPEC.md`). 2e passe : les lumières de la tour (faisceau, foudre, crépitement de charge, anneaux de la tempête) partent des deux lanternes, en formes I et II ; les deux pièces attendent sur la plage, au centre et séparées, à l'entrée du combat et servent à la construction. Planche : `build/out/phare-v2/comparaison-tirs.png` (non suivie). Détails : `chapters/ch2-silent-bells/NOTES.md`, « Lanternes latérales ».
+
+N. Chapitre I · Phase II : esquive en pas de côté, contres au sol (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-ch1-esquive-pas-de-cote.md`)
+
+Décisions :
+- L'esquive de la phase II devient le pas de côté du Chapitre II (pose `dodgeSide`, 0,38 s, image rémanente) à la place de la plongée `dodgeDown` ; le Veilleur reste sur son bloc, sans toucher le vide ni la lave.
+- Contre sur la tête du Colosse : le Veilleur reste au sol ; seul le rayon s'oriente vers la tête.
+- Finish (COUP ULTIME) : le Veilleur reste au sol ; seul le rayon vise.
+
+Rendu seulement : aucun timing ni réglage d'équilibrage ne change. `DG.drop` reste (rebord, défaite) ; la pose `dodgeDown` reste dans le module commun. Aucun texte affiché ne change ; aucun texte de lecteur d'écran ne décrivait un plongeon.
+
+Referme le point « Plongée d'esquive » de `docs/decisions/2026-11-01-ch1-foundry-floor-application.md`.
+
+Statut : en cours, branche `ch1/dodge-side` (PR à ouvrir).
 
 Vérifications
 Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.
