@@ -21,7 +21,6 @@ function start(){
   if(R){
     if(R.mode==='lost'){if(RUN.on)restartRun();else beginP3(true);return}
     if(R.mode==='space'){showMenu(false);return}
-    if(R.mode==='fake'){showMenu(false);return}
     R=null;setPhaseUI(1);newGame();lastP=-1;lastB=-1;hud();
   }
   if(Q){
@@ -79,7 +78,7 @@ el.go2.addEventListener('click',()=>{prefs.help=el.help.checked=true;LB.store.se
 function showEnd(){
   const win=G.mode==='won';
   el.eye.textContent=win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite');
-  el.title.textContent=win?(G.p2?_('Phase I cleared','Phase I terminée'):_('The Colossus drops to one knee.','Le Colosse plie un genou.')):_('Crushed on the stone.','Écrasé sur la pierre.');
+  el.title.textContent=win?(G.p2?_('Phase I cleared','Phase I terminée'):_('Phase I cleared','Phase I terminée')):_('Crushed on the stone.','Écrasé sur la pierre.');
   el.stats.textContent=_('Blocks ','Blocages ')+G.blocks+_(' · Hits taken ',' · Coups subis ')+G.grabs+trStr(1);
   el.stats.hidden=false;
   el.desc.textContent=win?(G.p2?_('The Colossus smashes the bridge and dives through the breach into the foundry beneath the arch, as if he knew the way.',"Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin."):_(`Phase II will open with its upcoming attacks.`,`La phase II s'ouvrira avec ses prochaines attaques.`)):_(`The lantern rolls across the stones of the bridge and goes out. Nothing holds the Colossus back now: the road to the valleys lies open.`,`La lanterne roule sur les pierres du pont et s'éteint. Plus rien ne retient le Colosse : la route des vallées est ouverte.`);
