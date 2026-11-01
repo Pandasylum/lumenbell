@@ -1,6 +1,6 @@
 # 2026-10-31 · `engine/hero-states` : une seule machine à états du Veilleur
 
-Session 3 du plan de `docs/COMMUN.md` § 4. Branche `engine/hero-states`. Les trois phases du Chapitre I et les trois phases du Chapitre II passent par `LB.hero` (`shared/js/16-hero.js`).
+Session 3 du plan de `docs/COMMUN.md` § 4. Branche `engine/hero-states-2` (publiée sous ce nom : `engine/hero-states` porte une première version sur une base en retard, à supprimer par Kevin). Les trois phases du Chapitre I et les trois phases du Chapitre II passent par `LB.hero` (`shared/js/16-hero.js`).
 
 ## 1. Décision de Kevin du 31 octobre : barre de récupération et lanterne (remplace le n° 1 du 28 octobre)
 Le n° 1 du 28 octobre (`docs/decisions/2026-10-28-engine-shared.md`, § 1 : « barre de récupération toujours visible », seul retour d'un appui refusé) est **remplacé** par :
