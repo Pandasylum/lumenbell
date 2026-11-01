@@ -51,7 +51,7 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 | Phase | Décor | Fin de phase |
 |---|---|---|
 | I | Le pont de pierre | Il plonge par la brèche dans la fonderie cachée sous l'arche ; le Veilleur saute à sa poursuite |
-| II | La Fonderie (puits, chaînes, lac de lave) | Le Veilleur se rattrape à une passerelle ; ravivé, le Colosse s'envole par la cheminée |
+| II | La Fonderie (puits, chaînes, lac de lave) | Le grand four engloutit le Colosse ; ravivé, il s'envole par la cheminée |
 | III | Le sommet du Clocher | Scène de fin |
 
 Textes exacts : `docs/TEXTES-CH1.md`.
