@@ -48,3 +48,7 @@
 
 ## 2026-11-01 · ci/skip-docs-only
 - Rien ne change à l'écran : les modifications de documentation seule n'attendent plus la CI complète.
+
+## 2026-11-01 · engine/watcher
+- Chapitre II : le Veilleur porte maintenant le heaume, le tabard et le sceptre-lanterne à petite cloche du Chapitre I, en combat, au prologue, à l'épilogue et dans le menu (fini le bâton à cristal et l'œil turquoise) ; son blocage montre le bouclier bleu du Chapitre I.
+- Chapitre I : au repos, sur le pont et au Clocher, le Veilleur respire (léger balancement, pans du manteau) ; rien d'autre ne change.

@@ -14,19 +14,6 @@ const PCAP_TXT=()=>[_('On the coast, the mist no longer lifts.','Sur la côte, l
 /* intro cartons: [start, end, text] in seconds */
 const PCAPF=()=>PCAP_TXT().map((s,i)=>[PRO_SHOTS[i]+PRO_T.lead,PRO_SHOTS[i+1]-PRO_T.lead,s]);
 const PSFX=[[0,'swell'],[PRO_SHOTS[1],'rumble'],[PRO_SHOTS[2],'swell'],[PRO_SHOTS[3],'glints'],[PRO_SHOTS[4]+PRO_T.walk,'land'],[PRO_TITLE+.4,'sting']];
-function proHero(x,y,white,staffA,stA,lean){
-  ctx.save();ctx.translate(x,y);ctx.rotate(lean||0);
-  if(white<1){drawWizard({fl:Math.sin(rt*4)*1.5})}
-  if(white>0){ctx.save();ctx.globalAlpha=white;drawWizard({fl:Math.sin(rt*4)*1.5,white:true});ctx.restore()}
-  // the arm always, the staff only once the stars have given it back
-  const dx=Math.cos(staffA),dy=Math.sin(staffA),hand=[26+dx*4,-64],sb=[hand[0]-dx*60,hand[1]-dy*60],st=[hand[0]+dx*80,hand[1]+dy*80];
-  ctx.lineCap='round';ctx.strokeStyle=white>.5?'#dfe5fa':'#323f5e';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(23,-78);ctx.lineTo(hand[0],hand[1]);ctx.stroke();
-  if(stA>0){ctx.globalAlpha=stA;ctx.strokeStyle='#6e5238';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(sb[0],sb[1]);ctx.lineTo(st[0],st[1]);ctx.stroke();
-    ctx.save();ctx.translate(st[0],st[1]);ctx.rotate(staffA+Math.PI/2);ctx.shadowColor='#6fd3ff';ctx.shadowBlur=22;ctx.fillStyle='#d8f4ff';ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(8,0);ctx.lineTo(0,10);ctx.lineTo(-8,0);ctx.closePath();ctx.fill();ctx.restore();ctx.globalAlpha=1}
-  ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(hand[0],hand[1],5,0,6.283);ctx.fill();
-  ctx.restore();
-  return{x:x+hand[0],y:y+hand[1],tx:x+st[0],ty:y+st[1]};
-}
 /* ---- pieces of the coast, shared by the intro and the outro ---- */
 function skyGrad(top,bot,y1){const g=ctx.createLinearGradient(0,0,0,y1);g.addColorStop(0,top);g.addColorStop(1,bot);ctx.fillStyle=g;ctx.fillRect(-40,-40,W+80,y1+40)}
 /* the sea from y0 down: colour stops, swell lines */
@@ -93,8 +80,8 @@ function drawPrologue(t){
     ctx.fillStyle='#0a1012';ctx.beginPath();ctx.moveTo(-40,H);ctx.lineTo(-40,GY-8);ctx.quadraticCurveTo(300,GY-16,520,GY+6);ctx.quadraticCurveTo(580,GY+40,640,H);ctx.fill();
     ctx.strokeStyle='rgba(220,245,240,.3)';ctx.lineWidth=1.5;for(let i=0;i<3;i++){const k=(rt*.3+i*.33)%1;ctx.beginPath();ctx.moveTo(520-k*40,GY+10+i*8);ctx.quadraticCurveTo(700,GY+20+i*12,W+40,GY+14+i*12);ctx.stroke()}
     mist(400,3,.2,10);
-    if(shot>=4){const walk=eio(clamp(ts/PRO_T.walk,0,1)),hx=lerp(-40,W/2-60,walk),hy=GY-(walk<1?Math.abs(Math.sin(t*6))*3:0);
-    proHero(hx,hy,0,walk<1?-1.3:-1.42,1,walk<1?.03:0);
+    if(shot>=4){const walk=eio(clamp(ts/PRO_T.walk,0,1)),hx=lerp(-40,W/2-60,walk);
+    LB.drawWatcher(ctx,hx,GY,walk<1?'walk':'idle',walk<1?t:rt);   // the Watcher of the series (shared/js/20-watcher.js)
     if(ts>=PRO_T.walk&&once('land'))burst(W/2-60,GY,14,'#9fb6a0',3,.7,.3)}}
   ctx.restore();
   // cuts between shots: a short dip to black

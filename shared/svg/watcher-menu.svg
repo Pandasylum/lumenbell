@@ -1,0 +1,6 @@
+<path class="mw" d="M205 455 L215 392 Q205 380 213 366 Q222 354 234 366 Q242 380 232 392 L242 455Z"/>
+<path class="mw" d="M250 455 L250 332" stroke="{ink}" stroke-width="4" fill="none"/>
+<circle class="mw" cx="250" cy="322" r="16" fill="#ffd27a" opacity=".22"/>
+<path class="mw" d="M243 314 L250 307 L257 314Z"/>
+<rect class="mw" x="243" y="314" width="14" height="18" fill="#ffd27a" opacity=".95"/>
+<path class="mw" d="M248 314 L248 332 M252 314 L252 332" stroke="{ink}" stroke-width="1.2"/>

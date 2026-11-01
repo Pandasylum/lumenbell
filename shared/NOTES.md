@@ -13,6 +13,8 @@
 | `js/08-lang.js` | `LB.LANGS` (ordre des boutons : EN, FR), `LB.lang.cur`, `LB.lang.init()`, `LB.lang.set(l)`, `LB._(en, fr)` |
 | `js/12-audio.js` | `LB.audio` : contexte unique, `tone`, `noise`, réglages Son / Musique, suspension en arrière-plan |
 | `js/16-hero.js` | `LB.HERO_T`, `LB.HERO_DIFF`, `LB.diff` (`apply`, `use`, `cur`), `LB.hero` (`create`, `press`, `release`, `step`, `stops`, `stopped`, `hurt`, `perfect`, `dur`), `LB.drawRecoveryBar`, `LB.DENY_COL` |
+| `js/20-watcher.js` | `LB.WATCHER_T`, `LB.WATCHER_POSES`, `LB.drawWatcher`, `LB.drawWatcherBody`, `LB.drawLantern`, `LB.drawScepter`, `LB.lanternBeam`, `LB.drawBlock`, `LB.watcherLanternCol`, `LB.WATCHER_SIL`, `LB.drawWatcherSil` |
+| `svg/watcher-menu.svg` | Silhouette du Veilleur des menus (hors `parts.txt` : insérée dans la page par `build/assemble.py`, ligne `@svg watcher-menu.svg <encre>`, `{ink}` = encre du décor) |
 
 ## Clés de sauvegarde
 - `LB.key('lang'|'snd'|'mus'|'help')` → `lb-lang`, `lb-snd`, `lb-mus`, `lb-help` (communes à la série) ; tout autre nom → `lb-<id>-<nom>` (`lb-ch1-intro`, `lb-ch2-unl`…).
@@ -46,11 +48,20 @@
 - **Dessin** (laissé aux chapitres) : la lanterne passe au rouge `LB.DENY_COL` quand `p.deny > 0` (une ligne par dessin) ; `LB.drawRecoveryBar(ctx, x, y_pieds, p)` ne se dessine que pendant `recover` et que le chapitre n'appelle que si la case « Aide » est cochée. Les chapitres lisent `p.s`, `p.t`, `p.rd`, `p.rk`, `p.deny`, `p.stam`.
 - Un état d'animation propre au chapitre (prise, riposte, coup de lanterne, mort `down`) n'est pas dans `LB.hero` : `step` ne le touche pas.
 
+## Veilleur dessiné (`LB.drawWatcher`, session `engine/watcher`, 1er novembre)
+- **Un seul Veilleur** pour la série, celui du Chapitre I déplacé sans retouche (heaume à visière, tabard à l'emblème, sceptre-lanterne à petite cloche). Repère : pieds à l'origine, x vers l'adversaire ; épaule (23, −78).
+- `LB.drawWatcher(ctx, x, y, pose, t, opt)` ; `t` = horloge du chapitre (respiration, marche) ; `opt.k` = avancement de la pose (0 à 1). La pose (`LB.WATCHER_POSES` : `idle`, `block`, `dodgeSide`, `dodgeDown`, `hold`, `raise`, `hurt`, `down`, `cast`, `counter`, `victory`, `fall`, `walk`) donne la géométrie ; **tout champ de `opt` la remplace** (`dx`, `dy`, `rot`, `rot2`, `sx`, `sy`, `scale`, `body`, `shoulder`, `armR`, `hand`, puis le sceptre : `staff` [talon, lanterne] ou `sa` + `L` ou `staffA` ; `glow`, `lanternCol`, `lamp`, `aura`, `beam`, `white`, `fl`, `breath`, `staffAlpha`, `inFrame`). Un chapitre qui chorégraphie lui-même (contres, finale, cinématiques) passe ses valeurs : c'est ainsi que le Chapitre I reste identique au pixel. Renvoie `{lx, ly}`, centre de la lanterne dans le repère de l'appelant.
+- **Respiration** (`LB.WATCHER_T.breath`, décision n° 5 du 28 octobre) : par défaut pour `idle` seulement ; `opt.breath` force ou coupe. Chapitre I : au repos en phases I et III, pas en phase II (chute) ; Chapitre II : au repos et dans les cinématiques.
+- **Lanterne** : `glow` = halo (0 à 1), `lamp` = intensité de cinématique (verre et halo s'éteignent ; 1 = intacte, aucun calcul), `LB.watcherLanternCol(p, lit)` : rouge pendant `deny` (`LB.DENY_COL`), allumée, ambre en récupération, repos. Couleurs dans `LB.WATCHER_T.lantern` (ne pas les changer sans CHANGEMENTS.md E).
+- **Bouclier** : `LB.drawBlock(ctx, x, y, t, act, {plain})` (x, y = pieds ; s'affaiblit sur la durée de l'action `act`).
+- **Silhouettes** : `opt.flat` (lointaine, aplats), `opt.ink` (contre-jour de dos), `LB.drawWatcherSil(ctx, encre, {sway, k, r, s})` (intro), fragment `svg/watcher-menu.svg` (menus).
+- **Piège** : le dessin ne doit jamais tirer `Math.random` (les bots et les captures comptent sur la graine).
+
 ## Tests
 - `tests/audio.js` (CI) : contexte unique sur les deux `dist` et sur les copies de test, suspension / reprise (onglet caché, `pagehide` / `pageshow`, focus en arrière-plan), bruitages par `LB.audio.tone` / `noise`, musiques sur le contexte commun, réglages `lb-snd` / `lb-mus` relus ; `errs []` attendu.
 - `tests/keys.js` (CI) : clés communes et migration sur les deux `dist`, langue par défaut, clés `eb-…` du Chapitre I, aide mémorisée, écriture dans les seules `lb-…`, choix vu d'un chapitre à l'autre.
-- `tests/visual-shots.js` : captures déterministes des deux chapitres, comparaison au pixel (voir `NOTES.md` racine) ; depuis le 31 octobre, aussi un appui refusé et la barre de récupération avec l'aide cochée puis décochée.
+- `tests/visual-shots.js` : captures déterministes des deux chapitres, comparaison au pixel (voir `NOTES.md` racine) ; depuis le 31 octobre, aussi un appui refusé et la barre de récupération avec l'aide cochée puis décochée ; depuis le 1er novembre, `--poses` (planches de toutes les poses de `LB.drawWatcher`, identiques d'un chapitre à l'autre, et poses en scène) et `--no-breath` (respiration neutralisée).
 - `tests/input.js` (états du Veilleur des deux chapitres) et `tests/ch1-bot.js` (bots du Chapitre I à pas fixe, avant / après sur la même graine).
 
 ## À venir (plan de `docs/COMMUN.md` § 4)
-~~`LB.hero` et `HERO_T` (3)~~ fait le 31 octobre, `LB.drawWatcher` (4), `LB.cine` et `LB.title` (5), menu, HUD, cartes, entrées (6).
+~~`LB.hero` et `HERO_T` (3)~~ fait le 31 octobre, ~~`LB.drawWatcher` (4)~~ fait le 1er novembre, `LB.cine` et `LB.title` (5), menu, HUD, cartes, entrées (6).

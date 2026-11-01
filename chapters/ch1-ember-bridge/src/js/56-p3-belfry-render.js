@@ -138,25 +138,16 @@ function drawHero3(){
   const p=R.pl,h=heroPose3(),t=R.time;
   const hf=heroFlip();if(hf){ctx.save();ctx.translate(h.x,0);ctx.scale(-1,1);ctx.translate(-h.x,0)}
   if(!h.y)ctx.fillStyle='rgba(0,0,0,.35)',ctx.beginPath(),ctx.ellipse(h.x,DECK+2,30,5,0,0,6.283),ctx.fill();
-  ctx.save();ctx.translate(h.x,DECK+(h.y||0));ctx.rotate(h.rot);ctx.scale(1,h.sy);
-  drawWizard({fl:0});
-  qlimb([23,-78],h.hand,9,'#2a3550');ctx.fillStyle='#2a3550';ctx.beginPath();ctx.arc(23,-78,6.5,0,6.283);ctx.fill();
-  ctx.save();ctx.translate(h.hand[0],h.hand[1]);ctx.rotate(h.sa);
+  /* le Veilleur commun (LB.drawWatcher) ; la phase donne sa géométrie : sceptre en main, garde levée, contres, finale */
   const c3=R.cn,hk3=c3&&(c3.k==='bat'||c3.k==='plant')?Math.max(0,1-Math.abs(c3.t-(c3.k==='bat'?.24:.32))/.16):0;
-  drawScepter(76,p.s==='act'?1:Math.max(.3,h.glow||0,hk3),p.deny>0?LB.DENY_COL:p.s==='recover'?'#c9a85a':(p.s==='act'||h.glow>0||hk3>0)?'#fff4d6':'#ffd27a');
-  if(hk3>0){ctx.save();ctx.globalCompositeOperation='lighter';lanternBeam([84,0],[84+48*hk3,0],14,hk3);ctx.restore()}
-  ctx.restore();
-  ctx.fillStyle='#cdb69a';ctx.beginPath();ctx.arc(h.hand[0],h.hand[1],5,0,6.283);ctx.fill();
-  ctx.restore();
-  if(p.s==='act'){
-    const a=1-.45*p.t/HD('block').act,ramp=clamp01(p.t/.07),cx=PX+82,cy=DECK-76,rx=34*(.6+.4*ramp),ry=92*(.8+.2*ramp);
-    ctx.save();ctx.globalAlpha=a*ramp;
-    const g=ctx.createRadialGradient(cx-18,cy,6,cx,cy,ry);
-    g.addColorStop(0,'rgba(111,211,255,.06)');g.addColorStop(.7,'rgba(111,211,255,.2)');g.addColorStop(1,'rgba(191,234,255,.5)');
-    ctx.fillStyle=g;ctx.shadowColor='#6fd3ff';ctx.shadowBlur=24;
-    ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,6.283);ctx.fill();
-    ctx.restore();
-  }
+  const play=R.mode==='play',low=p.s==='down'||p.s==='hurt';
+  const pose=R.mode==='intro'?'walk':R.mode==='finale'?'victory':!play?'idle':c3?'cast':p.s==='act'?'raise':low?(p.s==='down'?'down':'hurt'):'idle';
+  LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:h.sy,
+    breath:pose==='idle'&&play,hand:h.hand,sa:h.sa,L:76,
+    glow:p.s==='act'?1:Math.max(.3,h.glow||0,hk3),
+    lanternCol:p.deny>0?LB.DENY_COL:p.s==='recover'?'#c9a85a':(p.s==='act'||h.glow>0||hk3>0)?'#fff4d6':'#ffd27a',
+    beam:hk3>0?{len:48*hk3,w:14,al:hk3}:null});
+  if(p.s==='act')LB.drawBlock(ctx,PX,DECK,p.t,HD('block').act,{plain:true});
   if(hf)ctx.restore();
 }
 function drawBombs(a){
