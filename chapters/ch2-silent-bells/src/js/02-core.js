@@ -2,13 +2,27 @@ const $=id=>document.getElementById(id);
 /* save keys and language: common to the series (shared/, LB.store, LB.key, LB.lang). Common keys lb-lang, lb-snd, lb-mus,
    lb-help (old pn-lang, eb-lang, db-opt*: LB.OLD_KEYS); this chapter's keys lb-ch2-* (unlock, records), old db-unl, db-best-*. */
 LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']],audio:{master:.75,sfx:.9,mus:.3}});
-const OPT_KEY={optHelp:LB.key('help')};
 /* UNLOCK_ALL: true = the three phases are open from the start (phase track), as in Ember Bridge; the difficulties and the
    Trial are always open. false = progressive unlock: a phase opens once the previous one is cleared (key lb-ch2-unl, still
    written on every clear). Disabled for testing; idea to extend to the whole series later (common screen). */
 const UNLOCK_ALL=true;
 const unlocked=()=>UNLOCK_ALL?3:+LB.store.get(LB.key('unl'),1);
 const _=LB._;
+/* TRIAL_OPEN: true = the Trial is open from the start (testing, as in Chapter I); false = opened by the true ending (lb-ch2-end,
+   written at the victory, which also shows « ▶ Outro » in the menu). */
+const TRIAL_OPEN=true;
+function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
+/* the chapter's table for the series frame (menu, start screen, cards, HUD: shared/js/28-ui.js, docs/COMMUN.md § 3.1) */
+const CHAPTER={n:2,id:'ch2',
+  name:()=>_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
+  color:'#4fe0cc',color2:'#9fe4ff',rgb:'79,224,204',
+  menu:{bg:'#04070b',glowA:.3,titleA:.4,particles:'spray',t:{glowMin:.5}},
+  trial:{name:()=>_('Trial by Water',"Épreuve de l'eau"),note:[()=>_('You recover 1 life between phases.','Tu récupères 1 PV entre les phases.')]},
+  player:()=>_('The Watcher','Le Veilleur'),help:{},
+  trialOpen:()=>TRIAL_OPEN||endSeen(),endSeen,best:n=>+LB.store.get(LB.key('best-'+n),0)||0,fmt:t=>fmt(t)
+};
+/* card and pause of the series (LB.card, LB.pause); the menu and the start screen are mounted in 96-loop.js */
+LB.card.mount($('stage'),$('menu'));LB.pause.mount($('stage'),$('menu'));
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;

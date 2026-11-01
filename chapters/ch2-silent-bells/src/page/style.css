@@ -48,13 +48,11 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .card{max-width:480px;display:grid;gap:10px;justify-items:start;padding:20px 22px;background:var(--panel);border:1px solid var(--line)}
 .card h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(26px,5vw,38px);line-height:1;text-wrap:balance}
 .card p{margin:0;color:var(--muted);font-size:14px}
-.card .how2{color:var(--fg);font-size:13px;border-left:3px solid var(--acc);padding-left:10px}
 .rtab{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;width:100%;margin:2px 0 4px}
 .rtab div{display:flex;flex-direction:column;gap:1px}
 .rtab small{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .rtab b{font-family:var(--font-display);font-weight:800;font-size:24px;line-height:1.05;font-variant-numeric:tabular-nums}
 .rtab .rec b{color:var(--acc)}
-.brow{display:flex;flex-wrap:wrap;gap:8px}
 .btn{font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border:0;padding:10px 20px;background:var(--acc);color:var(--ink)}
 .btn:hover{background:var(--acc2)}
 .btn.ghost{background:none;color:var(--acc);border:2px solid var(--acc)}
@@ -68,53 +66,18 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .opts{display:flex;flex-wrap:wrap;gap:6px 16px;margin-left:auto;font-size:13px;color:var(--muted)}
 .opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-/* Home menu: same look as Ember Bridge's title screen, cold instead of molten */
-.ov.menu{position:fixed;inset:0;z-index:50;padding:24px;background:radial-gradient(ellipse 80% 70% at 50% 110%,rgba(79,224,204,.3),transparent 62%),#04070b;place-items:center}
-.mscene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.mscene .eye{animation:mblink 5s infinite}
-.mscene .lava{animation:mglow 3.2s ease-in-out infinite alternate}
+/* Home menu: the common menu (LB.menu, shared/js/28-ui.js); only the animations of this chapter's scene stay here */
 .mscene .orb{animation:mglow 2.4s ease-in-out infinite alternate}
 .mscene .aur{animation:mglow 6s ease-in-out infinite alternate}
 .mscene .aur2{animation:mglow 8s ease-in-out infinite alternate-reverse}
 .mscene .beam{transform-origin:715px 200px;animation:msweep 7s ease-in-out infinite alternate}
 .mscene .tent{animation:mglow 2.4s ease-in-out infinite alternate}
-.mem-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.msn{position:absolute;bottom:-10px;width:3px;height:3px;border-radius:50%;background:#e8f8ff;box-shadow:0 0 6px 1px rgba(159,242,255,.6);opacity:0;pointer-events:none;animation:mfall linear infinite}
-/* sea spray rising from the reef (no snow in this chapter) */
-@keyframes mfall{0%{transform:translate(0,0);opacity:0}10%{opacity:.7}100%{transform:translate(var(--dx),-45vh);opacity:0}}
-@keyframes mglow{from{opacity:.5}to{opacity:1}}
-@keyframes mblink{0%,92%,100%{opacity:1}95%{opacity:.15}}
 @keyframes msweep{from{transform:rotate(-16deg)}to{transform:rotate(18deg)}}
-@media (prefers-reduced-motion:reduce){.msn,.mscene *{animation:none!important}.msn{display:none}}
-/* Portrait: the scene sits in the upper half, framed on the Watcher and the tower; the title and choices below it */
-@media (orientation:portrait) and (max-aspect-ratio:10/11){
-  .ov.menu{place-items:end center;padding-bottom:max(28px,env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse 90% 40% at 50% 100%,rgba(79,224,204,.22),transparent 70%),linear-gradient(#03070c 0,#03070c 46%,#03080b 52%,#061417 100%)}
-  .mscene{top:3%;height:43%}
-  .ov.menu .mcard .eyebrow,.ov.menu .mcard h2,.ov.menu .mcard .sub,.ov.menu .mcard .tag{transform:none}
-  .mcard{gap:10px}
-}
-.mcard{position:relative;z-index:1;display:grid;gap:12px;padding:8px 0;justify-items:center;text-align:center;max-width:620px}
-.ov.menu .mcard .eyebrow,.ov.menu .mcard h2,.ov.menu .mcard .sub,.ov.menu .mcard .tag{transform:translateY(-9vh)}
-.mcard .eyebrow{color:#9fe4ff}
-.mcard h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(40px,9vw,88px);line-height:.92;letter-spacing:.01em;text-wrap:balance;color:var(--fg);text-shadow:0 0 40px rgba(79,224,204,.4)}
-.mcard h2 span{color:var(--teal);text-shadow:0 0 40px rgba(79,224,204,.8)}
-.mcard .sub{margin:-4px 0 0;font-family:var(--font-display);font-weight:700;font-size:clamp(18px,3vw,24px);letter-spacing:.14em;text-transform:uppercase;color:#cfeee9}
-.mcard .tag{margin:0;color:var(--muted);font-size:14px;max-width:46ch}
-.mcard .how{margin:0;font-size:12px;color:#a8a39a;max-width:60ch}
-.btn.big{font-size:24px;padding:12px 38px}
-.mph{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:620px}
-.mph button{min-width:0;display:grid;justify-items:center;padding:8px 6px;background:rgba(10,16,22,.82);border:1px solid #2c3a44;color:var(--fg);cursor:pointer;font:inherit}
-.mph button b{font-family:var(--font-display);font-weight:800;font-size:18px;line-height:1;color:var(--teal);text-transform:uppercase;letter-spacing:.05em}
-.mph button span{font-size:12px;color:var(--muted)}
-.mph button:hover{border-color:var(--teal);background:rgba(79,224,204,.12)}
-#introBtn{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(6,9,14,.6)}   /* rejeu du prologue (comme au Chapitre I) */
-.langs{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:3}
-.langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(6,9,14,.6);border:1px solid rgba(236,230,220,.3);border-radius:4px;cursor:pointer}
-.langs button[aria-pressed="true"]{border-color:var(--teal);background:rgba(79,224,204,.22)}
-@media (prefers-reduced-motion:reduce){.btn,.mph button{transition:none}}
-@media (max-width:560px){.mcard .tag,.mcard .how{display:none}.mcard h2{font-size:34px}.mcard{gap:9px}.btn.big{font-size:20px;padding:8px 26px}.card{padding:12px 14px;gap:8px}.ward{width:100%}.opts{margin-left:0}.rtab{grid-template-columns:repeat(2,1fr)}}
-@media (pointer:coarse){.hint{display:none}.ward{min-height:84px;font-size:24px}.btn,.mbtn,.phases button,.skip{min-height:44px}.opts label{padding:8px 4px}.langs button{min-height:40px}}
-@media (max-width:480px){body{padding-block:12px 20px}.mph{gap:6px;grid-template-columns:1fr 1fr;max-width:340px}.ov.menu{padding-top:16px}.ov:not(.menu){position:fixed;z-index:40;background:rgba(6,8,12,.92);padding:16px}}
+@media (prefers-reduced-motion:reduce){.mscene *{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}}
+@media (max-width:560px){.card{padding:12px 14px;gap:8px}.ward{width:100%}.opts{margin-left:0}.rtab{grid-template-columns:repeat(2,1fr)}}
+@media (pointer:coarse){.hint{display:none}.ward{min-height:84px;font-size:24px}.btn,.mbtn,.phases button,.skip{min-height:44px}.opts label{padding:8px 4px}}
+@media (max-width:480px){body{padding-block:12px 20px}.ov:not(.menu){position:fixed;z-index:40;background:rgba(6,8,12,.92);padding:16px}}
 @media (orientation:portrait) and (max-width:700px){.bars{grid-template-columns:1fr;gap:8px}.bar.boss{text-align:left}.bar span{display:flex;justify-content:space-between;white-space:nowrap}
   .controls{display:grid;grid-template-columns:1fr;gap:10px}.controls .mrow{order:2}.controls .mrow>*{flex:1}.controls .opts{order:3;margin-left:0}
   .ward{width:100%;min-width:0;height:auto;min-height:clamp(110px,17dvh,160px);font-size:clamp(28px,8vw,40px);letter-spacing:.1em}}
@@ -127,5 +90,4 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
   .stage{grid-area:stage;width:min(100%,calc((100dvh - 12px)*16/9));margin:0 auto;align-self:center}
   .controls{grid-area:controls;display:grid;gap:8px;align-self:end}.controls>*{width:100%;min-width:0}.controls .mrow{order:-1}.mrow>*{flex:1}
   .ward{min-height:84px;font-size:20px;padding:4px 6px}.hint,.opts{display:none}
-  .ov:not(.menu){padding:6px}.card{padding:8px 12px;gap:4px;max-width:100%}.card h2{font-size:20px}.card p{font-size:12px;line-height:1.3}
-  .mcard .tag,.mcard .how,.mcard .sub{display:none}.ov.menu .mcard .eyebrow,.ov.menu .mcard h2{transform:translateY(-4vh)}.mcard h2{font-size:clamp(30px,9vh,52px)}}
+  .ov:not(.menu){padding:6px}.card{padding:8px 12px;gap:4px;max-width:100%}.card h2{font-size:20px}.card p{font-size:12px;line-height:1.3}}

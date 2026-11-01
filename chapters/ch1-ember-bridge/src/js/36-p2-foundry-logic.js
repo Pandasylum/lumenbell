@@ -26,13 +26,10 @@ function qNew(){
     shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,wo:0,bx:QB[0],by:QB[1],hx:QH[0],hy:QH[1],dropY:0,splash:0,sideT:-9,ended:false,wing:false,fn:0};
 }
 function setPhaseUI(n){
-  try{$('retryBtn').disabled=false;$('phases').style.display=RUN.on?'none':''}catch(e){}
-  document.querySelectorAll('#phases li').forEach((li,i)=>{
-    li.classList.toggle('on',i===n-1);
-    if(i===n-1)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
-  });
-  $('hdEye').textContent=n===1?_('Phase I of III · On the bridge','Phase I sur III · Sur le pont'):n===2?_('Phase II of III · The Foundry','Phase II sur III · La Fonderie'):_('Phase III of III · The Bell Tower','Phase III sur III · Le Clocher');
-  el.ward.textContent=n===1?_('Block','Bloquer'):n===2?_('Dodge','Esquiver'):_('Block','Bloquer');
+  try{$('retryBtn').disabled=false}catch(e){}
+  LB.hud.track(n,{trial:RUN.on});   /* frise : phase en cours ; masquée en Épreuve */
+  LB.hud.set({head:n===1?_('Phase I of III · On the bridge','Phase I sur III · Sur le pont'):n===2?_('Phase II of III · The Foundry','Phase II sur III · La Fonderie'):_('Phase III of III · The Bell Tower','Phase III sur III · Le Clocher'),
+    ward:n===1?_('Block','Bloquer'):n===2?_('Dodge','Esquiver'):_('Block','Bloquer'),player:LB.tx(CHAPTER.player),boss:LB.tx(CHAPTER.boss)});
   cv.setAttribute('aria-label',n===1?_('Arena: the Watcher faces the Ember Colossus on a stone bridge','Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre'):n===2?_('Arena: the Watcher and the winged Ember Colossus face each other at the bottom of the Foundry',"Arène du combat : le Veilleur et le Colosse de braise ailé s'affrontent au fond de la Fonderie"):_('Arena: the Watcher faces the Ember Colossus atop the snowy Watchers\' Bell Tower','Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs'));
 }
 function beginP2(noLore){
@@ -244,15 +241,12 @@ function qLayout(){
 function qEnd(){
   const win=Q.mode==='lake';
   if(win&&RUN.on){setTimeout(()=>beginP3(true),0);return} /* épreuve : pas de carte entre les phases */
-  el.eye.textContent=win?_('Transition','Transition'):_('Defeat · Phase II','Défaite · Phase II');
-  el.title.textContent=win?_('Phase II cleared','Phase II terminée'):_('Struck down at the bottom of the Foundry.','Terrassé au fond de la Fonderie.');
-  el.stats.textContent=_('Dodges ','Esquives ')+Q.dodges+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2);
-  el.stats.hidden=false;
-  el.desc.textContent=win?_('The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney.',"Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée."):_(`The Watcher collapses at the bottom of the Foundry, and his light goes out with him.`,`Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui.`);
-  el.go.textContent=win?_('Start Phase III','Lancer la phase III'):_('Retry Phase II','Réessayer la phase II');
-  if(!win)deathCard();
-  el.ov.hidden=false;
-  try{el.go.focus({preventScroll:true})}catch(e){}
+  const o={onGo:start,eye:win?_('Transition','Transition'):_('Defeat · Phase II','Défaite · Phase II'),
+  title:win?_('Phase II cleared','Phase II terminée'):_('Struck down at the bottom of the Foundry.','Terrassé au fond de la Fonderie.'),
+  stats:_('Dodges ','Esquives ')+Q.dodges+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2),
+  desc:win?_('The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney.',"Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée."):_(`The Watcher collapses at the bottom of the Foundry, and his light goes out with him.`,`Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui.`),
+  go:win?_('Start Phase III','Lancer la phase III'):_('Retry Phase II','Réessayer la phase II')};
+  LB.card.show(win?o:deathCard(o));
 }
 function qStep(dt){
   Q.time+=dt;Q.t+=dt;

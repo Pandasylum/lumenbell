@@ -25,7 +25,6 @@ js/68-form2-logic.js
 js/72-flow.js
 js/76-epilogue.js
 js/80-sfx-combat.js
-js/84-menu-art.js
 js/88-lang.js
 js/92-events.js
 js/96-loop.js

@@ -91,3 +91,7 @@
 - Chapitre II : un bouton « ▶ Intro » en haut à gauche du menu rejoue le prologue, comme au Chapitre I.
 ## 2026-11-01 · engine/cine (titre du Chapitre III)
 - Chapitre II : le dernier carton de l'épilogue annonce « Chapitre III · Hollow Roots. À suivre. », toujours en vert mousse.
+## 2026-11-01 · menu/common
+- Les deux chapitres ont le même menu : « Lumenbell » puis le chapitre dessous, Respire / À la loyale / Sans pitié, « Épreuve du feu » ou « Épreuve de l'eau » (Challenge ultime), et un écran « Commencer » au lancement.
+- Chapitre II : plein écran, Entrée pour jouer depuis le menu, « ▶ Outro » après la vraie fin ; l'aide n'est plus cochée d'office en Facile, elle est proposée après trois défaites (comme au Chapitre I).
+- Chapitre I : seuls les sous-titres des difficultés changent ; l'aide est maintenant possible en Difficile.

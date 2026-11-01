@@ -1,14 +1,9 @@
 /* ---------- flow ---------- */
-let lastCard=null,onGo=null,onGo2=null;
+let lastCard=null;
 function setTheme(id){if($('optMus').checked)MUSIC.play(id);else MUSIC.stop()}
-function showCard(o){lastCard=o;
-  $('ovEye').textContent=o.eye||'';$('ovTitle').textContent=o.title||'';$('ovDesc').textContent=o.desc||'';
-  const how=$('ovHow');how.hidden=!o.how;how.textContent=o.how||'';
-  const tb=$('ovTable');tb.hidden=!o.table;tb.innerHTML='';if(o.table)for(const r of o.table){const d=document.createElement('div');if(r[2])d.className='rec';d.innerHTML='<small></small><b></b>';d.firstChild.textContent=r[0];d.lastChild.textContent=r[1];tb.appendChild(d)}
-  $('go').textContent=o.go;onGo=o.onGo;const g2=$('go2');g2.hidden=!o.go2;g2.textContent=o.go2||'';onGo2=o.onGo2||null;
-  $('ov').hidden=false;setTimeout(()=>{try{$('go').focus({preventScroll:true})}catch(e){}},30);
-}
-function hideCard(){$('ov').hidden=true}
+/* cards of the series (LB.card, declarative): kept in lastCard so that « Resume » from the menu shows it again */
+function showCard(o){lastCard=o;LB.card.show(o)}
+function hideCard(){LB.card.hide()}
 function playCine(id,k,cb){
   MUSIC.stop();S.phase=id;resetCine(S);S.parts=[];S.pops=[];S.cine={k,t0:gt};S.cineCb=cb;S.mode='cine';S.paused=false;
   S.tfBurst=S.tfFlash=S.tfAnch=false;S.tfId=(S.tfId||0)+1;S.flashT=-9;S.shake=0;
@@ -27,6 +22,10 @@ function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 /* replay from the menu (button ▶ Intro, as in Chapter I): the prologue plays over the menu even if seen; the game state
    (mode, game time, particles, a paused fight) is left as it was and restored at the end */
+/* replay of the epilogue from the menu (button ▶ Outro, after the true ending, as in Chapter I): over the menu, game state kept */
+function replayEpilogue(cb){if(EPI.playing())return;const keep={gt,t0:S.epT0,parts:S.parts,pops:S.pops,done:S.cineDone,shake:S.shake};
+  S.epT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();MUSIC.bedStop();setTheme(4);
+  EPI.replay(()=>{gt=keep.gt;S.epT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;S.shake=keep.shake;if(!$('menu').hidden)setTheme(4);cb&&cb()})}
 function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
   S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if($('optMus').checked)MUSIC.bed(2);
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
@@ -51,6 +50,7 @@ function clearedCard(id){S.mode='card';S.still=id;const next=ORDER[gpOf(id)];
 }
 function fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0')}
 function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
+  LB.store.set(LB.key('end'),'1');LB.menu.update();   // true ending seen (lb-ch2-end): « ▶ Outro » in the menu, Trial opened if TRIAL_OPEN is false
   const t=S.runT,key=LB.key('best-'+S.dk),rec=+LB.store.get(key,0);let isRec=false;
   if(S.full&&(!rec||t<rec)){LB.store.set(key,String(t));isRec=true}
   const best=S.full?(isRec?t:rec):rec;
@@ -60,15 +60,17 @@ function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
     go:_('Play again','Rejouer'),onGo:()=>startRun(S.dk),go2:_('Menu','Menu'),onGo2:showMenu});
 }
 function deathCard(){MUSIC.stop();const tr=S.d.trial;
-  showCard({eye:_('Defeat','Défaite'),title:_('The Watcher is down.','Le Veilleur est à terre.'),
+  const o={eye:_('Defeat','Défaite'),title:_('The Watcher is down.','Le Veilleur est à terre.'),
     desc:tr?_('Trial: one fall sends you back to Phase I.','Épreuve : une chute te renvoie à la phase I.'):'',
-    go:tr?_('Restart','Recommencer'):_('Retry phase','Réessayer la phase'),onGo:()=>tr?startRun(S.dk,true):retryPhase(),go2:_('Menu','Menu'),onGo2:showMenu});
+    go:tr?_('Restart','Recommencer'):_('Retry phase','Réessayer la phase'),onGo:()=>tr?startRun(S.dk,true):retryPhase(),go2:_('Menu','Menu'),onGo2:showMenu};
+  // Easy: on the 3rd defeat without help, the card offers to enable it (LB.help, decision 3 of 28 October), in place of Menu
+  if(!tr&&LB.help.defeat(S.dk==='easy')){o.go2=LB.helpOffer();o.onGo2=()=>{LB.help.enable();retryPhase()}}
+  showCard(o);
 }
 /* retry: from the start of the phase; in phase III that is form I, even after a defeat in form II (as in Ember Bridge) */
 function retryPhase(){S.hp=S.hpMax;S.bossHp=S.bossMax;resetPhaseState();S.form=1;S.mode='card';hud();beginPlay()}
 function startRun(dk,noPro){
   S=fresh(dk);S.full=true;S.phase=2;S.form=1;S.cineDone={};
-  $('optHelp').checked=dk==='easy'?true:DIFFS[dk].trial?false:$('optHelp').checked;$('optHelp').disabled=!!DIFFS[dk].trial;
   hideMenu();hud();
   if(noPro||PRO.seen())enterPhase(2,{first:true});else playPrologue(()=>enterPhase(2,{first:true}));
 }
@@ -76,10 +78,10 @@ function jumpPhase(gp){if(S.d.trial||S.mode==='menu')return;const id=ORDER[gp-1]
 function showMenu(){
   const wasPlay=S.mode==='play';if(wasPlay)S.paused=true;
   if(S.mode==='cine'||S.mode==='prologue'||S.mode==='epilogue'||S.mode==='won'||S.mode==='dead'){S.mode='menu';lastCard=null}
-  $('mResume').hidden=!(wasPlay||(S.mode==='card'&&lastCard));
-  hideCard();$('pause').hidden=true;$('skip').hidden=true;$('menu').hidden=false;$('mphM').hidden=false;$('mphT').hidden=true;
+  const resume=wasPlay||(S.mode==='card'&&!!lastCard);
+  hideCard();LB.pause.hide();$('skip').hidden=true;LB.menu.show(resume);
   MUSIC.bedStop();setTheme(4);
 }
-function hideMenu(){$('menu').hidden=true}
-function setPause(p){if(S.mode!=='play')return;S.paused=p;$('pause').hidden=!p;if(p){up();MUSIC.stop();try{$('pResume').focus({preventScroll:true})}catch(e){}}else setTheme(S.phase)}
+function hideMenu(){LB.menu.hide()}
+function setPause(p){if(S.mode!=='play')return;S.paused=p;if(p){up();MUSIC.stop();LB.pause.show()}else{LB.pause.hide();setTheme(S.phase)}}
 

@@ -41,10 +41,12 @@ async function shots(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await
   const shot=async k=>{await pg.mouse.move(0,0);await pg.waitForTimeout(60);await pg.screenshot({path:path.join(dir,tag+'-'+k+'.png'),animations:'disabled'})};
   const click=async sel=>{await pg.evaluate(s=>{const e=document.querySelector(s);if(!e)throw new Error('absent: '+s);e.click()},sel)};
   await adv(30);
-  if(ch==='ch1'){await shot('gate');await click('#gateBtn')}
+  if(await pg.evaluate(()=>{const g=document.getElementById('gate');return!!g&&!g.hidden})){await shot('gate');await click('#gateBtn')}   // ecran de demarrage (LB.gate, les deux chapitres depuis menu/common)
   if(lang)await click('#langs button[data-lang='+lang+']');
   await adv(60);await shot('menu');
   if(nm==='old')continue;
+  // sous-menu de l'Epreuve (nom, records, note), puis retour
+  await click('#mphM [data-diff=trial]');await adv(10);await shot('menu-trial');await click('#mBackT');await adv(10);
   await click('#mphM [data-diff=normal]');await adv(150);await shot('intro-a');await adv(420);await shot('intro-b');
   await pg.keyboard.press('Escape');await adv(30);await pg.keyboard.press('Enter').catch(()=>{});await adv(30);
   for(const ph of [0,1,2]){

@@ -28,7 +28,7 @@ function drawHero(){
     const g=ctx.createRadialGradient(x,y-40,10,x,y-40,82);g.addColorStop(0,'rgba(127,214,255,0)');g.addColorStop(.8,'rgba(127,214,255,.14)');g.addColorStop(1,'rgba(180,240,255,.4)');
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,92,Math.PI,0);ctx.fill();ctx.strokeStyle='#bff0ff';ctx.lineWidth=2.5;ctx.stroke();ctx.restore()}
   // recovery bar under the Watcher: a help cue, only with the Help box ticked (the lantern turns red for a refused press)
-  if(play&&!S.cine&&$('optHelp').checked)LB.drawRecoveryBar(ctx,x,y,S.pl);
+  if(play&&!S.cine&&LB.help.on())LB.drawRecoveryBar(ctx,x,y,S.pl);
   // stamina bar, above the lantern of the Watcher (y - 206, the height of Ember Bridge's help bar)
   if(ph===3&&play&&!S.cine){const w=60;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-w/2,y-206,w,6);ctx.fillStyle=gt<S.broken?'#ff8a7a':S.pl.stam<.3?'#ffd27a':'#7fd6ff';ctx.fillRect(x-w/2,y-206,w*S.pl.stam,6)}
 }

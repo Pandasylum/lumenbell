@@ -8,9 +8,15 @@ function loop(now){
   ctx=ctxMain;SC=SCm;
   update(dt);gameUpdate(dt);draw();
 }
-(function(){const w=$('mSnow');for(let i=0;i<34;i++){const e=document.createElement('i');e.className='msn';e.style.left=(Math.random()*100)+'%';e.style.setProperty('--dx',((Math.random()-.5)*120)+'px');e.style.animationDuration=(7+Math.random()*8)+'s';e.style.animationDelay=(-Math.random()*12)+'s';const z=1.5+Math.random()*2.5;e.style.width=e.style.height=z+'px';w.appendChild(e)}})();
-function frameScene(){const sv=$('mScene'),port=window.innerHeight>window.innerWidth*1.1;sv.setAttribute('viewBox',port?'420 140 450 352':'0 0 960 540');sv.querySelectorAll('.mw').forEach(e=>{if(port)e.setAttribute('transform','translate(250 0)');else e.removeAttribute('transform')});sv.setAttribute('preserveAspectRatio',port?'xMidYMax meet':'xMidYMax slice')}
-window.addEventListener('resize',frameScene);frameScene();
+/* the menu of the series (LB.menu, shared/js/28-ui.js) around this chapter's scene (page/body.html): sea spray, ▶ Intro, ▶ Outro
+   (after the true ending), fullscreen, languages, difficulties, Trial by Water; the start screen (LB.gate: its click unlocks the
+   sound and starts the menu music). The spray draws Math.random here, where the old particles did. */
+LB.menu.mount(CHAPTER,{
+  onDiff:dk=>{ensureAudio();LB.help.use(DIFFS[dk]);startRun(dk)},
+  onResume:()=>{hideMenu();MUSIC.stop();if(S.mode==='play')setPause(false);else if(S.mode==='card'&&lastCard)showCard(lastCard)},
+  onIntro:()=>{ensureAudio();replayPrologue()},onOutro:()=>{ensureAudio();replayEpilogue()},onLang:()=>applyLang(),
+  onStart:()=>{if(!$('menu').hidden&&MUSIC.cur!==4)setTheme(4)}});
+LB.menu.show(false);LB.gate.focus();
 S.d=DIFFS.normal;S.phase=2;applyLang();requestAnimationFrame(loop);
 
 })();

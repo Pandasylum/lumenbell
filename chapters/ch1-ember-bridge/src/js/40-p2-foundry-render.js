@@ -393,18 +393,12 @@ function drawCnFx(){
   }
 }
 function drawHints2(){
-  if(!prefs.help||Q.mode!=='play')return;
+  if(!LB.help.on()||Q.mode!=='play')return;
   const p=Q.pl,a=Q.atk;
   if(a&&p.s!=='counter'){
     const h=a.hits.find(x=>!x.done);
     if(h){
-      const tt=h.at-a.t;
-      const act=HD('dodge').act;
-      if(!DIFF.easy){if(tt>0&&tt<=act+HINT_LEAD)hintBar(QH[0],QH[1]-95,tt<=act?tt/act:1-(tt-act)/HINT_LEAD,tt<=act)}
-      else if(tt<=act&&tt>0){
-        ctx.strokeStyle='rgba(111,211,255,.9)';ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(QH[0],QH[1]-10,70-20*(1-tt/act),0,6.283);ctx.stroke();
-      }
+      LB.cue(ctx,{x:QH[0],y:QH[1]-95,cx:QH[0],cy:QH[1]-10,r:70,tt:h.at-a.t,act:HD('dodge').act,easy:DIFF.easy});
     }
   }
   LB.drawRecoveryBar(ctx,QH[0],QH[1]+44,p); /* barre de récupération sous les pieds : repère d'aide, jamais rouge (la lanterne l'est) */

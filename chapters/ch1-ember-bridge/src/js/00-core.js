@@ -4,24 +4,44 @@ LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},old
 const _=LB._;
 const W=960,H=540,DECK=410,PX=250,BX=730;
 /* Difficulté. hp/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de blocage et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
-   jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; mk1/mk : repères sur la jauge du Colosse (phase I / phases II-III) ;
-   noHelp : pas d'aide visuelle (case masquée) ;
+   jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; les repères de la jauge du Colosse sont calculés
+   depuis les rages (rageHp, LB.hud.marks) ; l'aide visuelle est disponible partout sauf en Épreuve (LB.help) ;
    easy : aides et allègements, repères en cercle, pas de seconde vie en phase III (la foudre mène droit à la vraie fin) ;
    hard : attaques en plus (double fouet, épée à 3 coups, souffles enchaînés, rages à séquences) ; fm : fenêtre du souffle ; rm : récupération après blocage ;
-   t : durées de la phase I remplacées ; waitMin/waitMax : pause entre attaques ; chain : [PV, chance] d'un souffle enchaîné ; rbhp/ru/mkR : PV du Colosse, PV de la première rage et repères de la jauge en phase III ; u2 : PV de la rage en deux temps (phase III Difficile) ; q2/rages : phase II Difficile (attaques à 4 griffes, 5 vagues, boulette de feu, cris avec éboulement, balayage de queue). */
+   t : durées de la phase I remplacées ; waitMin/waitMax : pause entre attaques ; chain : [PV, chance] d'un souffle enchaîné ; rbhp/ru : PV du Colosse et PV de la première rage en phase III ; u2 : PV de la rage en deux temps (phase III Difficile) ; q2/rages : phase II Difficile (attaques à 4 griffes, 5 vagues, boulette de feu, cris avec éboulement, balayage de queue). */
 const DIFFS={
-  easy:{bhp:8,u:4,jets:2,easy:true,fury:{4:5,1:1},mk1:[0,3],mk:[0,3]},
-  normal:{bhp:10,u:5,jets:4,easy:false,fury:{5:5,1:1},mk1:[0,4],mk:[0,4]},
-  hard:{bhp:14,fm:1,u:10,jets:4,easy:false,hard:true,noHelp:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},mk1:[0,4,9],mk:[0,4,9],rbhp:12,ru:8,mkR:[0,4,7],
+  easy:{bhp:8,u:4,jets:2,easy:true,fury:{4:5,1:1}},
+  normal:{bhp:10,u:5,jets:4,easy:false,fury:{5:5,1:1}},
+  hard:{bhp:14,fm:1,u:10,jets:4,easy:false,hard:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},rbhp:12,ru:8,
         t:{windup:.5,strike:.42,sw1w:.75,sw1:.26,swgap:.22,sw2w:.15,sw2:.26,sw3g:.27,sw3w:.34,sw3:.26,fli:.5,stagger:.6,swrec:.65,flrec:.65,fyt:.36,fyg:.05},waitMin:.5,waitMax:.9,chain:[[5,.75],[10,.4]]}
 };
-/* Phase III : PV du Colosse (rbhp), PV de la première rage (ru) et repères de la jauge (mkR) ; par défaut identiques aux autres phases */
-for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u;d.mkR=d.mkR||d.mk}
-DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true,noHelp:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
+/* Phase III : PV du Colosse (rbhp) et PV de la première rage (ru) ; par défaut identiques aux autres phases */
+for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u}
+DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
 /* PV du Veilleur (hp), multiplicateurs m et rm : LB.HERO_DIFF (shared/js/16-hero.js), fusionnés ici ; l'Épreuve (tn, th) prend 4 PV au départ et +1 PV entre les phases (heal) */
 for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 /* Épreuve du feu ouverte pendant les tests (décision du 28 octobre) ; false rétablit le verrou par la vraie fin (84-loop.js) */
 const TRIAL_OPEN=true;
+/* PV du Colosse où part chaque rage, par phase (1 à 3) : repères de sa jauge (LB.hud.marks, plus la case du dernier PV) */
+const rageHp=(d,ph)=>ph===3?(d.u2?[d.ru,d.u2]:[d.ru]):(d.rages||[d.u]);
+/* Table du chapitre pour le cadre commun (menu, écran de démarrage, cartes, HUD : shared/js/28-ui.js, docs/COMMUN.md § 3.1) */
+const CHAPTER={n:1,id:'ch1',
+  name:()=>_('Chapter I · Ember Bridge','Chapitre I · Ember Bridge'),
+  color:'#ff7a2b',color2:'#ffc15a',rgb:'255,122,43',
+  menu:{bg:'#08060d',glowA:.38,titleA:.45,particles:'embers'},
+  tag:()=>_('The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower.','Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher.'),
+  how:()=>_('One button: block, dodge. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause."),
+  ver:'1.0.0',
+  next:{name:()=>_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),lock:()=>_('🔒 Chapter II','🔒 Chapitre II'),soon:()=>_('Coming soon','À venir'),col:'#7fe8d8',rgb:'79,224,204',hover:'#c8fff4'},
+  trial:{name:()=>_('Trial by Fire','Épreuve du feu'),note:[
+    ()=>_('The three phases in a row, with no pause and no visual help.',"Les trois phases d'affilée, sans pause et sans aide visuelle."),
+    ()=>_('You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'),
+    ()=>_('A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'),
+    ()=>_('One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run.")]},
+  player:()=>_('The Watcher','Le Veilleur'),boss:()=>_('Ember Colossus','Colosse de braise'),
+  help:{offer:()=>_(` Visual cues can help you find the right moment to block.`,` Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer.`)},
+  trialOpen:()=>trialOpen(),endSeen:()=>endSeen(),best:n=>parseFloat(LB.store.get(LB.key('best-'+n),'0'))||0,fmt:t=>fmtT(t)
+};
 /* Épreuve du feu : les 3 phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : les 4 PV de départ, RUN.max), une mort = retour à la phase I. */
 const RUN={on:false,max:4,cur:4,n:1,t:0,pt:[0,0,0],st:{},name:'tn'};
 function startHP(){return RUN.on?RUN.cur:DIFF.hp}
@@ -55,9 +75,10 @@ function perfWatch(raw){
   if(slowT>=2000){const avg=slowT/slowN;if(avg>23||slowS>=5)SBQ=SBQ>.3?.25:0;slowT=0;slowN=0;slowS=0}
 }
 const $=id=>document.getElementById(id);
-const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live'),help:$('optHelp'),snd:$('optSnd')};
-const prefs={help:LB.store.get(LB.key('help'),'0')==='1'}; /* mémorisée (lb-help) ; Son et Musique : LB.audio.sound / LB.audio.music (lb-snd, lb-mus) */
-let deaths=0; // défaites depuis le choix de la difficulté (Facile : propose l'aide visuelle à la 3e)
+/* carte et pause communes (LB.card, LB.pause), créées avant `el` ; le menu et l'écran de démarrage le sont dans 60-ui-menu.js */
+LB.card.mount($('stage'),$('menu'));LB.pause.mount($('stage'),$('menu'));
+const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),table:$('ovTable'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live'),help:$('optHelp'),snd:$('optSnd')};
+/* Aide : LB.help (lb-help, décochée par défaut) ; Son et Musique : LB.audio.sound / LB.audio.music (lb-snd, lb-mus) */
 let paused=true,pendingLore=false;
 const LORE={
   2:{get eye(){return _('Phase II · The Foundry','Phase II · La Fonderie')},get title(){return _('Into the Foundry.','Dans la Fonderie.')},get desc(){return _(`The forge shaft plunges endlessly down. Chains too large for a man's hand hang from the walls, rusted by centuries.`,`Le puits des forges s'enfonce sans fin. Aux parois pendent des chaînes trop grandes pour une main d'homme, rouillées de siècles.`)}},
@@ -65,9 +86,7 @@ const LORE={
 };
 function showLore(n){
   const L=LORE[n];
-  el.eye.textContent=L.eye;el.title.textContent=L.title;el.desc.textContent=L.desc;el.stats.hidden=true;el.go.textContent=_('Continue','Continuer');
-  el.ov.classList.remove('clear');el.ov.hidden=false;paused=true;pendingLore=true;
-  try{el.go.focus({preventScroll:true})}catch(e){}
+  paused=true;pendingLore=true;LB.card.show({eye:L.eye,title:L.title,desc:L.desc,go:_('Continue','Continuer'),onGo:start});
 }
 const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 

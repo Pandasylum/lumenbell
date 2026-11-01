@@ -16,20 +16,8 @@
     <div class="bar boss"><span>Ember Colossus <b id="hpBn"></b></span><div class="pips" id="hpB" role="img" aria-label="Points de vie du Colosse"></div></div>
   </section>
 
-  <div class="stage">
+  <div class="stage" id="stage">
     <canvas id="c" role="img" aria-label="Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre"></canvas>
-    <div class="ov" id="ov">
-      <div class="card">
-        <p class="eyebrow" id="ovEye">Phase I · The Bridge</p>
-        <h2 id="ovTitle">Hold the bridge.</h2>
-        <p class="stats" id="ovStats" hidden></p>
-        <div class="rtab" id="ovTable" hidden></div>
-        <p id="ovDesc">The Colossus has reached the bridge. Behind the Watcher lies nothing but the road to the valleys. A single rule: not one step back.</p>
-        <button class="btn" id="go" type="button">Start</button>
-        <button class="btn ghost" id="go2" type="button" hidden>Enable visual help</button>
-      </div>
-    </div>
-    <div class="gate" id="gate"><div class="langs" id="gateLangs" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></div><button class="btn big" id="gateBtn" type="button">Start</button></div>
     <div class="ov menu" id="menu" hidden>
     <svg class="mscene" viewBox="0 0 960 540" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
       <defs>
@@ -55,43 +43,6 @@
       <g class="eye" fill="#ffd27a"><circle cx="690" cy="232" r="4"/><circle cx="722" cy="232" r="4"/></g>
       <path d="M675 330 Q705 300 735 330 Q705 360 675 330Z" fill="#ff7a2b" opacity=".35" class="lava"/>
     </svg>
-    <div class="mem-wrap" id="mEmbers" aria-hidden="true"></div>
-      <button type="button" class="mbtn" id="introBtn">▶ Intro</button>
-      <button type="button" class="mbtn" id="outroBtn" hidden>▶ Outro</button>
-      <button type="button" class="mbtn fsb fsm" aria-label="Fullscreen" title="Fullscreen">⛶ <span>Fullscreen</span></button>
-      <div class="langs" id="langs" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></div>
-      <div class="mcard">
-        <h2><span>Lumen</span>bell</h2>
-        <p class="eyebrow chap">Chapter I · Ember Bridge</p>
-        <p class="tag">The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower.</p>
-        <button class="btn ghost" id="mResume" type="button" hidden>Resume</button>
-        <div class="mph" id="mphM" role="group" aria-label="Choisir la difficulté">
-          <button type="button" data-diff="easy"><b>Easy</b><span>Breathe</span></button>
-          <button type="button" data-diff="normal" aria-pressed="true"><b>Normal</b><span>The real fight</span></button>
-          <button type="button" data-diff="hard"><b>Hard</b><span>The Colossus unleashed</span></button>
-          <button type="button" data-diff="trial"><b>Trial by Fire</b><span>Ultimate challenge</span></button>
-        </div>
-        <div class="mph" id="mphT" role="group" aria-label="Trial by Fire" hidden>
-          <button type="button" data-diff="tn"><b>Normal</b><span>4 lives</span></button>
-          <button type="button" data-diff="th"><b>Hard</b><span>4 lives</span></button>
-          <button type="button" id="mBackT"><b>‹ Back</b><span>Difficulties</span></button>
-        </div>
-        <div class="tnote" id="trialNote" hidden>
-          <b>Trial by Fire</b>
-          <ul><li>The three phases in a row, with no pause and no visual help.</li><li>You recover 1 life between phases.</li><li>A single death sends you back to Phase I.</li><li>One stats table at the end of the run.</li></ul>
-        </div>
-        <p class="how">One button: block, dodge. Space, up arrow or tap the screen. P to pause.</p>
-        <p class="ver" aria-label="Version 1.0.0">v1.0.0</p>
-        <div class="mfoot"><button type="button" class="mlink" id="mNext" aria-disabled="true"><span class="nm"></span> <small class="soon"></small></button></div>
-      </div>
-    </div>
-    <div class="ov" id="pause" hidden>
-      <div class="card">
-        <p class="eyebrow">Pause</p>
-        <h2>Fight paused</h2>
-        <button class="btn" id="pResume" type="button">Resume</button>
-        <button class="btn ghost" id="pMenu" type="button">Menu</button>
-      </div>
     </div>
   </div>
 

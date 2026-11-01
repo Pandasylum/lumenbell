@@ -13,9 +13,9 @@
 |---|---|
 | `page/head.html` | `<title>`, metas, liens Google Fonts (retirés par `build.py`), `<style>` ouvrant |
 | `page/style.css` | Tout le CSS (entre `<style>` et `</style>`) |
-| `page/body.html` | `</style>`, balisage HTML (menu, overlay `#ovDesc`, pause), `<script>` ouvrant ; la boîte de cinématique `#cine` est créée par `LB.cine` |
+| `page/body.html` | `</style>`, balisage HTML (en-tête, barres, arène, scène SVG du menu dans `#menu`, commandes), `<script>` ouvrant ; la carte `#ov`, la pause, l'écran de démarrage et le reste du menu sont créés par `LB.card`, `LB.pause`, `LB.menu` (`shared/js/28-ui.js`) ; la boîte de cinématique `#cine` par `LB.cine` |
 | `js/00-open.js` | Ouverture de l'IIFE (suivie, dans `parts.txt`, de `@shared` : le code commun `shared/`, objet `LB`) |
-| `js/00-core.js` | `LB.setup` (clés `lb-ch1-…`, anciennes `eb-…`), `_ = LB._`, constantes, `DIFFS`, `RUN`, `T`, canvas, `el`, `LORE`, utilitaires, repères géométriques |
+| `js/00-core.js` | `LB.setup` (clés `lb-ch1-…`, anciennes `eb-…`), `_ = LB._`, constantes, `DIFFS`, `RUN`, `T`, `rageHp`, **`CHAPTER`** (table du cadre commun), carte et pause communes (`LB.card.mount`, `LB.pause.mount`), canvas, `el`, `LORE`, utilitaires, repères géométriques |
 | `js/04-audio-sfx.js` | `ensureAudio` (= `LB.audio.ensure`), `tone` et `noise` (enveloppe d'origine, via `LB.audio.tone`/`noise`), bruitages, cris (`painCry`, `roar`). Le contexte, la suspension en arrière-plan et le déverrouillage sont dans `shared/js/12-audio.js` |
 | `js/08-state.js` | `newGame`, `start`, `press`, intro de phase, `deathCard`, `showEnd` |
 | `js/12-effects.js` | Étincelles, onomatopées (`ONO`, `ONOSZ`), cris du Colosse (`CRIES`, `MEGA`), `float` |
@@ -30,13 +30,13 @@
 | `js/48-p3-belfry-poses.js` | Phase III : finale (`heroFin`, `finBoss`, ailes tombées), poses du Veilleur et du Colosse, masse |
 | `js/52-p3-belfry-decor.js` | Phase III : tours, cloche (`ringBell`), fanal, beffroi, fond et sol |
 | `js/56-p3-belfry-render.js` | Phase III : aura, fissures, Colosse, contres (cloche, éclats, rayon), fin vers la mer, `renderR` |
-| `js/60-ui-menu.js` | `CARD1`, `goPhase`, entrées, pause, réessayer, plein écran, menu, difficultés (`applyDiff`) |
+| `js/60-ui-menu.js` | `CARD1`, `goPhase`, options, pause (`setPause`), réessayer, menu commun (`LB.menu.mount`, braises), `showMenu`, difficultés (`applyDiff`, `LB.help.use`), entrées communes (`LB.input.bind`) |
 | `js/64-audio-music.js` | Musique synthétisée : combat, menu, finale, outro, `MUS`, `musTick` |
-| `js/68-texts-ui.js` | Textes d'interface (`UIT`, `UIA`), `applyLang`, boutons de langue |
+| `js/68-texts-ui.js` | Textes d'interface hors menu (`UIT`, `UIA`), `applyLang` (rappelé par les boutons de langue de `LB.menu`) |
 | `js/72-boot.js` | Démarrage (`buildStatic`, `newGame`, `showMenu`) |
 | `js/76-cine-intro.js` | Cinématique d'intro : scènes `DRAW`, cartons `SC` (durées), sons `CUE`, titre `LB.title` ; cadre `LB.cine` (`CINE`, drapeau `lb-ch1-intro`) |
 | `js/80-cine-outro.js` | Outro de la vraie fin : scènes, cartons `SC`, son `ENTER` ; cadre `LB.cine` (`OUTRO`, sans drapeau) |
-| `js/84-loop.js` | Chapitre II verrouillé, record de l'Épreuve, écran de démarrage, boucle `frame`, **fermeture de l'IIFE** |
+| `js/84-loop.js` | `endSeen`, `trialOpen`, focus de l'écran de démarrage (`LB.gate.focus`), boucle `frame`, **fermeture de l'IIFE** |
 | `page/end.html` | `</script>` |
 
 Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien déplacé) : chercher dans `docs/TEXTES-CH1.md` pour trouver le fichier.
@@ -45,7 +45,7 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 - **L'ordre de `parts.txt` est l'ordre d'exécution.** Une seule IIFE : déplacer un morceau peut casser une `const` utilisée avant sa déclaration (TDZ) même si le build « passe ». Ne pas réordonner sans raison.
 - **Chaque morceau finit par un saut de ligne**, et tout fichier de `src/` doit être listé dans `parts.txt` : `assemble.py` refuse sinon (erreur claire plutôt que JS collé ou fichier ignoré).
 - **Ancrages des scripts de build** : `build.py` cherche `<style>`/`</style>` et les 3 liens Google Fonts (`page/`) ; `build_test.py` cherche `requestAnimationFrame(frame);\n})();` (fin de `84-loop.js`) et `LB.cine.create({key:'intro',` (`76-cine-intro.js`, pour y ajouter `testSeen:true`). Ne pas modifier ces lignes sans adapter les scripts.
-- Le texte d'ouverture de la phase I existe deux fois : `#ovDesc` dans `page/body.html` et `CARD1` dans `js/60-ui-menu.js`.
+- Le texte d'ouverture de la phase I n'existe plus qu'une fois : `CARD1` dans `js/60-ui-menu.js` (la carte est créée par `LB.card`).
 - `js/72-boot.js` finit par un commentaire « écran de démarrage » qui décrit en fait le code de `84-loop.js` : laissé tel quel pour rester octet pour octet identique.
 - Les coupes sont faites sur les commentaires de section (`/* ---------- … */`) ; la ligne vide qui précède reste à la fin du morceau précédent.
 
@@ -79,3 +79,9 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 - L'intro (`CINE`) et l'outro (`OUTRO`) passent par `LB.cine` (`shared/js/24-cine.js`) : boîte, canvas, légende, bouton « Passer », fondus, clavier et drapeau `lb-ch1-intro` sont dans le module ; le chapitre ne garde que ses scènes (`DRAW`), ses cartons et durées (`SC`), ses sons (`CUE` : tintement du carton 3, braise et rugissement du carton 4 ; `ENTER` de l'outro) et le titre `LB.title` (« LUMEN » `#ff7a2b`, mi-carton 5). Les dessins de l'outro reçoivent l'état de lecture (`sTowers`, `sSea` : quatrième argument `st`).
 - Le style et le balisage de `#cine` ont quitté `page/style.css` et `page/body.html` (créés par le module, mêmes règles). `UIT` garde `#cineSkip` (sans effet tant que la boîte n'existe pas).
 - Preuve : `tests/visual-shots.js` (126/126 hors Chapitre II) et `--cine` (63/63 cartons du Chapitre I, titre compris) identiques au pixel contre `main`.
+
+## Cadre commun (session `menu/common`, 1er novembre)
+- Menu, écran de démarrage, cartes, pause, entrées, HUD, aide et plein écran viennent de `shared/js/28-ui.js` (voir `shared/NOTES.md`), alimentés par `CHAPTER` (`js/00-core.js`). Le chapitre garde : `CARD1`, `LORE`, ses cartes de fin (`showEnd`, `qEnd`, `rEnd`, `deathCard(o)` : objets passés à `LB.card.show`), `runTable` (lignes du tableau de l'Épreuve), `setPhaseUI` (sourcil, bouton, frise par `LB.hud`), `hud` (`LB.hud.player`, `LB.hud.boss`, repères `LB.hud.marks(rageHp(DIFF, phase))`).
+- **Identique au pixel** sauf les sous-titres des difficultés (« À la loyale », « Sans pitié » ; en anglais provisoire « Fair and square », « No mercy »). Le balisage des barres est gardé tel quel (nom en texte nu devant le compteur : une balise autour du nom décalait de 42 pixels l'anticrénelage).
+- **Aide** : `LB.help` ; plus de `noHelp` (case disponible en Difficile), désactivée en Épreuve ; 3ᵉ défaite en Facile : « Activer l'aide visuelle » et sa phrase (`CHAPTER.help.offer`). Repère : `LB.cue` (`drawHints`, `drawHints2`, `drawHints3`), même dessin qu'avant.
+- `mk1`, `mk`, `mkR` retirés de `DIFFS` (repères calculés par `rageHp`, mêmes cases) ; `prefs`, `deaths`, `updNext`, `updBest`, `trialMenu`, `hintBar`, `HINT_LEAD` n'existent plus (`LB.menu.update`, `LB.help`, `LB.cue`, `LB.CUE_T.lead`). `__t` de la copie de test : `showEnd`, `setPause` en plus.

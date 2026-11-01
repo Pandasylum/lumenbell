@@ -112,14 +112,12 @@ const PH=[null,
   head:()=>_('Phase III of III · The Reefs','Phase III sur III · Les récifs'),boss:()=>S.form===2?_('The Bottomless','La Sans-Fond'):_('The Drowned Lighthouse','Le Phare Noyé'),btn:()=>_('Block','Bloquer'),
   aria:()=>_("The Watcher on the reefs facing the Drowned Lighthouse, a tower made of the Elder's body, crowned by an electric jellyfish","Le Veilleur sur les récifs face au Phare Noyé, une tour faite du corps de l'Ancien et couronnée d'une méduse électrique")}
 ];
-function pips(el,n,max,marks){if(el.children.length!==max){el.innerHTML='';for(let i=0;i<max;i++)el.appendChild(document.createElement('span'))}[...el.children].forEach((s,i)=>{s.classList.toggle('on',i<n);s.classList.toggle('mark',!!marks&&marks.includes(i))})}
+/* HUD of the series (LB.hud): bars, rage marks, boss name, header line, action button, phase track (hidden in the Trial) */
 function hud(){
-  pips($('hpP'),S.hp,S.hpMax);pips($('hpB'),S.bossHp,S.bossMax,rageMarks());
-  $('hpPn').textContent=S.hp+'/'+S.hpMax;$('hpBn').textContent=S.bossHp+'/'+S.bossMax;
-  const P=PH[S.phase];$('nmB').textContent=P.boss();$('hdEye').textContent=P.head();$('ward').textContent=P.btn();
+  LB.hud.player(S.hp,S.hpMax);LB.hud.boss(S.bossHp,S.bossMax,rageMarks());
+  const P=PH[S.phase];LB.hud.set({boss:P.boss(),head:P.head(),ward:P.btn(),player:LB.tx(CHAPTER.player)});
   $('c').setAttribute('aria-label',P.aria());document.body.dataset.ph=S.phase;
-  const unl=unlocked(),gp=gpOf(S.phase);
-  document.querySelectorAll('#phases li').forEach((li,i)=>{const on=i+1===gp;li.classList.toggle('on',on);if(on)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');li.firstChild.disabled=!!S.d.trial||i+1>unl});
+  LB.hud.track(gpOf(S.phase),{trial:!!S.d.trial,unl:unlocked()});
 }
 
 /* ================= spells, anger and final assaults ================= */
@@ -130,7 +128,7 @@ function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
    then his rage spell (the signature spell of the phase), then the second-half patterns; the final assault comes at
    RAGE.finalHp. The boss bar marks the thresholds (pips underlined, as in Ember Bridge). */
 const RAGE={dur:1.6,dur2:.8,finalHp:1};
-const rageMarks=()=>[...(S.phase!==3||S.form===2?[RAGE.finalHp-1]:[]),...S.d.u.map(x=>x-1)];   // form I of phase III has no final assault
+const rageMarks=()=>LB.hud.marks(S.d.u,S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
   else if(S.phase===1){banner(_('Blue heart','Cœur bleu'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
