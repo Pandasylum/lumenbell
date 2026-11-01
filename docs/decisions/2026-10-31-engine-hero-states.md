@@ -9,7 +9,7 @@ Le n° 1 du 28 octobre (`docs/decisions/2026-10-28-engine-shared.md`, § 1 : « 
 - La disponibilité de la case « Aide » ne change pas (session 6) : elle reste masquée en Difficile et en Épreuve au Chapitre I.
 
 ## 2. Autres décisions du tableau du 28 octobre, codées ici
-- **N° 2, Épreuve** : 4 PV pour tout le parcours (`LB.HERO_DIFF.trial = {hp:4, heal:0}`), aucun soin entre les phases (Chapitre I : plus de +1 PV ; Difficile : 4 PV au lieu de 3). **Ouverte pendant les tests** : le Chapitre I n'est plus verrouillé par la vraie fin (`TRIAL_OPEN`, `00-core.js` ; `false` rétablit le verrou). Les textes de l'Épreuve devenus faux sont corrigés (§ 4). Le Chapitre II faisait déjà ainsi.
+- **N° 2, Épreuve** (soin **remplacé** le 31 octobre, voir § 6 : +1 PV entre les phases) : 4 PV de départ (`LB.HERO_DIFF.trial`), à l'origine codé sans soin (Chapitre I : plus de +1 PV ; Difficile : 4 PV au lieu de 3). **Ouverte pendant les tests** : le Chapitre I n'est plus verrouillé par la vraie fin (`TRIAL_OPEN`, `00-core.js` ; `false` rétablit le verrou). Les textes de l'Épreuve devenus faux sont corrigés (§ 4). Le Chapitre II faisait déjà ainsi.
 - **N° 4, phase I du Chapitre I** : une attaque bloquée renvoie à `ready` (`LB.hero.stopped`), comme partout ailleurs. Avant, le coup simple laissait le Veilleur finir son blocage puis sa récupération. **À valider en jeu** (ressenti du pont) : le Veilleur peut maintenant se relever tout de suite après un coup bloqué, y compris pour enchaîner un blocage.
 - Pas faits ici : n° 3 (aide, session 6), n° 5 (respiration, session 4), n° 6 (titre, session 5), n° 8 (repère d'aide, session 6).
 
@@ -38,3 +38,9 @@ Textes modifiés, tous FR + EN, sauf les onomatopées (aucun mot d'annonce à l'
 ## 5. Mesures (méthode et chiffres : `NOTES.md`, rapport de session)
 - Bots du Chapitre I (`tests/ch1-bot.js`, pas fixe 1/60 s, graine fixée dès le chargement) lancés **avant et après** sur les mêmes graines : 540 parties (Normal et Difficile, phases I à III, trois erreurs de timing, 30 graines par case) **identiques une à une**. Le bot n'appuie qu'une fois par menace, il ne peut donc pas voir la décision n° 4 ; elle est vérifiée à part (`tests/input.js`).
 - Bots du Chapitre II (`tests/ch2-bot.js` 100 parties, `tests/ch2-input.js`) : sorties identiques à celles de `main`.
+
+## 6. Décision de Kevin du 31 octobre (soir) : l'Épreuve rend 1 PV entre les phases (remplace le n° 2 du 28 octobre, « aucun soin »)
+- `LB.HERO_DIFF.trial = {hp:4, heal:1}`, dans les deux chapitres. Le reste de l'Épreuve ne change pas : 4 PV au départ, une mort ramène à la phase I, ouverte pendant les tests (`TRIAL_OPEN`).
+- **Règle d'origine du Chapitre I, reprise telle quelle** (relue dans `c8cac24`) : au passage d'une phase à la suivante, PV courants + 1, **plafonnés au maximum de la run, les 4 PV de départ** (`RUN.max`, Normal comme Difficile). Le soin se fait à l'entrée de la phase suivante (`beginP2`, `beginP3` ; au Chapitre II `enterPhase`). Au Chapitre II, `heal` numérique = ce nombre de PV, plafonné à `hpMax` ; `heal: true` (hors Épreuve) reste « PV pleins ».
+- Textes (FR + EN), formulation d'origine du Chapitre I : « You recover 1 life between phases. » / « Tu récupères 1 PV entre les phases. » rétablie dans la note de l'Épreuve du Chapitre I ; le Chapitre II n'avait pas de note, seulement le sous-titre « Sans soin » / « No healing » (devenu faux), remplacé par la même phrase. Le mode d'emploi « bloquer, esquiver » est inchangé. Le texte « Aucun PV n'est récupéré… » du § 4 est annulé.
+- Test : `tests/ch2-trial.js` (Chapitre II) et `tests/input.js` (Chapitre I) contrôlent +1 PV et le plafond. Bots : aucun changement (l'Épreuve n'y est pas jouée).

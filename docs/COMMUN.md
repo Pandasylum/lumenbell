@@ -140,7 +140,7 @@ const CHAPTER={
 | Table | Contenu |
 |---|---|
 | `HERO_T` | par geste : `block:{act:.333,rec:.7,grace:.06,perf:.08}`, `dodge:{act:.333,rec:.7,grace:.05,perf:.08,fool:.6}`, `hold:{act:.333,rec:.7,grace:.06,perf:.08,drain:.36,regen:.38,broken:.9}` ; `deny:.25` ; `hurt:{base:.38,min:.14,margin:.2}` |
-| `HERO_DIFF` | `easy:{hp:6,m:2,rm:1}`, `normal:{hp:4,m:1,rm:1}`, `hard:{hp:3,m:.6,rm:1.2}`, `trial:{hp:4,heal:0}` (**T**) |
+| `HERO_DIFF` | `easy:{hp:6,m:2,rm:1}`, `normal:{hp:4,m:1,rm:1}`, `hard:{hp:3,m:.6,rm:1.2}`, `trial:{hp:4,heal:1}` (décision du 31 octobre : +1 PV entre les phases, plafond 4 PV ; remplace « aucun soin ») |
 | `CINE_T` | fondu 0,8 s, apparition de la légende 0,5 s + 0,6 s, durée minimale d'un carton 6 s |
 | `TITLE_T` | `size:96, sub:…, gap:22, y:.36` (placement mesuré du Ch. II) |
 | `MENU_T` | durées des particules et des scintillements, remontée du titre (`-9vh`, `-4vh` en paysage bas) |

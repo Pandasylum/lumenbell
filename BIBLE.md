@@ -38,7 +38,7 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 | Normal | 4 | 10 | × 1 | Référence de l'équilibrage |
 | Difficile | 3 | 14 (12 en phase III) | × 0,6 | Pas d'aide, attaques de base modifiées, rages en deux temps, souffles enchaînés |
 
-**Épreuve du feu** : les trois phases d'affilée, 4 PV pour tout le parcours, PV conservés, une mort ramène à la phase I. Normal et Difficile.
+**Épreuve du feu** : les trois phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : les 4 PV de départ), PV conservés, une mort ramène à la phase I. Normal et Difficile.
 
 ## Le Colosse de braise
 - **Silhouette** : dessinée une seule fois dans `demonBody`, partagée par les trois phases. **Validée : on ne la change pas.**

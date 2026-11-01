@@ -12,10 +12,10 @@ const _=LB._;
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
-/* Difficulty. The Watcher's own settings (hp = HP 6 / 4 / 3, trial 4 for the whole run and no healing; m = multiplier of his action,
+/* Difficulty. The Watcher's own settings (hp = HP 6 / 4 / 3, trial 4 at the start and +1 between phases, capped at 4; m = multiplier of his action,
    x2 / x1 / x0.6; rm = of his recovery, x1.2 in Hard) are LB.HERO_DIFF (shared/js/16-hero.js), merged into each entry by
    LB.diff.apply (the trial entries 'tn' / 'th' take the base difficulty of Normal / Hard); sp = attack speed; boss = boss HP
-   (kept from the import until playtests); heal = HP refilled between phases; u = boss HP at which a rage starts (one in Easy and
+   (kept from the import until playtests); heal = HP refilled between phases (true = all, a number = that many, capped at the starting HP); u = boss HP at which a rage starts (one in Easy and
    Normal, two in Hard, as in Ember Bridge, where Normal raged at 5 of 10 HP and Hard at 10 and 5 of 14: same proportions here). */
 const DIFFS={
   easy:{sp:.85,boss:6,u:[3],heal:true,fr:'Facile',en:'Easy'},

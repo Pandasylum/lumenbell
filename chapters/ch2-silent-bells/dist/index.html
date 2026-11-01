@@ -250,7 +250,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
           <button type="button" data-diff="easy"><b>Facile</b><span>Respirer</span></button>
           <button type="button" data-diff="normal"><b>Normal</b><span>Le vrai combat</span></button>
           <button type="button" data-diff="hard"><b>Difficile</b><span>Sans pitié</span></button>
-          <button type="button" data-diff="trial"><b>Épreuve</b><span>Sans soin</span></button>
+          <button type="button" data-diff="trial"><b>Épreuve</b><span>Tu récupères 1 PV entre les phases.</span></button>
         </div>
         <div class="mph" id="mphT" role="group" aria-label="Épreuve" hidden>
           <button type="button" data-diff="tn"><b>Normal</b><span>4 PV au total</span></button>
@@ -406,13 +406,13 @@ LB.HERO_T={
   deny:.25,                                         /* appui refusé : durée du retour rouge */
   hurt:{base:{block:.38,dodge:.38,hold:.55},min:.14,margin:.2}
 };
-/* Difficulté du Veilleur : PV (hp), multiplicateurs de l'action (m) et de la récupération (rm). trial : Épreuve, 4 PV pour tout le
-   parcours, aucun soin entre les phases (heal) ; elle s'ajoute à la difficulté de base (m et rm de Normal ou de Difficile). */
+/* Difficulté du Veilleur : PV (hp), multiplicateurs de l'action (m) et de la récupération (rm). trial : Épreuve, 4 PV au départ, +1 PV entre les
+   phases (heal) dans la limite des 4 PV de départ (décision du 31 octobre, qui remplace « aucun soin ») ; elle s'ajoute à la difficulté de base (m et rm de Normal ou de Difficile). */
 LB.HERO_DIFF={
   easy:{hp:6,m:2,rm:1},
   normal:{hp:4,m:1,rm:1},
   hard:{hp:3,m:.6,rm:1.2},
-  trial:{hp:4,heal:0}
+  trial:{hp:4,heal:1}
 };
 LB.diff={
   cur:null,
@@ -477,10 +477,10 @@ const _=LB._;
 
 /* ---------- constants ---------- */
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
-/* Difficulty. The Watcher's own settings (hp = HP 6 / 4 / 3, trial 4 for the whole run and no healing; m = multiplier of his action,
+/* Difficulty. The Watcher's own settings (hp = HP 6 / 4 / 3, trial 4 at the start and +1 between phases, capped at 4; m = multiplier of his action,
    x2 / x1 / x0.6; rm = of his recovery, x1.2 in Hard) are LB.HERO_DIFF (shared/js/16-hero.js), merged into each entry by
    LB.diff.apply (the trial entries 'tn' / 'th' take the base difficulty of Normal / Hard); sp = attack speed; boss = boss HP
-   (kept from the import until playtests); heal = HP refilled between phases; u = boss HP at which a rage starts (one in Easy and
+   (kept from the import until playtests); heal = HP refilled between phases (true = all, a number = that many, capped at the starting HP); u = boss HP at which a rage starts (one in Easy and
    Normal, two in Hard, as in Ember Bridge, where Normal raged at 5 of 10 HP and Hard at 10 and 5 of 14: same proportions here). */
 const DIFFS={
   easy:{sp:.85,boss:6,u:[3],heal:true,fr:'Facile',en:'Easy'},
@@ -2508,7 +2508,8 @@ function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
-  S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
+  S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
+ resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
 }
 function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:P.boss(),desc:P.desc(),go:_('Start','Commencer'),onGo:beginPlay})}
@@ -2675,7 +2676,7 @@ function applyLang(){
   document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
   $('mEye').textContent=_('Chapter II · Silent Bells','Chapitre II · Silent Bells');
   const M=[['easy',_('Easy','Facile'),_('Breathe','Respirer')],['normal',_('Normal','Normal'),_('The real fight','Le vrai combat')],['hard',_('Hard','Difficile'),_('No mercy','Sans pitié')],
-    ['trial',_('Trial','Épreuve'),_('No healing','Sans soin')],['tn',_('Normal','Normal'),_('4 HP total','4 PV au total')],['th',_('Hard','Difficile'),_('4 HP total','4 PV au total')]];
+    ['trial',_('Trial','Épreuve'),_('You recover 1 life between phases.','Tu récupères 1 PV entre les phases.')],['tn',_('Normal','Normal'),_('4 HP total','4 PV au total')],['th',_('Hard','Difficile'),_('4 HP total','4 PV au total')]];
   for(const m of M){const b=document.querySelector(`[data-diff="${m[0]}"]`);b.querySelector('b').textContent=m[1];b.querySelector('span').textContent=m[2]}
   $('mBackT').querySelector('b').textContent=_('‹ Back','‹ Retour');$('mBackT').querySelector('span').textContent=_('Difficulties','Difficultés');
   $('mResume').textContent=_('Resume','Reprendre');$('pResume').textContent=_('Resume','Reprendre');$('pTitle').textContent=_('Fight paused','Combat en pause');

@@ -19,7 +19,8 @@ function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
-  S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(S.d.heal||o.first)S.hp=S.hpMax;resetPhaseState();
+  S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
+ resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
 }
 function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:P.boss(),desc:P.desc(),go:_('Start','Commencer'),onGo:beginPlay})}

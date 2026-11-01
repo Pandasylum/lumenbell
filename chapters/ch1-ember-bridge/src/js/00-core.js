@@ -18,11 +18,11 @@ const DIFFS={
 /* Phase III : PV du Colosse (rbhp), PV de la première rage (ru) et repères de la jauge (mkR) ; par défaut identiques aux autres phases */
 for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u;d.mkR=d.mkR||d.mk}
 DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true,noHelp:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
-/* PV du Veilleur (hp), multiplicateurs m et rm : LB.HERO_DIFF (shared/js/16-hero.js), fusionnés ici ; l'Épreuve (tn, th) prend 4 PV pour tout le parcours, sans soin entre les phases */
+/* PV du Veilleur (hp), multiplicateurs m et rm : LB.HERO_DIFF (shared/js/16-hero.js), fusionnés ici ; l'Épreuve (tn, th) prend 4 PV au départ et +1 PV entre les phases (heal) */
 for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 /* Épreuve du feu ouverte pendant les tests (décision du 28 octobre) ; false rétablit le verrou par la vraie fin (84-loop.js) */
 const TRIAL_OPEN=true;
-/* Épreuve du feu : les 3 phases d'affilée, 4 PV pour tout le parcours (aucun soin entre les phases), une mort = retour à la phase I. */
+/* Épreuve du feu : les 3 phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : les 4 PV de départ, RUN.max), une mort = retour à la phase I. */
 const RUN={on:false,max:4,cur:4,n:1,t:0,pt:[0,0,0],st:{},name:'tn'};
 function startHP(){return RUN.on?RUN.cur:DIFF.hp}
 let DIFF=LB.diff.use(DIFFS.normal),BRW=.2;

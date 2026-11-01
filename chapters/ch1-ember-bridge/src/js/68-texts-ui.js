@@ -12,7 +12,7 @@ const UIT=[
  ['#mBackT b','‹ Back','‹ Retour'],['#mBackT span','Difficulties','Difficultés'],
  ['#trialNote b','Trial by Fire','Épreuve du feu'],
  ['#trialNote li:nth-child(1)','The three phases in a row, with no pause and no visual help.',"Les trois phases d'affilée, sans pause et sans aide visuelle."],
- ['#trialNote li:nth-child(2)','No life is recovered between phases.',"Aucun PV n'est récupéré entre les phases."],
+ ['#trialNote li:nth-child(2)','You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'],
  ['#trialNote li:nth-child(3)','A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'],
  ['#trialNote li:nth-child(4)','One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run."],
  ['#menu .how','One button: block, dodge. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause."],

@@ -299,7 +299,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
         </div>
         <div class="tnote" id="trialNote" hidden>
           <b>Trial by Fire</b>
-          <ul><li>The three phases in a row, with no pause and no visual help.</li><li>No life is recovered between phases.</li><li>A single death sends you back to Phase I.</li><li>One stats table at the end of the run.</li></ul>
+          <ul><li>The three phases in a row, with no pause and no visual help.</li><li>You recover 1 life between phases.</li><li>A single death sends you back to Phase I.</li><li>One stats table at the end of the run.</li></ul>
         </div>
         <p class="how">One button: block, dodge. Space, up arrow or tap the screen. P to pause.</p>
         <p class="ver" aria-label="Version 1.0.0">v1.0.0</p>
@@ -463,13 +463,13 @@ LB.HERO_T={
   deny:.25,                                         /* appui refusé : durée du retour rouge */
   hurt:{base:{block:.38,dodge:.38,hold:.55},min:.14,margin:.2}
 };
-/* Difficulté du Veilleur : PV (hp), multiplicateurs de l'action (m) et de la récupération (rm). trial : Épreuve, 4 PV pour tout le
-   parcours, aucun soin entre les phases (heal) ; elle s'ajoute à la difficulté de base (m et rm de Normal ou de Difficile). */
+/* Difficulté du Veilleur : PV (hp), multiplicateurs de l'action (m) et de la récupération (rm). trial : Épreuve, 4 PV au départ, +1 PV entre les
+   phases (heal) dans la limite des 4 PV de départ (décision du 31 octobre, qui remplace « aucun soin ») ; elle s'ajoute à la difficulté de base (m et rm de Normal ou de Difficile). */
 LB.HERO_DIFF={
   easy:{hp:6,m:2,rm:1},
   normal:{hp:4,m:1,rm:1},
   hard:{hp:3,m:.6,rm:1.2},
-  trial:{hp:4,heal:0}
+  trial:{hp:4,heal:1}
 };
 LB.diff={
   cur:null,
@@ -540,11 +540,11 @@ const DIFFS={
 /* Phase III : PV du Colosse (rbhp), PV de la première rage (ru) et repères de la jauge (mkR) ; par défaut identiques aux autres phases */
 for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u;d.mkR=d.mkR||d.mk}
 DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true,noHelp:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
-/* PV du Veilleur (hp), multiplicateurs m et rm : LB.HERO_DIFF (shared/js/16-hero.js), fusionnés ici ; l'Épreuve (tn, th) prend 4 PV pour tout le parcours, sans soin entre les phases */
+/* PV du Veilleur (hp), multiplicateurs m et rm : LB.HERO_DIFF (shared/js/16-hero.js), fusionnés ici ; l'Épreuve (tn, th) prend 4 PV au départ et +1 PV entre les phases (heal) */
 for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 /* Épreuve du feu ouverte pendant les tests (décision du 28 octobre) ; false rétablit le verrou par la vraie fin (84-loop.js) */
 const TRIAL_OPEN=true;
-/* Épreuve du feu : les 3 phases d'affilée, 4 PV pour tout le parcours (aucun soin entre les phases), une mort = retour à la phase I. */
+/* Épreuve du feu : les 3 phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : les 4 PV de départ, RUN.max), une mort = retour à la phase I. */
 const RUN={on:false,max:4,cur:4,n:1,t:0,pt:[0,0,0],st:{},name:'tn'};
 function startHP(){return RUN.on?RUN.cur:DIFF.hp}
 let DIFF=LB.diff.use(DIFFS.normal),BRW=.2;
@@ -4654,7 +4654,7 @@ const UIT=[
  ['#mBackT b','‹ Back','‹ Retour'],['#mBackT span','Difficulties','Difficultés'],
  ['#trialNote b','Trial by Fire','Épreuve du feu'],
  ['#trialNote li:nth-child(1)','The three phases in a row, with no pause and no visual help.',"Les trois phases d'affilée, sans pause et sans aide visuelle."],
- ['#trialNote li:nth-child(2)','No life is recovered between phases.',"Aucun PV n'est récupéré entre les phases."],
+ ['#trialNote li:nth-child(2)','You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'],
  ['#trialNote li:nth-child(3)','A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'],
  ['#trialNote li:nth-child(4)','One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run."],
  ['#menu .how','One button: block, dodge. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause."],

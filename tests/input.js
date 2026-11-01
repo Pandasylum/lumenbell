@@ -5,6 +5,7 @@
 //     recuperation ne relance rien (etat et temps inchanges) et met deny = 0,25 s ; action 0,333 s puis recuperation 0,7 s puis ready ;
 //     coup recu : etourdissement raccourci pour pouvoir arreter l'attaque suivante (phases II et III) ;
 //  1. phase I : un coup simple bloque renvoie a ready (le Colosse part en rebond), comme partout ailleurs ;
+//  1b. Epreuve : +1 PV entre les phases, plafond 4 ;
 //  2. spam a l'aveugle (un appui toutes les 0,25 / 0,5 / 0,75 / 1 s) : le Veilleur meurt, Normal, phases I a III ;
 //  3. joueur parfait (appui au milieu de la fenetre d'arret, erreur nulle) : aucun coup recu en phases II et III, Normal et Difficile ;
 //     phase I : le bot ne joue pas les fureurs a la perfection, on verifie seulement qu'il bloque.
@@ -49,6 +50,16 @@ const which=process.argv[2]||'all',errs=[],near=(a,b)=>Math.abs(a-b)<.02;
    const bad=rb.filter(s=>s!=='ready').length;console.log('phase I, coup simple bloque -> etat du Veilleur au rebond :',JSON.stringify(rb.reduce((c,s)=>(c[s]=(c[s]||0)+1,c),{})));
    if(!rb.length)errs.push('Ch1 phase I : aucun coup simple bloque observe');
    if(bad)errs.push('Ch1 phase I : '+bad+'/'+rb.length+' coups bloques ne renvoient pas a ready')}
+  // 1b. Epreuve : +1 PV rendu entre les phases, plafond = 4 PV de depart (Normal et Difficile) ; Chapitre II : tests/ch2-trial.js
+  for(const dk of ['tn','th']){
+   await pg.reload();await pg.waitForTimeout(150);
+   const r=await pg.evaluate(dk=>{const T=window.__t,out={};T.applyDiff(dk);T.goPhase(1);T.start();
+    for(let i=0;i<60*6&&T.getG().mode!=='play';i++)T.adv(1/60);
+    out.max=T.RUN.max;const G=T.getG();G.php=2;G.p2=true;G.mode='won';G.endIn=.05;for(let i=0;i<30&&!T.getQ();i++)T.adv(1/60);out.p2=T.getQ()?T.getQ().php:null;
+    const Q=T.getQ();Q.php=3;Q.mode='lake';Q.endIn=.05;for(let i=0;i<10;i++)T.adv(1/60);T.start();for(let i=0;i<5;i++)T.adv(1/60);out.p3=T.getR()?T.getR().php:null;
+    const R=T.getR();R.php=4;return out},dk);
+   console.log('Epreuve',dk,JSON.stringify(r));
+   if(r.max!==4||r.p2!==3||r.p3!==4)errs.push('Ch1 Epreuve '+dk+' : '+JSON.stringify(r)+' (4 PV max, 2 -> 3 puis 3 -> 4 attendus)')}
   // 2. spam a l'aveugle
   for(const ph of [1,2,3]){const out=[];
    for(const sp of [.25,.5,.75,1]){const r=await run(pg,{dk:'normal',phase:ph,spam:sp,sigma:0,aim:-1,seed:3,maxT:300});out.push(sp+' s : '+r.res+' en '+r.t+' s, boss '+r.boss);

@@ -44,7 +44,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Série | Series | — | Enchaînement d'attaques arrêtées (« Série bloquée », lecteur d'écran) | `archives/DECISIONS-2026-10-27-28.md#bloquer` |
 | Contre | — | — | Phase III du Chapitre I : le physique se contre à la cloche, la distance avec des éclats, l'arme et le crochet avec le rayon au sol | `BIBLE.md:60-66` |
 | Reflet (faux coup) | Reflection | `fool` (ch2) | Phase I du Chapitre II : esquiver sans mordre aux faux reflets | `docs/CH2-SPEC.md:36` ; `archives/DECISIONS-2026-10-27-28.md#etats-veilleur` ; `archives/DECISIONS-2026-10-27-28.md#deuxieme-passe` |
-| Épreuve du feu | Trial by Fire | `trial`, `RUN` (ch1) ; `HERO_DIFF.trial` | Trois phases d'affilée, 4 PV pour tout le parcours, PV conservés, une mort ramène à la phase I | `BIBLE.md:41` ; `chapters/ch1-ember-bridge/src/page/body.html:77` ; `docs/decisions/2026-10-28-engine-shared.md:7` |
+| Épreuve du feu | Trial by Fire | `trial`, `RUN` (ch1) ; `HERO_DIFF.trial` | Trois phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : 4 PV), PV conservés, une mort ramène à la phase I | `BIBLE.md:41` ; `chapters/ch1-ember-bridge/src/page/body.html:77` ; `docs/decisions/2026-10-31-engine-hero-states.md` (n° 2 remplacé le 31 octobre) |
 
 ## Personnages
 
@@ -106,7 +106,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Facile / Normal / Difficile | Easy / Normal / Hard | `DIFFS` (ch1), `HERO_DIFF` | PV du Veilleur 6 / 4 / 3 ; fenêtres × 2 / × 1 / × 0,6 ; Normal est la référence | `BIBLE.md:35-39` ; `chapters/ch1-ember-bridge/src/js/00-core.js:12` ; `archives/COMMUN-inventaire.md#s1-3` |
 | Respire / Le vrai combat | Breathe / The real fight | `UIT` | Sous-titres de Facile et de Normal du Chapitre I | `chapters/ch1-ember-bridge/src/js/68-texts-ui.js:7-8` |
 | Épreuve du feu | Trial by Fire | `data-diff="trial"` | Nom au Chapitre I (sous-titre « Challenge ultime ») | `chapters/ch1-ember-bridge/src/page/body.html:77` ; `chapters/ch1-ember-bridge/src/js/68-texts-ui.js:13` |
-| Épreuve / Sans soin | Trial / No healing | — | Nom au Chapitre II | `chapters/ch2-silent-bells/src/js/88-lang.js:7` |
+| Épreuve (sous-titre : « Tu récupères 1 PV entre les phases. » / *You recover 1 life between phases.*) | Trial | — | Nom au Chapitre II ; « Sans soin » / *No healing* remplacé le 31 octobre (soin de 1 PV entre les phases) | `chapters/ch2-silent-bells/src/js/88-lang.js:7` |
 | Phase I sur III · … | Phase I of III · … | — | Sourcil des cartes de phase du Chapitre II ; le titre est le nom du boss | `chapters/ch2-silent-bells/src/js/64-prologue.js:119,124,130` ; `archives/DECISIONS-2026-10-27-28.md#ch2-gameplay-textes` |
 | Chapitre II · Silent Bells | Chapter II · Silent Bells | — | Titre au menu ; « Ember Bridge · Chapitre II » disparaît. Badge « À venir » tant que verrouillé | `docs/CH2-SPEC.md:8` ; `BIBLE.md:8` |
 | Passer | Skip | `#cineSkip` | Bouton des cinématiques (intro, outro) | `docs/COMMUN.md §1.6` |

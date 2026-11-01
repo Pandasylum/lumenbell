@@ -17,13 +17,13 @@ LB.HERO_T={
   deny:.25,                                         /* appui refusé : durée du retour rouge */
   hurt:{base:{block:.38,dodge:.38,hold:.55},min:.14,margin:.2}
 };
-/* Difficulté du Veilleur : PV (hp), multiplicateurs de l'action (m) et de la récupération (rm). trial : Épreuve, 4 PV pour tout le
-   parcours, aucun soin entre les phases (heal) ; elle s'ajoute à la difficulté de base (m et rm de Normal ou de Difficile). */
+/* Difficulté du Veilleur : PV (hp), multiplicateurs de l'action (m) et de la récupération (rm). trial : Épreuve, 4 PV au départ, +1 PV entre les
+   phases (heal) dans la limite des 4 PV de départ (décision du 31 octobre, qui remplace « aucun soin ») ; elle s'ajoute à la difficulté de base (m et rm de Normal ou de Difficile). */
 LB.HERO_DIFF={
   easy:{hp:6,m:2,rm:1},
   normal:{hp:4,m:1,rm:1},
   hard:{hp:3,m:.6,rm:1.2},
-  trial:{hp:4,heal:0}
+  trial:{hp:4,heal:1}
 };
 LB.diff={
   cur:null,
