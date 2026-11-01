@@ -72,4 +72,4 @@
 - Chapitre II, phase III : au sommet du Phare Noyé, deux blocs sombres encadrent de nouveau la méduse, comme dans la toute première version de la tour.
 - Ils apparaissent quand la méduse s'installe dans la lanterne, volent en éclats avec la tour au passage à la Sans-Fond et reviennent quand la tour se reforme. Rien d'autre ne change.
 - 2e passe : faisceaux, foudre et anneaux de la Tempête de cloches jaillissent maintenant des deux lanternes latérales du sommet, et non plus de la méduse ou du ciel.
-- À l'entrée de la phase III, les deux lanternes gisent dans un coin du récif ; une tentacule vient les chercher pour couronner la tour.
+- À l'entrée de la phase III, les deux lanternes gisent sur la plage, au centre, à l'écart l'une de l'autre ; une tentacule vient les chercher pour couronner la tour.

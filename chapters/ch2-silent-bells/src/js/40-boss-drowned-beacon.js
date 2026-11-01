@@ -51,8 +51,8 @@ const PDRAW={tb0:pTb0,tb1:pTb1,tb2:pTb2,ring:pRing,sbell:pSmallBell,head:pHead,s
    Elder. LAMPS: where they sit around the jellyfish in its lantern (70 px to each side, 24 px below it, as in 2b75101); the
    point (x, y) of a pose is the middle of the mouth, where the tower's lights leave from. Index 0 = left, 1 = right */
 const LAMPS=[-1,1].map(s=>({x:s*70,y:24,r:-s*Math.PI/2}));
-/* lying on the reef in the bottom-left corner of the screen at the start of phase III, until the construction takes them */
-const LAMP_FLOOR=[{x:60,y:GY-34,r:Math.PI/2},{x:170,y:GY-34,r:-Math.PI/2}];
+/* lying on the reef between the Watcher and the tower, apart from each other, at the start of phase III, until the construction takes them */
+const LAMP_FLOOR=[{x:400,y:GY-34,r:Math.PI/2},{x:560,y:GY-34,r:-Math.PI/2}];
 /* where they lie once the Bottomless is dead (end cinematic and its still) */
 const LAMP_REST=[{x:LX-380,y:GY-34,r:Math.PI/2},{x:LX+185,y:GY-34,r:-Math.PI/2}];
 /* poses around a jellyfish at (jx, jy); k = scale of the offsets (jellyfish radius / 36); spread = flung out (0 = in place) */
