@@ -12,6 +12,7 @@ Décisions de Kevin du 1er novembre 2026, validées. Périmètre : Chapitre I, p
 - **Bloc trop étroit pour l'amplitude du Chapitre II** : le Chapitre II recule de 48 px (corps à l'échelle 1, soit environ 38 px au corps réduit 0,8 de la phase II). Le bloc ne laisse qu'environ 19 px à gauche du Veilleur avant que la robe déborde, et 31 px à droite. Choix : le recul vers la gauche, le plus lisible (on s'écarte du coup), réduit à 18 px. **Signalé** : le pas est plus court qu'au Chapitre II ; l'inclinaison et l'image rémanente le rendent lisible.
 - **Contre sur la tête** : plus de montée de 120 px ; le rayon part de la lanterne et monte vers la tête.
 - **Finish** : plus d'oscillation verticale ni de montée ; le pas en avant passe de 50 à 28 px pour que la robe reste sur le bloc.
+- **Estoc** (contre `stab`, ajouté le 1er novembre après validation de Kevin) : le pas en avant passe de 60 à 28 px (comme le Finish) et le petit saut de 6 px est retiré, pour que la robe reste sur le bloc jusqu'au plein élan. Dessin seulement : les dégâts, la fenêtre (`sp.stab`) et la cible du rayon ne lisent que la position du Colosse, pas celle du Veilleur ; seul le point de départ dessiné du rayon suit le Veilleur.
 - Étincelles d'une esquive réussie : au niveau du Veilleur sur son bloc (plus au point bas de la plongée). Même nombre de tirages aléatoires : parties du bot identiques.
 - Inchangés : `DG.drop` (hauteur du bloc, rebord `QFLOOR`, chute de la défaite), la pose `dodgeDown` du module commun (non renommée, non supprimée, désormais inutilisée), la silhouette du Colosse, les autres phases.
 - Lecteur d'écran : aucun texte ne décrivait l'esquive comme un plongeon ; rien à corriger, rien d'ajouté à l'écran.
@@ -21,10 +22,9 @@ Décisions de Kevin du 1er novembre 2026, validées. Périmètre : Chapitre I, p
 
 ## À valider par Kevin
 - Amplitude du pas de côté réduite à 18 px par la largeur du bloc (voir plus haut). Autre possibilité : élargir le bloc vers la gauche (décor seulement) pour retrouver l'amplitude du Chapitre II.
-- **Estoc** (contre `stab`, non demandé, inchangé) : au sommet de son élan (60 px en avant, 6 px au-dessus), le Veilleur dépasse le bord droit du bloc. Le ramener sur le bloc, comme le Finish ?
 
 ## Tests
 - Build reproductible (nouveau `dist` = référence), `build_test.py`, `smoke.js` (`errs []`), syntaxe du fichier final, `input.js ch1` (`errs []`).
-- `ch1-bot.js` avant/après sur la même graine : 360 parties identiques (JSON identique).
+- `ch1-bot.js` avant/après sur la même graine : 360 parties identiques (JSON identique), vérifié de nouveau après l'estoc.
 - `visual-shots.js` : 122 images identiques sur 126 ; les 4 écarts sont l'esquive de la phase II (`p2-b` en trois tailles, `p2-deny-act`). Planches de poses : 37 sur 38 identiques, écart `ch1-p2-dodge` seulement.
-- Captures de la phase II image par image (esquive, contre sur la tête, estoc, rayon, Finish) : seules l'esquive, le contre sur la tête et le Finish diffèrent ; aucune image ne montre le Veilleur hors du bloc pendant l'esquive, le contre sur la tête ni le Finish.
+- Captures de la phase II image par image (esquive, contre sur la tête, estoc, rayon, Finish) : seules l'esquive, le contre sur la tête, le Finish et l'estoc diffèrent (estoc : seul le Veilleur bouge, le Colosse est inchangé) ; aucune image ne montre le Veilleur hors du bloc pendant l'esquive, le contre sur la tête ni le Finish.
