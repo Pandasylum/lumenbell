@@ -23,6 +23,7 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 - [2026-11-01 · Chapitre I : phase II au fond de la Fonderie (plus de chute ni de passerelle ; le grand four engloutit le Colosse, qui s'envole par la cheminée) ; lanterne orange visible pendant tout le combat de la phase II ; textes de défaite et lecteur d'écran (session `ch1/foundry-floor`, à appliquer)](docs/decisions/2026-11-01-ch1-foundry-floor.md)
 
 - [2026-11-01 · idées validées par Kevin : nom « LumenBell » partout (reste à cadrer : titre visuel, package Android), fausse fin de Facile supprimée (vraie fin partout), esquive au sol cohérente avec la phase II, cinématiques du Chapitre II dans l'esprit du Chapitre I, tour du Phare Noyé d'avant C1 (validation à l'écran d'abord)](docs/decisions/2026-11-01-idees-validees.md)
+- [2026-11-01 · Chapitre I, phase II : esquive en pas de côté du Chapitre II (`dodgeSide`, 0,38 s, image rémanente) sur le bloc, à la place de la plongée ; contre sur la tête et Finish au sol, seul le rayon vise ; referme le point « Plongée d'esquive » de l'application `ch1/foundry-floor` (session `ch1/dodge-side`)](docs/decisions/2026-11-01-ch1-esquive-pas-de-cote.md)
 - [2026-11-01 · `ch1/foundry-floor` : application de K, L, G, D ; Veilleur sur un bloc du pont tombé, lanterne posée sur le rebord, Facile sans seconde vie (vraie fin directe) ; à valider : plongée d'esquive au point bas, titre de l'ancienne carte de fin de phase I](docs/decisions/2026-11-01-ch1-foundry-floor-application.md)
 
 

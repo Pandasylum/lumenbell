@@ -75,54 +75,54 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | src/js/16-p1-bridge-logic.js:320 | _() |  | The Colossus dives through the breach into the Foundry. The Watcher leaps after him. | Le Colosse plonge par la brèche dans la Fonderie. Le Veilleur saute à sa poursuite. |
 | src/js/16-p1-bridge-logic.js:333 | _() |  | Attempt  | Essai  |
 | src/js/16-p1-bridge-logic.js:333 | _() |  | Attempts  | Essais  |
-| src/js/36-p2-foundry-logic.js:9 | _() |  | Claw strikes | Coups de griffe |
-| src/js/36-p2-foundry-logic.js:10 | _() |  | Wing strike | Coup d'ailes |
-| src/js/36-p2-foundry-logic.js:11 | _() |  | Debris throw | Lancer de débris |
-| src/js/36-p2-foundry-logic.js:14 | _() |  | Claw flurry | Rafale de griffes |
-| src/js/36-p2-foundry-logic.js:15 | _() |  | Wing barrage | Barrage d'ailes |
-| src/js/36-p2-foundry-logic.js:16 | _() |  | Debris and fireball | Débris et boule de feu |
-| src/js/36-p2-foundry-logic.js:33 | _() |  | Phase I of III · On the bridge | Phase I sur III · Sur le pont |
-| src/js/36-p2-foundry-logic.js:33 | _() |  | Phase II of III · The Foundry | Phase II sur III · La Fonderie |
-| src/js/36-p2-foundry-logic.js:33 | _() |  | Phase III of III · The Bell Tower | Phase III sur III · Le Clocher |
-| src/js/36-p2-foundry-logic.js:34 | _() |  | Block | Bloquer |
-| src/js/36-p2-foundry-logic.js:34 | _() |  | Block | Bloquer |
-| src/js/36-p2-foundry-logic.js:34 | _() |  | Dodge | Esquiver |
-| src/js/36-p2-foundry-logic.js:35 | _() |  | Arena: the Watcher and the winged Ember Colossus face each other at the bottom of the Foundry | Arène du combat : le Veilleur et le Colosse de braise ailé s'affrontent au fond de la Fonderie |
-| src/js/36-p2-foundry-logic.js:35 | _() |  | Arena: the Watcher faces the Ember Colossus atop the snowy Watchers' Bell Tower | Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs |
-| src/js/36-p2-foundry-logic.js:35 | _() |  | Arena: the Watcher faces the Ember Colossus on a stone bridge | Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre |
-| src/js/36-p2-foundry-logic.js:41 | _() |  | Phase II. The Foundry. The button now dodges. | Phase II. La Fonderie. Le bouton sert maintenant à esquiver. |
-| src/js/36-p2-foundry-logic.js:75 | _() |  | ENRAGED | ENRAGEMENT |
-| src/js/36-p2-foundry-logic.js:75 | _() |  | RAGE! | RAGE ! |
-| src/js/36-p2-foundry-logic.js:86 | _() |  | Final assault: claws, wings, debris, then a final roar. | Dernier assaut : griffes, ailes, débris, puis un dernier cri. |
-| src/js/36-p2-foundry-logic.js:86 | _() |  | Final assault: the Colossus will chain his three attacks. | Dernier assaut : le Colosse va enchaîner ses trois attaques. |
-| src/js/36-p2-foundry-logic.js:86 | _() |  | The Colossus enrages. A flaming tail will end each attack. | Le Colosse s'enrage. Une queue enflammée terminera chaque attaque. |
-| src/js/36-p2-foundry-logic.js:99 | _() |  | , tail strike to follow. | , coup de queue à suivre. |
-| src/js/36-p2-foundry-logic.js:99 | _() |  | , tail sweep to follow. | , balayage de queue à suivre. |
-| src/js/36-p2-foundry-logic.js:110 | _() |  | A final roar: the bridge debris rains down! | Un dernier cri : les débris du pont pleuvent d'en haut ! |
-| src/js/36-p2-foundry-logic.js:110 | _() |  | The Colossus roars again. His tail will now sweep twice after each attack. Debris rains down! | Le Colosse rugit à nouveau. Sa queue balaiera deux fois après chaque attaque. Des débris pleuvent ! |
-| src/js/36-p2-foundry-logic.js:110 | _() |  | The Colossus roars: the bridge debris rains down! | Le Colosse rugit : les débris du pont pleuvent d'en haut ! |
-| src/js/36-p2-foundry-logic.js:131 | _() |  | CRUSHED! | ÉCRASÉ ! |
-| src/js/36-p2-foundry-logic.js:131 | _() |  | HIT! | TOUCHÉ ! |
-| src/js/36-p2-foundry-logic.js:133 | _() |  | Struck down at the bottom of the Foundry. Defeat. | Terrassé au fond de la Fonderie. Défaite. |
-| src/js/36-p2-foundry-logic.js:137 | _() |  | Hit. | Touché. |
-| src/js/36-p2-foundry-logic.js:161 | _() |  | Perfect dodge. Riposte! | Esquive parfaite. Riposte ! |
-| src/js/36-p2-foundry-logic.js:166 | _() |  | Chain dodged. The Watcher gathers himself. | Enchaînement esquivé. Le Veilleur se concentre. |
-| src/js/36-p2-foundry-logic.js:175 | _() |  | Riposte landed. | Riposte réussie. |
-| src/js/36-p2-foundry-logic.js:196 | _() |  | FINAL BLOW! | COUP ULTIME ! |
-| src/js/36-p2-foundry-logic.js:200 | _() |  | The lantern's beam pierces the Colossus's chest. | Le rayon de la lanterne transperce le torse du Colosse. |
-| src/js/36-p2-foundry-logic.js:211 | _() |  | The Colossus plunges toward the great furnace. | Le Colosse plonge vers le grand four. |
-| src/js/36-p2-foundry-logic.js:245 | _() |  | Defeat · Phase II | Défaite · Phase II |
-| src/js/36-p2-foundry-logic.js:245 | _() |  | Transition | Transition |
-| src/js/36-p2-foundry-logic.js:246 | _() |  | Phase II cleared | Phase II terminée |
-| src/js/36-p2-foundry-logic.js:246 | _() |  | Struck down at the bottom of the Foundry. | Terrassé au fond de la Fonderie. |
-| src/js/36-p2-foundry-logic.js:247 | _() |  |  · Hits taken  |  · Coups subis  |
-| src/js/36-p2-foundry-logic.js:247 | _() |  | Dodges  | Esquives  |
-| src/js/36-p2-foundry-logic.js:249 | _() |  | The Watcher collapses at the bottom of the Foundry, and his light goes out with him. | Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui. |
-| src/js/36-p2-foundry-logic.js:249 | _() |  | The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney. | Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée. |
-| src/js/36-p2-foundry-logic.js:250 | _() |  | Retry Phase II | Réessayer la phase II |
-| src/js/36-p2-foundry-logic.js:250 | _() |  | Start Phase III | Lancer la phase III |
-| src/js/36-p2-foundry-logic.js:276 | _() |  | PHASE II | PHASE II |
-| src/js/36-p2-foundry-logic.js:298 | _() |  | The Colossus bursts from the furnace, wings spread! | Le Colosse jaillit du four, ailes déployées ! |
+| src/js/36-p2-foundry-logic.js:10 | _() |  | Claw strikes | Coups de griffe |
+| src/js/36-p2-foundry-logic.js:11 | _() |  | Wing strike | Coup d'ailes |
+| src/js/36-p2-foundry-logic.js:12 | _() |  | Debris throw | Lancer de débris |
+| src/js/36-p2-foundry-logic.js:15 | _() |  | Claw flurry | Rafale de griffes |
+| src/js/36-p2-foundry-logic.js:16 | _() |  | Wing barrage | Barrage d'ailes |
+| src/js/36-p2-foundry-logic.js:17 | _() |  | Debris and fireball | Débris et boule de feu |
+| src/js/36-p2-foundry-logic.js:34 | _() |  | Phase I of III · On the bridge | Phase I sur III · Sur le pont |
+| src/js/36-p2-foundry-logic.js:34 | _() |  | Phase II of III · The Foundry | Phase II sur III · La Fonderie |
+| src/js/36-p2-foundry-logic.js:34 | _() |  | Phase III of III · The Bell Tower | Phase III sur III · Le Clocher |
+| src/js/36-p2-foundry-logic.js:35 | _() |  | Block | Bloquer |
+| src/js/36-p2-foundry-logic.js:35 | _() |  | Block | Bloquer |
+| src/js/36-p2-foundry-logic.js:35 | _() |  | Dodge | Esquiver |
+| src/js/36-p2-foundry-logic.js:36 | _() |  | Arena: the Watcher and the winged Ember Colossus face each other at the bottom of the Foundry | Arène du combat : le Veilleur et le Colosse de braise ailé s'affrontent au fond de la Fonderie |
+| src/js/36-p2-foundry-logic.js:36 | _() |  | Arena: the Watcher faces the Ember Colossus atop the snowy Watchers' Bell Tower | Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs |
+| src/js/36-p2-foundry-logic.js:36 | _() |  | Arena: the Watcher faces the Ember Colossus on a stone bridge | Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre |
+| src/js/36-p2-foundry-logic.js:42 | _() |  | Phase II. The Foundry. The button now dodges. | Phase II. La Fonderie. Le bouton sert maintenant à esquiver. |
+| src/js/36-p2-foundry-logic.js:76 | _() |  | ENRAGED | ENRAGEMENT |
+| src/js/36-p2-foundry-logic.js:76 | _() |  | RAGE! | RAGE ! |
+| src/js/36-p2-foundry-logic.js:87 | _() |  | Final assault: claws, wings, debris, then a final roar. | Dernier assaut : griffes, ailes, débris, puis un dernier cri. |
+| src/js/36-p2-foundry-logic.js:87 | _() |  | Final assault: the Colossus will chain his three attacks. | Dernier assaut : le Colosse va enchaîner ses trois attaques. |
+| src/js/36-p2-foundry-logic.js:87 | _() |  | The Colossus enrages. A flaming tail will end each attack. | Le Colosse s'enrage. Une queue enflammée terminera chaque attaque. |
+| src/js/36-p2-foundry-logic.js:100 | _() |  | , tail strike to follow. | , coup de queue à suivre. |
+| src/js/36-p2-foundry-logic.js:100 | _() |  | , tail sweep to follow. | , balayage de queue à suivre. |
+| src/js/36-p2-foundry-logic.js:111 | _() |  | A final roar: the bridge debris rains down! | Un dernier cri : les débris du pont pleuvent d'en haut ! |
+| src/js/36-p2-foundry-logic.js:111 | _() |  | The Colossus roars again. His tail will now sweep twice after each attack. Debris rains down! | Le Colosse rugit à nouveau. Sa queue balaiera deux fois après chaque attaque. Des débris pleuvent ! |
+| src/js/36-p2-foundry-logic.js:111 | _() |  | The Colossus roars: the bridge debris rains down! | Le Colosse rugit : les débris du pont pleuvent d'en haut ! |
+| src/js/36-p2-foundry-logic.js:133 | _() |  | CRUSHED! | ÉCRASÉ ! |
+| src/js/36-p2-foundry-logic.js:133 | _() |  | HIT! | TOUCHÉ ! |
+| src/js/36-p2-foundry-logic.js:135 | _() |  | Struck down at the bottom of the Foundry. Defeat. | Terrassé au fond de la Fonderie. Défaite. |
+| src/js/36-p2-foundry-logic.js:139 | _() |  | Hit. | Touché. |
+| src/js/36-p2-foundry-logic.js:163 | _() |  | Perfect dodge. Riposte! | Esquive parfaite. Riposte ! |
+| src/js/36-p2-foundry-logic.js:168 | _() |  | Chain dodged. The Watcher gathers himself. | Enchaînement esquivé. Le Veilleur se concentre. |
+| src/js/36-p2-foundry-logic.js:177 | _() |  | Riposte landed. | Riposte réussie. |
+| src/js/36-p2-foundry-logic.js:198 | _() |  | FINAL BLOW! | COUP ULTIME ! |
+| src/js/36-p2-foundry-logic.js:202 | _() |  | The lantern's beam pierces the Colossus's chest. | Le rayon de la lanterne transperce le torse du Colosse. |
+| src/js/36-p2-foundry-logic.js:213 | _() |  | The Colossus plunges toward the great furnace. | Le Colosse plonge vers le grand four. |
+| src/js/36-p2-foundry-logic.js:247 | _() |  | Defeat · Phase II | Défaite · Phase II |
+| src/js/36-p2-foundry-logic.js:247 | _() |  | Transition | Transition |
+| src/js/36-p2-foundry-logic.js:248 | _() |  | Phase II cleared | Phase II terminée |
+| src/js/36-p2-foundry-logic.js:248 | _() |  | Struck down at the bottom of the Foundry. | Terrassé au fond de la Fonderie. |
+| src/js/36-p2-foundry-logic.js:249 | _() |  |  · Hits taken  |  · Coups subis  |
+| src/js/36-p2-foundry-logic.js:249 | _() |  | Dodges  | Esquives  |
+| src/js/36-p2-foundry-logic.js:251 | _() |  | The Watcher collapses at the bottom of the Foundry, and his light goes out with him. | Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui. |
+| src/js/36-p2-foundry-logic.js:251 | _() |  | The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney. | Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée. |
+| src/js/36-p2-foundry-logic.js:252 | _() |  | Retry Phase II | Réessayer la phase II |
+| src/js/36-p2-foundry-logic.js:252 | _() |  | Start Phase III | Lancer la phase III |
+| src/js/36-p2-foundry-logic.js:277 | _() |  | PHASE II | PHASE II |
+| src/js/36-p2-foundry-logic.js:299 | _() |  | The Colossus bursts from the furnace, wings spread! | Le Colosse jaillit du four, ailes déployées ! |
 | src/js/44-p3-belfry-logic.js:7 | _() |  | War hammer | Marteau de guerre |
 | src/js/44-p3-belfry-logic.js:8 | _() |  | Ember hail | Grêle de braise |
 | src/js/44-p3-belfry-logic.js:9 | _() |  | Charge, stomp and geyser | Charge, piétinement et geyser |

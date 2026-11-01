@@ -11,6 +11,6 @@ Session de code. Choix faits pendant l'application, à valider par Kevin.
 - **Genou** : « The Colossus is on his knees. Phase I cleared. » devient « Phase I cleared. » / « Phase I terminée. » ; le titre de l'ancienne carte (« plie un genou ») devient « Phase I cleared » / « Phase I terminée », comme la carte actuelle.
 
 ## À valider
-- **Plongée d'esquive** : au point bas du tour complet (rotation autour des pieds), la lanterne et le haut du corps passent d'environ 40 px sous la surface du rebord. Proposition (non implémentée) : faire tourner le Veilleur autour de sa taille au lieu de ses pieds, ou remplacer le tour complet par un saut arrière accroupi (sans rotation) vers le rebord.
+- **Plongée d'esquive** : au point bas du tour complet (rotation autour des pieds), la lanterne et le haut du corps passent d'environ 40 px sous la surface du rebord. Proposition (non implémentée) : faire tourner le Veilleur autour de sa taille au lieu de ses pieds, ou remplacer le tour complet par un saut arrière accroupi (sans rotation) vers le rebord. **Refermé le 1er novembre** : l'esquive devient le pas de côté du Chapitre II, sur le bloc (`docs/decisions/2026-11-01-ch1-esquive-pas-de-cote.md`).
 - **Ancienne carte de fin de phase I** (`showEnd` sans `G.p2`, probablement plus atteinte) : le titre répète la ligne du haut (« Phase I terminée » deux fois).
 - **Facile sans seconde vie** : confirmer que la vraie fin doit suivre directement, plutôt qu'après la seconde vie de Normal.

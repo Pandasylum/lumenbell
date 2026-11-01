@@ -67,3 +67,7 @@
 - Chapitre I, phase II : on ne tombe plus. Le Veilleur combat debout sur un bloc du pont, au bord d'un lac de lave, face au Colosse qui vole ; la chaîne rompue, l'anneau et une petite lanterne orange qui pulse doucement restent visibles tout le combat.
 - Fin de la phase II : le Colosse plonge dans la lave du grand four, en ressort et s'envole par la cheminée ; plus de passerelle.
 - En Facile, la vraie fin (pétrification, outro) s'affiche comme en Normal et déverrouille l'Épreuve du feu et le Chapitre II ; plus de « Fin ? ».
+
+## 2026-11-01 · ch1/dodge-side
+- Chapitre I, phase II : l'esquive est un pas de côté rapide sur le bloc, avec une image rémanente, comme au Chapitre II ; le Veilleur ne plonge plus du rocher.
+- Quand le rayon frappe la tête du Colosse, et pendant le coup ultime, le Veilleur reste debout sur son bloc : seul le rayon monte vers sa cible.
