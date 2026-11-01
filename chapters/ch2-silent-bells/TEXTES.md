@@ -86,7 +86,7 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 80 | On it, a single word is engraved: Crown. | Sur celle-ci, un seul mot est gravé : Couronne. |
 | 81 | And this time, the earth has not stopped trembling. | Et cette fois, la terre n'a pas cessé de trembler. |
 | 82 | In the heart of the forest, a Spire's light is failing. | Au cœur de la forêt, la lumière d'une Flèche faiblit. |
-| 83 | Chapter III. To be continued. | Chapitre III. À suivre. |
+| 83 | Chapter III · Hollow Roots. To be continued. | Chapitre III · Hollow Roots. À suivre. |
 | 84 | Epilogue | Épilogue |
 | 85 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
 | 86 | Easy | Facile |

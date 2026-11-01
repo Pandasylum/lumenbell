@@ -154,7 +154,7 @@ Sept chapitres, une tour et un Lié par chapitre. Seuls les chapitres I et II ex
 | --- | --- | --- | --- | --- |
 | I | Ember Bridge (existe) | Pont, Fonderie, Clocher | Le Colosse de braise | Orange chaud |
 | II | Silent Bells (existe) | Le Phare Noyé, récifs | La Voix Creuse, l’Ancien de Rouille, le Phare Noyé (la Sans-Fond, EN The Bottomless) | Turquoise |
-| III | Racines | La forêt et son village | Le Lié de racines (provisoire) | Vert mousse tirant sur le jaune |
+| III | Hollow Roots | La forêt et son village | Le Lié de racines (provisoire) | Vert mousse tirant sur le jaune |
 | IV | Givre | La tour du nord | Le Lié de givre (provisoire) | Bleu-blanc pâle |
 | V | La tour vide | Tour désertée | Le Lié de cendre (provisoire) | Gris argenté |
 | VI | La brèche | La brèche | Le Doyen, chef de l’ordre (phase I) ; Vharos : le Doyen, chef de l’ordre (phase I), avant sa transformation ; le Roi Spectral (phase II) (EN : The Spectral King) ; le Roi sur Nocthrys, puis les deux au sol, Nocthrys blessé (phase III) | Violet profond |
@@ -199,7 +199,7 @@ Le Colosse de braise, premier Lié à se réveiller, atteint le pont. Le Veilleu
  
 **Outro** : le Phare muet au matin ; gros plan de la cloche ; la vallée du chapitre I, la terre tremble, une tour s'éteint, les autres vacillent ; une Flèche de la forêt, dont la lumière vert mousse faiblit (la tour des Racines, chapitre III) ; « Chapitre III. À suivre. » en vert mousse. Le chapitre II est **perdu**.
  
-### Chapitre III · Racines (à écrire)
+### Chapitre III · Hollow Roots (à écrire)
  
 La tour de la forêt, gardée : un village l'entretient sans savoir pourquoi. Fragment principal : la berceuse du village, dont les paroles racontent l’histoire de sept vaillants unis contre l’adversité, une belle aventure dont on ne connaît pas la fin ; elle s’achève sur le plus fort, que les six acceptent de suivre à jamais (formulation à écrire à l’écriture du chapitre. Elle est chantée en deux parties, sans mots intelligibles, ses paroles s’écrivant à l’écran en sous-titres synchronisés : la première dans l’intro (sept vaillants unis, qui suivent le plus fort), la seconde dans l’outro (ils encerclent leurs ennemis pour les empêcher de fuir). Piste retenue : sur la dernière page de l'outro (avant l'annonce du chapitre IV), on découvre que celui qui chante est un Sonneur, pendant qu'il sonne la cloche du chapitre. Le chant du village raconte une histoire ancienne qui ne semble rien dire et porte une partie de l’histoire des Flèches liées. : il ne repousse rien, c'est l'usage de la cloche qui est efficace. Teinte vert mousse tirant sur le jaune, annoncée par la fin du chapitre II. Ici, « fixer » veut dire catalyser : le Sonneur fait résonner le Lumen déjà présent dans la cloche. Il chante en la sonnant.
 
@@ -376,3 +376,4 @@ Précision pour le chant du chapitre III : synthétisé, sans mots intelligibles
 ### 1er novembre 2026
 - Chapitre I, phase II : le combat se joue au fond de la Fonderie, plus de chute ni de scène de passerelle ; fin = le grand four engloutit le Colosse, qui s'envole par la cheminée. Aucun impact sur le lore.
 - Chapitre I : la lanterne orange du Colosse est visible pendant tout le combat de la phase II (avant : fin de phase II seulement).
+- Chapitre III : titre **Hollow Roots** (EN et FR : « Chapitre III · Hollow Roots », comme « Silent Bells »). Remplace le titre provisoire « Racines ». Écho voulu avec *The Hollow Voice* (II). Vérification TMview/INPI à ajouter à la liste des noms avant sortie publique.

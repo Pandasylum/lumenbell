@@ -89,3 +89,5 @@
 - Chapitre II : le titre de fin d'intro devient celui du Chapitre I (« LUMEN » turquoise, « BELL » crème), et le prologue ne se rejoue plus à chaque partie ; Espace le passe aussi.
 - Chapitre I : rien ne change à l'écran.
 - Chapitre II : un bouton « ▶ Intro » en haut à gauche du menu rejoue le prologue, comme au Chapitre I.
+## 2026-11-01 · engine/cine (titre du Chapitre III)
+- Chapitre II : le dernier carton de l'épilogue annonce « Chapitre III · Hollow Roots. À suivre. », toujours en vert mousse.
