@@ -124,7 +124,7 @@ function orbHit(){
   const b=G.boss;
   G.bhp=Math.max(0,G.bhp-DMG_ORB);G.recoil=1;G.shake=reduce?0:12;G.hitstop=.12;G.flash=.6;
   ring(ORB_T[0],ORB_T[1]);
-  burst(ORB_T[0],ORB_T[1],36,['#ffffff','#fff2b8','#bfeaff','#ffc15a']);
+  burst(ORB_T[0],ORB_T[1],36,['#ffffff','#fff2b8','#fff0b0','#ffc15a']);
   tone(660,.5,'sine',.08,500);tone(200,.3,'square',.06,-120);thud(1.3);cry1(true);
   if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('Phase I cleared.','Phase I terminée.'))}
   else{b.s='hurt';b.t=0;b.hurtT=1.1;say(_('Orb of light, dead center.','Orbe de lumière en plein cœur.'))}
@@ -307,7 +307,7 @@ function bossStep(dt){
         /* gros impact : le rayon explose sur le torse du Colosse, qui recule sous le choc */
         F.b=true;G.bhp=0;G.shake=reduce?0:26;G.flash=.95;
         const cx=BX-40,cy=DECK-200;
-        burst(cx,cy,70,['#ffffff','#bfeaff','#6fd3ff','#ffc15a']);burst(cx+30,cy+40,40,['#ffffff','#fff2b8','#ffc15a','#ff7a2b']);burst(cx-10,cy-50,30,['#ffffff','#bfeaff']);
+        burst(cx,cy,70,['#ffffff','#fff0b0','#ffd966','#ffc15a']);burst(cx+30,cy+40,40,['#ffffff','#fff2b8','#ffc15a','#ff7a2b']);burst(cx-10,cy-50,30,['#ffffff','#fff0b0']);
         boom(1.6,.28);tone(55,1.2,'sawtooth',.14,-20);tone(1200,.8,'sine',.06,-600);noise(.5,.2,5000,400);painCry(1.9,.2);
         float(_('BOOM!','BOUM !'),BX-160,DECK-320,'#ffffff');
       }

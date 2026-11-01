@@ -20,9 +20,9 @@ function flameRow(foot,d,pre,post,sc){
 function drawBolt(x,y0,y1,al,big){
   if(al<=0)return;
   const pts=[[x,y0]];for(let i=1;i<=9;i++)pts.push([i===9?x:x+rand(-34,34),y0+(y1-y0)*i/9]);
-  ctx.save();ctx.lineJoin='round';ctx.lineCap='round';ctx.shadowColor='#bfeaff';ctx.shadowBlur=30;
+  ctx.save();ctx.lineJoin='round';ctx.lineCap='round';ctx.shadowColor='#fff0b0';ctx.shadowBlur=30;
   for(let pass=0;pass<2;pass++){
-    ctx.strokeStyle=pass?'rgba(255,255,255,'+al+')':'rgba(111,211,255,'+(al*.6)+')';ctx.lineWidth=big?(pass?8:24):(pass?4:12);
+    ctx.strokeStyle=pass?'rgba(255,255,255,'+al+')':'rgba(255,217,102,'+(al*.6)+')';ctx.lineWidth=big?(pass?8:24):(pass?4:12);
     ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke();
   }
   ctx.restore();

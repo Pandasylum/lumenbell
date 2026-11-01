@@ -81,3 +81,6 @@
 ## 2026-11-01 · engine/lantern-color
 - Rien ne change à l'écran : session de relevé. Des images avant / après (lanterne jaune neutre, tirs jaune-blanc au lieu de bleu-blanc) sont prêtes à être validées par Kevin.
 - Si la palette est validée : la lanterne et ses tirs seront jaune-blanc dans les deux chapitres, le bleu-blanc restera réservé au bouclier et au givre.
+## 2026-11-01 · engine/lantern-color (application)
+- La lanterne du Veilleur est d'un jaune neutre ; quand il tire, orbe, éclats, rayon et foudre virent au jaune-blanc à cœur presque blanc, plus au bleu-blanc. Le bouclier et la garde restent bleus.
+- Chapitre I, phase II : la lanterne prend l'ambre de récupération, comme dans les deux autres phases.

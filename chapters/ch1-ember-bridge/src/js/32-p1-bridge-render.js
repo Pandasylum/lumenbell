@@ -277,7 +277,7 @@ function drawPlayer(){
     rot2:low?.12:0,sy:low?.82:1,
     breath:pose==='idle'&&G.mode!=='intro'&&lift<=0&&p.s!=='grabbed',
     hand,staff:[sb,st],glow:up?1:dashing?.6+.4*thrust:.25,
-    lanternCol:p.deny>0?LB.DENY_COL:up?'#fff4d6':(p.s==='recover'?'#c9a85a':'#ffd27a'),
+    lanternCol:LB.watcherLanternCol(p,up),
     inFrame:()=>{
       if(dashing&&thrust>0){const A=[st[0]+8,st[1]],Z=[BX-62-p.x,-58+lift+(G.ib||0)];lanternBeam(A,lerp2(A,Z,thrust),12+10*thrust,thrust)}
       if(ring){
@@ -475,15 +475,15 @@ function drawRing(){
   const R=G.ringFx;if(!R)return;
   /* halo de lumière : il naît dans la lanterne levée et s'étend en anneaux jusqu'au Colosse */
   const q=clamp01(R.t/.55),L=[G.pl.x+48,DECK-166-liftAmt()],rmax=BX-G.pl.x-60,a=1-q*.35;
-  ctx.save();ctx.translate(L[0],L[1]);ctx.shadowColor='#bfeaff';ctx.shadowBlur=28;
+  ctx.save();ctx.translate(L[0],L[1]);ctx.shadowColor='#fff0b0';ctx.shadowBlur=28;
   for(const [d,w] of [[0,9],[.16,5]]){
     const qq=clamp01((R.t/.55)-d);if(qq<=0)continue;const rr=14+es(qq)*rmax;
     ctx.globalAlpha=a*(1-d*2);ctx.strokeStyle='#ffffff';ctx.lineWidth=w;
     ctx.beginPath();ctx.ellipse(0,0,rr,rr*.62,0,0,6.283);ctx.stroke();
-    ctx.strokeStyle='rgba(111,211,255,.7)';ctx.lineWidth=w*2;ctx.globalAlpha=a*.35*(1-d*2);ctx.stroke();
+    ctx.strokeStyle='rgba(255,217,102,.7)';ctx.lineWidth=w*2;ctx.globalAlpha=a*.35*(1-d*2);ctx.stroke();
   }
   const fl=1-q;ctx.globalAlpha=fl;const g=ctx.createRadialGradient(0,0,0,0,0,60);
-  g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(1,'rgba(191,234,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,60,0,6.283);ctx.fill();
+  g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(1,'rgba(255,240,176,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,60,0,6.283);ctx.fill();
   ctx.restore();
 }
 const HOLE_X=BX-170; /* le trou s'ouvre devant le Colosse, là où frappe le marteau */
@@ -505,7 +505,7 @@ function drawCracks(){
   /* coup final de la phase I : le rayon de la lanterne file jusqu'au torse du Colosse et y explose */
   const p=G.pl;if(p.s!=='final'||p.t<.5)return;
   if(p.t>=1.1&&p.t<2.0){const u=(p.t-1.1)/.9,cx=BX-40+finRecoil(p.t),cy=DECK-200,rr=40+520*eo(u),al=Math.max(0,1-u*1.15);
-    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,rr);g.addColorStop(0,'rgba(255,255,255,'+al+')');g.addColorStop(.35,'rgba(191,234,255,'+(.6*al)+')');g.addColorStop(1,'rgba(111,211,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,rr,0,6.283);ctx.fill();
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,rr);g.addColorStop(0,'rgba(255,255,255,'+al+')');g.addColorStop(.35,'rgba(255,240,176,'+(.6*al)+')');g.addColorStop(1,'rgba(255,217,102,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,rr,0,6.283);ctx.fill();
     ctx.save();ctx.strokeStyle='rgba(255,255,255,'+(.8*al)+')';ctx.lineWidth=4;ctx.lineCap='round';for(let i=0;i<14;i++){const a=i*.4488+.2,r0=30+rr*.25,r1=r0+90+rr*.45;ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0);ctx.lineTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);ctx.stroke()}
     ctx.lineWidth=6*al+1;ctx.beginPath();ctx.arc(cx,cy,rr*.8,0,6.283);ctx.stroke();ctx.restore()}
   if(p.t>1.35)return;
@@ -537,14 +537,14 @@ function drawOrb(){
   if(!charge){
     for(let i=1;i<=5;i++){
       const qq=Math.max(0,q-i*.05),tp=lerp2(cr,ORB_T,es(qq));tp[1]-=70*Math.sin(Math.PI*qq);
-      ctx.fillStyle='rgba(220,245,255,'+(.35-i*.06)+')';
+      ctx.fillStyle='rgba(255,247,214,'+(.35-i*.06)+')';
       ctx.beginPath();ctx.arc(tp[0],tp[1],r*(1-i*.12),0,6.283);ctx.fill();
     }
   }
   ctx.save();
   const g=ctx.createRadialGradient(pos[0],pos[1],0,pos[0],pos[1],r*2.6);
-  g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.3,'rgba(255,246,200,.9)');
-  g.addColorStop(.65,'rgba(111,211,255,.35)');g.addColorStop(1,'rgba(111,211,255,0)');
+  g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.3,'rgba(255,250,232,.9)');
+  g.addColorStop(.65,'rgba(255,217,102,.35)');g.addColorStop(1,'rgba(255,217,102,0)');
   ctx.fillStyle=g;ctx.beginPath();ctx.arc(pos[0],pos[1],r*2.6,0,6.283);ctx.fill();
   ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=2;
   for(let i=0;i<8;i++){

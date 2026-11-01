@@ -331,7 +331,7 @@ function drawHero2(){
   const sk=qSideK(),pose=c?'counter':sk>0?'dodgeSide':p.s==='hurt'?'hurt':p.s==='down'?'fall':'idle';
   const opt={k:sk,dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:1,breath:false,fl:3*Math.sin(t*14),
     body:{dy:44,s:.8},shoulder:[18.5,-18.5],armR:5.2,hand:WH,sa:h.sa,L:80,aura:h.glow,
-    glow:Math.max(.35,h.glow,hitk),lanternCol:Q.pl.deny>0?LB.DENY_COL:h.glow>0||hitk>0?'#fff4d6':'#ffd27a'};
+    glow:Math.max(.35,h.glow,hitk),lanternCol:LB.watcherLanternCol(Q.pl,h.glow>0||hitk>0)};
   /* image rémanente du pas de côté, vers sa place de départ, comme au Chapitre II */
   if(sk>0&&qSideAge()<DG.side.ghost){ctx.save();ctx.globalAlpha=DG.side.ga;LB.drawWatcher(ctx,h.x+DG.side.gx,h.y,pose,t,Object.assign({},opt,{aura:0}));ctx.restore()}
   LB.drawWatcher(ctx,h.x,h.y,pose,t,opt);
@@ -384,8 +384,8 @@ function drawCnFx(){
   if(c.k==='beam'&&c.t>=.75&&c.t<1.35){
     const tip=qSwordTip(),to=[Q.bx-30,Q.by-4],u=(c.t-.75)/.6,wd=34*(1-u*.6)*(1+.1*Math.sin(Q.time*60));
     ctx.save();ctx.lineCap='round';
-    ctx.shadowColor='#6fd3ff';ctx.shadowBlur=30;
-    ctx.strokeStyle='rgba(111,211,255,.55)';ctx.lineWidth=wd*1.8;
+    ctx.shadowColor='#ffd966';ctx.shadowBlur=30;
+    ctx.strokeStyle='rgba(255,217,102,.55)';ctx.lineWidth=wd*1.8;
     ctx.beginPath();ctx.moveTo(tip[0],tip[1]);ctx.lineTo(to[0],to[1]);ctx.stroke();
     ctx.strokeStyle='#ffffff';ctx.lineWidth=wd*.6;
     ctx.beginPath();ctx.moveTo(tip[0],tip[1]);ctx.lineTo(to[0],to[1]);ctx.stroke();

@@ -170,10 +170,10 @@ function qFinal(){
 function qDamage(k){
   Q.bhp=Math.max(0,Q.bhp-1);Q.recoil=1;Q.shake=reduce?0:13;Q.hitstop=.11;Q.flash=.4;thud(1.2);
   const tg=k==='head'?[Q.bx,Q.by-92]:[Q.bx-30,Q.by-4];
-  qBurst(tg[0],tg[1],30,['#ffffff','#bfeaff','#ffc15a']);qRing(tg[0],tg[1]);
+  qBurst(tg[0],tg[1],30,['#ffffff','#fff0b0','#ffc15a']);qRing(tg[0],tg[1]);
   tone(170,.25,'square',.08,-110);tone(900,.2,'sine',.05);
   qFlameBurst(tg[0],tg[1],k==='beam'?1.3:1);
-  if(k==='beam'){Q.exps.push({x:tg[0],y:tg[1],t:0,s:.8});qRing(tg[0],tg[1]);qBurst(tg[0],tg[1],30,['#ffffff','#bfeaff','#6fd3ff'])}
+  if(k==='beam'){Q.exps.push({x:tg[0],y:tg[1],t:0,s:.8});qRing(tg[0],tg[1]);qBurst(tg[0],tg[1],30,['#ffffff','#fff0b0','#ffd966'])}
   say(_('Riposte landed.','Riposte réussie.'));
 }
 function qCnStep(dt){
@@ -182,7 +182,7 @@ function qCnStep(dt){
   const sp={stab:{hit:.35,end:1.15},head:{hit:.55,end:1.45},beam:{hit:.85,end:1.65}}[c.k];
   if(c.k==='beam'&&c.t<.75&&Math.random()<.6){
     const a=rand(0,6.283),r=rand(40,80),tip=qSwordTip();
-    Q.sparks.push({x:tip[0]+Math.cos(a)*r,y:tip[1]+Math.sin(a)*r,vx:-Math.cos(a)*r*4,vy:-Math.sin(a)*r*4,g:0,life:.25,max:.25,col:'#bfeaff',sz:2.5});
+    Q.sparks.push({x:tip[0]+Math.cos(a)*r,y:tip[1]+Math.sin(a)*r,vx:-Math.cos(a)*r*4,vy:-Math.sin(a)*r*4,g:0,life:.25,max:.25,col:'#fff0b0',sz:2.5});
   }
   if(!c.hit&&c.t>=sp.hit){c.hit=true;qDamage(c.k)}
   if(c.t>=sp.end){Q.cn=null;p.s='ready';p.t=0;b.s='hurt';b.t=0}
@@ -192,7 +192,7 @@ function qFinalStep(c){
   if(!c.a&&c.t>=.15){c.a=true;tone(500,.9,'sine',.05,600)}
   if(c.t<1.1&&Math.random()<.7){
     const a=rand(0,6.283),r=rand(70,130);
-    Q.sparks.push({x:Q.hx+Math.cos(a)*r,y:Q.hy+Math.sin(a)*r,vx:-Math.cos(a)*r*3.5,vy:-Math.sin(a)*r*3.5,g:0,life:.3,max:.3,col:Math.random()<.5?'#ffffff':'#bfeaff',sz:3});
+    Q.sparks.push({x:Q.hx+Math.cos(a)*r,y:Q.hy+Math.sin(a)*r,vx:-Math.cos(a)*r*3.5,vy:-Math.sin(a)*r*3.5,g:0,life:.3,max:.3,col:Math.random()<.5?'#ffffff':'#fff0b0',sz:3});
   }
   if(!c.b&&c.t>=1.55){
     c.b=true;Q.bhp=0;Q.recoil=1;Q.shake=reduce?0:16;Q.hitstop=.14;Q.flash=.8;thud(1.6);qFloat(_('FINAL BLOW!','COUP ULTIME !'),chest[0]-120,chest[1]-90,'#ffc15a');
