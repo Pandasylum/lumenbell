@@ -6,7 +6,7 @@ const W=960,H=540,DECK=410,PX=250,BX=730;
 /* Difficulté. hp/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de blocage et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
    jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; mk1/mk : repères sur la jauge du Colosse (phase I / phases II-III) ;
    noHelp : pas d'aide visuelle (case masquée) ;
-   easy : aides et allègements, repères en cercle, fausse fin ;
+   easy : aides et allègements, repères en cercle, pas de seconde vie en phase III (la foudre mène droit à la vraie fin) ;
    hard : attaques en plus (double fouet, épée à 3 coups, souffles enchaînés, rages à séquences) ; fm : fenêtre du souffle ; rm : récupération après blocage ;
    t : durées de la phase I remplacées ; waitMin/waitMax : pause entre attaques ; chain : [PV, chance] d'un souffle enchaîné ; rbhp/ru/mkR : PV du Colosse, PV de la première rage et repères de la jauge en phase III ; u2 : PV de la rage en deux temps (phase III Difficile) ; q2/rages : phase II Difficile (attaques à 4 griffes, 5 vagues, boulette de feu, cris avec éboulement, balayage de queue). */
 const DIFFS={

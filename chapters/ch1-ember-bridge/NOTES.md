@@ -24,9 +24,9 @@
 | `js/24-hero-draw.js` | Raccourci `lanternBeam` ; le Veilleur (corps, sceptre-lanterne, poses, bouclier) est dans `shared/js/20-watcher.js` (`LB.drawWatcher`) |
 | `js/28-boss-body.js` | Colosse : chaîne, enclumes, masse rangée, **`demonBody`** (silhouette validée, partagée) |
 | `js/32-p1-bridge-render.js` | Phase I : poses, attaques, effets, aides, `render` |
-| `js/36-p2-foundry-logic.js` | Phase II : `Q`, `DG`, attaques, `lakeY`, `qEnd`, `qStep` |
-| `js/40-p2-foundry-render.js` | Phase II : décor du puits, ailes, Colosse, Veilleur, lac (`drawLake`), `renderQ` |
-| `js/44-p3-belfry-logic.js` | Phase III : `R`, `R_T`, `RATK`, `ULT`, `FIN`, fuite (Facile), `rEnd`, `rStep`, `rFinale` |
+| `js/36-p2-foundry-logic.js` | Phase II : `Q`, `DG`, repères du fond (`QFLOOR`, `QLAKE`, `QEDGE`), attaques, `lakeY` (horloge de la fin), `qDive`, `qEnd`, `qStep` |
+| `js/40-p2-foundry-render.js` | Phase II : fond de la Fonderie (`qBackground`, hotte `qHood`), ailes, Colosse, Veilleur, lave, rebord, bloc, chaînes et lanterne (`drawLake`, `qLantern`), `renderQ` |
+| `js/44-p3-belfry-logic.js` | Phase III : `R`, `R_T`, `RATK`, `ULT`, `FIN`, `rEnd`, `rStep`, `rFinale` |
 | `js/48-p3-belfry-poses.js` | Phase III : finale (`heroFin`, `finBoss`, ailes tombées), poses du Veilleur et du Colosse, masse |
 | `js/52-p3-belfry-decor.js` | Phase III : tours, cloche (`ringBell`), fanal, beffroi, fond et sol |
 | `js/56-p3-belfry-render.js` | Phase III : aura, fissures, Colosse, contres (cloche, éclats, rayon), fin vers la mer, `renderR` |
@@ -66,3 +66,11 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 - **Respiration** au repos seulement (pose `idle`) : phase I hors intro et hors prise, phase III en combat ; pas en phase II (chute, pans au vent inchangés).
 - Menu : la silhouette du Veilleur vient de `shared/svg/watcher-menu.svg` (ligne `@svg` de `page/body.html`).
 - Preuve d'identité : `tests/visual-shots.js --no-breath` contre `main` : 126/126 identiques.
+
+## Phase II au fond de la Fonderie, vraie fin partout (session `ch1/foundry-floor`, 1er novembre)
+- **Décor fixe** : plus de défilement ni de traits de chute. Le Veilleur se tient sur un bloc du pont tombé sur le rebord (`QH`, pieds à `QH[1]+44`) ; le rebord est `DG.drop` plus bas (`QFLOOR`), la lave juste dessous (`QLAKE`), à droite de `QEDGE`. Mur, équerres, chaîne rompue, anneau et petite lanterne orange (section G : posée sur le rebord, x = 150, lueur faible, pulsation lente `Q.time*1.3`) sont dessinés pendant tout le combat (`drawLake(false)`). Hotte du grand four (`qHood`) en haut à droite.
+- **Aléatoire inchangé** : `Q.streaks`, `Q.debris`, `Q.scroll`, `Q.speed` sont encore mis à jour dans `qStep` (mêmes tirages, donc mêmes parties du bot) mais ne sont plus dessinés.
+- **Fin** : `lakeY()` n'est plus un niveau dessiné, c'est l'horloge de la fin (le plongeon a lieu au même instant qu'avant). `qDive()` fait descendre le Colosse vers la lave (dessin seulement) ; la lave passe devant lui une fois englouti, puis il s'envole vers la hotte. La passerelle et sa phrase sont supprimées ; `Q.landed` n'existe plus.
+- **Défaite** : le Veilleur tombe du bloc sur le rebord (`DG.drop` plus bas) et reste couché ; plus de chute dans le vide.
+- **Esquive** : `dodgeDown` et `DG.drop` inchangés ; la plongée descend du bloc sur le rebord. Point bas : la lanterne et le haut du corps passent sous la surface du rebord (à valider, voir `DECISIONS.md`).
+- **Facile** : plus de fuite ni de fausse fin (`R.mode` `flee`/`fake`, `FLEE`, `heroFlee`, `fleeBoss` supprimés). À 1 PV, la foudre mène directement à la vraie fin (`startFinale`), sans seconde vie ; `rEnd` (mode `space`) écrit `lb-ch1-end` et déverrouille l'Épreuve du feu et le Chapitre II comme en Normal.

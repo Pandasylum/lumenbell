@@ -62,3 +62,8 @@
 - Rien ne change encore à l'écran : la décision est actée, le codage viendra dans la session `ch1/foundry-floor`.
 - Chapitre I : le combat de la phase II se jouera au fond de la Fonderie, sur une plateforme au bord de la lave ; plus de chute ni de passerelle. Le Colosse vole au-dessus de la lave et s'envole par la cheminée après le grand four.
 - La petite lanterne orange du Colosse restera visible pendant tout le combat de la phase II, et plus seulement en fin de phase.
+
+## 2026-11-01 · ch1/foundry-floor
+- Chapitre I, phase II : on ne tombe plus. Le Veilleur combat debout sur un bloc du pont, au bord d'un lac de lave, face au Colosse qui vole ; la chaîne rompue, l'anneau et une petite lanterne orange qui pulse doucement restent visibles tout le combat.
+- Fin de la phase II : le Colosse plonge dans la lave du grand four, en ressort et s'envole par la cheminée ; plus de passerelle.
+- En Facile, la vraie fin (pétrification, outro) s'affiche comme en Normal et déverrouille l'Épreuve du feu et le Chapitre II ; plus de « Fin ? ».

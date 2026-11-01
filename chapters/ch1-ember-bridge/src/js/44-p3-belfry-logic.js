@@ -193,37 +193,6 @@ function startFinale(){
   R.mode='finale';R.fin={t:0};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;R.cut=0;R.fall=[];R.fmace=null;R.fbeam=[];
   say(_('The bell calls down the lightning. The Colossus raises his weapon to crush the Watcher.','La cloche appelle la foudre. Le Colosse lève son arme pour écraser le Veilleur.'));
 }
-/* Facile : au lieu de se soigner, le Colosse touché par la foudre s'enfuit en volant (fausse fin). */
-const FLEE={roar:.55,wing:.6,lift:1.3,gone:3.7,fade:4.0,end:5.0};
-const fleeU=t=>clamp01((t-FLEE.lift)/(FLEE.gone-FLEE.lift));
-function startFlee(){
-  R.mode='flee';R.fl={t:0};R.cn=null;R.atk=null;R.boss.s='flee';R.pl.s='ready';R.pl.t=0;
-  say(_("The bell calls down the lightning. The Colossus spreads his wings and flees.","La cloche appelle la foudre. Le Colosse déploie ses ailes et s'enfuit."));
-}
-function rFlee(dt){
-  const f=R.fl;f.t+=dt;const t=f.t;
-  if(t>=FLEE.roar&&!f.r){f.r=1;roar();R.shake=reduce?0:14;R.flash=.4}
-  if(t>=FLEE.gone-.4&&!f.bl){f.bl=1;ringBell(.35)}
-  [1.0,1.4,1.8,2.2,2.7,3.2].forEach((at,i)=>{if(t>=at&&!f['w'+i]){f['w'+i]=1;noise(.4,.24,700,140);boom(.3,.08)}});
-  if(t>=FLEE.lift&&t<FLEE.gone&&Math.random()<.6){
-    const u=fleeU(t);R.sparks.push({x:BX+190*u+rand(-70,70),y:DECK-620*u*u-rand(40,200),vx:rand(-40,40),vy:rand(20,90),g:60,life:.8,max:.8,col:'#ffb060',sz:rand(2,4)});
-  }
-  if(t>=1.3&&!f.hj){f.hj=1;say(_('The Watcher raises his lantern: the Colossus is driven back.','Le Veilleur lève sa lanterne : le Colosse est repoussé.'));tone(660,.6,'sine',.06,300);tone(990,.5,'sine',.04,200)}
-  if(t>=FLEE.end){R.mode='fake';rEnd()}
-}
-function fleeBoss(o){
-  const t=R.fl.t,k=es(clamp01((t-FLEE.wing)/.7)),u=fleeU(t),x=o.x;
-  o.warm=t<FLEE.lift?2:1.6;o.jaw=(t>FLEE.roar&&t<2.0)?16:6;
-  o.wa=.6*k;o.ws=1+.9*k;o.lean=-.06*k-.18*u;
-  o.dy=-30*es(clamp01((t-.9)/.6))-620*u*u+(t>FLEE.lift?Math.sin(t*14)*4:0);
-  o.x=x+190*u;
-  o.hands=[lerp2([x-128,DECK-66],[x-120,DECK-330],k),lerp2([x+128,DECK-66],[x+120,DECK-330],k)].map(p=>[p[0]+190*u,p[1]]);
-}
-function heroFlee(){
-  const t=R.fl.t,up=t>=FLEE.lift;
-  const y=up&&t<FLEE.fade?-Math.abs(Math.sin((t-FLEE.lift)*5.5))*14:0;
-  return{x:PX,y,hand:up?[26,-100]:[30,-72],sa:up?-1.45:.15,rot:0,sy:1,glow:up?1:.4};
-}
 function rDamage(k,c){
   if(k==='bolt'){
     const tg=[R.bx-20,DECK-230];
@@ -233,8 +202,7 @@ function rDamage(k,c){
     tone(90,.6,'sawtooth',.14,-40);tone(1200,.3,'sine',.07,-600);
     if(R.healed&&R.hornAt==null){R.hornAt=R.time;R.hornX=R.bx;noise(.3,.22,5000,900);tone(900,.25,'square',.06,-600);qBurst(R.bx+105,DECK-340,16,['#ffc15a','#ff7a2b','#ffffff'])}
     if(R.bhp<=1){
-      if(!R.healed&&DIFF.easy){startFlee();return}
-      if(!R.healed){
+      if(!R.healed&&!DIFF.easy){ /* Facile : pas de seconde vie, la vraie fin suit directement (la fausse fin est supprimée, 1er novembre) */
         R.healed=true;R.wdAt=R.time;R.cycle=2;R.u5=false;
         qBurst(R.bx-110,DECK-300,24,['#ffc15a','#ff7a2b','#ffffff']);qBurst(R.bx+110,DECK-300,24,['#ffc15a','#ff7a2b','#ffffff']);noise(.6,.16,3200,500);R.u55=false;R.u1=false;R.rk5=null;R.cn=null;R.pl.s='ready';R.pl.t=0;
         R.boss.s='heal';R.boss.t=0;say(_("Final death cry: the Colossus recovers all his health.","Ultime cri d'agonie : le Colosse récupère toute sa vie."));
@@ -315,14 +283,6 @@ function runTable(){
 }
 function rEnd(){
   $('ovTable').hidden=true;
-  if(R.mode==='fake'){
-    el.ov.classList.remove('clear');
-    el.eye.textContent=_('The End?','Fin ?');el.title.textContent=_('He has fled.','Il s\'est enfui.');el.stats.hidden=true;
-    el.desc.textContent=_(`The great bell rings alone in the night. Far out at sea, nothing answers. Somewhere, the Colossus's fire still burns. Replay the whole fight in Normal to discover the true ending.`,`La grande cloche sonne seule dans la nuit. Au large, rien ne répond. Quelque part, le feu du Colosse brûle encore. Refais tout le combat en Normal pour connaître la vraie fin.`);
-    el.go.textContent=_('Back to menu','Retour au menu');el.ov.hidden=false;
-    try{el.go.focus({preventScroll:true})}catch(e){}
-    return;
-  }
   const sp=R.mode==='space',win=R.mode==='won'||sp;
   if(sp){LB.store.set(LB.key('end'),'1');updNext()}
   el.ov.classList.toggle('clear',sp);
@@ -371,8 +331,6 @@ function rStep(dt){
   else if(!R.cn||R.cn.k!=='slide')R.bx+=(BX-R.bx)*Math.min(1,dt*3);
   if(R.hitstop>0){R.hitstop-=dt;hud();return}
   if(R.mode==='finale'){rFinale(dt);hud();return}
-  if(R.mode==='flee'){rFlee(dt);hud();return}
-  if(R.mode==='fake'){hud();return}
   if(R.mode==='space'){R.st+=dt;
     if(R.st>4.6&&!R.cardShown&&!R.outro){R.cardShown=true;rEnd()}hud();return}
   const p=R.pl;LB.hero.step(p,dt,{gesture:'block'});
@@ -460,7 +418,7 @@ function rFinale(dt){
   if(t>=FIN.hero+1.1&&!f.hs3){f.hs3=1;tone(262,1.6,'sine',.05,0)}
   if(t>=FIN.hero+1.65&&!f.hs4){f.hs4=1;tone(349,1.6,'sine',.05,0)}
   if(t>=FIN.hero+2.2&&!f.hs5){f.hs5=1;say(_('All but one.','Toutes, sauf une.'))}
-  if(t>=FIN.space){R.mode='space';R.st=0;R.outro=true;say(_('Far out at sea, the Drowned Beacon stays silent. End of Chapter I.','Au large, le Phare Noyé reste muet. Fin du chapitre I.'));
+  if(t>=FIN.space){R.mode='space';R.st=0;R.outro=true;say(_('Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I.','Au large, le Phare Noyé reste muet. Fin du chapitre I.'));
     OUTRO.play(()=>{if(!R)return;R.outro=false;if(R.mode==='space'&&!R.cardShown){R.cardShown=true;rEnd()}})}
 }
 
