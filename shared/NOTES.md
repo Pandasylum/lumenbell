@@ -77,4 +77,4 @@
 - `tests/input.js` (états du Veilleur des deux chapitres) et `tests/ch1-bot.js` (bots du Chapitre I à pas fixe, avant / après sur la même graine).
 
 ## À venir (plan de `docs/COMMUN.md` § 4)
-~~`LB.hero` et `HERO_T` (3)~~ fait le 31 octobre, ~~`LB.drawWatcher` (4)~~ fait le 1er novembre, ~~`LB.cine` et `LB.title` (5)~~ fait le 1er novembre, menu, HUD, cartes, entrées (6 ; bouton « ▶ Intro » du Chapitre II, `DEMANDES.md`).
+~~`LB.hero` et `HERO_T` (3)~~ fait le 31 octobre, ~~`LB.drawWatcher` (4)~~ fait le 1er novembre, ~~`LB.cine` et `LB.title` (5)~~ fait le 1er novembre, menu, HUD, cartes, entrées (6).

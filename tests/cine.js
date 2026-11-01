@@ -2,7 +2,8 @@
 // 1. dist publies (temps reel) : pour chaque chapitre et chaque facon de passer (Echap, Entree, Espace, bouton « Passer ») :
 //    contexte vide -> Normal lance l'intro (#cine visible, drapeau lb-chN-intro absent) ; passer -> #cine cache, drapeau a '1',
 //    carte de la phase I affichee (Chapitre II : cinematique d'entree de la phase I, bouton #skip du jeu) ; rechargement -> Normal ne rejoue pas l'intro ; Chapitre II : nouvelle partie depuis le menu
-//    sans prologue. Anciennes cles du Chapitre I (eb-intro) lues comme avant.
+//    sans prologue. Anciennes cles du Chapitre I (eb-intro) lues comme avant. Drapeau deja pose (bureau et telephone) : bouton
+//    « ▶ Intro » visible dans le menu des deux chapitres, il rejoue l'intro puis rend le menu ; Chapitre II : une partie en pause est gardee.
 // 2. outro du Chapitre I (bouton du menu, lb-ch1-end pose) : passe par Espace, aucun drapeau ecrit, rejouable.
 // 3. copies de test a crochets (pas fixe, LB.cine.manual) : intro jouee jusqu'au bout -> drapeau ecrit sans passer ; rejeu
 //    (replay) d'une intro deja vue ; epilogue du Chapitre II : passe par Espace, rappel appele, pas de drapeau ; dernier carton
@@ -43,6 +44,25 @@ async function startNormal(pg,ch){
  {const ctx=await b.newContext({viewport:{width:1100,height:760}});await ctx.addInitScript(()=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem('eb-intro','1')}});
   const pg=await ctx.newPage();await pg.goto('file://'+DIST.ch1);await pg.waitForTimeout(200);await startNormal(pg,'ch1');const s=await state(pg,'ch1');
   check(!s.cine&&s.card,'ch1 eb-intro : intro rejouee');console.log('ch1 eb-intro   intro',s.cine,' carte',s.card);await ctx.close()}
+ // drapeau pose (profil qui a deja vu l'intro) : Normal ne la rejoue pas, le bouton « ▶ Intro » du menu est visible et la rejoue
+ for(const ch of ['ch1','ch2'])for(const [w,h] of [[1100,760],[390,844]]){
+  const tag=ch+' drapeau pose '+w+'x'+h,ctx=await b.newContext({viewport:{width:w,height:h},locale:'fr-FR'});
+  await ctx.addInitScript(k=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem(k,'1')}},KEY[ch]);
+  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(tag+': pageerror: '+e.message));await pg.goto('file://'+DIST[ch]);await pg.waitForTimeout(200);
+  if(ch==='ch1')await pg.click('#gateBtn');await pg.waitForTimeout(150);
+  const btn=()=>pg.evaluate(()=>{const e=document.getElementById('introBtn');if(!e)return'absent';const r=e.getBoundingClientRect(),c=getComputedStyle(e),x=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+   return{vis:!e.hidden&&c.display!=='none'&&c.visibility!=='hidden'&&r.width>0&&r.right<=innerWidth&&r.bottom<=innerHeight&&r.top>=0,top:x===e||e.contains(x),txt:e.textContent}});
+  let B=await btn();check(B!=='absent'&&B.vis&&B.top&&B.txt==='▶ Intro',tag+': bouton de rejeu '+JSON.stringify(B));
+  await pg.click('#introBtn');await pg.waitForTimeout(500);let s=await state(pg,ch);check(s.cine,tag+': le bouton ne rejoue pas l\'intro');
+  await pg.keyboard.press('Escape');await pg.waitForTimeout(300);s=await state(pg,ch);check(!s.cine&&s.menu&&s.flag==='1',tag+': retour au menu apres le rejeu '+JSON.stringify(s));
+  await startNormal(pg,ch);s=await state(pg,ch);check(!s.cine&&s.card,tag+': Normal rejoue l\'intro alors qu\'elle est vue');
+  if(ch==='ch2'){   // partie en cours : Menu, rejeu, Reprendre -> la partie reprend telle quelle
+   await pg.click('#go');await pg.waitForTimeout(300);const eye0=await pg.evaluate(()=>document.getElementById('hdEye').textContent);
+   await pg.click('#menuBtn');await pg.waitForTimeout(200);await pg.click('#introBtn');await pg.waitForTimeout(400);await pg.keyboard.press('Enter');await pg.waitForTimeout(300);
+   const r=await pg.evaluate(()=>({resume:!document.getElementById('mResume').hidden,eye:document.getElementById('hdEye').textContent}));
+   check(r.resume&&r.eye===eye0,tag+': partie perdue apres le rejeu '+JSON.stringify(r)+' / '+eye0)}
+  console.log(tag.padEnd(26),'bouton',JSON.stringify(B),' rejeu et retour au menu : ok si aucune erreur ci-dessous');
+  await ctx.close()}
  // 2. outro du Chapitre I
  {const ctx=await b.newContext({viewport:{width:1100,height:760}});await ctx.addInitScript(()=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem('lb-ch1-end','1')}});
   const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push('ch1 outro: pageerror: '+e.message));await pg.goto('file://'+DIST.ch1);await pg.waitForTimeout(200);

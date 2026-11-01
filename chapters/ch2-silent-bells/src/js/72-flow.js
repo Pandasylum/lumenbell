@@ -25,8 +25,11 @@ const PRO=LB.cine.create({key:'intro',scenes:()=>CINE_D.intro.map((d,i)=>({d,txt
   onTick:t=>{if(!$('menu').hidden)gt=S.proT0+t}});   // menu open (replay): the game loop is stopped, game time follows the module's
 function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=true;$('hdEye').textContent='Prologue';PRO.play(endPrologue)}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-/* replay from a menu (API only, the button comes with the common menu, session 6): plays the prologue even if seen, then cb */
-function replayPrologue(cb){hideMenu();hud();playPrologue(cb||showMenu)}
+/* replay from the menu (button ▶ Intro, as in Chapter I): the prologue plays over the menu even if seen; the game state
+   (mode, game time, particles, a paused fight) is left as it was and restored at the end */
+function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
+  S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if($('optMus').checked)MUSIC.bed(2);
+  PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
 function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)

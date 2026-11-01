@@ -42,7 +42,7 @@
 
 ## Clés de sauvegarde
 Table des clés et des anciennes clés lues : `shared/NOTES.md:Clés`. Ce chapitre déclare seulement `LB.setup({id:'ch2', old:{'lb-ch2-unl':['db-unl']}, oldPrefix:[['lb-ch2-best-','db-best-']]})` dans `js/02-core.js`.
-- Drapeau « intro vue » : `lb-ch2-intro` (1er novembre, `engine/cine`) ; le prologue n'est joué qu'au premier lancement d'une partie, puis seulement par `PRO.replay` / `replayPrologue()` (bouton du menu : session 6).
+- Drapeau « intro vue » : `lb-ch2-intro` (1er novembre, `engine/cine`) ; le prologue n'est joué qu'au premier lancement d'une partie, puis seulement par le bouton « ▶ Intro » du menu (`#introBtn`, en haut à gauche, comme au Chapitre I ; `replayPrologue()` : joué par-dessus le menu, l'état de la partie, temps du jeu et partie en pause compris, est rendu tel quel à la fin).
 
 ## `<head>`
 - Repris dans les styles du jeu : `html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}` (zones sûres, utiles sur téléphone avec `viewport-fit=cover`). Le reste de l'enveloppe (`color-scheme:light`, `box-sizing`, police et fond du `body`, `[hidden]`, `img`) était écrasé par les styles du jeu ; `scroll-padding-top` ne servait pas (pas d'ancres).

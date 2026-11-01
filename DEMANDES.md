@@ -12,5 +12,5 @@ Une demande par entrée : date, chapitre demandeur, besoin, statut.
 ## 2026-10-28 · Chapitre II · vocabulaire « bloquer » au lieu de « parer » — fermée le 31 octobre
 - Fermée par la session `engine/hero-states` : le Chapitre I suit le vocabulaire (bouton « Bloquer » / « Block » en phases I et III, lecteur d'écran, aide, libellé de fin « Blocages », noms de code `blocks`, `dodges`, `blockSuccess`, `DMG_BLOCK`). Voir `docs/decisions/2026-10-31-engine-hero-states.md` et `docs/GLOSSAIRE.md` (À trancher n° 3, 4, 6). Reste ouvert : les mots « parade » de `BIBLE.md` et `docs/CH2-SPEC.md` (session « 00 · Direction »).
 
-## 2026-11-01 · moteur (`engine/cine`) · bouton « ▶ Intro » du Chapitre II — ouverte
-- Besoin : dans le menu du Chapitre II, un bouton « ▶ Intro » comme au Chapitre I (`#introBtn`), qui appelle `replayPrologue()` (`chapters/ch2-silent-bells/src/js/72-flow.js` : cache le menu, rejoue le prologue même vu, revient au menu). L'API existe (`PRO.replay`) ; le bouton et son libellé viennent avec le menu commun (session 6 `menu/common`).
+## 2026-11-01 · moteur (`engine/cine`) · bouton « ▶ Intro » du Chapitre II — fermée le 1er novembre
+- Fermée par la même session (`engine/cine`, correction après le test de Kevin) : `#introBtn` dans le menu du Chapitre II, `replayPrologue()`. Le menu commun (session 6) le reprendra avec celui du Chapitre I.

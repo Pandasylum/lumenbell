@@ -116,6 +116,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .mph button b{font-family:var(--font-display);font-weight:800;font-size:18px;line-height:1;color:var(--teal);text-transform:uppercase;letter-spacing:.05em}
 .mph button span{font-size:12px;color:var(--muted)}
 .mph button:hover{border-color:var(--teal);background:rgba(79,224,204,.12)}
+#introBtn{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(6,9,14,.6)}   /* rejeu du prologue (comme au Chapitre I) */
 .langs{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:3}
 .langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(6,9,14,.6);border:1px solid rgba(236,230,220,.3);border-radius:4px;cursor:pointer}
 .langs button[aria-pressed="true"]{border-color:var(--teal);background:rgba(79,224,204,.22)}
@@ -244,6 +245,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
         <g opacity=".12"><ellipse cx="715" cy="470" rx="90" ry="8" fill="#9ff2ff" class="lava"/></g>
       </svg>
       <div class="mem-wrap" id="mSnow" aria-hidden="true"></div>
+      <button type="button" class="mbtn" id="introBtn">▶ Intro</button>
       <div class="langs" id="langs" role="group" aria-label="Langue"><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="fr" aria-pressed="true">FR</button></div>
       <div class="mcard">
         <p class="eyebrow" id="mEye">Chapitre II · Silent Bells</p>
@@ -2854,8 +2856,11 @@ const PRO=LB.cine.create({key:'intro',scenes:()=>CINE_D.intro.map((d,i)=>({d,txt
   onTick:t=>{if(!$('menu').hidden)gt=S.proT0+t}});   // menu open (replay): the game loop is stopped, game time follows the module's
 function playPrologue(cb){MUSIC.stop();S.mode='prologue';S.proT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.proCb=cb;hideCard();if($('optMus').checked)MUSIC.bed(2);$('skip').hidden=true;$('hdEye').textContent='Prologue';PRO.play(endPrologue)}
 function endPrologue(){if(S.mode!=='prologue')return;const cb=S.proCb;S.proCb=null;MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
-/* replay from a menu (API only, the button comes with the common menu, session 6): plays the prologue even if seen, then cb */
-function replayPrologue(cb){hideMenu();hud();playPrologue(cb||showMenu)}
+/* replay from the menu (button ▶ Intro, as in Chapter I): the prologue plays over the menu even if seen; the game state
+   (mode, game time, particles, a paused fight) is left as it was and restored at the end */
+function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
+  S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if($('optMus').checked)MUSIC.bed(2);
+  PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
 function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
@@ -3065,6 +3070,7 @@ $('menuBtn').addEventListener('click',showMenu);
 $('mResume').addEventListener('click',()=>{hideMenu();MUSIC.stop();if(S.mode==='play')setPause(false);else if(S.mode==='card'&&lastCard)showCard(lastCard)});
 document.querySelectorAll('#phases button').forEach(b=>b.addEventListener('click',()=>jumpPhase(+b.dataset.ph)));
 document.querySelectorAll('[data-diff]').forEach(b=>b.addEventListener('click',()=>{ensureAudio();const dk=b.dataset.diff;if(dk==='trial'){$('mphM').hidden=true;$('mphT').hidden=false;return}startRun(dk)}));
+$('introBtn').addEventListener('click',e=>{e.currentTarget.blur();ensureAudio();replayPrologue()});
 $('mBackT').addEventListener('click',()=>{$('mphM').hidden=false;$('mphT').hidden=true});
 document.querySelectorAll('#langs button').forEach(b=>b.addEventListener('click',()=>{LB.lang.set(b.dataset.lang);applyLang()}));
 $('optSnd').checked=LB.audio.sound;$('optMus').checked=LB.audio.music;$('optHelp').checked=LB.store.get(OPT_KEY.optHelp,'0')==='1';
