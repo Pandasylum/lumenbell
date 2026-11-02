@@ -21,7 +21,7 @@ function guardStatic(){   // 4a
  const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?(/^(dist|out|node_modules)$/.test(e.name)?[]:walk(path.join(d,e.name))):/\.js$/.test(e.name)?[path.join(d,e.name)]:[]);
  const dirs=[path.join(ROOT,'shared/js'),...fs.readdirSync(path.join(ROOT,'chapters')).map(c=>path.join(ROOT,'chapters',c,'src'))].filter(fs.existsSync);
  for(const d of dirs)for(const f of walk(d)){const rel=path.relative(ROOT,f),src=fs.readFileSync(f,'utf8');
-  if(rel!=='shared/js/24-cine.js'){src.split('\n').forEach((l,i)=>{if(/fillText|strokeText/.test(l)&&/LUMENBELL|CHAPITRE|CHAPTER/.test(l))errs.push('carton a suivre : « '+rel+':'+(i+1)+' » dessine LUMENBELL / CHAPITRE hors de LB.nextCard')})}
+  if(rel!=='shared/js/24-cine.js'){src.split('\n').forEach((l,i)=>{if((/fillText|strokeText/.test(l)&&/LUMENBELL|CHAPITRE|CHAPTER/.test(l))||/LUMENBELL ·|· CHAPITRE|· CHAPTER/.test(l))errs.push('carton a suivre : « '+rel+':'+(i+1)+' » dessine LUMENBELL / CHAPITRE hors de LB.nextCard')})}
   const n=(src.match(/LB\.nextCard\(/g)||[]).length;if(rel!=='shared/js/24-cine.js'&&n>1)errs.push('carton a suivre : '+rel+' contient '+n+' appels LB.nextCard');}
  for(const ch of fs.readdirSync(path.join(ROOT,'chapters'))){const d=path.join(ROOT,'chapters',ch,'src');if(!fs.existsSync(d))continue;
   const n=walk(d).reduce((a,f)=>a+(fs.readFileSync(f,'utf8').match(/LB\.nextCard\(/g)||[]).length,0);if(n>1)errs.push('carton a suivre : '+ch+' contient '+n+' appels LB.nextCard');}}
