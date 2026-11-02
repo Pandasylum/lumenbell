@@ -17,7 +17,6 @@ const CHAPTER={n:2,id:'ch2',
   title:'Silent Bells',
   color:'#4fe0cc',color2:'#9fe4ff',rgb:'79,224,204',
   menu:{bg:'#04070b',glowA:.3,titleA:.4,particles:'spray',t:{glowMin:.5}},
-  next:{n:3,title:'Hollow Roots'},   // Chapter III: does not exist yet; colour and hover come from LB.CH_COL (shared)
   trial:{name:()=>_('Trial by Water',"Épreuve de l'eau")},
   player:()=>_('The Watcher','Le Veilleur'),help:{},
   trialOpen:()=>TRIAL_OPEN||endSeen(),endSeen,best:n=>+LB.store.get(LB.key('best-'+n),0)||0,fmt:t=>fmt(t)

@@ -17,7 +17,7 @@ const ROOT=path.resolve(__dirname,'..'),SITE=path.join(ROOT,'site'),errs=[];
 const check=(c,msg)=>{if(!c)errs.push(msg)};
 const TYPES={'.html':'text/html; charset=utf-8'};
 // oscillateurs du fond sonore par defaut (a), lus dans la table du hub construit : balayage + houle commune + (houle + voix) par note + souffle ; le reste = cloches
-const HT=new Function('return '+fs.readFileSync(path.join(SITE,'index.html'),'utf8').match(/const HUB_T=(\{[\s\S]*?\n\});/)[1])(),BEDN=1+1+HT.beds.a.notes.length*(1+HT.beds.a.detune.length)+1;
+const HT=new Function('return '+fs.readFileSync(path.join(SITE,'index.html'),'utf8').match(/const HUB_T=(\{[\s\S]*?\n\});/)[1])(),BEDN=1+1+HT.bed.notes.length*(1+HT.bed.detune.length)+1;
 const server=http.createServer((q,r)=>{const u=decodeURIComponent(q.url.split('?')[0]),f=path.join(SITE,u.endsWith('/')?u+'index.html':u);
  if(!f.startsWith(SITE)||!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);r.end();return}
  r.writeHead(200,{'content-type':TYPES[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r)});
