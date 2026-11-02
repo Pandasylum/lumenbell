@@ -24,23 +24,28 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .mote{position:absolute;bottom:-10px;border-radius:50%;background:var(--moteCol);box-shadow:var(--moteGlow);opacity:0;pointer-events:none;animation:hrise linear infinite}
 @keyframes hrise{0%{transform:translate(0,0);opacity:0}15%{opacity:var(--motePeak)}100%{transform:translate(var(--dx),var(--moteRise));opacity:0}}
 /* titre « LUMENBELL » : LUMEN = LB.BRAND.lantern, BELL = LB.BRAND.bell ; centré verticalement entre le haut de la zone sûre
-   et le haut de la tour I (--titleTop, posé par layout()) */
-.hhead{position:absolute;left:0;right:0;top:var(--titleTop,0px);z-index:1;text-align:center;pointer-events:none;padding-top:env(safe-area-inset-top,0px)}
-.brand{margin:0;font-family:var(--font-display);font-weight:800;font-size:var(--titleFs);line-height:.95;letter-spacing:.04em;text-transform:uppercase}
+   et le haut de la tour I (--titleTop, posé par layout()) ; mêmes marges latérales que la figure : même axe vertical ; le retrait
+   .04em du début compense l'espace de lettre après la dernière lettre */
+.hhead{position:absolute;left:max(var(--pad),env(safe-area-inset-left,0px));right:max(var(--pad),env(safe-area-inset-right,0px));top:var(--titleTop,0px);z-index:1;text-align:center;pointer-events:none;padding-top:env(safe-area-inset-top,0px)}
+.brand{margin:0;font-family:var(--font-display);font-weight:800;font-size:var(--titleFs);line-height:.95;letter-spacing:.04em;padding-left:.04em;text-transform:uppercase}
 .brand span{color:var(--lantern);text-shadow:0 0 40px rgba(var(--lanternRgb),.7)}
 .brand i{font-style:normal;color:var(--bell);text-shadow:0 0 40px rgba(var(--lanternRgb),.25)}
-/* figure : carré de côté --s, centré en (--fx, --fy) dans la place restante (sous le titre, à côté ou au-dessus de la carte) */
+/* figure : carré de côté --s, centré en (--fx, --fy) dans la place restante (sous le titre) */
 .figwrap{position:relative;width:100%;min-height:0;align-self:stretch}
 .fig{position:absolute;left:var(--fx,50%);top:var(--fy,50%);width:var(--s);height:var(--s);transform:translate(-50%,-50%)}
 .wire{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .wire line{stroke-width:var(--wireW);vector-effect:non-scaling-stroke;stroke-linecap:round;opacity:var(--wireOff);transition:opacity var(--lightDur) ease,stroke var(--lightDur) ease}
 .wire line.on{opacity:var(--wireOn)}
 .tw{position:absolute;width:var(--hit);height:var(--hit);transform:translate(-50%,-50%);display:grid;place-items:center;padding:0;margin:0;border:0;border-radius:50%;background:none;cursor:pointer;color:inherit;font:inherit}
+.tw>*{grid-area:1/1}
 .tw:disabled{cursor:default}
 .tw:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .tw .dot{display:block;width:var(--dot);height:var(--dot);border-radius:50%;border:var(--ringW) solid var(--ringOff);background:transparent;transition:background-color var(--lightDur) ease,border-color var(--lightDur) ease,box-shadow var(--lightDur) ease,opacity var(--lightDur) ease}
 .tw.play .dot,.tw.done .dot{background:var(--c);border-color:var(--c);box-shadow:0 0 var(--glowB) var(--glowS) rgba(var(--cr),.55)}
 .tw.play .dot{animation:hpulse var(--pulseDur) ease-in-out infinite alternate}
+/* « à jouer » : fin cercle autour du point, dans tous les modes (il reste quand la pulsation s'arrête) ; seul cet état en a un */
+.tw .halo{display:none;width:calc(var(--dot) + 2*(var(--haloGap) + var(--haloW)));height:calc(var(--dot) + 2*(var(--haloGap) + var(--haloW)));border:var(--haloW) solid var(--c);border-radius:50%;pointer-events:none}
+.tw.play .halo{display:block}
 .tw.soon .dot{border-color:var(--c);opacity:.7}
 .tw.ring .dot{animation:hring var(--ringDur) ease-out 1}
 .tw.sel .dot{animation:none;opacity:1;box-shadow:0 0 calc(var(--glowB)*1.8) calc(var(--glowS)*1.8) rgba(var(--cr),.85)}   /* tour choisie : reste éclairée */
@@ -48,13 +53,13 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 @keyframes hring{0%{box-shadow:0 0 var(--glowB) var(--glowS) rgba(var(--cr),.55)}30%{box-shadow:0 0 calc(var(--glowB)*2.4) calc(var(--glowS)*2.4) rgba(var(--cr),.85)}100%{box-shadow:0 0 var(--glowB) var(--glowS) rgba(var(--cr),.55)}}
 .core{position:absolute;left:50%;top:50%;width:var(--core);height:var(--core);transform:translate(-50%,-50%);border-radius:50%;background:var(--coreCol);opacity:var(--coreLo);box-shadow:0 0 calc(var(--core)*1.5) 1px var(--coreCol);animation:hbeat var(--beat) ease-in-out infinite;pointer-events:none}
 @keyframes hbeat{0%,100%{opacity:var(--coreLo)}12%{opacity:var(--coreHi)}24%{opacity:var(--coreLo)}36%{opacity:calc(var(--coreHi)*.7)}50%{opacity:var(--coreLo)}}
-/* carte d'un chapitre : jamais sur la figure ; portrait : bandeau en bas, sous la figure ; paysage : panneau sur le côté */
-.hcard{position:absolute;z-index:4;display:grid;gap:8px;justify-items:center;text-align:center;padding:18px 20px;background:rgba(14,10,20,.92);border:1px solid var(--line);border-top:3px solid var(--c);box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 30px rgba(var(--cr),.18);outline:none}
-.hcard.port{left:50%;bottom:0;transform:translateX(-50%);width:var(--bandW)}
-.hcard.side{right:0;top:var(--fy,50%);transform:translateY(-50%);width:var(--sideW)}
-.hcard .eyebrow{margin:0;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-.hcard h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:var(--nameFs);line-height:1;letter-spacing:.03em;text-transform:uppercase;color:var(--c);text-shadow:0 0 30px rgba(var(--cr),.6)}
-.hcard .soon{margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:2px .8em}
+/* carte d'un chapitre : petite, ancrée sous la tour choisie (ou au-dessus), pointe vers elle ; left, top, --tipX et .up posés par placeCard() */
+.hcard{position:absolute;z-index:4;left:0;top:0;width:max-content;max-width:calc(100vw - 2*var(--cardEdge));display:grid;gap:3px;justify-items:center;text-align:center;padding:5px 12px 6px;background:#0e0a14;border:1px solid rgba(var(--cr),.6);box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 24px rgba(var(--cr),.18);outline:none}
+.hcard .tip{position:absolute;left:var(--tipX,50%);top:0;width:var(--tipS);height:var(--tipS);background:#0e0a14;border:solid rgba(var(--cr),.6);border-width:1px 0 0 1px;transform:translate(-50%,-50%) rotate(45deg)}
+.hcard.up .tip{top:100%;border-width:0 1px 1px 0}
+.hcard h2{margin:0;white-space:nowrap;font-family:var(--font-display);font-weight:800;font-size:var(--nameFs);line-height:1;letter-spacing:.03em;text-transform:uppercase;color:var(--c);text-shadow:0 0 24px rgba(var(--cr),.6)}
+.hcard .soon{margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:2px .8em;white-space:nowrap}
+.hcard .btn{padding:6px 22px;font-size:17px}
 .btn{font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border:2px solid var(--c,var(--lantern));padding:10px 26px;min-height:var(--touch);background:var(--c,var(--lantern));color:#0b0710}
 .btn:hover{filter:brightness(1.12)}
 .btn:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
@@ -91,9 +96,9 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(8,6,13,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .gate .btn{box-shadow:0 0 36px rgba(var(--lanternRgb),.45)}
 @media (max-height:520px) and (orientation:landscape){.hfoot{padding-top:2px}}
-/* mouvement réduit (LB.motion : réglage du hub, Auto = préférence du système ; classe .lb-rm sur <html>) : rien ne bouge, les trois
-   états diffèrent par la forme : à jouer = point plein et fin anneau autour ; terminé = point plein sans anneau ; fermé = anneau éteint */
+/* mouvement réduit (LB.motion : préférence du système seule ; classe .lb-rm sur <html>) : rien ne bouge ; les trois états gardent leur
+   forme (à jouer = point plein et fin cercle ; terminé = point plein sans cercle ; fermé = cercle éteint sans point) */
 .lb-rm .mote{display:none}
 .lb-rm .tw.play .dot,.lb-rm .tw.ring .dot,.lb-rm .core{animation:none}
 .lb-rm .tw .dot,.lb-rm .wire line{transition:none}
-.lb-rm .tw.play .dot{opacity:1;box-shadow:0 0 0 var(--rmGap) var(--bg),0 0 0 calc(var(--rmGap) + var(--rmRing)) var(--c)}
+.lb-rm .tw.play .dot{opacity:1}

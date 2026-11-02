@@ -16,6 +16,8 @@ const path=require('path'),http=require('http'),fs=require('fs');const launch=re
 const ROOT=path.resolve(__dirname,'..'),SITE=path.join(ROOT,'site'),errs=[];
 const check=(c,msg)=>{if(!c)errs.push(msg)};
 const TYPES={'.html':'text/html; charset=utf-8'};
+// oscillateurs du fond sonore par defaut (a), lus dans la table du hub construit : balayage + houle commune + (houle + voix) par note + souffle ; le reste = cloches
+const HT=new Function('return '+fs.readFileSync(path.join(SITE,'index.html'),'utf8').match(/const HUB_T=(\{[\s\S]*?\n\});/)[1])(),BEDN=1+1+HT.beds.a.notes.length*(1+HT.beds.a.detune.length)+1;
 const server=http.createServer((q,r)=>{const u=decodeURIComponent(q.url.split('?')[0]),f=path.join(SITE,u.endsWith('/')?u+'index.html':u);
  if(!f.startsWith(SITE)||!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);r.end();return}
  r.writeHead(200,{'content-type':TYPES[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r)});
@@ -84,9 +86,9 @@ async function back(pg){await Promise.all([pg.waitForNavigation({waitUntil:'load
   await Promise.all([pg.waitForNavigation({waitUntil:'load'}),pg.evaluate(()=>location.replace('../index.html?back=1'))]);
   const tw=()=>pg.evaluate(()=>[1,2].map(n=>{const e=document.querySelector('.tw[data-n="'+n+'"]');return ['closed','play','done'].find(k=>e.classList.contains(k))+(e.classList.contains('ring')?'+ring':'')}));
   const t0=await tw();await pg.waitForTimeout(1500);const t1=await tw();let S=await st(pg);
-  check(t0.join()==='play,closed'&&t1.join()==='done+ring,play'&&S.p.osc>=4+5&&!S.gate,tag+' : la tour I s\'allume avec sa cloche '+t0+' -> '+t1+' ('+S.p.osc+' oscillateurs)');
+  check(t0.join()==='play,closed'&&t1.join()==='done+ring,play'&&S.p.osc>=BEDN+5&&!S.gate,tag+' : la tour I s\'allume avec sa cloche '+t0+' -> '+t1+' ('+S.p.osc+' oscillateurs)');
   await pg.reload();await pg.waitForTimeout(1500);const t2=await tw();S=await st(pg);
-  check(t2.join()==='done,play'&&S.p.osc<=4,tag+' : rechargement : pas de rejeu '+t2+' ('+S.p.osc+')');
+  check(t2.join()==='done,play'&&S.p.osc<=BEDN,tag+' : rechargement : pas de rejeu '+t2+' ('+S.p.osc+')');
   for(const d of ['chapters/ch1-ember-bridge/dist/index.html','chapters/ch2-silent-bells/dist/index.html']){const src=fs.readFileSync(path.join(ROOT,d),'utf8');
    check((src.match(/LB\.hubEnd\(/g)||[]).length>=1,tag+' : '+d+' : derniere carte non branchee sur LB.hubEnd')}
   console.log(tag.padEnd(22),t0.join(' '),'->',t1.join(' '),'| recharge',t2.join(' '));await ctx.close()}

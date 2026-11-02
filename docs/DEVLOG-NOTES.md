@@ -136,3 +136,8 @@
 - Le joueur verra une roue en haut à droite du hub : Musique, Bruitages, Mouvement réduit, et « Réinitialiser la progression » qu'il faut maintenir 2 s pendant qu'une jauge se remplit.
 - En touchant une tour, la carte s'ouvre sous la figure (téléphone en portrait) ou à côté (paysage), sans jamais la cacher ; la tour choisie reste éclairée.
 - À la fin d'un chapitre lancé depuis le hub, « Chapitres » le ramène au hub, où la tour s'allume une seule fois avec sa cloche ; le fond sonore est plus léger, sans grave.
+
+### 2026-11-02 — menu/crown-fixes-2 : correctifs 2 du hub
+- Le joueur verra, sous la tour touchée, une petite carte (nom du chapitre en couleur, « Entrer ») avec une pointe vers la tour ; elle ne cache jamais une autre tour ni le point central, et le fond ou Échap la ferme.
+- Une tour à jouer a toujours un fin cercle autour de son point (même sans pulsation) ; terminée : point plein sans cercle ; fermée : cercle éteint. Le hub suit seul la préférence « mouvement réduit » du système.
+- Le fond sonore est grave, ample et lent (houles, écho long) ; le titre est exactement au-dessus du centre de la figure.
