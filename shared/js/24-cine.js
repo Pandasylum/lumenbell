@@ -92,8 +92,9 @@ LB.cine=(()=>{
    le nom a sa ligne de base à y ; la ligne du chapitre à y + subDy, plus bas si les boîtes mesurées (measureText)
    l'exigent pour garder gap entre les deux (police de repli plus haute) ; nom réduit s'il dépasse maxW. */
 /* LB.BRAND : règle de couleur unique du mot « LUMENBELL » (titre d'intro, carton « à suivre », menu des deux chapitres) :
-   « LUMEN » = LB.CH_COL du chapitre (couleur du chapitre au menu), « BELL » = bell (crème). Aucune autre couleur en dur pour ce mot ; garde dans tests/cine.js. */
-LB.BRAND={bell:'#f0e8df'};
+   « LUMEN » = LB.CH_COL du chapitre (couleur du chapitre au menu), « BELL » = bell (crème). Aucune autre couleur en dur pour ce mot ; garde dans tests/cine.js.
+   Hub (site/) : « LUMEN » = lantern (jaune de la lanterne du Veilleur au repos, LB.WATCHER_T.lantern.idle, une seule source), « BELL » = bell. */
+LB.BRAND={bell:'#f0e8df',lantern:LB.WATCHER_T.lantern.idle};
 LB.TITLE_T={in:1.75,size:96,sub:26,y:118,subDy:42,gap:8,maxW:840,ls:4,subLs:3,glow:.85,blur:30,subCol:'rgba(240,232,223,.88)'};
 LB.rgba=(hex,a)=>'rgba('+[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)).join(',')+','+a+')';
 LB.title=(c,t,t0,o)=>{

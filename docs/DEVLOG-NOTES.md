@@ -127,3 +127,7 @@
 
 ### 2026-11-02 — Menu : lien suivant sur téléphone
 - Le joueur verra, sur téléphone, le lien « Chapitre III · Hollow Roots · À venir » se replier dans la largeur de la carte, sans décaler le menu du Chapitre II.
+
+### 2026-11-02 — menu/crown A : le hub
+- Le joueur verra, après « Commencer », six points de lumière en cercle autour d'un point blanc qui bat ; le Chapitre I pulse, les chapitres terminés restent allumés, reliés par un fil, et répondent chacun par une cloche.
+- En touchant un point, il verra « Chapitre N », le nom du chapitre dans sa couleur et « Entrer » ; dans le chapitre, un bouton « Retour » le ramène au hub, où la tour d'un chapitre qu'il vient de finir s'allume.
