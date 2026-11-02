@@ -114,3 +114,4 @@
 - 2026-11-02 (ch2/cinematics, test) : la vérification des textes du Chapitre II n'échoue plus sur le titre « à suivre » de l'outro (Chapitre III · Hollow Roots), seule la liste des textes autorisés change.
 - 2026-11-02 (engine/next-card) : le dernier carton des deux outros s'écrit pareil : « LUMEN » à la couleur du chapitre suivant puis « BELL · CHAPITRE N » en crème, sur une ligne, et le nom du chapitre en grand dessous.
 - La légende dessous suit la même forme dans les deux chapitres : « Chapitre N · Nom. À suivre. », teintée de la couleur du chapitre suivant.
+- 2026-11-02 (ci/speed) : rien ne change à l'écran ; seule la CI va plus vite (tests en parallèle, caches ; sur main, seul le contrôle « smoke » tourne).
