@@ -94,7 +94,7 @@ async function startNormal(pg,ch){
   check(r.replay&&r.replayEnd&&r.replayDone,ch+' crochets : rejeu');
   if(ch==='ch1')check(r.done,'ch1 crochets : rappel de fin non appele');
   if(ch==='ch2'){check(!r.seen0,'ch2 crochets : prologue vu avant d\'etre joue');check(r.mode!=='prologue','ch2 crochets : mode '+r.mode+' apres le prologue');
-   check(r.epi.vis,'ch2 epilogue : absent');check(/rgb\(185, 207, 90\)/.test(r.epi.col)&&r.epi.txt==='Chapitre III · Hollow Roots. À suivre.','ch2 epilogue : dernier carton '+JSON.stringify([r.epi.txt,r.epi.col]));
+   check(r.epi.vis,'ch2 epilogue : absent');check(/rgb\(185, 207, 90\)/.test(r.epi.col)&&r.epi.txt==='À suivre.','ch2 epilogue : dernier carton '+JSON.stringify([r.epi.txt,r.epi.col]));
    check(r.epi.hidden&&r.epi.mode!=='epilogue','ch2 epilogue : Espace ne passe pas');check(!r.epi.flags.length,'ch2 epilogue : drapeau ecrit '+r.epi.flags)}
   await ctx.close()}
  console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});

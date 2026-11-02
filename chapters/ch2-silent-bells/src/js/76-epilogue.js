@@ -8,7 +8,7 @@ const ECAP_TXT=()=>[_('By morning, the Drowned Lighthouse still stands, mute. It
   _('On it, a single word is engraved: Crown.','Sur celle-ci, un seul mot est gravé : Couronne.'),
   _('And this time, the earth has not stopped trembling.',"Et cette fois, la terre n'a pas cessé de trembler."),
   _("In the heart of the forest, a Spire's light is failing.","Au cœur de la forêt, la lumière d'une Flèche faiblit."),
-  _('Chapter III · Hollow Roots. To be continued.','Chapitre III · Hollow Roots. À suivre.')];
+  _('To be continued.','À suivre.')];
 const EPI_SHOTS=CINE_D.outro.slice(0,3).reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of shots 1 to 4
 const EPI_TITLE=EPI_SHOTS[3]+CINE_D.outro[3];   // carton 5 (next chapter)
 /* title of the next chapter (last card): layout of Chapter I's outro (small line at NT.y1, big title at NT.y2, centred, fades in

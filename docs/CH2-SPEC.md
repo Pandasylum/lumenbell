@@ -49,7 +49,7 @@ Référence lue par tests/ch2-texts.js ; ne pas déplacer. Les nouveaux textes e
 2. Gros plan de la cloche : « Sur celle-ci, un seul mot est gravé : Couronne. »
 3. « Et cette fois, la terre n'a pas cessé de trembler. » Image : la vallée et les tours du Chapitre I, fissures, une tour éteinte, les autres vacillent.
 4. « Au cœur de la forêt, la lumière d'une Flèche faiblit. » (indice de la tour suivante : les Racines ; la Flèche liée de la forêt commence à faiblir ; plus de lueur turquoise sous les vagues)
-5. « Chapitre III · Hollow Roots. À suivre. », titre teinté de la couleur du chapitre suivant.
+5. « À suivre. », sous le titre dessiné LUMENBELL · CHAPITRE III / HOLLOW ROOTS (LUMEN et le reste teintés de la couleur du chapitre suivant, BELL crème).
 
 À supprimer de l'ancienne version : « Le Roi n'est plus le Roi », « Fais taire le glas », « Ne crois pas ce que tu vois », « Éteins le phare », les modes d'emploi dans les cartes de phase, l'intro « étoiles / bâton », « marais des Cloches », « lac gelé », la fonderie, « les villages avaient fondu leurs cloches ».
 
@@ -66,7 +66,7 @@ Titres et boss : Phase I · The Mirror Hall (The Hollow Voice) ; Phase II · The
 
 **Phase III** : entrée "The sea has drawn back. The ships it took sleep on the reef, their wrecks given over to a presence that knows neither rest nor forgetting." ; fin "In the wreckage lies the Lighthouse's bell, cracked and silent."
 
-**Outro** : 1. "By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again." 2. "On it, a single word is engraved: Crown." 3. "And this time, the earth has not stopped trembling." 4. "In the heart of the forest, a Spire's light is failing." 5. "Chapter III · Hollow Roots. To be continued."
+**Outro** : 1. "By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again." 2. "On it, a single word is engraved: Crown." 3. "And this time, the earth has not stopped trembling." 4. "In the heart of the forest, a Spire's light is failing." 5. "To be continued.", under the drawn title LUMENBELL · CHAPTER III / HOLLOW ROOTS (LUMEN and the rest tinted with the next chapter's colour, BELL cream).
 
 ## Code couleur par chapitre
 Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III : racines, vert mousse tirant sur le jaune (distinct du turquoise). Chapitre IV : givre, bleu-blanc pâle. Chapitre V : gris argenté. Chapitre VI : violet profond. Chapitre VII : blanc. Héros : jaune neutre. Le titre « à suivre » et le point de la Couronne dans le menu suivent ce code.
