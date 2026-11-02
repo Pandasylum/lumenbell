@@ -177,6 +177,9 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - Copie de test (`tests/ch2-lib.js`) : `LB.cine.manual = true`, `step(dt, dessiner)` fait aussi avancer `LB.cine` ; `__t.PRO`, `__t.EPI`.
 - `tests/ch2-smoke.js` : passe le prologue par Échap avant de cliquer la frise (le prologue couvre maintenant l'en-tête).
 
+## Carte « à suivre » (session `ch2/cinematics`, 1er novembre)
+- Le carton 5 de l'épilogue dessine « LUMENBELL · CHAPITRE III » / « HOLLOW ROOTS » par `LB.nextCard` (`76-epilogue.js`, forêt, depuis `EPI_TITLE`), vert mousse `CH_COL[3]` ; `CH_COL` est maintenant `LB.CH_COL` (`shared/js/24-cine.js`). Légende inchangée. Cinématiques de phase (trappe, descente, fin de phase II, transformation, fin de phase III) : pas passées par `LB.cine`, à faire plus tard.
+
 ## Cadre commun (session `menu/common`, 1er novembre)
 - Menu, écran de démarrage, cartes, pause, entrées, HUD, aide et plein écran : `shared/js/28-ui.js` (voir `shared/NOTES.md`), alimentés par `CHAPTER` (`js/02-core.js` : turquoise `#4fe0cc`, ligne du chapitre `#9fe4ff`, embruns, « Épreuve de l'eau » et sa note d'origine). Le menu est celui du Chapitre I (structure, ordre du titre, polices, tailles) ; la scène SVG reste dans `page/body.html`, ses animations propres (faisceau, méduse, brume, tentacules) dans `page/style.css`.
 - **Nouveau pour le joueur** : écran de démarrage (Commencer + langues, le clic lance la musique du menu), plein écran dans l'en-tête et le menu, Entrée / Espace au menu (Normal), W et Z, « ▶ Outro » après la vraie fin (`lb-ch2-end`, écrite à la victoire ; `replayEpilogue()` dans `72-flow.js`), records de l'Épreuve sous Normal et Difficile, cartes et pause aux boutons l'un sous l'autre, frise masquée en Épreuve, `TRIAL_OPEN` (`js/02-core.js`).

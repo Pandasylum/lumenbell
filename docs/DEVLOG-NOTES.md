@@ -108,3 +108,6 @@
 - 2026-11-02 (docs/apk-hub) : rien ne change encore dans le jeu, cette session ne pose que la décision.
 - À venir : un seul site avec un écran de démarrage, puis la Couronne pour choisir le chapitre ; les chapitres s'ouvrent sans second écran de démarrage.
 - À venir : un seul bouton « Commencer » au hub, avec une musique dédiée ; l'APK aura le même contenu que le web.
+
+- 2026-11-02 (ch2/cinematics) : à la fin de l'outro du Chapitre I, la carte « Chapitre II · Silent Bells » passe au turquoise de la marée.
+- À la fin de l'outro du Chapitre II, une carte « LUMENBELL · CHAPITRE III / HOLLOW ROOTS » apparaît en vert mousse sur la forêt, avec la même mise en page que celle du Chapitre I.
