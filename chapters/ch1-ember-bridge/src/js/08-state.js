@@ -74,7 +74,7 @@ function deathCard(o){
 }
 function showEnd(){
   const win=G.mode==='won';
-  const o={onGo:start,eye:win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite'),
+  const o={onGo:start,onMenu:toMenu,eye:win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite'),
   title:win?(G.p2?_('Phase I cleared','Phase I terminée'):_('Phase I cleared','Phase I terminée')):_('Crushed on the stone.','Écrasé sur la pierre.'),
   stats:_('Blocks ','Blocages ')+G.blocks+_(' · Hits taken ',' · Coups subis ')+G.grabs+trStr(1),
   desc:win?(G.p2?_('The Colossus smashes the bridge and dives through the breach into the foundry beneath the arch, as if he knew the way.',"Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin."):_(`Phase II will open with its upcoming attacks.`,`La phase II s'ouvrira avec ses prochaines attaques.`)):_(`The lantern rolls across the stones of the bridge and goes out. Nothing holds the Colossus back now: the road to the valleys lies open.`,`La lanterne roule sur les pierres du pont et s'éteint. Plus rien ne retient le Colosse : la route des vallées est ouverte.`),

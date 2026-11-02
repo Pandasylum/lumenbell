@@ -241,7 +241,7 @@ function qLayout(){
 function qEnd(){
   const win=Q.mode==='lake';
   if(win&&RUN.on){setTimeout(()=>beginP3(true),0);return} /* épreuve : pas de carte entre les phases */
-  const o={onGo:start,eye:win?_('Transition','Transition'):_('Defeat · Phase II','Défaite · Phase II'),
+  const o={onGo:start,onMenu:toMenu,eye:win?_('Transition','Transition'):_('Defeat · Phase II','Défaite · Phase II'),
   title:win?_('Phase II cleared','Phase II terminée'):_('Struck down at the bottom of the Foundry.','Terrassé au fond de la Fonderie.'),
   stats:_('Dodges ','Esquives ')+Q.dodges+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2),
   desc:win?_('The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney.',"Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée."):_(`The Watcher collapses at the bottom of the Foundry, and his light goes out with him.`,`Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui.`),

@@ -67,32 +67,29 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 61 | Phase I cleared | Phase I terminée |
 | 62 | Phase III cleared | Phase III terminée |
 | 63 | Continue | Continuer |
-| 64 | Menu | Menu |
-| 65 | Victory | Victoire |
-| 66 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
-| 67 | Time | Temps |
-| 68 | Hits taken | Coups reçus |
-| 69 | Perfects | Parfaits |
-| 70 | Best | Record |
-| 71 | New record.  | Nouveau record.  |
-| 72 | Records only count for runs started from the beginning. | Le record ne compte que pour une partie lancée depuis le début. |
-| 73 | Play again | Rejouer |
-| 74 | Menu | Menu |
-| 75 | Defeat | Défaite |
-| 76 | The Watcher is down. | Le Veilleur est à terre. |
-| 77 | Trial: one fall sends you back to Phase I. | Épreuve : une chute te renvoie à la phase I. |
-| 78 | Restart | Recommencer |
-| 79 | Retry phase | Réessayer la phase |
-| 80 | Menu | Menu |
-| 81 | By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again. | Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus. |
-| 82 | On it, a single word is engraved: Crown. | Sur celle-ci, un seul mot est gravé : Couronne. |
-| 83 | And this time, the earth has not stopped trembling. | Et cette fois, la terre n'a pas cessé de trembler. |
-| 84 | In the heart of the forest, a Spire's light is failing. | Au cœur de la forêt, la lumière d'une Flèche faiblit. |
-| 85 | Chapter III · Hollow Roots. To be continued. | Chapitre III · Hollow Roots. À suivre. |
-| 86 | Epilogue | Épilogue |
-| 87 | Retry | Réessayer |
-| 88 | Skip › | Passer › |
-| 89 | Space, up arrow or tap the screen · P pause · R retry · Enter to skip | Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer |
-| 90 | Visual help | Aide visuelle |
-| 91 | Sound | Son |
-| 92 | Music | Musique |
+| 64 | Victory | Victoire |
+| 65 | Chapter II · Silent Bells | Chapitre II · Silent Bells |
+| 66 | Time | Temps |
+| 67 | Hits taken | Coups reçus |
+| 68 | Perfects | Parfaits |
+| 69 | Best | Record |
+| 70 | New record.  | Nouveau record.  |
+| 71 | Records only count for runs started from the beginning. | Le record ne compte que pour une partie lancée depuis le début. |
+| 72 | Play again | Rejouer |
+| 73 | Defeat | Défaite |
+| 74 | The Watcher is down. | Le Veilleur est à terre. |
+| 75 | Trial: one fall sends you back to Phase I. | Épreuve : une chute te renvoie à la phase I. |
+| 76 | Restart | Recommencer |
+| 77 | Retry phase | Réessayer la phase |
+| 78 | By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again. | Au matin, le Phare Noyé se dresse encore, muet. Sa cloche ne résonnera plus. |
+| 79 | On it, a single word is engraved: Crown. | Sur celle-ci, un seul mot est gravé : Couronne. |
+| 80 | And this time, the earth has not stopped trembling. | Et cette fois, la terre n'a pas cessé de trembler. |
+| 81 | In the heart of the forest, a Spire's light is failing. | Au cœur de la forêt, la lumière d'une Flèche faiblit. |
+| 82 | Chapter III · Hollow Roots. To be continued. | Chapitre III · Hollow Roots. À suivre. |
+| 83 | Epilogue | Épilogue |
+| 84 | Retry | Réessayer |
+| 85 | Skip › | Passer › |
+| 86 | Space, up arrow or tap the screen · P pause · R retry · Enter to skip | Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer |
+| 87 | Visual help | Aide visuelle |
+| 88 | Sound | Son |
+| 89 | Music | Musique |

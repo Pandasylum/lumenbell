@@ -12,6 +12,9 @@
 //    un seul appel par chapitre) ; dernier carton des Chapitres I et II rendu au meme instant : meme geometrie, LUMEN = CH_COL[n], BELL creme, legende au meme format.
 // 5. garde de couleur du mot « LUMENBELL » (LB.BRAND) : titre d'intro, carton « a suivre » et menu des deux chapitres = meme paire (LUMEN = couleur du chapitre, BELL = creme) ;
 //    le creme et le coloriage de LUMEN/BELL ne sont ecrits que dans shared/js/24-cine.js (+ la regle CSS du menu qui lit LB.BRAND).
+// 6. garde de l'interface commune (shared/js/28-ui.js) : lien « chapitre suivant » du menu (« Chapitre N · Nom », couleur LB.CH_COL[N], badge « A venir », pas de cadenas) et carte de defaite
+//    (LB.card : « Reessayer » puis « Menu » a droite, offre d'aide dessous, stats / desc / how vides masques) identiques dans les deux chapitres ; echoue si un chapitre
+//    redefinit ces elements hors de shared/ (col / rgb / hover dans CHAPTER.next, go2 « Menu », regles #ov / .mlink / .cbtns, cadenas).
 // Usage : node cine.js (python3 build/build_test.py avant). Sortie attendue : errs []
 const path=require('path');const launch=require('./launch');const {testPage}=require('./ch2-lib');
 const ROOT=path.resolve(__dirname,'..'),errs=[];
@@ -34,8 +37,16 @@ function guardBrand(){   // 5a : « LUMEN » / « BELL » ne sont coloriés que 
   fs.readFileSync(f,'utf8').split('\n').forEach((l,i)=>{
    if(/f0e8df|240,\s*232,\s*223/i.test(l)&&/LUMEN|BELL|Lumen|bell/.test(l)&&!/subCol/.test(l)&&!/^LB\.BRAND=/.test(l)&&!/^\s*--fg/.test(l)&&!/^\s*\/\*/.test(l)&&!/\.cream/.test(l))errs.push('marque : creme ecrit en dur hors LB.BRAND : '+rel+':'+(i+1));
    if(/fillText\(\s*('LUMEN'|'BELL'|T\.head)/.test(l)&&!(rel==='shared/js/24-cine.js'&&/fillStyle=(o\.col|LB\.BRAND\.bell)/.test(l)))errs.push('marque : LUMEN/BELL colorie hors LB.BRAND : '+rel+':'+(i+1))})}}
+function guardUi(){   // 6a : rien de ces elements n'est redefini dans un chapitre
+ const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?(/^(dist|out|node_modules)$/.test(e.name)?[]:walk(path.join(d,e.name))):/\.(js|css|html)$/.test(e.name)?[path.join(d,e.name)]:[]);
+ for(const ch of fs.readdirSync(path.join(ROOT,'chapters'))){const d=path.join(ROOT,'chapters',ch,'src');if(!fs.existsSync(d))continue;
+  for(const f of walk(d)){const rel=path.relative(ROOT,f);fs.readFileSync(f,'utf8').split('\n').forEach((l,i)=>{const at=rel+':'+(i+1);
+   if(/\bnext\s*:\s*\{/.test(l)&&/\b(col|rgb|hover)\s*:/.test(l))errs.push('lien suivant : col / rgb / hover dans '+at+' (derives de LB.CH_COL)');
+   if(/\bgo2\s*:[^,}]*['"`]Menu['"`]/.test(l))errs.push('carte : bouton « Menu » en go2 dans '+at+' (passer onMenu)');
+   if(/#mNext|\.mlink|mlink|chapterLock|goMenu|\.cbtns|--chc|#ov\s+\.btn/.test(l)&&!/^\s*\/\//.test(l))errs.push('interface commune redefinie hors de shared/ : '+at)})}}}
 guardBrand();
 guardStatic();
+guardUi();
 async function state(pg,ch){return pg.evaluate(k=>({cine:!document.getElementById('cine').hidden,flag:localStorage.getItem(k),
  card:!document.getElementById('ov').hidden||!document.getElementById('skip')?.hidden&&!!document.getElementById('skip'),menu:!document.getElementById('menu').hidden}),KEY[ch])}
 async function startNormal(pg,ch){
@@ -170,4 +181,25 @@ const CARD={};
    const nh=N.find(x=>x[0]==='LUMEN'),nt=N.find(x=>/^BELL ·/.test(x[0]));check(nh&&nt&&hex(nh[1])==='#123456'&&hex(nt[1])===cream,tag+' : carton a suivre '+JSON.stringify(N));
    check(R.menu[0]==='Lumenbell'&&hex(R.menu[1])===col&&hex(R.menu[2])===cream,tag+' : menu '+JSON.stringify(R.menu)+' attendu '+col+' / '+cream);
    console.log(tag.padEnd(12),'titre',T.LUMEN,T.BELL,'| carton',nh&&nh[1],nt&&nt[1],'| menu',R.menu.slice(1).join(' '));await ctx.close()}}
+ // 6b. lien suivant du menu et carte de defaite : meme rendu dans les deux chapitres
+ {const hex=c=>{const m=/^rgba?\((\d+), (\d+), (\d+)/.exec(c);return m?'#'+[1,2,3].map(i=>(+m[i]).toString(16).padStart(2,'0')).join(''):String(c).toLowerCase()},SIG={};
+  for(const ch of ['ch1','ch2']){const ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' ui: pageerror: '+e.message));
+   await pg.goto('file://'+(ch==='ch1'?path.join(ROOT,'build/out/test.html'):testPage()));await pg.waitForTimeout(200);await pg.evaluate(()=>{const g=document.getElementById('gateBtn');if(g&&!document.getElementById('gate').hidden)g.click()});await pg.waitForTimeout(100);
+   const R=await pg.evaluate(ch=>{const T=window.__t,LB=T.LB,q=s=>document.querySelector(s),vis=e=>!!e&&!e.hidden&&e.getClientRects().length>0,mn=q('#mNext'),nx=LB.menu.C.next;
+    const nxt={n:nx.n,title:LB.tx(nx.title),txt:mn.querySelector('.nm').textContent,badge:mn.querySelector('.soon').textContent,color:getComputedStyle(mn).color,want:LB.CH_COL[nx.n],lock:mn.classList.contains('lock')||mn.textContent.includes('🔒')};
+    if(ch==='ch1'){T.getG().mode='lost';T.showEnd()}else T.deathCard();
+    const ov=q('#ov'),ids=[...ov.querySelectorAll('button')].filter(vis).map(e=>e.id),g=q('#go').getBoundingClientRect(),m=q('#goMenu').getBoundingClientRect(),
+     empt=['ovStats','ovDesc','ovHow'].map(i=>{const e=q('#'+i);return[i,e.textContent===''&&!e.hidden]}).filter(x=>x[1]).map(x=>x[0]);
+    return{nxt,ids,menuTxt:q('#goMenu').textContent,side:m.left>g.left&&Math.abs(m.top-g.top)<2,go2:vis(q('#go2')),empt,
+     bg:[getComputedStyle(q('#go')).backgroundColor,getComputedStyle(q('#goMenu')).color,getComputedStyle(q('#goMenu')).borderTopColor],chc:getComputedStyle(document.documentElement).getPropertyValue('--chc').trim(),own:LB.CH_COL[LB.menu.C.n]}},ch);
+   const tag=ch+' ui',N=R.nxt;
+   check(new RegExp('^(Chapitre|Chapter) (II|III) · '+N.title+'$').test(N.txt)&&N.title.length>0,tag+' : lien suivant « '+N.txt+' » (attendu « Chapitre N · Nom »)');
+   check(hex(N.color)===N.want&&!!N.want,tag+' : lien suivant de couleur '+hex(N.color)+' (LB.CH_COL['+N.n+'] = '+N.want+')');
+   check(N.badge==='À venir'&&!N.lock,tag+' : badge « '+N.badge+' » / cadenas '+N.lock);
+   check(JSON.stringify(R.ids)==='["go","goMenu"]'&&R.menuTxt==='Menu',tag+' : boutons de la carte '+JSON.stringify(R.ids)+' « '+R.menuTxt+' »');
+   check(R.side&&!R.go2,tag+' : Menu a droite du bouton principal '+R.side+', go2 visible '+R.go2);
+   check(!R.empt.length,tag+' : zones vides non masquees '+R.empt);
+   check(hex(R.bg[0])===R.own&&hex(R.bg[1])===R.own&&hex(R.bg[2])===R.own&&R.chc===R.own,tag+' : couleurs des boutons '+JSON.stringify(R.bg)+' --chc '+R.chc+' attendu '+R.own);
+   SIG[ch]=JSON.stringify([R.ids,R.menuTxt,R.side,R.go2,N.badge,N.lock]);console.log(tag.padEnd(12),N.txt,'|',hex(N.color),'|',R.ids.join(','),'|',N.badge);await ctx.close()}
+  check(SIG.ch1===SIG.ch2,'ui : structure de carte / lien suivant differente entre les chapitres '+JSON.stringify(SIG))}
  console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});

@@ -108,7 +108,7 @@ Décision du 28 octobre (`docs/CH2-SPEC.md:98`) : un seul geste **bloquer** (*bl
 |---|---|---|---|
 | Touches d'action | Espace, flèche haut, toucher l'écran, bouton `#ward` | Ch. I : aussi W et Z (ch1:`60-ui-menu.js:123`, `BIBLE.md:30`) ; Ch. II : Espace et flèche haut seulement, gère le relâchement (ch2:`2067`, `2071`) | **C** : W et Z au Ch. II, relâchement géré pour tous |
 | Toucher | `pointerdown` | Ch. II : capture du pointeur et `up()` (ch2:`2058-2061`) | **C2** |
-| Cartes `#ov` | Sourcil, titre, texte, bouton | Ch. I : `#ovStats` + `go2` = « Activer l'aide » (ch1:`body.html:22-30`) ; Ch. II : `.brow`, `go2` = Menu, `#ovHow`, `showCard(o)` (ch2:`168-180`, `1867-1873`) | **C2** (`showCard(o)` déclaratif) |
+| Cartes `#ov` | Sourcil, titre, texte, bouton | Ch. I : `#ovStats` + `go2` = « Activer l'aide » (ch1:`body.html:22-30`) ; Ch. II : `.brow`, `onMenu` = bouton Menu commun (`LB.card`), `#ovHow`, `showCard(o)` (ch2:`168-180`, `1867-1873`) | **C2** (`showCard(o)` déclaratif) |
 
 ## 2. Recommandation générale
 
@@ -159,7 +159,7 @@ const CHAPTER={
 | Aide visuelle | `LB.cue(ctx,x,y,k,open,kind)` (`kind` : `real`, `fake`, `hold`) |
 | HUD | `LB.hud.pips(box,n,max,marks)`, `LB.hud.set({php,pmax,bhp,bmax,marks,bossName,head,ward})`, `LB.hud.phaseTrack(n,{trial})` |
 | Effets | `LB.ono(word,x,y,col)`, `LB.rage(name,desc)` (lecteur d'écran + sting, rien à l'écran), `LB.say(txt)` |
-| Cartes | `LB.card.show({eye,title,desc,table,go,onGo,go2,onGo2})`, `LB.card.hide()` |
+| Cartes | `LB.card.show({eye,title,desc,table,go,onGo,onMenu,go2,onGo2})`, `LB.card.hide()` |
 | Cinématiques | `LB.cine.create({key,scenes,onEnd})` → `{play(done), seen(), playing()}` ; bouton « Passer », Échap/Entrée/Espace ; `LB.title(ctx,t,t0)` (« Lumenbell » en grand, chapitre dessous, couleur du chapitre) |
 | Menu | `LB.menu.mount(CHAPTER,{onDiff,onTrial,onIntro,onOutro})`, `LB.menu.show(fromGame)`, `LB.menu.hide()`, `LB.gate.mount()` |
 | Pause, entrées | `LB.input.bind({press,release,retry,pause,skip})` (Espace, flèche haut, W, Z, toucher ; P/Échap ; R ; Entrée), `LB.pause.set(on)` |

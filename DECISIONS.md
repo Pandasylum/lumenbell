@@ -108,3 +108,4 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 - [2026-11-02 · `engine/brand-colors` : une seule règle de couleur pour « LUMENBELL » (« LUMEN » = couleur du chapitre, « BELL » = crème), table `LB.BRAND`, lue par le titre d'intro, le carton « à suivre » et le menu ; garde dans `tests/cine.js`](docs/decisions/2026-11-02-brand-colors.md)
 
 - 2026-11-02 : titre du menu (cartes des deux chapitres) affiché en capitales (« LUMENBELL ») par `text-transform` dans `shared/js/28-ui.js` ; texte, couleurs et tailles inchangés, titre de page et autres textes non touchés.
+- [2026-11-02 · `menu/common-ui` : lien « chapitre suivant » (nom + `LB.CH_COL` + « À venir », sans cadenas) et carte de défaite / de fin (Réessayer + Menu, offre d'aide dessous) communs, dans `shared/js/28-ui.js` ; garde dans `tests/cine.js`](docs/decisions/2026-11-02-menu-common-ui.md)

@@ -86,7 +86,7 @@ const CINE=(()=>{
     cx.fillStyle='#ffd27a';cx.shadowColor='#ffb347';cx.shadowBlur=16;cx.beginPath();cx.arc(690,232,4,0,6.283);cx.arc(722,232,4,0,6.283);cx.fill();cx.shadowBlur=0;
     const lg=cx.createRadialGradient(705,330,0,705,330,40);lg.addColorStop(0,'rgba(255,122,43,.5)');lg.addColorStop(1,'rgba(255,122,43,0)');cx.fillStyle=lg;cx.fillRect(660,290,90,80);
     embers(t,1);cx.restore();
-    LB.title(cx,lt,SC[4].d/2,{col:'#ff7a2b',sub:_('CHAPTER I · EMBER BRIDGE','CHAPITRE I · EMBER BRIDGE')});   /* titre commun (LB.title), à mi-carton */
+    LB.title(cx,lt,SC[4].d/2,{col:LB.CH_COL[1],sub:_('CHAPTER I · EMBER BRIDGE','CHAPITRE I · EMBER BRIDGE')});   /* titre commun (LB.title), à mi-carton */
   }
   const DRAW=[sMnt,sVal,sBridge,sWake,sFace];
   /* sons du carton : la braise qui s'ouvre (carton 4), le tintement de la lanterne (carton 3) */
