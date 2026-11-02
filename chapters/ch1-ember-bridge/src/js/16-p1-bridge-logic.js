@@ -322,21 +322,14 @@ function bossStep(dt){
       break;}
   }
 }
-function pips(box,n,max,marks){
-  if(box.children.length!==max){
-    box.textContent='';
-    for(let i=0;i<max;i++)box.appendChild(document.createElement('span'));
-  }
-  for(let i=0;i<max;i++){box.children[i].classList.toggle('on',i<n);box.children[i].classList.toggle('mark',marks.includes(i))}
-}
 let lastP=-1,lastB=-1,tries=[0,0,0,0],cntS=null;
 function trStr(ph){const n=RUN.on?RUN.n:(tries[ph]||1);return ' · '+(n>1?_('Attempts ','Essais '):_('Attempt ','Essai '))+n}
 function hud(){
   const S=R||Q||G;
   if(S!==cntS&&S.mode==='play'){cntS=S;tries[R?3:Q?2:1]++}
-  if(S.php!==lastP){pips(el.hpP,S.php,DIFF.hp,[]);$('hpPn').textContent=S.php+'/'+DIFF.hp;lastP=S.php}
+  if(S.php!==lastP){LB.hud.player(S.php,DIFF.hp);lastP=S.php}
   const bmax=S===R?DIFF.rbhp:DIFF.bhp,bk=S===G?1:S===R?3:2;
-  if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;pips(el.hpB,S.bhp,bmax,S===G?DIFF.mk1:S===R?DIFF.mkR:DIFF.mk);$('hpBn').textContent=S.bhp+'/'+bmax;lastB=S.bhp}
+  if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;LB.hud.boss(S.bhp,bmax,LB.hud.marks(rageHp(DIFF,bk)));lastB=S.bhp}   /* repères : rages calculées (rageHp) et dernier PV */
 }
 function step(dt){
   G.time+=dt;

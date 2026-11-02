@@ -57,19 +57,20 @@ for(const [ch,c] of [...COMMON.flatMap(c=>[['ch1',c],['ch2',c]]),...CH1.map(c=>[
  await pg.click('#gateBtn');await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(300);
  const cine=await pg.evaluate(()=>!document.getElementById('cine').hidden);console.log('ch1 intro vue : cinematique',cine);
  if(cine)errs.push('ch1 intro vue (eb-intro) : la cinematique se rejoue');await ctx.close()}
-// Chapitre I : aide memorisee d'une difficulte a l'autre ; coupee en Difficile (case masquee) sans toucher a lb-help
+// Chapitre I : aide memorisee d'une difficulte a l'autre, disponible aussi en Difficile (decision n° 3 du 28 octobre, session menu/common) ;
+// l'Epreuve (case desactivee) est controlee par help.js
 {const c={nom:'aide'};const {ctx,pg}=await open(b,'ch1',c);
  await pg.click('#gateBtn');await pg.evaluate(()=>document.getElementById('optHelp').click());
  const r=[];for(const d of ['easy','hard','normal']){await pg.evaluate(()=>{const m=document.getElementById('menuBtn');if(m&&m.offsetParent)m.click()});
   await pg.evaluate(d=>document.querySelector('#mphM [data-diff='+d+']').click(),d);await pg.waitForTimeout(200);
   r.push(await pg.evaluate(()=>({help:document.getElementById('optHelp').checked,hidden:document.getElementById('optHelp').closest('label').hidden,key:localStorage.getItem('lb-help')})))}
  console.log('ch1 aide',JSON.stringify(r));
- const want=[{help:true,hidden:false,key:'1'},{help:false,hidden:true,key:'1'},{help:true,hidden:false,key:'1'}];
+ const want=[{help:true,hidden:false,key:'1'},{help:true,hidden:false,key:'1'},{help:true,hidden:false,key:'1'}];
  if(JSON.stringify(r)!==JSON.stringify(want))errs.push('ch1 aide : '+JSON.stringify(r)+' au lieu de '+JSON.stringify(want));await ctx.close()}
 // Ecriture dans chaque chapitre : cles lb-* seulement ; puis l'autre chapitre (meme origine file://) relit le choix
 for(const [ch,other] of [['ch1','ch2'],['ch2','ch1']]){
  const c={nom:'ecriture',locale:'fr-FR'};const {ctx,pg}=await open(b,ch,c);
- if(ch==='ch1')await pg.click('#gateBtn');
+ await pg.click('#gateBtn');   // ecran de demarrage, les deux chapitres (LB.gate)
  await pg.click('#langs button[data-lang=en]');await pg.evaluate(()=>{optSnd.click();optMus.click();optHelp.click()});
  const k=await pg.evaluate(()=>{const o={...localStorage};delete o.__init;return o});console.log(ch,'ecriture',JSON.stringify(k));
  if(k['lb-lang']!=='en'||k['lb-snd']!=='0'||k['lb-mus']!=='0'||k['lb-help']!=='1')errs.push(ch+' ecriture : cles lb-* non ecrites');

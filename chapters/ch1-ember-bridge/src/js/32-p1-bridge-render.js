@@ -294,25 +294,15 @@ function drawBarrier(){
   LB.drawBlock(ctx,PX,DECK,p.t,HD('block').act);
 }
 
-/* Repère de timing discret (Normal) : petite barre au-dessus du Veilleur, orange tant que le blocage n'est pas ouvert puis bleue pendant la fenêtre. */
-function hintBar(cx,y,k,blue){
-  const w=68,h=6,x=cx-w/2;
-  ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(x-1,y-1,w+2,h+2);
-  ctx.fillStyle=blue?'#6fd3ff':'rgba(255,122,43,.85)';ctx.fillRect(x,y,w*clamp01(k),h);
-}
-const HINT_LEAD=.8; // durée d'approche affichée avant l'ouverture de la fenêtre (phases II et III)
+/* Repère d'aide commun (LB.cue, shared/js/28-ui.js) : barre au-dessus du Veilleur en Normal et en Difficile (orange tant que le
+   blocage n'est pas ouvert, bleue pendant la fenêtre), cercle qui se resserre en Facile. Approche affichée : LB.CUE_T.lead. */
 function drawHints(){
-  if(G.mode!=='play'||!prefs.help)return;
+  if(G.mode!=='play'||!LB.help.on())return;
   const b=G.boss,p=G.pl;
   /* repère de timing : barre au-dessus de la tête, ou en Facile un cercle qui se resserre autour du Veilleur (bleu = fenêtre de blocage) */
   const cue=(k,blue)=>{
-    if(DIFF.easy){
-      const r=blue?40+22*clamp01(k):110-48*clamp01(k);
-      ctx.save();ctx.lineWidth=blue?5:3;ctx.strokeStyle=blue?'#6fd3ff':'rgba(255,122,43,.85)';
-      if(blue){ctx.shadowColor='#6fd3ff';ctx.shadowBlur=12}
-      ctx.beginPath();ctx.arc(PX+10,DECK-100,r,0,6.283);ctx.stroke();ctx.restore();return;
-    }
-    hintBar(PX,DECK-206,k,blue);
+    if(DIFF.easy){LB.cue.ring(ctx,PX+10,DECK-100,blue?40+22*clamp01(k):110-48*clamp01(k),blue);return}
+    LB.cue.bar(ctx,PX,DECK-206,k,blue);
   };
   if(['sw1w','sw1','swgap','sw2w','sw2','sw3g','sw3w','sw3'].includes(b.s)){
     const hit=+b.s.charAt(2),wait=[T.sw1w,T.sw2w,T.sw3w][hit-1],strike=[T.sw1,T.sw2,T.sw3][hit-1];

@@ -8,19 +8,25 @@ function drawCounter(){
 }
 
 /* ---------- visual help ---------- */
+/* the cue of the series for a real attack (LB.cue, decision 8 of 28 October, as in Chapter I): a bar above the head in Normal and
+   Hard, a ring closing round the Watcher in Easy. This chapter keeps its own cues: the half-circle of the beams (hold: dashed to get
+   ready, full to hold) and the dashed ring of a reflection (fake). CUE_Y: height of the bar above the feet, per internal phase (in
+   phase III the stamina bar sits at 206, the bar goes above it). */
+const CUE_Y={1:206,2:206,3:218};
 function drawHelp(){
-  if(!$('optHelp').checked||S.mode!=='play')return;
+  if(!LB.help.on()||S.mode!=='play')return;
+  const easy=S.dk==='easy';let next=null;
   for(const th of S.threats){
     if(th.done)continue;
     if(th.hold){if(gt>=th.t0&&gt<=th.tb){const on=gt>=th.ta;ctx.save();ctx.strokeStyle=on?'#e8fdff':'rgba(232,253,255,.6)';ctx.lineWidth=on?4:2;if(!on)ctx.setLineDash([5,6]);ctx.beginPath();ctx.arc(HX,GY-40,on?100:100+40*clamp((th.ta-gt)/1.2,0,1),Math.PI,0);ctx.stroke();ctx.restore()}continue}
     if(gt<th.t0)continue;
+    if(th.real){if(th.ti>gt&&(!next||th.ti<next.ti))next=th;continue}   // the series' cue shows the next real attack only, as in Chapter I
     const span=Math.min(1,th.ti-th.t0),k=(th.ti-gt)/span;if(k>1||k<-.3)continue;
     const r=26+64*Math.max(0,k);
-    ctx.save();
-    if(th.real){ctx.strokeStyle=k<=(PT().act/span)&&k>=0?'#ffffff':'rgba(127,214,255,.85)';ctx.lineWidth=3}
-    else{ctx.strokeStyle='rgba(170,160,190,.7)';ctx.lineWidth=2;ctx.setLineDash([5,6])}
+    ctx.save();ctx.strokeStyle='rgba(170,160,190,.7)';ctx.lineWidth=2;ctx.setLineDash([5,6]);
     ctx.beginPath();ctx.arc(HX+10,HY-10,r,0,Math.PI*2);ctx.stroke();ctx.restore();
   }
+  if(next){ctx.save();LB.cue(ctx,{x:HX,y:GY-CUE_Y[S.phase],cx:HX+10,cy:HY-10,r:70,tt:next.ti-gt,act:PT().act,easy});ctx.restore()}
   ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(HX+10,HY-10,26,0,Math.PI*2);ctx.stroke();
 }
 

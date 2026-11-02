@@ -24,7 +24,7 @@ Décision de Kevin du 1er novembre 2026, validée telle quelle. Documentation se
    - les points 14 et 15 de « À trancher » dans `docs/GLOSSAIRE.md` (nom de l'Épreuve, sous-titres) ;
    - l'ancienne décision 9 de `docs/decisions/2026-10-28-engine-shared.md` (libellé de Difficile propre au chapitre) : ce libellé devient commun à tous les chapitres.
 
-5. **À appliquer** : session `menu/common`, table `CHAPTER` et sous-titres communs. Aucun texte de menu n'est modifié par ce fichier.
+5. **À appliquer** : session `menu/common`, table `CHAPTER` et sous-titres communs. Aucun texte de menu n'est modifié par ce fichier. **Appliqué le 1er novembre** (`docs/decisions/2026-11-01-menu-common.md`), avec l'anglais provisoire Breathe, Fair and square, No mercy, Ultimate challenge, Trial by Fire, Trial by Water, à valider.
 
 ## Reste ouvert
 

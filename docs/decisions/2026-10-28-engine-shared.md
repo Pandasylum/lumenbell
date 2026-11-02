@@ -11,7 +11,7 @@
 | 6 | **Titre de fin d'intro comme au Chapitre I** (« LUMEN » couleur du chapitre + « BELL » crème, 96 px ; ligne du chapitre en Big Shoulders 26 px dessous) | Session 5 `engine/cine` (`LB.title`) ; le contrôle sans chevauchement de `tests/ch2-title.js` est à garder. La règle du titre de fin d'outro reste à trancher. Pas codée ici : changement de rendu. |
 | 7 | **Langue du navigateur par défaut** (sinon anglais), **ordre des boutons du Chapitre I** (EN, FR) | **Codée ici** : `LB.lang.init`, `LB.LANGS`. Le Chapitre II n'est plus en français par défaut ; ses boutons passent dans l'ordre EN, FR. |
 | 8 | **Repère d'aide du Chapitre I** (barre au-dessus de la tête en Normal, cercle qui se resserre en Facile) | Session 6 (`LB.cue`). Pas codée ici. |
-| 9 | **Libellé de la difficulté Difficile propre au chapitre** (Facile et Normal communs) | Déjà le cas ; table du chapitre (`CHAPTER.sub.hard`) en session 6. |
+| 9 | ~~**Libellé de la difficulté Difficile propre au chapitre** (Facile et Normal communs)~~ **Fermée le 1er novembre** : le libellé devient commun à tous les chapitres (« Sans pitié », décision du 1er novembre, `docs/decisions/2026-11-01-menus-epreuve-sous-titres.md`), appliqué par la session `menu/common` | — |
 
 ## 2. Session `engine/shared` (branche `engine/shared`)
 - **Dossier `shared/`** : morceaux `.js` communs, listés dans `shared/parts.txt`, insérés par `build/assemble.py` à la ligne `@shared` du `parts.txt` de chaque chapitre, dans l'IIFE du chapitre. Pas de modules ES (décision du 27 octobre). Un seul nom commun : `LB`. Détails : `shared/NOTES.md`.

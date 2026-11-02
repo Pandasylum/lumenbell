@@ -7,8 +7,7 @@ function goPhase(n){
   el.go2.hidden=true;hideMenu();el.ov.classList.remove('clear');
   if(n===1){
     R=null;Q=null;setPhaseUI(1);newGame();lastP=-1;lastB=-1;hud();
-    el.eye.textContent=CARD1.eye;el.title.textContent=CARD1.title;el.desc.textContent=CARD1.desc;el.go.textContent=CARD1.go;
-    el.stats.hidden=true;el.ov.hidden=false;
+    LB.card.show({eye:CARD1.eye,title:CARD1.title,desc:CARD1.desc,go:CARD1.go,onGo:start});
     say(_('Phase I.','Phase I.'));
     if(RUN.on)start();
   }else if(n===2){beginP2()}
@@ -19,23 +18,18 @@ document.querySelectorAll('#phases button').forEach(b=>b.addEventListener('click
   try{if(!el.ov.hidden)el.go.focus({preventScroll:true})}catch(e){}
 }));
 
-/* ---------- input ---------- */
-cv.addEventListener('pointerdown',e=>{e.preventDefault();press()});
-el.ward.addEventListener('pointerdown',e=>{e.preventDefault();press()});
-el.ward.addEventListener('click',e=>{if(e.detail===0)press()});
-el.go.addEventListener('click',start);
-el.help.checked=prefs.help;el.snd.checked=LB.audio.sound;$('optMus').checked=LB.audio.music;
-el.help.addEventListener('change',()=>{prefs.help=el.help.checked;LB.store.set(LB.key('help'),prefs.help?'1':'0')});
+/* ---------- input : entrées communes (LB.input, shared/js/28-ui.js) ---------- */
+LB.card.setGo(start);
+LB.help.mount();el.snd.checked=LB.audio.sound;$('optMus').checked=LB.audio.music;   /* aide : LB.help (lb-help) */
 el.snd.addEventListener('change',()=>LB.audio.setSound(el.snd.checked));
 $('optMus').addEventListener('change',()=>LB.audio.setMusic($('optMus').checked));
 const pauseEl=$('pause');
 const menuEl=$('menu');
 function setPause(on){
-  if(on){if(paused||!el.ov.hidden)return;paused=true;pauseEl.hidden=false;try{$('pResume').focus({preventScroll:true})}catch(e){}}
-  else{pauseEl.hidden=true;paused=false;if(document.activeElement&&document.activeElement.blur)document.activeElement.blur()}
+  if(on){if(paused||!el.ov.hidden)return;paused=true;LB.pause.show()}
+  else{LB.pause.hide();paused=false;if(document.activeElement&&document.activeElement.blur)document.activeElement.blur()}
 }
-$('pResume').addEventListener('click',()=>setPause(false));
-$('pMenu').addEventListener('click',()=>{pauseEl.hidden=true;showMenu(true)});
+LB.pause.bind({onResume:()=>setPause(false),onMenu:()=>{pauseEl.hidden=true;showMenu(true)}});
 $('pauseBtn').addEventListener('click',e=>{setPause(true);e.currentTarget.blur()});
 /* Épreuve : Réessayer = abandonner la run (compte comme une défaite), avec confirmation pour éviter les faux appuis. */
 let abandonT=0,abandonTm=0;
@@ -58,23 +52,16 @@ function retryPhase(){
 }
 $('retryBtn').addEventListener('click',e=>{e.currentTarget.blur();retryPhase()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)setPause(true)});
-/* Plein écran : API standard (ou préfixée Safari) ; bouton masqué si indisponible (iPhone). */
-{const de=document.documentElement,rq=de.requestFullscreen||de.webkitRequestFullscreen,ex=document.exitFullscreen||document.webkitExitFullscreen,
-  isFs=()=>!!(document.fullscreenElement||document.webkitFullscreenElement),
-  btns=document.querySelectorAll('.fsb');
- if(!rq){btns.forEach(b=>b.hidden=true)}
- else btns.forEach(b=>b.addEventListener('click',e=>{e.currentTarget.blur();try{const r=isFs()?ex.call(document):rq.call(de);if(r&&r.catch)r.catch(()=>{})}catch(x){}}));
-}
+/* Menu commun (LB.menu) : scène du chapitre (page/body.html), braises, boutons de rejeu, plein écran, langues, difficultés,
+   Épreuve du feu ; écran de démarrage (LB.gate). Les braises tirent Math.random ici, à la même place qu'avant. */
+LB.menu.mount(CHAPTER,{
+  onDiff:dk=>{applyDiff(dk);ensureAudio();if(CINE.seen())goPhase(1);else CINE.play(()=>goPhase(1))},
+  onResume:()=>{hideMenu();try{if(!el.ov.hidden)el.go.focus({preventScroll:true})}catch(e){}},
+  onIntro:()=>CINE.play(()=>{}),onOutro:()=>OUTRO.play(()=>{}),onLang:()=>applyLang()});
 function showMenu(fromGame){
-  $('ovTable').hidden=true;paused=true;pauseEl.hidden=true;menuEl.hidden=false;el.ov.classList.remove('clear');
-  $('mphM').hidden=false;$('mphT').hidden=true;$('trialNote').hidden=true;
-  $('mResume').hidden=!fromGame;
-  try{(fromGame?$('mResume'):document.querySelector('#menu [data-diff=normal]')).focus({preventScroll:true})}catch(e){}
+  el.table.hidden=true;paused=true;pauseEl.hidden=true;LB.menu.show(fromGame);
 }
 function hideMenu(){paused=false;menuEl.hidden=true;pauseEl.hidden=true}
-$('mResume').addEventListener('click',()=>{hideMenu();try{if(!el.ov.hidden)el.go.focus({preventScroll:true})}catch(e){}});
-(function(){const sv=document.querySelector('.mscene');function fit(){const r=innerWidth/innerHeight;sv.setAttribute('preserveAspectRatio',r<1.2?'xMidYMax meet':'xMidYMax slice')}fit();addEventListener('resize',fit)})();
-(function(){const w=$('mEmbers');for(let i=0;i<26;i++){const e=document.createElement('i');e.className='mem';e.style.left=(Math.random()*100)+'%';e.style.setProperty('--dx',((Math.random()-.5)*160)+'px');e.style.animationDuration=(5+Math.random()*7)+'s';e.style.animationDelay=(-Math.random()*10)+'s';const z=2+Math.random()*3;e.style.width=e.style.height=z+'px';w.appendChild(e)}})();
 /* Épreuve du feu : Normal jouable, Difficile en attente de la phase III Difficile. */
 const BASEW={flwin:T.flwin,breath:BRW}; /* fenêtres courtes du souffle (phases I et III), réglage d'attaque ; l'action et la récupération du Veilleur sont dans LB.hero */
 const BASET=Object.assign({},T);
@@ -85,43 +72,17 @@ function restartRun(){
 }
 function applyDiff(name){
   const d=DIFFS[name]||DIFFS.normal,fm=d.fm||d.m;
-  DIFF=LB.diff.use(d);RUN.on=!!d.trial;RUN.max=d.hp;RUN.cur=d.hp;RUN.n=1;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};RUN.name=name;resetRetryLabel();try{$('retryBtn').disabled=false;$('phases').style.display=RUN.on?'none':''}catch(e){}Object.assign(T,BASET,d.t||{});
+  DIFF=LB.diff.use(d);RUN.on=!!d.trial;RUN.max=d.hp;RUN.cur=d.hp;RUN.n=1;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};RUN.name=name;resetRetryLabel();try{$('retryBtn').disabled=false}catch(e){}Object.assign(T,BASET,d.t||{});
   T.flwin=BASEW.flwin*fm;BRW=BASEW.breath*fm;
-  document.querySelectorAll('#phases button').forEach((b,i)=>{b.disabled=!!d.trial;b.title=d.trial?_('Not available in the trial','Indisponible dans l\'épreuve'):''});
+  LB.hud.track(R?3:Q?2:1,{trial:!!d.trial});   /* Épreuve : frise masquée, phases fermées */
   lastP=lastB=-1;
-  prefs.help=el.help.checked=!d.noHelp&&LB.store.get(LB.key('help'),'0')==='1';deaths=0; /* aide mémorisée (lb-help), toujours coupée là où elle est masquée */tries=[0,0,0,0];cntS=null;
-  el.help.closest('label').hidden=!!d.noHelp;
+  LB.help.use(d);tries=[0,0,0,0];cntS=null;   /* aide mémorisée (lb-help), décochée et désactivée en Épreuve ; défaites remises à zéro */
 }
-function trialMenu(on){updBest();$('mphM').hidden=on;$('mphT').hidden=!on;$('trialNote').hidden=!on;try{(on?$('mphT').querySelector('button'):$('mphM').querySelector('[data-diff=normal]')).focus({preventScroll:true})}catch(e){}}
-$('mBackT').addEventListener('click',()=>trialMenu(false));
-document.querySelectorAll('#menu .mph button').forEach(b=>b.addEventListener('click',()=>{
-  if(b.disabled||!b.dataset.diff)return;
-  if(b.dataset.diff==='trial'&&!trialOpen()){b.blur();return} /* verrouillée : aucun message, le cadenas suffit */
-  if(b.dataset.diff==='trial'){trialMenu(true);return}
-  applyDiff(b.dataset.diff);
-  document.querySelectorAll('#menu .mph button').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));
-  ensureAudio();
-  if(CINE.seen())goPhase(1);else CINE.play(()=>goPhase(1));
-}));
 $('menuBtn').addEventListener('click',e=>{showMenu(true);e.currentTarget.blur()});
-window.addEventListener('keydown',e=>{
-  if(e.repeat)return;
-  if(!$('gate').hidden)return; /* écran de démarrage : seul le bouton agit */
-  const k=e.key;
-  if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
-  if((k==='r'||k==='R')&&menuEl.hidden&&el.ov.hidden){e.preventDefault();retryPhase();return}
-  if((k==='p'||k==='P'||k==='Escape')&&menuEl.hidden){e.preventDefault();setPause(pauseEl.hidden);return}
-  if(!pauseEl.hidden){if((k===' '||k==='Enter')&&document.activeElement!==$('pMenu')){e.preventDefault();setPause(false)}return}
-  if(!menuEl.hidden){
-    if((k===' '||k==='Enter')&&!menuEl.contains(document.activeElement)){e.preventDefault();document.querySelector('#menu [data-diff=normal]').click()}
-    return;
-  }
-  if(!el.ov.hidden){
-    if((k===' '||k==='Enter')&&document.activeElement!==el.go){e.preventDefault();el.go.click()}
-    return;
-  }
-  if(k===' '||k==='Spacebar'||k==='ArrowUp'||k==='w'||k==='W'||k==='z'||k==='Z'){e.preventDefault();press()}
-});
+/* Espace, flèche haut, W, Z, toucher : action ; relâchement ; P / Échap : pause ; R : réessayer (arène seule, sans carte) ;
+   Entrée / Espace : carte, pause, menu (Normal) ; écran de démarrage : seul son bouton */
+LB.input.bind({press,release:()=>{const S=R||Q||G;if(S&&S.pl)LB.hero.release(S.pl)},
+  pause:()=>setPause(pauseEl.hidden),retry:()=>{if(el.ov.hidden)retryPhase()}});
 
 
 

@@ -64,7 +64,6 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .card{max-width:460px;display:grid;gap:10px;justify-items:start;padding:20px 22px;background:var(--panel);border:1px solid var(--line)}
 .card h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(26px,5vw,38px);line-height:1;text-wrap:balance}
 .card p{margin:0;color:var(--muted);font-size:14px}
-.card .stats{color:var(--fg);font-variant-numeric:tabular-nums}
 .rtab{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 18px;width:100%;margin:2px 0 4px}.rtab div{display:flex;flex-direction:column;gap:1px}.rtab small{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.rtab b{font-family:var(--font-display);font-weight:800;font-size:24px;line-height:1.05;font-variant-numeric:tabular-nums}.rtab .rec b{color:var(--ember)}
 
 .btn{font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border:0;padding:10px 20px;background:var(--ember);color:#1a0c04}
@@ -85,49 +84,12 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .mbtn{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer}
 .mrow{display:flex;gap:8px;align-items:center}
 .mbtn:hover{color:var(--fg);background:rgba(255,255,255,.06)}
-.ov.menu{position:fixed;inset:0;z-index:50;padding:24px;background:radial-gradient(ellipse 80% 70% at 50% 110%,rgba(255,122,43,.38),transparent 62%),#08060d}
 .ov.clear{background:transparent;place-items:end center}
 .ov.clear .card{background:rgba(22,17,29,.84);max-width:640px;padding:12px 18px;gap:6px}
-.mem-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.mscene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.mscene .eye{animation:mblink 5s infinite}
-.mscene .lava{animation:mglow 3.2s ease-in-out infinite alternate}
-.mem{position:absolute;bottom:-10px;width:4px;height:4px;border-radius:50%;background:#ffb060;box-shadow:0 0 8px 2px rgba(255,122,43,.8);opacity:0;pointer-events:none;animation:mrise linear infinite}
-@keyframes mrise{0%{transform:translate(0,0);opacity:0}10%{opacity:.9}100%{transform:translate(var(--dx),-80vh);opacity:0}}
-@keyframes mglow{from{opacity:.55}to{opacity:1}}
-@keyframes mblink{0%,92%,100%{opacity:1}95%{opacity:.15}}
-@media (prefers-reduced-motion:reduce){.mem,.mscene .eye,.mscene .lava{animation:none}.mem{display:none}}
-.mcard{position:relative;z-index:1;display:grid;padding:8px 0;gap:12px;justify-items:center;text-align:center;max-width:600px}
-.mcard h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(40px,9vw,88px);line-height:.92;letter-spacing:.01em;text-wrap:balance;color:var(--fg);text-shadow:0 0 40px rgba(255,122,43,.45)}
-.mcard h2 span{color:var(--ember);text-shadow:0 0 40px rgba(255,122,43,.8)}
-.ov.menu .mcard .eyebrow,.ov.menu .mcard h2,.ov.menu .mcard .tag{transform:translateY(-9vh)} /* titre remonté, boutons de difficulté inchangés */
-.mcard .eyebrow.chap{font-size:16px;letter-spacing:.2em;color:var(--glow);margin-top:-4px}
-.mcard .tag{margin:0;color:var(--muted);font-size:14px;max-width:46ch}
-.mcard .how{margin:0;font-size:12px;color:var(--muted)}
-.gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(8,6,13,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-.gate[hidden]{display:none}
-.gate .btn{padding:14px 44px;font-size:24px;letter-spacing:.12em;box-shadow:0 0 36px rgba(255,122,43,.45)}
-.mcard .tnote{width:100%;max-width:420px;box-sizing:border-box;text-align:left;padding:12px 16px;background:rgba(22,17,29,.8);border:1px solid var(--line);border-left:3px solid var(--ember);font-size:13px;line-height:1.45;color:var(--muted)}
-.mcard .tnote[hidden]{display:none}
-.mcard .tnote b{display:block;margin-bottom:6px;font-family:var(--font-display);font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:var(--glow)}
-.mcard .tnote ul{margin:0;padding-left:18px;display:grid;gap:3px}
-.btn.big{font-size:24px;padding:12px 38px}
 .btn.ghost{background:none;color:var(--ember);border:2px solid var(--ember)}
 .btn.ghost:hover{background:rgba(255,122,43,.15);color:var(--glow)}
-.mph{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:580px}
-.mph button{min-width:0;display:grid;gap:0;justify-items:center;padding:8px 6px;background:rgba(22,17,29,.8);border:1px solid var(--line);color:var(--fg);cursor:pointer;font:inherit}
-.mph button b{font-family:var(--font-display);font-weight:800;font-size:18px;line-height:1;color:var(--ember);text-transform:uppercase;letter-spacing:.05em}
-.mph button span{font-size:12px;color:var(--muted)}
-.mph button:hover:not(:disabled){border-color:var(--ember);background:rgba(255,122,43,.1)}
-.mph button[aria-pressed="true"]{border-color:var(--ember);background:rgba(255,122,43,.16)}
-.mph button:disabled{opacity:.45;cursor:not-allowed}
-.mph[hidden]{display:none}
 
 @media (max-width:560px){
-  .mcard .tag,.mcard .how{display:none}
-  .mcard{gap:8px}
-  .mcard h2{font-size:34px}
-  .btn.big{font-size:20px;padding:8px 26px}
   .card{padding:12px 14px;gap:8px}
   .ward{width:100%}
   .opts{margin-left:0}
@@ -136,11 +98,8 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 @media (pointer:coarse){.hint{display:none}.ward{min-height:84px;font-size:24px}.btn,.mbtn,.phases button{min-height:44px}.opts label{padding:8px 4px}}
 @media (max-width:480px){
   body{padding-block:12px 20px}
-  .mph{gap:6px;grid-template-columns:1fr 1fr;max-width:340px}.mph button b{font-size:17px;letter-spacing:.04em}.mph button span{font-size:11px}
-  .ov.menu{padding:16px 12px}
   .ov:not(.menu):not(.clear){position:fixed;z-index:40;background:rgba(8,6,13,.9);padding:16px}
   .ov:not(.menu):not(.clear) .card{max-width:420px}
-  .mcard h2{font-size:clamp(34px,11vw,48px)}
 }
 @media (max-height:520px) and (orientation:landscape){
   /* Paysage : l'arène prend toute la hauteur, le reste passe dans une colonne à droite */
@@ -166,9 +125,6 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
   .controls .opts{order:-2;display:flex;margin:0}.opts label:not([for=optHelp]){display:none}.opts label{padding:2px 0}
   .rtab{gap:4px 10px}.rtab b{font-size:16px}.rtab small{font-size:9px}
   .ov:not(.menu){padding:6px}.card{padding:8px 12px;gap:3px;max-width:100%}.card h2{font-size:20px}.card p{font-size:12px;line-height:1.3}.card .btn{padding:4px 18px;min-height:36px;font-size:15px}
-  .ov.menu .mcard .tag,.ov.menu .mcard .how{display:none}
-  .ov.menu .mcard .eyebrow,.ov.menu .mcard h2{transform:translateY(-4vh)}
-  .mcard h2{font-size:clamp(30px,9vh,52px)}
 }
 /* Portrait mobile : les barres de vie ont une hauteur fixe (une ligne chacune, sans retour à la ligne),
    donc l'arène et le bouton d'action ne bougent plus quand les valeurs changent. Gros bouton d'action. */
@@ -184,28 +140,6 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
   .controls .opts{order:3;margin-left:0}
   .ward{width:100%;min-width:0;height:auto;min-height:clamp(110px,17dvh,160px);font-size:clamp(28px,8vw,40px);letter-spacing:.1em}
 }
-.fsm{position:absolute;top:12px;left:12px;z-index:3;background:rgba(10,7,16,.6)}.fsm span{font-size:13px}@media (max-width:480px){.fsm span{display:none}}
-.fsb[hidden]{display:none}
-/* sous-menu de l'épreuve : 3 boutons centrés (la grille à 4 colonnes les décalait) */
-#mphT{grid-template-columns:repeat(3,1fr);max-width:440px}
-@media (max-width:480px){#mphT{grid-template-columns:1fr 1fr;max-width:340px}#mphT #mBackT{grid-column:1/-1}}
-@media (pointer:coarse){.fsb{display:none!important}#introBtn{top:12px!important}#outroBtn{top:56px!important}} /* mobile : déjà en plein écran (APK) ou géré par le navigateur */
-.mfoot{display:flex;justify-content:center;margin-top:2px}
-.mlink{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:#7fe8d8;text-decoration:none;border:1px solid rgba(79,224,204,.5);padding:7px 14px;background:rgba(4,22,24,.55)}
-.mlink{font-family:inherit;cursor:default}
-.ver{margin:6px 0 0;font-size:11px;letter-spacing:.14em;color:var(--muted);opacity:.6;text-align:center}
-.mlink.lock{color:var(--muted);border-color:var(--line);background:rgba(10,7,16,.5);opacity:.75}
-.mlink.lock:hover{background:rgba(10,7,16,.5);color:var(--muted)}
-.mph button[aria-disabled=true]{opacity:.45;cursor:not-allowed}
-.mlink:hover{background:rgba(79,224,204,.18);color:#c8fff4}
-.mlink small{font-size:11px;letter-spacing:.12em;color:var(--muted);border:1px solid var(--line);padding:1px 6px}
-#introBtn{position:absolute;top:56px;left:12px;z-index:3;background:rgba(10,7,16,.6)}
-#outroBtn{position:absolute;top:100px;left:12px;z-index:3;background:rgba(10,7,16,.6)}
-.langs{position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:3}
-.langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(241,227,207,.3);border-radius:4px;cursor:pointer}
-.langs button[aria-pressed="true"]{border-color:var(--ember);background:rgba(255,122,43,.22);color:#fff}
-.langs button:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
-@media (pointer:coarse){.langs button{min-height:40px}}
 </style>
 <style>html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -226,20 +160,8 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
     <div class="bar boss"><span>Ember Colossus <b id="hpBn"></b></span><div class="pips" id="hpB" role="img" aria-label="Points de vie du Colosse"></div></div>
   </section>
 
-  <div class="stage">
+  <div class="stage" id="stage">
     <canvas id="c" role="img" aria-label="Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre"></canvas>
-    <div class="ov" id="ov">
-      <div class="card">
-        <p class="eyebrow" id="ovEye">Phase I · The Bridge</p>
-        <h2 id="ovTitle">Hold the bridge.</h2>
-        <p class="stats" id="ovStats" hidden></p>
-        <div class="rtab" id="ovTable" hidden></div>
-        <p id="ovDesc">The Colossus has reached the bridge. Behind the Watcher lies nothing but the road to the valleys. A single rule: not one step back.</p>
-        <button class="btn" id="go" type="button">Start</button>
-        <button class="btn ghost" id="go2" type="button" hidden>Enable visual help</button>
-      </div>
-    </div>
-    <div class="gate" id="gate"><div class="langs" id="gateLangs" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></div><button class="btn big" id="gateBtn" type="button">Start</button></div>
     <div class="ov menu" id="menu" hidden>
     <svg class="mscene" viewBox="0 0 960 540" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
       <defs>
@@ -270,43 +192,6 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
       <g class="eye" fill="#ffd27a"><circle cx="690" cy="232" r="4"/><circle cx="722" cy="232" r="4"/></g>
       <path d="M675 330 Q705 300 735 330 Q705 360 675 330Z" fill="#ff7a2b" opacity=".35" class="lava"/>
     </svg>
-    <div class="mem-wrap" id="mEmbers" aria-hidden="true"></div>
-      <button type="button" class="mbtn" id="introBtn">▶ Intro</button>
-      <button type="button" class="mbtn" id="outroBtn" hidden>▶ Outro</button>
-      <button type="button" class="mbtn fsb fsm" aria-label="Fullscreen" title="Fullscreen">⛶ <span>Fullscreen</span></button>
-      <div class="langs" id="langs" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></div>
-      <div class="mcard">
-        <h2><span>Lumen</span>bell</h2>
-        <p class="eyebrow chap">Chapter I · Ember Bridge</p>
-        <p class="tag">The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower.</p>
-        <button class="btn ghost" id="mResume" type="button" hidden>Resume</button>
-        <div class="mph" id="mphM" role="group" aria-label="Choisir la difficulté">
-          <button type="button" data-diff="easy"><b>Easy</b><span>Breathe</span></button>
-          <button type="button" data-diff="normal" aria-pressed="true"><b>Normal</b><span>The real fight</span></button>
-          <button type="button" data-diff="hard"><b>Hard</b><span>The Colossus unleashed</span></button>
-          <button type="button" data-diff="trial"><b>Trial by Fire</b><span>Ultimate challenge</span></button>
-        </div>
-        <div class="mph" id="mphT" role="group" aria-label="Trial by Fire" hidden>
-          <button type="button" data-diff="tn"><b>Normal</b><span>4 lives</span></button>
-          <button type="button" data-diff="th"><b>Hard</b><span>4 lives</span></button>
-          <button type="button" id="mBackT"><b>‹ Back</b><span>Difficulties</span></button>
-        </div>
-        <div class="tnote" id="trialNote" hidden>
-          <b>Trial by Fire</b>
-          <ul><li>The three phases in a row, with no pause and no visual help.</li><li>You recover 1 life between phases.</li><li>A single death sends you back to Phase I.</li><li>One stats table at the end of the run.</li></ul>
-        </div>
-        <p class="how">One button: block, dodge. Space, up arrow or tap the screen. P to pause.</p>
-        <p class="ver" aria-label="Version 1.0.0">v1.0.0</p>
-        <div class="mfoot"><button type="button" class="mlink" id="mNext" aria-disabled="true"><span class="nm"></span> <small class="soon"></small></button></div>
-      </div>
-    </div>
-    <div class="ov" id="pause" hidden>
-      <div class="card">
-        <p class="eyebrow">Pause</p>
-        <h2>Fight paused</h2>
-        <button class="btn" id="pResume" type="button">Resume</button>
-        <button class="btn ghost" id="pMenu" type="button">Menu</button>
-      </div>
     </div>
   </div>
 
@@ -870,30 +755,398 @@ LB.title=(c,t,t0,o)=>{
   const U=o.sub.toUpperCase(),asc=c.measureText(U).actualBoundingBoxAscent||T.sub*.72;
   c.fillText(U,480,Math.max(T.y+T.subDy,T.y+desc+T.gap+asc));c.restore();
 };
+/* ---------- Cadre commun des chapitres (session menu/common, 1er novembre 2026) ----------
+   LB.menu (menu de la série), LB.gate (écran de démarrage), LB.card (cartes #ov), LB.pause, LB.input (entrées), LB.hud
+   (barres, nom du boss, sourcil, frise), LB.cue (repère d'aide), LB.help (case « Aide »), LB.fs (plein écran), LB.MENU_T.
+   Référence par élément (docs/COMMUN.md § 1) : le Chapitre I pour ce que le joueur voit (structure, ordre du titre, polices,
+   tailles, écran de démarrage, boutons de rejeu, Entrée / Espace au menu, repère d'aide), le Chapitre II pour l'outillage
+   (carte déclarative, relâchement, zones sûres). Le chapitre ne déclare qu'une table CHAPTER (docs/COMMUN.md § 3.1) :
+   n, id, title, color (code couleur), color2 (clair : ligne du chapitre, note de l'Épreuve), rgb (halos), menu {bg, glowA,
+   titleA, particles, t}, trial {name}, player, tag? (accroche), how? (mode d'emploi), next {n, title, col, rgb, hover, open?}, help {offer?},
+   et les fonctions trialOpen(), endSeen(), best(n), fmt(t). Un texte est une fonction qui rend la chaîne déjà traduite
+   (le chapitre y appelle sa fonction de texte) ou un objet {en, fr}. Le style (LB.UI_CSS) est créé ici avec les couleurs du chapitre.
+   Les textes communs (difficultés, sous-titres, boutons) sont ici, en LB._(en, fr). Aucun mot d'annonce. */
+/* Version du jeu, une seule pour la série, affichée au menu (« v1.0.0 ») : valeur du Chapitre I (CHANGELOG.md v1.0.0). */
+LB.VERSION='1.0.0';
+/* Règles de l'Épreuve, identiques dans tous les chapitres (texte d'origine du Chapitre I) : note du menu. Le nom de l'Épreuve est propre au chapitre. */
+LB.TRIAL_RULES=[()=>LB._('The three phases in a row, with no pause and no visual help.',"Les trois phases d'affilée, sans pause et sans aide visuelle."),
+ ()=>LB._('You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'),
+ ()=>LB._('A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'),
+ ()=>LB._('One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run.")];
+LB.ROMAN=['','I','II','III','IV','V','VI','VII'];
+/* « Chapitre N · Titre » et son cadenas : libellés communs (le chapitre ne donne que n et title) */
+LB.chapterName=(n,title)=>LB._('Chapter '+LB.ROMAN[n]+' · '+title,'Chapitre '+LB.ROMAN[n]+' · '+title);
+LB.chapterLock=n=>LB._('🔒 Chapter '+LB.ROMAN[n],'🔒 Chapitre '+LB.ROMAN[n]);
+LB.MENU_T={
+  /* placement commun à tous les chapitres (aucune position propre à un chapitre) : largeur de la carte et des difficultés, lignes réservées
+     de l'accroche et du mode d'emploi (px ; réservées même si le chapitre n'en a pas, pour que les boutons restent au même endroit) */
+  cardW:'min(94vw,580px)',btnFs:'min(18px,2.8vw)',   // police du nom d'une difficulté : ne passe jamais à la ligne (4 colonnes jusqu'à 480 px)
+  nextW:'min(100%,366px)',nextFs:'clamp(11px,3.7vw,15px)',tagH:42,howH:18,   // largeur adaptable de la carte, largeur du bouton du chapitre suivant et sa police (ne passe jamais à la ligne)
+  btnH:44,btnHLow:34,     // hauteur mini des boutons du haut du menu (Intro, Outro, plein écran) : écran tactile, puis paysage bas
+  raise:'-9vh',raiseLow:'-4vh',raiseMinH:700,tinyH:340,          // remontée du titre (paysage bas : raiseLow)
+  glow:3.2,glowMin:.55,blink:5,          // scintillement des braises / de la mer (.lava), clignement des yeux (.eye)
+  /* particules du menu : nombre, durée [min, + aléa] s, avance max s, taille [min, + aléa] px, dérive x px, montée, opacité au pic */
+  embers:{id:'mEmbers',cls:'mem',key:'mrise',n:26,dur:[5,7],delay:10,size:[2,3],dx:160,rise:'-80vh',peak:.9,w:4,col:'#ffb060',glow:'0 0 8px 2px rgba(255,122,43,.8)'},
+  spray:{id:'mSnow',cls:'msn',key:'mfall',n:34,dur:[7,8],delay:12,size:[1.5,2.5],dx:120,rise:'-45vh',peak:.7,w:3,col:'#e8f8ff',glow:'0 0 6px 1px rgba(159,242,255,.6)'}
+};
+LB.tx=o=>o==null?'':typeof o==='function'?o():typeof o==='string'?o:LB._(o.en,o.fr);
+LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],c=C.color,c2=C.color2,rgb=C.rgb,N=C.next;
+ return '.bar span i{font-style:normal}\n'+
+ '.card .stats{color:var(--fg);font-variant-numeric:tabular-nums}\n'+
+ '.card .how2{color:var(--fg);font-size:13px;border-left:3px solid '+c+';padding-left:10px}\n'+
+ '.ov.menu{position:fixed;inset:0;z-index:50;padding:24px;place-items:start center;background:radial-gradient(ellipse 80% 70% at 50% 110%,rgba('+rgb+','+C.menu.glowA+'),transparent 62%),'+C.menu.bg+'}\n'+
+ '.mem-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none}\n'+
+ '.mscene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}\n'+
+ '.mscene .eye{animation:mblink '+M.blink+'s infinite}\n'+
+ '.mscene .lava{animation:mglow '+M.glow+'s ease-in-out infinite alternate}\n'+
+ '.'+P.cls+'{position:absolute;bottom:-10px;width:'+P.w+'px;height:'+P.w+'px;border-radius:50%;background:'+P.col+';box-shadow:'+P.glow+';opacity:0;pointer-events:none;animation:'+P.key+' linear infinite}\n'+
+ '@keyframes '+P.key+'{0%{transform:translate(0,0);opacity:0}10%{opacity:'+P.peak+'}100%{transform:translate(var(--dx),'+P.rise+');opacity:0}}\n'+
+ '@keyframes mglow{from{opacity:'+M.glowMin+'}to{opacity:1}}\n'+
+ '@keyframes mblink{0%,92%,100%{opacity:1}95%{opacity:.15}}\n'+
+ '@media (prefers-reduced-motion:reduce){.'+P.cls+',.mscene .eye,.mscene .lava{animation:none}.'+P.cls+'{display:none}}\n'+
+ '.mcard{margin-block:auto;position:relative;z-index:1;display:grid;padding:8px 0;gap:12px;justify-items:center;text-align:center;width:'+M.cardW+'}\n'+
+ '.mcard h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(40px,9vw,88px);line-height:.92;letter-spacing:.01em;text-wrap:balance;color:var(--fg);text-shadow:0 0 40px rgba('+rgb+','+C.menu.titleA+')}\n'+
+ '.mcard h2 span{color:'+c+';text-shadow:0 0 40px rgba('+rgb+',.8)}\n'+
+ '.ov.menu .mcard .eyebrow,.ov.menu .mcard h2,.ov.menu .mcard .tag{transform:translateY('+M.raise+')}\n'+
+ '@media (max-height:'+M.raiseMinH+'px){.ov.menu .mcard .eyebrow,.ov.menu .mcard h2,.ov.menu .mcard .tag{transform:none}}   /* écran bas : pas de remontée, le titre ne sort jamais de l\'écran */\n'+
+ '.mcard .eyebrow.chap{font-size:16px;letter-spacing:.2em;color:'+c2+';margin-top:-4px}\n'+
+ '.mcard .tag{margin:0;color:var(--muted);font-size:14px;max-width:46ch;min-height:'+M.tagH+'px}\n'+
+ '.mcard .how{margin:0;font-size:12px;color:var(--muted);min-height:'+M.howH+'px}\n'+
+ '.gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(8,6,13,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}\n'+
+ '.gate[hidden]{display:none}\n'+
+ '.gate .btn{padding:14px 44px;font-size:24px;letter-spacing:.12em;box-shadow:0 0 36px rgba('+rgb+',.45)}\n'+
+ '.mcard .tnote{width:100%;max-width:420px;box-sizing:border-box;text-align:left;padding:12px 16px;background:rgba(22,17,29,.8);border:1px solid var(--line);border-left:3px solid '+c+';font-size:13px;line-height:1.45;color:var(--muted)}\n'+
+ '.mcard .tnote[hidden]{display:none}\n'+
+ '.mcard .tnote b{display:block;margin-bottom:6px;font-family:var(--font-display);font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:'+c2+'}\n'+
+ '.mcard .tnote ul{margin:0;padding-left:18px;display:grid;gap:3px}\n'+
+ '.btn.big{font-size:24px;padding:12px 38px}\n'+
+ '.mph{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%}\n'+
+ '.mph button{min-width:0;display:grid;gap:0;justify-items:center;padding:8px 6px;background:rgba(22,17,29,.8);border:1px solid var(--line);color:var(--fg);cursor:pointer;font:inherit}\n'+
+ '.mph button b{font-family:var(--font-display);font-weight:800;font-size:'+M.btnFs+';line-height:1;white-space:nowrap;color:'+c+';text-transform:uppercase;letter-spacing:.05em}\n'+
+ '.mph button span{font-size:12px;color:var(--muted)}\n'+
+ '.mph button:hover:not(:disabled){border-color:'+c+';background:rgba('+rgb+',.1)}\n'+
+ '.mph button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.16)}\n'+
+ '.mph button:disabled{opacity:.45;cursor:not-allowed}\n'+
+ '.mph[hidden]{display:none}\n'+
+ '@media (max-width:560px){.mcard .tag,.mcard .how{display:none}.mcard{gap:8px}.mcard h2{font-size:34px}.btn.big{font-size:20px;padding:8px 26px}}\n'+
+ '@media (max-width:480px){.mph{gap:6px;grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}.mph button b{font-size:17px;letter-spacing:.04em}.mph button span{font-size:11px}.ov.menu{padding:16px 12px}.mcard h2{font-size:clamp(34px,11vw,48px)}}\n'+
+ '@media (max-height:520px) and (orientation:landscape){.ov.menu{padding-block:8px}.mcard{gap:6px;padding:0}.mcard .tnote{padding:6px 12px;font-size:11px;line-height:1.3}.mcard .tnote b{margin-bottom:2px;font-size:14px}.mcard .tnote ul{gap:1px}.ver{margin:0}.ov.menu .mcard .tag,.ov.menu .mcard .how{display:none}.ov.menu .mcard .eyebrow,.ov.menu .mcard h2{transform:none}.mcard h2{font-size:clamp(30px,9vh,52px)}}\n'+
+ '@media (max-height:'+M.tinyH+'px) and (orientation:landscape){.ov.menu{padding-block:4px}.mcard{gap:4px;padding:0}.mcard .tnote{line-height:1.2}.mcard h2{font-size:26px;line-height:.85}.mcard .eyebrow.chap{font-size:13px;margin-top:0}.mcard .tnote{padding:4px 10px}.mcard .tnote b{font-size:12px}.mcard .tnote ul{padding-left:14px}}\n'+
+ '.fsm{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}.fsm span{font-size:13px}@media (max-width:480px){.fsm span{display:none}}\n'+
+ '.fsb[hidden]{display:none}\n'+
+ '#mphT{grid-template-columns:repeat(3,minmax(0,1fr));max-width:440px}\n'+
+ '@media (max-width:480px){#mphT{grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}#mphT #mBackT{grid-column:1/-1}}\n'+
+ '@media (pointer:coarse){.fsb{display:none!important}#introBtn{top:calc(12px + env(safe-area-inset-top,0px))!important}#outroBtn{top:calc(56px + env(safe-area-inset-top,0px))!important}}\n'+
+ '.mfoot{display:flex;width:100%;justify-content:center;margin-top:2px}\n'+
+ '.mlink{display:flex;align-items:center;justify-content:center;gap:8px;width:'+M.nextW+';box-sizing:border-box;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:'+M.nextFs+';letter-spacing:.08em;text-transform:uppercase;color:'+N.col+';text-decoration:none;border:1px solid rgba('+N.rgb+',.5);padding:7px 14px;background:rgba(4,22,24,.55)}\n'+
+ '.mlink{font-family:inherit;cursor:default}\n'+
+ '.ver{margin:6px 0 0;font-size:11px;letter-spacing:.14em;color:var(--muted);opacity:.6;text-align:center}\n'+
+ '.mlink.lock{color:var(--muted);border-color:var(--line);background:rgba(10,7,16,.5);opacity:.75}\n'+
+ '.mlink.lock:hover{background:rgba(10,7,16,.5);color:var(--muted)}\n'+
+ '.mph button[aria-disabled=true]{opacity:.45;cursor:not-allowed}\n'+
+ '.mlink:hover{background:rgba('+N.rgb+',.18);color:'+N.hover+'}\n'+
+ '.mlink small{font-size:.7333em;letter-spacing:.12em;color:var(--muted);border:1px solid var(--line);padding:1px .55em}\n'+
+ '#introBtn{position:absolute;top:calc(56px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
+ '#outroBtn{position:absolute;top:calc(100px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
+ '.langs{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:3}\n'+
+ '.langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(241,227,207,.3);border-radius:4px;cursor:pointer}\n'+
+ '.langs button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.22);color:#fff}\n'+
+ '.langs button:focus-visible{outline:2px solid '+c+';outline-offset:2px}\n'+
+ '@media (pointer:coarse){.langs button{min-height:40px}.ov.menu .mbtn{min-height:'+M.btnH+'px}}\n'+
+ '@media (max-height:520px) and (orientation:landscape){.ov.menu .mbtn{min-height:'+M.btnHLow+'px;padding-block:2px}}\n'};
+LB.ui=(()=>{
+  const $=id=>document.getElementById(id),mk=(tag,attrs,html)=>{const e=document.createElement(tag);for(const k in attrs||{})e.setAttribute(k,attrs[k]);if(html!=null)e.innerHTML=html;return e};
+  let styled=false;
+  /* style commun, une seule fois, avec les couleurs du chapitre (après le style de la page : les règles du menu l'emportent comme avant) */
+  function style(C){if(styled)return;styled=true;const st=document.createElement('style');st.textContent=LB.UI_CSS(C);document.head.appendChild(st)}
+  return{$,mk,style};
+})();
+
+/* ---------- LB.card : carte de l'arène (#ov), déclarative ----------
+   show({eye, title, stats, table, desc, how, go, onGo, go2, onGo2, clear}) ; table = lignes [libellé, valeur, record?].
+   hide(), visible(), go() (le bouton principal), el (éléments). Le bouton reçoit le focus (Entrée / Espace le pressent). */
+LB.card=(()=>{
+  const el={};let onGo=null,onGo2=null;
+  function mount(stage,before){
+    if(el.ov)return el;
+    const ov=LB.ui.mk('div',{class:'ov',id:'ov',hidden:''},'<div class="card"><p class="eyebrow" id="ovEye"></p><h2 id="ovTitle"></h2><p class="stats" id="ovStats" hidden></p><div class="rtab" id="ovTable" hidden></div><p id="ovDesc"></p><p class="how2" id="ovHow" hidden></p><button class="btn" id="go" type="button"></button><button class="btn ghost" id="go2" type="button" hidden></button></div>');
+    stage.insertBefore(ov,before||null);
+    Object.assign(el,{ov,eye:ov.querySelector('#ovEye'),title:ov.querySelector('#ovTitle'),stats:ov.querySelector('#ovStats'),table:ov.querySelector('#ovTable'),
+      desc:ov.querySelector('#ovDesc'),how:ov.querySelector('#ovHow'),go:ov.querySelector('#go'),go2:ov.querySelector('#go2')});
+    el.go.addEventListener('click',()=>{if(onGo)onGo()});
+    el.go2.addEventListener('click',()=>{if(onGo2)onGo2()});
+    return el;
+  }
+  function table(rows){el.table.innerHTML='';for(const r of rows){const d=document.createElement('div');if(r[2])d.className='rec';d.innerHTML='<small></small><b></b>';d.firstChild.textContent=r[0];d.lastChild.textContent=r[1];el.table.appendChild(d)}}
+  function show(o){
+    el.eye.textContent=o.eye||'';el.title.textContent=o.title||'';
+    el.stats.hidden=!o.stats;el.stats.textContent=o.stats||'';
+    el.table.hidden=!o.table;el.table.innerHTML='';if(o.table)table(o.table);
+    el.desc.textContent=o.desc||'';el.how.hidden=!o.how;el.how.textContent=o.how||'';
+    el.go.textContent=o.go||'';onGo=o.onGo||null;
+    el.go2.hidden=!o.go2;el.go2.textContent=o.go2||'';onGo2=o.onGo2||null;
+    el.ov.classList.toggle('clear',!!o.clear);el.ov.hidden=false;
+    try{el.go.focus({preventScroll:true})}catch(e){}
+  }
+  return{el,mount,show,hide(){if(el.ov)el.ov.hidden=true},visible(){return!!el.ov&&!el.ov.hidden},go(){if(onGo)onGo()},setGo(f){onGo=f},setGo2(f){onGo2=f}};
+})();
+
+/* ---------- LB.pause : carte de pause (Reprendre, Menu) ---------- */
+LB.pause=(()=>{
+  let ov=null,h={};
+  function mount(stage,after,hh){
+    h=hh||{};if(ov)return ov;
+    ov=LB.ui.mk('div',{class:'ov',id:'pause',hidden:''},'<div class="card"><p class="eyebrow">Pause</p><h2 id="pTitle">Fight paused</h2><button class="btn" id="pResume" type="button">Resume</button><button class="btn ghost" id="pMenu" type="button">Menu</button></div>');
+    stage.insertBefore(ov,after?after.nextSibling:null);
+    ov.querySelector('#pResume').addEventListener('click',()=>{if(h.onResume)h.onResume()});
+    ov.querySelector('#pMenu').addEventListener('click',()=>{if(h.onMenu)h.onMenu()});
+    return ov;
+  }
+  function lang(){if(!ov)return;ov.querySelector('#pTitle').textContent=LB._('Fight paused','Combat en pause');ov.querySelector('#pResume').textContent=LB._('Resume','Reprendre')}
+  return{mount,lang,bind(hh){h=hh},show(){ov.hidden=false;try{ov.querySelector('#pResume').focus({preventScroll:true})}catch(e){}},hide(){if(ov)ov.hidden=true},
+    visible(){return!!ov&&!ov.hidden},resume(){if(h.onResume)h.onResume()},get el(){return ov}};
+})();
+
+/* ---------- LB.fs : plein écran (boutons .fsb : en-tête et menu) ; masqués si l'API manque (iPhone) ---------- */
+LB.fs={bind(){const de=document.documentElement,rq=de.requestFullscreen||de.webkitRequestFullscreen,ex=document.exitFullscreen||document.webkitExitFullscreen,
+  isFs=()=>!!(document.fullscreenElement||document.webkitFullscreenElement),btns=document.querySelectorAll('.fsb');
+ if(!rq){btns.forEach(b=>b.hidden=true);return}
+ btns.forEach(b=>{if(b.dataset.fs)return;b.dataset.fs='1';b.addEventListener('click',e=>{e.currentTarget.blur();try{const r=isFs()?ex.call(document):rq.call(de);if(r&&r.catch)r.catch(()=>{})}catch(x){}})})},
+ lang(){document.querySelectorAll('.fsb').forEach(b=>{const t=LB._('Fullscreen','Plein écran');b.setAttribute('aria-label',t);b.title=t})}};
+
+/* ---------- LB.gate : écran de démarrage (Commencer + langues) ; le clic débloque le son (comme au Chapitre I) ---------- */
+LB.gate=(()=>{
+  let g=null,h={};
+  function mount(stage,before,hh){
+    h=hh||{};if(g)return g;
+    g=LB.ui.mk('div',{class:'gate',id:'gate'},'<div class="langs" id="gateLangs" role="group" aria-label="Language">'+LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')+'</div><button class="btn big" id="gateBtn" type="button">Start</button>');
+    stage.insertBefore(g,before||null);
+    g.querySelector('#gateBtn').addEventListener('click',()=>{LB.audio.ensure();g.hidden=true;try{document.querySelector('#menu [data-diff=normal]').focus({preventScroll:true})}catch(e){}if(h.onStart)h.onStart()});
+    return g;
+  }
+  return{mount,visible(){return!!g&&!g.hidden},focus(){try{g.querySelector('#gateBtn').focus({preventScroll:true})}catch(e){}},get el(){return g}};
+})();
+
+/* ---------- LB.menu : menu de la série ----------
+   mount(C, h) : construit autour de la scène SVG du chapitre (déjà dans #menu, classe .mscene) les particules, « ▶ Intro »,
+   « ▶ Outro » (après la vraie fin), plein écran, langues, puis la carte : « Lumen|bell », la ligne du chapitre dessous, accroche,
+   Reprendre, les quatre difficultés, le sous-menu de l'Épreuve (Normal, Difficile, Retour) et sa note, mode d'emploi, version,
+   chapitre suivant ; aussi l'écran de démarrage (LB.gate), la carte (LB.card) et la pause (LB.pause) s'ils manquent.
+   h : {onDiff(dk), onIntro(), onOutro(), onResume(), onLang(), onStart()}. show(reprendre), hide(), visible(), lang(),
+   update() (verrou de l'Épreuve, records, « ▶ Outro », chapitre suivant), trial(on). */
+LB.menu=(()=>{
+  let C=null,h={},m=null,card=null;const $=LB.ui.$;
+  const DK=['easy','normal','hard'];
+  const TX={easy:()=>LB._('Easy','Facile'),normal:()=>LB._('Normal','Normal'),hard:()=>LB._('Hard','Difficile'),
+    sEasy:()=>LB._('Breathe','Respire'),sNormal:()=>LB._('Fair and square','À la loyale'),sHard:()=>LB._('No mercy','Sans pitié'),sTrial:()=>LB._('Ultimate challenge','Challenge ultime')};
+  function particles(){const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],w=LB.ui.mk('div',{class:'mem-wrap',id:P.id,'aria-hidden':'true'});
+    for(let i=0;i<P.n;i++){const e=document.createElement('i');e.className=P.cls;e.style.left=(Math.random()*100)+'%';e.style.setProperty('--dx',((Math.random()-.5)*P.dx)+'px');
+      e.style.animationDuration=(P.dur[0]+Math.random()*P.dur[1])+'s';e.style.animationDelay=(-Math.random()*P.delay)+'s';const z=P.size[0]+Math.random()*P.size[1];e.style.width=e.style.height=z+'px';w.appendChild(e)}
+    return w}
+  function mount(CH,hh){
+    C=CH;h=hh||{};if(m)return m;
+    LB.ui.style(C);
+    m=$('menu');const stage=m.parentNode;
+    if(!LB.card.el.ov)LB.card.mount(stage,m);
+    LB.gate.mount(stage,m,{onStart:()=>{if(h.onStart)h.onStart()}});
+    if(!LB.pause.el)LB.pause.mount(stage,m);
+    m.appendChild(particles());
+    m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'introBtn'},'▶ Intro'));
+    m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'outroBtn',hidden:''},'▶ Outro'));
+    m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn fsb fsm','aria-label':'Fullscreen',title:'Fullscreen'},'⛶ <span>Fullscreen</span>'));
+    m.appendChild(LB.ui.mk('div',{class:'langs',id:'langs',role:'group','aria-label':'Language'},LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')));
+    const b=(dk,pr)=>'<button type="button" data-diff="'+dk+'"'+(pr?' aria-pressed="true"':'')+'><b></b><span></span></button>';
+    card=LB.ui.mk('div',{class:'mcard'},'<h2><span>Lumen</span>bell</h2><p class="eyebrow chap" id="mEye"></p><p class="tag"></p>'+
+      '<button class="btn ghost" id="mResume" type="button" hidden>Resume</button>'+
+      '<div class="mph" id="mphM" role="group" aria-label="Choose difficulty">'+b('easy')+b('normal',1)+b('hard')+b('trial')+'</div>'+
+      '<div class="mph" id="mphT" role="group" aria-label="Trial" hidden>'+b('tn')+b('th')+'<button type="button" id="mBackT"><b></b><span></span></button></div>'+
+      '<div class="tnote" id="trialNote" hidden><b></b><ul>'+LB.TRIAL_RULES.map(()=>'<li></li>').join('')+'</ul></div>'+
+      '<p class="how"></p><p class="ver" aria-label="Version '+LB.VERSION+'">v'+LB.VERSION+'</p>'+
+      '<div class="mfoot"><button type="button" class="mlink" id="mNext" aria-disabled="true"><span class="nm"></span> <small class="soon"></small></button></div>');
+    m.appendChild(card);
+    /* scène : cadrée sur le bas en paysage, entière en portrait (comme au Chapitre I) */
+    const sv=m.querySelector('.mscene');if(sv){const fit=()=>sv.setAttribute('preserveAspectRatio',innerWidth/innerHeight<1.2?'xMidYMax meet':'xMidYMax slice');fit();addEventListener('resize',fit)}
+    m.querySelectorAll('.mph button').forEach(bt=>bt.addEventListener('click',()=>{
+      if(bt.disabled||!bt.dataset.diff)return;
+      if(bt.dataset.diff==='trial'&&!C.trialOpen()){bt.blur();return}   /* verrouillée : aucun message, le cadenas suffit */
+      if(bt.dataset.diff==='trial'){trial(true);return}
+      m.querySelectorAll('.mph button').forEach(o=>o.setAttribute('aria-pressed',String(o===bt)));
+      if(h.onDiff)h.onDiff(bt.dataset.diff);
+    }));
+    $('mBackT').addEventListener('click',()=>trial(false));
+    $('mResume').addEventListener('click',()=>{if(h.onResume)h.onResume()});
+    $('introBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onIntro)h.onIntro()});
+    $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onOutro)h.onOutro()});
+    $('mNext').addEventListener('click',e=>e.currentTarget.blur());   /* chapitre suivant : « À venir » suffit, aucun message */
+    document.querySelectorAll('#langs button,#gateLangs button').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
+    LB.fs.bind();
+    lang();
+    return m;
+  }
+  /* records de l'Épreuve, verrou, « ▶ Outro », chapitre suivant */
+  function update(){if(!m)return;
+    for(const n of ['tn','th']){const sp=m.querySelector('#mphT [data-diff='+n+'] span'),v=+C.best(n)||0;sp.textContent=v?'🏆 '+C.fmt(v):LB._('No record yet','Pas encore de record')}
+    const ok=C.endSeen(),tok=C.trialOpen(),tb=m.querySelector('#mphM [data-diff=trial]'),nm=LB.tx(C.trial.name);
+    $('outroBtn').hidden=!ok;
+    tb.setAttribute('aria-disabled',String(!tok));   /* Épreuve : ouverte pendant les tests (TRIAL_OPEN), sinon débloquée par la vraie fin */
+    tb.querySelector('b').textContent=tok?nm:'🔒 '+nm;tb.querySelector('span').textContent=tok?TX.sTrial():LB._('To unlock','À débloquer');
+    {const b=$('mNext'),op=!!C.next.open&&C.next.open();   /* chapitre suivant : toujours non cliquable ; cadenas tant qu'il n'est pas ouvert */
+     b.classList.toggle('lock',!op);b.querySelector('.nm').textContent=op?LB.chapterName(C.next.n,C.next.title):LB.chapterLock(C.next.n);b.querySelector('.soon').textContent=LB._('Coming soon','À venir')}
+  }
+  function lang(){if(!m)return;
+    document.documentElement.lang=LB.lang.cur;
+    update();
+    $('mEye').textContent=LB.chapterName(C.n,C.title);
+    m.querySelector('.mcard .tag').textContent=LB.tx(C.tag);
+    $('mResume').textContent=LB._('Resume','Reprendre');
+    const gb=$('gateBtn');if(gb)gb.textContent=LB._('Start','Commencer');
+    for(const dk of DK){const bt=m.querySelector('#mphM [data-diff='+dk+']');bt.querySelector('b').textContent=TX[dk]();bt.querySelector('span').textContent=TX['s'+dk[0].toUpperCase()+dk.slice(1)]()}
+    m.querySelector('#mphT [data-diff=tn] b').textContent=TX.normal();m.querySelector('#mphT [data-diff=th] b').textContent=TX.hard();
+    $('mBackT').querySelector('b').textContent=LB._('‹ Back','‹ Retour');$('mBackT').querySelector('span').textContent=LB._('Difficulties','Difficultés');
+    $('trialNote').querySelector('b').textContent=LB.tx(C.trial.name);
+    $('trialNote').querySelectorAll('li').forEach((li,i)=>li.textContent=LB.TRIAL_RULES[i]());
+    m.querySelector('.mcard .how').textContent=LB.tx(C.how);
+    m.querySelector('.fsm span').textContent=LB._('Fullscreen','Plein écran');
+    $('introBtn').textContent='▶ Intro';$('outroBtn').textContent='▶ Outro';
+    $('mphM').setAttribute('aria-label',LB._('Choose difficulty','Choisir la difficulté'));$('mphT').setAttribute('aria-label',LB.tx(C.trial.name));
+    document.querySelectorAll('#langs,#gateLangs').forEach(e=>e.setAttribute('aria-label',LB._('Language','Langue')));
+    document.querySelectorAll('#langs button,#gateLangs button').forEach(bt=>bt.setAttribute('aria-pressed',String(bt.dataset.lang===LB.lang.cur)));
+    LB.fs.lang();LB.pause.lang();
+  }
+  function trial(on){update();$('mphM').hidden=on;$('mphT').hidden=!on;$('trialNote').hidden=!on;
+    try{(on?$('mphT').querySelector('button'):$('mphM').querySelector('[data-diff=normal]')).focus({preventScroll:true})}catch(e){}}
+  function show(resume){m.hidden=false;LB.card.el.ov&&LB.card.el.ov.classList.remove('clear');
+    $('mphM').hidden=false;$('mphT').hidden=true;$('trialNote').hidden=true;$('mResume').hidden=!resume;
+    try{(resume?$('mResume'):m.querySelector('[data-diff=normal]')).focus({preventScroll:true})}catch(e){}}
+  return{mount,show,hide(){if(m)m.hidden=true},visible(){return!!m&&!m.hidden},lang,update,trial,get C(){return C}};
+})();
+
+/* ---------- LB.input : entrées communes ----------
+   Action : Espace, flèche haut, W, Z, toucher l'arène ou le bouton d'action ; relâchement (touche, doigt, perte du focus) pour
+   tous ; P / Échap : pause ; R : réessayer ; Entrée / Espace : carte, pause (reprendre) et menu (Normal) ; écran de démarrage :
+   seul son bouton agit ; case à cocher focalisée : rien. bind({press, release, pause, retry, skip}) : skip(e) rend true si le
+   chapitre a pris la touche (cinématique propre au chapitre). */
+LB.input=(()=>{
+  const ACT=[' ','Spacebar','ArrowUp','w','W','z','Z'];let h={},bound=false;
+  function bind(hh){h=hh;if(bound)return;bound=true;
+    const cv=document.getElementById('c'),ward=document.getElementById('ward'),rel=()=>{if(h.release)h.release()};
+    for(const t of [cv,ward]){if(!t)continue;
+      t.addEventListener('pointerdown',e=>{e.preventDefault();try{t.setPointerCapture(e.pointerId)}catch(x){}if(h.press)h.press()});
+      t.addEventListener('pointerup',rel);t.addEventListener('pointercancel',rel);t.addEventListener('lostpointercapture',rel)}
+    if(ward){ward.addEventListener('click',e=>{if(e.detail===0&&h.press)h.press()});ward.addEventListener('contextmenu',e=>e.preventDefault())}
+    window.addEventListener('blur',rel);
+    window.addEventListener('keyup',e=>{if(ACT.includes(e.key)||e.key==='Enter')rel()});   /* Entrée : bouton d'action focalisé (clic clavier) */
+    window.addEventListener('keydown',e=>{
+      if(LB.gate.visible())return;   /* écran de démarrage : seul le bouton agit */
+      const k=e.key,a=document.activeElement;
+      if(a&&a.tagName==='INPUT')return;
+      if(h.skip&&h.skip(e))return;
+      if(e.repeat){if(ACT.includes(k)&&!LB.menu.visible())e.preventDefault();return}
+      if(k==='r'||k==='R'){if(!LB.menu.visible()&&h.retry){e.preventDefault();h.retry()}return}
+      if(k==='p'||k==='P'||k==='Escape'){if(!LB.menu.visible()&&h.pause){e.preventDefault();h.pause()}return}
+      const ok=k===' '||k==='Enter';
+      if(LB.pause.visible()){if(ok&&a!==document.getElementById('pMenu')){e.preventDefault();LB.pause.resume()}return}
+      if(LB.menu.visible()){const mn=document.getElementById('menu');if(ok&&!mn.contains(a)){e.preventDefault();mn.querySelector('#mphM [data-diff=normal]').click()}return}
+      if(LB.card.visible()){if(ok&&a!==LB.card.el.go){e.preventDefault();LB.card.el.go.click()}return}
+      if(ACT.includes(k)){e.preventDefault();if(h.press)h.press()}
+    });
+  }
+  return{bind,ACT};
+})();
+
+/* ---------- LB.hud : barres de vie, nom du boss, sourcil de phase, bouton d'action, frise ----------
+   pips(boîte, n, max, repères) ; marks(rages, final) : repères de rage calculés (case du PV où part chaque rage, et celle du
+   dernier assaut à `final` PV, 1 par défaut ; null : sans dernier assaut) ; player(n, max) ; boss(n, max, repères) ;
+   set({boss, head, ward}) ; track(n, {trial, unl}) : phase en cours, frise masquée en Épreuve, phases au-delà de unl fermées. */
+LB.hud={
+  pips(box,n,max,marks){
+    if(box.children.length!==max){box.textContent='';for(let i=0;i<max;i++)box.appendChild(document.createElement('span'))}
+    for(let i=0;i<max;i++){box.children[i].classList.toggle('on',i<n);box.children[i].classList.toggle('mark',!!marks&&marks.includes(i))}
+  },
+  marks(rages,final){return[...(final===null?[]:[(final||1)-1]),...rages.map(x=>x-1)]},
+  player(n,max){LB.hud.pips(document.getElementById('hpP'),n,max,[]);document.getElementById('hpPn').textContent=n+'/'+max},
+  boss(n,max,marks){LB.hud.pips(document.getElementById('hpB'),n,max,marks);document.getElementById('hpBn').textContent=n+'/'+max},
+  set(o){const s=(id,v)=>{if(v==null)return;const e=document.getElementById(id);if(e&&e.textContent!==v)e.textContent=v};
+    /* nom dans la barre : #nmP / #nmB (Chapitre II), sinon le texte en tête de la barre (Chapitre I : « nom » + espace, puis le compteur) */
+    const nm=(id,sel,v)=>{if(v==null)return;if(document.getElementById(id))return s(id,v);const t=(document.querySelector(sel)||{}).firstChild;if(t&&t.nodeType===3&&t.textContent!==v+' ')t.textContent=v+' '};
+    nm('nmB','.bars .bar.boss > span',o.boss);nm('nmP','.bars .bar:not(.boss) > span',o.player);s('hdEye',o.head);s('ward',o.ward)},
+  track(n,o){o=o||{};const ol=document.getElementById('phases');if(!ol)return;ol.style.display=o.trial?'none':'';
+    ol.querySelectorAll('li').forEach((li,i)=>{const on=i===n-1,b=li.querySelector('button');li.classList.toggle('on',on);if(on)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
+      if(b){b.disabled=!!o.trial||(o.unl!=null&&i+1>o.unl);b.title=o.trial?LB._('Not available in the trial',"Indisponible dans l'épreuve"):''}})}
+};
+
+/* ---------- LB.help : case « Aide » (décision n° 3 du 28 octobre) ----------
+   Décochée par défaut, mémorisée (lb-help), activable dans toutes les difficultés ; désactivée (et décochée, sans toucher à
+   lb-help) en Épreuve. use(d) au choix de la difficulté ; defeat(facile) : true à la 3e défaite en Facile sans aide (le chapitre
+   propose alors « Activer l'aide visuelle » sur la carte de défaite) ; enable() coche et mémorise ; on() : l'aide est active. */
+LB.help=(()=>{
+  let box=null,deaths=0;const stored=()=>LB.store.get(LB.key('help'),'0')==='1';
+  return{
+    mount(){box=document.getElementById('optHelp');if(!box)return;box.checked=stored();box.addEventListener('change',()=>{LB.store.set(LB.key('help'),box.checked?'1':'0')})},
+    on(){return!!box&&box.checked&&!box.disabled},
+    use(d){deaths=0;if(!box)return;if(d&&d.trial){box.disabled=true;box.checked=false}else{box.disabled=false;box.checked=stored()}},
+    defeat(easy){if(!easy||LB.help.on())return false;return++deaths===3},
+    enable(){if(!box)return;box.disabled=false;box.checked=true;LB.store.set(LB.key('help'),'1')},
+    get deaths(){return deaths}
+  };
+})();
+LB.helpOffer=()=>LB._('Enable visual help',"Activer l'aide visuelle");
+
+/* ---------- LB.cue : repère d'aide (décision n° 8 du 28 octobre : celui du Chapitre I) ----------
+   Normal et Difficile : barre au-dessus de la tête, orange à l'approche, bleue pendant la fenêtre d'action ; Facile : cercle
+   qui se resserre autour du Veilleur pendant la fenêtre. LB.cue(ctx, {x, y, cx, cy, r, tt, act, easy}) : x, y = barre (centre,
+   haut) ; cx, cy, r = cercle (rayon à l'ouverture) ; tt = temps jusqu'à l'impact ; act = durée de l'action. Le Chapitre II garde
+   ses aides propres : demi-cercle des faisceaux (hold), pointillé des reflets (fake). Table LB.CUE_T. */
+LB.CUE_T={lead:.8,bar:{w:68,h:6},shrink:20,open:'#6fd3ff',near:'rgba(255,122,43,.85)',ring:'rgba(111,211,255,.9)'};
+LB.cue=function(ctx,o){const T=LB.CUE_T,tt=o.tt,act=o.act;
+  if(!o.easy){if(tt>0&&tt<=act+T.lead)LB.cue.bar(ctx,o.x,o.y,tt<=act?tt/act:1-(tt-act)/T.lead,tt<=act);return}
+  if(tt<=act&&tt>0){ctx.strokeStyle=T.ring;ctx.lineWidth=3;ctx.beginPath();ctx.arc(o.cx,o.cy,o.r-T.shrink*(1-tt/act),0,6.283);ctx.stroke()}};
+LB.cue.bar=function(ctx,cx,y,k,open){const T=LB.CUE_T,w=T.bar.w,h=T.bar.h,x=cx-w/2;
+  ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(x-1,y-1,w+2,h+2);
+  ctx.fillStyle=open?T.open:T.near;ctx.fillRect(x,y,w*(k<0?0:k>1?1:k),h)};
+/* cercle d'approche (phase I du Chapitre I) : orange qui se resserre, puis bleu lumineux pendant la fenêtre */
+LB.cue.ring=function(ctx,cx,cy,r,open){const T=LB.CUE_T;
+  ctx.save();ctx.lineWidth=open?5:3;ctx.strokeStyle=open?T.open:T.near;if(open){ctx.shadowColor=T.open;ctx.shadowBlur=12}
+  ctx.beginPath();ctx.arc(cx,cy,r,0,6.283);ctx.stroke();ctx.restore()};
 /* Sauvegarde et langue : communes à la série (shared/, clés lb-…). Anciennes clés du Chapitre I (eb-…) lues si la nouvelle manque :
    eb-lang (langue, avec pn-lang : LB.OLD_KEYS), eb-intro, eb-end, eb-best-<mode>. */
 LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},oldPrefix:[['lb-ch1-best-','eb-best-']]});
 const _=LB._;
 const W=960,H=540,DECK=410,PX=250,BX=730;
 /* Difficulté. hp/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de blocage et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
-   jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; mk1/mk : repères sur la jauge du Colosse (phase I / phases II-III) ;
-   noHelp : pas d'aide visuelle (case masquée) ;
+   jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; les repères de la jauge du Colosse sont calculés
+   depuis les rages (rageHp, LB.hud.marks) ; l'aide visuelle est disponible partout sauf en Épreuve (LB.help) ;
    easy : aides et allègements, repères en cercle, pas de seconde vie en phase III (la foudre mène droit à la vraie fin) ;
    hard : attaques en plus (double fouet, épée à 3 coups, souffles enchaînés, rages à séquences) ; fm : fenêtre du souffle ; rm : récupération après blocage ;
-   t : durées de la phase I remplacées ; waitMin/waitMax : pause entre attaques ; chain : [PV, chance] d'un souffle enchaîné ; rbhp/ru/mkR : PV du Colosse, PV de la première rage et repères de la jauge en phase III ; u2 : PV de la rage en deux temps (phase III Difficile) ; q2/rages : phase II Difficile (attaques à 4 griffes, 5 vagues, boulette de feu, cris avec éboulement, balayage de queue). */
+   t : durées de la phase I remplacées ; waitMin/waitMax : pause entre attaques ; chain : [PV, chance] d'un souffle enchaîné ; rbhp/ru : PV du Colosse et PV de la première rage en phase III ; u2 : PV de la rage en deux temps (phase III Difficile) ; q2/rages : phase II Difficile (attaques à 4 griffes, 5 vagues, boulette de feu, cris avec éboulement, balayage de queue). */
 const DIFFS={
-  easy:{bhp:8,u:4,jets:2,easy:true,fury:{4:5,1:1},mk1:[0,3],mk:[0,3]},
-  normal:{bhp:10,u:5,jets:4,easy:false,fury:{5:5,1:1},mk1:[0,4],mk:[0,4]},
-  hard:{bhp:14,fm:1,u:10,jets:4,easy:false,hard:true,noHelp:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},mk1:[0,4,9],mk:[0,4,9],rbhp:12,ru:8,mkR:[0,4,7],
+  easy:{bhp:8,u:4,jets:2,easy:true,fury:{4:5,1:1}},
+  normal:{bhp:10,u:5,jets:4,easy:false,fury:{5:5,1:1}},
+  hard:{bhp:14,fm:1,u:10,jets:4,easy:false,hard:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},rbhp:12,ru:8,
         t:{windup:.5,strike:.42,sw1w:.75,sw1:.26,swgap:.22,sw2w:.15,sw2:.26,sw3g:.27,sw3w:.34,sw3:.26,fli:.5,stagger:.6,swrec:.65,flrec:.65,fyt:.36,fyg:.05},waitMin:.5,waitMax:.9,chain:[[5,.75],[10,.4]]}
 };
-/* Phase III : PV du Colosse (rbhp), PV de la première rage (ru) et repères de la jauge (mkR) ; par défaut identiques aux autres phases */
-for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u;d.mkR=d.mkR||d.mk}
-DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true,noHelp:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
+/* Phase III : PV du Colosse (rbhp) et PV de la première rage (ru) ; par défaut identiques aux autres phases */
+for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u}
+DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
 /* PV du Veilleur (hp), multiplicateurs m et rm : LB.HERO_DIFF (shared/js/16-hero.js), fusionnés ici ; l'Épreuve (tn, th) prend 4 PV au départ et +1 PV entre les phases (heal) */
 for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 /* Épreuve du feu ouverte pendant les tests (décision du 28 octobre) ; false rétablit le verrou par la vraie fin (84-loop.js) */
 const TRIAL_OPEN=true;
+/* PV du Colosse où part chaque rage, par phase (1 à 3) : repères de sa jauge (LB.hud.marks, plus la case du dernier PV) */
+const rageHp=(d,ph)=>ph===3?(d.u2?[d.ru,d.u2]:[d.ru]):(d.rages||[d.u]);
+/* Table du chapitre pour le cadre commun (menu, écran de démarrage, cartes, HUD : shared/js/28-ui.js, docs/COMMUN.md § 3.1) */
+const CHAPTER={n:1,id:'ch1',
+  title:'Ember Bridge',
+  color:'#ff7a2b',color2:'#ffc15a',rgb:'255,122,43',
+  menu:{bg:'#08060d',glowA:.38,titleA:.45,particles:'embers'},
+  tag:()=>_('The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower.','Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher.'),
+  how:()=>_('One button: block, dodge. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause."),
+  next:{n:2,title:'Silent Bells',col:'#7fe8d8',rgb:'79,224,204',hover:'#c8fff4',open:()=>endSeen()},
+  trial:{name:()=>_('Trial by Fire','Épreuve du feu')},
+  player:()=>_('The Watcher','Le Veilleur'),boss:()=>_('Ember Colossus','Colosse de braise'),
+  help:{offer:()=>_(` Visual cues can help you find the right moment to block.`,` Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer.`)},
+  trialOpen:()=>trialOpen(),endSeen:()=>endSeen(),best:n=>parseFloat(LB.store.get(LB.key('best-'+n),'0'))||0,fmt:t=>fmtT(t)
+};
 /* Épreuve du feu : les 3 phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : les 4 PV de départ, RUN.max), une mort = retour à la phase I. */
 const RUN={on:false,max:4,cur:4,n:1,t:0,pt:[0,0,0],st:{},name:'tn'};
 function startHP(){return RUN.on?RUN.cur:DIFF.hp}
@@ -927,9 +1180,10 @@ function perfWatch(raw){
   if(slowT>=2000){const avg=slowT/slowN;if(avg>23||slowS>=5)SBQ=SBQ>.3?.25:0;slowT=0;slowN=0;slowS=0}
 }
 const $=id=>document.getElementById(id);
-const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live'),help:$('optHelp'),snd:$('optSnd')};
-const prefs={help:LB.store.get(LB.key('help'),'0')==='1'}; /* mémorisée (lb-help) ; Son et Musique : LB.audio.sound / LB.audio.music (lb-snd, lb-mus) */
-let deaths=0; // défaites depuis le choix de la difficulté (Facile : propose l'aide visuelle à la 3e)
+/* carte et pause communes (LB.card, LB.pause), créées avant `el` ; le menu et l'écran de démarrage le sont dans 60-ui-menu.js */
+LB.card.mount($('stage'),$('menu'));LB.pause.mount($('stage'),$('menu'));
+const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),table:$('ovTable'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live'),help:$('optHelp'),snd:$('optSnd')};
+/* Aide : LB.help (lb-help, décochée par défaut) ; Son et Musique : LB.audio.sound / LB.audio.music (lb-snd, lb-mus) */
 let paused=true,pendingLore=false;
 const LORE={
   2:{get eye(){return _('Phase II · The Foundry','Phase II · La Fonderie')},get title(){return _('Into the Foundry.','Dans la Fonderie.')},get desc(){return _(`The forge shaft plunges endlessly down. Chains too large for a man's hand hang from the walls, rusted by centuries.`,`Le puits des forges s'enfonce sans fin. Aux parois pendent des chaînes trop grandes pour une main d'homme, rouillées de siècles.`)}},
@@ -937,9 +1191,7 @@ const LORE={
 };
 function showLore(n){
   const L=LORE[n];
-  el.eye.textContent=L.eye;el.title.textContent=L.title;el.desc.textContent=L.desc;el.stats.hidden=true;el.go.textContent=_('Continue','Continuer');
-  el.ov.classList.remove('clear');el.ov.hidden=false;paused=true;pendingLore=true;
-  try{el.go.focus({preventScroll:true})}catch(e){}
+  paused=true;pendingLore=true;LB.card.show({eye:L.eye,title:L.title,desc:L.desc,go:_('Continue','Continuer'),onGo:start});
 }
 const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1026,7 +1278,7 @@ function toIdle(){
 }
 
 function start(){
-  el.go2.hidden=true;$('ovTable').hidden=true;
+  el.go2.hidden=true;el.table.hidden=true;
   if(RUN.on&&!R&&!Q&&G&&G.mode==='lost'){restartRun();return}
   if(pendingLore){pendingLore=false;paused=false;el.ov.hidden=true;ensureAudio();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();return}
   if(R){
@@ -1076,27 +1328,21 @@ function press(){
   ensureAudio();
   if(LB.hero.press(G.pl,'block'))tone(520,.14,'triangle',.05,320)
 }
-/* Facile : à la 3e défaite, la carte propose d'activer l'aide visuelle. */
-function deathCard(){
-  if(RUN.on){el.go.textContent=_('Start over from Phase I','Reprendre à la phase I');el.desc.textContent+=_(' In the trial, one death sends you back to the very beginning, at full health.'," Dans l'épreuve, une mort te renvoie au tout début, en pleine forme.");return}
-  if(!DIFF.easy||prefs.help)return;
-  if(++deaths===3){
-    el.desc.textContent+=_(` Visual cues can help you find the right moment to block.`,` Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer.`);
-    el.go2.hidden=false;
-  }
+/* Carte de défaite (o : carte à montrer). Épreuve : tout reprendre. Facile : à la 3e défaite sans aide, la carte propose
+   d'activer l'aide visuelle (LB.help, décision n° 3 du 28 octobre). */
+function deathCard(o){
+  if(RUN.on){o.go=_('Start over from Phase I','Reprendre à la phase I');o.desc+=_(' In the trial, one death sends you back to the very beginning, at full health.'," Dans l'épreuve, une mort te renvoie au tout début, en pleine forme.");return o}
+  if(LB.help.defeat(DIFF.easy)){o.desc+=LB.tx(CHAPTER.help.offer);o.go2=LB.helpOffer();o.onGo2=()=>{LB.help.enable();start()}}
+  return o;
 }
-el.go2.addEventListener('click',()=>{prefs.help=el.help.checked=true;LB.store.set(LB.key('help'),'1');start()});
 function showEnd(){
   const win=G.mode==='won';
-  el.eye.textContent=win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite');
-  el.title.textContent=win?(G.p2?_('Phase I cleared','Phase I terminée'):_('Phase I cleared','Phase I terminée')):_('Crushed on the stone.','Écrasé sur la pierre.');
-  el.stats.textContent=_('Blocks ','Blocages ')+G.blocks+_(' · Hits taken ',' · Coups subis ')+G.grabs+trStr(1);
-  el.stats.hidden=false;
-  el.desc.textContent=win?(G.p2?_('The Colossus smashes the bridge and dives through the breach into the foundry beneath the arch, as if he knew the way.',"Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin."):_(`Phase II will open with its upcoming attacks.`,`La phase II s'ouvrira avec ses prochaines attaques.`)):_(`The lantern rolls across the stones of the bridge and goes out. Nothing holds the Colossus back now: the road to the valleys lies open.`,`La lanterne roule sur les pierres du pont et s'éteint. Plus rien ne retient le Colosse : la route des vallées est ouverte.`);
-  el.go.textContent=win?(G.p2?_('Start Phase II','Lancer la phase II'):_('Replay Phase I','Rejouer la phase I')):_('Retry','Réessayer');
-  if(!win)deathCard();
-  el.ov.hidden=false;
-  try{el.go.focus({preventScroll:true})}catch(e){}
+  const o={onGo:start,eye:win?(G.p2?_('Transition','Transition'):_('Phase I cleared','Phase I terminée')):_('Defeat','Défaite'),
+  title:win?(G.p2?_('Phase I cleared','Phase I terminée'):_('Phase I cleared','Phase I terminée')):_('Crushed on the stone.','Écrasé sur la pierre.'),
+  stats:_('Blocks ','Blocages ')+G.blocks+_(' · Hits taken ',' · Coups subis ')+G.grabs+trStr(1),
+  desc:win?(G.p2?_('The Colossus smashes the bridge and dives through the breach into the foundry beneath the arch, as if he knew the way.',"Le Colosse fracasse le pont et plonge par la brèche dans la fonderie cachée sous l'arche, comme s'il en connaissait le chemin."):_(`Phase II will open with its upcoming attacks.`,`La phase II s'ouvrira avec ses prochaines attaques.`)):_(`The lantern rolls across the stones of the bridge and goes out. Nothing holds the Colossus back now: the road to the valleys lies open.`,`La lanterne roule sur les pierres du pont et s'éteint. Plus rien ne retient le Colosse : la route des vallées est ouverte.`),
+  go:win?(G.p2?_('Start Phase II','Lancer la phase II'):_('Replay Phase I','Rejouer la phase I')):_('Retry','Réessayer')};
+  LB.card.show(win?o:deathCard(o));
 }
 
 /* ---------- effects ---------- */
@@ -1496,21 +1742,14 @@ function bossStep(dt){
       break;}
   }
 }
-function pips(box,n,max,marks){
-  if(box.children.length!==max){
-    box.textContent='';
-    for(let i=0;i<max;i++)box.appendChild(document.createElement('span'));
-  }
-  for(let i=0;i<max;i++){box.children[i].classList.toggle('on',i<n);box.children[i].classList.toggle('mark',marks.includes(i))}
-}
 let lastP=-1,lastB=-1,tries=[0,0,0,0],cntS=null;
 function trStr(ph){const n=RUN.on?RUN.n:(tries[ph]||1);return ' · '+(n>1?_('Attempts ','Essais '):_('Attempt ','Essai '))+n}
 function hud(){
   const S=R||Q||G;
   if(S!==cntS&&S.mode==='play'){cntS=S;tries[R?3:Q?2:1]++}
-  if(S.php!==lastP){pips(el.hpP,S.php,DIFF.hp,[]);$('hpPn').textContent=S.php+'/'+DIFF.hp;lastP=S.php}
+  if(S.php!==lastP){LB.hud.player(S.php,DIFF.hp);lastP=S.php}
   const bmax=S===R?DIFF.rbhp:DIFF.bhp,bk=S===G?1:S===R?3:2;
-  if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;pips(el.hpB,S.bhp,bmax,S===G?DIFF.mk1:S===R?DIFF.mkR:DIFF.mk);$('hpBn').textContent=S.bhp+'/'+bmax;lastB=S.bhp}
+  if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;LB.hud.boss(S.bhp,bmax,LB.hud.marks(rageHp(DIFF,bk)));lastB=S.bhp}   /* repères : rages calculées (rageHp) et dernier PV */
 }
 function step(dt){
   G.time+=dt;
@@ -1995,25 +2234,15 @@ function drawBarrier(){
   LB.drawBlock(ctx,PX,DECK,p.t,HD('block').act);
 }
 
-/* Repère de timing discret (Normal) : petite barre au-dessus du Veilleur, orange tant que le blocage n'est pas ouvert puis bleue pendant la fenêtre. */
-function hintBar(cx,y,k,blue){
-  const w=68,h=6,x=cx-w/2;
-  ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(x-1,y-1,w+2,h+2);
-  ctx.fillStyle=blue?'#6fd3ff':'rgba(255,122,43,.85)';ctx.fillRect(x,y,w*clamp01(k),h);
-}
-const HINT_LEAD=.8; // durée d'approche affichée avant l'ouverture de la fenêtre (phases II et III)
+/* Repère d'aide commun (LB.cue, shared/js/28-ui.js) : barre au-dessus du Veilleur en Normal et en Difficile (orange tant que le
+   blocage n'est pas ouvert, bleue pendant la fenêtre), cercle qui se resserre en Facile. Approche affichée : LB.CUE_T.lead. */
 function drawHints(){
-  if(G.mode!=='play'||!prefs.help)return;
+  if(G.mode!=='play'||!LB.help.on())return;
   const b=G.boss,p=G.pl;
   /* repère de timing : barre au-dessus de la tête, ou en Facile un cercle qui se resserre autour du Veilleur (bleu = fenêtre de blocage) */
   const cue=(k,blue)=>{
-    if(DIFF.easy){
-      const r=blue?40+22*clamp01(k):110-48*clamp01(k);
-      ctx.save();ctx.lineWidth=blue?5:3;ctx.strokeStyle=blue?'#6fd3ff':'rgba(255,122,43,.85)';
-      if(blue){ctx.shadowColor='#6fd3ff';ctx.shadowBlur=12}
-      ctx.beginPath();ctx.arc(PX+10,DECK-100,r,0,6.283);ctx.stroke();ctx.restore();return;
-    }
-    hintBar(PX,DECK-206,k,blue);
+    if(DIFF.easy){LB.cue.ring(ctx,PX+10,DECK-100,blue?40+22*clamp01(k):110-48*clamp01(k),blue);return}
+    LB.cue.bar(ctx,PX,DECK-206,k,blue);
   };
   if(['sw1w','sw1','swgap','sw2w','sw2','sw3g','sw3w','sw3'].includes(b.s)){
     const hit=+b.s.charAt(2),wait=[T.sw1w,T.sw2w,T.sw3w][hit-1],strike=[T.sw1,T.sw2,T.sw3][hit-1];
@@ -2304,13 +2533,10 @@ function qNew(){
     shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,wo:0,bx:QB[0],by:QB[1],hx:QH[0],hy:QH[1],dropY:0,splash:0,sideT:-9,ended:false,wing:false,fn:0};
 }
 function setPhaseUI(n){
-  try{$('retryBtn').disabled=false;$('phases').style.display=RUN.on?'none':''}catch(e){}
-  document.querySelectorAll('#phases li').forEach((li,i)=>{
-    li.classList.toggle('on',i===n-1);
-    if(i===n-1)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
-  });
-  $('hdEye').textContent=n===1?_('Phase I of III · On the bridge','Phase I sur III · Sur le pont'):n===2?_('Phase II of III · The Foundry','Phase II sur III · La Fonderie'):_('Phase III of III · The Bell Tower','Phase III sur III · Le Clocher');
-  el.ward.textContent=n===1?_('Block','Bloquer'):n===2?_('Dodge','Esquiver'):_('Block','Bloquer');
+  try{$('retryBtn').disabled=false}catch(e){}
+  LB.hud.track(n,{trial:RUN.on});   /* frise : phase en cours ; masquée en Épreuve */
+  LB.hud.set({head:n===1?_('Phase I of III · On the bridge','Phase I sur III · Sur le pont'):n===2?_('Phase II of III · The Foundry','Phase II sur III · La Fonderie'):_('Phase III of III · The Bell Tower','Phase III sur III · Le Clocher'),
+    ward:n===1?_('Block','Bloquer'):n===2?_('Dodge','Esquiver'):_('Block','Bloquer'),player:LB.tx(CHAPTER.player),boss:LB.tx(CHAPTER.boss)});
   cv.setAttribute('aria-label',n===1?_('Arena: the Watcher faces the Ember Colossus on a stone bridge','Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre'):n===2?_('Arena: the Watcher and the winged Ember Colossus face each other at the bottom of the Foundry',"Arène du combat : le Veilleur et le Colosse de braise ailé s'affrontent au fond de la Fonderie"):_('Arena: the Watcher faces the Ember Colossus atop the snowy Watchers\' Bell Tower','Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs'));
 }
 function beginP2(noLore){
@@ -2522,15 +2748,12 @@ function qLayout(){
 function qEnd(){
   const win=Q.mode==='lake';
   if(win&&RUN.on){setTimeout(()=>beginP3(true),0);return} /* épreuve : pas de carte entre les phases */
-  el.eye.textContent=win?_('Transition','Transition'):_('Defeat · Phase II','Défaite · Phase II');
-  el.title.textContent=win?_('Phase II cleared','Phase II terminée'):_('Struck down at the bottom of the Foundry.','Terrassé au fond de la Fonderie.');
-  el.stats.textContent=_('Dodges ','Esquives ')+Q.dodges+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2);
-  el.stats.hidden=false;
-  el.desc.textContent=win?_('The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney.',"Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée."):_(`The Watcher collapses at the bottom of the Foundry, and his light goes out with him.`,`Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui.`);
-  el.go.textContent=win?_('Start Phase III','Lancer la phase III'):_('Retry Phase II','Réessayer la phase II');
-  if(!win)deathCard();
-  el.ov.hidden=false;
-  try{el.go.focus({preventScroll:true})}catch(e){}
+  const o={onGo:start,eye:win?_('Transition','Transition'):_('Defeat · Phase II','Défaite · Phase II'),
+  title:win?_('Phase II cleared','Phase II terminée'):_('Struck down at the bottom of the Foundry.','Terrassé au fond de la Fonderie.'),
+  stats:_('Dodges ','Esquives ')+Q.dodges+_(' · Hits taken ',' · Coups subis ')+Q.taken+trStr(2),
+  desc:win?_('The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney.',"Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée."):_(`The Watcher collapses at the bottom of the Foundry, and his light goes out with him.`,`Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui.`),
+  go:win?_('Start Phase III','Lancer la phase III'):_('Retry Phase II','Réessayer la phase II')};
+  LB.card.show(win?o:deathCard(o));
 }
 function qStep(dt){
   Q.time+=dt;Q.t+=dt;
@@ -2979,18 +3202,12 @@ function drawCnFx(){
   }
 }
 function drawHints2(){
-  if(!prefs.help||Q.mode!=='play')return;
+  if(!LB.help.on()||Q.mode!=='play')return;
   const p=Q.pl,a=Q.atk;
   if(a&&p.s!=='counter'){
     const h=a.hits.find(x=>!x.done);
     if(h){
-      const tt=h.at-a.t;
-      const act=HD('dodge').act;
-      if(!DIFF.easy){if(tt>0&&tt<=act+HINT_LEAD)hintBar(QH[0],QH[1]-95,tt<=act?tt/act:1-(tt-act)/HINT_LEAD,tt<=act)}
-      else if(tt<=act&&tt>0){
-        ctx.strokeStyle='rgba(111,211,255,.9)';ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(QH[0],QH[1]-10,70-20*(1-tt/act),0,6.283);ctx.stroke();
-      }
+      LB.cue(ctx,{x:QH[0],y:QH[1]-95,cx:QH[0],cy:QH[1]-10,r:70,tt:h.at-a.t,act:HD('dodge').act,easy:DIFF.easy});
     }
   }
   LB.drawRecoveryBar(ctx,QH[0],QH[1]+44,p); /* barre de récupération sous les pieds : repère d'aide, jamais rouge (la lanterne l'est) */
@@ -3388,23 +3605,18 @@ function runTable(){
   const C=[[_('Total time','Temps total'),fmtT(tot)],[_('Hits taken','Coups subis'),a.h+b.h+R.taken],[_('Attempts','Essais'),RUN.n],
     [_('Phase I','Phase I'),fmtT(RUN.pt[0])],[_('Phase II','Phase II'),fmtT(RUN.pt[1])],[_('Phase III','Phase III'),fmtT(RUN.pt[2])],
     [_('Blocks','Blocages'),a.p+R.blocks],[_('Dodges','Esquives'),b.p],[rec?_('New record!','Nouveau record !'):_('Best time','Meilleur temps'),fmtT(best),rec]];
-  return C.map(c=>'<div'+(c[2]?' class="rec"':'')+'><small>'+c[0]+'</small><b>'+c[1]+'</b></div>').join('');
+  return C;   /* lignes [libellé, valeur, record] : LB.card */
 }
 function rEnd(){
-  $('ovTable').hidden=true;
   const sp=R.mode==='space',win=R.mode==='won'||sp;
-  if(sp){LB.store.set(LB.key('end'),'1');updNext()}
-  el.ov.classList.toggle('clear',sp);
-  el.eye.textContent=sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III');
-  el.title.textContent=sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.');
-  el.stats.textContent=_('Blocks ','Blocages ')+R.blocks+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3);
-  el.stats.hidden=false;
-  el.desc.textContent=sp?_(`The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while.`,`Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps.`):win?_(`The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch.`,`Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore.`):_(`Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again.`,`La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus.`);
-  el.go.textContent=sp?_('Back to menu','Retour au menu'):win?_('Replay from Phase I','Rejouer depuis la phase I'):_('Retry Phase III','Réessayer la phase III');
-  if(sp&&RUN.on){el.eye.textContent=_('Trial by Fire · Complete','Épreuve du feu · Terminée');el.stats.hidden=true;$('ovTable').innerHTML=runTable();$('ovTable').hidden=false}
-  if(!win)deathCard();
-  el.ov.hidden=false;
-  try{el.go.focus({preventScroll:true})}catch(e){}
+  if(sp){LB.store.set(LB.key('end'),'1');LB.menu.update()}
+  const o={onGo:start,clear:sp,eye:sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III'),
+  title:sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.'),
+  stats:_('Blocks ','Blocages ')+R.blocks+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3),
+  desc:sp?_(`The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while.`,`Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps.`):win?_(`The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch.`,`Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore.`):_(`Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again.`,`La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus.`),
+  go:sp?_('Back to menu','Retour au menu'):win?_('Replay from Phase I','Rejouer depuis la phase I'):_('Retry Phase III','Réessayer la phase III')};
+  if(sp&&RUN.on){o.eye=_('Trial by Fire · Complete','Épreuve du feu · Terminée');o.stats='';o.table=runTable()}
+  LB.card.show(win?o:deathCard(o));
 }
 function chargeX(t){
   if(t<.35)return BX-5*Math.sin(t*50);
@@ -4494,18 +4706,12 @@ function renderSpace(){
 }
 
 function drawHints3(){
-  if(!prefs.help||R.mode!=='play')return;
+  if(!LB.help.on()||R.mode!=='play')return;
   const a=R.atk,p=R.pl;
   if(a&&p.s!=='counter'){
     const h=a.hits.find(x=>!x.done);
     if(h){
-      const tt=h.at-a.t;
-      const act=HD('block').act;
-      if(!DIFF.easy){if(tt>0&&tt<=act+HINT_LEAD)hintBar(PX,DECK-206,tt<=act?tt/act:1-(tt-act)/HINT_LEAD,tt<=act)}
-      else if(tt<=act&&tt>0){
-        ctx.strokeStyle='rgba(111,211,255,.9)';ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(GUARD[0],GUARD[1],60-20*(1-tt/act),0,6.283);ctx.stroke();
-      }
+      LB.cue(ctx,{x:PX,y:DECK-206,cx:GUARD[0],cy:GUARD[1],r:60,tt:h.at-a.t,act:HD('block').act,easy:DIFF.easy});
     }
   }
   LB.drawRecoveryBar(ctx,PX,DECK,p); /* barre de récupération sous les pieds : repère d'aide, jamais rouge (la lanterne l'est) */
@@ -4558,8 +4764,7 @@ function goPhase(n){
   el.go2.hidden=true;hideMenu();el.ov.classList.remove('clear');
   if(n===1){
     R=null;Q=null;setPhaseUI(1);newGame();lastP=-1;lastB=-1;hud();
-    el.eye.textContent=CARD1.eye;el.title.textContent=CARD1.title;el.desc.textContent=CARD1.desc;el.go.textContent=CARD1.go;
-    el.stats.hidden=true;el.ov.hidden=false;
+    LB.card.show({eye:CARD1.eye,title:CARD1.title,desc:CARD1.desc,go:CARD1.go,onGo:start});
     say(_('Phase I.','Phase I.'));
     if(RUN.on)start();
   }else if(n===2){beginP2()}
@@ -4570,23 +4775,18 @@ document.querySelectorAll('#phases button').forEach(b=>b.addEventListener('click
   try{if(!el.ov.hidden)el.go.focus({preventScroll:true})}catch(e){}
 }));
 
-/* ---------- input ---------- */
-cv.addEventListener('pointerdown',e=>{e.preventDefault();press()});
-el.ward.addEventListener('pointerdown',e=>{e.preventDefault();press()});
-el.ward.addEventListener('click',e=>{if(e.detail===0)press()});
-el.go.addEventListener('click',start);
-el.help.checked=prefs.help;el.snd.checked=LB.audio.sound;$('optMus').checked=LB.audio.music;
-el.help.addEventListener('change',()=>{prefs.help=el.help.checked;LB.store.set(LB.key('help'),prefs.help?'1':'0')});
+/* ---------- input : entrées communes (LB.input, shared/js/28-ui.js) ---------- */
+LB.card.setGo(start);
+LB.help.mount();el.snd.checked=LB.audio.sound;$('optMus').checked=LB.audio.music;   /* aide : LB.help (lb-help) */
 el.snd.addEventListener('change',()=>LB.audio.setSound(el.snd.checked));
 $('optMus').addEventListener('change',()=>LB.audio.setMusic($('optMus').checked));
 const pauseEl=$('pause');
 const menuEl=$('menu');
 function setPause(on){
-  if(on){if(paused||!el.ov.hidden)return;paused=true;pauseEl.hidden=false;try{$('pResume').focus({preventScroll:true})}catch(e){}}
-  else{pauseEl.hidden=true;paused=false;if(document.activeElement&&document.activeElement.blur)document.activeElement.blur()}
+  if(on){if(paused||!el.ov.hidden)return;paused=true;LB.pause.show()}
+  else{LB.pause.hide();paused=false;if(document.activeElement&&document.activeElement.blur)document.activeElement.blur()}
 }
-$('pResume').addEventListener('click',()=>setPause(false));
-$('pMenu').addEventListener('click',()=>{pauseEl.hidden=true;showMenu(true)});
+LB.pause.bind({onResume:()=>setPause(false),onMenu:()=>{pauseEl.hidden=true;showMenu(true)}});
 $('pauseBtn').addEventListener('click',e=>{setPause(true);e.currentTarget.blur()});
 /* Épreuve : Réessayer = abandonner la run (compte comme une défaite), avec confirmation pour éviter les faux appuis. */
 let abandonT=0,abandonTm=0;
@@ -4609,23 +4809,16 @@ function retryPhase(){
 }
 $('retryBtn').addEventListener('click',e=>{e.currentTarget.blur();retryPhase()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)setPause(true)});
-/* Plein écran : API standard (ou préfixée Safari) ; bouton masqué si indisponible (iPhone). */
-{const de=document.documentElement,rq=de.requestFullscreen||de.webkitRequestFullscreen,ex=document.exitFullscreen||document.webkitExitFullscreen,
-  isFs=()=>!!(document.fullscreenElement||document.webkitFullscreenElement),
-  btns=document.querySelectorAll('.fsb');
- if(!rq){btns.forEach(b=>b.hidden=true)}
- else btns.forEach(b=>b.addEventListener('click',e=>{e.currentTarget.blur();try{const r=isFs()?ex.call(document):rq.call(de);if(r&&r.catch)r.catch(()=>{})}catch(x){}}));
-}
+/* Menu commun (LB.menu) : scène du chapitre (page/body.html), braises, boutons de rejeu, plein écran, langues, difficultés,
+   Épreuve du feu ; écran de démarrage (LB.gate). Les braises tirent Math.random ici, à la même place qu'avant. */
+LB.menu.mount(CHAPTER,{
+  onDiff:dk=>{applyDiff(dk);ensureAudio();if(CINE.seen())goPhase(1);else CINE.play(()=>goPhase(1))},
+  onResume:()=>{hideMenu();try{if(!el.ov.hidden)el.go.focus({preventScroll:true})}catch(e){}},
+  onIntro:()=>CINE.play(()=>{}),onOutro:()=>OUTRO.play(()=>{}),onLang:()=>applyLang()});
 function showMenu(fromGame){
-  $('ovTable').hidden=true;paused=true;pauseEl.hidden=true;menuEl.hidden=false;el.ov.classList.remove('clear');
-  $('mphM').hidden=false;$('mphT').hidden=true;$('trialNote').hidden=true;
-  $('mResume').hidden=!fromGame;
-  try{(fromGame?$('mResume'):document.querySelector('#menu [data-diff=normal]')).focus({preventScroll:true})}catch(e){}
+  el.table.hidden=true;paused=true;pauseEl.hidden=true;LB.menu.show(fromGame);
 }
 function hideMenu(){paused=false;menuEl.hidden=true;pauseEl.hidden=true}
-$('mResume').addEventListener('click',()=>{hideMenu();try{if(!el.ov.hidden)el.go.focus({preventScroll:true})}catch(e){}});
-(function(){const sv=document.querySelector('.mscene');function fit(){const r=innerWidth/innerHeight;sv.setAttribute('preserveAspectRatio',r<1.2?'xMidYMax meet':'xMidYMax slice')}fit();addEventListener('resize',fit)})();
-(function(){const w=$('mEmbers');for(let i=0;i<26;i++){const e=document.createElement('i');e.className='mem';e.style.left=(Math.random()*100)+'%';e.style.setProperty('--dx',((Math.random()-.5)*160)+'px');e.style.animationDuration=(5+Math.random()*7)+'s';e.style.animationDelay=(-Math.random()*10)+'s';const z=2+Math.random()*3;e.style.width=e.style.height=z+'px';w.appendChild(e)}})();
 /* Épreuve du feu : Normal jouable, Difficile en attente de la phase III Difficile. */
 const BASEW={flwin:T.flwin,breath:BRW}; /* fenêtres courtes du souffle (phases I et III), réglage d'attaque ; l'action et la récupération du Veilleur sont dans LB.hero */
 const BASET=Object.assign({},T);
@@ -4636,43 +4829,17 @@ function restartRun(){
 }
 function applyDiff(name){
   const d=DIFFS[name]||DIFFS.normal,fm=d.fm||d.m;
-  DIFF=LB.diff.use(d);RUN.on=!!d.trial;RUN.max=d.hp;RUN.cur=d.hp;RUN.n=1;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};RUN.name=name;resetRetryLabel();try{$('retryBtn').disabled=false;$('phases').style.display=RUN.on?'none':''}catch(e){}Object.assign(T,BASET,d.t||{});
+  DIFF=LB.diff.use(d);RUN.on=!!d.trial;RUN.max=d.hp;RUN.cur=d.hp;RUN.n=1;RUN.t=0;RUN.pt=[0,0,0];RUN.st={};RUN.name=name;resetRetryLabel();try{$('retryBtn').disabled=false}catch(e){}Object.assign(T,BASET,d.t||{});
   T.flwin=BASEW.flwin*fm;BRW=BASEW.breath*fm;
-  document.querySelectorAll('#phases button').forEach((b,i)=>{b.disabled=!!d.trial;b.title=d.trial?_('Not available in the trial','Indisponible dans l\'épreuve'):''});
+  LB.hud.track(R?3:Q?2:1,{trial:!!d.trial});   /* Épreuve : frise masquée, phases fermées */
   lastP=lastB=-1;
-  prefs.help=el.help.checked=!d.noHelp&&LB.store.get(LB.key('help'),'0')==='1';deaths=0; /* aide mémorisée (lb-help), toujours coupée là où elle est masquée */tries=[0,0,0,0];cntS=null;
-  el.help.closest('label').hidden=!!d.noHelp;
+  LB.help.use(d);tries=[0,0,0,0];cntS=null;   /* aide mémorisée (lb-help), décochée et désactivée en Épreuve ; défaites remises à zéro */
 }
-function trialMenu(on){updBest();$('mphM').hidden=on;$('mphT').hidden=!on;$('trialNote').hidden=!on;try{(on?$('mphT').querySelector('button'):$('mphM').querySelector('[data-diff=normal]')).focus({preventScroll:true})}catch(e){}}
-$('mBackT').addEventListener('click',()=>trialMenu(false));
-document.querySelectorAll('#menu .mph button').forEach(b=>b.addEventListener('click',()=>{
-  if(b.disabled||!b.dataset.diff)return;
-  if(b.dataset.diff==='trial'&&!trialOpen()){b.blur();return} /* verrouillée : aucun message, le cadenas suffit */
-  if(b.dataset.diff==='trial'){trialMenu(true);return}
-  applyDiff(b.dataset.diff);
-  document.querySelectorAll('#menu .mph button').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));
-  ensureAudio();
-  if(CINE.seen())goPhase(1);else CINE.play(()=>goPhase(1));
-}));
 $('menuBtn').addEventListener('click',e=>{showMenu(true);e.currentTarget.blur()});
-window.addEventListener('keydown',e=>{
-  if(e.repeat)return;
-  if(!$('gate').hidden)return; /* écran de démarrage : seul le bouton agit */
-  const k=e.key;
-  if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
-  if((k==='r'||k==='R')&&menuEl.hidden&&el.ov.hidden){e.preventDefault();retryPhase();return}
-  if((k==='p'||k==='P'||k==='Escape')&&menuEl.hidden){e.preventDefault();setPause(pauseEl.hidden);return}
-  if(!pauseEl.hidden){if((k===' '||k==='Enter')&&document.activeElement!==$('pMenu')){e.preventDefault();setPause(false)}return}
-  if(!menuEl.hidden){
-    if((k===' '||k==='Enter')&&!menuEl.contains(document.activeElement)){e.preventDefault();document.querySelector('#menu [data-diff=normal]').click()}
-    return;
-  }
-  if(!el.ov.hidden){
-    if((k===' '||k==='Enter')&&document.activeElement!==el.go){e.preventDefault();el.go.click()}
-    return;
-  }
-  if(k===' '||k==='Spacebar'||k==='ArrowUp'||k==='w'||k==='W'||k==='z'||k==='Z'){e.preventDefault();press()}
-});
+/* Espace, flèche haut, W, Z, toucher : action ; relâchement ; P / Échap : pause ; R : réessayer (arène seule, sans carte) ;
+   Entrée / Espace : carte, pause, menu (Normal) ; écran de démarrage : seul son bouton */
+LB.input.bind({press,release:()=>{const S=R||Q||G;if(S&&S.pl)LB.hero.release(S.pl)},
+  pause:()=>setPause(pauseEl.hidden),retry:()=>{if(el.ov.hidden)retryPhase()}});
 
 
 
@@ -4884,44 +5051,21 @@ function musTick(){
 setInterval(musTick,90);
 
 /* ---------- langue ---------- */
-const UIT=[
- ['#menu .mcard .eyebrow','Chapter I · Ember Bridge','Chapitre I · Ember Bridge'],
- ['#menu .mcard .tag','The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower.','Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher.'],
- ['#mResume','Resume','Reprendre'],
- ['#gateBtn','Start','Commencer'],
- ['#menu [data-diff=easy] b','Easy','Facile'],['#menu [data-diff=easy] span','Breathe','Respire'],
- ['#menu [data-diff=normal] b','Normal','Normal'],['#menu [data-diff=normal] span','The real fight','Le vrai combat'],
- ['#menu [data-diff=hard] b','Hard','Difficile'],['#menu [data-diff=hard] span','The Colossus unleashed','Le Colosse déchaîné'],
- 
- ['#menu [data-diff=tn] b','Normal','Normal'],['#menu [data-diff=th] b','Hard','Difficile'],
- ['#mBackT b','‹ Back','‹ Retour'],['#mBackT span','Difficulties','Difficultés'],
- ['#trialNote b','Trial by Fire','Épreuve du feu'],
- ['#trialNote li:nth-child(1)','The three phases in a row, with no pause and no visual help.',"Les trois phases d'affilée, sans pause et sans aide visuelle."],
- ['#trialNote li:nth-child(2)','You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'],
- ['#trialNote li:nth-child(3)','A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'],
- ['#trialNote li:nth-child(4)','One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run."],
- ['#menu .how','One button: block, dodge. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause."],
- ['.fsm span','Fullscreen','Plein écran'],['#introBtn','▶ Intro','▶ Intro'],['#outroBtn','▶ Outro','▶ Outro'],['#cineSkip','Skip ›','Passer ›'],['#pause h2','Fight paused','Combat en pause'],['#pResume','Resume','Reprendre'],
- ['#go2','Enable visual help',"Activer l'aide visuelle"],
+const UIT=[   /* textes du menu, de l'écran de démarrage, de la pause et des barres : LB.menu, LB.pause, LB.hud (CHAPTER, 00-core.js) */
+ ['#cineSkip','Skip ›','Passer ›'],
  ['#retryBtn','Retry','Réessayer'],
  ['.hint','Space, up arrow, or tap the screen · P pause · R retry',"Espace, flèche haut, ou toucher l'écran · P pause · R réessayer"],
  ['label[for=optHelp]',' Visual help',' Aide visuelle','last'],['label[for=optSnd]',' Sound',' Son','last'],['label[for=optMus]',' Music',' Musique','last'],
- ['.bars .bar:not(.boss) > span','The Watcher ','Le Veilleur ','first'],['.bars .bar.boss > span','Ember Colossus ','Colosse de braise ','first'],
 ];
-const UIA=[['#phases','Fight phases','Phases du combat'],['.bars','Hit points','Points de vie'],['#hpP',"The Watcher's hit points",'Points de vie du Veilleur'],['#hpB',"The Colossus's hit points",'Points de vie du Colosse'],['#menu .mph','Choose difficulty','Choisir la difficulté']];
-function applyLang(){updNext();updBest();
+const UIA=[['#phases','Fight phases','Phases du combat'],['.bars','Hit points','Points de vie'],['#hpP',"The Watcher's hit points",'Points de vie du Veilleur'],['#hpB',"The Colossus's hit points",'Points de vie du Colosse']];
+function applyLang(){
   document.documentElement.lang=LB.lang.cur;
   UIT.forEach(([sel,en,fr,node])=>{const e=document.querySelector(sel);if(!e)return;const t=_(en,fr);
     if(node==='last'){e.lastChild.textContent=t}else if(node==='first'){e.firstChild.textContent=t}else e.textContent=t});
   UIA.forEach(([sel,en,fr])=>{const e=document.querySelector(sel);if(e)e.setAttribute('aria-label',_(en,fr))});
-  document.querySelectorAll('#langs button,#gateLangs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
   try{setPhaseUI(R?3:Q?2:1)}catch(e){}
-  try{el.help.closest('label').hidden=!!(DIFF&&DIFF.noHelp)}catch(e){}
 }
-document.querySelectorAll('#langs button,#gateLangs button').forEach(b=>b.addEventListener('click',()=>{
-  LB.lang.set(b.dataset.lang);applyLang();b.blur();
-}));
-applyLang();
+applyLang();   /* boutons de langue : LB.menu (menu et écran de démarrage), qui rappelle applyLang */
 /* ---------- boot ---------- */
 buildStatic();
 newGame();
@@ -5024,7 +5168,6 @@ const CINE=(()=>{
   const CUE={2:[[.3,()=>{tone(660,.9,'sine',.04,200);tone(990,1.1,'sine',.025,0)}]],3:[[.45,()=>{boom(1.2,.12);roar()}]]};
   return LB.cine.create({key:'intro',scenes:SC.map((s,i)=>Object.assign({draw:DRAW[i],cue:CUE[i]},s))});
 })();
-$('introBtn').addEventListener('click',e=>{e.currentTarget.blur();CINE.play(()=>{})});
 /* Outro de la vraie fin : le lore après la bataille, jusqu'au lien avec Silent Bells. Rejouable depuis le menu une fois débloquée. */
 const OUTRO=(()=>{
   const cx=LB.cine.mount().cx;   /* cadre commun LB.cine (shared/js/24-cine.js) ; pas de drapeau : rejouée depuis le menu */
@@ -5113,22 +5256,12 @@ const OUTRO=(()=>{
   const ENTER={0:()=>{tone(196,3,'sine',.07,0);tone(392,2.2,'sine',.03,0)}};
   return LB.cine.create({scenes:SC.map((s,i)=>Object.assign({draw:DRAW[i],enter:ENTER[i]},s))});
 })();
-$('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();OUTRO.play(()=>{})});
 
 /* Chapitre II : verrouillé tant que la vraie fin n'a pas été vue (mémorisé dans le navigateur, quand c'est possible) */
 function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
 function trialOpen(){return TRIAL_OPEN||endSeen()} /* TRIAL_OPEN : 00-core.js */
-/* Épreuve du feu : meilleur temps affiché sous chaque difficulté (mémorisé dans le navigateur) */
-function updBest(){for(const n of ['tn','th']){const sp=document.querySelector('#mphT [data-diff='+n+'] span');if(!sp)continue;const v=parseFloat(LB.store.get(LB.key('best-'+n),'0'))||0;sp.textContent=v?'🏆 '+fmtT(v):_('No record yet','Pas encore de record')}}
-function updNext(){const b=$('mNext'),ok=endSeen(),tok=trialOpen();try{$('outroBtn').hidden=!ok}catch(e){}
-  const tb=document.querySelector('#mphM [data-diff=trial]');tb.setAttribute('aria-disabled',String(!tok)); /* Épreuve du feu : ouverte pendant les tests, sinon débloquée par la vraie fin */
-  tb.querySelector('b').textContent=tok?_('Trial by Fire','Épreuve du feu'):_('🔒 Trial by Fire','🔒 Épreuve du feu');
-  tb.querySelector('span').textContent=tok?_('Ultimate challenge','Challenge ultime'):_('To unlock','À débloquer');b.classList.toggle('lock',!ok);
-  b.querySelector('.nm').textContent=ok?_('Chapter II · Silent Bells','Chapitre II · Silent Bells'):_('🔒 Chapter II','🔒 Chapitre II');
-  b.querySelector('.soon').textContent=_('Coming soon','À venir')}
-$('mNext').addEventListener('click',e=>e.currentTarget.blur()); /* Chapitre II : « À venir » suffit, aucun message */
-$('gateBtn').addEventListener('click',()=>{ensureAudio();$('gate').hidden=true;try{$('menu').querySelector('[data-diff=normal]').focus({preventScroll:true})}catch(e){}});
-try{$('gateBtn').focus({preventScroll:true})}catch(e){}
+/* Épreuve du feu (records sous Normal et Difficile, verrou), « ▶ Outro » et chapitre suivant : LB.menu.update (CHAPTER.best, trialOpen, endSeen) */
+LB.gate.focus();   /* écran de démarrage (LB.gate) : un clic obligatoire, qui débloque le son ; focus posé en dernier, comme avant */
 let last=performance.now();
 function frame(now){
   perfWatch(now-last);const dt=Math.min(.05,(now-last)/1000);last=now;

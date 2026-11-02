@@ -41,6 +41,7 @@ for(const c of CASES){
  await ctx.close()}
 // ecriture : le choix de langue et les options vont dans les cles lb-*, jamais dans les anciennes
 {const ctx=await b.newContext({offline:true});const pg=await ctx.newPage();await pg.goto('file://'+FILE);await pg.waitForTimeout(300);
+ await pg.click('#gateBtn');   // ecran de demarrage (LB.gate, depuis menu/common)
  await pg.click('#langs button[data-lang=en]');await pg.evaluate(()=>{optMus.click();optHelp.click()});
  const k=await pg.evaluate(()=>({...localStorage}));console.log('ecriture',JSON.stringify(k));
  if(k['lb-lang']!=='en'||k['lb-mus']!=='0'||k['lb-help']!=='1')errs.push('ecriture: cles lb-* non ecrites');

@@ -86,5 +86,4 @@ const OUTRO=(()=>{
   const ENTER={0:()=>{tone(196,3,'sine',.07,0);tone(392,2.2,'sine',.03,0)}};
   return LB.cine.create({scenes:SC.map((s,i)=>Object.assign({draw:DRAW[i],enter:ENTER[i]},s))});
 })();
-$('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();OUTRO.play(()=>{})});
 

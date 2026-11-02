@@ -279,23 +279,18 @@ function runTable(){
   const C=[[_('Total time','Temps total'),fmtT(tot)],[_('Hits taken','Coups subis'),a.h+b.h+R.taken],[_('Attempts','Essais'),RUN.n],
     [_('Phase I','Phase I'),fmtT(RUN.pt[0])],[_('Phase II','Phase II'),fmtT(RUN.pt[1])],[_('Phase III','Phase III'),fmtT(RUN.pt[2])],
     [_('Blocks','Blocages'),a.p+R.blocks],[_('Dodges','Esquives'),b.p],[rec?_('New record!','Nouveau record !'):_('Best time','Meilleur temps'),fmtT(best),rec]];
-  return C.map(c=>'<div'+(c[2]?' class="rec"':'')+'><small>'+c[0]+'</small><b>'+c[1]+'</b></div>').join('');
+  return C;   /* lignes [libellé, valeur, record] : LB.card */
 }
 function rEnd(){
-  $('ovTable').hidden=true;
   const sp=R.mode==='space',win=R.mode==='won'||sp;
-  if(sp){LB.store.set(LB.key('end'),'1');updNext()}
-  el.ov.classList.toggle('clear',sp);
-  el.eye.textContent=sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III');
-  el.title.textContent=sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.');
-  el.stats.textContent=_('Blocks ','Blocages ')+R.blocks+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3);
-  el.stats.hidden=false;
-  el.desc.textContent=sp?_(`The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while.`,`Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps.`):win?_(`The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch.`,`Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore.`):_(`Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again.`,`La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus.`);
-  el.go.textContent=sp?_('Back to menu','Retour au menu'):win?_('Replay from Phase I','Rejouer depuis la phase I'):_('Retry Phase III','Réessayer la phase III');
-  if(sp&&RUN.on){el.eye.textContent=_('Trial by Fire · Complete','Épreuve du feu · Terminée');el.stats.hidden=true;$('ovTable').innerHTML=runTable();$('ovTable').hidden=false}
-  if(!win)deathCard();
-  el.ov.hidden=false;
-  try{el.go.focus({preventScroll:true})}catch(e){}
+  if(sp){LB.store.set(LB.key('end'),'1');LB.menu.update()}
+  const o={onGo:start,clear:sp,eye:sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III'),
+  title:sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.'),
+  stats:_('Blocks ','Blocages ')+R.blocks+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3),
+  desc:sp?_(`The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while.`,`Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps.`):win?_(`The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch.`,`Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore.`):_(`Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again.`,`La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus.`),
+  go:sp?_('Back to menu','Retour au menu'):win?_('Replay from Phase I','Rejouer depuis la phase I'):_('Retry Phase III','Réessayer la phase III')};
+  if(sp&&RUN.on){o.eye=_('Trial by Fire · Complete','Épreuve du feu · Terminée');o.stats='';o.table=runTable()}
+  LB.card.show(win?o:deathCard(o));
 }
 function chargeX(t){
   if(t<.35)return BX-5*Math.sin(t*50);

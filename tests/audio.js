@@ -18,7 +18,7 @@ const SPY=`(()=>{window.__acs=[];window.__h=false;
  for(const k of ['createOscillator','createBufferSource']){const f=C.prototype[k];C.prototype[k]=function(...a){this.__src=(this.__src||0)+1;return f.apply(this,a)}}})();`;
 const CH={
  ch1:{dist:path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html'),src:path.join(ROOT,'chapters/ch1-ember-bridge/src/js'),gate:'#gateBtn'},
- ch2:{dist:lib.DIST,src:path.join(ROOT,'chapters/ch2-silent-bells/src/js'),gate:'#go'}};
+ ch2:{dist:lib.DIST,src:path.join(ROOT,'chapters/ch2-silent-bells/src/js'),gate:'#gateBtn'}};   // ecran de demarrage dans les deux chapitres (LB.gate, menu/common)
 async function page(b,file){const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true,locale:'en-US'});
  const p=await ctx.newPage();p.on('pageerror',e=>errs.push('pageerror '+e.message));
  await p.addInitScript(SPY);await p.goto('file://'+file);await sleep(400);return {ctx,p}}

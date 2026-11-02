@@ -93,4 +93,3 @@ const CINE=(()=>{
   const CUE={2:[[.3,()=>{tone(660,.9,'sine',.04,200);tone(990,1.1,'sine',.025,0)}]],3:[[.45,()=>{boom(1.2,.12);roar()}]]};
   return LB.cine.create({key:'intro',scenes:SC.map((s,i)=>Object.assign({draw:DRAW[i],cue:CUE[i]},s))});
 })();
-$('introBtn').addEventListener('click',e=>{e.currentTarget.blur();CINE.play(()=>{})});

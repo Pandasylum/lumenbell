@@ -11,11 +11,7 @@
 //    ligne d'un de ces textes coupe en deux (legendes trop longues).
 // Sortie attendue : errs []
 const fs=require('fs');const launch=require('./launch');const {DIST,script,specTexts}=require('./ch2-lib');const {open,run}=require('./ch2-bot');
-const BAN=[/parfait/i,/\bparée?s?\b/i,/esquiv/i,/touché/i,/contré/i,/un reflet/i,/trop tard/i,/frappe\s*!/i,/tiens\s*!/i,/coup de grâce/i,
- /coup double/i,/bloqué/i,/garde brisée/i,/il revient/i,/prépare la garde/i,/riposte/i,/parade/i,
- /\bperfect/i,/parried/i,/\bparry!/i,/dodged/i,/countered/i,/a reflection/i,/too late/i,/strike\s*!/i,/hold\s*!/i,/get ready/i,
- /final blow/i,/double hit/i,/^hit\s*!?$/i,/blocked/i,/guard broken/i,/comes back/i,/×\s*\d/];
-const banned=s=>{s=String(s).replace(/ /g,'');return BAN.find(r=>r.test(s))};
+const {banned}=require('./ch2-lib');   // liste BAN commune (ch2-lib.js, reprise par announce.js)
 const errs=[];
 // 1. statique
 {const code=script(fs.readFileSync(DIST,'utf8'));let n=0;

@@ -4,7 +4,7 @@
 //    carte de la phase I affichee (Chapitre II : cinematique d'entree de la phase I, bouton #skip du jeu) ; rechargement -> Normal ne rejoue pas l'intro ; Chapitre II : nouvelle partie depuis le menu
 //    sans prologue. Anciennes cles du Chapitre I (eb-intro) lues comme avant. Drapeau deja pose (bureau et telephone) : bouton
 //    « ▶ Intro » visible dans le menu des deux chapitres, il rejoue l'intro puis rend le menu ; Chapitre II : une partie en pause est gardee.
-// 2. outro du Chapitre I (bouton du menu, lb-ch1-end pose) : passe par Espace, aucun drapeau ecrit, rejouable.
+// 2. outro des deux chapitres (bouton « ▶ Outro » du menu, cache sans la vraie fin, visible avec lb-chN-end) : passe par Espace, retour au menu, aucun drapeau ecrit, rejouable.
 // 3. copies de test a crochets (pas fixe, LB.cine.manual) : intro jouee jusqu'au bout -> drapeau ecrit sans passer ; rejeu
 //    (replay) d'une intro deja vue ; epilogue du Chapitre II : passe par Espace, rappel appele, pas de drapeau ; dernier carton
 //    de l'epilogue teinte de la couleur du Chapitre III.
@@ -17,7 +17,7 @@ const check=(c,msg)=>{if(!c)errs.push(msg)};
 async function state(pg,ch){return pg.evaluate(k=>({cine:!document.getElementById('cine').hidden,flag:localStorage.getItem(k),
  card:!document.getElementById('ov').hidden||!document.getElementById('skip')?.hidden&&!!document.getElementById('skip'),menu:!document.getElementById('menu').hidden}),KEY[ch])}
 async function startNormal(pg,ch){
- if(ch==='ch1'){await pg.evaluate(()=>{const g=document.getElementById('gateBtn');if(g&&!document.getElementById('gate').hidden)g.click()})}
+ await pg.evaluate(()=>{const g=document.getElementById('gateBtn');if(g&&!document.getElementById('gate').hidden)g.click()})   // ecran de demarrage (LB.gate), les deux chapitres
  await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(400)}
 (async()=>{const b=await launch();
  // 1. passage et drapeau, dist publies
@@ -49,7 +49,7 @@ async function startNormal(pg,ch){
   const tag=ch+' drapeau pose '+w+'x'+h,ctx=await b.newContext({viewport:{width:w,height:h},locale:'fr-FR'});
   await ctx.addInitScript(k=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem(k,'1')}},KEY[ch]);
   const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(tag+': pageerror: '+e.message));await pg.goto('file://'+DIST[ch]);await pg.waitForTimeout(200);
-  if(ch==='ch1')await pg.click('#gateBtn');await pg.waitForTimeout(150);
+  await pg.click('#gateBtn');await pg.waitForTimeout(150);
   const btn=()=>pg.evaluate(()=>{const e=document.getElementById('introBtn');if(!e)return'absent';const r=e.getBoundingClientRect(),c=getComputedStyle(e),x=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
    return{vis:!e.hidden&&c.display!=='none'&&c.visibility!=='hidden'&&r.width>0&&r.right<=innerWidth&&r.bottom<=innerHeight&&r.top>=0,top:x===e||e.contains(x),txt:e.textContent}});
   let B=await btn();check(B!=='absent'&&B.vis&&B.top&&B.txt==='▶ Intro',tag+': bouton de rejeu '+JSON.stringify(B));
@@ -63,14 +63,18 @@ async function startNormal(pg,ch){
    check(r.resume&&r.eye===eye0,tag+': partie perdue apres le rejeu '+JSON.stringify(r)+' / '+eye0)}
   console.log(tag.padEnd(26),'bouton',JSON.stringify(B),' rejeu et retour au menu : ok si aucune erreur ci-dessous');
   await ctx.close()}
- // 2. outro du Chapitre I
- {const ctx=await b.newContext({viewport:{width:1100,height:760}});await ctx.addInitScript(()=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem('lb-ch1-end','1')}});
-  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push('ch1 outro: pageerror: '+e.message));await pg.goto('file://'+DIST.ch1);await pg.waitForTimeout(200);
+ // 2. outro des deux chapitres : « ▶ Outro » au menu apres la vraie fin (lb-chN-end ; Chapitre II depuis menu/common), absent avant
+ for(const ch of ['ch1','ch2']){
+  {const ctx=await b.newContext({viewport:{width:1100,height:760}});const pg=await ctx.newPage();await pg.goto('file://'+DIST[ch]);await pg.waitForTimeout(200);await pg.click('#gateBtn');
+   const hid=await pg.evaluate(()=>document.getElementById('outroBtn').hidden);check(hid,ch+' outro : bouton visible sans la vraie fin');await ctx.close()}
+  const ctx=await b.newContext({viewport:{width:1100,height:760}});await ctx.addInitScript(k=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem(k,'1')}},'lb-'+ch+'-end');
+  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' outro: pageerror: '+e.message));await pg.goto('file://'+DIST[ch]);await pg.waitForTimeout(200);
   await pg.click('#gateBtn');await pg.waitForTimeout(100);
-  for(const k of [1,2]){await pg.click('#outroBtn');await pg.waitForTimeout(500);let v=await pg.evaluate(()=>!document.getElementById('cine').hidden);check(v,'ch1 outro : ne se lance pas ('+k+')');
-   await pg.keyboard.press('Space');await pg.waitForTimeout(300);v=await pg.evaluate(()=>!document.getElementById('cine').hidden);check(!v,'ch1 outro : Espace ne passe pas ('+k+')')}
-  const keys=await pg.evaluate(()=>Object.keys(localStorage).filter(k=>/outro|intro/.test(k)));check(!keys.length,'ch1 outro : drapeau ecrit '+keys);
-  console.log('ch1 outro      lancee deux fois, passee par Espace ; cles intro/outro :',keys);await ctx.close()}
+  for(const k of [1,2]){await pg.click('#outroBtn');await pg.waitForTimeout(500);let v=await pg.evaluate(()=>!document.getElementById('cine').hidden);check(v,ch+' outro : ne se lance pas ('+k+')');
+   await pg.keyboard.press('Space');await pg.waitForTimeout(300);v=await pg.evaluate(()=>!document.getElementById('cine').hidden&&!document.getElementById('menu').hidden);check(!v,ch+' outro : Espace ne passe pas ('+k+')')}
+  const m=await pg.evaluate(()=>!document.getElementById('menu').hidden);check(m,ch+' outro : pas de retour au menu');
+  const keys=await pg.evaluate(()=>Object.keys(localStorage).filter(k=>/outro|intro/.test(k)));check(!keys.length,ch+' outro : drapeau ecrit '+keys);
+  console.log(ch,'outro      lancee deux fois, passee par Espace ; cles intro/outro :',keys);await ctx.close()}
  // 3. copies de test a crochets
  for(const ch of ['ch1','ch2']){
   const file=ch==='ch1'?path.join(ROOT,'build/out/test.html'):testPage();
