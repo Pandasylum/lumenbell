@@ -27,7 +27,13 @@
 //    aux six tours.
 // Usage : node hub.js (python3 build/build_site.py avant). Sortie attendue : errs []
 const path=require('path'),fs=require('fs'),os=require('os');const launch=require('./launch');
-const HUB='file://'+path.resolve(__dirname,'../site/index.html'),errs=[];
+// Le hub est servi en http (serveur local, racine du depot) : le stockage des pages file:// n'est pas fiable d'une navigation a l'autre
+// (cause des echecs intermittents « rechargement » : le nouveau document voyait un stockage vide, l'application ecrit pourtant de facon synchrone).
+const ROOT=path.resolve(__dirname,'..'),errs=[];let HUB='',BASE='',SIX='';
+const server=require('http').createServer((q,r)=>{const u=decodeURIComponent(q.url.split('?')[0]);
+ if(u==='/__six.html'){r.writeHead(200,{'content-type':'text/html; charset=utf-8'});return r.end(SIX)}
+ const f=path.join(ROOT,u);if(!f.startsWith(ROOT)||!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end()}
+ r.writeHead(200,{'content-type':/\.html$/.test(f)?'text/html; charset=utf-8':'text/plain; charset=utf-8'});r.end(fs.readFileSync(f))});
 const check=(c,msg)=>{if(!c)errs.push(msg)};
 const SECRET=/couronne|crown/i,HUB_PAD=16;
 // table du hub lue dans le source construit (le hub est dans une fonction : HUB_T n'est pas global)
@@ -38,12 +44,17 @@ const BEDN=1+1+HT.beds.a.notes.length*(1+HT.beds.a.detune.length)+1;
 // instrumentation : oscillateurs crees (cloches et bourdon)
 const PROBE=()=>{const A=window.AudioContext;if(!A)return;window.__osc=0;window.__oscs=[];window.__flt=[];window.__dl=0;const o=A.prototype.createOscillator,f=A.prototype.createBiquadFilter,d=A.prototype.createDelay;A.prototype.createDelay=function(){window.__dl++;return d.apply(this,arguments)};
  A.prototype.createOscillator=function(){window.__osc++;const x=o.call(this);window.__oscs.push(x);return x};A.prototype.createBiquadFilter=function(){const x=f.call(this);window.__flt.push(x);return x}};
-const SEED=keys=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');for(const k in keys)localStorage.setItem(k,keys[k])}};
+// graines posees une seule fois par contexte : le repere est dans localStorage (le meme stockage que les cles testees, valide par settle), pas dans sessionStorage
+const SEED=keys=>{if(/\.html$/.test(location.pathname)&&!localStorage.getItem('__i')){localStorage.setItem('__i','1');for(const k in keys)localStorage.setItem(k,keys[k])}};
 const BLOCK=()=>{for(const k of ['localStorage','sessionStorage'])Object.defineProperty(window,k,{get(){throw new DOMException('blocked','SecurityError')}})};
+// attend que l'ecriture localStorage de la page soit vue par une AUTRE page du meme contexte (donc validee cote navigateur) avant un
+// rechargement ou une navigation : etat attendu, jamais une duree fixe. fn(arg) s'evalue dans la page temoin (un fichier texte local).
+async function settle(ctx,fn,arg,tag){const w=await ctx.newPage();try{await w.goto(BASE+'/tests/hub.js');await w.waitForFunction(fn,arg,{timeout:8000})}
+ catch(e){errs.push((tag||'')+': ecriture localStorage non validee : '+e.message.split('\n')[0])}finally{await w.close()}}
 async function open(b,o){o=o||{};const ctx=await b.newContext({viewport:o.vp||{width:1280,height:720},locale:o.lang==='en'?'en-US':'fr-FR',reducedMotion:o.reduced?'reduce':'no-preference',hasTouch:!!o.touch,isMobile:!!o.touch});
  await ctx.addInitScript(PROBE);
  if(o.block)await ctx.addInitScript(BLOCK);else await ctx.addInitScript(SEED,o.keys||{});
- if(o.lit)await ctx.addInitScript(v=>{if(!sessionStorage.getItem('__l')){sessionStorage.setItem('__l','1');localStorage.setItem('lb-hub-lit',v)}},o.lit);
+ if(o.lit)await ctx.addInitScript(v=>{if(/\.html$/.test(location.pathname)&&!localStorage.getItem('__l')){localStorage.setItem('__l','1');localStorage.setItem('lb-hub-lit',v)}},o.lit);
  const pg=await ctx.newPage(),tag=o.tag||'';
  pg.on('pageerror',e=>errs.push(tag+': pageerror: '+e.message));pg.on('console',m=>{if(m.type()==='error')errs.push(tag+': console: '+m.text())});
  await pg.goto((o.url||HUB)+(o.q||''));await pg.waitForTimeout(150);return{ctx,pg}}
@@ -61,7 +72,7 @@ const cardGeo=pg=>pg.evaluate(()=>{const c=document.getElementById('hcard'),q=c.
   anchored:!!t&&(up?q.bottom<=t.y-t.r+.5:q.top>=t.y+t.r-.5)&&t.x>=q.left&&t.x<=q.right&&tip.left>=q.left-1&&tip.right<=q.right+1}});
 const cardOk=(tag,G,n)=>check(G.open&&G.discs===7&&!G.hit.length&&G.inside&&G.anchored&&G.sel.join()===String(n),tag+' : carte '+JSON.stringify(G));
 const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.classList.contains('tw')?+a.dataset.n:a&&a.id});
-(async()=>{const b=await launch();
+(async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));BASE='http://127.0.0.1:'+server.address().port;HUB=BASE+'/site/index.html';const b=await launch();
  // 1. profils
  const P=[['vierge',{},['play','closed','closed','closed','closed','closed']],
   ['I termine',{'lb-ch1-end':'1'},['done','play','closed','closed','closed','closed']],
@@ -135,7 +146,7 @@ const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.cla
   check(await pg.evaluate(()=>localStorage.getItem('lb-hub-lit'))==='[1]',tag+' : tour fetee memorisee');
   check(await pg.evaluate(()=>document.querySelector('.tw[data-n="1"]').classList.contains('ring')),tag+' : tour I sonne');
   // rechargement : pas de rejeu (tour allumee d'emblee, aucune cloche)
-  await pg.reload();await pg.waitForTimeout(1400);const t2=(await towers(pg)).map(t=>t.st),o2=await pg.evaluate(()=>window.__osc);
+  await settle(ctx,()=>localStorage.getItem('lb-hub-lit')==='[1]',null,tag);await pg.reload();await pg.waitForTimeout(1400);const t2=(await towers(pg)).map(t=>t.st),o2=await pg.evaluate(()=>window.__osc);
   check(t2[0]==='done'&&o2<=BEDN&&await pg.evaluate(()=>!document.querySelector('.tw.ring')),tag+' : rechargement : pas de rejeu '+t2+' ('+o2+' oscillateurs)');await ctx.close()}
  // 2c. tour deja fetee, arrivee par l'ecran de demarrage : allumee sans animation ni cloche
  {const tag='deja fetee',{ctx,pg}=await open(b,{keys:{'lb-ch1-end':'1'},lit:'[1]',tag});
@@ -176,6 +187,7 @@ const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.cla
   check(K.mus==='0'&&K.snd==='0'&&K.mo===null&&K.pr==='false false',tag+' : reglages ecrits et appliques, aucune cle de mouvement '+JSON.stringify(K));
   await pg.keyboard.press('Escape');await pg.waitForTimeout(50);check(await pg.evaluate(()=>document.getElementById('hset').hidden&&document.activeElement.id==='setBtn'),tag+' : Echap ferme les reglages');
   // dans les chapitres : son et musique relus
+  await settle(ctx,()=>localStorage.getItem('lb-mus')==='0'&&localStorage.getItem('lb-snd')==='0',null,tag);
   for(const ch of [1,2]){await pg.goto(HUB.replace('index.html','ch'+ch+'/index.html?from=hub'));await pg.waitForTimeout(400);
    const C=await pg.evaluate(()=>({snd:document.getElementById('optSnd').checked,mus:document.getElementById('optMus').checked}));
    check(!C.snd&&!C.mus,tag+' : chapitre '+ch+' : reglages appliques '+JSON.stringify(C))}
@@ -197,6 +209,7 @@ const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.cla
   let K=await ks();const left=Object.keys(GONE).filter(k=>k in K),lost=Object.keys(KEEP).filter(k=>K[k]!==KEEP[k]);
   check(!left.length&&!lost.length,tag+' : cles restantes '+left+' / reglages perdus '+lost);
   let T=(await towers(pg)).map(t=>t.st).join(' ');check(T==='play closed closed closed closed closed'&&await pg.evaluate(()=>document.getElementById('hset').hidden),tag+' : hub vierge apres effacement '+T);
+  await settle(ctx,k=>k.every(x=>localStorage.getItem(x)===null),Object.keys(GONE).filter(k=>k!=='lb-hub-lit'),tag);
   await pg.goto(HUB);await pg.waitForTimeout(150);await pg.click('#gateBtn');await pg.waitForTimeout(1200);T=(await towers(pg)).map(t=>t.st).join(' ');K=await ks();
   check(T==='play closed closed closed closed closed'&&!('lb-ch1-end' in K)&&(await pg.evaluate(()=>document.documentElement.lang))==='fr',tag+' : rechargement : toujours vierge '+T+' '+JSON.stringify(K));
   console.log(tag.padEnd(36),'jauge a 1 s',mid.toFixed(2),'| restent',Object.keys(K).join(' '));await ctx.close()}
@@ -274,11 +287,11 @@ const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.cla
  // 4b. les six tours : copie temporaire du hub (six chapitres, toutes les tours ouvertes) ; la carte de chacune, a chaque taille
  {const src=fs.readFileSync(path.resolve(__dirname,'../site/index.html'),'utf8'),A3="{n:3,title:'Hollow Roots',soon:true,bell:293.66}",
    six=src.replace(A3,A3+",{n:4,title:'Test Four',soon:true,bell:293.66},{n:5,title:'Test Five',soon:true,bell:293.66},{n:6,title:'Test Six',soon:true,bell:293.66}").replace("prev=st[n]==='done'","prev=true"),
-   f=path.join(os.tmpdir(),'lb-hub-six-'+process.pid+'.html');
-  check(six!==src&&six.includes('prev=true')&&six.includes("{n:6,title:'Test Six'"),'six tours : copie de test non construite');fs.writeFileSync(f,six);
-  try{for(const [w,h,touch] of SZ)for(const lang of ['fr','en']){const tag='six tours '+w+'x'+h+' '+lang,{ctx,pg}=await open(b,{vp:{width:w,height:h},touch,lang,url:'file://'+f,tag});
+   f=null;
+  check(six!==src&&six.includes('prev=true')&&six.includes("{n:6,title:'Test Six'"),'six tours : copie de test non construite');SIX=six;
+  try{for(const [w,h,touch] of SZ)for(const lang of ['fr','en']){const tag='six tours '+w+'x'+h+' '+lang,{ctx,pg}=await open(b,{vp:{width:w,height:h},touch,lang,url:BASE+'/__six.html',tag});
     if(touch)await pg.tap('#gateBtn');else await pg.click('#gateBtn');await pg.waitForTimeout(100);const sides=[];
     for(let n=1;n<=6;n++){if(touch)await pg.tap('.tw[data-n="'+n+'"]');else await pg.click('.tw[data-n="'+n+'"]');await pg.waitForTimeout(40);const G=await cardGeo(pg);cardOk(tag+' tour '+n,G,n);sides.push(G.up?'^':'v')}
     console.log(tag.padEnd(30),'carte (v dessous, ^ dessus) :',sides.join(' '));await ctx.close()}}
-  finally{try{fs.unlinkSync(f)}catch(e){}}}
- console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});
+  finally{SIX=''}}
+ console.log('errs',errs);await b.close();server.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});
