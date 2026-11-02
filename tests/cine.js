@@ -13,7 +13,7 @@
 // 5. garde de couleur du mot « LUMENBELL » (LB.BRAND) : titre d'intro, carton « a suivre » et menu des deux chapitres = meme paire (LUMEN = couleur du chapitre, BELL = creme) ;
 //    hub (site/index.html) : LUMEN = LB.BRAND.lantern (jaune lanterne #ffe066), BELL = creme ;
 //    le creme et le coloriage de LUMEN/BELL ne sont ecrits que dans shared/js/24-cine.js, le jaune lanterne que dans la table du Veilleur (LB.WATCHER_T.lantern.idle) ; le coloriage de LUMEN/BELL ne sont ecrits que dans shared/js/24-cine.js (+ la regle CSS du menu qui lit LB.BRAND, les variables du hub posees depuis LB.BRAND).
-// 6. garde de l'interface commune (shared/js/28-ui.js) : lien « Retour » vers le hub (seulement depuis le hub, ?from=hub : texte « Retour », icone des sept points, meme rendu) et carte de defaite
+// 6. garde de l'interface commune (shared/js/28-ui.js) : lien « Chapitres » vers le hub (seulement depuis le hub, ?from=hub : texte « Chapitres », icone des sept points, meme rendu) et carte de defaite
 //    (LB.card : « Reessayer » puis « Menu » a droite, offre d'aide dessous, stats / desc / how vides masques) identiques dans les deux chapitres ; ouvert seul : pas de lien ; echoue si un chapitre
 //    redefinit ces elements hors de shared/ (col / rgb / hover dans CHAPTER.next, go2 « Menu », regles #ov / .mlink / #mHub / .cbtns, cadenas).
 // Usage : node cine.js (python3 build/build_test.py avant). Sortie attendue : errs []
@@ -188,12 +188,12 @@ const CARD={};
    const H=await pg.evaluate(()=>{const h=document.getElementById('brand'),sp=h.querySelector('span'),it=h.querySelector('i'),cs=getComputedStyle;return[h.textContent,cs(h).textTransform,cs(sp).color,cs(it).color]});
    check(H[0]==='Lumenbell'&&H[1]==='uppercase'&&hex(H[2])==='#ffe066'&&hex(H[3])===cream,'hub marque : '+JSON.stringify(H)+' attendu LUMEN #ffe066 / BELL '+cream);
    console.log('hub marque'.padEnd(12),'titre',H[1],hex(H[2]),hex(H[3]));await ctx.close()}}
- // 6b. lien « Retour » du menu (depuis le hub seulement) et carte de defaite : meme rendu dans les deux chapitres
+ // 6b. lien « Chapitres » du menu (depuis le hub seulement) et carte de defaite : meme rendu dans les deux chapitres
  {const hex=c=>{const m=/^rgba?\((\d+), (\d+), (\d+)/.exec(c);return m?'#'+[1,2,3].map(i=>(+m[i]).toString(16).padStart(2,'0')).join(''):String(c).toLowerCase()},SIG={};
   for(const ch of ['ch1','ch2']){const ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' ui: pageerror: '+e.message));
    const page='file://'+(ch==='ch1'?path.join(ROOT,'build/out/test.html'):testPage());
    await pg.goto(page);await pg.waitForTimeout(200);const alone=await pg.evaluate(()=>!document.getElementById('mHub')&&!document.querySelector('#menu .mfoot'));
-   check(alone,ch+' ui : ouvert seul, le menu ne doit pas avoir de lien Retour');
+   check(alone,ch+' ui : ouvert seul, le menu ne doit pas avoir de lien Chapitres');
    await pg.goto(page+'?from=hub');await pg.waitForTimeout(200);
    const R=await pg.evaluate(ch=>{const T=window.__t,LB=T.LB,q=s=>document.querySelector(s),vis=e=>!!e&&!e.hidden&&e.getClientRects().length>0,mn=q('#mHub'),cs=getComputedStyle(mn);
     const nxt={gate:vis(q('#gate')),vis:vis(mn),txt:mn.querySelector('.nm').textContent,dots:mn.querySelectorAll('svg.hubico circle').length,look:[cs.color,cs.borderTopColor,cs.backgroundColor,cs.fontFamily,cs.fontSize,cs.width,cs.minHeight].join(' ; '),label:mn.getAttribute('aria-label')};
@@ -203,11 +203,11 @@ const CARD={};
     return{nxt,ids,menuTxt:q('#goMenu').textContent,side:m.left>g.left&&Math.abs(m.top-g.top)<2,go2:vis(q('#go2')),empt,
      bg:[getComputedStyle(q('#go')).backgroundColor,getComputedStyle(q('#goMenu')).color,getComputedStyle(q('#goMenu')).borderTopColor],chc:getComputedStyle(document.documentElement).getPropertyValue('--chc').trim(),own:LB.CH_COL[LB.menu.C.n]}},ch);
    const tag=ch+' ui',N=R.nxt;
-   check(N.vis&&!N.gate&&N.txt==='Retour'&&N.dots===7&&!/couronne|crown/i.test(N.label+N.txt),tag+' : lien Retour '+JSON.stringify(N));
+   check(N.vis&&!N.gate&&N.txt==='Chapitres'&&N.dots===7&&!/couronne|crown/i.test(N.label+N.txt),tag+' : lien Chapitres '+JSON.stringify(N));
    check(JSON.stringify(R.ids)==='["go","goMenu"]'&&R.menuTxt==='Menu',tag+' : boutons de la carte '+JSON.stringify(R.ids)+' « '+R.menuTxt+' »');
    check(R.side&&!R.go2,tag+' : Menu a droite du bouton principal '+R.side+', go2 visible '+R.go2);
    check(!R.empt.length,tag+' : zones vides non masquees '+R.empt);
    check(hex(R.bg[0])===R.own&&hex(R.bg[1])===R.own&&hex(R.bg[2])===R.own&&R.chc===R.own,tag+' : couleurs des boutons '+JSON.stringify(R.bg)+' --chc '+R.chc+' attendu '+R.own);
    SIG[ch]=JSON.stringify([R.ids,R.menuTxt,R.side,R.go2,N.txt,N.dots,N.look,N.label]);console.log(tag.padEnd(12),N.txt,'|',N.look,'|',R.ids.join(','));await ctx.close()}
-  check(SIG.ch1===SIG.ch2,'ui : structure de carte / lien Retour differente entre les chapitres '+JSON.stringify(SIG))}
+  check(SIG.ch1===SIG.ch2,'ui : structure de carte / lien Chapitres differente entre les chapitres '+JSON.stringify(SIG))}
  console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});

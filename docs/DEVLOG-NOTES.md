@@ -131,3 +131,8 @@
 ### 2026-11-02 — menu/crown A : le hub
 - Le joueur verra, après « Commencer », six points de lumière en cercle autour d'un point blanc qui bat ; le Chapitre I pulse, les chapitres terminés restent allumés, reliés par un fil, et répondent chacun par une cloche.
 - En touchant un point, il verra « Chapitre N », le nom du chapitre dans sa couleur et « Entrer » ; dans le chapitre, un bouton « Retour » le ramène au hub, où la tour d'un chapitre qu'il vient de finir s'allume.
+
+### 2026-11-02 — menu/crown-fixes : correctifs du hub
+- Le joueur verra une roue en haut à droite du hub : Musique, Bruitages, Mouvement réduit, et « Réinitialiser la progression » qu'il faut maintenir 2 s pendant qu'une jauge se remplit.
+- En touchant une tour, la carte s'ouvre sous la figure (téléphone en portrait) ou à côté (paysage), sans jamais la cacher ; la tour choisie reste éclairée.
+- À la fin d'un chapitre lancé depuis le hub, « Chapitres » le ramène au hub, où la tour s'allume une seule fois avec sa cloche ; le fond sonore est plus léger, sans grave.

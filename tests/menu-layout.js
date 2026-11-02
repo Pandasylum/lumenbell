@@ -3,17 +3,17 @@
 // « ▶ Outro » visible), menu avec « Reprendre » (partie en cours), sous-menu de l'Epreuve, ecran de demarrage. Pour chaque element
 // present dans les deux chapitres on compare gauche, haut, largeur, hauteur a TOL pixels ; en plus, aucun element (bouton, texte, note de
 // regles de l'Epreuve) ne doit depasser de l'ecran (dans la fenetre, dans les deux chapitres).
-// Hub (session menu/crown) : l'ecran de demarrage est mesure ouvert seul (sans lien Retour) ; les trois etats du menu, ouvert depuis
-// le hub (?from=hub : sans ecran de demarrage, avec le lien « Retour », meme place et meme taille dans les deux chapitres).
+// Hub (session menu/crown) : l'ecran de demarrage est mesure ouvert seul (sans lien Chapitres) ; les trois etats du menu, ouvert depuis
+// le hub (?from=hub : sans ecran de demarrage, avec le lien « Chapitres », meme place et meme taille dans les deux chapitres).
 // Tolerance TOL (pixels). Les elements dont le texte est centre et de longueur propre au chapitre (ligne du chapitre, bouton du chapitre
-// Retour exclu : meme taille, meme position) sont compares par leur centre, leur haut et leur hauteur, pas par leur largeur.
+// Chapitres exclu : meme taille, meme position) sont compares par leur centre, leur haut et leur hauteur, pas par leur largeur.
 // Sortie attendue : errs []
 const path=require('path');const launch=require('./launch');
 const F={ch1:path.resolve(__dirname,'../chapters/ch1-ember-bridge/dist/index.html'),ch2:path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html')};
 const TOL=1,errs=[];
 // bureau (souris), telephones en portrait (tactile), paysage bas (tactile)
 const SIZES=[['desk',1100,760,false],['p320',320,568,true],['p360',360,640,true],['p375',375,667,true],['phone',390,844,true],['l568',568,320,true],['l640',640,360,true],['land',860,400,true]];
-const SEL={intro:'#introBtn',outro:'#outroBtn',fs:'.fsm',langEn:'#langs [data-lang=en]',langFr:'#langs [data-lang=fr]',easy:'#mphM [data-diff=easy]',normal:'#mphM [data-diff=normal]',hard:'#mphM [data-diff=hard]',
+const SEL={intro:'#introBtn',outro:'#outroBtn',langEn:'#langs [data-lang=en]',langFr:'#langs [data-lang=fr]',easy:'#mphM [data-diff=easy]',normal:'#mphM [data-diff=normal]',hard:'#mphM [data-diff=hard]',
  trial:'#mphM [data-diff=trial]',resume:'#mResume',hub:'#mHub',ver:'.mcard .ver',h2:'.mcard h2',chap:'#mEye',tn:'#mphT [data-diff=tn]',th:'#mphT [data-diff=th]',back:'#mBackT',note:'#trialNote',
  gate:'#gateBtn',gEn:'#gateLangs [data-lang=en]',gFr:'#gateLangs [data-lang=fr]'};
 async function grab(pg,names){return pg.evaluate(([S,names])=>{const o={};for(const n of names){const e=document.querySelector(S[n]);if(!e||e.hidden||getComputedStyle(e).display==='none'){o[n]=null;continue}
@@ -25,17 +25,18 @@ for(const [nm,w,h,touch] of SIZES)for(const lang of ['fr','en'])for(const ch of 
  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' '+tag+': pageerror: '+e.message));
  await pg.goto('file://'+F[ch]);await pg.waitForTimeout(400);
  const R={};R.gate=await grab(pg,['gate','gEn','gFr']);
- if(await pg.evaluate(()=>!!document.getElementById('mHub')))errs.push(ch+' '+tag+' : lien Retour present, chapitre ouvert seul');
+ if(await pg.evaluate(()=>!!document.getElementById('mHub')))errs.push(ch+' '+tag+' : lien Chapitres present, chapitre ouvert seul');
  await pg.goto('file://'+F[ch]+'?from=hub');await pg.waitForTimeout(400);
  if(await pg.evaluate(()=>!document.getElementById('gate').hidden))errs.push(ch+' '+tag+' : ecran de demarrage visible depuis le hub');
- R.menu=await grab(pg,['intro','outro','fs','langEn','langFr','easy','normal','hard','trial','hub','ver','h2','chap']);
- if(!R.menu.hub)errs.push(ch+' '+tag+' : lien Retour absent depuis le hub');
+ R.menu=await grab(pg,['intro','outro','langEn','langFr','easy','normal','hard','trial','hub','ver','h2','chap']);
+ if(!R.menu.hub)errs.push(ch+' '+tag+' : lien Chapitres absent depuis le hub');
+ if(await pg.evaluate(()=>!!document.querySelector('.fsb,.fsm')))errs.push(ch+' '+tag+' : bouton plein ecran encore present');
  await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(500);
  if(ch==='ch2'&&await pg.evaluate(()=>!document.getElementById('skip').hidden)){await pg.keyboard.press('Enter');await pg.waitForTimeout(400)}   // cinematique d'entree de phase : passee, la carte s'affiche
  await pg.evaluate(()=>document.getElementById('menuBtn').click());await pg.waitForTimeout(300);
- R.resume=await grab(pg,['intro','outro','fs','langEn','langFr','easy','normal','hard','trial','resume','hub','ver','h2','chap']);
+ R.resume=await grab(pg,['intro','outro','langEn','langFr','easy','normal','hard','trial','resume','hub','ver','h2','chap']);
  await pg.evaluate(()=>document.querySelector('#mphM [data-diff=trial]').click());await pg.waitForTimeout(200);
- R.trial=await grab(pg,['intro','outro','fs','langEn','langFr','tn','th','back','note','hub','ver','h2','chap']);
+ R.trial=await grab(pg,['intro','outro','langEn','langFr','tn','th','back','note','hub','ver','h2','chap']);
  (all[tag]=all[tag]||{})[ch]=R;all[tag].size=[w,h];await ctx.close()}
 const OUT={};
 for(const tag in all)for(const ch of ['ch1','ch2'])for(const st of ['gate','menu','resume','trial']){const [w,h]=all[tag].size;for(const n in all[tag][ch][st]){const r=all[tag][ch][st][n];if(!r)continue;

@@ -54,10 +54,10 @@ function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
   const t=S.runT,key=LB.key('best-'+S.dk),rec=+LB.store.get(key,0);let isRec=false;
   if(S.full&&(!rec||t<rec)){LB.store.set(key,String(t));isRec=true}
   const best=S.full?(isRec?t:rec):rec;
-  showCard({eye:_('Victory','Victoire')+' · '+S.d[LB.lang.cur],title:_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
+  showCard(LB.hubEnd({eye:_('Victory','Victoire')+' · '+S.d[LB.lang.cur],title:_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
     table:[[_('Time','Temps'),fmt(t)],[_('Hits taken','Coups reçus'),S.hits],[_('Perfects','Parfaits'),S.perfects],[_('Best','Record'),best?fmt(best):'—',true]],
     desc:(isRec?_('New record. ','Nouveau record. '):'')+(S.full?'':_('Records only count for runs started from the beginning.','Le record ne compte que pour une partie lancée depuis le début.')),
-    go:_('Play again','Rejouer'),onGo:()=>startRun(S.dk),onMenu:showMenu});
+    go:_('Play again','Rejouer'),onGo:()=>startRun(S.dk),onMenu:showMenu},2,S.d.trial));   // from the hub, outside the Trial: « Chapters » goes back to the hub
 }
 function deathCard(){MUSIC.stop();const tr=S.d.trial;
   const o={eye:_('Defeat','Défaite'),title:_('The Watcher is down.','Le Veilleur est à terre.'),
