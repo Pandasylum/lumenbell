@@ -80,7 +80,7 @@ Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III
 
 ## Sorts et rages (décisions du 27 octobre, pour C1 puis session équilibrage)
 
-**Vocabulaire (28 octobre) :** le Veilleur n'a plus d'épée, donc plus de « parade ». Un seul geste, **bloquer** (EN *block*), pour les phases où l'on faisait parer, et **esquiver** ; la phase III garde le blocage tenu (barrage), avec le bouton « Bloquer » / « Block » (validé le 30 octobre ; avant : « Garde » / « Guard »). Même principe, mêmes fonctions et mêmes états que le Chapitre I (`ready` → action → `recover`). Les noms dans le code et les textes (FR/EN, lecteur d'écran, aide, difficultés) suivent.
+**Vocabulaire (28 octobre) :** le Veilleur n'a plus d'épée, donc plus de « parade » (mot abandonné). Un seul geste, **bloquer** (EN *block*), pour les phases où le geste s'appelait « parer », et **esquiver** ; la phase III garde le blocage tenu (barrage), avec le bouton « Bloquer » / « Block » (validé le 30 octobre ; avant : « Garde » / « Guard »). Même principe, mêmes fonctions et mêmes états que le Chapitre I (`ready` → action → `recover`). Les noms dans le code et les textes (FR/EN, lecteur d'écran, aide, difficultés) suivent.
 
 Seul l'aspect change ; les valeurs (timings, fenêtres) restent celles du code jusqu'à la session d'équilibrage.
 

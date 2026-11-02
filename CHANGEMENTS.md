@@ -9,16 +9,11 @@ Suivi
 Ce document évolue à chaque mise à jour du lore. Chaque section ci-dessous a un statut. Claude met à jour le statut après avoir appliqué une section (date et lien de la PR). Une section entièrement appliquée et fusionnée est déplacée en bas du document, dans « Appliqué », pour le garder court. Une nouvelle décision qui touche l'existant devient une nouvelle section (lettre suivante, avec la date).
 
 Section	Sujet	Statut	Date	PR
-A	Chapitre II · Textes et titre de la forme II	En cours	30 octobre 2026 (mis à jour le 29)	branche `ch2/lore-changements` (PR à ouvrir)
-B	Boss de la phase II : l'Ancien de Rouille	En cours	28 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
-C	Chapitre II · Lumière du boss et de la Sans-Fond	En cours	28 octobre 2026 (mis à jour le 29)	branche `ch2/lore-changements` (PR à ouvrir)
 D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	En cours	28 octobre 2026 (mis à jour le 29)	branche `ch1/foundry-floor` (PR à ouvrir)
-E	Veilleur · Couleur de la lanterne et des tirs	Fait (PR à fusionner)	1er novembre 2026	branche `claude/lanterne-color-audit-5ie121` (prévue `engine/lantern-color`)
 F	Documents à mettre à jour	En cours (CH2-SPEC et COMMUN faits ; BIBLE, DECISIONS, LORE restent)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
 G	Chapitre I · Lanterne du Colosse de braise	En cours	29 octobre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
-H	Chapitre II · Rémanence (évaporation du Lumen)	En cours	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
-J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours (a) et (b) ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (PR à ouvrir)
+J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours : (a) et (b) fusionnés ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (a et b fusionnés)
 
 K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
 L	Chapitre I · Fausse fin de Facile supprimée	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
@@ -36,42 +31,6 @@ Les traductions anglaises ont été validées par Kevin (29 octobre).
 Après modification : régénérer TEXTES.md, lancer tests/ch2-texts.js et les autres tests du chapitre, vérifier visuellement les cartons (durées de lecture : 6 à 7 s pour l'intro, environ 4 s pour l'outro).
 Faire une branche et une PR par ensemble cohérent (textes, lumière, couleur du Veilleur, documents).
 Après chaque section appliquée : mettre à jour le tableau « Suivi », puis ajouter une ligne dans DECISIONS.md si une décision a été prise en cours de route.
-A. Chapitre II · Textes
-
-Remplacer les textes suivants (français validé par Kevin ; « Phare » prend sa majuscule partout ; « le navire » est masculin).
-
-Où	Ancien texte	Nouveau texte FR	Nouveau texte EN
-Phase I, entrée	« Au pied du Phare, l'eau est un miroir. Une voix y répond au Veilleur. »	« Une étrange pesanteur enveloppe le pied du Phare. Des sonorités cristallines résonnent dans l'immensité. Parmi ces échos suspendus, une voix flotte dans l'air, empreinte d'une profonde tristesse. »	"A strange heaviness settles over the foot of the Lighthouse. Crystalline sounds ring out across the vastness. Among these suspended echoes, a voice drifts through the air, steeped in deep sorrow."
-Phase I, fin	« L'espace d'un instant, la lanterne du Veilleur faiblit. »	« La Voix s'éteint dans un dernier murmure, familier au Veilleur. »	"The Voice fades in a last murmur, familiar to the Watcher."
-Phase II, entrée	« Sous le Phare, la coque d'un navire échoué. Elle sent le fer et le sel. »	« Sous le Phare, la coque d'un navire échoué. Le fer rongé par le sel semble reposer ici depuis des siècles. »	"Beneath the Lighthouse, the hull of a stranded ship. The iron, eaten away by salt, seems to have lain here for centuries."
-Phase II, fin	« La coque s'effondre autour du Roi. Pour la première fois, la lune se reflète sur son corps de métal. »	« Le navire s'effondre autour de l'Ancien. La lune se reflète sur son armure, mais rien ne répond à sa lumière. »	"The ship collapses around the Elder. The moon gleams on his armor, but nothing answers his light."
-Phase III, entrée	« La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif. »	« La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif, leurs carcasses livrées à une présence qui ne connaît ni repos ni oubli. »	"The sea has drawn back. The ships it took sleep on the reef, their wrecks given over to a presence that knows neither rest nor forgetting."
-Phase III, fin	« Dans les décombres, la cloche du Phare, fêlée et muette. »	« Dans les décombres gît la cloche du Phare, fêlée et muette. »	"In the wreckage lies the Lighthouse's bell, cracked and silent."
-
-Notes :
-
-Phase I, fin : seule la phrase change. L'animation de la lanterne du Veilleur qui faiblit (CINE_P1.dim) et la lanterne turquoise qui coule restent telles quelles : c'est montré, ce n'est plus écrit. La phrase est volontairement ouverte : le passé du héros reste inconnu.
-Phase II, fin : « l'Ancien » (FR) et « the Elder » (EN) sont les noms courts du boss de la phase II (voir B). Le sens de « rien ne répond à sa lumière » est volontairement ambigu (la lune, la lueur turquoise, la cloche) : il dit qu'il n'y a plus de présence vivante dans l'armure. Ne pas le préciser.
-Phase III, fin : le verbe « gît » sous-entend que tout le monde a perdu à cet endroit. Ne pas le remplacer.
-Phase III, forme II : supprimer le carton. Le Chapitre I n'a aucun carton quand le Colosse récupère sa vie en phase III ; le Chapitre II doit être cohérent. Retirer du changement de forme tout texte affiché, y compris « La tour éclate. Au milieu des débris, la méduse, à découvert. ». La cinématique de changement de forme et les effets restent inchangés. Le titre de la forme II devient « La Sans-Fond » (il remplace « L'Éclaté » / « The Shattered ») ; EN proposé : « The Bottomless ». Si une phrase de lecteur d'écran existe déjà pour ce moment, la garder telle quelle (elle ne doit rien ajouter à l'écran).
-Ne pas ajouter de texte pour dire que la créature « emprunte une forme » : cela se déduit (voir C).
-Intro et outro du Chapitre II : aucun changement de texte.
-B. Chapitre II · Le boss de la phase II devient l'Ancien de Rouille
-
-« Roi de Rouille » (The Rust King) est renommé « l'Ancien de Rouille ». « Sonneur de Rouille » n'a jamais été employé : ne pas l'introduire. « Ancien » est un indice : il nomme un ancien Veilleur.
-
-Nom du boss affiché (carte d'entrée de phase II, titre de phase, lecteur d'écran, frise, TEXTES.md) : FR « L'Ancien de Rouille ». EN : « The Rust Elder ».
-Dans tout texte affiché ou lu qui dit « le Roi » / « the King » à propos de ce boss : « l'Ancien » / « the Elder ».
-Mettre à jour les tests qui lisent ces textes (tests/ch2-texts.js, tests/ch2-announce.js) et docs/CH2-SPEC.md.
-Ne pas toucher au Roi Sombre (chapitre VI, pas encore dans le jeu).
-C. Chapitre II · Lumière du boss et de la Sans-Fond
-
-Principe (validé) : la lumière vivante pulse, la lumière copiée ne pulse pas. La Sans-Fond a mangé le Lumen de la lanterne de l'Ancien et en porte la couleur turquoise ; cette lueur est une copie : fixe, sans pulsation. Le joueur le lit sans texte.
-
-Cœur de l'Ancien de Rouille : lueur turquoise fixe, sans pulsation, dès le début de la phase II, visible aussi par les jointures de l'armure. Ce n'est pas la lumière de l'ancien Veilleur : c'est la Sans-Fond qui l'habite. Remplacer toute lueur ambre-rouge du cœur par cette lueur turquoise fixe. Ne pas changer la lumière de la cloche de tête sans nouvelle consigne.
-Fin de la phase II : le sol tient, le navire s'effondre, le plafond s'ouvre, la lune éclaire l'armure, l'Ancien s'agenouille sous le cône de lumière. La lueur turquoise du cœur reste visible, fixe. Rien ne répond.
-Phase III : toutes les lueurs turquoises de la Sans-Fond (lanterne du sommet de la tour, méduse de la forme II) sont fixes, sans pulsation. Seule la lanterne de la gardienne (phase I) pulse. Si une lueur turquoise de la Sans-Fond pulse aujourd'hui, la rendre fixe.
-Phase I : ne rien changer à la lanterne de la gardienne (elle pulse en coulant) ni au halo dans le miroir.
 D. Chapitre I · « Drowned Lighthouse » et genou de fin de phase I
 
 Le nom anglais du Phare Noyé est toujours « the Drowned Lighthouse », jamais « Beacon » : beacon désigne déjà le fanal du Clocher au Chapitre I.
@@ -84,18 +43,6 @@ src/js/44-p3-belfry-logic.js (ligne 468, scène de fin) : « Far out at sea, the
 Chercher aussi toute autre occurrence de « Drowned Beacon » dans le dépôt (texte affiché, lecteur d'écran, TEXTES.md). Ne pas toucher aux « beacon » qui désignent le fanal du Clocher.
 
 Genou à terre : garder l'outro (carton 1 : le Colosse s'incline de lui-même face à la cloche avant d'être figé). Retirer en revanche « à genoux » et « plie un genou » des textes de fin de phase I (lecteur d'écran ; ancienne carte, 08-state.js ligne 84) : le genou est réservé à l'outro. Reprendre la formulation de la carte actuelle de fin de phase I (08-state.js, ligne 87) ; en cas de doute, proposer. Interprétation de la réponse « garder celui de l'outro » : à confirmer en relisant la PR.
-
-E. Le Veilleur (commun) · Couleur de la lanterne et des tirs
-
-Décision : le Veilleur a un jaune neutre ; quand il tire, le jaune vire vers le jaune-blanc (et non plus vers le bleu-blanc, pour ne pas confondre avec le givre du chapitre IV). Le rendu est à valider à l'écran (le jaune-blanc est plus cohérent mais peut être moins beau).
-Raison de lore : le Lumen du héros est affaibli, le blanc d’origine atténué se teinte de jaune ; il reste supérieur à celui des autres et le blanc ressort dans ses tirs.
-
-À faire :
-
-Relever la couleur actuelle de la lanterne et des tirs (éclats, rayon, foudre contre le Colosse) dans les deux chapitres.
-Produire une comparaison en images (avant / jaune neutre + tirs jaune-blanc), sur une scène de chaque chapitre, et la joindre à la PR.
-Ne pas changer sans cette validation visuelle. Les valeurs de jeu ne bougent pas.
-Rester dans l'esprit de la bible : la lanterne est la seule couleur claire de l'écran ; le Veilleur dessiné une seule fois, partagé.
 
 F. Documents à mettre à jour
 docs/LORE.md : remplacer par l'export Markdown du document Lumenbell · Lore définitif.
@@ -140,11 +87,6 @@ Lueur orange (code couleur de la braise), faible, avec une pulsation lente : le 
 Elle n'apparaît pas dans l'outro. Ce sont de simples indices : pas de texte, pas de bruitage, pas de zoom.
 Emplacement exact et forme : à choisir (près des équerres et des chaînes, lisible sur la cinématique) et à signaler dans la PR.
 Ne pas toucher à la silhouette du Colosse (validée) : la lanterne est un élément de décor, pas de son équipement.
-H. Chapitre II · Rémanence : évaporation du Lumen (validé le 29 octobre)
-À la mort de la Sans-Fond (animation de fin de la phase III), la lueur turquoise s'évapore : c'est la Rémanence.
-Elle ne retourne pas dans une lanterne (la lanterne de l'Ancien reste éteinte).
-Le turquoise s’éclaircit vers le blanc en montant, sans texte ni bruitage
-L'évaporation accompagne ou précède l'image de la cloche fêlée (ordre à ajuster).
 I. Chapitre II · Pleurs avant la Voix (à tenter)
 Avant l'apparition de la Voix Creuse (phase I), ajouter un pleur étouffé dans le son. Tout le son est synthétisé : pas de fichier audio.
 Sobre et bref, sans texte : il porte la « profonde tristesse » que le texte d'entrée annonce sans la répéter à l'écran.
@@ -251,4 +193,10 @@ Ne pas introduire « Sonneur » comme nom de boss.
 Ne pas changer les timings, valeurs d'équilibrage ou la silhouette du Colosse.
 Appliqué
 
-Aucune section pour l'instant. Quand une section est faite et fusionnée, la déplacer ici avec sa date et sa PR.
+- **A** · Chapitre II · Textes et titre de la forme II : Fait (PR fusionnée), 30 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Nouveaux textes d'entrée et de fin des trois phases ; plus de carton à la forme II (titre « La Sans-Fond »).
+- **B** · Boss de la phase II : l'Ancien de Rouille : Fait (PR fusionnée), 28 octobre 2026, branche `ch2/lore-changements`. « Roi de Rouille » devient « l'Ancien de Rouille » (EN « The Rust Elder »).
+- **C** · Chapitre II · Lumière du boss et de la Sans-Fond : Fait (PR fusionnée), 28 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Cœur turquoise fixe ; lueurs de la Sans-Fond sans pulsation.
+- **H** · Chapitre II · Rémanence : Fait (PR fusionnée), 30 octobre 2026, branche `ch2/lore-changements`. Évaporation du Lumen à la mort de la Sans-Fond, sans texte ni bruitage.
+- **E** · Veilleur · Couleur de la lanterne et des tirs : Fait (PR fusionnée), 1er novembre 2026, branche `engine/lantern-color`. Lanterne jaune neutre, tirs jaune-blanc dans les deux chapitres.
+
+Quand une section est faite et fusionnée, la déplacer ici avec sa date et sa PR.
