@@ -104,3 +104,7 @@
 
 ## 2026-11-02 · docs/rangement-2
 - Rien ne change à l'écran : cette session ne range que la documentation (feuille de route, glossaire, changements, bible, cahier des charges du Chapitre II).
+
+- 2026-11-02 (docs/apk-hub) : rien ne change encore dans le jeu, cette session ne pose que la décision.
+- À venir : un seul site avec un écran de démarrage, puis la Couronne pour choisir le chapitre ; les chapitres s'ouvrent sans second écran de démarrage.
+- À venir : un seul bouton « Commencer » au hub, avec une musique dédiée ; l'APK aura le même contenu que le web.
