@@ -88,11 +88,12 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 82 | On it, a single word is engraved: Crown. | Sur celle-ci, un seul mot est gravé : Couronne. |
 | 83 | And this time, the earth has not stopped trembling. | Et cette fois, la terre n'a pas cessé de trembler. |
 | 84 | In the heart of the forest, a Spire's light is failing. | Au cœur de la forêt, la lumière d'une Flèche faiblit. |
-| 85 | To be continued. | À suivre. |
-| 86 | Epilogue | Épilogue |
-| 87 | Retry | Réessayer |
-| 88 | Skip › | Passer › |
-| 89 | Space, up arrow or tap the screen · P pause · R retry · Enter to skip | Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer |
-| 90 | Visual help | Aide visuelle |
-| 91 | Sound | Son |
-| 92 | Music | Musique |
+| 85 | Chapter III · Hollow Roots. To be continued. | Chapitre III · Hollow Roots. À suivre. |
+| 86 | LUMENBELL · CHAPTER III | LUMENBELL · CHAPITRE III |
+| 87 | Epilogue | Épilogue |
+| 88 | Retry | Réessayer |
+| 89 | Skip › | Passer › |
+| 90 | Space, up arrow or tap the screen · P pause · R retry · Enter to skip | Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer |
+| 91 | Visual help | Aide visuelle |
+| 92 | Sound | Son |
+| 93 | Music | Musique |
