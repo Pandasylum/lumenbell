@@ -14,9 +14,9 @@
 // 3b. reglages (roue) : Musique, Bruitages (lb-mus, lb-snd), pas de reglage de mouvement, Echap ;
 //    reinitialisation : un clic ou un appui relache avant 2 s n'efface rien (jauge revenue a zero), 2 s maintenues effacent toute la
 //    progression (RESET_T, anciennes cles comprises) et gardent langue et reglages ; le hub revient a l'etat vierge, meme apres rechargement.
-// 3c. fond sonore ?bed=a|b|c (defaut a) : toutes les frequences de la table des variantes dans la bande 50-500 Hz, passe-bas <= 1,2 kHz,
-//    houles de 12 a 20 s, oscillateurs reellement crees dans la bande, retard a retroaction ; b = bourdon du premier jet a -4 dB plus un
-//    partiel ; cloches inchangees (table et hauteurs jouees) ; plein ecran absent (hub et chapitres).
+// 3c. fond sonore (HUB_T.bed, variante unique, sans ?bed) : toutes les frequences de la table dans la bande 50-500 Hz, passe-bas <= 1,2 kHz,
+//    houles de 12 a 20 s, oscillateurs reellement crees dans la bande, retard a retroaction ; cloches inchangees (table et hauteurs
+//    jouees) ; plein ecran absent (hub et chapitres).
 // 4. tailles 375x667, 390x844, 844x390 (tactile), 1280x720, 1920x1080 : zones tactiles >= 48 px, rien hors de l'ecran, pas de
 //    defilement, la figure ne chevauche ni le titre ni le bas ; titre centre entre le haut de l'ecran et la tour I, sur le meme axe
 //    vertical que la figure (ecart <= 2 px) ; version dans le coin bas droit a la hauteur des langues ; carte d'entree (petite, ancree
@@ -39,8 +39,8 @@ const SECRET=/couronne|crown/i,HUB_PAD=16;
 // table du hub lue dans le source construit (le hub est dans une fonction : HUB_T n'est pas global)
 const SRC=fs.readFileSync(path.resolve(__dirname,'../site/index.html'),'utf8'),HT=new Function('return '+SRC.match(/const HUB_T=(\{[\s\S]*?\n\});/)[1])(),
  HC=new Function('return '+SRC.match(/const HUB_CH=(\[[\s\S]*?\n\]);/)[1])();
-// oscillateurs du fond sonore par defaut (a) : balayage + houle commune + (houle + voix) par note + souffle ; le reste vient des cloches
-const BEDN=1+1+HT.beds.a.notes.length*(1+HT.beds.a.detune.length)+1;
+// oscillateurs du fond sonore (HUB_T.bed, variante unique) : balayage + houle commune + (houle + voix) par note + souffle ; le reste vient des cloches
+const BEDN=1+1+HT.bed.notes.length*(1+HT.bed.detune.length)+1;
 // instrumentation : oscillateurs crees (cloches et bourdon)
 const PROBE=()=>{const A=window.AudioContext;if(!A)return;window.__osc=0;window.__oscs=[];window.__flt=[];window.__dl=0;const o=A.prototype.createOscillator,f=A.prototype.createBiquadFilter,d=A.prototype.createDelay;A.prototype.createDelay=function(){window.__dl++;return d.apply(this,arguments)};
  A.prototype.createOscillator=function(){window.__osc++;const x=o.call(this);window.__oscs.push(x);return x};A.prototype.createBiquadFilter=function(){const x=f.call(this);window.__flt.push(x);return x}};
@@ -213,21 +213,16 @@ const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.cla
   await pg.goto(HUB);await pg.waitForTimeout(150);await pg.click('#gateBtn');await pg.waitForTimeout(1200);T=(await towers(pg)).map(t=>t.st).join(' ');K=await ks();
   check(T==='play closed closed closed closed closed'&&!('lb-ch1-end' in K)&&(await pg.evaluate(()=>document.documentElement.lang))==='fr',tag+' : rechargement : toujours vierge '+T+' '+JSON.stringify(K));
   console.log(tag.padEnd(36),'jauge a 1 s',mid.toFixed(2),'| restent',Object.keys(K).join(' '));await ctx.close()}
- // 3c. fond sonore : trois ambiances graves ; table lue dans le source construit (le hub est dans une fonction : HUB_T n'est pas global)
+ // 3c. fond sonore : une seule ambiance grave (« nebuleuse », sans ?bed) ; table lue dans le source construit (le hub est dans une fonction : HUB_T n'est pas global)
  {const inBand=f=>f>=50&&f<=500,near=(x,y)=>Math.abs(x-y)<=Math.abs(y)*.001+.005;
   // table : bande utile 50-500 Hz, rien au-dessus de 1,2 kHz, houles de 12 a 20 s, echo long, entree en fondu
-  for(const k of ['a','b','c']){const v=HT.beds[k],fr=v.notes.map(n=>n[0]).concat(v.air.f,v.spark?v.spark.f:[],v.echo.damp),tag='table fond '+k;
+  {const v=HT.bed,fr=v.notes.map(n=>n[0]).concat(v.air.f,v.spark?v.spark.f:[],v.echo.damp),tag='table fond';
    check(fr.every(inBand),tag+' : frequences hors de la bande 50-500 Hz '+fr.filter(f=>!inBand(f)));
    check(v.hp>=50&&v.lp.lo>=50&&v.lp.hi<=1200&&v.lp.lo<v.lp.hi&&v.lp.period>=12,tag+' : passe-bas / passe-haut '+JSON.stringify([v.hp,v.lp]));
    const per=[v.swell.all.period].concat(v.swell.periods);check(per.every(x=>x>=12&&x<=20)&&v.swell.depth>0&&v.swell.all.depth>0,tag+' : houles de 12 a 20 s '+per);
    check(v.echo.t>=1&&v.echo.fb>0&&v.echo.fb<.7&&v.fade>=5,tag+' : ecart long, retroaction, fondu '+JSON.stringify([v.echo,v.fade]));
-   check(v.notes.length>=2&&(k!=='a'||(v.detune.length>=2&&v.detune.length<=3)),tag+' : notes / voix desaccordees');
+   check(v.notes.length>=2&&v.detune.length>=2,tag+' : notes / voix desaccordees');
    console.log(tag.padEnd(36),'notes',v.notes.map(n=>n[0]).join(' '),'| passe-bas',v.lp.lo+'-'+v.lp.hi,'| houles',per.join(' '))}
-  check(HT.beds.a.notes.length===3&&Math.abs(HT.beds.a.notes[1][0]/HT.beds.a.notes[0][0]-1.5)<.01,'table fond a : quinte ouverte');
-  // b : bourdon du premier jet (55 / 82,41 / 110,2 Hz ; .07 / .045 / .025) a -4 dB, plus un partiel (octave de 82,41)
-  {const nb=HT.beds.b.notes,F0=[[55,.07],[82.41,.045],[110.2,.025]],g=Math.pow(10,-4/20);
-   check(F0.every(([f,v],i)=>near(nb[i][0],f)&&Math.abs(nb[i][1]/(v*g)-1)<.02),'table fond b : bourdon du premier jet a -4 dB '+JSON.stringify(nb));
-   check(nb.length>=4&&near(nb[3][0],82.41*2),'table fond b : second partiel '+JSON.stringify(nb[3]))}
   // cloches inchangees : table et hauteurs
   const BELL={dur:3.6,vol:.07,partials:[[1,1,1],[2.0,.5,.7],[2.76,.32,.5],[4.07,.18,.35],[5.4,.1,.25]]};
   check(JSON.stringify(HT.bell)===JSON.stringify(BELL)&&JSON.stringify(HC.map(c=>c.bell))==='[392,329.63,293.66]','cloches : table changee '+JSON.stringify([HT.bell,HC.map(c=>c.bell)]));
@@ -235,18 +230,16 @@ const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.cla
    const f=await pg.evaluate(()=>window.__oscs.map(o=>o.frequency.value));
    check(BELL.partials.every(([k])=>f.some(x=>near(x,392*k))),'cloches : hauteurs jouees '+f.filter(x=>x>=20).map(Math.round));
    check(f.filter(x=>x>=20&&x>500).length===BELL.partials.filter(([k])=>392*k>500).length,'cloches : seules les cloches depassent 500 Hz '+f.filter(x=>x>500).map(Math.round));await ctx.close()}
-  // a l'ecoute : oscillateurs, filtres et retard reellement crees ; sans ?bed (ou valeur inconnue) : a
-  const pages=[];for(const bd of ['a','b','c','z']){const r=await open(b,{q:bd==='z'?'?bed=z':'?bed='+bd,tag:'fond '+bd});await r.pg.click('#gateBtn');pages.push([bd,r])}
-  await pages[0][1].pg.waitForTimeout(9500);const got={};
-  for(const [bd,{ctx,pg}] of pages){const A=await pg.evaluate(()=>({f:window.__oscs.map(o=>o.frequency.value),flt:window.__flt.map(f=>[f.type,f.frequency.value]),dl:window.__dl}));
-   const aud=A.f.filter(f=>f>=20),lfo=A.f.filter(f=>f<20),v=HT.beds[bd==='z'?'a':bd];got[bd]=aud.slice().sort((x,y)=>x-y).join();
-   check(aud.length>=v.notes.length&&aud.every(inBand),'fond '+bd+' : composantes audibles hors bande '+JSON.stringify(aud));
-   check(v.notes.every(n=>aud.some(f=>near(f,n[0]))),'fond '+bd+' : notes de la table jouees '+JSON.stringify(aud));
-   check(A.flt.filter(f=>f[0]==='highpass').every(f=>f[1]>=50)&&A.flt.filter(f=>f[0]==='lowpass').every(f=>f[1]<=1200)&&A.flt.some(f=>f[0]==='highpass')&&A.flt.some(f=>f[0]==='lowpass'),'fond '+bd+' : filtres '+JSON.stringify(A.flt));
-   check(lfo.length>=v.notes.length+3&&lfo.every(f=>f>=1/40-1e-6&&f<=1/12+1e-6),'fond '+bd+' : houles et balayage lents '+JSON.stringify(lfo));
-   check(A.dl>=1,'fond '+bd+' : ecart a retroaction cree ('+A.dl+')');
-   console.log(('fond sonore '+bd).padEnd(36),'audibles',aud.map(Math.round).join(' '),'| lents',lfo.map(f=>(1/f).toFixed(0)+'s').join(' '));await ctx.close()}
-  check(got.z===got.a,'fond : valeur ?bed inconnue = a');}
+  // a l'ecoute : oscillateurs, filtres et retard reellement crees (variante unique, sans parametre d'URL)
+  {const {ctx,pg}=await open(b,{tag:'fond'});await pg.click('#gateBtn');await pg.waitForTimeout(9500);
+   const A=await pg.evaluate(()=>({f:window.__oscs.map(o=>o.frequency.value),flt:window.__flt.map(f=>[f.type,f.frequency.value]),dl:window.__dl}));
+   const aud=A.f.filter(f=>f>=20),lfo=A.f.filter(f=>f<20),v=HT.bed;
+   check(aud.length>=v.notes.length&&aud.every(inBand),'fond : composantes audibles hors bande '+JSON.stringify(aud));
+   check(v.notes.every(n=>aud.some(f=>near(f,n[0]))),'fond : notes de la table jouees '+JSON.stringify(aud));
+   check(A.flt.filter(f=>f[0]==='highpass').every(f=>f[1]>=50)&&A.flt.filter(f=>f[0]==='lowpass').every(f=>f[1]<=1200)&&A.flt.some(f=>f[0]==='highpass')&&A.flt.some(f=>f[0]==='lowpass'),'fond : filtres '+JSON.stringify(A.flt));
+   check(lfo.length>=v.notes.length+3&&lfo.every(f=>f>=1/40-1e-6&&f<=1/12+1e-6),'fond : houles et balayage lents '+JSON.stringify(lfo));
+   check(A.dl>=1,'fond : ecart a retroaction cree ('+A.dl+')');
+   console.log('fond sonore'.padEnd(36),'audibles',aud.map(Math.round).join(' '),'| lents',lfo.map(f=>(1/f).toFixed(0)+'s').join(' '));await ctx.close()}}
  // 4. tailles, rotation
  const SZ=[[375,667,true],[390,844,true],[844,390,true],[1280,720,false],[1920,1080,false]];
  const geo=pg=>pg.evaluate(()=>{const r=e=>{const q=e.getBoundingClientRect();return[q.left,q.top,q.width,q.height]},vis=e=>!e.hidden&&getComputedStyle(e).display!=='none'&&e.getClientRects().length>0;

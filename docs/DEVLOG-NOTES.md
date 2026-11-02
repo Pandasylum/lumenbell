@@ -141,3 +141,7 @@
 - Le joueur verra, sous la tour touchée, une petite carte (nom du chapitre en couleur, « Entrer ») avec une pointe vers la tour ; elle ne cache jamais une autre tour ni le point central, et le fond ou Échap la ferme.
 - Une tour à jouer a toujours un fin cercle autour de son point (même sans pulsation) ; terminée : point plein sans cercle ; fermée : cercle éteint. Le hub suit seul la préférence « mouvement réduit » du système.
 - Le fond sonore est grave, ample et lent (houles, écho long) ; le titre est exactement au-dessus du centre de la figure.
+
+### 2026-11-02 — hub/cleanup : fond sonore du hub
+- Le fond sonore du hub est désormais la nappe grave « nébuleuse » (plus présente, houles et souffle), par défaut : plus d'ambiance à choisir par adresse.
+- Rien d'autre ne change à l'écran ni dans les chapitres : mêmes cloches, mêmes timings et volumes.
