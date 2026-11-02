@@ -111,3 +111,4 @@
 
 - 2026-11-02 (ch2/cinematics) : à la fin de l'outro du Chapitre I, la carte « Chapitre II · Silent Bells » passe au turquoise de la marée.
 - À la fin de l'outro du Chapitre II, une carte « LUMENBELL · CHAPITRE III / HOLLOW ROOTS » apparaît en vert mousse sur la forêt, avec la même mise en page que celle du Chapitre I.
+- 2026-11-02 (ch2/cinematics, test) : la vérification des textes du Chapitre II n'échoue plus sur le titre « à suivre » de l'outro (Chapitre III · Hollow Roots), seule la liste des textes autorisés change.
