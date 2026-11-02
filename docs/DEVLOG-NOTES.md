@@ -98,3 +98,5 @@
 ## 2026-11-01 · menu/common (corrections)
 - Les deux menus ont les mêmes boutons aux mêmes places (bureau et téléphone), la version « v1.0.0 » et le bouton verrouillé du chapitre suivant (Chapitre III · Hollow Roots au Chapitre II).
 - Les règles de l'Épreuve sont les mêmes dans les deux chapitres (quatre lignes, texte du Chapitre I).
+## 2026-11-02 · menu/common (tailles d'écran)
+- Les menus des deux chapitres tiennent sur tous les écrans de téléphone, en portrait comme en paysage, avec le bouton du chapitre suivant toujours de la même taille.

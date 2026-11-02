@@ -11,28 +11,28 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | shared/js/28-ui.js:16 | _() |  | You recover 1 life between phases. | Tu récupères 1 PV entre les phases. |
 | shared/js/28-ui.js:17 | _() |  | A single death sends you back to Phase I. | Une seule mort te renvoie à la phase I. |
 | shared/js/28-ui.js:18 | _() |  | One stats table at the end of the run. | Un seul tableau de stats à la fin de la run. |
-| shared/js/28-ui.js:145 | _() |  | Fight paused | Combat en pause |
-| shared/js/28-ui.js:145 | _() |  | Resume | Reprendre |
-| shared/js/28-ui.js:155 | _() |  | Fullscreen | Plein écran |
-| shared/js/28-ui.js:180 | _() |  | Easy | Facile |
-| shared/js/28-ui.js:180 | _() |  | Hard | Difficile |
-| shared/js/28-ui.js:180 | _() |  | Normal | Normal |
-| shared/js/28-ui.js:181 | _() |  | Breathe | Respire |
-| shared/js/28-ui.js:181 | _() |  | Fair and square | À la loyale |
-| shared/js/28-ui.js:181 | _() |  | No mercy | Sans pitié |
-| shared/js/28-ui.js:181 | _() |  | Ultimate challenge | Challenge ultime |
-| shared/js/28-ui.js:228 | _() |  | No record yet | Pas encore de record |
-| shared/js/28-ui.js:232 | _() |  | To unlock | À débloquer |
-| shared/js/28-ui.js:234 | _() |  | Coming soon | À venir |
-| shared/js/28-ui.js:241 | _() |  | Resume | Reprendre |
-| shared/js/28-ui.js:242 | _() |  | Start | Commencer |
-| shared/js/28-ui.js:245 | _() |  | Difficulties | Difficultés |
-| shared/js/28-ui.js:245 | _() |  | ‹ Back | ‹ Retour |
-| shared/js/28-ui.js:249 | _() |  | Fullscreen | Plein écran |
-| shared/js/28-ui.js:251 | _() |  | Choose difficulty | Choisir la difficulté |
-| shared/js/28-ui.js:252 | _() |  | Language | Langue |
-| shared/js/28-ui.js:315 | _() |  | Not available in the trial | Indisponible dans l'épreuve |
-| shared/js/28-ui.js:333 | _() |  | Enable visual help | Activer l'aide visuelle |
+| shared/js/28-ui.js:148 | _() |  | Fight paused | Combat en pause |
+| shared/js/28-ui.js:148 | _() |  | Resume | Reprendre |
+| shared/js/28-ui.js:158 | _() |  | Fullscreen | Plein écran |
+| shared/js/28-ui.js:183 | _() |  | Easy | Facile |
+| shared/js/28-ui.js:183 | _() |  | Hard | Difficile |
+| shared/js/28-ui.js:183 | _() |  | Normal | Normal |
+| shared/js/28-ui.js:184 | _() |  | Breathe | Respire |
+| shared/js/28-ui.js:184 | _() |  | Fair and square | À la loyale |
+| shared/js/28-ui.js:184 | _() |  | No mercy | Sans pitié |
+| shared/js/28-ui.js:184 | _() |  | Ultimate challenge | Challenge ultime |
+| shared/js/28-ui.js:231 | _() |  | No record yet | Pas encore de record |
+| shared/js/28-ui.js:235 | _() |  | To unlock | À débloquer |
+| shared/js/28-ui.js:237 | _() |  | Coming soon | À venir |
+| shared/js/28-ui.js:244 | _() |  | Resume | Reprendre |
+| shared/js/28-ui.js:245 | _() |  | Start | Commencer |
+| shared/js/28-ui.js:248 | _() |  | Difficulties | Difficultés |
+| shared/js/28-ui.js:248 | _() |  | ‹ Back | ‹ Retour |
+| shared/js/28-ui.js:252 | _() |  | Fullscreen | Plein écran |
+| shared/js/28-ui.js:254 | _() |  | Choose difficulty | Choisir la difficulté |
+| shared/js/28-ui.js:255 | _() |  | Language | Langue |
+| shared/js/28-ui.js:318 | _() |  | Not available in the trial | Indisponible dans l'épreuve |
+| shared/js/28-ui.js:336 | _() |  | Enable visual help | Activer l'aide visuelle |
 | src/js/00-core.js:32 | _() |  | The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower. | Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher. |
 | src/js/00-core.js:33 | _() |  | One button: block, dodge. Space, up arrow or tap the screen. P to pause. | Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause. |
 | src/js/00-core.js:35 | _() |  | Trial by Fire | Épreuve du feu |
