@@ -32,7 +32,7 @@ for(const c of CASES){
  pg.on('pageerror',e=>errs.push(c.nom+': pageerror: '+e.message));
  pg.on('request',r=>{if(!/^(file|data|blob):/.test(r.url()))errs.push(c.nom+': reseau: '+r.url())});
  await pg.goto('file://'+(c.off?OFF:FILE));await pg.waitForTimeout(300);
- const st=await pg.evaluate(ks=>({lang:document.documentElement.lang,snd:optSnd.checked,mus:optMus.checked,help:optHelp.checked,
+ const st=await pg.evaluate(ks=>({lang:document.documentElement.lang,snd:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('snd').on,mus:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('mus').on,help:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help').on,
   locked:[...document.querySelectorAll('#phases button')].map(x=>x.disabled?1:0).join(''),
   keys:Object.fromEntries(ks.map(k=>[k,localStorage.getItem(k)]))}),Object.keys(c.keys));
  for(const k in c.want)if(st[k]!==c.want[k])errs.push(c.nom+': '+k+' = '+st[k]+' au lieu de '+c.want[k]);
@@ -42,7 +42,7 @@ for(const c of CASES){
 // ecriture : le choix de langue et les options vont dans les cles lb-*, jamais dans les anciennes
 {const ctx=await b.newContext({offline:true});const pg=await ctx.newPage();await pg.goto('file://'+FILE);await pg.waitForTimeout(300);
  await pg.click('#gateBtn');   // ecran de demarrage (LB.gate, depuis menu/common)
- await pg.click('#langs button[data-lang=en]');await pg.evaluate(()=>{optMus.click();optHelp.click()});
+ await pg.click('#langs button[data-lang=en]');await pg.evaluate(()=>{const s=((id,v)=>{const g=document.getElementById('mGear');g.click();document.querySelector('#lbSet [data-id='+id+'] [data-v='+v+']').click();g.click()});s('mus',false);s('help',true)});
  const k=await pg.evaluate(()=>({...localStorage}));console.log('ecriture',JSON.stringify(k));
  if(k['lb-lang']!=='en'||k['lb-mus']!=='0'||k['lb-help']!=='1')errs.push('ecriture: cles lb-* non ecrites');
  if(Object.keys(k).some(x=>/^(pn|db|eb)-/.test(x)))errs.push('ecriture: ancienne cle ecrite');

@@ -15,7 +15,7 @@ LB.menu.mount(CHAPTER,{
   onDiff:dk=>{ensureAudio();LB.help.use(DIFFS[dk]);startRun(dk)},
   onResume:()=>{hideMenu();MUSIC.stop();if(S.mode==='play')setPause(false);else if(S.mode==='card'&&lastCard)showCard(lastCard)},
   onIntro:()=>{ensureAudio();replayPrologue()},onOutro:()=>{ensureAudio();replayEpilogue()},onLang:()=>applyLang(),
-  onStart:()=>{if(!$('menu').hidden&&MUSIC.cur!==4)setTheme(4)}});
+  onStart:()=>{if(!$('menu').hidden&&MUSIC.cur!==4)setTheme(4)},onSet:syncAudio});
 LB.menu.show(false);LB.gate.focus();
 S.d=DIFFS.normal;S.phase=2;applyLang();requestAnimationFrame(loop);
 

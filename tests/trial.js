@@ -36,11 +36,11 @@ for(const ch of ['ch1','ch2'])for(const lang of ['fr','en']){
  check(t.sub.length===3&&/^(Normal|Normal)/.test(t.sub[0])&&t.sub[0].endsWith(lang==='fr'?'Pas encore de record':'No record yet'),tag+': boutons du sous-menu '+JSON.stringify(t.sub));
  await pg.click('#mphT [data-diff=tn]');await pg.waitForTimeout(400);
  if(await pg.evaluate(()=>!!document.getElementById('cine')&&!document.getElementById('cine').hidden)){await pg.keyboard.press('Escape');await pg.waitForTimeout(300)}
- const r=await pg.evaluate(()=>({track:getComputedStyle(document.getElementById('phases')).display,help:document.getElementById('optHelp').checked,dis:document.getElementById('optHelp').disabled,
-  label:document.getElementById('optHelp').closest('label').hidden,key:localStorage.getItem('lb-help')}));
+ const r=await pg.evaluate(()=>({track:getComputedStyle(document.getElementById('phases')).display,help:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help').on,dis:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help').dis,
+  label:false,key:localStorage.getItem('lb-help')}));
  check(r.track==='none'&&!r.help&&r.dis&&!r.label&&r.key==='1',tag+': Epreuve (frise, aide) '+JSON.stringify(r));
  await pg.click('#menuBtn');await pg.waitForTimeout(200);await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(300);
- const n=await pg.evaluate(()=>({track:getComputedStyle(document.getElementById('phases')).display,help:document.getElementById('optHelp').checked,dis:document.getElementById('optHelp').disabled}));
+ const n=await pg.evaluate(()=>({track:getComputedStyle(document.getElementById('phases')).display,help:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help').on,dis:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help').dis}));
  check(n.track!=='none'&&n.help&&!n.dis,tag+': retour en Normal (frise, aide memorisee) '+JSON.stringify(n));
  console.log(tag,JSON.stringify({difficultes:m.join(' / '),note:t.lines.length+' lignes',epreuve:r,normal:n}));
  await ctx.close()}

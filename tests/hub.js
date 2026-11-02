@@ -189,7 +189,7 @@ const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.cla
   // dans les chapitres : son et musique relus
   await settle(ctx,()=>localStorage.getItem('lb-mus')==='0'&&localStorage.getItem('lb-snd')==='0',null,tag);
   for(const ch of [1,2]){await pg.goto(HUB.replace('index.html','ch'+ch+'/index.html?from=hub'));await pg.waitForTimeout(400);
-   const C=await pg.evaluate(()=>({snd:document.getElementById('optSnd').checked,mus:document.getElementById('optMus').checked}));
+   const C=await pg.evaluate(()=>({snd:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('snd').on,mus:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('mus').on}));
    check(!C.snd&&!C.mus,tag+' : chapitre '+ch+' : reglages appliques '+JSON.stringify(C))}
   await ctx.close()}
  // reinitialisation maintenue

@@ -100,7 +100,7 @@ const hide=(p,off)=>p.evaluate(off=>{window.__h=off;document.dispatchEvent(new E
   const g0=await ev(()=>__t.LB.audio.mus.gain.value);await sleep(1500);const g1=await ev(()=>__t.LB.audio.mus.gain.value);
   ok(g0>0&&g1<0.001,ch+' test : le bus musique fond en 0,12 s au lieu de se couper net ('+g0.toFixed(3)+' -> '+g1.toFixed(4)+')');
   await p.reload();await sleep(500);
-  const r=await ev(()=>[__t.LB.audio.sound,__t.LB.audio.music,document.getElementById('optSnd').checked,document.getElementById('optMus').checked]);
+  const r=await ev(()=>[__t.LB.audio.sound,__t.LB.audio.music,(__t.LB.settings.toggle(true),(id=>{const b=document.querySelector('#lbSet .hsrow[data-id="'+id+'"] button[aria-pressed=true]');return b&&b.dataset.v})('snd')==='true'),(id=>{const b=document.querySelector('#lbSet .hsrow[data-id="'+id+'"] button[aria-pressed=true]');return b&&b.dataset.v})('mus')==='true']);   // cases retirees : roue de reglages (LB.settings)
   ok(r.join()==='false,false,false,false',ch+' test : reglages relus apres rechargement ('+r+')');
   await ev(()=>{__t.LB.audio.setSound(true);__t.LB.audio.setMusic(true)});
   await ctx.close();

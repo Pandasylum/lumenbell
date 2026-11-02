@@ -3,8 +3,7 @@ const UIT=[   /* textes du menu, de l'écran de démarrage, de la pause et des b
  ['#cineSkip','Skip ›','Passer ›'],
  ['#retryBtn','Retry','Réessayer'],
  ['.hint','Space, up arrow, or tap the screen · P pause · R retry',"Espace, flèche haut, ou toucher l'écran · P pause · R réessayer"],
- ['label[for=optHelp]',' Visual help',' Aide visuelle','last'],['label[for=optSnd]',' Sound',' Son','last'],['label[for=optMus]',' Music',' Musique','last'],
-];
+ ];
 const UIA=[['#phases','Fight phases','Phases du combat'],['.bars','Hit points','Points de vie'],['#hpP',"The Watcher's hit points",'Points de vie du Veilleur'],['#hpB',"The Colossus's hit points",'Points de vie du Colosse']];
 function applyLang(){
   document.documentElement.lang=LB.lang.cur;

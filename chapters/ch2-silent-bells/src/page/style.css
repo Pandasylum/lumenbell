@@ -63,8 +63,6 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .ward.down{background:rgba(127,214,255,.32)}
 .mrow{display:flex;gap:8px;align-items:center}
 .hint{margin:0;color:var(--muted);font-size:13px}
-.opts{display:flex;flex-wrap:wrap;gap:6px 16px;margin-left:auto;font-size:13px;color:var(--muted)}
-.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* Home menu: the common menu (LB.menu, shared/js/28-ui.js); only the animations of this chapter's scene stay here */
 .mscene .orb{animation:mglow 2.4s ease-in-out infinite alternate}
@@ -75,11 +73,11 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 @keyframes msweep{from{transform:rotate(-16deg)}to{transform:rotate(18deg)}}
 .lb-rm .mscene *{animation:none!important}   /* mouvement réduit : LB.motion (réglage du hub, sinon le système) */
 .lb-rm .btn{transition:none}
-@media (max-width:560px){.card{padding:12px 14px;gap:8px}.ward{width:100%}.opts{margin-left:0}.rtab{grid-template-columns:repeat(2,1fr)}}
-@media (pointer:coarse){.hint{display:none}.ward{min-height:84px;font-size:24px}.btn,.mbtn,.phases button,.skip{min-height:44px}.opts label{padding:8px 4px}}
+@media (max-width:560px){.card{padding:12px 14px;gap:8px}.ward{width:100%}.rtab{grid-template-columns:repeat(2,1fr)}}
+@media (pointer:coarse){.hint{display:none}.ward{min-height:84px;font-size:24px}.btn,.mbtn,.phases button,.skip{min-height:44px}}
 @media (max-width:480px){body{padding-block:12px 20px}.ov:not(.menu){position:fixed;z-index:40;background:rgba(6,8,12,.92);padding:16px}}
 @media (orientation:portrait) and (max-width:700px){.bars{grid-template-columns:1fr;gap:8px}.bar.boss{text-align:left}.bar span{display:flex;justify-content:space-between;white-space:nowrap}
-  .controls{display:grid;grid-template-columns:1fr;gap:10px}.controls .mrow{order:2}.controls .mrow>*{flex:1}.controls .opts{order:3;margin-left:0}
+  .controls{display:grid;grid-template-columns:1fr;gap:10px}.controls .mrow{order:2}.controls .mrow>*{flex:1}
   .ward{width:100%;min-width:0;height:auto;min-height:clamp(110px,17dvh,160px);font-size:clamp(28px,8vw,40px);letter-spacing:.1em}}
 @media (max-height:520px) and (orientation:landscape){
   body{padding-block:6px}
@@ -89,5 +87,5 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
   .bars{grid-area:bars;grid-template-columns:1fr;gap:8px}.bar.boss{text-align:left}
   .stage{grid-area:stage;width:min(100%,calc((100dvh - 12px)*16/9));margin:0 auto;align-self:center}
   .controls{grid-area:controls;display:grid;gap:8px;align-self:end}.controls>*{width:100%;min-width:0}.controls .mrow{order:-1}.mrow>*{flex:1}
-  .ward{min-height:84px;font-size:20px;padding:4px 6px}.hint,.opts{display:none}
+  .ward{min-height:84px;font-size:20px;padding:4px 6px}.hint{display:none}
   .ov:not(.menu){padding:6px}.card{padding:8px 12px;gap:4px;max-width:100%}.card h2{font-size:20px}.card p{font-size:12px;line-height:1.3}}

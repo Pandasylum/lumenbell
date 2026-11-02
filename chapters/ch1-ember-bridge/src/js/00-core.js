@@ -71,7 +71,7 @@ function perfWatch(raw){
 const $=id=>document.getElementById(id);
 /* carte et pause communes (LB.card, LB.pause), créées avant `el` ; le menu et l'écran de démarrage le sont dans 60-ui-menu.js */
 LB.card.mount($('stage'),$('menu'));LB.pause.mount($('stage'),$('menu'));
-const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),table:$('ovTable'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live'),help:$('optHelp'),snd:$('optSnd')};
+const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),table:$('ovTable'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live')};
 /* Aide : LB.help (lb-help, décochée par défaut) ; Son et Musique : LB.audio.sound / LB.audio.music (lb-snd, lb-mus) */
 let paused=true,pendingLore=false;
 const LORE={

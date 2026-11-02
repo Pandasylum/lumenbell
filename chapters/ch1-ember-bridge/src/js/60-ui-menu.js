@@ -20,16 +20,14 @@ document.querySelectorAll('#phases button').forEach(b=>b.addEventListener('click
 
 /* ---------- input : entrées communes (LB.input, shared/js/28-ui.js) ---------- */
 LB.card.setGo(start);
-LB.help.mount();el.snd.checked=LB.audio.sound;$('optMus').checked=LB.audio.music;   /* aide : LB.help (lb-help) */
-el.snd.addEventListener('change',()=>LB.audio.setSound(el.snd.checked));
-$('optMus').addEventListener('change',()=>LB.audio.setMusic($('optMus').checked));
+LB.help.mount();   /* aide visuelle : LB.help (lb-help) ; Musique, Bruitages, Aide : roue de réglages du menu (LB.settings) */
 const pauseEl=$('pause');
 const menuEl=$('menu');
 function setPause(on){
   if(on){if(paused||!el.ov.hidden)return;paused=true;LB.pause.show()}
   else{LB.pause.hide();paused=false;if(document.activeElement&&document.activeElement.blur)document.activeElement.blur()}
 }
-LB.pause.bind({onResume:()=>setPause(false),onMenu:()=>{pauseEl.hidden=true;showMenu(true)}});
+LB.pause.bind({onResume:()=>setPause(false),onMenu:()=>{pauseEl.hidden=true;showMenu(false)}});
 $('pauseBtn').addEventListener('click',e=>{setPause(true);e.currentTarget.blur()});
 /* Épreuve : Réessayer = abandonner la run (compte comme une défaite), avec confirmation pour éviter les faux appuis. */
 let abandonT=0,abandonTm=0;
