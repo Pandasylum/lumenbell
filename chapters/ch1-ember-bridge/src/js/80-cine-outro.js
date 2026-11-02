@@ -11,7 +11,7 @@ const OUTRO=(()=>{
     {d:9.5,en:"One by one, the Bound Spires answered the call. From peak to peak, their bells carried the news across the mountains, and beneath every tower, the stone trembled.",fr:"Une à une, les Flèches liées ont répondu à l'appel. De sommet en sommet, leurs cloches ont porté la nouvelle à travers les montagnes, et sous chaque tour, la pierre a tremblé."},
     {d:8,en:"Every bell answered. Every one but one. Far out at sea, the Drowned Lighthouse stayed silent, as if the depths had imposed silence on it.",fr:"Toutes les cloches ont répondu. Toutes, sauf une. Au large, le Phare Noyé est resté muet, comme si les profondeurs lui avaient imposé le silence."},
     {d:6,en:"At dawn, lantern in hand, the Watcher set out for the coast.",fr:"À l'aube, lanterne à la main, le Veilleur s'est mis en route vers la côte."},
-    {d:7,en:"Chapter II · Silent Bells. To be continued.",fr:"Chapitre II · Silent Bells. À suivre."}
+    {d:7,col:LB.CH_COL[2],en:"Chapter II · Silent Bells. To be continued.",fr:"Chapitre II · Silent Bells. À suivre."}
   ];
   const poly=(p,col)=>{cx.fillStyle=col;cx.beginPath();p.forEach((q,i)=>i?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1]));cx.closePath();cx.fill()};
   function sky(t,top,bot,hz){const g=cx.createLinearGradient(0,0,0,hz);g.addColorStop(0,top);g.addColorStop(1,bot);cx.fillStyle=g;cx.fillRect(0,0,960,hz);for(const s of STR){if(s.y>hz-10)continue;cx.globalAlpha=.3+.6*Math.abs(Math.sin(t*.8+s.p));cx.fillStyle='#eef2ff';cx.fillRect(s.x,s.y,s.r,s.r)}cx.globalAlpha=1}
@@ -84,6 +84,7 @@ const OUTRO=(()=>{
     const a=clamp01((s-1)/1.5);cx.globalAlpha=a;cx.textAlign='left';cx.font='700 22px '+DISPLAY;{const L=_('LUMENBELL · CHAPTER II','LUMENBELL · CHAPITRE II'),w=cx.measureText(L).width,x0=480-w/2,w1=cx.measureText('LUMEN').width;   /* « LUMEN » couleur du chapitre annoncé, « BELL » crème (décision du 2 novembre) */
       cx.fillStyle=OUT_COL;cx.fillText('LUMEN',x0,118);cx.fillStyle=LB.TITLE_T.cream;cx.fillText(L.slice(5),x0+w1,118)}
     cx.fillStyle='#e8f6ff';cx.textAlign='center';cx.font='800 62px '+DISPLAY;cx.fillText('SILENT BELLS',480,182);cx.globalAlpha=1;cx.textAlign='start'}
+    LB.nextCard(cx,s,{n:2,name:'Silent Bells',col:LB.CH_COL[2]})}
   const DRAW=[sStatue,sValley,sTowers,sSea,sDawn,sTitle];
   /* premier carton : la cloche qui s'est tue */
   const ENTER={0:()=>{tone(196,3,'sine',.07,0);tone(392,2.2,'sine',.03,0)}};

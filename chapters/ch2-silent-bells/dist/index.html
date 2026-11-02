@@ -743,6 +743,22 @@ LB.title=(c,t,t0,o)=>{
   const U=o.sub.toUpperCase(),asc=c.measureText(U).actualBoundingBoxAscent||T.sub*.72;
   c.fillText(U,480,Math.max(T.y+T.subDy,T.y+desc+T.gap+asc));c.restore();
 };
+
+/* ---------- LB.nextCard : carte « à suivre » de fin d'outro (décision n° 2 du 1er novembre, 2026-11-01-cinematiques-et-a-suivre.md) ----------
+   Même rendu pour toute la série, celui de la fin de l'outro du Chapitre I : « LUMENBELL · CHAPITRE N+1 » en petit, le nom du
+   chapitre en grand dessous, au centre. Seuls changent le numéro, le nom, la couleur et le décor.
+   LB.nextCard(ctx, s, {n, name, col, decor}) : s = secondes depuis le début du carton ; n = numéro du chapitre suivant ;
+   col = couleur du chapitre suivant (LB.CH_COL[n]) ; decor(ctx) = le plan de fond, dessiné avant le texte (facultatif : le
+   chapitre peut l'avoir déjà dessiné). La légende (HTML) est celle du carton de LB.cine, teintée de la même couleur. */
+LB.CH_COL={2:'#4fe0cc',3:'#b9cf5a'};   /* code couleur par chapitre (docs/GLOSSAIRE.md, CH_COL) ; I, IV et suivants s'ajoutent ici */
+LB.NEXT_T={delay:1,in:1.5,y1:118,y2:182,size1:22,size2:62,x:480,roman:['','I','II','III','IV','V','VI','VII']};
+LB.nextCard=(c,s,o)=>{
+  const T=LB.NEXT_T;if(o.decor)o.decor(c);
+  const a=Math.max(0,Math.min(1,(s-T.delay)/T.in)),R=T.roman[o.n];
+  c.save();c.globalAlpha=a;c.fillStyle=o.col;c.textAlign='center';
+  c.font='700 '+T.size1+'px '+LB.FONT.display;c.fillText(LB._('LUMENBELL · CHAPTER '+R,'LUMENBELL · CHAPITRE '+R),T.x,T.y1);
+  c.font='800 '+T.size2+'px '+LB.FONT.display;c.fillText(o.name.toUpperCase(),T.x,T.y2);c.restore();
+};
 /* ---------- Cadre commun des chapitres (session menu/common, 1er novembre 2026) ----------
    LB.menu (menu de la série), LB.gate (écran de démarrage), LB.card (cartes #ov), LB.pause, LB.input (entrées), LB.hud
    (barres, nom du boss, sourcil, frise), LB.cue (repère d'aide), LB.help (case « Aide »), LB.fs (plein écran), LB.MENU_T.
@@ -2254,7 +2270,7 @@ function resetCine(s){s.hatchK=0;s.hatchSnap=0;s.lampDim=0;s.ripT=0;s.cine=null;
 function startCine(p,k){const s=p.s;resetCine(s);if(MUSIC.cur!==s.phase)MUSIC.bed(s.phase);s.demo=false;s.parts=[];s.pops=[];s.cine={k,t0:gt};s.tfBurst=s.tfFlash=s.tfAnch=false;s.tfId=(s.tfId||0)+1;s.flashT=-9}
 function fadeAll(a,c){if(a<=0)return;ctx.fillStyle=`rgba(${c||'0,0,0'},${clamp(a,0,1)})`;ctx.fillRect(0,0,W,H)}
 /* chapter colours (docs/CH2-SPEC.md): II tide turquoise, III roots moss green leaning yellow */
-const CH_COL={2:'#4fe0cc',3:'#b9cf5a'};
+const CH_COL=LB.CH_COL;   // table commune (shared/js/24-cine.js)
 function title(t,t0,eye,name,col,ncol){if(t<t0)return;const a=clamp((t-t0)/.5,0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
   ctx.font='700 16px '+LB.FONT.body;ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,H*.42-46+(1-a)*8);
   ctx.font='800 64px '+LB.FONT.display;{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px ${LB.FONT.display}`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
@@ -3275,6 +3291,7 @@ function drawEpilogue(t){
       ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
     mist(420,4,.08,6);
     nextTitle(t-EPI_TITLE)}   // title of the next chapter over the forest (layout of Chapter I's last card)
+    LB.nextCard(ctx,t-EPI_TITLE,{n:3,name:'Hollow Roots',col:CH_COL[3]})}   // next-chapter card over the forest (same layout as Chapter I)
   ctx.restore();
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});

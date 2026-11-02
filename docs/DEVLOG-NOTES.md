@@ -110,3 +110,7 @@
 - À venir : un seul bouton « Commencer » au hub, avec une musique dédiée ; l'APK aura le même contenu que le web.
 - 2026-11-02 (outro/titre-lumen) : à la fin de l'outro du Chapitre I, dans « LUMENBELL · CHAPITRE II », seul « LUMEN » est turquoise ; « BELL » reste crème.
 - Le premier carton de l'outro du Chapitre II dure 6 s au lieu de 7.
+
+- 2026-11-02 (ch2/cinematics) : à la fin de l'outro du Chapitre I, la carte « Chapitre II · Silent Bells » passe au turquoise de la marée.
+- À la fin de l'outro du Chapitre II, une carte « LUMENBELL · CHAPITRE III / HOLLOW ROOTS » apparaît en vert mousse sur la forêt, avec la même mise en page que celle du Chapitre I.
+- 2026-11-02 (ch2/cinematics, test) : la vérification des textes du Chapitre II n'échoue plus sur le titre « à suivre » de l'outro (Chapitre III · Hollow Roots), seule la liste des textes autorisés change.

@@ -67,6 +67,7 @@ function drawEpilogue(t){
       ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
     mist(420,4,.08,6);
     nextTitle(t-EPI_TITLE)}   // title of the next chapter over the forest (layout of Chapter I's last card)
+    LB.nextCard(ctx,t-EPI_TITLE,{n:3,name:'Hollow Roots',col:CH_COL[3]})}   // next-chapter card over the forest (same layout as Chapter I)
   ctx.restore();
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
