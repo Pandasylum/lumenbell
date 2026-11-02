@@ -117,3 +117,6 @@
 - 2026-11-02 (ci/speed) : rien ne change à l'écran ; seule la CI va plus vite (tests en parallèle, caches ; sur main, seul le contrôle « smoke » tourne).
 - 2026-11-02 (engine/brand-colors) : le mot « LUMENBELL » se colore partout pareil : « LUMEN » à la couleur du chapitre, « BELL » en crème, au titre de l'intro, au dernier carton de l'outro et au menu des deux chapitres.
 - Au menu du Chapitre II, « bell » passe d'un crème légèrement plus sombre au même crème que le titre de l'intro (écart presque invisible).
+
+### 2026-11-02 — Menu : titre en capitales
+- Le joueur verra le titre du menu en capitales, sur écran large comme sur téléphone, avec les mêmes couleurs qu'avant.
