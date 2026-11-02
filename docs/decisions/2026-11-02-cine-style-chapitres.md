@@ -9,7 +9,7 @@ Décisions de Kevin, valables pour tout chapitre, présent ou à venir.
 
 ## 2. Ce qui change
 - **Chapitre I** : la petite ligne « LUMENBELL · CHAPITRE II » de la fin de l'outro : « LUMEN » turquoise `#4fe0cc` (chapitre annoncé), « BELL · CHAPITRE II » crème (`LB.TITLE_T.cream`). Même police, taille, position. Aucun autre changement de plan, de texte ou de durée. Le rendu de l'outro change : voulu, plus d'identité au pixel pour cette carte.
-- **Chapitre II** : l'outro n'écrit nulle part « LUMENBELL » sur `main` (le dernier carton n'a que sa légende HTML) : rien créé. Premier carton de l'outro : 7 s → 6 s (`CINE_D.outro` : `[6, 6, 6, 7, 7]`, soit 32 s). Autres durées et textes inchangés.
+- **Chapitre II** : le titre « à suivre » du dernier carton est rétabli (`nextTitle`, `76-epilogue.js`) : « LUMENBELL · CHAPITRE III » petit, « HOLLOW ROOTS » grand, vert mousse `CH_COL[3]`, « BELL » crème, mise en page de l'outro du Chapitre I. Légende réduite à « À suivre. » / « To be continued. » (la précédente doublait le titre) ; `TEXTES.md` et la liste de `tests/ch2-announce.js` suivent. Le titre n'avait jamais été sur cette branche : il vient de `dd1680a` (PR #47, `LB.nextCard`), refait ici sans `shared/`. Premier carton de l'outro : 7 s → 6 s (`CINE_D.outro` : `[6, 6, 6, 7, 7]`, soit 32 s). Autres durées et textes inchangés.
 - Rien dans `shared/`.
 
 ## 3. Points à valider

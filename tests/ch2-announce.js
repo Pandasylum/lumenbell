@@ -30,7 +30,7 @@ const errs=[];
   const d=await pg.evaluate(()=>{const d=window.__drawn;window.__drawn={};return d});
   for(const k in d)seen[k]=(seen[k]||0)+d[k]}
  for(const k in seen){const b2=banned(k);if(b2)errs.push('affiche : '+JSON.stringify(k)+' ('+seen[k]+' images) : '+b2)}
- {const sp=specTexts(),ONO=['CLANG','BAM','KRAKOOM','KRAAAK'],ok=[...sp.pairs,...sp.titles,...sp.bosses,sp.engraving].flat().concat('Lumenbell','Lumen','Bell',ONO).map(x=>x.toUpperCase());
+ {const sp=specTexts(),ONO=['CLANG','BAM','KRAKOOM','KRAAAK'],ok=[...sp.pairs,...sp.titles,...sp.bosses,sp.engraving].flat().concat('Lumenbell','Lumen','Bell',ONO,'· CHAPITRE III','· CHAPTER III','HOLLOW ROOTS').map(x=>x.toUpperCase());
   for(const k in seen){const t=k.replace(/\u200a/g,'').toUpperCase().trim();if(!t)continue;
    if(!ok.some(x=>x===t||(t.length>12&&(x.startsWith(t+' ')||x.endsWith(' '+t)))))errs.push('texte hors cahier des charges : '+JSON.stringify(k))}}
  console.log('textes dessines :',Object.keys(seen).sort().map(k=>JSON.stringify(k.replace(/ /g,''))).join(', '));

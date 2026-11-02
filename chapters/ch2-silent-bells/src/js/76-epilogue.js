@@ -8,9 +8,20 @@ const ECAP_TXT=()=>[_('By morning, the Drowned Lighthouse still stands, mute. It
   _('On it, a single word is engraved: Crown.','Sur celle-ci, un seul mot est gravé : Couronne.'),
   _('And this time, the earth has not stopped trembling.',"Et cette fois, la terre n'a pas cessé de trembler."),
   _("In the heart of the forest, a Spire's light is failing.","Au cœur de la forêt, la lumière d'une Flèche faiblit."),
-  _('Chapter III · Hollow Roots. To be continued.','Chapitre III · Hollow Roots. À suivre.')];
+  _('To be continued.','À suivre.')];
 const EPI_SHOTS=CINE_D.outro.slice(0,3).reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of shots 1 to 4
 const EPI_TITLE=EPI_SHOTS[3]+CINE_D.outro[3];   // carton 5 (next chapter)
+/* title of the next chapter (last card): layout of Chapter I's outro (small line at NT.y1, big title at NT.y2, centred, fades in
+   NT.in s after NT.delay); in « LUMENBELL » only « LUMEN » takes the chapter colour, « BELL » stays cream (LB.TITLE_T.cream) */
+const NT={delay:1,in:1.5,y1:118,y2:182,s1:22,s2:62,x:480};
+function nextTitle(s){
+  const a=clamp((s-NT.delay)/NT.in,0,1);if(a<=0)return;
+  const col=CH_COL[3],L=_('LUMENBELL · CHAPTER III','LUMENBELL · CHAPITRE III');
+  ctx.save();ctx.globalAlpha=a;ctx.textAlign='left';ctx.font=`700 ${NT.s1}px ${LB.FONT.display}`;
+  const w=ctx.measureText(L).width,w1=ctx.measureText(L.slice(0,5)).width,w2=ctx.measureText(L.slice(5,9)).width,x0=NT.x-w/2;
+  ctx.fillStyle=col;ctx.fillText(L.slice(0,5),x0,NT.y1);ctx.fillStyle=LB.TITLE_T.cream;ctx.fillText(L.slice(5,9),x0+w1,NT.y1);ctx.fillStyle=col;ctx.fillText(L.slice(9),x0+w1+w2,NT.y1);
+  ctx.textAlign='center';ctx.font=`800 ${NT.s2}px ${LB.FONT.display}`;ctx.fillText('HOLLOW ROOTS',NT.x,NT.y2);ctx.restore();
+}
 /* shot 4: the forest Spire (x, top), its light fading from SPIRE.a0 to SPIRE.a1 over the shot, with flickers */
 const SPIRE={x:500,top:170,a0:.9,a1:.25,fade:6};
 /* shot 3: the valley's towers (x, height); TOWER_OUT goes dark at EPI_DARK; the earth cracks along VCRACKS */
@@ -54,7 +65,8 @@ function drawEpilogue(t){
       ctx.save();ctx.globalCompositeOperation='lighter';glow(P.x,P.top+8,130,'rgba(185,207,90,.9)',.55*fl);ell(P.x,P.top+8,3,4,`rgba(240,245,210,${.9*fl})`);ctx.restore()};
     const R=mulberry(616);for(let layer=0;layer<3;layer++){if(layer===1)light();ctx.fillStyle=['#0b0f0c','#070a08','#030504'][layer];for(let i=0;i<8;i++){const x=R()*W,w=10+layer*12+R()*14;if(layer&&Math.abs(x-P.x)<40)continue;  // the Spire stays visible between the near trunks
       ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
-    mist(420,4,.08,6)}
+    mist(420,4,.08,6);
+    nextTitle(t-EPI_TITLE)}   // title of the next chapter over the forest (layout of Chapter I's last card)
   ctx.restore();
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
