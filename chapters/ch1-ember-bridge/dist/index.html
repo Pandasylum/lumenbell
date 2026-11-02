@@ -5174,6 +5174,7 @@ const OUTRO=(()=>{
   const STR=Array.from({length:140},()=>({x:rand(0,960),y:rand(0,330),r:rand(.4,1.8),p:rand(0,6.3)}));
   const SNW=Array.from({length:90},()=>({x:rand(0,960),y:rand(0,540),v:rand(30,80),s:rand(1,3)}));
   const BUB=Array.from({length:34},(v,i)=>({x:rand(0,960),o:rand(0,340),r:rand(1.5,4)}));
+  const OUT_COL='#4fe0cc';   /* couleur du chapitre annoncé (Chapitre II, marée) */
   const SC=[
     {d:9.5,en:"The great bell has fallen silent. Atop the Bell Tower, the Ember Colossus is now only a statue of black stone, kneeling before the bell. Lit by the Watcher, the beacon now keeps watch over him.",fr:"La grande cloche s'est tue. Au sommet du Clocher, le Colosse de braise n'est plus qu'une statue de pierre noire, à genoux face à la cloche. Allumé par le Veilleur, le fanal veille désormais sur lui."},
     {d:6.5,en:"In the valleys, the villages are still asleep. They will never know what was at stake that night, above their roofs.",fr:"Dans les vallées, les villages dorment encore. Ils ne sauront jamais ce qui s'est joué cette nuit au-dessus de leurs toits."},
@@ -5250,7 +5251,9 @@ const OUTRO=(()=>{
     cx.fillStyle='#02040a';cx.fillRect(0,0,960,540);const g=cx.createLinearGradient(0,200,0,540);g.addColorStop(0,'#02040a');g.addColorStop(1,'#06303a');cx.fillStyle=g;cx.fillRect(0,200,960,340);
     for(const b of BUB){const y=540-((t*30+b.o)%340);cx.fillStyle='rgba(140,255,230,.25)';cx.beginPath();cx.arc(b.x,y,b.r,0,6.283);cx.fill()}
     const yb=300+es(clamp01(s/4))*80;bell(480,yb-120,.7,Math.sin(t*.8)*.12);const k=.5+.5*Math.sin(t*2),gg=cx.createRadialGradient(480,yb,2,480,yb,120);gg.addColorStop(0,'rgba(120,255,225,'+(.25*k)+')');gg.addColorStop(1,'rgba(80,200,220,0)');cx.fillStyle=gg;cx.fillRect(300,yb-140,360,280);
-    const a=clamp01((s-1)/1.5);cx.globalAlpha=a;cx.fillStyle='#e8f6ff';cx.textAlign='center';cx.font='700 22px '+DISPLAY;cx.fillText(_('LUMENBELL · CHAPTER II','LUMENBELL · CHAPITRE II'),480,118);cx.font='800 62px '+DISPLAY;cx.fillText('SILENT BELLS',480,182);cx.globalAlpha=1;cx.textAlign='start'}
+    const a=clamp01((s-1)/1.5);cx.globalAlpha=a;cx.textAlign='left';cx.font='700 22px '+DISPLAY;{const L=_('LUMENBELL · CHAPTER II','LUMENBELL · CHAPITRE II'),w=cx.measureText(L).width,x0=480-w/2,w1=cx.measureText('LUMEN').width;   /* « LUMEN » couleur du chapitre annoncé, « BELL » crème (décision du 2 novembre) */
+      cx.fillStyle=OUT_COL;cx.fillText('LUMEN',x0,118);cx.fillStyle=LB.TITLE_T.cream;cx.fillText(L.slice(5),x0+w1,118)}
+    cx.fillStyle='#e8f6ff';cx.textAlign='center';cx.font='800 62px '+DISPLAY;cx.fillText('SILENT BELLS',480,182);cx.globalAlpha=1;cx.textAlign='start'}
   const DRAW=[sStatue,sValley,sTowers,sSea,sDawn,sTitle];
   /* premier carton : la cloche qui s'est tue */
   const ENTER={0:()=>{tone(196,3,'sine',.07,0);tone(392,2.2,'sine',.03,0)}};

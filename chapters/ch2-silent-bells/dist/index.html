@@ -2669,7 +2669,7 @@ const MUSIC=(()=>{
    C the beach with the boats that no longer go out, D the Lighthouse's top, a faint glimmer up there; E (title) the
    Watcher comes onto the shore. */
 /* carton durations of this chapter (s): intro A to E, outro (epilogue) 1 to 5 */
-const CINE_D={intro:[6,7,7,7,6],outro:[7,6,6,7,7]};
+const CINE_D={intro:[6,7,7,7,6],outro:[6,6,6,7,7]};
 const PRO_T={walk:1.4,titleAt:.6};
 const PRO_SHOTS=CINE_D.intro.slice(0,4).reduce((a,d)=>(a.push(a[a.length-1]+d),a),[0]);   // starts of A, B, C, D, E
 const PRO_TITLE=PRO_SHOTS[4]+PRO_T.titleAt;
