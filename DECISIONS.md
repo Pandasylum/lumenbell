@@ -106,3 +106,5 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 - [2026-11-01 · `ch2/cinematics` : cinématiques du Chapitre II au style du Chapitre I, carte « à suivre » commune `LB.nextCard` (Chapitre I teinté turquoise, Chapitre II « Hollow Roots » vert mousse), `LB.CH_COL`](docs/decisions/2026-11-01-cinematiques-et-a-suivre.md)
 - [2026-11-02 · `engine/next-card` : un seul module de carton « à suivre », `LB.nextCard` (« LUMEN » couleur du chapitre + « BELL · CHAPITRE N » crème, nom dessous, table `LB.NEXT_T`), garde dans `tests/cine.js`](docs/decisions/2026-11-02-cine-style-chapitres.md)
 - [2026-11-02 · `engine/brand-colors` : une seule règle de couleur pour « LUMENBELL » (« LUMEN » = couleur du chapitre, « BELL » = crème), table `LB.BRAND`, lue par le titre d'intro, le carton « à suivre » et le menu ; garde dans `tests/cine.js`](docs/decisions/2026-11-02-brand-colors.md)
+
+- 2026-11-02 : titre du menu (cartes des deux chapitres) affiché en capitales (« LUMENBELL ») par `text-transform` dans `shared/js/28-ui.js` ; texte, couleurs et tailles inchangés, titre de page et autres textes non touchés.
