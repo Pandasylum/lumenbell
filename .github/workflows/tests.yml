@@ -73,6 +73,7 @@ jobs:
           node menu-layout.js
           node menu-title.js
           node trial.js
+          node input.js
           node inputs.js
           node help.js
           node announce.js
