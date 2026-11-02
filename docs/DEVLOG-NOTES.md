@@ -120,3 +120,7 @@
 
 ### 2026-11-02 — Menu : titre en capitales
 - Le joueur verra le titre du menu en capitales, sur écran large comme sur téléphone, avec les mêmes couleurs qu'avant.
+
+### 2026-11-02 — Menu : lien suivant et fenêtre de défaite communs
+- Le joueur verra, sous le menu des deux chapitres, « Chapitre N · Nom » dans la couleur du chapitre suivant avec « À venir », sans cadenas.
+- Il verra, sur les fenêtres de défaite et de fin des deux chapitres, « Réessayer » et « Menu » côte à côte, et l'offre d'aide sur une ligne dessous.

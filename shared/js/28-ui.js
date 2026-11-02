@@ -5,7 +5,7 @@
    tailles, écran de démarrage, boutons de rejeu, Entrée / Espace au menu, repère d'aide), le Chapitre II pour l'outillage
    (carte déclarative, relâchement, zones sûres). Le chapitre ne déclare qu'une table CHAPTER (docs/COMMUN.md § 3.1) :
    n, id, title, color (code couleur), color2 (clair : ligne du chapitre, note de l'Épreuve), rgb (halos), menu {bg, glowA,
-   titleA, particles, t}, trial {name}, player, tag? (accroche), how? (mode d'emploi), next {n, title, col, rgb, hover, open?}, help {offer?},
+   titleA, particles, t}, trial {name}, player, tag? (accroche), how? (mode d'emploi), next {n, title, open?} (couleur, rgb et survol dérivés de LB.CH_COL[n]), help {offer?},
    et les fonctions trialOpen(), endSeen(), best(n), fmt(t). Un texte est une fonction qui rend la chaîne déjà traduite
    (le chapitre y appelle sa fonction de texte) ou un objet {en, fr}. Le style (LB.UI_CSS) est créé ici avec les couleurs du chapitre.
    Les textes communs (difficultés, sous-titres, boutons) sont ici, en LB._(en, fr). Aucun mot d'annonce. */
@@ -17,9 +17,8 @@ LB.TRIAL_RULES=[()=>LB._('The three phases in a row, with no pause and no visual
  ()=>LB._('A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'),
  ()=>LB._('One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run.")];
 LB.ROMAN=['','I','II','III','IV','V','VI','VII'];
-/* « Chapitre N · Titre » et son cadenas : libellés communs (le chapitre ne donne que n et title) */
+/* « Chapitre N · Titre » : libellé commun (le chapitre ne donne que n et title) */
 LB.chapterName=(n,title)=>LB._('Chapter '+LB.ROMAN[n]+' · '+title,'Chapitre '+LB.ROMAN[n]+' · '+title);
-LB.chapterLock=n=>LB._('🔒 Chapter '+LB.ROMAN[n],'🔒 Chapitre '+LB.ROMAN[n]);
 LB.MENU_T={
   /* placement commun à tous les chapitres (aucune position propre à un chapitre) : largeur de la carte et des difficultés, lignes réservées
      de l'accroche et du mode d'emploi (px ; réservées même si le chapitre n'en a pas, pour que les boutons restent au même endroit) */
@@ -33,8 +32,15 @@ LB.MENU_T={
   spray:{id:'mSnow',cls:'msn',key:'mfall',n:34,dur:[7,8],delay:12,size:[1.5,2.5],dx:120,rise:'-45vh',peak:.7,w:3,col:'#e8f8ff',glow:'0 0 6px 1px rgba(159,242,255,.6)'}
 };
 LB.tx=o=>o==null?'':typeof o==='function'?o():typeof o==='string'?o:LB._(o.en,o.fr);
-LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],c=C.color,c2=C.color2,rgb=C.rgb,N=C.next;
+LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],c=C.color,c2=C.color2,rgb=C.rgb,N=C.next,nc=LB.CH_COL[N.n]||'#8a8a9a',nrgb=LB.chRgb(N.n),nh=LB.chHover(N.n);
  return '.bar span i{font-style:normal}\n'+
+ ':root{--chc:'+c+';--chc2:'+c2+';--chr:'+rgb+'}   /* couleur du chapitre pour la carte (#ov) */\n'+
+ '#ov [hidden]{display:none!important}\n'+
+ '#ov .cbtns{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-start}\n'+
+ '#ov .btn{border:2px solid var(--chc);background:var(--chc);color:#0b0710}\n'+
+ '#ov .btn:hover{background:var(--chc2);border-color:var(--chc2)}\n'+
+ '#ov .btn.ghost{background:none;color:var(--chc)}\n'+
+ '#ov .btn.ghost:hover{background:rgba(var(--chr),.15);color:var(--chc2)}\n'+
  '.card .stats{color:var(--fg);font-variant-numeric:tabular-nums}\n'+
  '.card .how2{color:var(--fg);font-size:13px;border-left:3px solid '+c+';padding-left:10px}\n'+
  '.ov.menu{position:fixed;inset:0;z-index:50;padding:24px;place-items:start center;background:radial-gradient(ellipse 80% 70% at 50% 110%,rgba('+rgb+','+C.menu.glowA+'),transparent 62%),'+C.menu.bg+'}\n'+
@@ -82,13 +88,11 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '@media (max-width:480px){#mphT{grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}#mphT #mBackT{grid-column:1/-1}}\n'+
  '@media (pointer:coarse){.fsb{display:none!important}#introBtn{top:calc(12px + env(safe-area-inset-top,0px))!important}#outroBtn{top:calc(56px + env(safe-area-inset-top,0px))!important}}\n'+
  '.mfoot{display:flex;width:100%;justify-content:center;margin-top:2px}\n'+
- '.mlink{display:flex;align-items:center;justify-content:center;gap:8px;width:'+M.nextW+';box-sizing:border-box;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:'+M.nextFs+';letter-spacing:.08em;text-transform:uppercase;color:'+N.col+';text-decoration:none;border:1px solid rgba('+N.rgb+',.5);padding:7px 14px;background:rgba(4,22,24,.55)}\n'+
+ '.mlink{display:flex;align-items:center;justify-content:center;gap:8px;width:'+M.nextW+';box-sizing:border-box;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:'+M.nextFs+';letter-spacing:.08em;text-transform:uppercase;color:'+nc+';text-decoration:none;border:1px solid rgba('+nrgb+',.5);padding:7px 14px;background:rgba(4,22,24,.55)}\n'+
  '.mlink{font-family:inherit;cursor:default}\n'+
  '.ver{margin:6px 0 0;font-size:11px;letter-spacing:.14em;color:var(--muted);opacity:.6;text-align:center}\n'+
- '.mlink.lock{color:var(--muted);border-color:var(--line);background:rgba(10,7,16,.5);opacity:.75}\n'+
- '.mlink.lock:hover{background:rgba(10,7,16,.5);color:var(--muted)}\n'+
  '.mph button[aria-disabled=true]{opacity:.45;cursor:not-allowed}\n'+
- '.mlink:hover{background:rgba('+N.rgb+',.18);color:'+N.hover+'}\n'+
+ '.mlink:hover{background:rgba('+nrgb+',.18);color:'+nh+'}\n'+
  '.mlink small{font-size:.7333em;letter-spacing:.12em;color:var(--muted);border:1px solid var(--line);padding:1px .55em}\n'+
  '#introBtn{position:absolute;top:calc(56px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
  '#outroBtn{position:absolute;top:calc(100px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
@@ -107,18 +111,20 @@ LB.ui=(()=>{
 })();
 
 /* ---------- LB.card : carte de l'arène (#ov), déclarative ----------
-   show({eye, title, stats, table, desc, how, go, onGo, go2, onGo2, clear}) ; table = lignes [libellé, valeur, record?].
+   show({eye, title, stats, table, desc, how, go, onGo, onMenu, go2, onGo2, clear}) ; onMenu : ajoute « Menu » à droite du bouton principal
+   (cartes de défaite et de fin, rendu commun) ; go2 : offre d'aide, sur une ligne dessous ; stats / desc / how vides : masqués ; table = lignes [libellé, valeur, record?].
    hide(), visible(), go() (le bouton principal), el (éléments). Le bouton reçoit le focus (Entrée / Espace le pressent). */
 LB.card=(()=>{
-  const el={};let onGo=null,onGo2=null;
+  const el={};let onGo=null,onGo2=null,onMenu=null;
   function mount(stage,before){
     if(el.ov)return el;
-    const ov=LB.ui.mk('div',{class:'ov',id:'ov',hidden:''},'<div class="card"><p class="eyebrow" id="ovEye"></p><h2 id="ovTitle"></h2><p class="stats" id="ovStats" hidden></p><div class="rtab" id="ovTable" hidden></div><p id="ovDesc"></p><p class="how2" id="ovHow" hidden></p><button class="btn" id="go" type="button"></button><button class="btn ghost" id="go2" type="button" hidden></button></div>');
+    const ov=LB.ui.mk('div',{class:'ov',id:'ov',hidden:''},'<div class="card"><p class="eyebrow" id="ovEye"></p><h2 id="ovTitle"></h2><p class="stats" id="ovStats" hidden></p><div class="rtab" id="ovTable" hidden></div><p id="ovDesc" hidden></p><p class="how2" id="ovHow" hidden></p><div class="cbtns"><button class="btn" id="go" type="button"></button><button class="btn ghost" id="goMenu" type="button" hidden></button></div><button class="btn ghost" id="go2" type="button" hidden></button></div>');
     stage.insertBefore(ov,before||null);
     Object.assign(el,{ov,eye:ov.querySelector('#ovEye'),title:ov.querySelector('#ovTitle'),stats:ov.querySelector('#ovStats'),table:ov.querySelector('#ovTable'),
-      desc:ov.querySelector('#ovDesc'),how:ov.querySelector('#ovHow'),go:ov.querySelector('#go'),go2:ov.querySelector('#go2')});
+      desc:ov.querySelector('#ovDesc'),how:ov.querySelector('#ovHow'),go:ov.querySelector('#go'),menu:ov.querySelector('#goMenu'),go2:ov.querySelector('#go2')});
     el.go.addEventListener('click',()=>{if(onGo)onGo()});
     el.go2.addEventListener('click',()=>{if(onGo2)onGo2()});
+    el.menu.addEventListener('click',()=>{if(onMenu)onMenu()});
     return el;
   }
   function table(rows){el.table.innerHTML='';for(const r of rows){const d=document.createElement('div');if(r[2])d.className='rec';d.innerHTML='<small></small><b></b>';d.firstChild.textContent=r[0];d.lastChild.textContent=r[1];el.table.appendChild(d)}}
@@ -126,8 +132,9 @@ LB.card=(()=>{
     el.eye.textContent=o.eye||'';el.title.textContent=o.title||'';
     el.stats.hidden=!o.stats;el.stats.textContent=o.stats||'';
     el.table.hidden=!o.table;el.table.innerHTML='';if(o.table)table(o.table);
-    el.desc.textContent=o.desc||'';el.how.hidden=!o.how;el.how.textContent=o.how||'';
+    el.desc.hidden=!o.desc;el.desc.textContent=o.desc||'';el.how.hidden=!o.how;el.how.textContent=o.how||'';
     el.go.textContent=o.go||'';onGo=o.onGo||null;
+    onMenu=o.onMenu||null;el.menu.hidden=!onMenu;el.menu.textContent=LB._('Menu','Menu');
     el.go2.hidden=!o.go2;el.go2.textContent=o.go2||'';onGo2=o.onGo2||null;
     el.ov.classList.toggle('clear',!!o.clear);el.ov.hidden=false;
     try{el.go.focus({preventScroll:true})}catch(e){}
@@ -234,8 +241,8 @@ LB.menu=(()=>{
     $('outroBtn').hidden=!ok;
     tb.setAttribute('aria-disabled',String(!tok));   /* Épreuve : ouverte pendant les tests (TRIAL_OPEN), sinon débloquée par la vraie fin */
     tb.querySelector('b').textContent=tok?nm:'🔒 '+nm;tb.querySelector('span').textContent=tok?TX.sTrial():LB._('To unlock','À débloquer');
-    {const b=$('mNext'),op=!!C.next.open&&C.next.open();   /* chapitre suivant : toujours non cliquable ; cadenas tant qu'il n'est pas ouvert */
-     b.classList.toggle('lock',!op);b.querySelector('.nm').textContent=op?LB.chapterName(C.next.n,C.next.title):LB.chapterLock(C.next.n);b.querySelector('.soon').textContent=LB._('Coming soon','À venir')}
+    {const b=$('mNext'),op=!!C.next.open&&C.next.open();   /* chapitre suivant : « Chapitre N · Nom » dans la couleur LB.CH_COL[N], badge « À venir » ; toujours non cliquable */
+     b.classList.toggle('open',op);b.querySelector('.nm').textContent=LB.chapterName(C.next.n,LB.tx(C.next.title));b.querySelector('.soon').textContent=LB._('Coming soon','À venir')}
   }
   function lang(){if(!m)return;
     document.documentElement.lang=LB.lang.cur;
@@ -291,7 +298,7 @@ LB.input=(()=>{
       const ok=k===' '||k==='Enter';
       if(LB.pause.visible()){if(ok&&a!==document.getElementById('pMenu')){e.preventDefault();LB.pause.resume()}return}
       if(LB.menu.visible()){const mn=document.getElementById('menu');if(ok&&!mn.contains(a)){e.preventDefault();mn.querySelector('#mphM [data-diff=normal]').click()}return}
-      if(LB.card.visible()){if(ok&&a!==LB.card.el.go){e.preventDefault();LB.card.el.go.click()}return}
+      if(LB.card.visible()){if(ok&&!(a&&LB.card.el.ov.contains(a)&&a.tagName==='BUTTON')){e.preventDefault();LB.card.el.go.click()}return}
       if(ACT.includes(k)){e.preventDefault();if(h.press)h.press()}
     });
   }

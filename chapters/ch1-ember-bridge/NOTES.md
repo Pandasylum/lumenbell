@@ -87,3 +87,5 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 - `mk1`, `mk`, `mkR` retirés de `DIFFS` (repères calculés par `rageHp`, mêmes cases) ; `prefs`, `deaths`, `updNext`, `updBest`, `trialMenu`, `hintBar`, `HINT_LEAD` n'existent plus (`LB.menu.update`, `LB.help`, `LB.cue`, `LB.CUE_T.lead`). `__t` de la copie de test : `showEnd`, `setPause` en plus.
 - 2026-11-02 (engine/next-card) : le dernier carton de l'outro n'a qu'un appel `LB.nextCard` (rendu commun, `LB.NEXT_T`) ; ne pas y redessiner « LUMENBELL · CHAPITRE » (garde dans `tests/cine.js`).
 - 2026-11-02 (engine/brand-colors) : « LUMEN »/« BELL » (titre d'intro, carton « à suivre », menu) suivent `LB.BRAND` : « LUMEN » couleur du chapitre, « BELL » crème ; aucune couleur en dur pour ce mot dans le chapitre (garde dans `tests/cine.js`).
+
+- 2026-11-02 (`menu/common-ui`) : lien « chapitre suivant » et carte de défaite / de fin communs (`shared/js/28-ui.js`) ; `CHAPTER.next` = `{n, title, open?}` (couleur dérivée de `LB.CH_COL`), cartes avec `onMenu` au lieu de `go2` « Menu ». Décision : `docs/decisions/2026-11-02-menu-common-ui.md`.

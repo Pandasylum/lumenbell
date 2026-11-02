@@ -118,7 +118,10 @@ LB.title=(c,t,t0,o)=>{
    col = couleur du chapitre suivant (LB.CH_COL[n]) ; decor(ctx) = plan de fond dessiné avant le texte (facultatif).
    Légende HTML (LB.cine, même forme pour tous) : « Chapitre N · Nom. À suivre. » / « Chapter N · Name. To be continued. », teintée LB.CH_COL[n].
    Toutes les valeurs sont dans LB.NEXT_T. */
-LB.CH_COL={2:'#4fe0cc',3:'#b9cf5a'};   /* code couleur par chapitre (docs/GLOSSAIRE.md, CH_COL) ; I, IV et suivants s'ajoutent ici */
+LB.CH_COL={1:'#ff7a2b',2:'#4fe0cc',3:'#b9cf5a'};   /* code couleur par chapitre (docs/GLOSSAIRE.md, CH_COL) ; IV et suivants s'ajoutent ici */
+/* teinte dérivée d'un chapitre (lien « chapitre suivant » du menu) : « r,g,b » et version éclaircie au survol */
+LB.chRgb=n=>{const h=LB.CH_COL[n]||'#8a8a9a';return[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(',')};
+LB.chHover=n=>{const h=LB.CH_COL[n]||'#8a8a9a';return'#'+[1,3,5].map(i=>Math.round(parseInt(h.slice(i,i+2),16)*.45+255*.55).toString(16).padStart(2,'0')).join('')};
 LB.NEXT_T={delay:1,in:1.5,y1:118,y2:182,size1:22,size2:62,x:480,ls1:2,ls2:2,
   head:'LUMEN',tail:['BELL · CHAPTER ','BELL · CHAPITRE '],roman:['','I','II','III','IV','V','VI','VII']};
 LB.nextCard=(c,s,o)=>{

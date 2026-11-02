@@ -187,3 +187,5 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - Retirés : `84-menu-art.js` (`renderMenu`, `MS`, canvas `#mc` : code mort), `OPT_KEY`, `frameScene` (cadrage portrait propre au chapitre), anciennes cartes `.brow`, écouteurs de touches du chapitre (`LB.input` ; les cinématiques de phase prennent Entrée / Échap par `skip`).
 - 2026-11-02 (engine/next-card) : le carton de l'épilogue n'a qu'un appel `LB.nextCard` (rendu commun, `LB.NEXT_T`) ; pas de dessin local du titre « à suivre » (garde dans `tests/cine.js`).
 - 2026-11-02 (engine/brand-colors) : « LUMEN »/« BELL » (titre d'intro, carton « à suivre », menu) suivent `LB.BRAND` : « LUMEN » couleur du chapitre, « BELL » crème ; aucune couleur en dur pour ce mot dans le chapitre (garde dans `tests/cine.js`).
+
+- 2026-11-02 (`menu/common-ui`) : lien « chapitre suivant » et carte de défaite / de fin communs (`shared/js/28-ui.js`) ; `CHAPTER.next` = `{n, title, open?}` (couleur dérivée de `LB.CH_COL`), cartes avec `onMenu` au lieu de `go2` « Menu ». Décision : `docs/decisions/2026-11-02-menu-common-ui.md`.

@@ -61,6 +61,7 @@ LB.menu.mount(CHAPTER,{
 function showMenu(fromGame){
   el.table.hidden=true;paused=true;pauseEl.hidden=true;LB.menu.show(fromGame);
 }
+function toMenu(){LB.card.hide();showMenu(false)}   /* bouton « Menu » des cartes de défaite et de fin (LB.card, onMenu) */
 function hideMenu(){paused=false;menuEl.hidden=true;pauseEl.hidden=true}
 /* Épreuve du feu : Normal jouable, Difficile en attente de la phase III Difficile. */
 const BASEW={flwin:T.flwin,breath:BRW}; /* fenêtres courtes du souffle (phases I et III), réglage d'attaque ; l'action et la récupération du Veilleur sont dans LB.hero */
