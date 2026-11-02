@@ -95,3 +95,4 @@
 
 ## À venir (plan de `docs/COMMUN.md` § 4)
 ~~`LB.hero` et `HERO_T` (3)~~ fait le 31 octobre, ~~`LB.drawWatcher` (4)~~ fait le 1er novembre, ~~`LB.cine` et `LB.title` (5)~~ fait le 1er novembre, ~~menu, HUD, cartes, entrées (6)~~ fait le 1er novembre ; suite : tests communs (7), la Couronne (8).
+- 2026-11-02 (engine/brand-colors) : `LB.BRAND.bell` (crème) est la seule source ; `LB.TITLE_T.cream` et `LB.NEXT_T.cream` n'existent plus. Titre d'intro, carton « à suivre » et menu (`<h2><span>Lumen</span><i>bell</i></h2>`) la lisent ; ne pas écrire le crème en dur à côté de « LUMEN »/« BELL » (garde dans `tests/cine.js`).

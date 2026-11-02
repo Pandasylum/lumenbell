@@ -91,7 +91,10 @@ LB.cine=(()=>{
    26 px crème dessous. LB.title(ctx, t, t0, {col, sub}) : apparaît en TITLE_T.in secondes à partir de t0. Placement :
    le nom a sa ligne de base à y ; la ligne du chapitre à y + subDy, plus bas si les boîtes mesurées (measureText)
    l'exigent pour garder gap entre les deux (police de repli plus haute) ; nom réduit s'il dépasse maxW. */
-LB.TITLE_T={in:1.75,size:96,sub:26,y:118,subDy:42,gap:8,maxW:840,ls:4,subLs:3,glow:.85,blur:30,cream:'#f0e8df',subCol:'rgba(240,232,223,.88)'};
+/* LB.BRAND : règle de couleur unique du mot « LUMENBELL » (titre d'intro, carton « à suivre », menu des deux chapitres) :
+   « LUMEN » = LB.CH_COL du chapitre (couleur du chapitre au menu), « BELL » = bell (crème). Aucune autre couleur en dur pour ce mot ; garde dans tests/cine.js. */
+LB.BRAND={bell:'#f0e8df'};
+LB.TITLE_T={in:1.75,size:96,sub:26,y:118,subDy:42,gap:8,maxW:840,ls:4,subLs:3,glow:.85,blur:30,subCol:'rgba(240,232,223,.88)'};
 LB.rgba=(hex,a)=>'rgba('+[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)).join(',')+','+a+')';
 LB.title=(c,t,t0,o)=>{
   const T=LB.TITLE_T,a=(t-t0)/T.in,ta=a<0?0:a>1?1:a;if(!(ta>0))return;
@@ -101,7 +104,7 @@ LB.title=(c,t,t0,o)=>{
   let w1=c.measureText('LUMEN').width,w2=c.measureText('BELL').width;
   if(w1+w2>T.maxW){c.font=font(Math.floor(T.size*T.maxW/(w1+w2)));w1=c.measureText('LUMEN').width;w2=c.measureText('BELL').width}
   const x0=480-(w1+w2)/2,desc=c.measureText('LUMENBELL').actualBoundingBoxDescent||0;
-  c.fillStyle=o.col;c.fillText('LUMEN',x0,T.y);c.fillStyle=T.cream;c.fillText('BELL',x0+w1,T.y);
+  c.fillStyle=o.col;c.fillText('LUMEN',x0,T.y);c.fillStyle=LB.BRAND.bell;c.fillText('BELL',x0+w1,T.y);
   c.shadowBlur=0;c.textAlign='center';if(ls)c.letterSpacing=T.subLs+'px';c.fillStyle=T.subCol;c.font='700 '+T.sub+'px '+LB.FONT.display;
   const U=o.sub.toUpperCase(),asc=c.measureText(U).actualBoundingBoxAscent||T.sub*.72;
   c.fillText(U,480,Math.max(T.y+T.subDy,T.y+desc+T.gap+asc));c.restore();
@@ -109,14 +112,14 @@ LB.title=(c,t,t0,o)=>{
 
 /* ---------- LB.nextCard : carton « à suivre » de fin d'outro, SEULE implémentation (décision du 2 novembre, 2026-11-02-cine-style-chapitres.md) ----------
    Même rendu pour toute la série : une ligne centrée en y1, « LUMEN » couleur du chapitre suivant puis « BELL · CHAPITRE N » crème
-   (LB.TITLE_T.cream) ; le nom du chapitre en grand dessous, couleur du chapitre suivant, centré en y2. Seuls changent le numéro, le nom,
+   (LB.BRAND.bell) ; le nom du chapitre en grand dessous, couleur du chapitre suivant, centré en y2. Seuls changent le numéro, le nom,
    la couleur et le décor. Aucun chapitre ne redessine ce carton : un seul appel LB.nextCard par chapitre (garde dans tests/cine.js).
    LB.nextCard(ctx, s, {n, name, col, decor}) : s = secondes depuis le début du carton ; n = numéro du chapitre suivant ;
    col = couleur du chapitre suivant (LB.CH_COL[n]) ; decor(ctx) = plan de fond dessiné avant le texte (facultatif).
    Légende HTML (LB.cine, même forme pour tous) : « Chapitre N · Nom. À suivre. » / « Chapter N · Name. To be continued. », teintée LB.CH_COL[n].
    Toutes les valeurs sont dans LB.NEXT_T. */
 LB.CH_COL={2:'#4fe0cc',3:'#b9cf5a'};   /* code couleur par chapitre (docs/GLOSSAIRE.md, CH_COL) ; I, IV et suivants s'ajoutent ici */
-LB.NEXT_T={delay:1,in:1.5,y1:118,y2:182,size1:22,size2:62,x:480,ls1:2,ls2:2,cream:LB.TITLE_T.cream,
+LB.NEXT_T={delay:1,in:1.5,y1:118,y2:182,size1:22,size2:62,x:480,ls1:2,ls2:2,
   head:'LUMEN',tail:['BELL · CHAPTER ','BELL · CHAPITRE '],roman:['','I','II','III','IV','V','VI','VII']};
 LB.nextCard=(c,s,o)=>{
   const T=LB.NEXT_T;if(o.decor)o.decor(c);
@@ -124,7 +127,7 @@ LB.nextCard=(c,s,o)=>{
   c.save();c.globalAlpha=a;c.textAlign='left';
   c.font='700 '+T.size1+'px '+LB.FONT.display;if(ls)c.letterSpacing=T.ls1+'px';
   const tail=LB._(T.tail[0],T.tail[1])+R,w1=c.measureText(T.head).width,w2=c.measureText(tail).width,x0=T.x-(w1+w2)/2;
-  c.fillStyle=o.col;c.fillText(T.head,x0,T.y1);c.fillStyle=T.cream;c.fillText(tail,x0+w1,T.y1);
+  c.fillStyle=o.col;c.fillText(T.head,x0,T.y1);c.fillStyle=LB.BRAND.bell;c.fillText(tail,x0+w1,T.y1);
   c.textAlign='center';c.fillStyle=o.col;c.font='800 '+T.size2+'px '+LB.FONT.display;if(ls)c.letterSpacing=T.ls2+'px';
   c.fillText(o.name.toUpperCase(),T.x,T.y2);c.restore();
 };

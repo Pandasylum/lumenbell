@@ -115,3 +115,5 @@
 - 2026-11-02 (engine/next-card) : le dernier carton des deux outros s'écrit pareil : « LUMEN » à la couleur du chapitre suivant puis « BELL · CHAPITRE N » en crème, sur une ligne, et le nom du chapitre en grand dessous.
 - La légende dessous suit la même forme dans les deux chapitres : « Chapitre N · Nom. À suivre. », teintée de la couleur du chapitre suivant.
 - 2026-11-02 (ci/speed) : rien ne change à l'écran ; seule la CI va plus vite (tests en parallèle, caches ; sur main, seul le contrôle « smoke » tourne).
+- 2026-11-02 (engine/brand-colors) : le mot « LUMENBELL » se colore partout pareil : « LUMEN » à la couleur du chapitre, « BELL » en crème, au titre de l'intro, au dernier carton de l'outro et au menu des deux chapitres.
+- Au menu du Chapitre II, « bell » passe d'un crème légèrement plus sombre au même crème que le titre de l'intro (écart presque invisible).
