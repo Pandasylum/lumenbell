@@ -10,6 +10,8 @@
 //    de l'epilogue teinte de la couleur du Chapitre III.
 // 4. garde du carton « a suivre » : LB.nextCard seule implementation (aucune chaine « LUMENBELL · CHAPTER/CHAPITRE » dessinee ailleurs que dans shared/js/24-cine.js,
 //    un seul appel par chapitre) ; dernier carton des Chapitres I et II rendu au meme instant : meme geometrie, LUMEN = CH_COL[n], BELL creme, legende au meme format.
+// 5. garde de couleur du mot « LUMENBELL » (LB.BRAND) : titre d'intro, carton « a suivre » et menu des deux chapitres = meme paire (LUMEN = couleur du chapitre, BELL = creme) ;
+//    le creme et le coloriage de LUMEN/BELL ne sont ecrits que dans shared/js/24-cine.js (+ la regle CSS du menu qui lit LB.BRAND).
 // Usage : node cine.js (python3 build/build_test.py avant). Sortie attendue : errs []
 const path=require('path');const launch=require('./launch');const {testPage}=require('./ch2-lib');
 const ROOT=path.resolve(__dirname,'..'),errs=[];
@@ -25,6 +27,14 @@ function guardStatic(){   // 4a
   const n=(src.match(/LB\.nextCard\(/g)||[]).length;if(rel!=='shared/js/24-cine.js'&&n>1)errs.push('carton a suivre : '+rel+' contient '+n+' appels LB.nextCard');}
  for(const ch of fs.readdirSync(path.join(ROOT,'chapters'))){const d=path.join(ROOT,'chapters',ch,'src');if(!fs.existsSync(d))continue;
   const n=walk(d).reduce((a,f)=>a+(fs.readFileSync(f,'utf8').match(/LB\.nextCard\(/g)||[]).length,0);if(n>1)errs.push('carton a suivre : '+ch+' contient '+n+' appels LB.nextCard');}}
+function guardBrand(){   // 5a : « LUMEN » / « BELL » ne sont coloriés que par LB.BRAND (shared/js/24-cine.js) ; le crème n'est écrit qu'une fois
+ const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?(/^(dist|out|node_modules)$/.test(e.name)?[]:walk(path.join(d,e.name))):/\.(js|css)$/.test(e.name)?[path.join(d,e.name)]:[]);
+ const dirs=[path.join(ROOT,'shared'),...fs.readdirSync(path.join(ROOT,'chapters')).map(c=>path.join(ROOT,'chapters',c,'src'))].filter(fs.existsSync);
+ for(const d of dirs)for(const f of walk(d)){const rel=path.relative(ROOT,f);
+  fs.readFileSync(f,'utf8').split('\n').forEach((l,i)=>{
+   if(/f0e8df|240,\s*232,\s*223/i.test(l)&&/LUMEN|BELL|Lumen|bell/.test(l)&&!/subCol/.test(l)&&!/^LB\.BRAND=/.test(l)&&!/^\s*--fg/.test(l)&&!/^\s*\/\*/.test(l)&&!/\.cream/.test(l))errs.push('marque : creme ecrit en dur hors LB.BRAND : '+rel+':'+(i+1));
+   if(/fillText\(\s*('LUMEN'|'BELL'|T\.head)/.test(l)&&!(rel==='shared/js/24-cine.js'&&/fillStyle=(o\.col|LB\.BRAND\.bell)/.test(l)))errs.push('marque : LUMEN/BELL colorie hors LB.BRAND : '+rel+':'+(i+1))})}}
+guardBrand();
 guardStatic();
 async function state(pg,ch){return pg.evaluate(k=>({cine:!document.getElementById('cine').hidden,flag:localStorage.getItem(k),
  card:!document.getElementById('ov').hidden||!document.getElementById('skip')?.hidden&&!!document.getElementById('skip'),menu:!document.getElementById('menu').hidden}),KEY[ch])}
@@ -144,4 +154,20 @@ const CARD={};
    check(L1.head.y===L2.head.y&&L1.head.font===L2.head.font&&L1.tail.font===L2.tail.font,'cartons : ligne du haut differente (y/police) '+JSON.stringify([L1.head.y,L2.head.y,L1.head.font,L2.head.font]));
    check(L1.name.y===L2.name.y&&L1.name.font===L2.name.font&&L1.name.x===L2.name.x,'cartons : titre different (position/taille) '+JSON.stringify([L1.name.y,L2.name.y,L1.name.font,L2.name.font]));
    check(Math.abs((L1.head.x+(L1.head.w+L1.tail.w)/2)-(L2.head.x+(L2.head.w+L2.tail.w)/2))<1,'cartons : centre de la ligne du haut different')}}
+ // 5. regle de couleur unique du mot « LUMENBELL » : titre d'intro, carton « a suivre », menu des deux chapitres = meme paire (LUMEN = chapitre, BELL = LB.BRAND.bell)
+ {const hex=c=>{const m=/^rgba?\((\d+), (\d+), (\d+)/.exec(c);return m?'#'+[1,2,3].map(i=>(+m[i]).toString(16).padStart(2,'0')).join(''):String(c).toLowerCase()};
+  const cream='#f0e8df',want={ch1:'#ff7a2b',ch2:null};
+  for(const ch of ['ch1','ch2']){const ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' marque: pageerror: '+e.message));
+   await pg.goto('file://'+(ch==='ch1'?path.join(ROOT,'build/out/test.html'):testPage()));await pg.waitForTimeout(200);await pg.evaluate(()=>{const g=document.getElementById('gateBtn');if(g&&!document.getElementById('gate').hidden)g.click()});await pg.waitForTimeout(150);
+   const R=await pg.evaluate(()=>{const LB=window.__t.LB,cv=document.createElement('canvas');cv.width=960;cv.height=540;const c=cv.getContext('2d'),rec=[],f=c.fillText.bind(c);
+    c.fillText=(t,x,y)=>{rec.push([String(t),String(c.fillStyle)]);return f(t,x,y)};
+    LB.title(c,10,0,{col:'#123456',sub:'x'});const ti=rec.splice(0);LB.nextCard(c,10,{n:2,name:'x',col:'#123456'});const nx=rec.splice(0);
+    const h=document.querySelector('#menu .mcard h2'),sp=h.querySelector('span'),it=h.querySelector('i');
+    return{title:ti,next:nx,menu:[h.textContent,sp&&getComputedStyle(sp).color,it&&getComputedStyle(it).color],ch2:LB.CH_COL[2],bell:LB.BRAND&&LB.BRAND.bell}});
+   const tag=ch+' marque',col=want[ch]||R.ch2,T=Object.fromEntries(R.title),N=R.next;
+   check(R.bell===cream,tag+' : LB.BRAND.bell '+R.bell);
+   check(hex(T.LUMEN)==='#123456'&&hex(T.BELL)===cream,tag+' : titre d\'intro '+JSON.stringify([T.LUMEN,T.BELL]));
+   const nh=N.find(x=>x[0]==='LUMEN'),nt=N.find(x=>/^BELL ·/.test(x[0]));check(nh&&nt&&hex(nh[1])==='#123456'&&hex(nt[1])===cream,tag+' : carton a suivre '+JSON.stringify(N));
+   check(R.menu[0]==='Lumenbell'&&hex(R.menu[1])===col&&hex(R.menu[2])===cream,tag+' : menu '+JSON.stringify(R.menu)+' attendu '+col+' / '+cream);
+   console.log(tag.padEnd(12),'titre',T.LUMEN,T.BELL,'| carton',nh&&nh[1],nt&&nt[1],'| menu',R.menu.slice(1).join(' '));await ctx.close()}}
  console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});
