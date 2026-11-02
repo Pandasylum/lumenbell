@@ -100,3 +100,4 @@
 - Les règles de l'Épreuve sont les mêmes dans les deux chapitres (quatre lignes, texte du Chapitre I).
 ## 2026-11-02 · menu/common (tailles d'écran)
 - Les menus des deux chapitres tiennent sur tous les écrans de téléphone, en portrait comme en paysage, avec le bouton du chapitre suivant toujours de la même taille.
+- Rien ne change à l'écran : seuls les tests automatiques sont plus fiables (engine/tests).

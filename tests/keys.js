@@ -40,7 +40,7 @@ const state=ch=>()=>{const q=s=>document.querySelector(s),o={lang:document.docum
  return o};
 async function open(b,ch,c){const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true,locale:c.locale||'en-US'});
  // cles posees une seule fois par contexte (marque dans localStorage : une 2e page du meme contexte garde l'etat)
- await ctx.addInitScript(o=>{if(localStorage.getItem('__init'))return;localStorage.clear();localStorage.setItem('__init','1');for(const k in o)localStorage.setItem(k,o[k])},c.set||{});
+ if(!c.keep)await ctx.addInitScript(o=>{if(localStorage.getItem('__init'))return;localStorage.clear();localStorage.setItem('__init','1');for(const k in o)localStorage.setItem(k,o[k])},c.set||{});
  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' '+c.nom+': pageerror: '+e.message));
  pg.on('request',r=>{if(!/^(file|data|blob):/.test(r.url()))errs.push(ch+' '+c.nom+': reseau: '+r.url())});
  await pg.goto('file://'+F[ch]);await pg.waitForTimeout(300);return{ctx,pg}}
@@ -69,14 +69,17 @@ for(const [ch,c] of [...COMMON.flatMap(c=>[['ch1',c],['ch2',c]]),...CH1.map(c=>[
  if(JSON.stringify(r)!==JSON.stringify(want))errs.push('ch1 aide : '+JSON.stringify(r)+' au lieu de '+JSON.stringify(want));await ctx.close()}
 // Ecriture dans chaque chapitre : cles lb-* seulement ; puis l'autre chapitre (meme origine file://) relit le choix
 for(const [ch,other] of [['ch1','ch2'],['ch2','ch1']]){
- const c={nom:'ecriture',locale:'fr-FR'};const {ctx,pg}=await open(b,ch,c);
+ const c={nom:'ecriture',locale:'fr-FR',keep:true};const {ctx,pg}=await open(b,ch,c);   // keep : pas de script d'init (il viderait le stockage vu par la 2e page)
  await pg.click('#gateBtn');   // ecran de demarrage, les deux chapitres (LB.gate)
  await pg.click('#langs button[data-lang=en]');await pg.evaluate(()=>{optSnd.click();optMus.click();optHelp.click()});
  const k=await pg.evaluate(()=>{const o={...localStorage};delete o.__init;return o});console.log(ch,'ecriture',JSON.stringify(k));
  if(k['lb-lang']!=='en'||k['lb-snd']!=='0'||k['lb-mus']!=='0'||k['lb-help']!=='1')errs.push(ch+' ecriture : cles lb-* non ecrites');
  if(Object.keys(k).some(x=>/^(pn|db|eb)-/.test(x)))errs.push(ch+' ecriture : ancienne cle ecrite');
  const p2=await ctx.newPage();p2.on('pageerror',e=>errs.push(other+' relecture: pageerror: '+e.message));
- await p2.goto('file://'+F[other]);await p2.waitForTimeout(300);
+ await p2.goto('file://'+F[other]);
+ // attendre que l'ecriture de la 1re page soit visible dans la 2e, puis recharger pour que le jeu relise les cles
+ await p2.waitForFunction(()=>localStorage.getItem('lb-lang')==='en'&&localStorage.getItem('lb-snd')==='0'&&localStorage.getItem('lb-mus')==='0'&&localStorage.getItem('lb-help')==='1');
+ await p2.reload();await p2.waitForFunction(()=>document.documentElement.lang==='en');
  const st=await p2.evaluate(state(other));console.log(other,'relit',JSON.stringify(st));
  for(const [kk,v] of Object.entries({lang:'en',snd:false,mus:false,help:true}))if(st[kk]!==v)errs.push(other+' relit le choix de '+ch+' : '+kk+' = '+st[kk]);
  await ctx.close()}
