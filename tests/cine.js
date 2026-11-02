@@ -88,6 +88,13 @@ const CARD={};
   const m=await pg.evaluate(()=>!document.getElementById('menu').hidden);check(m,ch+' outro : pas de retour au menu');
   const keys=await pg.evaluate(()=>Object.keys(localStorage).filter(k=>/outro|intro/.test(k)));check(!keys.length,ch+' outro : drapeau ecrit '+keys);
   console.log(ch,'outro      lancee deux fois, passee par Espace ; cles intro/outro :',keys);await ctx.close()}
+ // 2b. dernier carton de l'outro du Chapitre I : dist publie en temps reel (OUTRO n'est pas expose a la copie de test)
+ {const ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});await ctx.addInitScript(()=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem('lb-ch1-end','1')}});
+  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push('ch1 carton: pageerror: '+e.message));await pg.goto('file://'+DIST.ch1);await pg.waitForTimeout(200);await pg.click('#gateBtn');
+  await pg.evaluate(()=>{window.__rec=[];const P=CanvasRenderingContext2D.prototype,f0=P.fillText;P.fillText=function(t,x,y){window.__rec.push({t:String(t),x,y,col:this.fillStyle,font:this.font,al:this.textAlign,w:this.measureText(String(t)).width,a:this.globalAlpha});if(window.__rec.length>400)window.__rec.shift();return f0.apply(this,arguments)}});
+  await pg.click('#outroBtn');await pg.waitForFunction(()=>/suivre/.test(document.getElementById('cineCap').textContent),null,{timeout:90000});await pg.waitForTimeout(4500);
+  const card=await pg.evaluate(()=>{const r=window.__rec,i=r.map(x=>x.t).lastIndexOf('LUMEN');return{cap:document.getElementById('cineCap').textContent,capCol:document.getElementById('cineCap').style.color,rec:i<0?[]:r.slice(i,i+3)}});
+  CARD.ch1=card;await pg.keyboard.press('Space');await ctx.close()}
  // 3. copies de test a crochets
  for(const ch of ['ch1','ch2']){
   const file=ch==='ch1'?path.join(ROOT,'build/out/test.html'):testPage();
@@ -100,15 +107,14 @@ const CARD={};
    I.replay(()=>{o.replayDone=1});o.replay=I.playing()&&!document.getElementById('cine').hidden;L.skip();o.replayEnd=!I.playing();
    if(ch==='ch2'){o.epi={};T.playEpilogue(()=>{o.epi.done=1});o.epi.vis=!document.getElementById('cine').hidden;run(27.5);o.epi.col=document.getElementById('cineCap').style.color;o.epi.txt=document.getElementById('cineCap').textContent}
    // 4b : dernier carton rendu (ch1 : outro ; ch2 : epilogue deja au dernier carton) ; on enregistre les fillText de l'image finale
-   {const rec=[],P=CanvasRenderingContext2D.prototype,f0=P.fillText;P.fillText=function(t,x,y){rec.push({t:String(t),x,y,col:this.fillStyle,font:this.font,al:this.textAlign,w:this.measureText(String(t)).width,a:this.globalAlpha});return f0.apply(this,arguments)};
+   if(ch==='ch2'){const rec=[],P=CanvasRenderingContext2D.prototype,f0=P.fillText;P.fillText=function(t,x,y){rec.push({t:String(t),x,y,col:this.fillStyle,font:this.font,al:this.textAlign,w:this.measureText(String(t)).width,a:this.globalAlpha});return f0.apply(this,arguments)};
     const cap=()=>document.getElementById('cineCap').textContent,end=/suivre|continued/;
-    if(ch==='ch1'){L.skip();OUTRO.play(()=>{});for(let i=0;i<60*80&&!end.test(cap());i++)L.step(1/60,false)}
-    else{L.skip();T.playEpilogue(()=>{});for(let i=0;i<60*80&&!end.test(cap());i++)T.step(1/60,false)}
-    for(let i=0;i<60*4;i++){if(ch==='ch1')L.step(1/60,false);else T.step(1/60,false)}
-    rec.length=0;if(ch==='ch1')L.step(1/60,true);else T.step(1/60,true);
+    {L.skip();T.playEpilogue(()=>{});for(let i=0;i<60*80&&!end.test(cap());i++)T.step(1/60,false)}
+    for(let i=0;i<60*4;i++)T.step(1/60,false)
+    rec.length=0;T.step(1/60,true);
     P.fillText=f0;o.card={cap:cap(),capCol:document.getElementById('cineCap').style.color,rec,col:T.LB.CH_COL}}
    return o},[ch,KEY[ch]]);
-  CARD[ch]=r.card;
+  if(ch==='ch2')CARD[ch]=r.card;
   if(ch==='ch2'){await pg.keyboard.press('Space');await pg.waitForTimeout(100);
    Object.assign(r.epi,await pg.evaluate(k=>({hidden:document.getElementById('cine').hidden,done:document.getElementById('cine').hidden,flags:Object.keys(localStorage).filter(x=>/epi|outro/.test(x)),mode:window.__t.S.mode}),KEY[ch]))}
   console.log(ch,'crochets',JSON.stringify(r));
@@ -120,7 +126,7 @@ const CARD={};
    check(r.epi.hidden&&r.epi.mode!=='epilogue','ch2 epilogue : Espace ne passe pas');check(!r.epi.flags.length,'ch2 epilogue : drapeau ecrit '+r.epi.flags)}
   await ctx.close()}
 
- {const C1=CARD.ch1,C2=CARD.ch2,hex=c=>{const m=/^rgb\((\d+), (\d+), (\d+)\)$/.exec(c);return m?'#'+[1,2,3].map(i=>(+m[i]).toString(16).padStart(2,'0')).join(''):c};
+ {CARD.ch1.col=CARD.ch2.col;const C1=CARD.ch1,C2=CARD.ch2,hex=c=>{const m=/^rgb\((\d+), (\d+), (\d+)\)$/.exec(c);return m?'#'+[1,2,3].map(i=>(+m[i]).toString(16).padStart(2,'0')).join(''):c};
   const lines=C=>{const r=C.rec.filter(x=>/LUMEN|BELL|^[A-Z ]+$/.test(x.t)&&x.a>0);return{head:r.find(x=>x.t==='LUMEN'),tail:r.find(x=>/^BELL ·/.test(x.t)),name:r.filter(x=>x!==r.find(y=>y.t==='LUMEN')&&!/^BELL ·/.test(x.t)).pop()}};
   console.log('carton a suivre',JSON.stringify({ch1:C1.rec.map(x=>[x.t,x.col,x.x,x.y]),ch2:C2.rec.map(x=>[x.t,x.col,x.x,x.y])}));
   const L1=lines(C1),L2=lines(C2),cream='#f0e8df';
