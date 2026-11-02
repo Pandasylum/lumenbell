@@ -29,6 +29,7 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 - [2026-11-01 · `ch1/foundry-floor` : application de K, L, G, D ; Veilleur sur un bloc du pont tombé, lanterne posée sur le rebord, Facile sans seconde vie (vraie fin directe) ; à valider : plongée d'esquive au point bas, titre de l'ancienne carte de fin de phase I](docs/decisions/2026-11-01-ch1-foundry-floor-application.md)
 - [2026-11-02 · version affichée (version du jeu, v1.0.0 pour l'instant), titre du menu « LUMENBELL » / « LumenBell », règle du titre « à suivre », « sans pause » = trois phases enchaînées](docs/decisions/2026-11-02-version-et-titre.md)
 
+- [2026-11-02 · package Android `com.lumenbell.game` (keystore inchangé, appli distincte) ; hub unique `site/` (Couronne, `ch1/`, `ch2/`, un dossier par chapitre, zip itch.io identique) ; ordre démarrage → Couronne → chapitre ; déblocage par la vraie fin du précédent ; un seul bouton « Commencer » au hub, musique dédiée, chapitres sans écran de démarrage depuis le hub ; à vérifier sur téléphone (son après navigation)](docs/decisions/2026-11-02-apk-hub-package.md)
 
 ## 2026-10-26 / 27 – Refonte du lore et des textes du Chapitre I
 - Le secret (les Scellés sont d'anciens Veilleurs) n'est **jamais dit** ; un fragment par chapitre, davantage dans le premier.

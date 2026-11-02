@@ -14,9 +14,9 @@
 2. Moteur commun, tests (`engine/tests`) : suite des tests du moteur. Plan en sessions : `docs/COMMUN.md` §4.
 3. **ch1/foundry-floor** et **ch1/dodge-side** (pas encore fusionnés) : Chapitre I, phase II au fond de la Fonderie (`CHANGEMENTS.md` K), fausse fin de Facile supprimée (`CHANGEMENTS.md` L), lanterne du Colosse (G), textes (D), esquive en pas de côté (N, `docs/decisions/2026-11-01-idees-validees.md` c).
 4. **ch2/cinematics** : cinématiques du Chapitre II refaites dans l'esprit du Chapitre I, après `engine/cine`.
-5. **menu/crown** : choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres.
+5. **menu/crown** : choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres ; hub = site/ avec musique dédiée (voir docs/decisions/2026-11-02-apk-hub-package.md).
 6. **ch2/perf** : optimisation du Chapitre II, après la fusion des deux jeux : mesure des images par seconde, poids, minification ; build identique à chaque étape, comme pour le Chapitre I.
-7. **Renommage LumenBell** : après `ch1/foundry-floor`. Titre de menu en majuscules « LUMENBELL », partout ailleurs « LumenBell » (textes affichés, documents, titre de page, nom d'app Android, titre de fin d'intro). Reste à cadrer : écriture visuelle du titre, nom de package Android.
+7. **Renommage LumenBell** : après `ch1/foundry-floor`. Titre de menu en majuscules « LUMENBELL », partout ailleurs « LumenBell » (textes affichés, documents, titre de page, nom d'app Android, titre de fin d'intro). Reste à cadrer : écriture visuelle du titre. package : com.lumenbell.game (tranché, appliqué en session menu/crown).
 8. Plus tard : modules ES, Google Play, iOS ; chapitre III (Racines).
 
 ## Idées notées pour plus tard
