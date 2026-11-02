@@ -57,6 +57,11 @@ jobs:
           python3 build/build_ch2.py
           git diff --exit-code chapters/ch2-silent-bells/dist/
           test -z "$(git status --porcelain chapters/ch2-silent-bells/dist/)"
+      - name: Site (hub + chapitres) - le build reproduit exactement site/
+        run: |
+          python3 build/build_site.py
+          git diff --exit-code site/
+          test -z "$(git status --porcelain site/)"
       - name: Version de test
         run: python3 build/build_test.py
       - name: Cache des navigateurs Playwright
@@ -79,13 +84,17 @@ jobs:
         run: |
           node smoke.js
           node fonts-offline.js
-      - name: Apercu du jeu (Chapitres I et II)
+      # site/index.html : le hub ; site/ch1, site/ch2 : les chapitres ouverts depuis le hub (lien Retour)
+      - name: Apercu du jeu (hub et Chapitres I et II)
         uses: actions/upload-artifact@v4
         with:
           name: jeu-apercu
           path: |
             chapters/ch1-ember-bridge/dist/index.html
             chapters/ch2-silent-bells/dist/index.html
+            site/index.html
+            site/ch1/index.html
+            site/ch2/index.html
           retention-days: 14
           if-no-files-found: error
 
@@ -124,6 +133,10 @@ jobs:
               node ch2-retouches3.js
               node ch2-announce.js
               node ch2-bot.js 100 --check
+          - name: Hub (site assemble)
+            run: |
+              node hub.js
+              node hub-site.js
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -137,6 +150,7 @@ jobs:
         run: |
           python3 build/build.py
           python3 build/build_ch2.py
+          python3 build/build_site.py
           python3 build/build_test.py
       - name: Cache des navigateurs Playwright
         id: pw

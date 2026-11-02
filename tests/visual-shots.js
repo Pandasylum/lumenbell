@@ -12,6 +12,8 @@
 //   node visual-shots.js --cine <dossier> [ch1.html] [ch2test.html]   cartons des intros et outros des deux chapitres a instants
 //        fixes (CINE_AT, secondes) : Chapitre I par le DOM du dist (intro depuis Normal, outro par le bouton du menu), Chapitre II par
 //        la copie de test a crochets (ch2-lib.js ; CH2_DIST / CH2_TEST_OUT pour un autre dist). Comparer ensuite avec --compare.
+//   node visual-shots.js --hub <dossier> [site/index.html]   hub du site (session menu/crown) seul : 375x667, 390x844, 844x390,
+//        1280x720, 1920x1080 ; ecran de demarrage, profils vierge / I termine / I et II termines, carte du Chapitre II ouverte (FR).
 //   --no-breath (avec une capture) : respiration neutralisee (LB.WATCHER_T.breath a zero, par remplacement de texte dans une copie)
 //        pour prouver qu'un chapitre est identique au pixel hors respiration.
 // Determinisme (methode du Chapitre II, NOTES.md) : requestAnimationFrame, performance.now et Date.now remplaces par un pas
@@ -78,6 +80,18 @@ async function menus(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await
   const shot=async k=>{await pg.mouse.move(0,0);await pg.waitForTimeout(60);await pg.screenshot({path:path.join(dir,tag+'-'+k+'.png'),animations:'disabled'})};
   await adv(30);await shot('gate');await click('#gateBtn');await adv(60);await shot('menu');
   await click('#mphM [data-diff=trial]');await adv(10);await shot('menu-trial');await ctx.close()}
+ await b.close();return errs}
+async function hubShots(dir,file){fs.mkdirSync(dir,{recursive:true});const b=await launch();const errs=[];
+ const PROF={vierge:{},I:{'lb-ch1-end':'1'},'I-II':{'lb-ch1-end':'1','lb-ch2-end':'1'}};
+ for(const [w,h,touch] of [[375,667,true],[390,844,true],[844,390,true],[1280,720,false],[1920,1080,false]])for(const pr in PROF){
+  const ctx=await b.newContext({viewport:{width:w,height:h},locale:'fr-FR',reducedMotion:'reduce',hasTouch:touch,isMobile:touch});await ctx.addInitScript(CLOCK,1234);
+  await ctx.addInitScript(o=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');for(const k in o)localStorage.setItem(k,o[k])}},PROF[pr]);
+  const pg=await ctx.newPage(),tag='hub-'+w+'x'+h+'-'+pr;pg.on('pageerror',e=>errs.push(tag+': '+e.message));await pg.goto('file://'+file);
+  const shot=async k=>{await pg.mouse.move(0,0);await pg.waitForTimeout(60);await pg.screenshot({path:path.join(dir,tag+(k?'-'+k:'')+'.png'),animations:'disabled'})};
+  if(pr==='vierge')await shot('gate');
+  await pg.evaluate(()=>document.getElementById('gateBtn').click());await pg.evaluate(()=>document.activeElement&&document.activeElement.blur());await shot('');
+  if(pr==='I-II'){await pg.evaluate(()=>document.querySelector('.tw[data-n="2"]').click());await shot('carte')}
+  await ctx.close()}
  await b.close();return errs}
 async function compare(a,b){const fa=fs.readdirSync(a).filter(f=>f.endsWith('.png')).sort(),fb=new Set(fs.readdirSync(b));
  const br=await launch();const pg=await (await br.newContext()).newPage();const out=[];let same=0;
@@ -207,6 +221,8 @@ async function cineShots(dir,files){fs.mkdirSync(dir,{recursive:true});const b=a
  if(A[0]==='--menu'){if(!A[1])throw new Error('usage : node visual-shots.js --menu <dossier> [ch1.html] [ch2.html]');
   const files={ch1:path.resolve(A[2]||path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')),ch2:path.resolve(A[3]||path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html'))};
   const errs=await menus(path.resolve(A[1]),files);console.log('errs',errs);process.exitCode=errs.length?1:0;return}
+ if(A[0]==='--hub'){if(!A[1])throw new Error('usage : node visual-shots.js --hub <dossier> [site/index.html]');
+  const errs=await hubShots(path.resolve(A[1]),path.resolve(A[2]||path.join(ROOT,'site/index.html')));console.log('errs',errs);process.exitCode=errs.length?1:0;return}
  if(A[0]==='--cine'){if(!A[1])throw new Error('usage : node visual-shots.js --cine <dossier> [ch1.html] [ch2test.html]');
   const files={ch1:path.resolve(A[2]||path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')),ch2:path.resolve(A[3]||require('./ch2-lib').testPage())};
   const errs=await cineShots(path.resolve(A[1]),files);console.log('errs',errs);process.exitCode=errs.length?1:0;return}

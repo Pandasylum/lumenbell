@@ -1,0 +1,9 @@
+# Ordre d'assemblage du hub (site/index.html), lu par build/build_site.py comme build/assemble.py lit un chapitre.
+# Les morceaux sont colles bout a bout, sans rien ajouter : l'ordre compte. '@shared' : morceaux communs (shared/parts.txt).
+page/head.html
+page/style.css
+page/body.html
+js/00-open.js
+@shared
+js/10-hub.js
+page/end.html

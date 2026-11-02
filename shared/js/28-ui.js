@@ -5,7 +5,7 @@
    tailles, écran de démarrage, boutons de rejeu, Entrée / Espace au menu, repère d'aide), le Chapitre II pour l'outillage
    (carte déclarative, relâchement, zones sûres). Le chapitre ne déclare qu'une table CHAPTER (docs/COMMUN.md § 3.1) :
    n, id, title, color (code couleur), color2 (clair : ligne du chapitre, note de l'Épreuve), rgb (halos), menu {bg, glowA,
-   titleA, particles, t}, trial {name}, player, tag? (accroche), how? (mode d'emploi), next {n, title, open?} (couleur, rgb et survol dérivés de LB.CH_COL[n]), help {offer?},
+   titleA, particles, t}, trial {name}, player, tag? (accroche), how? (mode d'emploi), next {n, title, open?} (plus affiché depuis le hub : remplacé par « Retour », voir LB.HUB), help {offer?},
    et les fonctions trialOpen(), endSeen(), best(n), fmt(t). Un texte est une fonction qui rend la chaîne déjà traduite
    (le chapitre y appelle sa fonction de texte) ou un objet {en, fr}. Le style (LB.UI_CSS) est créé ici avec les couleurs du chapitre.
    Les textes communs (difficultés, sous-titres, boutons) sont ici, en LB._(en, fr). Aucun mot d'annonce. */
@@ -19,11 +19,24 @@ LB.TRIAL_RULES=[()=>LB._('The three phases in a row, with no pause and no visual
 LB.ROMAN=['','I','II','III','IV','V','VI','VII'];
 /* « Chapitre N · Titre » : libellé commun (le chapitre ne donne que n et title) */
 LB.chapterName=(n,title)=>LB._('Chapter '+LB.ROMAN[n]+' · '+title,'Chapitre '+LB.ROMAN[n]+' · '+title);
+/* ---------- Hub (site/index.html, décision docs/decisions/2026-11-02-hub-site.md) ----------
+   Le hub ouvre un chapitre par <chapitre>/index.html?from=hub : LB.fromHub est vrai, le chapitre n'affiche pas son écran de
+   démarrage (le geste a été fait au hub) et son menu montre « Retour », qui rend le hub par ../index.html?back=<n> (sans nouvel
+   écran, la musique du hub repart). Ouvert seul (lien direct, tests) : écran de démarrage, pas de lien. LB.HUB : chemins et
+   paramètres ; LB.HUB_ICON : petite figure des sept points (icône du lien, même dessin dans tous les chapitres). */
+LB.HUB={path:'../index.html',from:'hub',back:'back'};
+LB.HUB_ICON={size:20,r:7.2,dot:1.9,core:1.3,off:'#5a5266',core0:'#ffffff'};
+LB.fromHub=(()=>{try{return new URLSearchParams(location.search).get('from')===LB.HUB.from}catch(e){return false}})();
+LB.hubIcon=()=>{const I=LB.HUB_ICON,c=I.size/2;let s='<svg class="hubico" aria-hidden="true" focusable="false" width="'+I.size+'" height="'+I.size+'" viewBox="0 0 '+I.size+' '+I.size+'">';
+  for(let n=1;n<=6;n++){const a=-Math.PI/2+(n-1)*Math.PI/3;s+='<circle cx="'+(c+I.r*Math.cos(a)).toFixed(2)+'" cy="'+(c+I.r*Math.sin(a)).toFixed(2)+'" r="'+I.dot+'" fill="'+(LB.CH_COL[n]||I.off)+'"/>'}
+  return s+'<circle cx="'+c+'" cy="'+c+'" r="'+I.core+'" fill="'+I.core0+'" opacity=".55"/></svg>'};
+LB.toHub=(()=>{let gone=false;return n=>{if(gone)return false;gone=true;try{location.replace(LB.HUB.path+'?'+LB.HUB.back+'='+n)}catch(e){gone=false}return true}})();
 LB.MENU_T={
   /* placement commun à tous les chapitres (aucune position propre à un chapitre) : largeur de la carte et des difficultés, lignes réservées
      de l'accroche et du mode d'emploi (px ; réservées même si le chapitre n'en a pas, pour que les boutons restent au même endroit) */
   cardW:'min(94vw,580px)',btnFs:'min(18px,2.8vw)',   // police du nom d'une difficulté : ne passe jamais à la ligne (4 colonnes jusqu'à 480 px)
-  nextW:'min(100%,366px)',nextFs:'clamp(11px,3.7vw,15px)',nextFsSmall:'clamp(10px,3.1vw,13px)',nextSmallMax:560,tagH:42,howH:18,   // largeur adaptable de la carte, largeur du bouton du chapitre suivant et sa police (ne passe jamais à la ligne)
+  nextW:'min(100%,240px)',nextFs:'clamp(12px,3.7vw,15px)',nextH:44,tagH:42,howH:18,
+  back:{fg:'#f0e8df',line:'#2d2438',bg:'rgba(10,7,16,.6)',hover:'rgba(255,255,255,.08)'},   // couleurs du lien « Retour » : les mêmes dans tous les chapitres (celles du Chapitre I)   // lien « Retour » vers le hub (largeur, police, hauteur mini), lignes réservées de l'accroche et du mode d'emploi
   btnH:44,btnHLow:34,     // hauteur mini des boutons du haut du menu (Intro, Outro, plein écran) : écran tactile, puis paysage bas
   raise:'-9vh',raiseLow:'-4vh',raiseMinH:700,tinyH:340,          // remontée du titre (paysage bas : raiseLow)
   glow:3.2,glowMin:.55,blink:5,          // scintillement des braises / de la mer (.lava), clignement des yeux (.eye)
@@ -32,7 +45,7 @@ LB.MENU_T={
   spray:{id:'mSnow',cls:'msn',key:'mfall',n:34,dur:[7,8],delay:12,size:[1.5,2.5],dx:120,rise:'-45vh',peak:.7,w:3,col:'#e8f8ff',glow:'0 0 6px 1px rgba(159,242,255,.6)'}
 };
 LB.tx=o=>o==null?'':typeof o==='function'?o():typeof o==='string'?o:LB._(o.en,o.fr);
-LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],c=C.color,c2=C.color2,rgb=C.rgb,N=C.next,nc=LB.CH_COL[N.n]||'#8a8a9a',nrgb=LB.chRgb(N.n),nh=LB.chHover(N.n);
+LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],c=C.color,c2=C.color2,rgb=C.rgb;
  return '.bar span i{font-style:normal}\n'+
  ':root{--chc:'+c+';--chc2:'+c2+';--chr:'+rgb+'}   /* couleur du chapitre pour la carte (#ov) */\n'+
  '#ov [hidden]{display:none!important}\n'+
@@ -88,13 +101,13 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '@media (max-width:480px){#mphT{grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}#mphT #mBackT{grid-column:1/-1}}\n'+
  '@media (pointer:coarse){.fsb{display:none!important}#introBtn{top:calc(12px + env(safe-area-inset-top,0px))!important}#outroBtn{top:calc(56px + env(safe-area-inset-top,0px))!important}}\n'+
  '.mfoot{display:flex;width:100%;min-width:0;justify-content:center;margin-top:2px}\n'+
- '.mlink{display:flex;align-items:center;justify-content:center;gap:8px;width:'+M.nextW+';box-sizing:border-box;min-width:0;max-width:100%;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:'+M.nextFs+';letter-spacing:.08em;text-transform:uppercase;color:'+nc+';text-decoration:none;border:1px solid rgba('+nrgb+',.5);padding:7px 14px;background:rgba(4,22,24,.55)}\n'+
- '.mlink{font-family:inherit;cursor:default}\n'+
- '@media (max-width:'+M.nextSmallMax+'px){.mlink{flex-wrap:wrap;white-space:normal;font-size:'+M.nextFsSmall+';letter-spacing:.04em;padding:6px 10px;text-align:center}}   /* téléphone : « Chapitre N · Nom » + badge se replient dans la largeur de la carte, sans l\'élargir */\n'+
+ /* lien « Retour » vers le hub : même rendu dans tous les chapitres (couleurs neutres, icône des sept points) */
+ '.mlink{display:flex;align-items:center;justify-content:center;gap:10px;width:'+M.nextW+';min-height:'+M.nextH+'px;box-sizing:border-box;min-width:0;max-width:100%;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:'+M.nextFs+';letter-spacing:.1em;text-transform:uppercase;color:'+M.back.fg+';border:1px solid '+M.back.line+';padding:6px 16px;background:'+M.back.bg+';cursor:pointer}\n'+
+ '.mlink .hubico{flex:none}\n'+
+ '.mlink:focus-visible{outline:2px solid '+M.back.fg+';outline-offset:2px}\n'+
  '.ver{margin:6px 0 0;font-size:11px;letter-spacing:.14em;color:var(--muted);opacity:.6;text-align:center}\n'+
  '.mph button[aria-disabled=true]{opacity:.45;cursor:not-allowed}\n'+
- '.mlink:hover{background:rgba('+nrgb+',.18);color:'+nh+'}\n'+
- '.mlink small{font-size:.7333em;letter-spacing:.12em;color:var(--muted);border:1px solid var(--line);padding:1px .55em}\n'+
+ '.mlink:hover{background:'+M.back.hover+'}\n'+
  '#introBtn{position:absolute;top:calc(56px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
  '#outroBtn{position:absolute;top:calc(100px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
  '.langs{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:3}\n'+
@@ -102,7 +115,7 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.langs button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.22);color:#fff}\n'+
  '.langs button:focus-visible{outline:2px solid '+c+';outline-offset:2px}\n'+
  '@media (pointer:coarse){.langs button{min-height:40px}.ov.menu .mbtn{min-height:'+M.btnH+'px}}\n'+
- '@media (max-height:520px) and (orientation:landscape){.ov.menu .mbtn{min-height:'+M.btnHLow+'px;padding-block:2px}}\n'};
+ '@media (max-height:520px) and (orientation:landscape){.ov.menu .mbtn{min-height:'+M.btnHLow+'px;padding-block:2px}.mlink{min-height:'+M.btnHLow+'px;padding-block:2px}}\n'};
 LB.ui=(()=>{
   const $=id=>document.getElementById(id),mk=(tag,attrs,html)=>{const e=document.createElement(tag);for(const k in attrs||{})e.setAttribute(k,attrs[k]);if(html!=null)e.innerHTML=html;return e};
   let styled=false;
@@ -176,16 +189,18 @@ LB.gate=(()=>{
     g.querySelector('#gateBtn').addEventListener('click',()=>{LB.audio.ensure();g.hidden=true;try{document.querySelector('#menu [data-diff=normal]').focus({preventScroll:true})}catch(e){}if(h.onStart)h.onStart()});
     return g;
   }
-  return{mount,visible(){return!!g&&!g.hidden},focus(){try{g.querySelector('#gateBtn').focus({preventScroll:true})}catch(e){}},get el(){return g}};
+  /* écran masqué (chapitre ouvert depuis le hub) : le focus va à « Normal » du menu */
+  return{mount,visible(){return!!g&&!g.hidden},focus(){try{(g&&!g.hidden?g.querySelector('#gateBtn'):document.querySelector('#menu [data-diff=normal]')).focus({preventScroll:true})}catch(e){}},get el(){return g}};
 })();
 
 /* ---------- LB.menu : menu de la série ----------
    mount(C, h) : construit autour de la scène SVG du chapitre (déjà dans #menu, classe .mscene) les particules, « ▶ Intro »,
    « ▶ Outro » (après la vraie fin), plein écran, langues, puis la carte : « Lumen|bell », la ligne du chapitre dessous, accroche,
    Reprendre, les quatre difficultés, le sous-menu de l'Épreuve (Normal, Difficile, Retour) et sa note, mode d'emploi, version,
-   chapitre suivant ; aussi l'écran de démarrage (LB.gate), la carte (LB.card) et la pause (LB.pause) s'ils manquent.
+   « Retour » vers le hub (seulement si LB.fromHub) ; aussi l'écran de démarrage (LB.gate), la carte (LB.card) et la pause (LB.pause) s'ils manquent.
    h : {onDiff(dk), onIntro(), onOutro(), onResume(), onLang(), onStart()}. show(reprendre), hide(), visible(), lang(),
-   update() (verrou de l'Épreuve, records, « ▶ Outro », chapitre suivant), trial(on). */
+   update() (verrou de l'Épreuve, records, « ▶ Outro »), trial(on). Depuis le hub, l'écran de démarrage reste masqué : le son est
+   relancé (LB.audio.ensure ; si le navigateur le bloque, il part au premier appui) et onStart est appelé comme après « Commencer ». */
 LB.menu=(()=>{
   let C=null,h={},m=null,card=null;const $=LB.ui.$;
   const DK=['easy','normal','hard'];
@@ -201,6 +216,7 @@ LB.menu=(()=>{
     m=$('menu');const stage=m.parentNode;
     if(!LB.card.el.ov)LB.card.mount(stage,m);
     LB.gate.mount(stage,m,{onStart:()=>{if(h.onStart)h.onStart()}});
+    if(LB.fromHub){LB.gate.el.hidden=true;LB.audio.ensure();setTimeout(()=>{if(h.onStart)h.onStart()},0)}   /* après la fin du démarrage du chapitre */
     if(!LB.pause.el)LB.pause.mount(stage,m);
     m.appendChild(particles());
     m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'introBtn'},'▶ Intro'));
@@ -214,7 +230,7 @@ LB.menu=(()=>{
       '<div class="mph" id="mphT" role="group" aria-label="Trial" hidden>'+b('tn')+b('th')+'<button type="button" id="mBackT"><b></b><span></span></button></div>'+
       '<div class="tnote" id="trialNote" hidden><b></b><ul>'+LB.TRIAL_RULES.map(()=>'<li></li>').join('')+'</ul></div>'+
       '<p class="how"></p><p class="ver" aria-label="Version '+LB.VERSION+'">v'+LB.VERSION+'</p>'+
-      '<div class="mfoot"><button type="button" class="mlink" id="mNext" aria-disabled="true"><span class="nm"></span> <small class="soon"></small></button></div>');
+      (LB.fromHub?'<div class="mfoot"><button type="button" class="mlink" id="mHub">'+LB.hubIcon()+'<span class="nm"></span></button></div>':''));
     m.appendChild(card);
     /* scène : cadrée sur le bas en paysage, entière en portrait (comme au Chapitre I) */
     const sv=m.querySelector('.mscene');if(sv){const fit=()=>sv.setAttribute('preserveAspectRatio',innerWidth/innerHeight<1.2?'xMidYMax meet':'xMidYMax slice');fit();addEventListener('resize',fit)}
@@ -229,21 +245,19 @@ LB.menu=(()=>{
     $('mResume').addEventListener('click',()=>{if(h.onResume)h.onResume()});
     $('introBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onIntro)h.onIntro()});
     $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onOutro)h.onOutro()});
-    $('mNext').addEventListener('click',e=>e.currentTarget.blur());   /* chapitre suivant : « À venir » suffit, aucun message */
+    if(LB.fromHub)$('mHub').addEventListener('click',e=>{e.currentTarget.blur();LB.toHub(C.n)});   /* une seule navigation, même au double appui */
     document.querySelectorAll('#langs button,#gateLangs button').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
     LB.fs.bind();
     lang();
     return m;
   }
-  /* records de l'Épreuve, verrou, « ▶ Outro », chapitre suivant */
+  /* records de l'Épreuve, verrou, « ▶ Outro » */
   function update(){if(!m)return;
     for(const n of ['tn','th']){const sp=m.querySelector('#mphT [data-diff='+n+'] span'),v=+C.best(n)||0;sp.textContent=v?'🏆 '+C.fmt(v):LB._('No record yet','Pas encore de record')}
     const ok=C.endSeen(),tok=C.trialOpen(),tb=m.querySelector('#mphM [data-diff=trial]'),nm=LB.tx(C.trial.name);
     $('outroBtn').hidden=!ok;
     tb.setAttribute('aria-disabled',String(!tok));   /* Épreuve : ouverte pendant les tests (TRIAL_OPEN), sinon débloquée par la vraie fin */
     tb.querySelector('b').textContent=tok?nm:'🔒 '+nm;tb.querySelector('span').textContent=tok?TX.sTrial():LB._('To unlock','À débloquer');
-    {const b=$('mNext'),op=!!C.next.open&&C.next.open();   /* chapitre suivant : « Chapitre N · Nom » dans la couleur LB.CH_COL[N], badge « À venir » ; toujours non cliquable */
-     b.classList.toggle('open',op);b.querySelector('.nm').textContent=LB.chapterName(C.next.n,LB.tx(C.next.title));b.querySelector('.soon').textContent=LB._('Coming soon','À venir')}
   }
   function lang(){if(!m)return;
     document.documentElement.lang=LB.lang.cur;
@@ -260,6 +274,7 @@ LB.menu=(()=>{
     m.querySelector('.mcard .how').textContent=LB.tx(C.how);
     m.querySelector('.fsm span').textContent=LB._('Fullscreen','Plein écran');
     $('introBtn').textContent='▶ Intro';$('outroBtn').textContent='▶ Outro';
+    if(LB.fromHub){$('mHub').querySelector('.nm').textContent=LB._('Back','Retour');$('mHub').setAttribute('aria-label',LB._('Back to the chapters','Retour aux chapitres'))}
     $('mphM').setAttribute('aria-label',LB._('Choose difficulty','Choisir la difficulté'));$('mphT').setAttribute('aria-label',LB.tx(C.trial.name));
     document.querySelectorAll('#langs,#gateLangs').forEach(e=>e.setAttribute('aria-label',LB._('Language','Langue')));
     document.querySelectorAll('#langs button,#gateLangs button').forEach(bt=>bt.setAttribute('aria-pressed',String(bt.dataset.lang===LB.lang.cur)));
