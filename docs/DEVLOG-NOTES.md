@@ -108,3 +108,5 @@
 - 2026-11-02 (docs/apk-hub) : rien ne change encore dans le jeu, cette session ne pose que la décision.
 - À venir : un seul site avec un écran de démarrage, puis la Couronne pour choisir le chapitre ; les chapitres s'ouvrent sans second écran de démarrage.
 - À venir : un seul bouton « Commencer » au hub, avec une musique dédiée ; l'APK aura le même contenu que le web.
+- 2026-11-02 (outro/titre-lumen) : à la fin de l'outro du Chapitre I, dans « LUMENBELL · CHAPITRE II », seul « LUMEN » est turquoise ; « BELL » reste crème.
+- Le premier carton de l'outro du Chapitre II dure 6 s au lieu de 7.
