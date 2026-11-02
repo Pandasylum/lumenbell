@@ -796,7 +796,7 @@ LB.MENU_T={
   /* placement commun à tous les chapitres (aucune position propre à un chapitre) : largeur de la carte et des difficultés, lignes réservées
      de l'accroche et du mode d'emploi (px ; réservées même si le chapitre n'en a pas, pour que les boutons restent au même endroit) */
   cardW:'min(94vw,580px)',btnFs:'min(18px,2.8vw)',   // police du nom d'une difficulté : ne passe jamais à la ligne (4 colonnes jusqu'à 480 px)
-  nextW:'min(100%,366px)',nextFs:'clamp(11px,3.7vw,15px)',tagH:42,howH:18,   // largeur adaptable de la carte, largeur du bouton du chapitre suivant et sa police (ne passe jamais à la ligne)
+  nextW:'min(100%,366px)',nextFs:'clamp(11px,3.7vw,15px)',nextFsSmall:'clamp(10px,3.1vw,13px)',nextSmallMax:560,tagH:42,howH:18,   // largeur adaptable de la carte, largeur du bouton du chapitre suivant et sa police (ne passe jamais à la ligne)
   btnH:44,btnHLow:34,     // hauteur mini des boutons du haut du menu (Intro, Outro, plein écran) : écran tactile, puis paysage bas
   raise:'-9vh',raiseLow:'-4vh',raiseMinH:700,tinyH:340,          // remontée du titre (paysage bas : raiseLow)
   glow:3.2,glowMin:.55,blink:5,          // scintillement des braises / de la mer (.lava), clignement des yeux (.eye)
@@ -860,9 +860,10 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '#mphT{grid-template-columns:repeat(3,minmax(0,1fr));max-width:440px}\n'+
  '@media (max-width:480px){#mphT{grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}#mphT #mBackT{grid-column:1/-1}}\n'+
  '@media (pointer:coarse){.fsb{display:none!important}#introBtn{top:calc(12px + env(safe-area-inset-top,0px))!important}#outroBtn{top:calc(56px + env(safe-area-inset-top,0px))!important}}\n'+
- '.mfoot{display:flex;width:100%;justify-content:center;margin-top:2px}\n'+
- '.mlink{display:flex;align-items:center;justify-content:center;gap:8px;width:'+M.nextW+';box-sizing:border-box;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:'+M.nextFs+';letter-spacing:.08em;text-transform:uppercase;color:'+nc+';text-decoration:none;border:1px solid rgba('+nrgb+',.5);padding:7px 14px;background:rgba(4,22,24,.55)}\n'+
+ '.mfoot{display:flex;width:100%;min-width:0;justify-content:center;margin-top:2px}\n'+
+ '.mlink{display:flex;align-items:center;justify-content:center;gap:8px;width:'+M.nextW+';box-sizing:border-box;min-width:0;max-width:100%;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:'+M.nextFs+';letter-spacing:.08em;text-transform:uppercase;color:'+nc+';text-decoration:none;border:1px solid rgba('+nrgb+',.5);padding:7px 14px;background:rgba(4,22,24,.55)}\n'+
  '.mlink{font-family:inherit;cursor:default}\n'+
+ '@media (max-width:'+M.nextSmallMax+'px){.mlink{flex-wrap:wrap;white-space:normal;font-size:'+M.nextFsSmall+';letter-spacing:.04em;padding:6px 10px;text-align:center}}   /* téléphone : « Chapitre N · Nom » + badge se replient dans la largeur de la carte, sans l\'élargir */\n'+
  '.ver{margin:6px 0 0;font-size:11px;letter-spacing:.14em;color:var(--muted);opacity:.6;text-align:center}\n'+
  '.mph button[aria-disabled=true]{opacity:.45;cursor:not-allowed}\n'+
  '.mlink:hover{background:rgba('+nrgb+',.18);color:'+nh+'}\n'+

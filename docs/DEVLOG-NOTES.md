@@ -124,3 +124,6 @@
 ### 2026-11-02 — Menu : lien suivant et fenêtre de défaite communs
 - Le joueur verra, sous le menu des deux chapitres, « Chapitre N · Nom » dans la couleur du chapitre suivant avec « À venir », sans cadenas.
 - Il verra, sur les fenêtres de défaite et de fin des deux chapitres, « Réessayer » et « Menu » côte à côte, et l'offre d'aide sur une ligne dessous.
+
+### 2026-11-02 — Menu : lien suivant sur téléphone
+- Le joueur verra, sur téléphone, le lien « Chapitre III · Hollow Roots · À venir » se replier dans la largeur de la carte, sans décaler le menu du Chapitre II.
