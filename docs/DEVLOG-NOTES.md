@@ -101,3 +101,7 @@
 ## 2026-11-02 · menu/common (tailles d'écran)
 - Les menus des deux chapitres tiennent sur tous les écrans de téléphone, en portrait comme en paysage, avec le bouton du chapitre suivant toujours de la même taille.
 - Rien ne change à l'écran : seuls les tests automatiques sont plus fiables (engine/tests).
+
+## 2026-11-02 · docs/apk-hub
+- Rien de nouveau à l'écran pour l'instant : la décision du hub est actée (écran de démarrage, Couronne, un seul bouton « Commencer » avec une musique dédiée au hub).
+- Sur téléphone, la prochaine version s'appellera LumenBell (package `com.lumenbell.game`) et s'installera à côté de l'ancienne appli, sans la remplacer.

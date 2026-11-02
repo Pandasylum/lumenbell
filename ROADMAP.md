@@ -12,10 +12,10 @@
 4. Test sur téléphone (ressenti, lisibilité, fluidité).
 5. D · optimisation du Chapitre II (`ch2/perf`) : mesure des images par seconde, poids, minification ; build identique à chaque étape, comme pour le Chapitre I.
 6. Moteur commun (`engine/`, suite) : boucle, entrées, difficultés, **un seul Veilleur dessiné et animé pour tous les chapitres** (poses de garde, pas de côté, coup reçu, victoire ; voir `DEMANDES.md`). Plan en sessions : `docs/COMMUN.md` §4.
-8. Menu : **une seule fonction de menu pour les 7 chapitres** (boutons au même endroit, mêmes polices, même position des textes — nom du jeu en grand, nom du chapitre en dessous en petit —, mêmes durées), alimentée par une table par chapitre (nom, couleur, sous-titre) ; écran titre commun, choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres.
+8. Menu : **une seule fonction de menu pour les 7 chapitres** (boutons au même endroit, mêmes polices, même position des textes — nom du jeu en grand, nom du chapitre en dessous en petit —, mêmes durées), alimentée par une table par chapitre (nom, couleur, sous-titre) ; écran titre commun, choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres. Hub = `site/` (voir `docs/decisions/2026-11-02-apk-hub-package.md`) ; musique dédiée du hub.
 9. Plus tard : modules ES, Google Play, iOS ; chapitre III (Racines).
 10. **ch1/foundry-floor** : Chapitre I, phase II au fond de la Fonderie (`CHANGEMENTS.md` K), fausse fin de Facile supprimée (`CHANGEMENTS.md` L), esquive au sol cohérente avec la phase II (`docs/decisions/2026-11-01-idees-validees.md` c).
-11. **Renommage LumenBell partout** (textes affichés, documents, titre de page, nom d'app Android, titre de fin d'intro) : après `ch1/foundry-floor`. Reste à cadrer : écriture visuelle du titre, nom de package Android.
+11. **Renommage LumenBell partout** (textes affichés, documents, titre de page, nom d'app Android, titre de fin d'intro) : après `ch1/foundry-floor`. Reste à cadrer : écriture visuelle du titre. (Nom de package Android tranché : `com.lumenbell.game`, appliqué en session 8.)
 12. **ch2/cinematics** : cinématiques du Chapitre II refaites dans l'esprit du Chapitre I, après `engine/cine`.
 
 ## Idées notées pour plus tard
