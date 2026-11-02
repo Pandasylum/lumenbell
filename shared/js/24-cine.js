@@ -107,18 +107,24 @@ LB.title=(c,t,t0,o)=>{
   c.fillText(U,480,Math.max(T.y+T.subDy,T.y+desc+T.gap+asc));c.restore();
 };
 
-/* ---------- LB.nextCard : carte « à suivre » de fin d'outro (décision n° 2 du 1er novembre, 2026-11-01-cinematiques-et-a-suivre.md) ----------
-   Même rendu pour toute la série, celui de la fin de l'outro du Chapitre I : « LUMENBELL · CHAPITRE N+1 » en petit, le nom du
-   chapitre en grand dessous, au centre. Seuls changent le numéro, le nom, la couleur et le décor.
+/* ---------- LB.nextCard : carton « à suivre » de fin d'outro, SEULE implémentation (décision du 2 novembre, 2026-11-02-cine-style-chapitres.md) ----------
+   Même rendu pour toute la série : une ligne centrée en y1, « LUMEN » couleur du chapitre suivant puis « BELL · CHAPITRE N » crème
+   (LB.TITLE_T.cream) ; le nom du chapitre en grand dessous, couleur du chapitre suivant, centré en y2. Seuls changent le numéro, le nom,
+   la couleur et le décor. Aucun chapitre ne redessine ce carton : un seul appel LB.nextCard par chapitre (garde dans tests/cine.js).
    LB.nextCard(ctx, s, {n, name, col, decor}) : s = secondes depuis le début du carton ; n = numéro du chapitre suivant ;
-   col = couleur du chapitre suivant (LB.CH_COL[n]) ; decor(ctx) = le plan de fond, dessiné avant le texte (facultatif : le
-   chapitre peut l'avoir déjà dessiné). La légende (HTML) est celle du carton de LB.cine, teintée de la même couleur. */
+   col = couleur du chapitre suivant (LB.CH_COL[n]) ; decor(ctx) = plan de fond dessiné avant le texte (facultatif).
+   Légende HTML (LB.cine, même forme pour tous) : « Chapitre N · Nom. À suivre. » / « Chapter N · Name. To be continued. », teintée LB.CH_COL[n].
+   Toutes les valeurs sont dans LB.NEXT_T. */
 LB.CH_COL={2:'#4fe0cc',3:'#b9cf5a'};   /* code couleur par chapitre (docs/GLOSSAIRE.md, CH_COL) ; I, IV et suivants s'ajoutent ici */
-LB.NEXT_T={delay:1,in:1.5,y1:118,y2:182,size1:22,size2:62,x:480,roman:['','I','II','III','IV','V','VI','VII']};
+LB.NEXT_T={delay:1,in:1.5,y1:118,y2:182,size1:22,size2:62,x:480,ls1:2,ls2:2,cream:LB.TITLE_T.cream,
+  head:'LUMEN',tail:['BELL · CHAPTER ','BELL · CHAPITRE '],roman:['','I','II','III','IV','V','VI','VII']};
 LB.nextCard=(c,s,o)=>{
   const T=LB.NEXT_T;if(o.decor)o.decor(c);
-  const a=Math.max(0,Math.min(1,(s-T.delay)/T.in)),R=T.roman[o.n];
-  c.save();c.globalAlpha=a;c.fillStyle=o.col;c.textAlign='center';
-  c.font='700 '+T.size1+'px '+LB.FONT.display;c.fillText(LB._('LUMENBELL · CHAPTER '+R,'LUMENBELL · CHAPITRE '+R),T.x,T.y1);
-  c.font='800 '+T.size2+'px '+LB.FONT.display;c.fillText(o.name.toUpperCase(),T.x,T.y2);c.restore();
+  const a=Math.max(0,Math.min(1,(s-T.delay)/T.in)),R=T.roman[o.n],ls=c.letterSpacing!==undefined;
+  c.save();c.globalAlpha=a;c.textAlign='left';
+  c.font='700 '+T.size1+'px '+LB.FONT.display;if(ls)c.letterSpacing=T.ls1+'px';
+  const tail=LB._(T.tail[0],T.tail[1])+R,w1=c.measureText(T.head).width,w2=c.measureText(tail).width,x0=T.x-(w1+w2)/2;
+  c.fillStyle=o.col;c.fillText(T.head,x0,T.y1);c.fillStyle=T.cream;c.fillText(tail,x0+w1,T.y1);
+  c.textAlign='center';c.fillStyle=o.col;c.font='800 '+T.size2+'px '+LB.FONT.display;if(ls)c.letterSpacing=T.ls2+'px';
+  c.fillText(o.name.toUpperCase(),T.x,T.y2);c.restore();
 };
