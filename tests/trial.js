@@ -3,7 +3,7 @@
 //  1. noms et sous-titres : Facile « Respire », Normal « À la loyale », Difficile « Sans pitié », Epreuve + element du chapitre
 //     (« Épreuve du feu », « Épreuve de l'eau ») « Challenge ultime » ; anglais provisoire (Breathe, Fair and square, No mercy,
 //     Ultimate challenge, Trial by Fire, Trial by Water : a valider par le projet Lore) ;
-//  2. sous-menu de l'Epreuve : Normal, Difficile (record ou « Pas encore de record »), Retour ; note avec « Tu récupères 1 PV entre
+//  2. sous-menu de l'Epreuve : Normal, Difficile (record ou « Pas encore de record »), Retour ; note identique dans les deux chapitres (quatre regles, texte du Chapitre I), avec « Tu récupères 1 PV entre
 //     les phases. » / « You recover 1 life between phases. » (texte d'origine) ;
 //  3. en Epreuve (Normal) : frise des phases masquee, case « Aide » desactivee et decochee, lb-help inchangee ; retour en Normal :
 //     case rendue, valeur memorisee ;
@@ -14,6 +14,7 @@ const fs=require('fs'),path=require('path'),os=require('os');const launch=requir
 const F={ch1:path.resolve(__dirname,'../chapters/ch1-ember-bridge/dist/index.html'),ch2:path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html')};
 const NAME={ch1:{en:'Trial by Fire',fr:'Épreuve du feu'},ch2:{en:'Trial by Water',fr:"Épreuve de l'eau"}};
 const SUB={en:['Easy','Breathe','Normal','Fair and square','Hard','No mercy','Ultimate challenge'],fr:['Facile','Respire','Normal','À la loyale','Difficile','Sans pitié','Challenge ultime']};
+const RULES={en:['The three phases in a row, with no pause and no visual help.','A single death sends you back to Phase I.','One stats table at the end of the run.'],fr:["Les trois phases d'affilée, sans pause et sans aide visuelle.",'Une seule mort te renvoie à la phase I.','Un seul tableau de stats à la fin de la run.']};
 const HEAL={en:'You recover 1 life between phases.',fr:'Tu récupères 1 PV entre les phases.'};
 const errs=[],check=(c,m)=>{if(!c)errs.push(m)};
 function locked(ch){const h=fs.readFileSync(F[ch],'utf8'),a='const TRIAL_OPEN=true;';if(h.split(a).length!==2)throw new Error(ch+' : TRIAL_OPEN introuvable');
@@ -31,7 +32,7 @@ for(const ch of ['ch1','ch2'])for(const lang of ['fr','en']){
  const t=await pg.evaluate(()=>({m:document.getElementById('mphM').hidden,t:!document.getElementById('mphT').hidden,note:!document.getElementById('trialNote').hidden,
   noteName:document.querySelector('#trialNote b').textContent,lines:[...document.querySelectorAll('#trialNote li')].map(x=>x.textContent),
   sub:[...document.querySelectorAll('#mphT button')].map(x=>x.textContent)}));
- check(t.m&&t.t&&t.note&&t.noteName===NAME[ch][lang]&&t.lines.includes(HEAL[lang]),tag+': sous-menu de l\'Epreuve '+JSON.stringify(t));
+ check(t.m&&t.t&&t.note&&t.noteName===NAME[ch][lang]&&t.lines.length===4&&t.lines.includes(HEAL[lang])&&t.lines[0]===RULES[lang][0]&&t.lines[2]===RULES[lang][1]&&t.lines[3]===RULES[lang][2],tag+': sous-menu de l\'Epreuve '+JSON.stringify(t));
  check(t.sub.length===3&&/^(Normal|Normal)/.test(t.sub[0])&&t.sub[0].endsWith(lang==='fr'?'Pas encore de record':'No record yet'),tag+': boutons du sous-menu '+JSON.stringify(t.sub));
  await pg.click('#mphT [data-diff=tn]');await pg.waitForTimeout(400);
  if(await pg.evaluate(()=>!!document.getElementById('cine')&&!document.getElementById('cine').hidden)){await pg.keyboard.press('Escape');await pg.waitForTimeout(300)}

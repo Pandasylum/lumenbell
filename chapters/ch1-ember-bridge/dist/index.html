@@ -761,12 +761,27 @@ LB.title=(c,t,t0,o)=>{
    Référence par élément (docs/COMMUN.md § 1) : le Chapitre I pour ce que le joueur voit (structure, ordre du titre, polices,
    tailles, écran de démarrage, boutons de rejeu, Entrée / Espace au menu, repère d'aide), le Chapitre II pour l'outillage
    (carte déclarative, relâchement, zones sûres). Le chapitre ne déclare qu'une table CHAPTER (docs/COMMUN.md § 3.1) :
-   n, id, name, color (code couleur), color2 (clair : ligne du chapitre, note de l'Épreuve), rgb (halos), menu {bg, glowA,
-   titleA, particles, t}, trial {name, note[]}, boss, tag?, how?, ver?, next? {name, lock, soon, col, rgb, hover}, help {offer?},
+   n, id, title, color (code couleur), color2 (clair : ligne du chapitre, note de l'Épreuve), rgb (halos), menu {bg, glowA,
+   titleA, particles, t}, trial {name}, player, tag? (accroche), how? (mode d'emploi), next {n, title, col, rgb, hover, open?}, help {offer?},
    et les fonctions trialOpen(), endSeen(), best(n), fmt(t). Un texte est une fonction qui rend la chaîne déjà traduite
    (le chapitre y appelle sa fonction de texte) ou un objet {en, fr}. Le style (LB.UI_CSS) est créé ici avec les couleurs du chapitre.
    Les textes communs (difficultés, sous-titres, boutons) sont ici, en LB._(en, fr). Aucun mot d'annonce. */
+/* Version du jeu, une seule pour la série, affichée au menu (« v1.0.0 ») : valeur du Chapitre I (CHANGELOG.md v1.0.0). */
+LB.VERSION='1.0.0';
+/* Règles de l'Épreuve, identiques dans tous les chapitres (texte d'origine du Chapitre I) : note du menu. Le nom de l'Épreuve est propre au chapitre. */
+LB.TRIAL_RULES=[()=>LB._('The three phases in a row, with no pause and no visual help.',"Les trois phases d'affilée, sans pause et sans aide visuelle."),
+ ()=>LB._('You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'),
+ ()=>LB._('A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'),
+ ()=>LB._('One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run.")];
+LB.ROMAN=['','I','II','III','IV','V','VI','VII'];
+/* « Chapitre N · Titre » et son cadenas : libellés communs (le chapitre ne donne que n et title) */
+LB.chapterName=(n,title)=>LB._('Chapter '+LB.ROMAN[n]+' · '+title,'Chapitre '+LB.ROMAN[n]+' · '+title);
+LB.chapterLock=n=>LB._('🔒 Chapter '+LB.ROMAN[n],'🔒 Chapitre '+LB.ROMAN[n]);
 LB.MENU_T={
+  /* placement commun à tous les chapitres (aucune position propre à un chapitre) : largeur de la carte et des difficultés, lignes réservées
+     de l'accroche et du mode d'emploi (px ; réservées même si le chapitre n'en a pas, pour que les boutons restent au même endroit) */
+  cardW:580,tagH:42,howH:18,
+  btnH:44,btnHLow:34,     // hauteur mini des boutons du haut du menu (Intro, Outro, plein écran) : écran tactile, puis paysage bas
   raise:'-9vh',raiseLow:'-4vh',          // remontée du titre (paysage bas : raiseLow)
   glow:3.2,glowMin:.55,blink:5,          // scintillement des braises / de la mer (.lava), clignement des yeux (.eye)
   /* particules du menu : nombre, durée [min, + aléa] s, avance max s, taille [min, + aléa] px, dérive x px, montée, opacité au pic */
@@ -774,7 +789,7 @@ LB.MENU_T={
   spray:{id:'mSnow',cls:'msn',key:'mfall',n:34,dur:[7,8],delay:12,size:[1.5,2.5],dx:120,rise:'-45vh',peak:.7,w:3,col:'#e8f8ff',glow:'0 0 6px 1px rgba(159,242,255,.6)'}
 };
 LB.tx=o=>o==null?'':typeof o==='function'?o():typeof o==='string'?o:LB._(o.en,o.fr);
-LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],c=C.color,c2=C.color2,rgb=C.rgb,N=C.next||{col:c,rgb,hover:c2};
+LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],c=C.color,c2=C.color2,rgb=C.rgb,N=C.next;
  return '.bar span i{font-style:normal}\n'+
  '.card .stats{color:var(--fg);font-variant-numeric:tabular-nums}\n'+
  '.card .how2{color:var(--fg);font-size:13px;border-left:3px solid '+c+';padding-left:10px}\n'+
@@ -788,13 +803,13 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '@keyframes mglow{from{opacity:'+M.glowMin+'}to{opacity:1}}\n'+
  '@keyframes mblink{0%,92%,100%{opacity:1}95%{opacity:.15}}\n'+
  '@media (prefers-reduced-motion:reduce){.'+P.cls+',.mscene .eye,.mscene .lava{animation:none}.'+P.cls+'{display:none}}\n'+
- '.mcard{position:relative;z-index:1;display:grid;padding:8px 0;gap:12px;justify-items:center;text-align:center;max-width:600px}\n'+
+ '.mcard{position:relative;z-index:1;display:grid;padding:8px 0;gap:12px;justify-items:center;text-align:center;width:min(100%,'+M.cardW+'px)}\n'+
  '.mcard h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(40px,9vw,88px);line-height:.92;letter-spacing:.01em;text-wrap:balance;color:var(--fg);text-shadow:0 0 40px rgba('+rgb+','+C.menu.titleA+')}\n'+
  '.mcard h2 span{color:'+c+';text-shadow:0 0 40px rgba('+rgb+',.8)}\n'+
  '.ov.menu .mcard .eyebrow,.ov.menu .mcard h2,.ov.menu .mcard .tag{transform:translateY('+M.raise+')}\n'+
  '.mcard .eyebrow.chap{font-size:16px;letter-spacing:.2em;color:'+c2+';margin-top:-4px}\n'+
- '.mcard .tag{margin:0;color:var(--muted);font-size:14px;max-width:46ch}\n'+
- '.mcard .how{margin:0;font-size:12px;color:var(--muted)}\n'+
+ '.mcard .tag{margin:0;color:var(--muted);font-size:14px;max-width:46ch;min-height:'+M.tagH+'px}\n'+
+ '.mcard .how{margin:0;font-size:12px;color:var(--muted);min-height:'+M.howH+'px}\n'+
  '.gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(8,6,13,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}\n'+
  '.gate[hidden]{display:none}\n'+
  '.gate .btn{padding:14px 44px;font-size:24px;letter-spacing:.12em;box-shadow:0 0 36px rgba('+rgb+',.45)}\n'+
@@ -803,7 +818,7 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.mcard .tnote b{display:block;margin-bottom:6px;font-family:var(--font-display);font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:'+c2+'}\n'+
  '.mcard .tnote ul{margin:0;padding-left:18px;display:grid;gap:3px}\n'+
  '.btn.big{font-size:24px;padding:12px 38px}\n'+
- '.mph{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:580px}\n'+
+ '.mph{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:'+M.cardW+'px}\n'+
  '.mph button{min-width:0;display:grid;gap:0;justify-items:center;padding:8px 6px;background:rgba(22,17,29,.8);border:1px solid var(--line);color:var(--fg);cursor:pointer;font:inherit}\n'+
  '.mph button b{font-family:var(--font-display);font-weight:800;font-size:18px;line-height:1;color:'+c+';text-transform:uppercase;letter-spacing:.05em}\n'+
  '.mph button span{font-size:12px;color:var(--muted)}\n'+
@@ -834,7 +849,8 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(241,227,207,.3);border-radius:4px;cursor:pointer}\n'+
  '.langs button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.22);color:#fff}\n'+
  '.langs button:focus-visible{outline:2px solid '+c+';outline-offset:2px}\n'+
- '@media (pointer:coarse){.langs button{min-height:40px}}\n'};
+ '@media (pointer:coarse){.langs button{min-height:40px}.ov.menu .mbtn{min-height:'+M.btnH+'px}}\n'+
+ '@media (max-height:520px) and (orientation:landscape){.ov.menu .mbtn{min-height:'+M.btnHLow+'px;padding-block:2px}}\n'};
 LB.ui=(()=>{
   const $=id=>document.getElementById(id),mk=(tag,attrs,html)=>{const e=document.createElement(tag);for(const k in attrs||{})e.setAttribute(k,attrs[k]);if(html!=null)e.innerHTML=html;return e};
   let styled=false;
@@ -937,13 +953,13 @@ LB.menu=(()=>{
     m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn fsb fsm','aria-label':'Fullscreen',title:'Fullscreen'},'⛶ <span>Fullscreen</span>'));
     m.appendChild(LB.ui.mk('div',{class:'langs',id:'langs',role:'group','aria-label':'Language'},LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')));
     const b=(dk,pr)=>'<button type="button" data-diff="'+dk+'"'+(pr?' aria-pressed="true"':'')+'><b></b><span></span></button>';
-    card=LB.ui.mk('div',{class:'mcard'},'<h2><span>Lumen</span>bell</h2><p class="eyebrow chap" id="mEye"></p>'+(C.tag?'<p class="tag"></p>':'')+
+    card=LB.ui.mk('div',{class:'mcard'},'<h2><span>Lumen</span>bell</h2><p class="eyebrow chap" id="mEye"></p><p class="tag"></p>'+
       '<button class="btn ghost" id="mResume" type="button" hidden>Resume</button>'+
       '<div class="mph" id="mphM" role="group" aria-label="Choose difficulty">'+b('easy')+b('normal',1)+b('hard')+b('trial')+'</div>'+
       '<div class="mph" id="mphT" role="group" aria-label="Trial" hidden>'+b('tn')+b('th')+'<button type="button" id="mBackT"><b></b><span></span></button></div>'+
-      '<div class="tnote" id="trialNote" hidden><b></b><ul>'+C.trial.note.map(()=>'<li></li>').join('')+'</ul></div>'+
-      (C.how?'<p class="how"></p>':'')+(C.ver?'<p class="ver" aria-label="Version '+C.ver+'">v'+C.ver+'</p>':'')+
-      (C.next?'<div class="mfoot"><button type="button" class="mlink" id="mNext" aria-disabled="true"><span class="nm"></span> <small class="soon"></small></button></div>':''));
+      '<div class="tnote" id="trialNote" hidden><b></b><ul>'+LB.TRIAL_RULES.map(()=>'<li></li>').join('')+'</ul></div>'+
+      '<p class="how"></p><p class="ver" aria-label="Version '+LB.VERSION+'">v'+LB.VERSION+'</p>'+
+      '<div class="mfoot"><button type="button" class="mlink" id="mNext" aria-disabled="true"><span class="nm"></span> <small class="soon"></small></button></div>');
     m.appendChild(card);
     /* scène : cadrée sur le bas en paysage, entière en portrait (comme au Chapitre I) */
     const sv=m.querySelector('.mscene');if(sv){const fit=()=>sv.setAttribute('preserveAspectRatio',innerWidth/innerHeight<1.2?'xMidYMax meet':'xMidYMax slice');fit();addEventListener('resize',fit)}
@@ -958,7 +974,7 @@ LB.menu=(()=>{
     $('mResume').addEventListener('click',()=>{if(h.onResume)h.onResume()});
     $('introBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onIntro)h.onIntro()});
     $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onOutro)h.onOutro()});
-    if(C.next)$('mNext').addEventListener('click',e=>e.currentTarget.blur());   /* chapitre suivant : « À venir » suffit, aucun message */
+    $('mNext').addEventListener('click',e=>e.currentTarget.blur());   /* chapitre suivant : « À venir » suffit, aucun message */
     document.querySelectorAll('#langs button,#gateLangs button').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
     LB.fs.bind();
     lang();
@@ -971,21 +987,22 @@ LB.menu=(()=>{
     $('outroBtn').hidden=!ok;
     tb.setAttribute('aria-disabled',String(!tok));   /* Épreuve : ouverte pendant les tests (TRIAL_OPEN), sinon débloquée par la vraie fin */
     tb.querySelector('b').textContent=tok?nm:'🔒 '+nm;tb.querySelector('span').textContent=tok?TX.sTrial():LB._('To unlock','À débloquer');
-    if(C.next){const b=$('mNext');b.classList.toggle('lock',!ok);b.querySelector('.nm').textContent=ok?LB.tx(C.next.name):LB.tx(C.next.lock);b.querySelector('.soon').textContent=LB.tx(C.next.soon)}
+    {const b=$('mNext'),op=!!C.next.open&&C.next.open();   /* chapitre suivant : toujours non cliquable ; cadenas tant qu'il n'est pas ouvert */
+     b.classList.toggle('lock',!op);b.querySelector('.nm').textContent=op?LB.chapterName(C.next.n,C.next.title):LB.chapterLock(C.next.n);b.querySelector('.soon').textContent=LB._('Coming soon','À venir')}
   }
   function lang(){if(!m)return;
     document.documentElement.lang=LB.lang.cur;
     update();
-    $('mEye').textContent=LB.tx(C.name);
-    if(C.tag)m.querySelector('.mcard .tag').textContent=LB.tx(C.tag);
+    $('mEye').textContent=LB.chapterName(C.n,C.title);
+    m.querySelector('.mcard .tag').textContent=LB.tx(C.tag);
     $('mResume').textContent=LB._('Resume','Reprendre');
     const gb=$('gateBtn');if(gb)gb.textContent=LB._('Start','Commencer');
     for(const dk of DK){const bt=m.querySelector('#mphM [data-diff='+dk+']');bt.querySelector('b').textContent=TX[dk]();bt.querySelector('span').textContent=TX['s'+dk[0].toUpperCase()+dk.slice(1)]()}
     m.querySelector('#mphT [data-diff=tn] b').textContent=TX.normal();m.querySelector('#mphT [data-diff=th] b').textContent=TX.hard();
     $('mBackT').querySelector('b').textContent=LB._('‹ Back','‹ Retour');$('mBackT').querySelector('span').textContent=LB._('Difficulties','Difficultés');
     $('trialNote').querySelector('b').textContent=LB.tx(C.trial.name);
-    $('trialNote').querySelectorAll('li').forEach((li,i)=>li.textContent=LB.tx(C.trial.note[i]));
-    if(C.how)m.querySelector('.mcard .how').textContent=LB.tx(C.how);
+    $('trialNote').querySelectorAll('li').forEach((li,i)=>li.textContent=LB.TRIAL_RULES[i]());
+    m.querySelector('.mcard .how').textContent=LB.tx(C.how);
     m.querySelector('.fsm span').textContent=LB._('Fullscreen','Plein écran');
     $('introBtn').textContent='▶ Intro';$('outroBtn').textContent='▶ Outro';
     $('mphM').setAttribute('aria-label',LB._('Choose difficulty','Choisir la difficulté'));$('mphT').setAttribute('aria-label',LB.tx(C.trial.name));
@@ -1116,18 +1133,13 @@ const TRIAL_OPEN=true;
 const rageHp=(d,ph)=>ph===3?(d.u2?[d.ru,d.u2]:[d.ru]):(d.rages||[d.u]);
 /* Table du chapitre pour le cadre commun (menu, écran de démarrage, cartes, HUD : shared/js/28-ui.js, docs/COMMUN.md § 3.1) */
 const CHAPTER={n:1,id:'ch1',
-  name:()=>_('Chapter I · Ember Bridge','Chapitre I · Ember Bridge'),
+  title:'Ember Bridge',
   color:'#ff7a2b',color2:'#ffc15a',rgb:'255,122,43',
   menu:{bg:'#08060d',glowA:.38,titleA:.45,particles:'embers'},
   tag:()=>_('The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower.','Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher.'),
   how:()=>_('One button: block, dodge. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause."),
-  ver:'1.0.0',
-  next:{name:()=>_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),lock:()=>_('🔒 Chapter II','🔒 Chapitre II'),soon:()=>_('Coming soon','À venir'),col:'#7fe8d8',rgb:'79,224,204',hover:'#c8fff4'},
-  trial:{name:()=>_('Trial by Fire','Épreuve du feu'),note:[
-    ()=>_('The three phases in a row, with no pause and no visual help.',"Les trois phases d'affilée, sans pause et sans aide visuelle."),
-    ()=>_('You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'),
-    ()=>_('A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'),
-    ()=>_('One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run.")]},
+  next:{n:2,title:'Silent Bells',col:'#7fe8d8',rgb:'79,224,204',hover:'#c8fff4',open:()=>endSeen()},
+  trial:{name:()=>_('Trial by Fire','Épreuve du feu')},
   player:()=>_('The Watcher','Le Veilleur'),boss:()=>_('Ember Colossus','Colosse de braise'),
   help:{offer:()=>_(` Visual cues can help you find the right moment to block.`,` Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer.`)},
   trialOpen:()=>trialOpen(),endSeen:()=>endSeen(),best:n=>parseFloat(LB.store.get(LB.key('best-'+n),'0'))||0,fmt:t=>fmtT(t)

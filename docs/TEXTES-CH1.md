@@ -7,48 +7,45 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | Fichier:ligne | Type | Durée | Anglais | Français |
 |---|---|---|---|---|
 | shared/js/24-cine.js:76 | _() |  | Skip › | Passer › |
-| shared/js/28-ui.js:129 | _() |  | Fight paused | Combat en pause |
-| shared/js/28-ui.js:129 | _() |  | Resume | Reprendre |
-| shared/js/28-ui.js:139 | _() |  | Fullscreen | Plein écran |
-| shared/js/28-ui.js:164 | _() |  | Easy | Facile |
-| shared/js/28-ui.js:164 | _() |  | Hard | Difficile |
-| shared/js/28-ui.js:164 | _() |  | Normal | Normal |
-| shared/js/28-ui.js:165 | _() |  | Breathe | Respire |
-| shared/js/28-ui.js:165 | _() |  | Fair and square | À la loyale |
-| shared/js/28-ui.js:165 | _() |  | No mercy | Sans pitié |
-| shared/js/28-ui.js:165 | _() |  | Ultimate challenge | Challenge ultime |
-| shared/js/28-ui.js:212 | _() |  | No record yet | Pas encore de record |
-| shared/js/28-ui.js:216 | _() |  | To unlock | À débloquer |
-| shared/js/28-ui.js:224 | _() |  | Resume | Reprendre |
-| shared/js/28-ui.js:225 | _() |  | Start | Commencer |
-| shared/js/28-ui.js:228 | _() |  | Difficulties | Difficultés |
-| shared/js/28-ui.js:228 | _() |  | ‹ Back | ‹ Retour |
-| shared/js/28-ui.js:232 | _() |  | Fullscreen | Plein écran |
-| shared/js/28-ui.js:234 | _() |  | Choose difficulty | Choisir la difficulté |
-| shared/js/28-ui.js:235 | _() |  | Language | Langue |
-| shared/js/28-ui.js:298 | _() |  | Not available in the trial | Indisponible dans l'épreuve |
-| shared/js/28-ui.js:316 | _() |  | Enable visual help | Activer l'aide visuelle |
-| src/js/00-core.js:29 | _() |  | Chapter I · Ember Bridge | Chapitre I · Ember Bridge |
+| shared/js/28-ui.js:15 | _() |  | The three phases in a row, with no pause and no visual help. | Les trois phases d'affilée, sans pause et sans aide visuelle. |
+| shared/js/28-ui.js:16 | _() |  | You recover 1 life between phases. | Tu récupères 1 PV entre les phases. |
+| shared/js/28-ui.js:17 | _() |  | A single death sends you back to Phase I. | Une seule mort te renvoie à la phase I. |
+| shared/js/28-ui.js:18 | _() |  | One stats table at the end of the run. | Un seul tableau de stats à la fin de la run. |
+| shared/js/28-ui.js:145 | _() |  | Fight paused | Combat en pause |
+| shared/js/28-ui.js:145 | _() |  | Resume | Reprendre |
+| shared/js/28-ui.js:155 | _() |  | Fullscreen | Plein écran |
+| shared/js/28-ui.js:180 | _() |  | Easy | Facile |
+| shared/js/28-ui.js:180 | _() |  | Hard | Difficile |
+| shared/js/28-ui.js:180 | _() |  | Normal | Normal |
+| shared/js/28-ui.js:181 | _() |  | Breathe | Respire |
+| shared/js/28-ui.js:181 | _() |  | Fair and square | À la loyale |
+| shared/js/28-ui.js:181 | _() |  | No mercy | Sans pitié |
+| shared/js/28-ui.js:181 | _() |  | Ultimate challenge | Challenge ultime |
+| shared/js/28-ui.js:228 | _() |  | No record yet | Pas encore de record |
+| shared/js/28-ui.js:232 | _() |  | To unlock | À débloquer |
+| shared/js/28-ui.js:234 | _() |  | Coming soon | À venir |
+| shared/js/28-ui.js:241 | _() |  | Resume | Reprendre |
+| shared/js/28-ui.js:242 | _() |  | Start | Commencer |
+| shared/js/28-ui.js:245 | _() |  | Difficulties | Difficultés |
+| shared/js/28-ui.js:245 | _() |  | ‹ Back | ‹ Retour |
+| shared/js/28-ui.js:249 | _() |  | Fullscreen | Plein écran |
+| shared/js/28-ui.js:251 | _() |  | Choose difficulty | Choisir la difficulté |
+| shared/js/28-ui.js:252 | _() |  | Language | Langue |
+| shared/js/28-ui.js:315 | _() |  | Not available in the trial | Indisponible dans l'épreuve |
+| shared/js/28-ui.js:333 | _() |  | Enable visual help | Activer l'aide visuelle |
 | src/js/00-core.js:32 | _() |  | The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower. | Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher. |
 | src/js/00-core.js:33 | _() |  | One button: block, dodge. Space, up arrow or tap the screen. P to pause. | Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause. |
-| src/js/00-core.js:35 | _() |  | Chapter II · Silent Bells | Chapitre II · Silent Bells |
-| src/js/00-core.js:35 | _() |  | Coming soon | À venir |
-| src/js/00-core.js:35 | _() |  | 🔒 Chapter II | 🔒 Chapitre II |
-| src/js/00-core.js:36 | _() |  | Trial by Fire | Épreuve du feu |
-| src/js/00-core.js:37 | _() |  | The three phases in a row, with no pause and no visual help. | Les trois phases d'affilée, sans pause et sans aide visuelle. |
-| src/js/00-core.js:38 | _() |  | You recover 1 life between phases. | Tu récupères 1 PV entre les phases. |
-| src/js/00-core.js:39 | _() |  | A single death sends you back to Phase I. | Une seule mort te renvoie à la phase I. |
-| src/js/00-core.js:40 | _() |  | One stats table at the end of the run. | Un seul tableau de stats à la fin de la run. |
-| src/js/00-core.js:41 | _() |  | Ember Colossus | Colosse de braise |
-| src/js/00-core.js:41 | _() |  | The Watcher | Le Veilleur |
-| src/js/00-core.js:42 | _() |  |  Visual cues can help you find the right moment to block. |  Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer. |
-| src/js/00-core.js:84 | _() |  | Into the Foundry. | Dans la Fonderie. |
-| src/js/00-core.js:84 | _() |  | Phase II · The Foundry | Phase II · La Fonderie |
-| src/js/00-core.js:84 | _() |  | The forge shaft plunges endlessly down. Chains too large for a man's hand hang from the walls, rusted by centuries. | Le puits des forges s'enfonce sans fin. Aux parois pendent des chaînes trop grandes pour une main d'homme, rouillées de siècles. |
-| src/js/00-core.js:85 | _() |  | After a chase up the forge chimney, the Colossus is caught atop the Watchers' Bell Tower. An echo of the past rings out. | Après une poursuite le long de la cheminée des forges, le Colosse est rattrapé au sommet du Clocher des Veilleurs. Un écho du passé résonne. |
-| src/js/00-core.js:85 | _() |  | Phase III · The Bell Tower | Phase III · Le Clocher |
-| src/js/00-core.js:85 | _() |  | The Watchers' Bell Tower. | Le Clocher des Veilleurs. |
-| src/js/00-core.js:89 | _() |  | Continue | Continuer |
+| src/js/00-core.js:35 | _() |  | Trial by Fire | Épreuve du feu |
+| src/js/00-core.js:36 | _() |  | Ember Colossus | Colosse de braise |
+| src/js/00-core.js:36 | _() |  | The Watcher | Le Veilleur |
+| src/js/00-core.js:37 | _() |  |  Visual cues can help you find the right moment to block. |  Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer. |
+| src/js/00-core.js:79 | _() |  | Into the Foundry. | Dans la Fonderie. |
+| src/js/00-core.js:79 | _() |  | Phase II · The Foundry | Phase II · La Fonderie |
+| src/js/00-core.js:79 | _() |  | The forge shaft plunges endlessly down. Chains too large for a man's hand hang from the walls, rusted by centuries. | Le puits des forges s'enfonce sans fin. Aux parois pendent des chaînes trop grandes pour une main d'homme, rouillées de siècles. |
+| src/js/00-core.js:80 | _() |  | After a chase up the forge chimney, the Colossus is caught atop the Watchers' Bell Tower. An echo of the past rings out. | Après une poursuite le long de la cheminée des forges, le Colosse est rattrapé au sommet du Clocher des Veilleurs. Un écho du passé résonne. |
+| src/js/00-core.js:80 | _() |  | Phase III · The Bell Tower | Phase III · Le Clocher |
+| src/js/00-core.js:80 | _() |  | The Watchers' Bell Tower. | Le Clocher des Veilleurs. |
+| src/js/00-core.js:84 | _() |  | Continue | Continuer |
 | src/js/08-state.js:40 | _() |  | Fight started. | Combat lancé. |
 | src/js/08-state.js:40 | _() |  | The Watcher takes his post on the bridge. The Colossus arrives. | Le Veilleur prend position sur le pont. Le Colosse arrive. |
 | src/js/08-state.js:55 | _() |  | RAAAH! | RAAAH ! |

@@ -2,6 +2,7 @@
 // Usage :
 //   node visual-shots.js <dossier> [ch1.html] [ch2.html]   captures (par defaut les deux dist/index.html)
 //   node visual-shots.js --compare <dossierA> <dossierB>    compare au pixel ; pour chaque ecart : nombre de pixels et boite
+//   node visual-shots.js --menu <dossier> [ch1.html] [ch2.html]   ecran de demarrage, menu et sous-menu de l'Epreuve seuls (FR et EN, bureau et telephone)
 //   node visual-shots.js --poses <dossier> [ch1test.html] [ch2test.html]   le Veilleur commun (LB.drawWatcher) : une planche de toutes
 //        les poses et une planche de variantes (lanterne, voile blanc, silhouettes, bouclier), dessinees par le module de chaque
 //        chapitre (les deux planches doivent etre identiques d'un chapitre a l'autre), puis les poses en scene : Chapitre I (phase I
@@ -67,6 +68,16 @@ async function shots(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await
   }
   await pg.keyboard.press('p');await adv(20);await shot('pause');
   await ctx.close()}
+ await b.close();return errs}
+/* menus seuls (ecran de demarrage, menu, sous-menu de l'Epreuve ; FR et EN, bureau 1100 x 760 et telephone 390 x 844) : node visual-shots.js --menu <dossier> [ch1.html] [ch2.html] */
+async function menus(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await launch();const errs=[];
+ for(const ch of ['ch1','ch2'])for(const [nm,w,h] of [['desk',1100,760],['phone',390,844]])for(const lang of ['fr','en']){
+  const ctx=await b.newContext({viewport:{width:w,height:h},locale:lang==='fr'?'fr-FR':'en-US',reducedMotion:'reduce'});await ctx.addInitScript(CLOCK,1234);
+  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' '+nm+': '+e.message));await pg.goto('file://'+files[ch]);
+  const tag=ch+'-'+nm+'-'+lang,adv=n=>pg.evaluate(n=>window.__adv(n),n),click=s=>pg.evaluate(s=>document.querySelector(s).click(),s);
+  const shot=async k=>{await pg.mouse.move(0,0);await pg.waitForTimeout(60);await pg.screenshot({path:path.join(dir,tag+'-'+k+'.png'),animations:'disabled'})};
+  await adv(30);await shot('gate');await click('#gateBtn');await adv(60);await shot('menu');
+  await click('#mphM [data-diff=trial]');await adv(10);await shot('menu-trial');await ctx.close()}
  await b.close();return errs}
 async function compare(a,b){const fa=fs.readdirSync(a).filter(f=>f.endsWith('.png')).sort(),fb=new Set(fs.readdirSync(b));
  const br=await launch();const pg=await (await br.newContext()).newPage();const out=[];let same=0;
@@ -193,6 +204,9 @@ async function cineShots(dir,files){fs.mkdirSync(dir,{recursive:true});const b=a
 (async()=>{const a=process.argv.slice(2);
  if(a[0]==='--compare'){const d=await compare(a[1],a[2]);process.exitCode=d.length?1:0;return}
  const nb=a.includes('--no-breath');const A=a.filter(x=>x!=='--no-breath');
+ if(A[0]==='--menu'){if(!A[1])throw new Error('usage : node visual-shots.js --menu <dossier> [ch1.html] [ch2.html]');
+  const files={ch1:path.resolve(A[2]||path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')),ch2:path.resolve(A[3]||path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html'))};
+  const errs=await menus(path.resolve(A[1]),files);console.log('errs',errs);process.exitCode=errs.length?1:0;return}
  if(A[0]==='--cine'){if(!A[1])throw new Error('usage : node visual-shots.js --cine <dossier> [ch1.html] [ch2test.html]');
   const files={ch1:path.resolve(A[2]||path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')),ch2:path.resolve(A[3]||require('./ch2-lib').testPage())};
   const errs=await cineShots(path.resolve(A[1]),files);console.log('errs',errs);process.exitCode=errs.length?1:0;return}

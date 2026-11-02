@@ -26,18 +26,13 @@ const TRIAL_OPEN=true;
 const rageHp=(d,ph)=>ph===3?(d.u2?[d.ru,d.u2]:[d.ru]):(d.rages||[d.u]);
 /* Table du chapitre pour le cadre commun (menu, écran de démarrage, cartes, HUD : shared/js/28-ui.js, docs/COMMUN.md § 3.1) */
 const CHAPTER={n:1,id:'ch1',
-  name:()=>_('Chapter I · Ember Bridge','Chapitre I · Ember Bridge'),
+  title:'Ember Bridge',
   color:'#ff7a2b',color2:'#ffc15a',rgb:'255,122,43',
   menu:{bg:'#08060d',glowA:.38,titleA:.45,particles:'embers'},
   tag:()=>_('The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower.','Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher.'),
   how:()=>_('One button: block, dodge. Space, up arrow or tap the screen. P to pause.',"Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause."),
-  ver:'1.0.0',
-  next:{name:()=>_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),lock:()=>_('🔒 Chapter II','🔒 Chapitre II'),soon:()=>_('Coming soon','À venir'),col:'#7fe8d8',rgb:'79,224,204',hover:'#c8fff4'},
-  trial:{name:()=>_('Trial by Fire','Épreuve du feu'),note:[
-    ()=>_('The three phases in a row, with no pause and no visual help.',"Les trois phases d'affilée, sans pause et sans aide visuelle."),
-    ()=>_('You recover 1 life between phases.','Tu récupères 1 PV entre les phases.'),
-    ()=>_('A single death sends you back to Phase I.','Une seule mort te renvoie à la phase I.'),
-    ()=>_('One stats table at the end of the run.',"Un seul tableau de stats à la fin de la run.")]},
+  next:{n:2,title:'Silent Bells',col:'#7fe8d8',rgb:'79,224,204',hover:'#c8fff4',open:()=>endSeen()},
+  trial:{name:()=>_('Trial by Fire','Épreuve du feu')},
   player:()=>_('The Watcher','Le Veilleur'),boss:()=>_('Ember Colossus','Colosse de braise'),
   help:{offer:()=>_(` Visual cues can help you find the right moment to block.`,` Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer.`)},
   trialOpen:()=>trialOpen(),endSeen:()=>endSeen(),best:n=>parseFloat(LB.store.get(LB.key('best-'+n),'0'))||0,fmt:t=>fmtT(t)

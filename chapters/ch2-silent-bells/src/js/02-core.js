@@ -14,10 +14,11 @@ const TRIAL_OPEN=true;
 function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
 /* the chapter's table for the series frame (menu, start screen, cards, HUD: shared/js/28-ui.js, docs/COMMUN.md § 3.1) */
 const CHAPTER={n:2,id:'ch2',
-  name:()=>_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
+  title:'Silent Bells',
   color:'#4fe0cc',color2:'#9fe4ff',rgb:'79,224,204',
   menu:{bg:'#04070b',glowA:.3,titleA:.4,particles:'spray',t:{glowMin:.5}},
-  trial:{name:()=>_('Trial by Water',"Épreuve de l'eau"),note:[()=>_('You recover 1 life between phases.','Tu récupères 1 PV entre les phases.')]},
+  next:{n:3,title:'Hollow Roots',col:'#b9cf5a',rgb:'185,207,90',hover:'#e4f0a8'},   // Chapitre III : n'existe pas encore, bouton verrouillé
+  trial:{name:()=>_('Trial by Water',"Épreuve de l'eau")},
   player:()=>_('The Watcher','Le Veilleur'),help:{},
   trialOpen:()=>TRIAL_OPEN||endSeen(),endSeen,best:n=>+LB.store.get(LB.key('best-'+n),0)||0,fmt:t=>fmt(t)
 };

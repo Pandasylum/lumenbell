@@ -70,6 +70,7 @@ jobs:
       - name: Cadre commun des deux chapitres (menu, Epreuve, entrees, aide, aucun mot d'annonce, cinematiques)
         working-directory: tests
         run: |
+          node menu-layout.js
           node menu-title.js
           node trial.js
           node inputs.js
