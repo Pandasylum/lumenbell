@@ -33,23 +33,28 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .mote{position:absolute;bottom:-10px;border-radius:50%;background:var(--moteCol);box-shadow:var(--moteGlow);opacity:0;pointer-events:none;animation:hrise linear infinite}
 @keyframes hrise{0%{transform:translate(0,0);opacity:0}15%{opacity:var(--motePeak)}100%{transform:translate(var(--dx),var(--moteRise));opacity:0}}
 /* titre « LUMENBELL » : LUMEN = LB.BRAND.lantern, BELL = LB.BRAND.bell ; centré verticalement entre le haut de la zone sûre
-   et le haut de la tour I (--titleTop, posé par layout()) */
-.hhead{position:absolute;left:0;right:0;top:var(--titleTop,0px);z-index:1;text-align:center;pointer-events:none;padding-top:env(safe-area-inset-top,0px)}
-.brand{margin:0;font-family:var(--font-display);font-weight:800;font-size:var(--titleFs);line-height:.95;letter-spacing:.04em;text-transform:uppercase}
+   et le haut de la tour I (--titleTop, posé par layout()) ; mêmes marges latérales que la figure : même axe vertical ; le retrait
+   .04em du début compense l'espace de lettre après la dernière lettre */
+.hhead{position:absolute;left:max(var(--pad),env(safe-area-inset-left,0px));right:max(var(--pad),env(safe-area-inset-right,0px));top:var(--titleTop,0px);z-index:1;text-align:center;pointer-events:none;padding-top:env(safe-area-inset-top,0px)}
+.brand{margin:0;font-family:var(--font-display);font-weight:800;font-size:var(--titleFs);line-height:.95;letter-spacing:.04em;padding-left:.04em;text-transform:uppercase}
 .brand span{color:var(--lantern);text-shadow:0 0 40px rgba(var(--lanternRgb),.7)}
 .brand i{font-style:normal;color:var(--bell);text-shadow:0 0 40px rgba(var(--lanternRgb),.25)}
-/* figure : carré de côté --s, centré en (--fx, --fy) dans la place restante (sous le titre, à côté ou au-dessus de la carte) */
+/* figure : carré de côté --s, centré en (--fx, --fy) dans la place restante (sous le titre) */
 .figwrap{position:relative;width:100%;min-height:0;align-self:stretch}
 .fig{position:absolute;left:var(--fx,50%);top:var(--fy,50%);width:var(--s);height:var(--s);transform:translate(-50%,-50%)}
 .wire{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .wire line{stroke-width:var(--wireW);vector-effect:non-scaling-stroke;stroke-linecap:round;opacity:var(--wireOff);transition:opacity var(--lightDur) ease,stroke var(--lightDur) ease}
 .wire line.on{opacity:var(--wireOn)}
 .tw{position:absolute;width:var(--hit);height:var(--hit);transform:translate(-50%,-50%);display:grid;place-items:center;padding:0;margin:0;border:0;border-radius:50%;background:none;cursor:pointer;color:inherit;font:inherit}
+.tw>*{grid-area:1/1}
 .tw:disabled{cursor:default}
 .tw:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .tw .dot{display:block;width:var(--dot);height:var(--dot);border-radius:50%;border:var(--ringW) solid var(--ringOff);background:transparent;transition:background-color var(--lightDur) ease,border-color var(--lightDur) ease,box-shadow var(--lightDur) ease,opacity var(--lightDur) ease}
 .tw.play .dot,.tw.done .dot{background:var(--c);border-color:var(--c);box-shadow:0 0 var(--glowB) var(--glowS) rgba(var(--cr),.55)}
 .tw.play .dot{animation:hpulse var(--pulseDur) ease-in-out infinite alternate}
+/* « à jouer » : fin cercle autour du point, dans tous les modes (il reste quand la pulsation s'arrête) ; seul cet état en a un */
+.tw .halo{display:none;width:calc(var(--dot) + 2*(var(--haloGap) + var(--haloW)));height:calc(var(--dot) + 2*(var(--haloGap) + var(--haloW)));border:var(--haloW) solid var(--c);border-radius:50%;pointer-events:none}
+.tw.play .halo{display:block}
 .tw.soon .dot{border-color:var(--c);opacity:.7}
 .tw.ring .dot{animation:hring var(--ringDur) ease-out 1}
 .tw.sel .dot{animation:none;opacity:1;box-shadow:0 0 calc(var(--glowB)*1.8) calc(var(--glowS)*1.8) rgba(var(--cr),.85)}   /* tour choisie : reste éclairée */
@@ -57,13 +62,13 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 @keyframes hring{0%{box-shadow:0 0 var(--glowB) var(--glowS) rgba(var(--cr),.55)}30%{box-shadow:0 0 calc(var(--glowB)*2.4) calc(var(--glowS)*2.4) rgba(var(--cr),.85)}100%{box-shadow:0 0 var(--glowB) var(--glowS) rgba(var(--cr),.55)}}
 .core{position:absolute;left:50%;top:50%;width:var(--core);height:var(--core);transform:translate(-50%,-50%);border-radius:50%;background:var(--coreCol);opacity:var(--coreLo);box-shadow:0 0 calc(var(--core)*1.5) 1px var(--coreCol);animation:hbeat var(--beat) ease-in-out infinite;pointer-events:none}
 @keyframes hbeat{0%,100%{opacity:var(--coreLo)}12%{opacity:var(--coreHi)}24%{opacity:var(--coreLo)}36%{opacity:calc(var(--coreHi)*.7)}50%{opacity:var(--coreLo)}}
-/* carte d'un chapitre : jamais sur la figure ; portrait : bandeau en bas, sous la figure ; paysage : panneau sur le côté */
-.hcard{position:absolute;z-index:4;display:grid;gap:8px;justify-items:center;text-align:center;padding:18px 20px;background:rgba(14,10,20,.92);border:1px solid var(--line);border-top:3px solid var(--c);box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 30px rgba(var(--cr),.18);outline:none}
-.hcard.port{left:50%;bottom:0;transform:translateX(-50%);width:var(--bandW)}
-.hcard.side{right:0;top:var(--fy,50%);transform:translateY(-50%);width:var(--sideW)}
-.hcard .eyebrow{margin:0;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-.hcard h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:var(--nameFs);line-height:1;letter-spacing:.03em;text-transform:uppercase;color:var(--c);text-shadow:0 0 30px rgba(var(--cr),.6)}
-.hcard .soon{margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:2px .8em}
+/* carte d'un chapitre : petite, ancrée sous la tour choisie (ou au-dessus), pointe vers elle ; left, top, --tipX et .up posés par placeCard() */
+.hcard{position:absolute;z-index:4;left:0;top:0;width:max-content;max-width:calc(100vw - 2*var(--cardEdge));display:grid;gap:3px;justify-items:center;text-align:center;padding:5px 12px 6px;background:#0e0a14;border:1px solid rgba(var(--cr),.6);box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 24px rgba(var(--cr),.18);outline:none}
+.hcard .tip{position:absolute;left:var(--tipX,50%);top:0;width:var(--tipS);height:var(--tipS);background:#0e0a14;border:solid rgba(var(--cr),.6);border-width:1px 0 0 1px;transform:translate(-50%,-50%) rotate(45deg)}
+.hcard.up .tip{top:100%;border-width:0 1px 1px 0}
+.hcard h2{margin:0;white-space:nowrap;font-family:var(--font-display);font-weight:800;font-size:var(--nameFs);line-height:1;letter-spacing:.03em;text-transform:uppercase;color:var(--c);text-shadow:0 0 24px rgba(var(--cr),.6)}
+.hcard .soon{margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:2px .8em;white-space:nowrap}
+.hcard .btn{padding:6px 22px;font-size:17px}
 .btn{font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border:2px solid var(--c,var(--lantern));padding:10px 26px;min-height:var(--touch);background:var(--c,var(--lantern));color:#0b0710}
 .btn:hover{filter:brightness(1.12)}
 .btn:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
@@ -100,12 +105,12 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(8,6,13,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .gate .btn{box-shadow:0 0 36px rgba(var(--lanternRgb),.45)}
 @media (max-height:520px) and (orientation:landscape){.hfoot{padding-top:2px}}
-/* mouvement réduit (LB.motion : réglage du hub, Auto = préférence du système ; classe .lb-rm sur <html>) : rien ne bouge, les trois
-   états diffèrent par la forme : à jouer = point plein et fin anneau autour ; terminé = point plein sans anneau ; fermé = anneau éteint */
+/* mouvement réduit (LB.motion : préférence du système seule ; classe .lb-rm sur <html>) : rien ne bouge ; les trois états gardent leur
+   forme (à jouer = point plein et fin cercle ; terminé = point plein sans cercle ; fermé = cercle éteint sans point) */
 .lb-rm .mote{display:none}
 .lb-rm .tw.play .dot,.lb-rm .tw.ring .dot,.lb-rm .core{animation:none}
 .lb-rm .tw .dot,.lb-rm .wire line{transition:none}
-.lb-rm .tw.play .dot{opacity:1;box-shadow:0 0 0 var(--rmGap) var(--bg),0 0 0 calc(var(--rmGap) + var(--rmRing)) var(--c)}
+.lb-rm .tw.play .dot{opacity:1}
 </style>
 </head>
 <body>
@@ -121,7 +126,7 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
       <span class="core" id="core" aria-hidden="true"></span>
     </div>
     <div class="hcard" id="hcard" role="dialog" aria-labelledby="hcName" tabindex="-1" hidden>
-      <p class="eyebrow" id="hcEye"></p>
+      <i class="tip" aria-hidden="true"></i>
       <h2 id="hcName"></h2>
       <p class="soon" id="hcSoon" hidden></p>
       <button class="btn" id="hcGo" type="button">Enter</button>
@@ -752,15 +757,12 @@ LB.toHub=(()=>{let gone=false;return n=>{if(gone)return false;gone=true;try{loca
 /* Vraie fin d'un chapitre ouvert depuis le hub (outro terminé, hors Épreuve) : le bouton de la dernière carte ramène au hub
    (« Chapitres »), qui allume la tour avec sa cloche. Épreuve ou chapitre ouvert seul : carte inchangée. o : options de LB.card.show. */
 LB.hubEnd=(o,n,trial)=>{if(LB.fromHub&&!trial){o.go=LB._('Chapters','Chapitres');o.onGo=()=>LB.toHub(n)}return o};
-/* ---------- LB.motion : réglage « Mouvement réduit » (hub, clé lb-pref-motion), lu par le hub et les chapitres ----------
-   auto (défaut : préférence du système), reduce, normal. apply() pose la classe LB.MOTION.cls sur <html> quand le mouvement est
-   réduit : les règles « mouvement réduit » du CSS s'écrivent .lb-rm …, jamais @media (prefers-reduced-motion). reduced() : JS. */
-LB.MOTION={key:'lb-pref-motion',vals:['auto','reduce','normal'],cls:'lb-rm'};
+/* ---------- LB.motion : mouvement réduit = préférence du système (prefers-reduced-motion), sans réglage ni clé de sauvegarde ----------
+   apply() pose la classe LB.MOTION.cls sur <html> quand le mouvement est réduit : les règles « mouvement réduit » du CSS s'écrivent
+   .lb-rm …, jamais @media (prefers-reduced-motion). reduced() : JS. */
+LB.MOTION={cls:'lb-rm'};
 LB.motion={
-  get(){const v=LB.store.get(LB.MOTION.key,'auto');return LB.MOTION.vals.includes(v)?v:'auto'},
-  set(v){if(!LB.MOTION.vals.includes(v))return;LB.store.set(LB.MOTION.key,v);LB.motion.apply()},
-  sys(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}},
-  reduced(){const v=LB.motion.get();return v==='reduce'||(v==='auto'&&LB.motion.sys())},
+  reduced(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}},
   apply(){try{document.documentElement.classList.toggle(LB.MOTION.cls,LB.motion.reduced())}catch(e){}}};
 LB.motion.apply();
 try{const mq=matchMedia('(prefers-reduced-motion: reduce)'),f=()=>LB.motion.apply();if(mq.addEventListener)mq.addEventListener('change',f);else if(mq.addListener)mq.addListener(f)}catch(e){}
@@ -1099,11 +1101,14 @@ LB.cue.ring=function(ctx,cx,cy,r,open){const T=LB.CUE_T;
 /* ---------- Hub de la série (site/index.html ; décision docs/decisions/2026-11-02-hub-site.md) ----------
    Écran de démarrage (un seul bouton : débloque le son, lance le fond sonore du hub), puis la figure : six tours en cercle (chapitres
    I à VI, I en haut, sens horaire), VII au centre (point blanc très faible qui bat, jamais cliquable). Aucun nom de la figure à
-   l'écran ni dans les libellés. Une tour : terminée (lumière stable), à jouer (pulsation douce), annoncée (anneau de sa couleur,
-   « À venir »), fermée (anneau éteint, sans nom, rien au toucher). Ouverte : chapitre I, ou vraie fin du précédent mémorisée
+   l'écran ni dans les libellés. Une tour, quel que soit le mouvement : à jouer (point qui pulse + fin cercle autour ; le cercle
+   reste quand la pulsation s'arrête), terminée (point plein, fixe, sans cercle), annoncée (anneau de sa couleur, « À venir »),
+   fermée (cercle éteint, sans point, sans nom, rien au toucher). Ouverte : chapitre I, ou vraie fin du précédent mémorisée
    (lb-chN-end), la chaîne entière comptant (II terminé sans I terminé : II reste fermé). Toucher une tour ouverte : sa cloche,
-   et une carte (« Chapitre N », nom, « Entrer ») qui ne couvre jamais la figure (portrait : bandeau dessous ; paysage : panneau
-   à côté), la tour choisie reste éclairée ; Entrer ouvre <chapitre>/index.html?from=hub (LB.HUB, shared/js/28-ui.js).
+   et une petite carte (nom en couleur, « Entrer ») ancrée sous la tour, avec une pointe vers elle (au-dessus si la place manque ;
+   placeCard, table HUB_T.card) qui ne couvre jamais une autre tour ni le point central ; la tour choisie reste éclairée ;
+   Entrer ouvre <chapitre>/index.html?from=hub (LB.HUB, shared/js/28-ui.js). Fond ou Échap : ferme la carte.
+   Mouvement réduit : le hub suit seul la préférence du système (LB.motion, classe .lb-rm).
    Retour d'un chapitre (?back=N, lien « Chapitres » ou fin du chapitre) : sans écran de démarrage, le fond sonore repart.
    Tours fêtées (lb-hub-lit, liste des chapitres) : à l'arrivée, une tour terminée pas encore fêtée s'allume devant le joueur
    avec sa cloche, puis est marquée fêtée ; une tour déjà fêtée apparaît allumée, sans animation.
@@ -1135,19 +1140,33 @@ const HUB_T={
   ringDur:1.4,                               // éclat d'une tour qui sonne (s)
   title:{fs:'clamp(30px,8vw,64px)',low:'clamp(24px,7vh,40px)',gap:12},   // titre (paysage bas : low) ; gap : marge mini au-dessus et au-dessous (px)
   ver:{right:0},                             // version : retrait du bord droit (px, dans la marge de l'écran), à la hauteur des langues
-  name:'clamp(30px,8vw,46px)',               // carte : nom du chapitre
-  card:{band:'min(100%,440px)',side:'min(40vw,300px)',gap:12,portrait:1},   // carte : bandeau (portrait), panneau (paysage), écart à la figure (px) ; portrait si largeur / hauteur < portrait
-  rm:{gap:3,ring:1.5},                       // mouvement réduit, « à jouer » : écart et épaisseur de l'anneau autour du point (px)
+  /* carte d'entrée, ancrée sous la tour choisie (placeCard) : fs nom du chapitre ; tip côté de la pointe (px, carré tourné) ; gap écart
+     entre le point de la tour et la pointe ; clear écart minimal aux tours, au centre, aux boutons et au titre ; edge marge des bords de
+     l'écran ; step pas de glissement sur le côté ; tipMin la pointe reste à au moins tipMin du bord de la carte. Ordre : en dessous,
+     sinon au-dessus ; d'abord sans toucher boutons ni titre, puis seulement sans toucher les tours et le centre. */
+  card:{fs:'clamp(20px,5.6vw,24px)',tip:8,gap:2,clear:2,edge:10,step:4,tipMin:14},
+  halo:{gap:3,w:1.5},                        // « à jouer » : écart et épaisseur du fin cercle autour du point (px), dans tous les modes
   set:{w:'min(92vw,380px)',gear:24,warn:'#ff8a7a'},   // réglages : largeur du panneau, dessin de la roue (px), couleur de la réinitialisation
   bell:{dur:3.6,vol:.07,partials:[[1,1,1],[2.0,.5,.7],[2.76,.32,.5],[4.07,.18,.35],[5.4,.1,.25]]},   // cloche : [rapport, niveau, durée relative]
-  /* fond sonore (bus musique), trois variantes à écouter (?bed=a|b|c, défaut a) : rien sous hp (Hz, passe-haut sur tout), niveau
-     nettement sous l'ancien bourdon (environ -8 dB et plus), entrée en fondu (fade, s), sortie (out, s). notes : tenues [f Hz, niveau,
-     tremblement Hz, profondeur] ; air : souffle filtré {niveau, bande Hz, Q, tremblement, profondeur} ; far : note lointaine qui
-     revient {f, niveau, first s, every [min, + aléa] s, atk, hold, dec s}. */
+  /* fond sonore (bus musique), trois ambiances graves à écouter (?bed=a|b|c, défaut a). Tout est synthétisé par LB.audio ; bande utile
+     50 à 500 Hz (notes, souffle, scintillements) ; rien d'audible au-dessus de 1,2 kHz (passe-bas lp.hi ≤ 1200) hors les cloches, qui
+     ne passent pas par ici. hp passe-haut (Hz) ; fade fondu d'entrée (s) ; lp passe-bas balayé {lo, hi Hz, period s, q} ;
+     notes tenues [f Hz, niveau] chacune en len(detune) voix désaccordées (cents) ; swell houles lentes {period s (12 à 20), depth 0 à 1}
+     : une houle commune (all) et une par note (periods) ; air souffle bruité très doux {vol, f Hz (passe-bas), period s, depth} ;
+     echo écho long {t s de retard, fb rétroaction, damp Hz (adoucit chaque répétition), wet niveau} ;
+     spark scintillements rares et doux {f [Hz], vol, first s, every [min, + aléa] s, atk, dec s}. */
   beds:{
-    a:{hp:150,fade:6,notes:[[659.25,.014,.11,.5],[987.77,.008,.07,.6]]},                                  // voile aigu : deux notes tenues, lent tremblement
-    b:{hp:150,fade:6,air:{vol:.05,bp:1400,q:.5,lfo:.05,depth:.5},far:{f:783.99,vol:.01,first:5,every:[16,10],atk:2,hold:0,dec:6}},   // souffle et note lointaine espacée
-    c:{hp:150,fade:6,far:{f:1318.51,vol:.007,first:8,every:[26,14],atk:5,hold:4,dec:8}}                   // presque silence : une note haute, rare
+    // a « espace profond » : quinte ouverte (ré-la-ré), trois voix légèrement désaccordées par note, houles longues
+    a:{hp:50,fade:9,lp:{lo:240,hi:640,period:38,q:.6},detune:[-5,0,5],notes:[[73.42,.034],[110,.026],[146.83,.014]],
+       swell:{all:{period:16,depth:.45},periods:[13,17,19],depth:.55},air:{vol:.004,f:260,period:18,depth:.6},echo:{t:1.3,fb:.52,damp:380,wet:.6}},
+    // b « premier essai » : le bourdon du premier jet du hub (55 / 82,41 / 110,2 Hz, passe-bas 380) à -4 dB, avec houles lentes, passe-bas
+    // qui respire et un second partiel (octave de 82,41 Hz)
+    b:{hp:50,fade:7,lp:{lo:300,hi:470,period:30,q:.5},detune:[0],notes:[[55,.0442],[82.41,.0284],[110.2,.0158],[164.82,.012]],
+       swell:{all:{period:15,depth:.35},periods:[14,18,12,20],depth:.5},air:{vol:.003,f:240,period:20,depth:.5},echo:{t:1.1,fb:.46,damp:360,wet:.45}},
+    // c « nébuleuse » : nappe grave-médium, houles et souffle plus présents, quelques scintillements très doux et rares
+    c:{hp:50,fade:9,lp:{lo:300,hi:900,period:29,q:.7},detune:[-7,7],notes:[[98,.03],[146.83,.024],[196,.018],[293.66,.01]],
+       swell:{all:{period:14,depth:.6},periods:[12,15,17,20],depth:.8},air:{vol:.011,f:420,period:13,depth:.8},echo:{t:1.5,fb:.56,damp:450,wet:.65},
+       spark:{f:[220,261.63,349.23,440],vol:.006,first:9,every:[12,14],atk:1.2,dec:5}}
   },
   bedOut:.4,
   motes:{n:18,dur:[12,10],delay:22,size:[1.5,2],dx:90,rise:'-75vh',peak:.5,col:'rgba(255,233,168,.9)',glow:'0 0 8px 2px rgba(255,214,120,.35)'},
@@ -1156,17 +1175,15 @@ const HUB_T={
 /* Réglages du hub (roue en haut à droite), un par ligne du panneau ; un réglage de plus = une entrée de plus, sans autre code.
    type toggle : oui / non (get, set) ; choice : une valeur parmi opts [valeur, en, fr] ; hold : appui maintenu `hold` s, jauge
    visible, jamais un simple clic (run). Musique et Bruitages : coupure du bus de LB.audio (lb-mus, lb-snd : les mêmes clés que les
-   cases Son et Musique des chapitres) ; Mouvement réduit : LB.motion (lb-pref-motion), lu aussi par les chapitres. */
+   cases Son et Musique des chapitres). Pas de réglage de mouvement : le hub suit la préférence du système (LB.motion). */
 const SETTINGS_T=[
   {id:'mus',type:'toggle',label:['Music','Musique'],get:()=>LB.audio.music,set:v=>LB.audio.setMusic(v)},
   {id:'snd',type:'toggle',label:['Sound effects','Bruitages'],get:()=>LB.audio.sound,set:v=>LB.audio.setSound(v)},
-  {id:'motion',type:'choice',label:['Reduced motion','Mouvement réduit'],opts:[['auto','Auto','Auto'],['reduce','Reduced','Réduit'],['normal','Normal','Normal']],
-   get:()=>LB.motion.get(),set:v=>LB.motion.set(v)},
   {id:'reset',type:'hold',label:['Reset progress','Réinitialiser la progression'],hint:['Hold to erase','Maintenir pour effacer'],hold:2,run:()=>reset()}
 ];
 /* Clés effacées par « Réinitialiser la progression » (relevées par grep des clés lb-… et de leurs anciennes clés) : fins de chapitre,
    difficultés terminées et déblocages, records, drapeaux « intro vue », tours fêtées. Gardées : langue (lb-lang), réglages (lb-snd,
-   lb-mus, lb-help, lb-pref-…) et leurs anciennes clés. keys : clés exactes ; prefix : début de clé. */
+   lb-mus, lb-help) et leurs anciennes clés. keys : clés exactes ; prefix : début de clé. */
 const RESET_T={
   keys:['lb-hub-lit',     // tours fêtées du hub
     'eb-end','eb-intro',  // anciennes clés du Chapitre I (lb-ch1-end, lb-ch1-intro), sinon recopiées à la lecture
@@ -1194,19 +1211,27 @@ function readLit(){const v=LB.store.get(LIT,null);if(v==null)return[];try{const 
 /* ---------- son : fond sonore (bus musique, HUB_T.beds[BED]) et cloches (bus effets) ---------- */
 const bed={nodes:null,timer:0,
   start(){if(this.nodes)return;const ctx=LB.audio.ensure();if(!ctx||!LB.audio.mus)return;
-    try{const B=HUB_T.beds[BED],t=ctx.currentTime,out=ctx.createGain(),hp=ctx.createBiquadFilter(),src=[];
-      hp.type='highpass';hp.frequency.value=B.hp;hp.connect(out);out.connect(LB.audio.mus);
-      out.gain.setValueAtTime(0,t);out.gain.linearRampToValueAtTime(1,t+B.fade);
-      const wob=(g,v,rate,depth)=>{g.gain.value=v*(1-depth/2);const l=ctx.createOscillator(),lg=ctx.createGain();l.frequency.value=rate;lg.gain.value=v*depth/2;l.connect(lg);lg.connect(g.gain);l.start(t);src.push(l)};
-      for(const [f,v,rate,depth] of B.notes||[]){const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f;wob(g,v,rate,depth);o.connect(g);g.connect(hp);o.start(t);src.push(o)}
-      if(B.air){const A=B.air,len=ctx.sampleRate*2,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
-        const s=ctx.createBufferSource(),bp=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=buf;s.loop=true;bp.type='bandpass';bp.frequency.value=A.bp;bp.Q.value=A.q;
-        wob(g,A.vol,A.lfo,A.depth);s.connect(bp);bp.connect(g);g.connect(hp);s.start(t);src.push(s)}
-      this.nodes={out,hp,src};if(B.far)this.far(B.far,B.far.first)}catch(e){this.nodes=null}},
-  far(F,wait){clearTimeout(this.timer);this.timer=setTimeout(()=>{const N=this.nodes,ctx=LB.audio.ctx;if(!N||!ctx)return;
-    try{const t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain(),a=t+F.atk,h=a+F.hold,e=h+F.dec;o.type='sine';o.frequency.value=F.f;
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(F.vol,a);g.gain.setValueAtTime(F.vol,h);g.gain.exponentialRampToValueAtTime(.0001,e);o.connect(g);g.connect(N.hp);o.start(t);o.stop(e+.1)}catch(x){}
-    this.far(F,F.every[0]+Math.random()*F.every[1])},wait*1000)},
+    try{const B=HUB_T.beds[BED],t=ctx.currentTime,src=[],node=(type,f,q)=>{const x=ctx.createBiquadFilter();x.type=type;x.frequency.value=f;if(q)x.Q.value=q;return x},
+        out=ctx.createGain(),bus=ctx.createGain(),lp=node('lowpass',(B.lp.lo+B.lp.hi)/2,B.lp.q),hp=node('highpass',B.hp);
+      out.gain.setValueAtTime(0,t);out.gain.linearRampToValueAtTime(1,t+B.fade);out.connect(LB.audio.mus);
+      /* bus -> passe-bas balayé -> passe-haut -> sortie, et l'écho (retard à rétroaction adouci) en parallèle */
+      bus.connect(lp);lp.connect(hp);hp.connect(out);
+      const sw=ctx.createOscillator(),sg=ctx.createGain();sw.frequency.value=1/B.lp.period;sg.gain.value=(B.lp.hi-B.lp.lo)/2;sw.connect(sg);sg.connect(lp.frequency);sw.start(t);src.push(sw);
+      const E=B.echo,dl=ctx.createDelay(Math.ceil(E.t)+1),fb=ctx.createGain(),dm=node('lowpass',E.damp),wet=ctx.createGain();dl.delayTime.value=E.t;fb.gain.value=E.fb;wet.gain.value=E.wet;
+      hp.connect(dl);dl.connect(dm);dm.connect(fb);fb.connect(dl);dm.connect(wet);wet.connect(out);
+      /* houle : le niveau de g monte et descend toutes les `period` s (entre base·(1-depth) et base) */
+      const swell=(g,base,period,depth)=>{g.gain.value=base*(1-depth/2);const l=ctx.createOscillator(),lg=ctx.createGain();l.frequency.value=1/period;lg.gain.value=base*depth/2;l.connect(lg);lg.connect(g.gain);l.start(t);src.push(l)};
+      const master=ctx.createGain();swell(master,1,B.swell.all.period,B.swell.all.depth);master.connect(bus);
+      B.notes.forEach(([f,v],i)=>{const g=ctx.createGain();swell(g,v/B.detune.length,B.swell.periods[i%B.swell.periods.length],B.swell.depth);g.connect(master);
+        for(const c of B.detune){const o=ctx.createOscillator();o.type='sine';o.frequency.value=f;o.detune.value=c;o.connect(g);o.start(t);src.push(o)}});
+      {const A=B.air,len=ctx.sampleRate*4,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);let last=0;   // bruit brun : que du grave
+        for(let i=0;i<len;i++){last=(last+.02*(Math.random()*2-1))/1.02;d[i]=last*3.5}
+        const s=ctx.createBufferSource(),g=ctx.createGain();s.buffer=buf;s.loop=true;swell(g,A.vol,A.period,A.depth);const nl=node('lowpass',A.f);s.connect(nl);nl.connect(g);g.connect(master);s.start(t);src.push(s)}
+      this.nodes={out,bus:master,src};if(B.spark)this.spark(B.spark,B.spark.first)}catch(e){this.nodes=null}},
+  spark(F,wait){clearTimeout(this.timer);this.timer=setTimeout(()=>{const N=this.nodes,ctx=LB.audio.ctx;if(!N||!ctx)return;
+    try{const t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain(),a=t+F.atk,e=a+F.dec;o.type='sine';o.frequency.value=F.f[Math.floor(Math.random()*F.f.length)];
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(F.vol,a);g.gain.exponentialRampToValueAtTime(.0001,e);o.connect(g);g.connect(N.bus);o.start(t);o.stop(e+.1)}catch(x){}
+    this.spark(F,F.every[0]+Math.random()*F.every[1])},wait*1000)},
   stop(){clearTimeout(this.timer);const N=this.nodes,ctx=LB.audio.ctx;if(!N||!ctx)return;this.nodes=null;
     try{const t=ctx.currentTime;N.out.gain.cancelScheduledValues(t);N.out.gain.setTargetAtTime(0,t,HUB_T.bedOut/3);N.src.forEach(o=>o.stop(t+HUB_T.bedOut))}catch(e){}}
 };
@@ -1221,7 +1246,7 @@ function build(){const fig=$('fig'),wire=$('wire'),core=$('core');
     l.setAttribute('x1',x1.toFixed(3));l.setAttribute('y1',y1.toFixed(3));l.setAttribute('x2',x2.toFixed(3));l.setAttribute('y2',y2.toFixed(3));wire.appendChild(l);seg[n]=l;
     const b=document.createElement('button');b.type='button';b.className='tw';b.dataset.n=n;b.style.left=x1+'%';b.style.top=y1+'%';
     const col=LB.CH_COL[n];if(col){b.style.setProperty('--c',col);b.style.setProperty('--cr',rgbOf(col))}
-    b.innerHTML='<span class="dot"></span>';b.addEventListener('click',e=>{e.stopPropagation();open(n)});fig.insertBefore(b,core);tw[n]=b}}
+    b.innerHTML='<span class="halo"></span><span class="dot"></span>';b.addEventListener('click',e=>{e.stopPropagation();open(n)});fig.insertBefore(b,core);tw[n]=b}}
 /* applique un état aux tours et au fil (st : n -> état) */
 function apply(st){shown=st;
   for(let n=1;n<=HUB_T.towers;n++){const b=tw[n],s=st[n],on=s!=='closed',c=CH(n);
@@ -1241,11 +1266,11 @@ function celebrate(){const now=states(),before=feastStates(),fresh=doneOf(now).f
 function open(n,quiet){const s=shown[n],c=CH(n);if(!c||s==='closed'||leaving)return;
   const hc=$('hcard'),col=LB.CH_COL[n]||'#8a8a9a';if(card&&tw[card])tw[card].classList.remove('sel');card=n;tw[n].classList.add('sel');if(!quiet)chime(n,0);
   hc.style.setProperty('--c',col);hc.style.setProperty('--cr',rgbOf(col));
-  $('hcEye').textContent=LB._('Chapter ','Chapitre ')+LB.ROMAN[n];$('hcName').textContent=c.title;
+  $('hcName').textContent=c.title;
   $('hcSoon').hidden=!c.soon;$('hcSoon').textContent=LB._('Coming soon','À venir');
-  $('hcGo').hidden=!!c.soon;$('hcGo').disabled=false;hc.setAttribute('aria-label',LB.chapterName(n,c.title));hc.hidden=false;layout();
+  $('hcGo').hidden=!!c.soon;$('hcGo').disabled=false;hc.setAttribute('aria-label',LB.chapterName(n,c.title));hc.hidden=false;placeCard();
   if(!quiet)try{(c.soon?hc:$('hcGo')).focus({preventScroll:true})}catch(e){}}
-function close(focus){if(!card)return;const n=card;card=0;tw[n].classList.remove('sel');$('hcard').hidden=true;layout();if(focus)try{tw[n].focus({preventScroll:true})}catch(e){}}
+function close(focus){if(!card)return;const n=card;card=0;tw[n].classList.remove('sel');$('hcard').hidden=true;if(focus)try{tw[n].focus({preventScroll:true})}catch(e){}}
 function enter(){const c=CH(card);if(!c||c.soon||leaving)return;leaving=true;$('hcGo').disabled=true;bed.stop();
   location.href=c.path+'?from='+LB.HUB.from}
 /* ---------- réglages (SETTINGS_T) ---------- */
@@ -1284,27 +1309,46 @@ function lang(){document.documentElement.lang=LB.lang.cur;
   $('fig').setAttribute('aria-label',LB._('Chapters','Chapitres'));$('langs').setAttribute('aria-label',LB._('Language','Langue'));
   const st=LB._('Settings','Réglages');$('setBtn').setAttribute('aria-label',st);$('setBtn').title=st;$('hsTitle').textContent=st;$('hsClose').setAttribute('aria-label',LB._('Close','Fermer'));
   document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
-  setSync();apply(shown);if(card)open(card,true);else layout()}
-/* ---------- mise en page (HUB_T) : figure aussi grande que la place restante, jamais sous la carte ; titre centré entre le haut
-   de la zone sûre et le haut de la tour I ---------- */
-function layout(){const R=document.documentElement.style,T=HUB_T,w=$('figwrap'),hc=$('hcard'),low=innerHeight<=T.lowH&&innerWidth>innerHeight;
+  setSync();apply(shown);if(card)open(card,true);layout()}
+/* ---------- mise en page (HUB_T) : figure aussi grande que la place restante (la carte ne la déplace pas) ; titre centré entre le haut
+   de la zone sûre et le haut de la tour I, sur le même axe vertical que la figure ---------- */
+function layout(){const R=document.documentElement.style,T=HUB_T,w=$('figwrap'),low=innerHeight<=T.lowH&&innerWidth>innerHeight;
   R.setProperty('--titleFs',low?T.title.low:T.title.fs);
   const sat=parseFloat(getComputedStyle($('hhead')).paddingTop)||0,th=$('brand').offsetHeight,wt=w.getBoundingClientRect().top;
-  const top=Math.max(0,sat+th+2*T.title.gap-wt);let W=w.clientWidth,H=w.clientHeight-top;
-  const port=innerWidth<innerHeight*T.card.portrait;hc.classList.toggle('port',port);hc.classList.toggle('side',!port);
-  if(card){if(port)H-=hc.offsetHeight+T.card.gap;else W-=hc.offsetWidth+T.card.gap}
+  const top=Math.max(0,sat+th+2*T.title.gap-wt),W=w.clientWidth,H=w.clientHeight-top;
   const s=Math.max(T.fig.min,Math.min(T.fig.max,W,H)),dot=Math.round(Math.max(T.dot.min,Math.min(T.dot.max,s*T.dot.k))),fy=top+Math.max(H,s)/2;
   R.setProperty('--s',s+'px');R.setProperty('--dot',dot+'px');R.setProperty('--core',Math.max(T.core.min,Math.round(s*T.core.k))+'px');
-  R.setProperty('--fx',(card&&!port?W/2:w.clientWidth/2)+'px');R.setProperty('--fy',fy+'px');
-  const towerTop=wt+fy-T.r*s-dot/2;R.setProperty('--titleTop',Math.round((towerTop-sat-th)/2)+'px')}
+  R.setProperty('--fx',W/2+'px');R.setProperty('--fy',fy+'px');
+  const towerTop=wt+fy-T.r*s-dot/2;R.setProperty('--titleTop',Math.round((towerTop-sat-th)/2)+'px');
+  if(card)placeCard()}
+/* carte d'entrée : sous la tour choisie (pointe vers elle), sinon au-dessus ; dans l'écran ; jamais sur une tour ni sur le point central.
+   Pour chaque côté, on cherche la position la plus proche de la tour (la carte glisse de côté, la pointe restant sur la carte) qui ne
+   recouvre ni les disques des tours et du centre, ni (en priorité) les boutons et le titre. */
+function placeCard(){const hc=$('hcard'),T=HUB_T.card;if(!card||hc.hidden)return;
+  const wr=$('figwrap').getBoundingClientRect(),dr=tw[card].querySelector('.dot').getBoundingClientRect(),W=innerWidth,H=innerHeight,m=T.edge,
+    tip=T.tip*Math.SQRT1_2,sat=parseFloat(getComputedStyle($('hhead')).paddingTop)||0,tx=dr.left+dr.width/2,ty=dr.top+dr.height/2,tr=dr.width/2,
+    cw=hc.offsetWidth,ch=hc.offsetHeight,
+    discs=[...document.querySelectorAll('.tw .dot,#core')].map(e=>{const q=e.getBoundingClientRect();return{x:q.left+q.width/2,y:q.top+q.height/2,r:q.width/2}}),
+    rg=document.createRange();rg.selectNodeContents($('brand'));
+    const boxes=[...document.querySelectorAll('#langs button,#ver,#setBtn'),rg].map(e=>e.getBoundingClientRect()),
+    hitC=(r,c)=>{const dx=Math.max(r.l-c.x,0,c.x-r.r),dy=Math.max(r.t-c.y,0,c.y-r.b);return dx*dx+dy*dy<(c.r+T.clear)*(c.r+T.clear)},
+    hitB=(r,o)=>r.l<o.right+T.clear&&r.r>o.left-T.clear&&r.t<o.bottom+T.clear&&r.b>o.top-T.clear,
+    lo=m,hi=Math.max(lo,W-m-cw),ideal=Math.min(hi,Math.max(lo,tx-cw/2)),
+    lefts=[ideal];for(let l=lo;l<hi;l+=T.step)lefts.push(l);lefts.push(hi);lefts.sort((a,b)=>Math.abs(a+cw/2-tx)-Math.abs(b+cw/2-tx));
+  const find=(side,avoid)=>{const t=side==='below'?ty+tr+T.gap+tip:ty-tr-T.gap-tip-ch;if(t<sat+m||t+ch>H-m)return null;
+    for(const l of lefts){if(tx<l+T.tipMin||tx>l+cw-T.tipMin)continue;const r={l,t,r:l+cw,b:t+ch};
+      if(discs.some(c=>hitC(r,c))||(avoid&&boxes.some(o=>hitB(r,o))))continue;return{l,t,side}}return null};
+  const at=find('below',true)||find('above',true)||find('below',false)||find('above',false)||{l:ideal,t:ty+tr+T.gap+tip,side:'below'};
+  hc.style.left=Math.round(at.l-wr.left)+'px';hc.style.top=Math.round(at.t-wr.top)+'px';hc.classList.toggle('up',at.side==='above');
+  hc.style.setProperty('--tipX',Math.round(Math.min(cw-T.tipMin,Math.max(T.tipMin,tx-at.l)))+'px')}
 function vars(){const R=document.documentElement.style,T=HUB_T,M=T.motes,set=(k,v)=>R.setProperty('--'+k,v);
   set('lantern',LB.BRAND.lantern);set('lanternRgb',rgbOf(LB.BRAND.lantern));set('bell',LB.BRAND.bell);
   set('pad',T.pad+'px');set('hit',T.hit+'px');set('touch',T.touch+'px');set('ringW',T.ring.w+'px');set('ringOff',T.ring.off);
   set('glowB',T.glow.blur+'px');set('glowS',T.glow.spread+'px');set('pulseDur',T.pulse.dur+'s');set('pulseLo',T.pulse.lo);
   set('coreCol',T.core.col);set('coreLo',T.core.lo);set('coreHi',T.core.hi);set('beat',T.core.beat+'s');
   set('wireW',T.wire.w+'px');set('wireOff',T.wire.off);set('wireOn',T.wire.on);set('lightDur',T.light.dur+'s');set('ringDur',T.ringDur+'s');
-  set('nameFs',T.name);set('bandW',T.card.band);set('sideW',T.card.side);set('verR',T.ver.right+'px');
-  set('rmGap',T.rm.gap+'px');set('rmRing',T.rm.ring+'px');set('setW',T.set.w);set('gearS',T.set.gear+'px');set('warn',T.set.warn);set('warnRgb',rgbOf(T.set.warn));
+  set('nameFs',T.card.fs);set('tipS',T.card.tip+'px');set('cardEdge',T.card.edge+'px');set('verR',T.ver.right+'px');
+  set('haloGap',T.halo.gap+'px');set('haloW',T.halo.w+'px');set('setW',T.set.w);set('gearS',T.set.gear+'px');set('warn',T.set.warn);set('warnRgb',rgbOf(T.set.warn));
   set('moteCol',M.col);set('moteGlow',M.glow);set('motePeak',M.peak);set('moteRise',M.rise)}
 function motes(){const M=HUB_T.motes,w=$('motes');
   for(let i=0;i<M.n;i++){const e=document.createElement('i');e.className='mote';e.style.left=(Math.random()*100)+'%';e.style.setProperty('--dx',((Math.random()-.5)*M.dx)+'px');

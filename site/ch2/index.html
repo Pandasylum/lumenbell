@@ -808,15 +808,12 @@ LB.toHub=(()=>{let gone=false;return n=>{if(gone)return false;gone=true;try{loca
 /* Vraie fin d'un chapitre ouvert depuis le hub (outro terminé, hors Épreuve) : le bouton de la dernière carte ramène au hub
    (« Chapitres »), qui allume la tour avec sa cloche. Épreuve ou chapitre ouvert seul : carte inchangée. o : options de LB.card.show. */
 LB.hubEnd=(o,n,trial)=>{if(LB.fromHub&&!trial){o.go=LB._('Chapters','Chapitres');o.onGo=()=>LB.toHub(n)}return o};
-/* ---------- LB.motion : réglage « Mouvement réduit » (hub, clé lb-pref-motion), lu par le hub et les chapitres ----------
-   auto (défaut : préférence du système), reduce, normal. apply() pose la classe LB.MOTION.cls sur <html> quand le mouvement est
-   réduit : les règles « mouvement réduit » du CSS s'écrivent .lb-rm …, jamais @media (prefers-reduced-motion). reduced() : JS. */
-LB.MOTION={key:'lb-pref-motion',vals:['auto','reduce','normal'],cls:'lb-rm'};
+/* ---------- LB.motion : mouvement réduit = préférence du système (prefers-reduced-motion), sans réglage ni clé de sauvegarde ----------
+   apply() pose la classe LB.MOTION.cls sur <html> quand le mouvement est réduit : les règles « mouvement réduit » du CSS s'écrivent
+   .lb-rm …, jamais @media (prefers-reduced-motion). reduced() : JS. */
+LB.MOTION={cls:'lb-rm'};
 LB.motion={
-  get(){const v=LB.store.get(LB.MOTION.key,'auto');return LB.MOTION.vals.includes(v)?v:'auto'},
-  set(v){if(!LB.MOTION.vals.includes(v))return;LB.store.set(LB.MOTION.key,v);LB.motion.apply()},
-  sys(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}},
-  reduced(){const v=LB.motion.get();return v==='reduce'||(v==='auto'&&LB.motion.sys())},
+  reduced(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}},
   apply(){try{document.documentElement.classList.toggle(LB.MOTION.cls,LB.motion.reduced())}catch(e){}}};
 LB.motion.apply();
 try{const mq=matchMedia('(prefers-reduced-motion: reduce)'),f=()=>LB.motion.apply();if(mq.addEventListener)mq.addEventListener('change',f);else if(mq.addListener)mq.addListener(f)}catch(e){}
