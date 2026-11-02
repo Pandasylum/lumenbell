@@ -23,7 +23,8 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | « Phare » prend sa majuscule partout ; le navire est masculin | `CHANGEMENTS.md:34` |
 | Nom EN du Phare Noyé : toujours *Drowned Lighthouse* ; « beacon » ne désigne que le fanal du Clocher (Chapitre I) | `CHANGEMENTS.md:70` |
 | Une lanterne s'éteint, elle n'est jamais « brisée » | `docs/LORE.md:118` |
-| « Lumenbell » : nom du jeu et de la série | `BIBLE.md:8` ; `docs/CH2-SPEC.md:8` |
+| « LumenBell » : nom du jeu et de la série | `BIBLE.md:8` ; `docs/CH2-SPEC.md:8` |
+| Titre affiché du menu : « LUMENBELL » (majuscules) ; partout ailleurs « LumenBell » | `docs/decisions/2026-11-02-version-et-titre.md` ; `ROADMAP.md` (renommage) |
 
 ## Gestes du joueur
 

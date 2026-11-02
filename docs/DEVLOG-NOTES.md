@@ -101,3 +101,6 @@
 ## 2026-11-02 · menu/common (tailles d'écran)
 - Les menus des deux chapitres tiennent sur tous les écrans de téléphone, en portrait comme en paysage, avec le bouton du chapitre suivant toujours de la même taille.
 - Rien ne change à l'écran : seuls les tests automatiques sont plus fiables (engine/tests).
+
+## 2026-11-02 · docs/rangement-2
+- Rien ne change à l'écran : cette session ne range que la documentation (feuille de route, glossaire, changements, bible, cahier des charges du Chapitre II).

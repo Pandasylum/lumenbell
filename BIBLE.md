@@ -5,7 +5,7 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 ## Pitch et identité
 - **Série** : *Lumenbell* est le nom du jeu et de la série. À la fin de l'intro il s'affiche en grand ; « Chapitre I – Ember Bridge » marque seulement le début du premier chapitre.
 - **Chapitre I** : Ember Bridge, le Veilleur contre le Colosse de braise (*Ember Colossus*), en trois décors : le pont de pierre, la Fonderie, puis le Clocher.
-- **Chapitre II** : Silent Bells (à fusionner). Dans le menu : badge verrouillé « À venir ».
+- **Chapitre II** : Silent Bells (dans le dépôt, menu commun). Dans le menu : badge verrouillé « À venir ».
 - **Format** : HTML5 canvas 960 × 540, itch.io puis Android (Capacitor, `com.emberbridge.game`, nom d'app *Lumenbell*), peut-être Google Play et iOS.
 - **Langues** : anglais et français, chaque texte dans les deux via `_('anglais','français')`.
 

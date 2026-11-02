@@ -7,16 +7,17 @@
 - Chapitre II : harmonisation avec Ember Bridge (A technique, B gameplay et textes, C visuels), nouveaux sorts codés.
 - Audit des éléments communs (`docs/COMMUN.md`), vocabulaire unique bloquer / esquiver (`docs/GLOSSAIRE.md`).
 - Code commun `shared/` (langue, clés `lb-…` avec migration depuis `eb-…`, audio) et source du Chapitre II en morceaux.
+- Moteur commun fusionné : états du Veilleur (`engine/hero-states`), Veilleur unique (`engine/watcher`), couleur de la lanterne et des tirs (`engine/lantern-color`), intro et outro communes (`engine/cine`), menu commun (`menu/common`).
 
 ## Prochaines étapes
-4. Test sur téléphone (ressenti, lisibilité, fluidité).
-5. D · optimisation du Chapitre II (`ch2/perf`) : mesure des images par seconde, poids, minification ; build identique à chaque étape, comme pour le Chapitre I.
-6. Moteur commun (`engine/`, suite) : boucle, entrées, difficultés, **un seul Veilleur dessiné et animé pour tous les chapitres** (poses de garde, pas de côté, coup reçu, victoire ; voir `DEMANDES.md`). Plan en sessions : `docs/COMMUN.md` §4.
-8. Menu : **une seule fonction de menu pour les 7 chapitres** (boutons au même endroit, mêmes polices, même position des textes — nom du jeu en grand, nom du chapitre en dessous en petit —, mêmes durées), alimentée par une table par chapitre (nom, couleur, sous-titre) ; écran titre commun, choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres.
-9. Plus tard : modules ES, Google Play, iOS ; chapitre III (Racines).
-10. **ch1/foundry-floor** : Chapitre I, phase II au fond de la Fonderie (`CHANGEMENTS.md` K), fausse fin de Facile supprimée (`CHANGEMENTS.md` L), esquive au sol cohérente avec la phase II (`docs/decisions/2026-11-01-idees-validees.md` c).
-11. **Renommage LumenBell partout** (textes affichés, documents, titre de page, nom d'app Android, titre de fin d'intro) : après `ch1/foundry-floor`. Reste à cadrer : écriture visuelle du titre, nom de package Android.
-12. **ch2/cinematics** : cinématiques du Chapitre II refaites dans l'esprit du Chapitre I, après `engine/cine`.
+1. Test sur téléphone (ressenti, lisibilité, fluidité).
+2. Moteur commun, tests (`engine/tests`) : suite des tests du moteur. Plan en sessions : `docs/COMMUN.md` §4.
+3. **ch1/foundry-floor** et **ch1/dodge-side** (pas encore fusionnés) : Chapitre I, phase II au fond de la Fonderie (`CHANGEMENTS.md` K), fausse fin de Facile supprimée (`CHANGEMENTS.md` L), lanterne du Colosse (G), textes (D), esquive en pas de côté (N, `docs/decisions/2026-11-01-idees-validees.md` c).
+4. **ch2/cinematics** : cinématiques du Chapitre II refaites dans l'esprit du Chapitre I, après `engine/cine`.
+5. **menu/crown** : choix du chapitre (la Couronne : six points autour d'un septième), progression, APK avec les deux chapitres.
+6. **ch2/perf** : optimisation du Chapitre II, après la fusion des deux jeux : mesure des images par seconde, poids, minification ; build identique à chaque étape, comme pour le Chapitre I.
+7. **Renommage LumenBell** : après `ch1/foundry-floor`. Titre de menu en majuscules « LUMENBELL », partout ailleurs « LumenBell » (textes affichés, documents, titre de page, nom d'app Android, titre de fin d'intro). Reste à cadrer : écriture visuelle du titre, nom de package Android.
+8. Plus tard : modules ES, Google Play, iOS ; chapitre III (Racines).
 
 ## Idées notées pour plus tard
 - **Session « sorts et équilibrage »** (après C1) : régler fenêtres et durées des nouveaux sorts du Chapitre II (codés, voir `docs/CH2-SPEC.md`). En tête : la phase III en Difficile (84 / 9 / 0 victoires du bot à 40 / 70 / 100 ms), le Difficile en général, la pénalité du reflet (0,6 s).
