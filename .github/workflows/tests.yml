@@ -1,21 +1,7 @@
 name: Tests
+# Declenche sur pull_request seulement : la PR a deja teste le meme code avant la fusion.
+# (Aucun job ne depend d'un push sur main ; android.yml est independant.)
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      # Documentation seule : pas de CI. Les .md lus par un test ou un build ne sont PAS listes
-      # (docs/CH2-SPEC.md, chapters/ch2-silent-bells/TEXTES.md) et declenchent donc la CI.
-      - '*.md'
-      - 'chapters/*/NOTES.md'
-      - 'shared/NOTES.md'
-      - 'docs/AUDIT-*.md'
-      - 'docs/COMMUN.md'
-      - 'docs/DEVLOG-NOTES.md'
-      - 'docs/GLOSSAIRE.md'
-      - 'docs/LORE.md'
-      - 'docs/TEXTES-CH1.md'
-      - 'docs/decisions/**'
-      - 'archives/**'
   pull_request:
     paths-ignore:
       # Documentation seule : pas de CI. Les .md lus par un test ou un build ne sont PAS listes
@@ -31,13 +17,20 @@ on:
       - 'docs/TEXTES-CH1.md'
       - 'docs/decisions/**'
       - 'archives/**'
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  # Controle obligatoire eventuel de la protection de branche : garder le nom « smoke ».
   smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
       - name: Le build reproduit exactement le fichier de reference
@@ -51,45 +44,26 @@ jobs:
           test -z "$(git status --porcelain chapters/ch2-silent-bells/dist/)"
       - name: Version de test
         run: python3 build/build_test.py
+      - name: Cache des navigateurs Playwright
+        id: pw
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
       - name: Installer Playwright
         working-directory: tests
         run: |
           npm ci
-          npx playwright install --with-deps chromium
-      - name: Test de fumee (3 phases x 3 difficultes) et polices hors ligne
+          if [ "${{ steps.pw.outputs.cache-hit }}" = "true" ]; then
+            npx playwright install-deps chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
+      - name: Chapitre I - test de fumee (3 phases x 3 difficultes) et polices hors ligne
         working-directory: tests
         run: |
           node smoke.js
           node fonts-offline.js
-      - name: Cles de sauvegarde communes aux deux chapitres (lb-*, migration des anciennes cles)
-        working-directory: tests
-        run: node keys.js
-      - name: Audio commun (un seul contexte, suspension et reprise, bruitages et musiques par LB.audio)
-        working-directory: tests
-        run: node audio.js
-      - name: Cadre commun des deux chapitres (menu, Epreuve, entrees, aide, aucun mot d'annonce, cinematiques)
-        working-directory: tests
-        run: |
-          node menu-layout.js
-          node menu-title.js
-          node trial.js
-          node input.js
-          node inputs.js
-          node help.js
-          node announce.js
-          node cine.js
-      - name: Chapitre II - textes, cles de sauvegarde, test de fumee (3 phases, hors ligne, sans reseau), aucun mot d'annonce
-        working-directory: tests
-        run: |
-          node ch2-texts.js
-          node ch2-keys.js
-          node ch2-smoke.js
-          node ch2-trial.js
-          node ch2-input.js
-          node ch2-title.js
-          node ch2-retouches3.js
-          node ch2-announce.js
-          node ch2-bot.js 100 --check
       - name: Apercu du jeu (Chapitres I et II)
         uses: actions/upload-artifact@v4
         with:
@@ -99,3 +73,70 @@ jobs:
             chapters/ch2-silent-bells/dist/index.html
           retention-days: 14
           if-no-files-found: error
+
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Commun (cles, audio, Epreuve, entrees, aide, annonces, cinematiques)
+            run: |
+              node keys.js
+              node audio.js
+              node trial.js
+              node input.js
+              node inputs.js
+              node help.js
+              node announce.js
+              node cine.js
+          - name: menu-layout
+            run: |
+              node menu-layout.js
+              node menu-title.js
+          - name: Chapitre II (textes, cles, fumee, Epreuve)
+            run: |
+              node ch2-texts.js
+              node ch2-keys.js
+              node ch2-smoke.js
+              node ch2-trial.js
+          - name: Chapitre II (entrees, titre, retouches, annonces, bot)
+            run: |
+              node ch2-input.js
+              node ch2-title.js
+              node ch2-retouches3.js
+              node ch2-announce.js
+              node ch2-bot.js 100 --check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Builds (ils alimentent la version de test)
+        run: |
+          python3 build/build.py
+          python3 build/build_ch2.py
+          python3 build/build_test.py
+      - name: Cache des navigateurs Playwright
+        id: pw
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
+      - name: Installer Playwright
+        working-directory: tests
+        run: |
+          npm ci
+          if [ "${{ steps.pw.outputs.cache-hit }}" = "true" ]; then
+            npx playwright install-deps chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
+      - name: Tests
+        working-directory: tests
+        run: ${{ matrix.run }}
