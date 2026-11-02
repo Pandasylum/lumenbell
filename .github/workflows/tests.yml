@@ -1,7 +1,22 @@
 name: Tests
-# Declenche sur pull_request seulement : la PR a deja teste le meme code avant la fusion.
-# (Aucun job ne depend d'un push sur main ; android.yml est independant.)
+# PR : tous les jobs. Push sur main : seul « smoke » (build reproductible + fumee + artefact).
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      # Documentation seule : pas de CI. Les .md lus par un test ou un build ne sont PAS listes
+      # (docs/CH2-SPEC.md, chapters/ch2-silent-bells/TEXTES.md) et declenchent donc la CI.
+      - '*.md'
+      - 'chapters/*/NOTES.md'
+      - 'shared/NOTES.md'
+      - 'docs/AUDIT-*.md'
+      - 'docs/COMMUN.md'
+      - 'docs/DEVLOG-NOTES.md'
+      - 'docs/GLOSSAIRE.md'
+      - 'docs/LORE.md'
+      - 'docs/TEXTES-CH1.md'
+      - 'docs/decisions/**'
+      - 'archives/**'
   pull_request:
     paths-ignore:
       # Documentation seule : pas de CI. Les .md lus par un test ou un build ne sont PAS listes
@@ -76,6 +91,7 @@ jobs:
 
   tests:
     name: ${{ matrix.name }}
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
