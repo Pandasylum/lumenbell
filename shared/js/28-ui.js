@@ -1,11 +1,11 @@
 /* ---------- Cadre commun des chapitres (session menu/common, 1er novembre 2026) ----------
    LB.menu (menu de la série), LB.gate (écran de démarrage), LB.card (cartes #ov), LB.pause, LB.input (entrées), LB.hud
-   (barres, nom du boss, sourcil, frise), LB.cue (repère d'aide), LB.help (case « Aide »), LB.fs (plein écran), LB.MENU_T.
+   (barres, nom du boss, sourcil, frise), LB.cue (repère d'aide), LB.help (case « Aide »), LB.motion (mouvement réduit), LB.hubEnd, LB.MENU_T.
    Référence par élément (docs/COMMUN.md § 1) : le Chapitre I pour ce que le joueur voit (structure, ordre du titre, polices,
    tailles, écran de démarrage, boutons de rejeu, Entrée / Espace au menu, repère d'aide), le Chapitre II pour l'outillage
    (carte déclarative, relâchement, zones sûres). Le chapitre ne déclare qu'une table CHAPTER (docs/COMMUN.md § 3.1) :
    n, id, title, color (code couleur), color2 (clair : ligne du chapitre, note de l'Épreuve), rgb (halos), menu {bg, glowA,
-   titleA, particles, t}, trial {name}, player, tag? (accroche), how? (mode d'emploi), next {n, title, open?} (plus affiché depuis le hub : remplacé par « Retour », voir LB.HUB), help {offer?},
+   titleA, particles, t}, trial {name}, player, tag? (accroche), how? (mode d'emploi), next {n, title, open?} (plus affiché depuis le hub : remplacé par « Chapitres », voir LB.HUB), help {offer?},
    et les fonctions trialOpen(), endSeen(), best(n), fmt(t). Un texte est une fonction qui rend la chaîne déjà traduite
    (le chapitre y appelle sa fonction de texte) ou un objet {en, fr}. Le style (LB.UI_CSS) est créé ici avec les couleurs du chapitre.
    Les textes communs (difficultés, sous-titres, boutons) sont ici, en LB._(en, fr). Aucun mot d'annonce. */
@@ -21,7 +21,7 @@ LB.ROMAN=['','I','II','III','IV','V','VI','VII'];
 LB.chapterName=(n,title)=>LB._('Chapter '+LB.ROMAN[n]+' · '+title,'Chapitre '+LB.ROMAN[n]+' · '+title);
 /* ---------- Hub (site/index.html, décision docs/decisions/2026-11-02-hub-site.md) ----------
    Le hub ouvre un chapitre par <chapitre>/index.html?from=hub : LB.fromHub est vrai, le chapitre n'affiche pas son écran de
-   démarrage (le geste a été fait au hub) et son menu montre « Retour », qui rend le hub par ../index.html?back=<n> (sans nouvel
+   démarrage (le geste a été fait au hub) et son menu montre « Chapitres », qui rend le hub par ../index.html?back=<n> (sans nouvel
    écran, la musique du hub repart). Ouvert seul (lien direct, tests) : écran de démarrage, pas de lien. LB.HUB : chemins et
    paramètres ; LB.HUB_ICON : petite figure des sept points (icône du lien, même dessin dans tous les chapitres). */
 LB.HUB={path:'../index.html',from:'hub',back:'back'};
@@ -31,13 +31,29 @@ LB.hubIcon=()=>{const I=LB.HUB_ICON,c=I.size/2;let s='<svg class="hubico" aria-h
   for(let n=1;n<=6;n++){const a=-Math.PI/2+(n-1)*Math.PI/3;s+='<circle cx="'+(c+I.r*Math.cos(a)).toFixed(2)+'" cy="'+(c+I.r*Math.sin(a)).toFixed(2)+'" r="'+I.dot+'" fill="'+(LB.CH_COL[n]||I.off)+'"/>'}
   return s+'<circle cx="'+c+'" cy="'+c+'" r="'+I.core+'" fill="'+I.core0+'" opacity=".55"/></svg>'};
 LB.toHub=(()=>{let gone=false;return n=>{if(gone)return false;gone=true;try{location.replace(LB.HUB.path+'?'+LB.HUB.back+'='+n)}catch(e){gone=false}return true}})();
+/* Vraie fin d'un chapitre ouvert depuis le hub (outro terminé, hors Épreuve) : le bouton de la dernière carte ramène au hub
+   (« Chapitres »), qui allume la tour avec sa cloche. Épreuve ou chapitre ouvert seul : carte inchangée. o : options de LB.card.show. */
+LB.hubEnd=(o,n,trial)=>{if(LB.fromHub&&!trial){o.go=LB._('Chapters','Chapitres');o.onGo=()=>LB.toHub(n)}return o};
+/* ---------- LB.motion : réglage « Mouvement réduit » (hub, clé lb-pref-motion), lu par le hub et les chapitres ----------
+   auto (défaut : préférence du système), reduce, normal. apply() pose la classe LB.MOTION.cls sur <html> quand le mouvement est
+   réduit : les règles « mouvement réduit » du CSS s'écrivent .lb-rm …, jamais @media (prefers-reduced-motion). reduced() : JS. */
+LB.MOTION={key:'lb-pref-motion',vals:['auto','reduce','normal'],cls:'lb-rm'};
+LB.motion={
+  get(){const v=LB.store.get(LB.MOTION.key,'auto');return LB.MOTION.vals.includes(v)?v:'auto'},
+  set(v){if(!LB.MOTION.vals.includes(v))return;LB.store.set(LB.MOTION.key,v);LB.motion.apply()},
+  sys(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}},
+  reduced(){const v=LB.motion.get();return v==='reduce'||(v==='auto'&&LB.motion.sys())},
+  apply(){try{document.documentElement.classList.toggle(LB.MOTION.cls,LB.motion.reduced())}catch(e){}}};
+LB.motion.apply();
+try{const mq=matchMedia('(prefers-reduced-motion: reduce)'),f=()=>LB.motion.apply();if(mq.addEventListener)mq.addEventListener('change',f);else if(mq.addListener)mq.addListener(f)}catch(e){}
 LB.MENU_T={
   /* placement commun à tous les chapitres (aucune position propre à un chapitre) : largeur de la carte et des difficultés, lignes réservées
      de l'accroche et du mode d'emploi (px ; réservées même si le chapitre n'en a pas, pour que les boutons restent au même endroit) */
   cardW:'min(94vw,580px)',btnFs:'min(18px,2.8vw)',   // police du nom d'une difficulté : ne passe jamais à la ligne (4 colonnes jusqu'à 480 px)
   nextW:'min(100%,240px)',nextFs:'clamp(12px,3.7vw,15px)',nextH:44,tagH:42,howH:18,
-  back:{fg:'#f0e8df',line:'#2d2438',bg:'rgba(10,7,16,.6)',hover:'rgba(255,255,255,.08)'},   // couleurs du lien « Retour » : les mêmes dans tous les chapitres (celles du Chapitre I)   // lien « Retour » vers le hub (largeur, police, hauteur mini), lignes réservées de l'accroche et du mode d'emploi
-  btnH:44,btnHLow:34,     // hauteur mini des boutons du haut du menu (Intro, Outro, plein écran) : écran tactile, puis paysage bas
+  back:{fg:'#f0e8df',line:'#2d2438',bg:'rgba(10,7,16,.6)',hover:'rgba(255,255,255,.08)'},   // couleurs du lien « Chapitres » vers le hub : les mêmes dans tous les chapitres (celles du Chapitre I)
+  btnH:44,btnHLow:34,     // hauteur mini des boutons du haut du menu (Intro, Outro) : écran tactile, puis paysage bas
+  top:{intro:12,outro:56},   // haut des boutons « ▶ Intro » et « ▶ Outro » (px, sous la zone sûre)
   raise:'-9vh',raiseLow:'-4vh',raiseMinH:700,tinyH:340,          // remontée du titre (paysage bas : raiseLow)
   glow:3.2,glowMin:.55,blink:5,          // scintillement des braises / de la mer (.lava), clignement des yeux (.eye)
   /* particules du menu : nombre, durée [min, + aléa] s, avance max s, taille [min, + aléa] px, dérive x px, montée, opacité au pic */
@@ -65,7 +81,7 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '@keyframes '+P.key+'{0%{transform:translate(0,0);opacity:0}10%{opacity:'+P.peak+'}100%{transform:translate(var(--dx),'+P.rise+');opacity:0}}\n'+
  '@keyframes mglow{from{opacity:'+M.glowMin+'}to{opacity:1}}\n'+
  '@keyframes mblink{0%,92%,100%{opacity:1}95%{opacity:.15}}\n'+
- '@media (prefers-reduced-motion:reduce){.'+P.cls+',.mscene .eye,.mscene .lava{animation:none}.'+P.cls+'{display:none}}\n'+
+ '.lb-rm .'+P.cls+',.lb-rm .mscene .eye,.lb-rm .mscene .lava{animation:none}.lb-rm .'+P.cls+'{display:none}   /* mouvement réduit (LB.motion) */\n'+
  '.mcard{margin-block:auto;position:relative;z-index:1;display:grid;padding:8px 0;gap:12px;justify-items:center;text-align:center;width:'+M.cardW+'}\n'+
  '.mcard h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(40px,9vw,88px);line-height:.92;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance;color:var(--fg);text-shadow:0 0 40px rgba('+rgb+','+C.menu.titleA+')}\n'+
  '.mcard h2 span{color:'+c+';text-shadow:0 0 40px rgba('+rgb+',.8)}\n'+
@@ -95,21 +111,18 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '@media (max-width:480px){.mph{gap:6px;grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}.mph button b{font-size:17px;letter-spacing:.04em}.mph button span{font-size:11px}.ov.menu{padding:16px 12px}.mcard h2{font-size:clamp(34px,11vw,48px)}}\n'+
  '@media (max-height:520px) and (orientation:landscape){.ov.menu{padding-block:8px}.mcard{gap:6px;padding:0}.mcard .tnote{padding:6px 12px;font-size:11px;line-height:1.3}.mcard .tnote b{margin-bottom:2px;font-size:14px}.mcard .tnote ul{gap:1px}.ver{margin:0}.ov.menu .mcard .tag,.ov.menu .mcard .how{display:none}.ov.menu .mcard .eyebrow,.ov.menu .mcard h2{transform:none}.mcard h2{font-size:clamp(30px,9vh,52px)}}\n'+
  '@media (max-height:'+M.tinyH+'px) and (orientation:landscape){.ov.menu{padding-block:4px}.mcard{gap:4px;padding:0}.mcard .tnote{line-height:1.2}.mcard h2{font-size:26px;line-height:.85}.mcard .eyebrow.chap{font-size:13px;margin-top:0}.mcard .tnote{padding:4px 10px}.mcard .tnote b{font-size:12px}.mcard .tnote ul{padding-left:14px}}\n'+
- '.fsm{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}.fsm span{font-size:13px}@media (max-width:480px){.fsm span{display:none}}\n'+
- '.fsb[hidden]{display:none}\n'+
  '#mphT{grid-template-columns:repeat(3,minmax(0,1fr));max-width:440px}\n'+
  '@media (max-width:480px){#mphT{grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}#mphT #mBackT{grid-column:1/-1}}\n'+
- '@media (pointer:coarse){.fsb{display:none!important}#introBtn{top:calc(12px + env(safe-area-inset-top,0px))!important}#outroBtn{top:calc(56px + env(safe-area-inset-top,0px))!important}}\n'+
  '.mfoot{display:flex;width:100%;min-width:0;justify-content:center;margin-top:2px}\n'+
- /* lien « Retour » vers le hub : même rendu dans tous les chapitres (couleurs neutres, icône des sept points) */
+ /* lien « Chapitres » vers le hub : même rendu dans tous les chapitres (couleurs neutres, icône des sept points) */
  '.mlink{display:flex;align-items:center;justify-content:center;gap:10px;width:'+M.nextW+';min-height:'+M.nextH+'px;box-sizing:border-box;min-width:0;max-width:100%;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:'+M.nextFs+';letter-spacing:.1em;text-transform:uppercase;color:'+M.back.fg+';border:1px solid '+M.back.line+';padding:6px 16px;background:'+M.back.bg+';cursor:pointer}\n'+
  '.mlink .hubico{flex:none}\n'+
  '.mlink:focus-visible{outline:2px solid '+M.back.fg+';outline-offset:2px}\n'+
  '.ver{margin:6px 0 0;font-size:11px;letter-spacing:.14em;color:var(--muted);opacity:.6;text-align:center}\n'+
  '.mph button[aria-disabled=true]{opacity:.45;cursor:not-allowed}\n'+
  '.mlink:hover{background:'+M.back.hover+'}\n'+
- '#introBtn{position:absolute;top:calc(56px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
- '#outroBtn{position:absolute;top:calc(100px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
+ '#introBtn{position:absolute;top:calc('+M.top.intro+'px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
+ '#outroBtn{position:absolute;top:calc('+M.top.outro+'px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
  '.langs{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:3}\n'+
  '.langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(241,227,207,.3);border-radius:4px;cursor:pointer}\n'+
  '.langs button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.22);color:#fff}\n'+
@@ -172,13 +185,6 @@ LB.pause=(()=>{
     visible(){return!!ov&&!ov.hidden},resume(){if(h.onResume)h.onResume()},get el(){return ov}};
 })();
 
-/* ---------- LB.fs : plein écran (boutons .fsb : en-tête et menu) ; masqués si l'API manque (iPhone) ---------- */
-LB.fs={bind(){const de=document.documentElement,rq=de.requestFullscreen||de.webkitRequestFullscreen,ex=document.exitFullscreen||document.webkitExitFullscreen,
-  isFs=()=>!!(document.fullscreenElement||document.webkitFullscreenElement),btns=document.querySelectorAll('.fsb');
- if(!rq){btns.forEach(b=>b.hidden=true);return}
- btns.forEach(b=>{if(b.dataset.fs)return;b.dataset.fs='1';b.addEventListener('click',e=>{e.currentTarget.blur();try{const r=isFs()?ex.call(document):rq.call(de);if(r&&r.catch)r.catch(()=>{})}catch(x){}})})},
- lang(){document.querySelectorAll('.fsb').forEach(b=>{const t=LB._('Fullscreen','Plein écran');b.setAttribute('aria-label',t);b.title=t})}};
-
 /* ---------- LB.gate : écran de démarrage (Commencer + langues) ; le clic débloque le son (comme au Chapitre I) ---------- */
 LB.gate=(()=>{
   let g=null,h={};
@@ -195,9 +201,9 @@ LB.gate=(()=>{
 
 /* ---------- LB.menu : menu de la série ----------
    mount(C, h) : construit autour de la scène SVG du chapitre (déjà dans #menu, classe .mscene) les particules, « ▶ Intro »,
-   « ▶ Outro » (après la vraie fin), plein écran, langues, puis la carte : « Lumen|bell », la ligne du chapitre dessous, accroche,
+   « ▶ Outro » (après la vraie fin), langues, puis la carte : « Lumen|bell », la ligne du chapitre dessous, accroche,
    Reprendre, les quatre difficultés, le sous-menu de l'Épreuve (Normal, Difficile, Retour) et sa note, mode d'emploi, version,
-   « Retour » vers le hub (seulement si LB.fromHub) ; aussi l'écran de démarrage (LB.gate), la carte (LB.card) et la pause (LB.pause) s'ils manquent.
+   « Chapitres » vers le hub (seulement si LB.fromHub) ; aussi l'écran de démarrage (LB.gate), la carte (LB.card) et la pause (LB.pause) s'ils manquent.
    h : {onDiff(dk), onIntro(), onOutro(), onResume(), onLang(), onStart()}. show(reprendre), hide(), visible(), lang(),
    update() (verrou de l'Épreuve, records, « ▶ Outro »), trial(on). Depuis le hub, l'écran de démarrage reste masqué : le son est
    relancé (LB.audio.ensure ; si le navigateur le bloque, il part au premier appui) et onStart est appelé comme après « Commencer ». */
@@ -221,7 +227,6 @@ LB.menu=(()=>{
     m.appendChild(particles());
     m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'introBtn'},'▶ Intro'));
     m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'outroBtn',hidden:''},'▶ Outro'));
-    m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn fsb fsm','aria-label':'Fullscreen',title:'Fullscreen'},'⛶ <span>Fullscreen</span>'));
     m.appendChild(LB.ui.mk('div',{class:'langs',id:'langs',role:'group','aria-label':'Language'},LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')));
     const b=(dk,pr)=>'<button type="button" data-diff="'+dk+'"'+(pr?' aria-pressed="true"':'')+'><b></b><span></span></button>';
     card=LB.ui.mk('div',{class:'mcard'},'<h2><span>Lumen</span><i>bell</i></h2><p class="eyebrow chap" id="mEye"></p><p class="tag"></p>'+
@@ -247,7 +252,6 @@ LB.menu=(()=>{
     $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onOutro)h.onOutro()});
     if(LB.fromHub)$('mHub').addEventListener('click',e=>{e.currentTarget.blur();LB.toHub(C.n)});   /* une seule navigation, même au double appui */
     document.querySelectorAll('#langs button,#gateLangs button').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
-    LB.fs.bind();
     lang();
     return m;
   }
@@ -272,13 +276,12 @@ LB.menu=(()=>{
     $('trialNote').querySelector('b').textContent=LB.tx(C.trial.name);
     $('trialNote').querySelectorAll('li').forEach((li,i)=>li.textContent=LB.TRIAL_RULES[i]());
     m.querySelector('.mcard .how').textContent=LB.tx(C.how);
-    m.querySelector('.fsm span').textContent=LB._('Fullscreen','Plein écran');
     $('introBtn').textContent='▶ Intro';$('outroBtn').textContent='▶ Outro';
-    if(LB.fromHub){$('mHub').querySelector('.nm').textContent=LB._('Back','Retour');$('mHub').setAttribute('aria-label',LB._('Back to the chapters','Retour aux chapitres'))}
+    if(LB.fromHub){$('mHub').querySelector('.nm').textContent=LB._('Chapters','Chapitres');$('mHub').setAttribute('aria-label',LB._('Back to the chapters','Retour aux chapitres'))}
     $('mphM').setAttribute('aria-label',LB._('Choose difficulty','Choisir la difficulté'));$('mphT').setAttribute('aria-label',LB.tx(C.trial.name));
     document.querySelectorAll('#langs,#gateLangs').forEach(e=>e.setAttribute('aria-label',LB._('Language','Langue')));
     document.querySelectorAll('#langs button,#gateLangs button').forEach(bt=>bt.setAttribute('aria-pressed',String(bt.dataset.lang===LB.lang.cur)));
-    LB.fs.lang();LB.pause.lang();
+    LB.pause.lang();
   }
   function trial(on){update();$('mphM').hidden=on;$('mphT').hidden=!on;$('trialNote').hidden=!on;
     try{(on?$('mphT').querySelector('button'):$('mphM').querySelector('[data-diff=normal]')).focus({preventScroll:true})}catch(e){}}

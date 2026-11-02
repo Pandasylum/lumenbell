@@ -82,7 +82,7 @@ async function menus(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await
   await click('#mphM [data-diff=trial]');await adv(10);await shot('menu-trial');await ctx.close()}
  await b.close();return errs}
 async function hubShots(dir,file){fs.mkdirSync(dir,{recursive:true});const b=await launch();const errs=[];
- const PROF={vierge:{},I:{'lb-ch1-end':'1'},'I-II':{'lb-ch1-end':'1','lb-ch2-end':'1'}};
+ const PROF={vierge:{},I:{'lb-ch1-end':'1','lb-hub-lit':'[1]'},'I-II':{'lb-ch1-end':'1','lb-ch2-end':'1','lb-hub-lit':'[1,2]'}};   // tours deja fetees : allumees d'emblee (horloge figee)
  for(const [w,h,touch] of [[375,667,true],[390,844,true],[844,390,true],[1280,720,false],[1920,1080,false]])for(const pr in PROF){
   const ctx=await b.newContext({viewport:{width:w,height:h},locale:'fr-FR',reducedMotion:'reduce',hasTouch:touch,isMobile:touch});await ctx.addInitScript(CLOCK,1234);
   await ctx.addInitScript(o=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');for(const k in o)localStorage.setItem(k,o[k])}},PROF[pr]);
@@ -91,6 +91,7 @@ async function hubShots(dir,file){fs.mkdirSync(dir,{recursive:true});const b=awa
   if(pr==='vierge')await shot('gate');
   await pg.evaluate(()=>document.getElementById('gateBtn').click());await pg.evaluate(()=>document.activeElement&&document.activeElement.blur());await shot('');
   if(pr==='I-II'){await pg.evaluate(()=>document.querySelector('.tw[data-n="2"]').click());await shot('carte')}
+  if(pr==='vierge'){await pg.evaluate(()=>document.getElementById('setBtn').click());await shot('reglages')}
   await ctx.close()}
  await b.close();return errs}
 async function compare(a,b){const fa=fs.readdirSync(a).filter(f=>f.endsWith('.png')).sort(),fb=new Set(fs.readdirSync(b));

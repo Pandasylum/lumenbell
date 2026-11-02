@@ -73,8 +73,8 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 .mscene .beam{transform-origin:715px 200px;animation:msweep 7s ease-in-out infinite alternate}
 .mscene .tent{animation:mglow 2.4s ease-in-out infinite alternate}
 @keyframes msweep{from{transform:rotate(-16deg)}to{transform:rotate(18deg)}}
-@media (prefers-reduced-motion:reduce){.mscene *{animation:none!important}}
-@media (prefers-reduced-motion:reduce){.btn{transition:none}}
+.lb-rm .mscene *{animation:none!important}   /* mouvement réduit : LB.motion (réglage du hub, sinon le système) */
+.lb-rm .btn{transition:none}
 @media (max-width:560px){.card{padding:12px 14px;gap:8px}.ward{width:100%}.opts{margin-left:0}.rtab{grid-template-columns:repeat(2,1fr)}}
 @media (pointer:coarse){.hint{display:none}.ward{min-height:84px;font-size:24px}.btn,.mbtn,.phases button,.skip{min-height:44px}.opts label{padding:8px 4px}}
 @media (max-width:480px){body{padding-block:12px 20px}.ov:not(.menu){position:fixed;z-index:40;background:rgba(6,8,12,.92);padding:16px}}

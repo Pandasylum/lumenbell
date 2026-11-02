@@ -83,7 +83,7 @@ function showLore(n){
   const L=LORE[n];
   paused=true;pendingLore=true;LB.card.show({eye:L.eye,title:L.title,desc:L.desc,go:_('Continue','Continuer'),onGo:start});
 }
-const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduce=LB.motion.reduced();   /* mouvement réduit : réglage du hub (lb-pref-motion), sinon le système */
 
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp01=v=>v<0?0:v>1?1:v;
