@@ -55,12 +55,20 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .core{position:absolute;left:50%;top:50%;width:var(--core);height:var(--core);transform:translate(-50%,-50%);border-radius:50%;background:var(--coreCol);opacity:var(--coreLo);box-shadow:0 0 calc(var(--core)*1.5) 1px var(--coreCol);animation:hbeat var(--beat) ease-in-out infinite;pointer-events:none}
 @keyframes hbeat{0%,100%{opacity:var(--coreLo)}12%{opacity:var(--coreHi)}24%{opacity:var(--coreLo)}36%{opacity:calc(var(--coreHi)*.7)}50%{opacity:var(--coreLo)}}
 /* carte d'un chapitre : petite, ancrée sous la tour choisie (ou au-dessus), pointe vers elle ; left, top, --tipX et .up posés par placeCard() */
-.hcard{position:absolute;z-index:4;left:0;top:0;width:max-content;max-width:calc(100vw - 2*var(--cardEdge));display:grid;gap:3px;justify-items:center;text-align:center;padding:5px 12px 6px;background:#0e0a14;border:1px solid rgba(var(--cr),.6);box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 24px rgba(var(--cr),.18);outline:none}
-.hcard .tip{position:absolute;left:var(--tipX,50%);top:0;width:var(--tipS);height:var(--tipS);background:#0e0a14;border:solid rgba(var(--cr),.6);border-width:1px 0 0 1px;transform:translate(-50%,-50%) rotate(45deg)}
-.hcard.up .tip{top:100%;border-width:0 1px 1px 0}
-.hcard h2{margin:0;white-space:nowrap;font-family:var(--font-display);font-weight:800;font-size:var(--nameFs);line-height:1;letter-spacing:.03em;text-transform:uppercase;color:var(--c);text-shadow:0 0 24px rgba(var(--cr),.6)}
-.hcard .soon{margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:2px .8em;white-space:nowrap}
-.hcard .btn{padding:6px 22px;font-size:17px}
+.hcard{position:absolute;z-index:4;left:0;top:0;width:max-content;max-width:calc(100vw - 2*var(--cardEdge));display:grid;gap:4px;justify-items:center;text-align:center;padding:10px 14px 8px;background:rgba(14,10,20,.92);border:1px solid rgba(var(--cr),.5);border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.55);outline:none}
+.hcard .tip{position:absolute;left:var(--tipX,50%);top:0;width:var(--tipS);height:var(--tipS);background:#0e0a14;border:solid rgba(var(--cr),.5);border-width:1px 0 0 1px;border-top-left-radius:2px;transform:translate(-50%,-50%) rotate(45deg)}
+.hcard.up .tip{top:100%;border-width:0 1px 1px 0;border-radius:0 0 2px 0}
+.hcard h2{margin:0;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:var(--nameFs);line-height:1;letter-spacing:.16em;padding-left:.16em;text-transform:uppercase;color:var(--c)}
+.hcard .soon{margin:0;min-height:var(--touch);display:grid;align-items:center;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+/* « Entrer » : bouton discret à fin contour, qui se remplit doucement au survol, au focus et au toucher ; zone ≥ 44 px */
+.hcard .btn{min-height:max(44px,var(--touch));padding:0 20px;font-size:14px;font-weight:700;letter-spacing:.2em;text-indent:.2em;border:1px solid rgba(var(--cr),.55);border-radius:4px;background:transparent;color:var(--fg);transition:background-color .22s ease,border-color .22s ease,color .22s ease}
+.hcard .btn:focus-visible,.hcard .btn:active{background:rgba(var(--cr),.22);border-color:var(--c);color:#fff}
+.hcard .btn:focus-visible{outline:none}
+@media (hover:hover){.hcard .btn:hover{background:rgba(var(--cr),.22);border-color:var(--c);color:#fff;filter:none}}
+/* « À venir » : même cadre, estompé, sans bouton */
+.hcard.soon{border-color:rgba(var(--cr),.26)}
+.hcard.soon .tip{border-color:rgba(var(--cr),.26)}
+.hcard.soon h2{opacity:.6}
 .btn{font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border:2px solid var(--c,var(--lantern));padding:10px 26px;min-height:var(--touch);background:var(--c,var(--lantern));color:#0b0710}
 .btn:hover{filter:brightness(1.12)}
 .btn:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
@@ -101,5 +109,5 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
    forme (à jouer = point plein et fin cercle ; terminé = point plein sans cercle ; fermé = cercle éteint sans point) */
 .lb-rm .mote{display:none}
 .lb-rm .tw.play .dot,.lb-rm .tw.ring .dot,.lb-rm .core{animation:none}
-.lb-rm .tw .dot,.lb-rm .wire line{transition:none}
+.lb-rm .tw .dot,.lb-rm .wire line,.lb-rm .hcard .btn{transition:none}
 .lb-rm .tw.play .dot{opacity:1}

@@ -43,7 +43,7 @@ const HUB_T={
      entre le point de la tour et la pointe ; clear écart minimal aux tours, au centre, aux boutons et au titre ; edge marge des bords de
      l'écran ; step pas de glissement sur le côté ; tipMin la pointe reste à au moins tipMin du bord de la carte. Ordre : en dessous,
      sinon au-dessus ; d'abord sans toucher boutons ni titre, puis seulement sans toucher les tours et le centre. */
-  card:{fs:'clamp(20px,5.6vw,24px)',tip:8,gap:2,clear:2,edge:10,step:4,tipMin:14},
+  card:{fs:'clamp(15px,4.4vw,18px)',tip:8,gap:2,clear:2,edge:10,step:4,tipMin:14},
   halo:{gap:3,w:1.5},                        // « à jouer » : écart et épaisseur du fin cercle autour du point (px), dans tous les modes
   set:{w:'min(92vw,380px)',gear:24,warn:'#ff8a7a'},   // réglages : largeur du panneau, dessin de la roue (px), couleur de la réinitialisation
   bell:{dur:3.6,vol:.07,partials:[[1,1,1],[2.0,.5,.7],[2.76,.32,.5],[4.07,.18,.35],[5.4,.1,.25]]},   // cloche : [rapport, niveau, durée relative]
@@ -156,7 +156,7 @@ function open(n,quiet){const s=shown[n],c=CH(n);if(!c||s==='closed'||leaving)ret
   const hc=$('hcard'),col=LB.CH_COL[n]||'#8a8a9a';if(card&&tw[card])tw[card].classList.remove('sel');card=n;tw[n].classList.add('sel');if(!quiet)chime(n,0);
   hc.style.setProperty('--c',col);hc.style.setProperty('--cr',rgbOf(col));
   $('hcName').textContent=c.title;
-  $('hcSoon').hidden=!c.soon;$('hcSoon').textContent=LB._('Coming soon','À venir');
+  hc.classList.toggle('soon',!!c.soon);$('hcSoon').hidden=!c.soon;$('hcSoon').textContent=LB._('Coming soon','À venir');
   $('hcGo').hidden=!!c.soon;$('hcGo').disabled=false;hc.setAttribute('aria-label',LB.chapterName(n,c.title));hc.hidden=false;placeCard();
   if(!quiet)try{(c.soon?hc:$('hcGo')).focus({preventScroll:true})}catch(e){}}
 function close(focus){if(!card)return;const n=card;card=0;tw[n].classList.remove('sel');$('hcard').hidden=true;if(focus)try{tw[n].focus({preventScroll:true})}catch(e){}}
