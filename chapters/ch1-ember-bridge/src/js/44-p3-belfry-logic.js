@@ -415,8 +415,8 @@ function rFinale(dt){
   if(t>=FIN.hero+1.65&&!f.hs4){f.hs4=1;tone(349,1.6,'sine',.05,0)}
   if(t>=FIN.hero+2.2&&!f.hs5){f.hs5=1;say(_('All but one.','Toutes, sauf une.'))}
   if(t>=FIN.space){R.mode='space';R.st=0;say(_('Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I.','Au large, le Phare Noyé reste muet. Fin du chapitre I.'));
-    R.outroAgain=LB.hubAgain(RUN.on,OUTRO);   /* hub, hors Épreuve, outro déjà vue : pas de relance, la carte garde aussi « Menu » */
-    if(R.outroAgain){R.cardShown=true;rEnd();return}
+    R.outroAgain=LB.hubAgain(RUN.on,OUTRO);   /* l'outro ne se joue qu'à la première vraie fin hors Épreuve ; en Épreuve, ni outro ni drapeau */
+    if(RUN.on||R.outroAgain){R.cardShown=true;rEnd();return}
     R.outro=true;OUTRO.play(()=>{if(!R)return;R.outro=false;if(R.mode==='space'&&!R.cardShown){R.cardShown=true;rEnd()}})}
 }
 

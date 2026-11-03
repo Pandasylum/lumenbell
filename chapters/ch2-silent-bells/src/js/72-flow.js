@@ -46,7 +46,7 @@ function phaseCleared(){
 }
 function clearedCard(id){S.mode='card';S.still=id;const next=ORDER[gpOf(id)];
   showCard({eye:[null,_('Phase II cleared','Phase II terminée'),_('Phase I cleared','Phase I terminée'),_('Phase III cleared','Phase III terminée')][id],title:PH[id].boss(),desc:PH[id].end(),
-    go:_('Continue','Continuer'),onGo:id===3?()=>{S.epAgain=LB.hubAgain(S.d.trial,EPI);if(S.epAgain)victory();else playEpilogue(victory)}:()=>enterPhase(next),onMenu:id===3?null:showMenu});
+    go:_('Continue','Continuer'),onGo:id===3?()=>{S.epAgain=LB.hubAgain(S.d.trial,EPI);if(S.d.trial||S.epAgain)victory();else playEpilogue(victory)}:()=>enterPhase(next),onMenu:id===3?null:showMenu});
 }
 function fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0')}
 function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);

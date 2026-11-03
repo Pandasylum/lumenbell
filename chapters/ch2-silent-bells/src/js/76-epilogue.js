@@ -60,7 +60,7 @@ function drawEpilogue(t){
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
 }
-/* the epilogue in the series frame; flag lb-ch2-outro (written at the end or on Skip, not to be confused with lb-ch2-end): from the hub, outside the Trial, it plays only the first time */
+/* the epilogue in the series frame; flag lb-ch2-outro (written at the end or on Skip, not to be confused with lb-ch2-end): it plays only at the first true ending outside the Trial (hub or alone), then only by ▶ Outro */
 const EPI=LB.cine.create({key:'outro',scenes:()=>CINE_D.outro.map((d,i)=>({d,txt:()=>ECAP_TXT()[i],col:i===4?CH_COL[3]:'',draw:cineScene(drawEpilogue)})),
   onTick:t=>{if(!$('menu').hidden)gt=S.epT0+t}});
 function playEpilogue(cb){MUSIC.stop();MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();setTheme(4);$('skip').hidden=true;$('hdEye').textContent=_('Epilogue','Épilogue');EPI.play(endEpilogue)}

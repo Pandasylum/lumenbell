@@ -35,8 +35,9 @@ LB.toHub=(()=>{let gone=false;return n=>{if(gone)return false;gone=true;try{loca
    (« Chapitres »), qui allume la tour avec sa cloche. Épreuve ou chapitre ouvert seul : carte inchangée. o : options de LB.card.show.
    again : l'outro était déjà vue (drapeau lb-chN-outro lu avant la fin) : la carte garde aussi « Menu » (menu = sa fonction) ; sinon « Chapitres » seul.
    Décision docs/decisions/2026-11-03-outro-une-fois.md. */
-/* LB.hubAgain(trial, cine) : chapitre ouvert depuis le hub, hors Épreuve, outro déjà vue (à lire avant de jouer l'outro) */
-LB.hubAgain=(trial,cine)=>!!(LB.fromHub&&!trial&&cine.seen());
+/* LB.hubAgain(trial, cine) : hors Épreuve et outro déjà vue (à lire avant de jouer l'outro ; en Épreuve le drapeau n'est jamais lu).
+   Règle : l'outro ne se joue qu'à la première vraie fin hors Épreuve ; ensuite seul « ▶ Outro » la rejoue. */
+LB.hubAgain=(trial,cine)=>!trial&&!!cine.seen();
 LB.hubEnd=(o,n,trial,again,menu)=>{if(LB.fromHub&&!trial){o.go=LB._('Chapters','Chapitres');o.onGo=()=>LB.toHub(n);o.onMenu=again?(menu||o.onMenu||null):null}return o};
 /* ---------- LB.motion : mouvement réduit = préférence du système (prefers-reduced-motion), sans réglage ni clé de sauvegarde ----------
    apply() pose la classe LB.MOTION.cls sur <html> quand le mouvement est réduit : les règles « mouvement réduit » du CSS s'écrivent
@@ -209,6 +210,14 @@ LB.card=(()=>{
   return{el,mount,show,hide(){if(el.ov)el.ov.hidden=true},visible(){return!!el.ov&&!el.ov.hidden},go(){if(onGo)onGo()},setGo(f){onGo=f},setGo2(f){onGo2=f}};
 })();
 
+/* ---------- LB.hdr : en-tête (frise, « Menu », roue) inerte derrière une carte, l'outro ou la pause ----------
+   L'en-tête (.top) prend l'attribut inert (ni clic, ni focus) tant que #ov, #pause ou #cine est ouvert, et le perd à la fermeture.
+   watch(n) observe l'attribut hidden de n (les chapitres le basculent aussi à la main) ; sync() recalcule. Menu ouvert : l'en-tête est déjà couvert. */
+LB.hdr=(()=>{const ws=[];
+  const sync=()=>{const e=document.querySelector('.top');if(!e)return;if(ws.some(n=>!n.hidden))e.setAttribute('inert','');else e.removeAttribute('inert')};
+  const watch=n=>{if(!n||ws.includes(n))return;ws.push(n);try{new MutationObserver(sync).observe(n,{attributes:true,attributeFilter:['hidden']})}catch(e){}sync()};
+  return{watch,sync}})();
+
 /* ---------- LB.pause : carte de pause (Reprendre, Menu) ----------
    « Menu » ouvre deux choix sous Reprendre : « Menu du chapitre » et, depuis le hub (LB.fromHub), « Chapitres » (LB.toHub). Chaque
    choix demande une confirmation (Quitter / Rester) : le combat en pause est perdu. Vues : main, choices, confirm (LB.pause.view).
@@ -284,6 +293,7 @@ LB.menu=(()=>{
     LB.gate.mount(stage,m,{onStart:()=>{if(h.onStart)h.onStart()}});
     if(LB.fromHub){LB.gate.el.hidden=true;LB.audio.ensure();setTimeout(()=>{if(h.onStart)h.onStart()},0)}   /* après la fin du démarrage du chapitre */
     if(!LB.pause.el)LB.pause.mount(stage,m);
+    ['ov','pause','cine'].forEach(id=>LB.hdr.watch($(id)));
     m.appendChild(particles());
     m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'introBtn'},'▶ Intro'));
     m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'outroBtn',hidden:''},'▶ Outro'));
