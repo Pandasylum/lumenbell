@@ -821,7 +821,7 @@ LB.MENU_T={
   back:{fg:'#f0e8df',line:'#2d2438',bg:'rgba(10,7,16,.6)',hover:'rgba(255,255,255,.08)'},   // couleurs du lien « Chapitres » vers le hub : les mêmes dans tous les chapitres (celles du Chapitre I)
   /* roue de réglages en jeu (même rendu que le bouton MENU / Pause) : hauteur, hauteur tactile, hauteur paysage bas, icône ; seuils des deux placements
      (portrait : en-tête, à droite de MENU ; paysage bas : ligne Pause / Réessayer) */
-  gameGear:{h:34,hTouch:44,hLow:30,icon:20,lowH:520,titleFs:'clamp(34px,7vw,52px)',titleLh:.95,titleMt:2,gap:6,lowPadPh:3,lowMinPh:20,lowPadMenu:5},   /* roue : sur la ligne du titre (bord droit des barres) ; paysage bas : à droite de MENU (frise resserrée pour tenir dans la colonne) */
+  gameGear:{touch:44,icon:20,lowH:520,eyeFs:12,eyeLh:1.5,lowPadPh:3,lowMinPh:20,lowPadMenu:5,compactW:820},   /* roue seule, sans carré : zone de toucher invisible (touch) centrée sur l'icône (icon), icône collée au bord droit ; portrait : ligne du sourcil (corps et interligne du sourcil) ; paysage bas : ligne de la frise, frise resserrée seulement si la colonne est étroite (compactW) */   /* roue : sur la ligne du titre (bord droit des barres) ; paysage bas : à droite de MENU (frise resserrée pour tenir dans la colonne) */
   btnH:44,btnHLow:34,     // hauteur mini des boutons du haut du menu (Intro, Outro) : écran tactile, puis paysage bas
   top:{intro:12,outro:56},   // haut des boutons « ▶ Intro » et « ▶ Outro » (px, sous la zone sûre)
   raise:'-9vh',raiseLow:'-4vh',raiseMinH:700,tinyH:340,          // remontée du titre (paysage bas : raiseLow)
@@ -920,13 +920,15 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.langs button:focus-visible{outline:2px solid '+c+';outline-offset:2px}\n'+
  /* roue de réglages en jeu (LB.settings.attach) : carré comme MENU, mêmes bords haut et bas ; sur la ligne du titre par défaut ; en paysage bas, à droite de MENU (même hauteur) */
  '.top{position:relative}\n'+
- '.mbtn.gear{display:inline-grid;place-items:center;flex:none;width:'+G.h+'px;height:'+G.h+'px;padding:0;box-sizing:border-box;color:var(--muted)}\n'+
- '#gearHead{position:absolute;right:0;margin-top:calc(('+G.titleLh+' * '+G.titleFs+' - '+G.h+'px) / 2 + '+G.titleMt+'px)}\n'+
- '.mbtn.gear svg{width:'+G.icon+'px;height:'+G.icon+'px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}\n'+
- '.mbtn.gear:hover,.mbtn.gear[aria-expanded="true"]{color:var(--fg)}\n'+
+ 'button.mbtn.gear{display:grid;place-items:center;flex:none;width:'+G.touch+'px;height:'+G.touch+'px;min-height:0;padding:0;border:0;background:none;color:var(--muted);box-sizing:border-box}\n'+
+ 'button.mbtn.gear svg{width:'+G.icon+'px;height:'+G.icon+'px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}\n'+
+ 'button.mbtn.gear:hover,button.mbtn.gear:focus-visible,button.mbtn.gear[aria-expanded="true"]{color:var(--fg);background:none}\n'+
+ '#gearHead,#gearMenu{position:absolute;right:calc(('+G.icon+'px - '+G.touch+'px) / 2)}\n'+
+ '#gearHead{margin-top:calc(('+G.eyeFs+'px * '+G.eyeLh+' - '+G.touch+'px) / 2)}\n'+
+ '.top>div:first-child{max-width:calc(100% - '+G.touch+'px)}\n'+
  '#gearMenu{display:none}\n'+
- '@media (pointer:coarse){.mbtn.gear{width:'+G.hTouch+'px;height:'+G.hTouch+'px}#gearHead{margin-top:calc(('+G.titleLh+' * '+G.titleFs+' - '+G.hTouch+'px) / 2 + '+G.titleMt+'px)}}\n'+
- '@media (max-height:'+G.lowH+'px) and (orientation:landscape){#gearHead{display:none}.hright>#menuBtn{align-self:stretch}.hright>#gearMenu{display:inline-grid;width:'+G.hLow+'px;height:auto;align-self:stretch;min-height:0}.phases button{min-width:'+G.lowMinPh+'px;padding-inline:'+G.lowPadPh+'px}.hright .mbtn:not(.gear){padding-inline:'+G.lowPadMenu+'px}}\n'+
+ '@media (max-height:'+G.lowH+'px) and (orientation:landscape){#gearHead{display:none}.hright>#gearMenu{display:grid}.top>div:first-child{max-width:none}}\n'+
+ '@media (max-height:'+G.lowH+'px) and (orientation:landscape) and (max-width:'+G.compactW+'px){.phases button{min-width:'+G.lowMinPh+'px;padding-inline:'+G.lowPadPh+'px}.hright .mbtn:not(.gear){padding-inline:'+G.lowPadMenu+'px}}   /* colonne étroite : la frise se resserre pour ne pas toucher la zone de la roue */\n'+
  '@media (pointer:coarse){.langs button{min-height:40px}.ov.menu .mbtn{min-height:'+M.btnH+'px}}\n'+
  '@media (max-height:520px) and (orientation:landscape){.ov.menu .mbtn{min-height:'+M.btnHLow+'px;padding-block:2px}.mlink{min-height:'+M.btnHLow+'px;padding-block:2px}}\n'};
 LB.ui=(()=>{
@@ -1221,7 +1223,7 @@ LB.GEAR_SVG='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path
 LB.gearBtn=()=>'<button class="gear" id="mGear" type="button" aria-haspopup="dialog" aria-expanded="false">'+LB.GEAR_SVG+'</button>';
 /* roues de l'en-tête (après MENU) et de la ligne Pause / Réessayer : mêmes réglages que le menu, une seule implémentation (LB.settings.attach) */
 LB.gameGear=()=>{const mk=id=>{const b=LB.ui.mk('button',{type:'button',class:'mbtn gear','aria-haspopup':'dialog','aria-expanded':'false'},LB.GEAR_SVG);b.id=id;return b},
-    H=document.querySelector('.top h1'),A=document.getElementById('menuBtn');
+    H=document.querySelector('.top h1').parentNode.firstElementChild,A=document.getElementById('menuBtn');
   if(H&&!document.getElementById('gearHead'))LB.settings.attach(mk('gearHead'),b=>H.parentNode.insertBefore(b,H));
   if(A&&!document.getElementById('gearMenu'))LB.settings.attach(mk('gearMenu'),b=>A.after(b))};
 LB.settings=(()=>{

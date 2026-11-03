@@ -152,3 +152,4 @@
 - Chapitre II : le menu n'affiche plus les cases « Aide visuelle », « Son » et « Musique » ; les réglages se trouvent sur la roue commune, à côté de EN/FR.
 - En plein combat, une roue de réglages (Musique, Bruitages, Aide visuelle) apparaît à côté de MENU en portrait et à côté de Pause / Réessayer en paysage ; l'ouvrir met le jeu en pause.
 - La roue de réglages en jeu est sur la ligne du titre en portrait (la frise ne bouge plus) et à droite de MENU en paysage.
+- La roue de réglages en jeu n'est plus qu'une icône : sur la ligne du sourcil en portrait, au bord droit de la ligne de la frise en paysage.
