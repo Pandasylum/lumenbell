@@ -20,6 +20,7 @@ Jeu canvas HTML5, série de combats de boss. Lis d'abord `BIBLE.md`, `NOTES.md` 
 15. Ne pas lire `archives/`, et ne rien lire au-delà des fichiers nommés par le prompt, sauf si le sujet l'exige.
 16. Session documentation seule : ne lire que les fichiers cités, aucun build, aucun test.
 17. Ne surveille jamais la CI et ne fais aucun polling (`gh run watch`, relectures en boucle) : termine après le push.
+18. Après tout changement de source du Chapitre II : lance `build.py`, `build_ch2.py` puis `build_site.py` et commite les fichiers générés, sinon la CI échoue (build reproductible).
 
 ## Fin de session
 Tests passés, `NOTES.md` et `DECISIONS.md` à jour, fichiers déposés sur la branche, résumé des changements.
