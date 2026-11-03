@@ -38,6 +38,16 @@ for(const [nm,w,h,touch] of SIZES)for(const lang of ['fr','en'])for(const ch of 
  await pg.evaluate(()=>document.querySelector('#mphM [data-diff=trial]').click());await pg.waitForTimeout(200);
  R.trial=await grab(pg,['intro','outro','langEn','langFr','tn','th','back','note','hub','ver','h2','chap']);
  (all[tag]=all[tag]||{})[ch]=R;all[tag].size=[w,h];await ctx.close()}
+// En jeu : I, II, III et MENU ont la meme hauteur (portrait et paysage bas, avec ou sans roue), dans les deux chapitres.
+for(const [nm,w,h] of [['p320',320,568],['phone',390,844],['l568',568,320],['land',860,400]])for(const ch of ['ch1','ch2']){
+ const ctx=await b.newContext({viewport:{width:w,height:h},isMobile:true,hasTouch:true});
+ await ctx.addInitScript(k=>{localStorage.setItem(k[0],'1');localStorage.setItem(k[1],'1')},['lb-'+ch+'-end','lb-'+ch+'-intro']);
+ const pg=await ctx.newPage();await pg.goto('file://'+F[ch]+'?from=hub');await pg.waitForTimeout(400);await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(400);
+ const m=()=>pg.evaluate(()=>[...document.querySelectorAll('#phases li'),document.getElementById('menuBtn')].map(e=>Math.round(e.getBoundingClientRect().height*10)/10));
+ const a=await m();await pg.addStyleTag({content:'.gear{display:none!important}'});const c=await m();
+ if(Math.max(...a)-Math.min(...a)>TOL)errs.push('frise '+ch+' '+nm+' : hauteurs I/II/III/MENU differentes '+JSON.stringify(a));
+ if(JSON.stringify(a)!==JSON.stringify(c))errs.push('frise '+ch+' '+nm+' : la roue change les hauteurs '+JSON.stringify([a,c]));
+ await ctx.close()}
 const OUT={};
 for(const tag in all)for(const ch of ['ch1','ch2'])for(const st of ['gate','menu','resume','trial']){const [w,h]=all[tag].size;for(const n in all[tag][ch][st]){const r=all[tag][ch][st][n];if(!r)continue;
  if(r[0]<-.5||r[1]<-.5||r[0]+r[2]>w+.5||r[1]+r[3]>h+.5)errs.push(tag+' '+ch+' '+st+' '+n+' depasse de l\'ecran '+w+'x'+h+' : '+JSON.stringify(r))}}
