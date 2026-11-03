@@ -55,3 +55,6 @@ Une session = un périmètre = une branche. Elle lit `BIBLE.md`, ce fichier et l
 ## Page verrouillée (ui/lock-scroll)
 - CSS de page : `site/src/page/style.css`, `chapters/*/src/page/style.css`, panneau `.hsbox` dans `shared/js/28-ui.js`. Test : `tests/lockscroll.js` (appelé par `hub.js` et `menu-layout.js`).
 - **Note session B (APK)** : régler aussi la WebView Android (`overScrollMode` « never ») ; rien à faire ici.
+
+## Builds versionnés du Chapitre II
+- Toute modif de `chapters/ch2-silent-bells/src/` demande deux régénérations commitées : `python3 build/build_ch2.py` (`chapters/ch2-silent-bells/dist/index.html`) puis `python3 build/build_site.py` (`site/ch2/index.html`). La CI vérifie les deux par `git diff --exit-code`.
