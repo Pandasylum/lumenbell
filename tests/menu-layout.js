@@ -33,10 +33,12 @@ for(const [nm,w,h,touch] of SIZES)for(const lang of ['fr','en'])for(const ch of 
  if(await pg.evaluate(()=>!!document.querySelector('.fsb,.fsm')))errs.push(ch+' '+tag+' : bouton plein ecran encore present');
  await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(500);
  if(ch==='ch2'&&await pg.evaluate(()=>!document.getElementById('skip').hidden)){await pg.keyboard.press('Enter');await pg.waitForTimeout(400)}   // cinematique d'entree de phase : passee, la carte s'affiche
+ if(touch&&(nm==='phone'||nm==='l640')&&lang==='fr')await require('./lockscroll')(ctx,pg,ch+' '+tag+' (scene de jeu)',errs);
  await pg.evaluate(()=>document.getElementById('menuBtn').click());await pg.waitForTimeout(300);
  R.resume=await grab(pg,['intro','outro','langEn','langFr','easy','normal','hard','trial','resume','hub','ver','h2','chap']);
  await pg.evaluate(()=>document.querySelector('#mphM [data-diff=trial]').click());await pg.waitForTimeout(200);
  R.trial=await grab(pg,['intro','outro','langEn','langFr','tn','th','back','note','hub','ver','h2','chap']);
+ if(touch&&(nm==='phone'||nm==='l640')&&lang==='fr')await require('./lockscroll')(ctx,pg,ch+' '+tag+' (menu)',errs);
  (all[tag]=all[tag]||{})[ch]=R;all[tag].size=[w,h];await ctx.close()}
 // En jeu : I, II, III et MENU ont la meme hauteur (portrait et paysage bas, avec ou sans roue), dans les deux chapitres.
 for(const [nm,w,h] of [['p320',320,568],['phone',390,844],['l568',568,320],['land',860,400]])for(const ch of ['ch1','ch2']){
