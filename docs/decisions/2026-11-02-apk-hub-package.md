@@ -41,5 +41,5 @@ Décision de Kevin du 2 novembre 2026. Rien n'est codé ici : l'application se f
 
 ## Suivi
 
-- `ROADMAP.md`, point 8 : hub = `site/`, musique dédiée du hub.
+- `ROADMAP.md`, section Fait : hub = `site/`, musique dédiée du hub.
 - `ROADMAP.md`, renommage LumenBell : « nom de package Android » tranché (`com.lumenbell.game`, appliqué en session `menu/crown`).
