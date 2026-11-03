@@ -9,17 +9,17 @@ Suivi
 Ce document évolue à chaque mise à jour du lore. Chaque section ci-dessous a un statut. Claude met à jour le statut après avoir appliqué une section (date et lien de la PR). Une section entièrement appliquée et fusionnée est déplacée en bas du document, dans « Appliqué », pour le garder court. Une nouvelle décision qui touche l'existant devient une nouvelle section (lettre suivante, avec la date).
 
 Section	Sujet	Statut	Date	PR
-D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	En cours	28 octobre 2026 (mis à jour le 29)	branche `ch1/foundry-floor` (PR à ouvrir)
+D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	Fait (PR fusionnée)	28 octobre 2026 (mis à jour le 29)	https://github.com/Pandasylum/lumenbell/pull/31
 F	Documents à mettre à jour	En cours (CH2-SPEC et COMMUN faits ; BIBLE, DECISIONS, LORE restent)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
-G	Chapitre I · Lanterne du Colosse de braise	En cours	29 octobre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
+G	Chapitre I · Lanterne du Colosse de braise	Fait (PR fusionnée)	29 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/31
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
 J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours : (a) et (b) fusionnés ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (a et b fusionnés)
 
-K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
-L	Chapitre I · Fausse fin de Facile supprimée	En cours	1er novembre 2026	branche `ch1/foundry-floor` (PR à ouvrir)
+K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	Fait (PR fusionnée)	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/31
+L	Chapitre I · Fausse fin de Facile supprimée	Fait (PR fusionnée)	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/31
 
 M	Chapitre II · Phare Noyé : tour d'avant C1	À faire (validation à l'écran d'abord)	1er novembre 2026	
-N	Chapitre I · Phase II : esquive en pas de côté, contres au sol	En cours	1er novembre 2026	branche `ch1/dodge-side` (PR à ouvrir)
+N	Chapitre I · Phase II : esquive en pas de côté, contres au sol	Fait (PR fusionnée)	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/36
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
 

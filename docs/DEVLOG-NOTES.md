@@ -156,3 +156,5 @@
 - Sur téléphone, plus rien ne glisse ni ne rebondit sous le doigt : le hub, les menus et le combat restent fixes ; seuls les longs panneaux (réglages, cartes) défilent encore.
 - Sur téléphone, l'application s'appelle « LumenBell » et s'installe à côté de l'ancienne (nouveau package) ; elle s'ouvre sur le hub.
 - Le hub et les deux chapitres sont dans le même APK ; la musique doit partir sans nouveau toucher.
+
+- Joueur : rien de nouveau à l'écran dans ce lot (feuille de route et statuts des changements uniquement, aucun changement de jeu).
