@@ -162,3 +162,5 @@
 - Depuis le hub, la première vraie fin enchaîne l'outro puis n'offre que « Chapitres » ; les fois suivantes, la fin saute l'outro et propose « Chapitres » et « Menu » (« ▶ Outro » reste au menu).
 
 - Joueur : rien de nouveau à l'écran dans ce lot (nouvelle page `docs/BALANCE.md`, tables d'équilibrage C1 et C2 en lecture seule, aucun changement de jeu).
+
+- Hub : la carte d'entrée devient sobre : cadre fin à la couleur du chapitre sur fond sombre translucide, nom petit et espacé, « Entrer » en bouton à fin contour qui se remplit doucement au survol, au focus et au toucher ; la carte « À venir » reprend le cadre, estompé, sans bouton.
