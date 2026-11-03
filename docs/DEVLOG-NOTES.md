@@ -167,3 +167,4 @@
 
 - Chapitre II, phase III : plus de lanternes sur la plage ; les cloches d'épaules de l'Ancien sont les phares du sommet. Partie 1 : immobiles, elles tournent autour du Phare pendant l'attaque des faisceaux, la cloche qui éclaire suivant le faisceau, puis reviennent doucement à leur poste.
 - Partie 2 : les cloches restent à leur poste et seule leur bouche pivote avec le faisceau ; les éclairs partent toujours des cloches.
+- Le faisceau sort désormais toujours de la bouche de la cloche qui éclaire, en combat comme dans la cinématique d'allumage : même point, même angle, aussi au démarrage, à l'arrêt et au retour au poste.

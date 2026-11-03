@@ -47,12 +47,12 @@ const PDRAW={tb0:pTb0,tb1:pTb1,tb2:pTb2,ring:pRing,sbell:pSmallBell,head:pHead,s
    follows them. Correction of Kevin (3 November 2026): in form I they orbit only during the beam attack, the bell that
    casts the beam aimed at it, then ease back to their post; in form II they stay at their post and only their mouth pivots
    with the beam. SPIN: rendering only (rx/ry = orbit radii, y = drop below the jellyfish, d = depth scale, span = px of reef
-   per unit of aim, pre = ease-in before a cinematic sweep, back = s of the easy return to the post).
+   per unit of aim, pre = ease-in before a cinematic sweep, back = s of the easy return to the post, align = share of the
+   tell over which the casting bell's mouth turns onto the beam).
    lampPoses keeps its old contract (index 0 = left, 1 = right at rest, point = middle of the mouth, s = side) so the beams,
    bolts and form II keep reading the bells from it */
-const SPIN={rx:70,ry:12,y:24,d:.14,span:500,pre:.5,back:.8};
-let spinAng=0;   // orbit angle, set by drawBoss3 (0 = at the post), 0 during the construction
-const spinA=()=>spinAng,TAU=Math.PI*2;
+const SPIN={rx:70,ry:12,y:24,d:.14,span:500,pre:.5,back:.8,align:.35};
+const TAU=Math.PI*2;
 /* orbit angle that aims the casting bell at the reef point bx (dir < 0: right bell, sweeping leftwards; dir > 0: left bell),
    the bell passing in front of the tower */
 function aimA(dir,bx){const c=clamp((bx-LX)/SPIN.span,-1,1);return dir<0?Math.acos(c):-Math.acos(-c)}
@@ -61,22 +61,37 @@ function sweepA(dir,pre,s,post){const b0=dir<0?940:-60,b1=dir<0?-60:940;
   if(post>0){const Ae=aimA(dir,b1);return lerp(Ae,Math.round(Ae/TAU)*TAU,eio(clamp(post,0,1)))}
   if(s>0)return aimA(dir,lerp(b0,b1,s));
   return aimA(dir,b0)*eio(clamp(pre,0,1))}
-/* reads the beam threats (never writes them); spinMem keeps the end of the last sweep for the return */
-let spinMem=null;
-function beamSpin(){let A=null;
+/* the sweep being cast this frame, worked out afresh at each call (so the bells, the beam, its glow and the cone read the same
+   angle and point in the same frame, whatever the drawing order): i = casting bell (0 left, 1 right), A = orbit angle,
+   bx = reef point the beam aims at, w = 0..1 how far the casting bell's mouth is turned onto the beam (eased in over
+   SPIN.align of the tell, out over the return). Reads the beam threats only, never writes them; spinMem keeps the end of
+   the last sweep for the return; spinCine = a sweep played by a cinematic (drawBoss3(cine)), valid for its frame only */
+let spinMem=null,spinCine=null;
+function castOf(dir,pre,s,post){pre=clamp(pre,0,1);s=clamp(s,0,1);post=clamp(post,0,1);const b0=dir<0?940:-60,b1=dir<0?-60:940;
+  return{i:dir<0?1:0,A:sweepA(dir,pre,s,post),bx:post>0?b1:s>0?lerp(b0,b1,s):b0,w:post>0?1-eio(post):s>0?1:eio(clamp(pre/SPIN.align,0,1))}}
+function castNow(){
+  if(spinCine&&spinCine.g===gt)return castOf(spinCine.dir,spinCine.pre,spinCine.s,spinCine.post);
+  let C=null;
   for(const th of S.threats){if(th.k!=='beam'||gt<th.t0)continue;const e=th.ts+th.D;if(gt>e+SPIN.back)continue;spinMem={dir:th.dir,e};
-    A=sweepA(th.dir,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1,gt<th.ts?0:clamp((gt-th.ts)/th.D,0,1),gt>e?(gt-e)/SPIN.back:0)}
-  if(A==null&&spinMem&&gt>=spinMem.e&&gt<spinMem.e+SPIN.back)A=sweepA(spinMem.dir,1,1,(gt-spinMem.e)/SPIN.back);
-  return A||0}
-function lampPoses(jx,jy,k,spread){const sp=spread||0,kk=k||1,A=spinA();return[0,1].map(i=>{const a=A+(i?0:Math.PI),c=Math.cos(a),z=Math.sin(a),s=i?1:-1;
-  return{x:jx+c*SPIN.rx*kk+s*95*sp,y:jy+(SPIN.y+z*SPIN.ry)*kk-30*sp,r:-c*Math.PI/2+s*.6*sp,s,c,z,sc:1+z*SPIN.d}})}
+    C=castOf(th.dir,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1,gt<th.ts?0:(gt-th.ts)/th.D,gt>e?(gt-e)/SPIN.back:0)}
+  if(!C&&spinMem&&gt>=spinMem.e&&gt<spinMem.e+SPIN.back)C=castOf(spinMem.dir,1,1,(gt-spinMem.e)/SPIN.back);
+  return C}
+/* mouth angle (rotation of the bell, mouth at local +y) that points from (x, y) at the reef point bx */
+const aimR=(x,y,bx)=>Math.atan2(-(bx-x),GY-y);
+/* poses of the two bells. At the tower top (jx, jy = LX, LY, no spread) they follow the sweep: the casting bell's mouth
+   turns onto the beam (r), m = unit direction of its mouth, cast = this bell casts now (w = how much) */
+function lampPoses(jx,jy,k,spread){const sp=spread||0,kk=k||1,top=jx===LX&&jy===LY&&!sp,C=top?castNow():null,A=C?C.A:0;
+  return[0,1].map(i=>{const a=A+(i?0:Math.PI),c=Math.cos(a),z=Math.sin(a),s=i?1:-1;
+    const x=jx+c*SPIN.rx*kk+s*95*sp,y=jy+(SPIN.y+z*SPIN.ry)*kk-30*sp,r0=-c*Math.PI/2+s*.6*sp;
+    const cast=!!C&&C.i===i,w=cast?C.w:0,r=cast?lerp(r0,aimR(x,y,C.bx),w):r0;
+    return{x,y,r,s,c,z,sc:1+z*SPIN.d,m:{x:-Math.sin(r),y:Math.cos(r)},cast,w}})}
 /* the bells are TOWER pieces (sbell): the old side-lantern hooks stay as no-ops for the callers of form II and the stills */
 const LAMP_FLOOR=[],LAMP_REST=[{x:LX-380,y:GY-34,r:Math.PI/2},{x:LX+185,y:GY-34,r:-Math.PI/2}];
 function drawLamps(){}
 function lamps(){}
 /* the turning bells at the summit, back half (z < 0) or front half; a soft cone leaves each mouth and turns with it */
 function spinBells(front,on,charge){const Q=lampPoses(LX,LY,1);
-  for(const q of Q){if((q.z>=0)!==front)continue;const dx=q.c,dy=.25*q.z+.15,L=150+charge*60,a=(.1+.18*charge)*on*(.55+.45*Math.abs(q.c));
+  for(const q of Q){if((q.z>=0)!==front)continue;const dx=q.m.x,dy=q.m.y,L=150+charge*60,a=(.1+.18*charge)*on*(.55+.45*Math.abs(q.c));
     if(a>0){ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(q.x,q.y,q.x+dx*L,q.y+dy*L);g.addColorStop(0,`rgba(220,252,255,${a})`);g.addColorStop(1,'rgba(110,230,255,0)');
       ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(q.x-dy*8,q.y+dx*8);ctx.lineTo(q.x+dx*L-dy*34,q.y+dy*L+dx*34);ctx.lineTo(q.x+dx*L+dy*34,q.y+dy*L-dx*34);ctx.lineTo(q.x+dy*8,q.y-dx*8);ctx.closePath();ctx.fill();ctx.restore()}
     ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);ctx.scale(q.sc,q.sc);if(q.z<0)ctx.globalAlpha*=.8+.2*(1+q.z);PDRAW.sbell();ctx.restore();
@@ -160,7 +175,7 @@ function drawBoss3(cine){
   glow(LX,LY,190+B.charge*90,'rgba(90,220,255,.5)',(.4+B.charge*.5)*on);
   ctx.save();if(hasFilter&&gt-S.bossFlash<.15)ctx.filter='brightness(1.9)';
   moorings(1);drawAnchorAt(anchorPose(null));
-  spinAng=cine?sweepA(cine.dir,cine.pre,cine.s,cine.post):beamSpin();spinBells(false,on,B.charge);
+  spinCine=cine?{...cine,g:gt}:null;spinBells(false,on,B.charge);
   drawPieces(null,.85,true);
   bindings(on,1);
   for(const [side,ph] of[[-1,0],[1,1.7]]){const sw=Math.sin(rt*1.8+ph);ctx.strokeStyle=`rgba(111,232,255,${.45*on+.1})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LX+side*20,LY+6);ctx.bezierCurveTo(LX+side*90,LY-30+sw*20,LX+side*140,LY+30-sw*30,LX+side*(170+sw*20),LY+80+sw*20);ctx.stroke()}
@@ -173,7 +188,7 @@ function drawBoss3(cine){
 /* transformation: the jellyfish bursts out of the King and rebuilds his parts into the tower */
 const TF_LEN=10;
 function drawTransform(){
-  const t=gt-S.tfT;spinAng=0;
+  const t=gt-S.tfT;spinCine=null;
   if(t<2){ // the King, shaking, heart turning blue
     S.shake=Math.max(S.shake,Math.min(1,t)*4);
     ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();
@@ -239,6 +254,7 @@ function reefSpikes(x,k,a){if(a<=0)return;ctx.save();ctx.globalAlpha*=a;
     ctx.fillStyle='#0b1214';ctx.fill();ctx.strokeStyle='rgba(120,220,205,.45)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(bx-2,GY+4-h*.6);ctx.lineTo(bx+1,GY+4-h);ctx.stroke();
     ell(bx+1,GY+4-h,3.5,2,'rgba(230,248,244,.85)');ell(bx-5,GY+2,6,2.5,'rgba(230,248,244,.5)')}
   ctx.restore()}
-/* the tower's sweeping beam, from the mouth of the turning bell now on that side (side: 1 = right, the default, -1 = left) */
-function beamShape(bx,a,side){const sd=side<0?-1:1,o=lampPoses(LX,LY,1).reduce((m,q)=>q.x*sd>m.x*sd?q:m),g=ctx.createLinearGradient(o.x,o.y,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(o.x,o.y-9);ctx.lineTo(o.x,o.y+9);ctx.lineTo(bx+80,GY+16);ctx.lineTo(bx-80,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,90,12,`rgba(200,250,255,${.25*a})`)}
+/* the tower's sweeping beam, from the mouth of the casting bell (side: 1 = right bell, the default, -1 = left bell), at its exact
+   point and angle in this frame: the slit lies across the mouth, and fades in/out with the mouth turning onto the beam (w) */
+function beamShape(bx,a,side){const o=lampPoses(LX,LY,1)[side<0?0:1];if(o.cast)a*=o.w;if(a<=0)return;const nx=-o.m.y*9,ny=o.m.x*9,g=ctx.createLinearGradient(o.x,o.y,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(o.x+nx,o.y+ny);ctx.lineTo(o.x-nx,o.y-ny);ctx.lineTo(bx+80,GY+16);ctx.lineTo(bx-80,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,90,12,`rgba(200,250,255,${.25*a})`)}
 
