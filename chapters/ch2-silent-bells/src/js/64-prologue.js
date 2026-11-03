@@ -168,7 +168,13 @@ const SP={
 function spawn(){
   const d=S.d,id=S.phase,f2=id===3&&S.form===2,gen=f2?P3b:[P1,P2,P3][id-1];
   const n=d.u.filter(x=>S.bossHp<=x).length;
-  if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
+  /* as in Ember Bridge (a fury restarts while the Colossus's HP are still at its threshold): a rage or final assault whose counter
+     failed (HP not lower than when the roar began) starts again; the counter that lowers the HP closes it */
+  if(!S.rageNext){
+    if(S.rageHp0!=null){if(S.bossHp>=S.rageHp0&&S.rageN>0)S.rageN--;S.rageHp0=null}
+    if(S.finalDone&&S.bossHp>0)S.finalDone=false;
+  }
+  if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.rageHp0=S.bossHp;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
   const stage=S.rageN?1:0,f=1/(d.sp*(1+.1*stage));
   if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;sched(gen(stage,f,gt+.25,false,r));return}
   if(!S.finalDone&&S.bossHp<=FINAL_AT&&(id!==3||f2)){
