@@ -54,6 +54,7 @@ const play=async(lbl,ph,hp)=>{let s=await toCard(lbl);
  if(s.ph!==String(ph))errs.push(lbl+': phase interne '+s.ph+' au lieu de '+ph);
  if(s.menu)errs.push(lbl+': menu affiche');
  if(!s.hp.endsWith('/'+hp))errs.push(lbl+': PV '+s.hp+' (max attendu '+hp+')')};
+const closeCard=async()=>{await pg.evaluate(()=>{const o=document.getElementById('ov');if(o&&!o.hidden)document.getElementById('go').click()});await pg.waitForTimeout(100)};
 console.log('menu',JSON.stringify(await st()));
 if(await pg.evaluate(()=>localStorage.getItem('db-unl'))!=='3')errs.push('db-unl non pose');
 for(const [dk,hp] of [['normal',4],['hard',3]]){
@@ -62,9 +63,9 @@ for(const [dk,hp] of [['normal',4],['hard',3]]){
  await play(dk+' phase I',2,hp);
  // frise : boutons I, II, III ; ORDER=[2,1,3]
  const s0=await st();if(s0.locked!=='000')errs.push('phases verrouillees malgre db-unl=3: '+s0.locked);
- await pg.click('#phases button[data-ph="2"]');await pg.waitForTimeout(300);
+ await closeCard();await pg.click('#phases button[data-ph="2"]');await pg.waitForTimeout(300);   // hard : la carte de defaite (PV 0) est restee affichee
  await play(dk+' phase II',1,hp);
- await pg.click('#phases button[data-ph="3"]');await pg.waitForTimeout(300);
+ await closeCard();await pg.click('#phases button[data-ph="3"]');await pg.waitForTimeout(300);
  await play(dk+' phase III',3,hp)}
 // sans cle : tout est ouvert des le depart (UNLOCK_ALL)
 {const ctx2=await b.newContext({viewport:{width:1100,height:760},offline:true});
