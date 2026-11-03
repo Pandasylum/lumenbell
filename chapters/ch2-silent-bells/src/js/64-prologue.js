@@ -191,7 +191,7 @@ function spawn(){
    edge `edge` and comes back towards its caster (second dodge, same speed); field = margin keeping every orb, shard and cry
    inside the visible field; ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
 const VOICE={vol:{easy:[2,3],normal:[3,5],hard:[3,5]},rain:{easy:2,normal:3,hard:3},echo:{easy:1,normal:2,hard:2},
-  last:{easy:1,normal:2,hard:2},twin:{dt:.3},wail:{edge:24,mouth:85},field:24,ray:.28};
+  last:{easy:1,normal:2,hard:2},twin:{dt:.45},wail:{edge:24,mouth:85},field:24,ray:.28};
 const voiceDk=()=>S.dk==='easy'?'easy':S.d.u.length>1?'hard':'normal';
 const fieldX=x=>clamp(x,VOICE.field,W-VOICE.field), fieldY=y=>clamp(y,VOICE.field,GY);
 function P2(stage,f,b,final,rage){
