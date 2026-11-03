@@ -819,6 +819,9 @@ LB.MENU_T={
   cardW:'min(94vw,580px)',btnFs:'min(18px,2.8vw)',   // police du nom d'une difficulté : ne passe jamais à la ligne (4 colonnes jusqu'à 480 px)
   nextW:'min(100%,240px)',nextFs:'clamp(12px,3.7vw,15px)',nextH:44,tagH:42,howH:18,
   back:{fg:'#f0e8df',line:'#2d2438',bg:'rgba(10,7,16,.6)',hover:'rgba(255,255,255,.08)'},   // couleurs du lien « Chapitres » vers le hub : les mêmes dans tous les chapitres (celles du Chapitre I)
+  /* roue de réglages en jeu (même rendu que le bouton MENU / Pause) : hauteur, hauteur tactile, hauteur paysage bas, icône ; seuils des deux placements
+     (portrait : en-tête, à droite de MENU ; paysage bas : ligne Pause / Réessayer) */
+  gameGear:{touch:44,rowH:34,padMenu:8,icon:20,lowH:520,eyeFs:12,eyeLh:1.5,lowPadPh:3,lowMinPh:20,lowPadMenu:5,compactW:820},   /* roue seule, sans carré : zone de toucher invisible (touch) centrée sur l'icône (icon), icône collée au bord droit ; portrait : ligne du sourcil (corps et interligne du sourcil) ; paysage bas : ligne de la frise, frise resserrée seulement si la colonne est étroite (compactW) */   /* roue : sur la ligne du titre (bord droit des barres) ; paysage bas : à droite de MENU (frise resserrée pour tenir dans la colonne) */
   btnH:44,btnHLow:34,     // hauteur mini des boutons du haut du menu (Intro, Outro) : écran tactile, puis paysage bas
   top:{intro:12,outro:56},   // haut des boutons « ▶ Intro » et « ▶ Outro » (px, sous la zone sûre)
   raise:'-9vh',raiseLow:'-4vh',raiseMinH:700,tinyH:340,          // remontée du titre (paysage bas : raiseLow)
@@ -828,7 +831,7 @@ LB.MENU_T={
   spray:{id:'mSnow',cls:'msn',key:'mfall',n:34,dur:[7,8],delay:12,size:[1.5,2.5],dx:120,rise:'-45vh',peak:.7,w:3,col:'#e8f8ff',glow:'0 0 6px 1px rgba(159,242,255,.6)'}
 };
 LB.tx=o=>o==null?'':typeof o==='function'?o():typeof o==='string'?o:LB._(o.en,o.fr);
-LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],S=LB.SET_T,c=C.color,c2=C.color2,rgb=C.rgb;
+LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],S=LB.SET_T,G=M.gameGear,c=C.color,c2=C.color2,rgb=C.rgb;
  return '.bar span i{font-style:normal}\n'+
  ':root{--chc:'+c+';--chc2:'+c2+';--chr:'+rgb+'}   /* couleur du chapitre pour la carte (#ov) */\n'+
  '#ov [hidden]{display:none!important}\n'+
@@ -915,6 +918,18 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(241,227,207,.3);border-radius:4px;cursor:pointer}\n'+
  '.langs button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.22);color:#fff}\n'+
  '.langs button:focus-visible{outline:2px solid '+c+';outline-offset:2px}\n'+
+ /* roue de réglages en jeu (LB.settings.attach) : carré comme MENU, mêmes bords haut et bas ; sur la ligne du titre par défaut ; en paysage bas, à droite de MENU (même hauteur) */
+ '.top{position:relative}\n'+
+ '.hright{align-items:stretch}   /* I, II, III et MENU : même hauteur (la roue est hors du flux) */\n'+
+ 'button.mbtn.gear{display:grid;place-items:center;flex:none;width:'+G.touch+'px;height:'+G.touch+'px;min-height:0;padding:0;border:0;background:none;color:var(--muted);box-sizing:border-box}\n'+
+ 'button.mbtn.gear svg{width:'+G.icon+'px;height:'+G.icon+'px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}\n'+
+ 'button.mbtn.gear:hover,button.mbtn.gear:focus-visible,button.mbtn.gear[aria-expanded="true"]{color:var(--fg);background:none}\n'+
+ '#gearHead,#gearMenu{position:absolute;right:calc(('+G.icon+'px - '+G.touch+'px) / 2)}\n'+
+ '#gearHead{margin-top:calc(('+G.eyeFs+'px * '+G.eyeLh+' - '+G.touch+'px) / 2)}\n'+
+ '.top>div:first-child{max-width:calc(100% - '+G.touch+'px)}\n'+
+ '#gearMenu{display:none}\n'+
+ '@media (max-height:'+G.lowH+'px) and (orientation:landscape){#gearHead{display:none}.hright>#gearMenu{display:grid}.top>div:first-child{max-width:none}.hright{align-items:center}.phases li{height:'+G.rowH+'px;box-sizing:border-box}.phases button{height:100%;min-height:0}.hright>#menuBtn{height:'+G.rowH+'px;min-height:0;padding-inline:'+G.padMenu+'px}}\n'+
+ '@media (max-height:'+G.lowH+'px) and (orientation:landscape) and (max-width:'+G.compactW+'px){.phases button{min-width:'+G.lowMinPh+'px;padding-inline:'+G.lowPadPh+'px}.hright .mbtn:not(.gear){padding-inline:'+G.lowPadMenu+'px}}   /* colonne étroite : la frise se resserre pour ne pas toucher la zone de la roue */\n'+
  '@media (pointer:coarse){.langs button{min-height:40px}.ov.menu .mbtn{min-height:'+M.btnH+'px}}\n'+
  '@media (max-height:520px) and (orientation:landscape){.ov.menu .mbtn{min-height:'+M.btnHLow+'px;padding-block:2px}.mlink{min-height:'+M.btnHLow+'px;padding-block:2px}}\n'};
 LB.ui=(()=>{
@@ -1037,6 +1052,7 @@ LB.menu=(()=>{
     m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'outroBtn',hidden:''},'▶ Outro'));
     m.appendChild(LB.ui.mk('div',{class:'langs',id:'langs',role:'group','aria-label':'Language'},LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')+LB.gearBtn()));
     LB.settings.mount(stage,$('mGear'),h.onSet);
+    LB.gameGear();
     const b=(dk,pr)=>'<button type="button" data-diff="'+dk+'"'+(pr?' aria-pressed="true"':'')+'><b></b><span></span></button>';
     card=LB.ui.mk('div',{class:'mcard'},'<h2><span>Lumen</span><i>bell</i></h2><p class="eyebrow chap" id="mEye"></p><p class="tag"></p>'+
       '<button class="btn ghost" id="mResume" type="button" hidden>Resume</button>'+
@@ -1116,7 +1132,7 @@ LB.input=(()=>{
     window.addEventListener('blur',rel);
     window.addEventListener('keyup',e=>{if(ACT.includes(e.key)||e.key==='Enter')rel()});   /* Entrée : bouton d'action focalisé (clic clavier) */
     window.addEventListener('keydown',e=>{
-      if(LB.gate.visible()||LB.settings.visible())return;   /* écran de démarrage : seul le bouton agit ; panneau de réglages : ses boutons et ses touches (LB.settings) */
+      if(LB.gate.visible()||LB.settings.visible()||LB.settings.handled(e))return;   /* écran de démarrage : seul le bouton agit ; panneau de réglages : ses boutons et ses touches (LB.settings) */
       const k=e.key,a=document.activeElement;
       if(a&&a.tagName==='INPUT')return;
       if(h.skip&&h.skip(e))return;
@@ -1131,7 +1147,9 @@ LB.input=(()=>{
       if(ACT.includes(k)){e.preventDefault();if(h.press)h.press()}
     });
   }
-  return{bind,ACT};
+  /* pause demandée hors clavier (roue de réglages en jeu) : comme P, sans rien faire déjà en pause, au menu ou sur l'écran de démarrage */
+  function pause(){if(LB.gate.visible()||LB.menu.visible()||LB.pause.visible()||!h.pause)return false;h.pause();return true}
+  return{bind,ACT,pause};
 })();
 
 /* ---------- LB.hud : barres de vie, nom du boss, sourcil de phase, bouton d'action, frise ----------
@@ -1202,9 +1220,15 @@ LB.SETTINGS_T=[
   {id:'snd',type:'toggle',label:['Sound effects','Bruitages'],get:()=>LB.audio.sound,set:v=>LB.audio.setSound(v)},
   {id:'help',type:'toggle',label:['Visual help','Aide visuelle'],get:()=>LB.help.on(),set:v=>LB.help.set(v),off:()=>LB.help.locked()}
 ];
-LB.gearBtn=()=>'<button class="gear" id="mGear" type="button" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.4L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.7h4l.4-2.7a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.4z"/><circle cx="12" cy="12" r="3"/></svg></button>';
+LB.GEAR_SVG='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.4L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.7h4l.4-2.7a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.4z"/><circle cx="12" cy="12" r="3"/></svg>';
+LB.gearBtn=()=>'<button class="gear" id="mGear" type="button" aria-haspopup="dialog" aria-expanded="false">'+LB.GEAR_SVG+'</button>';
+/* roues de l'en-tête (après MENU) et de la ligne Pause / Réessayer : mêmes réglages que le menu, une seule implémentation (LB.settings.attach) */
+LB.gameGear=()=>{const mk=id=>{const b=LB.ui.mk('button',{type:'button',class:'mbtn gear','aria-haspopup':'dialog','aria-expanded':'false'},LB.GEAR_SVG);b.id=id;return b},
+    H=document.querySelector('.top h1').parentNode.firstElementChild,A=document.getElementById('menuBtn');
+  if(H&&!document.getElementById('gearHead'))LB.settings.attach(mk('gearHead'),b=>H.parentNode.insertBefore(b,H));
+  if(A&&!document.getElementById('gearMenu'))LB.settings.attach(mk('gearMenu'),b=>A.after(b))};
 LB.settings=(()=>{
-  let box=null,gear=null,hook=null,open=false;
+  let box=null,gear=null,hook=null,open=false,from=null,last=null;const extra=[];   /* extra : roues de l'en-tête et de la ligne Pause (attach) */
   const OPTS=[[true,'On','Oui'],[false,'Off','Non']];
   function sync(){if(!box)return;
     for(const S of LB.SETTINGS_T){const row=box.querySelector('.hsrow[data-id="'+S.id+'"]');if(!row)continue;
@@ -1212,9 +1236,9 @@ LB.settings=(()=>{
       row.querySelectorAll('.hsopts button').forEach((b,i)=>{b.textContent=LB._(OPTS[i][1],OPTS[i][2]);b.disabled=off;b.setAttribute('aria-pressed',String(b.dataset.v===v))})}}
   function lang(){if(!box)return;const st=LB._('Settings','Réglages');
     box.querySelector('#lbSetT').textContent=st;box.querySelector('#lbSetX').setAttribute('aria-label',LB._('Close','Fermer'));
-    if(gear){gear.setAttribute('aria-label',st);gear.title=st}sync()}
-  function toggle(on){if(!box||on===open)return;open=on;box.hidden=!on;gear.setAttribute('aria-expanded',String(on));
-    if(on){sync();try{box.querySelector('#lbSetX').focus({preventScroll:true})}catch(e){}}else try{gear.focus({preventScroll:true})}catch(e){}}
+    for(const g of [gear].concat(extra))if(g){g.setAttribute('aria-label',st);g.title=st}sync()}
+  function toggle(on){if(!box||on===open)return;open=on;box.hidden=!on;for(const g of [gear].concat(extra))g.setAttribute('aria-expanded',String(on));
+    if(on){sync();try{box.querySelector('#lbSetX').focus({preventScroll:true})}catch(e){}}else try{(from&&from.offsetParent?from:gear).focus({preventScroll:true})}catch(e){}}
   function mount(stage,btn,onSet){
     hook=onSet||null;if(box)return box;gear=btn;
     box=LB.ui.mk('div',{class:'hset',id:'lbSet',role:'dialog','aria-modal':'true','aria-labelledby':'lbSetT',tabindex:'-1',hidden:''},'<div class="hsbox"><h2 id="lbSetT"></h2><button class="hsx" id="lbSetX" type="button">×</button><div class="hsrows"></div></div>');
@@ -1228,13 +1252,17 @@ LB.settings=(()=>{
     gear.addEventListener('click',e=>{e.stopPropagation();toggle(!open)});
     box.querySelector('#lbSetX').addEventListener('click',()=>toggle(false));
     box.addEventListener('click',e=>{if(e.target===box)toggle(false)});
-    window.addEventListener('keydown',e=>{if(!open)return;
+    window.addEventListener('keydown',e=>{if(!open)return;last=e;   /* last : touche prise par le panneau (LB.input l'ignore, même si le panneau vient de se fermer) */
       if(e.key==='Escape'){e.preventDefault();toggle(false)}
       else if(e.key==='Tab'){const f=[...box.querySelectorAll('button:not(:disabled)')],i=f.indexOf(document.activeElement);e.preventDefault();try{f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus()}catch(x){}}});
     lang();
     return box;
   }
-  return{mount,lang,sync,toggle,visible(){return open},get el(){return box}};
+  /* roue en jeu : ouvre le panneau et met la partie en pause (LB.input.pause : même mécanisme que la touche P) ; fermer ne reprend pas */
+  function attach(btn,where){if(!btn||extra.includes(btn))return btn;extra.push(btn);
+    btn.addEventListener('click',e=>{e.stopPropagation();from=btn;if(!open)LB.input.pause();toggle(!open)});
+    if(where)where(btn);lang();return btn}
+  return{mount,attach,lang,sync,toggle,visible(){return open},handled(e){return e===last},get el(){return box}};
 })();
 const $=id=>document.getElementById(id);
 /* save keys and language: common to the series (shared/, LB.store, LB.key, LB.lang). Common keys lb-lang, lb-snd, lb-mus,

@@ -25,7 +25,16 @@ async function pause(pg,tag,step){
  const vis=()=>pg.evaluate(()=>!document.getElementById('pause').hidden);const seq=[['p',true],['Escape',false],['Escape',true],['Enter',false],['P',true],[' ',false]];
  const a=await pg.evaluate(()=>window.__n.p);
  for(const [k,v] of seq){await pg.keyboard.press(k);await step();check(await vis()===v,tag+': pause apres '+JSON.stringify(k)+' : '+!v)}
- check(await pg.evaluate(()=>window.__n.p)===a,tag+': un appui sur le Veilleur pendant la pause')}
+ check(await pg.evaluate(()=>window.__n.p)===a,tag+': un appui sur le Veilleur pendant la pause')
+ // roue de reglages en jeu : cliquee -> pause active et panneau ouvert ; fermer ne reprend pas ; deja en pause : rien de plus
+ await pg.evaluate(()=>document.getElementById('gearHead').click());await step();
+ check(await vis()&&await pg.evaluate(()=>!document.getElementById('lbSet').hidden),tag+': roue en jeu : pause + panneau attendus');
+ await pg.keyboard.press('Escape');await step();
+ check(await vis()&&await pg.evaluate(()=>document.getElementById('lbSet').hidden),tag+': fermer le panneau ne doit pas reprendre');
+ await pg.evaluate(()=>document.getElementById('gearHead').click());await step();await pg.keyboard.press('Escape');await step();
+ check(await vis(),tag+': roue deja en pause : la pause doit rester');
+ await pg.keyboard.press('Escape');await step();
+ check(!await vis(),tag+': Reprendre apres la roue')}
 (async()=>{const b=await launch();
  // Chapitre I
  {const ctx=await b.newContext({viewport:{width:1100,height:760},hasTouch:true,locale:'fr-FR'});const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push('ch1: pageerror: '+e.message));
