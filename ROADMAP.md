@@ -27,6 +27,7 @@
 - **Revue complète des sorts, des fenêtres de contre et des effets des boss**, chapitre par chapitre : un tableau par chapitre (attaque, préparation, fenêtre, contre, effet, durée), puis équilibrage Facile / Normal / Difficile. À faire après les visuels et le test sur téléphone (session d'équilibrage).
 - **Contre-attaque à jauge de fatigue** (chaque attaque du boss la fait monter, point faible dévoilé, contre-attaque automatique) : mécanique réservée à un chapitre suivant.
 - **Écriture ancienne** (signes anguleux de la cloche) : à définir, pour « Couronne », « Lié », « cloche ».
+- Cinématiques de phase du Chapitre II (trappe, descente, fin de phase II, transformation, fin de phase III) : non refaites avec `LB.cine` ; style à part, différent des intros et outros (décision de Kevin du 2 novembre 2026).
 
 ## Avant une sortie publique
 - Vérifier les noms (TMview, INPI) et l'origine de l'icône.
