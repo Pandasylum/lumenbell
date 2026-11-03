@@ -131,7 +131,7 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.langs button.gear:hover,.langs button.gear[aria-expanded="true"]{color:var(--fg)}\n'+
  '.hset{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(8,6,13,.6);outline:none}\n'+
  '.hset[hidden]{display:none}\n'+
- '.hsbox{position:relative;width:'+S.w+';max-height:100%;overflow:auto;display:grid;gap:10px;padding:18px 20px;background:rgba(14,10,20,.96);border:1px solid var(--line);border-top:3px solid '+c+';box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 30px rgba('+rgb+',.12)}\n'+
+ '.hsbox{overscroll-behavior:contain;touch-action:pan-y;position:relative;width:'+S.w+';max-height:100%;overflow:auto;display:grid;gap:10px;padding:18px 20px;background:rgba(14,10,20,.96);border:1px solid var(--line);border-top:3px solid '+c+';box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 30px rgba('+rgb+',.12)}\n'+
  '.hsbox h2{margin:0;padding-right:44px;font-family:var(--font-display);font-weight:800;font-size:26px;line-height:1.2;letter-spacing:.05em;text-transform:uppercase;color:'+c+'}\n'+
  '.hsx{position:absolute;top:6px;right:6px;width:'+S.touch+'px;height:'+S.touch+'px;border:0;background:none;color:var(--muted);font-size:26px;line-height:1;cursor:pointer}\n'+
  '.hsx:hover{color:var(--fg)}\n'+

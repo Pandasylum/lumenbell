@@ -287,4 +287,12 @@ const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.cla
     for(let n=1;n<=6;n++){if(touch)await pg.tap('.tw[data-n="'+n+'"]');else await pg.click('.tw[data-n="'+n+'"]');await pg.waitForTimeout(40);const G=await cardGeo(pg);cardOk(tag+' tour '+n,G,n);sides.push(G.up?'^':'v')}
     console.log(tag.padEnd(30),'carte (v dessous, ^ dessus) :',sides.join(' '));await ctx.close()}}
   finally{SIX=''}}
+ // 5. page verrouillee : glisser au doigt (844x390 et 390x844) sur le hub, carte ouverte et panneau de reglages ouvert ; panneau de reglages defile encore
+ for(const [w,h] of [[844,390],[390,844]]){const tag='verrou '+w+'x'+h,{ctx,pg}=await open(b,{vp:{width:w,height:h},touch:true,tag});
+  await pg.tap('#gateBtn');await pg.waitForTimeout(100);await require('./lockscroll')(ctx,pg,tag+' hub',errs);
+  await pg.tap('.tw[data-n="1"]');await pg.waitForTimeout(100);await require('./lockscroll')(ctx,pg,tag+' carte',errs);await pg.keyboard.press('Escape');
+  const g=await pg.$('#setBtn');if(g){await g.tap();await pg.waitForTimeout(150);await require('./lockscroll')(ctx,pg,tag+' reglages',errs);
+   const o=await pg.evaluate(()=>{const e=document.querySelector('.hsbox');if(!e)return null;const c=getComputedStyle(e);return{oc:c.overscrollBehaviorY,ta:c.touchAction}});
+   check(!o||(o.oc==='contain'&&o.ta==='pan-y'),tag+' : panneau de reglages sans overscroll contain / pan-y '+JSON.stringify(o))}
+  await ctx.close()}
  console.log('errs',errs);await b.close();server.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});
