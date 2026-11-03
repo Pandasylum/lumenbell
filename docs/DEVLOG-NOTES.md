@@ -148,3 +148,5 @@
 ### 2026-11-02 — menu/chapter-settings : roue de réglages et pause
 - Dans le menu de chaque chapitre, une roue en haut à droite ouvre les réglages : Musique, Bruitages, Aide visuelle (les cases du bas de l'écran disparaissent).
 - En pause, « Menu » propose « Menu du chapitre » (et « Chapitres » si le jeu a été ouvert depuis le hub) ; chaque choix demande « Quitter le combat ? » avant de partir.
+
+- Chapitre II : le menu n'affiche plus les cases « Aide visuelle », « Son » et « Musique » ; les réglages se trouvent sur la roue commune, à côté de EN/FR.
