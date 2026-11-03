@@ -187,11 +187,12 @@ function spawn(){
 /* numbers per difficulty (easy / normal / hard): vol = orbs of a volley [min, max] (each pattern's count is clamped into it);
    rain = shards of a shard rain; echo = orbs, then shards, of each reflection in the Echoes (rages); last = shards of each
    reflection of the last Echo (final assault) when it shatters; real = chance that an orb of the Echoes is real (else illusory); twin = Hard's permanent echo beside the Voice: it copies
-   every spell of the Voice (same draw, real or illusory) `dt` s later (not scaled by f); wail: the cry bounces on the screen
+   every spell of the Voice (same draw, real or illusory) at least `dt` s later (not scaled by f), pushed back by `step` s until
+   every copied impact is at least `gap`*f (the spacing of a volley's orbs) from every other impact of the series (at most `max` s); wail: the cry bounces on the screen
    edge `edge` and comes back towards its caster (second dodge, same speed); field = margin keeping every orb, shard and cry
    inside the visible field; ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
 const VOICE={vol:{easy:[2,3],normal:[3,5],hard:[3,5]},rain:{easy:2,normal:3,hard:3},echo:{easy:1,normal:2,hard:2},
-  last:{easy:1,normal:2,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45},wail:{edge:24,mouth:85},field:24,ray:.28};
+  last:{easy:1,normal:2,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.44,step:.02,max:6},wail:{edge:24,mouth:85},field:24,ray:.28};
 const voiceDk=()=>S.dk==='easy'?'easy':S.d.u.length>1?'hard':'normal';
 const fieldX=x=>clamp(x,VOICE.field,W-VOICE.field), fieldY=y=>clamp(y,VOICE.field,GY);
 function P2(stage,f,b,final,rage){
@@ -214,7 +215,9 @@ function P2(stage,f,b,final,rage){
   const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
   pick(stage?p1:p0)();
   // Hard: the permanent echo beside the Voice copies each of her spells (same draw) VOICE.twin.dt s later
-  if(dk==='hard'){const dt=VOICE.twin.dt;for(const th of T.slice()){const own=(th.k==='orb'||th.k==='wail')&&th.src===0||th.k==='shard'&&th.si!=null;if(!own)continue;
+  if(dk==='hard'){const W2=VOICE.twin,gap=W2.gap*f,own=th=>(th.k==='orb'||th.k==='wail')&&th.src===0||th.k==='shard'&&th.si!=null,mine=T.filter(own);
+    let dt=W2.dt;const clash=d=>mine.some(m=>T.some(o=>Math.abs(m.ti+d-o.ti)<gap));while(clash(dt)&&dt<W2.dt+W2.max)dt+=W2.step;
+    for(const th of mine){
     const c=Object.assign({},th,{t0:th.t0+dt,tl:th.tl+dt,ti:th.ti+dt,twin:1});if(th.k!=='shard')c.src=3;if(th.k==='wail')c.x0=fieldX(VPOS[3].x-VOICE.wail.mouth);if(th.si!=null)c.si=(th.si+8)%SHARDS.length;T.push(c)}}
   return T;
 }
