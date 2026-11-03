@@ -167,4 +167,4 @@
 
 - Joueur : rien de visible (test de fumée du Chapitre II seul : la carte de défaite est fermée avant de cliquer la frise des phases).
 
-- Joueur : intro et outro du Chapitre II redessinées dans l'esprit du Chapitre I : plans plus sobres, un seul sujet par carton, brume et mer plus calmes, lueur turquoise de la gardienne qui pulse doucement ; la vallée tremble sans secousses saccadées et la lumière de la Flèche faiblit lentement.
+- Joueur : intro et outro du Chapitre II refaites dans la grammaire du Chapitre I : silhouettes plates sur ciel étoilé avec lune, une seule lumière par plan (la lueur turquoise de la gardienne qui pulse), caméra qui avance lentement, particules qui montent ; outro : aube sur le Phare, vallée sous les étoiles, forêt et Flèche qui faiblit.

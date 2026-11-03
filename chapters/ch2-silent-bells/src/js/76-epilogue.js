@@ -21,11 +21,14 @@ function drawEpilogue(t){
   const shot=EPI_SHOTS.filter(s=>t>=s).length-1,ts=t-EPI_SHOTS[shot];
   ctx.save();
   if(shot===0){ // the morning: the Lighthouse stands, mute; the Watcher on the shore, the bell at his feet
-    const g=ctx.createLinearGradient(0,0,0,320);g.addColorStop(0,'#1c2a3a');g.addColorStop(.6,'#6a6670');g.addColorStop(1,'#d8a882');ctx.fillStyle=g;ctx.fillRect(0,0,W,320);
-    glow(W*.2,300,260,'rgba(255,200,140,.8)',.3);mist(250,2,.1,4);
-    seaBand(318,'#4a6068','#0d1c20',.14);
-    lighthouse(690,330,.85,0);
-    ctx.fillStyle='#0a1114';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,GY-6);ctx.quadraticCurveTo(300,GY-20,560,GY+4);ctx.quadraticCurveTo(620,GY+40,680,H);ctx.fill();
+    const p=clamp(ts/CINE_D.outro[0],0,1);
+    ctx.save();cCam(1+.08*p,480,330,-16*p,0);
+    cSky('#12202e','#5a6672','#e2aa80');cStars(t,.25);
+    ctx.save();ctx.globalCompositeOperation='lighter';glow(W*.2,318,320,'rgba(255,190,130,.9)',.4);ctx.restore();
+    cSea(318,'#4a6068','#0d1c20',.12);
+    cLight(690,330,.85,0);
+    mist(262,2,.1,4);cMotes(t,.25);ctx.restore();
+    ctx.fillStyle='#050b0d';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,GY-6);ctx.quadraticCurveTo(300,GY-20,560,GY+4);ctx.quadraticCurveTo(620,GY+40,680,H);ctx.fill();
     drawP('head',330,GY-6,-.28,.85);
     LB.drawWatcher(ctx,220,GY,'idle',rt)}
   else if(shot===1){ // close-up of the bell: the signs, the crack, the word; a slow push-in
@@ -35,7 +38,7 @@ function drawEpilogue(t){
     glow(W/2+60,200,160,'rgba(255,210,160,.6)',.16+.04*Math.sin(t*1.1))}
   else if(shot===2){ // the valley of Chapter I: the earth keeps trembling, one tower goes dark, the others falter
     const sh=ts<3.9?(1.2+1.2*Math.abs(Math.sin(t*2))):0;ctx.translate(Math.sin(t*23)*sh,Math.cos(t*19)*sh);
-    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0a0c14');g.addColorStop(.7,'#1e1c22');g.addColorStop(1,'#120e0c');ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);
+    cSky('#05070d','#14141c','#1e1a1a');cStars(t,.5);
     ctx.fillStyle='#0d0f14';ctx.beginPath();ctx.moveTo(-20,330);[[120,220],[260,280],[420,190],[560,260],[720,200],[880,270],[980,240]].forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(980,H);ctx.lineTo(-20,H);ctx.fill();
     ctx.fillStyle='#14120f';ctx.beginPath();ctx.moveTo(-20,H);ctx.lineTo(-20,400);ctx.quadraticCurveTo(480,360,980,410);ctx.lineTo(980,H);ctx.fill();
     // the stone bridge of Chapter I, small, down in the valley
@@ -45,7 +48,7 @@ function drawEpilogue(t){
       if(a>0){ctx.save();ctx.globalCompositeOperation='lighter';glow(x,top-6,34,i===0?'rgba(255,170,90,.9)':'rgba(230,225,200,.9)',a);ell(x,top-6,2.5,3,`rgba(255,250,235,${a})`);ctx.restore()}});
     for(const c of VCRACKS){const k=clamp((t-c.t0)/.9,0,1);if(k<=0)continue;const n=Math.max(2,Math.ceil(c.pts.length*k));ctx.strokeStyle='#020202';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<n;i++)i?ctx.lineTo(c.pts[i][0],c.pts[i][1]):ctx.moveTo(c.pts[i][0],c.pts[i][1]);ctx.stroke()}}
   else{ // the forest: a Bound Spire among the trees, its light failing slowly; the title of the next chapter
-    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#05070a');g.addColorStop(1,'#0b0e0a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    cSky('#04060a','#080c0c','#0d120d');cStars(t,.35);
     const P=SPIRE,dim=lerp(P.a0,P.a1,eio(clamp(ts/P.fade,0,1))),fl=dim*(.85+.15*Math.sin(t*1.7));
     const light=()=>{const sg=ctx.createLinearGradient(P.x-16,0,P.x+16,0);sg.addColorStop(0,'#0c110c');sg.addColorStop(.45,'#263022');sg.addColorStop(1,'#0a0e0a');ctx.fillStyle=sg;ctx.beginPath();ctx.moveTo(P.x-16,H);ctx.lineTo(P.x-7,P.top+18);ctx.lineTo(P.x,P.top);ctx.lineTo(P.x+7,P.top+18);ctx.lineTo(P.x+16,H);ctx.closePath();ctx.fill();
       ctx.save();ctx.globalCompositeOperation='lighter';glow(P.x,P.top+8,130,'rgba(185,207,90,.9)',.55*fl);ell(P.x,P.top+8,3,4,`rgba(240,245,210,${.9*fl})`);ctx.restore()};
