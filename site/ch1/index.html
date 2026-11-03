@@ -830,7 +830,7 @@ LB.MENU_T={
   back:{fg:'#f0e8df',line:'#2d2438',bg:'rgba(10,7,16,.6)',hover:'rgba(255,255,255,.08)'},   // couleurs du lien « Chapitres » vers le hub : les mêmes dans tous les chapitres (celles du Chapitre I)
   /* roue de réglages en jeu (même rendu que le bouton MENU / Pause) : hauteur, hauteur tactile, hauteur paysage bas, icône ; seuils des deux placements
      (portrait : en-tête, à droite de MENU ; paysage bas : ligne Pause / Réessayer) */
-  gameGear:{h:34,hTouch:44,hLow:34,icon:20,lowH:520,portraitW:700,lowPad:5,lowLs:'.04em',lowGap:6},
+  gameGear:{h:34,hTouch:44,hLow:30,icon:20,lowH:520,titleFs:'clamp(34px,7vw,52px)',titleLh:.95,titleMt:2,gap:6,lowPadPh:3,lowMinPh:20,lowPadMenu:5},   /* roue : sur la ligne du titre (bord droit des barres) ; paysage bas : à droite de MENU (frise resserrée pour tenir dans la colonne) */
   btnH:44,btnHLow:34,     // hauteur mini des boutons du haut du menu (Intro, Outro) : écran tactile, puis paysage bas
   top:{intro:12,outro:56},   // haut des boutons « ▶ Intro » et « ▶ Outro » (px, sous la zone sûre)
   raise:'-9vh',raiseLow:'-4vh',raiseMinH:700,tinyH:340,          // remontée du titre (paysage bas : raiseLow)
@@ -840,7 +840,7 @@ LB.MENU_T={
   spray:{id:'mSnow',cls:'msn',key:'mfall',n:34,dur:[7,8],delay:12,size:[1.5,2.5],dx:120,rise:'-45vh',peak:.7,w:3,col:'#e8f8ff',glow:'0 0 6px 1px rgba(159,242,255,.6)'}
 };
 LB.tx=o=>o==null?'':typeof o==='function'?o():typeof o==='string'?o:LB._(o.en,o.fr);
-LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],S=LB.SET_T,c=C.color,c2=C.color2,rgb=C.rgb;
+LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],S=LB.SET_T,G=M.gameGear,c=C.color,c2=C.color2,rgb=C.rgb;
  return '.bar span i{font-style:normal}\n'+
  ':root{--chc:'+c+';--chc2:'+c2+';--chr:'+rgb+'}   /* couleur du chapitre pour la carte (#ov) */\n'+
  '#ov [hidden]{display:none!important}\n'+
@@ -927,16 +927,15 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(241,227,207,.3);border-radius:4px;cursor:pointer}\n'+
  '.langs button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.22);color:#fff}\n'+
  '.langs button:focus-visible{outline:2px solid '+c+';outline-offset:2px}\n'+
- /* roue de réglages en jeu (LB.settings.attach) : carré comme MENU, mêmes bords haut et bas ; en-tête par défaut, ligne Pause / Réessayer en paysage bas */
- '.hright>.mbtn{align-self:stretch}\n'+
- '@media (orientation:portrait) and (max-width:'+M.gameGear.portraitW+'px){.top>.hright{margin-left:auto}}   /* portrait : frise, MENU et roue collés au bord droit, même quand ils passent sous le nom */\n'+
- '.mbtn.gear{display:inline-grid;place-items:center;flex:none;width:'+M.gameGear.h+'px;min-height:'+M.gameGear.h+'px;padding:0;box-sizing:border-box;color:var(--muted)}\n'+
- '.mrow>.mbtn.gear{align-self:stretch}\n'+
- '.mbtn.gear svg{width:'+M.gameGear.icon+'px;height:'+M.gameGear.icon+'px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}\n'+
+ /* roue de réglages en jeu (LB.settings.attach) : carré comme MENU, mêmes bords haut et bas ; sur la ligne du titre par défaut ; en paysage bas, à droite de MENU (même hauteur) */
+ '.top{position:relative}\n'+
+ '.mbtn.gear{display:inline-grid;place-items:center;flex:none;width:'+G.h+'px;height:'+G.h+'px;padding:0;box-sizing:border-box;color:var(--muted)}\n'+
+ '#gearHead{position:absolute;right:0;margin-top:calc(('+G.titleLh+' * '+G.titleFs+' - '+G.h+'px) / 2 + '+G.titleMt+'px)}\n'+
+ '.mbtn.gear svg{width:'+G.icon+'px;height:'+G.icon+'px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}\n'+
  '.mbtn.gear:hover,.mbtn.gear[aria-expanded="true"]{color:var(--fg)}\n'+
- '.mrow>.mbtn.gear{display:none}\n'+
- '@media (pointer:coarse){.mbtn.gear{width:'+M.gameGear.hTouch+'px;min-height:'+M.gameGear.hTouch+'px}}\n'+
- '@media (max-height:'+M.gameGear.lowH+'px) and (orientation:landscape){.mrow{gap:'+M.gameGear.lowGap+'px}.mrow>.mbtn:not(.gear){padding-inline:'+M.gameGear.lowPad+'px;letter-spacing:'+M.gameGear.lowLs+'}.hright>.mbtn.gear{display:none}.mrow>.mbtn.gear{display:inline-grid;width:'+M.gameGear.hLow+'px;min-height:0;flex:none}}\n'+
+ '#gearMenu{display:none}\n'+
+ '@media (pointer:coarse){.mbtn.gear{width:'+G.hTouch+'px;height:'+G.hTouch+'px}#gearHead{margin-top:calc(('+G.titleLh+' * '+G.titleFs+' - '+G.hTouch+'px) / 2 + '+G.titleMt+'px)}}\n'+
+ '@media (max-height:'+G.lowH+'px) and (orientation:landscape){#gearHead{display:none}.hright>#menuBtn{align-self:stretch}.hright>#gearMenu{display:inline-grid;width:'+G.hLow+'px;height:auto;align-self:stretch;min-height:0}.phases button{min-width:'+G.lowMinPh+'px;padding-inline:'+G.lowPadPh+'px}.hright .mbtn:not(.gear){padding-inline:'+G.lowPadMenu+'px}}\n'+
  '@media (pointer:coarse){.langs button{min-height:40px}.ov.menu .mbtn{min-height:'+M.btnH+'px}}\n'+
  '@media (max-height:520px) and (orientation:landscape){.ov.menu .mbtn{min-height:'+M.btnHLow+'px;padding-block:2px}.mlink{min-height:'+M.btnHLow+'px;padding-block:2px}}\n'};
 LB.ui=(()=>{
@@ -1230,10 +1229,10 @@ LB.SETTINGS_T=[
 LB.GEAR_SVG='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.4L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.7h4l.4-2.7a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.4z"/><circle cx="12" cy="12" r="3"/></svg>';
 LB.gearBtn=()=>'<button class="gear" id="mGear" type="button" aria-haspopup="dialog" aria-expanded="false">'+LB.GEAR_SVG+'</button>';
 /* roues de l'en-tête (après MENU) et de la ligne Pause / Réessayer : mêmes réglages que le menu, une seule implémentation (LB.settings.attach) */
-LB.gameGear=()=>{const mk=()=>LB.ui.mk('button',{type:'button',class:'mbtn gear','aria-haspopup':'dialog','aria-expanded':'false'},LB.GEAR_SVG),
-    A=document.getElementById('menuBtn'),B=document.getElementById('retryBtn');
-  if(A&&!document.getElementById('gearHead'))LB.settings.attach(mk(),b=>{b.id='gearHead';A.after(b)});
-  if(B&&!document.getElementById('gearRow'))LB.settings.attach(mk(),b=>{b.id='gearRow';B.after(b)})};
+LB.gameGear=()=>{const mk=id=>{const b=LB.ui.mk('button',{type:'button',class:'mbtn gear','aria-haspopup':'dialog','aria-expanded':'false'},LB.GEAR_SVG);b.id=id;return b},
+    H=document.querySelector('.top h1'),A=document.getElementById('menuBtn');
+  if(H&&!document.getElementById('gearHead'))LB.settings.attach(mk('gearHead'),b=>H.parentNode.insertBefore(b,H));
+  if(A&&!document.getElementById('gearMenu'))LB.settings.attach(mk('gearMenu'),b=>A.after(b))};
 LB.settings=(()=>{
   let box=null,gear=null,hook=null,open=false,from=null,last=null;const extra=[];   /* extra : roues de l'en-tête et de la ligne Pause (attach) */
   const OPTS=[[true,'On','Oui'],[false,'Off','Non']];
