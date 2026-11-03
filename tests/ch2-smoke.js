@@ -57,7 +57,7 @@ const play=async(lbl,ph,hp)=>{let s=await toCard(lbl);
 console.log('menu',JSON.stringify(await st()));
 if(await pg.evaluate(()=>localStorage.getItem('db-unl'))!=='3')errs.push('db-unl non pose');
 for(const [dk,hp] of [['normal',4],['hard',3]]){
- if(dk!=='normal'){await pg.click('#menuBtn');await pg.waitForTimeout(300)}
+ if(dk!=='normal'){await pg.evaluate(()=>{const o=document.getElementById('ov');if(o&&!o.hidden)document.getElementById('go').click()});await pg.waitForTimeout(100);await pg.click('#menuBtn');await pg.waitForTimeout(300)}
  await pg.click('[data-diff='+dk+']');await pg.waitForTimeout(300);
  await play(dk+' phase I',2,hp);
  // frise : boutons I, II, III ; ORDER=[2,1,3]
@@ -78,7 +78,7 @@ for(const [dk,hp] of [['normal',4],['hard',3]]){
   if(await pg.evaluate(()=>!document.getElementById('cine').hidden)){await pg.keyboard.press('Escape');await pg.waitForTimeout(200)}   // le prologue couvre l'ecran (cadre commun) : le passer
   await pg.click('#phases button[data-ph="'+gp+'"]');await pg.waitForTimeout(300); // frise, sans finir le niveau precedent
   await play('sans cle '+dk+' phase '+['','I','II','III'][gp]+' directe',ph,hp);
-  await pg.click('#menuBtn');await pg.waitForTimeout(300)}
+  await pg.evaluate(()=>{const o=document.getElementById('ov');if(o&&!o.hidden)document.getElementById('go').click()});await pg.waitForTimeout(100);await pg.click('#menuBtn');await pg.waitForTimeout(300)}
  await pg.click('[data-diff=trial]');await pg.waitForTimeout(200);await pg.click('[data-diff=tn]');await pg.waitForTimeout(300);
  const t=await toCard('Epreuve');console.log('sans cle, Epreuve',JSON.stringify(t));
  if(t.ph!=='2'||!t.hp.endsWith('/4')||t.locked!=='111')errs.push('Epreuve : phase '+t.ph+', PV '+t.hp+', frise '+t.locked+' (attendu phase I, 4 PV, frise fermee)');
