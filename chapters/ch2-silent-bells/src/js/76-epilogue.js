@@ -54,8 +54,7 @@ function drawEpilogue(t){
       ctx.save();ctx.globalCompositeOperation='lighter';glow(P.x,P.top+8,130,'rgba(185,207,90,.9)',.55*fl);ell(P.x,P.top+8,3,4,`rgba(240,245,210,${.9*fl})`);ctx.restore()};
     const R=mulberry(616);for(let layer=0;layer<3;layer++){if(layer===1)light();ctx.fillStyle=['#0b0f0c','#070a08','#030504'][layer];for(let i=0;i<6;i++){const x=R()*W,w=10+layer*12+R()*14;if(layer&&Math.abs(x-P.x)<60)continue;  // the Spire stays visible between the near trunks
       ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
-    mist(420,2,.07,4);
-    LB.nextCard(ctx,t-EPI_TITLE,{n:3,name:'Hollow Roots',col:CH_COL[3]})}
+    mist(420,2,.07,4);}
   else{ // carton 5: no tower any more, a symbol: antlers rising from roots, in Chapter III's colour (as the bell in Chapter I)
     const q=t-EPI_TITLE,a=clamp(q/2.2,0,1)*(.88+.12*Math.sin(t*1.6));
     ctx.save();cCam(1+.04*clamp(q/8,0,1),480,200,0,0);cSky('#04060a','#08100f','#0d150f');cStars(t,.3);
