@@ -166,3 +166,5 @@
 - Hub : la carte d'entrée devient sobre : cadre fin à la couleur du chapitre sur fond sombre translucide, nom petit et espacé, « Entrer » en bouton à fin contour qui se remplit doucement au survol, au focus et au toucher ; la carte « À venir » reprend le cadre, estompé, sans bouton.
 
 - Joueur : rien de visible (test de fumée du Chapitre II seul : la carte de défaite est fermée avant de cliquer la frise des phases).
+
+- Joueur : intro et outro du Chapitre II redessinées dans l'esprit du Chapitre I : plans plus sobres, un seul sujet par carton, brume et mer plus calmes, lueur turquoise de la gardienne qui pulse doucement ; la vallée tremble sans secousses saccadées et la lumière de la Flèche faiblit lentement.
