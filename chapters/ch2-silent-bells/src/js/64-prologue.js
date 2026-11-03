@@ -190,24 +190,27 @@ function spawn(){
    every spell of the Voice (same draw, real or illusory) at least `dt` s later (not scaled by f), pushed back by `step` s until
    every copied impact is at least `gap`*f (the spacing of a volley's orbs) from every other impact of the series (at most `max` s); wail: the cry bounces on the screen
    edge `edge` and comes back towards its caster (second dodge, same speed); field = margin keeping every orb, shard and cry
-   inside the visible field; ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
+   inside the visible field; orb = an orb grows in the hand until `tl`*f and lands at `ti`*f (was 1.3: slower flight, same
+   spacing between orbs); shards (Echoes, last Echo, copies) are never closer than the shard rain's minimum spacing (RAIN, per
+   difficulty: the Hard grace after a shard needs it); ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
 const VOICE={vol:{easy:[2,3],normal:[3,5],hard:[3,5]},rain:{easy:2,normal:3,hard:3},echo:{easy:1,normal:2,hard:2},
-  last:{easy:1,normal:2,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.44,step:.02,max:6},wail:{edge:24,mouth:85},field:24,ray:.28};
+  last:{easy:1,normal:2,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.44,step:.02,max:6},orb:{tl:.45,ti:1.45},backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
 const voiceDk=()=>S.dk==='easy'?'easy':S.d.u.length>1?'hard':'normal';
 const fieldX=x=>clamp(x,VOICE.field,W-VOICE.field), fieldY=y=>clamp(y,VOICE.field,GY);
 function P2(stage,f,b,final,rage){
   const T=[],dk=voiceDk();let t=b,hitT=b;
-  const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+.45*f,ti:t+1.3*f,real,src:src||0});hitT=Math.max(hitT,t+1.3*f);t+=.44*f};
+  const O=VOICE.orb,G=RAIN[S.d.m<1?'hard':'normal'];
+  const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+O.tl*f,ti:t+O.ti*f,real,src:src||0});hitT=Math.max(hitT,t+O.ti*f);t+=.44*f};
   const volley=(n,ill,src)=>{const V=VOICE.vol[dk];n=clamp(n,V[0],V[1]);ill=Math.min(ill,n-1);const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i),src);t+=.9*f;S.cv='volley'};
   // the cry leaves the mouth, crosses the Watcher, bounces on the screen edge and comes back towards its caster (two dodges)
   const wail=src=>{src=src||0;const x0=fieldX(VPOS[src].x-VOICE.wail.mouth),e=VOICE.wail.edge,ti=t+1.9*f,v=(x0-HX)/(1.1*f),d=(HX-e)/v;
     T.push({k:'wail',t0:t,tl:t+.8*f,ti,real:true,src,x0,ret:0});T.push({k:'wail',t0:ti,tl:ti+d,ti:ti+2*d,real:true,src,x0,ret:1});
-    hitT=Math.max(hitT,ti+2*d);t=Math.max(t+1.3*f,ti+2*d-1.3*f+.44*f);S.cv='wail'};
+    hitT=Math.max(hitT,ti+2*d);t=Math.max(t+1.3*f,ti+2*d-O.ti*f+.44*f);S.cv='wail'};
   // a reflection shatters once its attacks are dodged (the Watcher's ray breaks it), sending n shards at the Watcher
-  const shatter=(src,n)=>{const E=SP.echo,g=(E.break2-E.break1)*f;let s=hitT+E.break1*f,end=s;for(let i=0;i<n;i++){T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src,ray:!i});end=s+E.ti*f;s+=g}hitT=end;t=Math.max(t,end-1.3*f+.4*f)};
+  const shatter=(src,n)=>{const E=SP.echo,g=Math.max((E.break2-E.break1)*f,G[0]);let s=hitT+E.break1*f,end=s;for(let i=0;i<n;i++){T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src,ray:!i});end=s+E.ti*f;s+=g}hitT=end;t=Math.max(t,end-O.ti*f+Math.max(.4*f,G[0]))};
   // Echoes (rages): each reflection casts its orbs (nature drawn at random), then shatters into as many shards
   const echoR=()=>{const n=VOICE.echo[dk];[1,2].sort(()=>Math.random()-.5).forEach(src=>{for(let i=0;i<n;i++){orb(Math.random()<VOICE.real[dk],src);t+=.1*f}t+=.9*f;shatter(src,n)});S.cv='echo'};
-  const rain=()=>{const n=VOICE.rain[dk],G=RAIN[S.d.m<1?'hard':'normal'];let s=t;for(let i=0;i<n;i++){if(i)s+=G[0]+Math.random()*(G[1]-G[0]);S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f,ti:s+.95*f,si:S.shardNext})}hitT=Math.max(hitT,s+.95*f);t=s+1.3*f;S.cv='rain'};
+  const rain=()=>{const n=VOICE.rain[dk];let s=t;for(let i=0;i<n;i++){if(i)s+=G[0]+Math.random()*(G[1]-G[0]);S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f,ti:s+.95*f,si:S.shardNext})}hitT=Math.max(hitT,s+.95*f);t=s+1.3*f;S.cv='rain'};
   if(rage){echoR();return T}
   // last Echo: two reflections, each a volley then a cry, then it shatters; the finish is the classic counter on the Voice
   if(final){[1,2].forEach(src=>{volley(VOICE.vol[dk][0],1,src);wail(src);shatter(src,VOICE.last[dk])});S.cv='volley';return T}
@@ -216,7 +219,7 @@ function P2(stage,f,b,final,rage){
   pick(stage?p1:p0)();
   // Hard: the permanent echo beside the Voice copies each of her spells (same draw) VOICE.twin.dt s later
   if(dk==='hard'){const W2=VOICE.twin,gap=W2.gap*f,own=th=>(th.k==='orb'||th.k==='wail')&&th.src===0||th.k==='shard'&&th.si!=null,mine=T.filter(own);
-    let dt=W2.dt;const clash=d=>mine.some(m=>T.some(o=>Math.abs(m.ti+d-o.ti)<gap));while(clash(dt)&&dt<W2.dt+W2.max)dt+=W2.step;
+    let dt=W2.dt;const clash=d=>mine.some(m=>T.some(o=>Math.abs(m.ti+d-o.ti)<(m.k==='shard'||o.k==='shard'?Math.max(gap,G[0]):gap)));while(clash(dt)&&dt<W2.dt+W2.max)dt+=W2.step;
     for(const th of mine){
     const c=Object.assign({},th,{t0:th.t0+dt,tl:th.tl+dt,ti:th.ti+dt,twin:1});if(th.k!=='shard')c.src=3;if(th.k==='wail')c.x0=fieldX(VPOS[3].x-VOICE.wail.mouth);if(th.si!=null)c.si=(th.si+8)%SHARDS.length;T.push(c)}}
   return T;
@@ -225,7 +228,11 @@ function P2(stage,f,b,final,rage){
    comes back as a real attack once he can dodge again (action + recovery + DG.backWin). Dodging a reflection is not a fault:
    the series stays clean unless the Watcher takes the returning blow (the 'hit' branches of update() set pat.ok=false) */
 function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
-  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}
+  // the return is pushed back (by VOICE.backStep s) while it would land closer to another real attack than a volley's spacing
+  // (the shard rain's minimum next to a shard), so the Watcher can always dodge both (decision 2026-11-03-ch2-voix-creuse)
+  const c=PT(),g=.44/S.d.sp,G0=RAIN[S.d.m<1?'hard':'normal'][0];let ti=gt+c.act+c.rec+DG.backWin;const ti0=ti;
+  while(ti<ti0+3&&S.threats.some(o=>!o.done&&o!==th&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(o.ti-ti)<(o.k==='shard'?Math.max(g,G0):g)))ti+=VOICE.backStep;
+  const nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}
 function shardPos(si){const s=SHARDS[si],m=VOICE.field+s.s;return{x:clamp(s.x+Math.sin(rt*.4+s.o)*12,m,W-m),y:clamp(s.y+Math.cos(rt*.5+s.o)*8,m,GY-m),s:s.s}}
 function drawOrbs(){
   for(const th of S.threats){
