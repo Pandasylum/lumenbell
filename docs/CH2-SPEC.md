@@ -18,12 +18,12 @@ L'Ancien peut être redessiné pour être plus esthétique, mais chaque pièce d
 |---|---|
 | Cloche de tête | Lanterne du sommet, la méduse brille dedans ; elle tombe quand la tour éclate |
 | Cloches du torse | Étages de la tour |
-| Épaules | Balcons |
+| Cloches d'épaules | Phares du sommet : elles tournent autour du Phare, sous la méduse, et la lumière les suit ; les éclairs en partent, annoncés par un crépitement |
 | Bras | Arcs-boutants |
 | Ancre | Plantée au pied de la tour, elle l'amarre |
 | Chaînes | Amarres vers les récifs |
 
-Les deux lanternes latérales du sommet sont des pièces propres à la tour, trouvées aux sols, sans équivalent chez l'Ancien.
+La tour n'utilise que les pièces de l'Ancien, sans rien ajouter (décision du 3 novembre 2026) : plus de lanternes sur la plage.
 
 ## La cloche
 La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (écriture ancienne inventée, dessinée une seule fois et réutilisée) ; le mot **Couronne** (EN : **Crown**) est gravé en clair au centre, visible en gros plan dans l'outro. Le joueur peut croire que c'est lié à la tête du Roi : fausse piste voulue.
