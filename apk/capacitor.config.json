@@ -1,6 +1,6 @@
 {
-  "appId": "com.emberbridge.game",
-  "appName": "Lumenbell",
+  "appId": "com.lumenbell.game",
+  "appName": "LumenBell",
   "webDir": "www",
   "backgroundColor": "#000000"
 }
