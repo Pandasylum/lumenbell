@@ -69,7 +69,7 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .hcard.soon{border-color:rgba(var(--cr),.26)}
 .hcard.soon .tip{border-color:rgba(var(--cr),.26)}
 .hcard.soon h2{opacity:.6}
-@media (max-height:520px) and (orientation:landscape){.hcard{gap:2px;padding:6px 12px 5px}.hcard h2{font-size:15px}.hcard .btn{min-height:44px}.hcard .soon{min-height:44px}}
+@media (max-height:520px) and (orientation:landscape){.hcard{gap:1px;padding:4px 12px 3px}.hcard h2{font-size:14px}.hcard .soon{min-height:var(--touch)}}
 .btn{font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border:2px solid var(--c,var(--lantern));padding:10px 26px;min-height:var(--touch);background:var(--c,var(--lantern));color:#0b0710}
 .btn:hover{filter:brightness(1.12)}
 .btn:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
