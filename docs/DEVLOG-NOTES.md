@@ -175,3 +175,7 @@
 - Chapitre II : si tu rates la riposte pendant une rage ou un dernier assaut, le boss relance la rage jusqu'à ce que tu le touches, comme au Chapitre I.
 
 - Joueur : rien de visible (règle de build ajoutée aux consignes et aux pièges ; aucun changement de source).
+
+- Chapitre II, Voix Creuse : chaque sort a sa riposte (laser direct, laser qui ricoche sur un miroir, onde de la clochette) ; la plainte rebondit sur le bord de l'écran et revient, il faut l'esquiver deux fois.
+- Les Échos lancent chacun leurs orbes puis éclatent sous ton rayon ; le dernier assaut fait combattre deux illusions l'une après l'autre ; une grande orbe ricoche sur un miroir et frappe la Voix à la tête.
+- En Difficile, un écho reste à côté de la Voix et répète chacun de ses sorts 0,3 s plus tard.

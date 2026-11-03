@@ -6,12 +6,13 @@ function mirrorLight(){if(S.phase!==2)return 0;const G=MIRROR_GLOW;
   if(S.cine&&S.cine.k==='out'){const t=gt-S.cine.t0;return t<CINE_P1.drop?lerp(G.max,G.end,clamp(t/CINE_P1.drop,0,1)):0}
   if(S.mode==='play'||S.mode==='ko'||S.mode==='dead')return G.base+(G.max-G.base)*(1-S.bossHp/S.bossMax);return G.base}
 function voiceAnim(){
-  let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
-  let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
+  let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&!th.ret&&!th.src&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
+  let echo=0;for(const th of S.threats){if((th.k==='orb'||th.k==='wail')&&th.src>0&&th.src<3&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
   return{cast,echo};
 }
-const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160}];
-function voicePos(i){const v=VPOS[i];return{x:v.x,y:v.y+Math.sin(rt*1.6+i*2)*8}}
+/* 0 the Voice, 1 and 2 her reflections (Echoes), 3 Hard's permanent echo beside her (decision 2026-11-03-ch2-voix-creuse) */
+const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160},{x:870,y:266}];
+function voicePos(i){const v=VPOS[i],d=i===0?voiceSway():null;return{x:v.x+(d?d.x:0),y:v.y+Math.sin(rt*1.6+i*2)*8+(d?d.y:0)}}
 function voiceHand(i,cast){const p=voicePos(i);return cast?{x:p.x-84,y:p.y-62}:{x:p.x-46,y:p.y+30}}
 function drawBoss2(){
   const A=voiceAnim();
@@ -21,7 +22,9 @@ function drawBoss2(){
     // rage: a reflection shatters, sending a shard at the Watcher
     const br=S.threats.find(t=>t.k==='shard'&&t.from===i&&gt>=t.t0);
     if(br){if(!br.bk){br.bk=1;const p=voicePos(i);burst(p.x,p.y-80,26,'#ece4ff',6,.9,.2);burst(p.x,p.y-20,16,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass')}continue}
-    const has=S.threats.some(t=>t.k==='orb'&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,S.echoA*.5,has?1:0,0)}}
+    const has=S.threats.some(t=>(t.k==='orb'||t.k==='wail'&&!t.ret)&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,S.echoA*.5,has?1:0,0)}}
+  // Hard: the permanent echo beside the Voice, casting her spells again a moment later
+  if(S.mode==='play'&&S.phase===2&&voiceDk()==='hard'){const has=S.threats.some(t=>(t.k==='orb'||t.k==='wail'&&!t.ret)&&t.src===3&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(3,.45,has?1:0,0)}
   ctx.save();
   if(hasFilter&&gt-S.bossFlash<.15)ctx.filter='brightness(1.8)';
   drawVoice(0,1-clamp((ko-.4)/.6,0,1),A.cast,ko);

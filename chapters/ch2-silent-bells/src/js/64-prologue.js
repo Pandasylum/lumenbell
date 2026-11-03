@@ -183,28 +183,47 @@ function spawn(){
     sched(gen(1,f,gt+1.6,true));return}
   sched(gen(stage,f,gt+.25));
 }
-/* ---- Phase I · the Hollow Voice ---- */
+/* ---- Phase I · the Hollow Voice (decision docs/decisions/2026-11-03-ch2-voix-creuse.md) ---- */
+/* numbers per difficulty (easy / normal / hard): vol = orbs of a volley [min, max] (each pattern's count is clamped into it);
+   rain = shards of a shard rain; echo = orbs, then shards, of each reflection in the Echoes (rages); last = shards of each
+   reflection of the last Echo (final assault) when it shatters; twin = Hard's permanent echo beside the Voice: it copies
+   every spell of the Voice (same draw, real or illusory) `dt` s later (not scaled by f); wail: the cry bounces on the screen
+   edge `edge` and comes back towards its caster (second dodge, same speed); field = margin keeping every orb, shard and cry
+   inside the visible field; ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
+const VOICE={vol:{easy:[2,3],normal:[3,5],hard:[3,5]},rain:{easy:2,normal:3,hard:3},echo:{easy:1,normal:2,hard:2},
+  last:{easy:1,normal:2,hard:2},twin:{dt:.3},wail:{edge:24,mouth:85},field:24,ray:.28};
+const voiceDk=()=>S.dk==='easy'?'easy':S.d.u.length>1?'hard':'normal';
+const fieldX=x=>clamp(x,VOICE.field,W-VOICE.field), fieldY=y=>clamp(y,VOICE.field,GY);
 function P2(stage,f,b,final,rage){
-  const T=[];let t=b;
-  const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+.45*f,ti:t+1.3*f,real,src:src||0});t+=.44*f};
-  const volley=(n,ill)=>{const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i));t+=.9*f};
-  const echo=()=>{const real=Math.floor(Math.random()*3);[0,1,2].sort(()=>Math.random()-.5).forEach(s=>{orb(s===real,s);t+=.1*f});t+=.9*f};
-  // rage: the echo, then the two reflections shatter one by one, each sending a shard at the Watcher
-  const echoR=()=>{const t0=t;echo();const last=t0+2*.54*f+1.3*f,E=SP.echo;[1,2].forEach((src,j)=>{const s=last+E['break'+(j+1)]*f;T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src})});t=Math.max(t,last+E.break2*f+E.ti*f+.4*f)};
-  const wail=()=>{T.push({k:'wail',t0:t,tl:t+.8*f,ti:t+1.9*f,real:true});t+=1.3*f};
-  const rain=n=>{const G=RAIN[S.d.m<1?'hard':'normal'];let s=t;for(let i=0;i<n;i++){if(i)s+=G[0]+Math.random()*(G[1]-G[0]);S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f,ti:s+.95*f,si:S.shardNext})}t=s+1.3*f};
+  const T=[],dk=voiceDk();let t=b,hitT=b;
+  const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+.45*f,ti:t+1.3*f,real,src:src||0});hitT=Math.max(hitT,t+1.3*f);t+=.44*f};
+  const volley=(n,ill,src)=>{const V=VOICE.vol[dk];n=clamp(n,V[0],V[1]);ill=Math.min(ill,n-1);const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i),src);t+=.9*f;S.cv='volley'};
+  // the cry leaves the mouth, crosses the Watcher, bounces on the screen edge and comes back towards its caster (two dodges)
+  const wail=src=>{src=src||0;const x0=fieldX(VPOS[src].x-VOICE.wail.mouth),e=VOICE.wail.edge,ti=t+1.9*f,v=(x0-HX)/(1.1*f),d=(HX-e)/v;
+    T.push({k:'wail',t0:t,tl:t+.8*f,ti,real:true,src,x0,ret:0});T.push({k:'wail',t0:ti,tl:ti+d,ti:ti+2*d,real:true,src,x0,ret:1});
+    hitT=Math.max(hitT,ti+2*d);t=Math.max(t+1.3*f,ti+2*d-1.3*f+.44*f);S.cv='wail'};
+  // a reflection shatters once its attacks are dodged (the Watcher's ray breaks it), sending n shards at the Watcher
+  const shatter=(src,n)=>{const E=SP.echo,g=(E.break2-E.break1)*f;let s=hitT+E.break1*f,end=s;for(let i=0;i<n;i++){T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src,ray:!i});end=s+E.ti*f;s+=g}hitT=end;t=Math.max(t,end-1.3*f+.4*f)};
+  // Echoes (rages): each reflection casts its orbs (nature drawn at random), then shatters into as many shards
+  const echoR=()=>{const n=VOICE.echo[dk];[1,2].sort(()=>Math.random()-.5).forEach(src=>{for(let i=0;i<n;i++){orb(Math.random()<.5,src);t+=.1*f}t+=.9*f;shatter(src,n)});S.cv='echo'};
+  const rain=()=>{const n=VOICE.rain[dk],G=RAIN[S.d.m<1?'hard':'normal'];let s=t;for(let i=0;i<n;i++){if(i)s+=G[0]+Math.random()*(G[1]-G[0]);S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f,ti:s+.95*f,si:S.shardNext})}hitT=Math.max(hitT,s+.95*f);t=s+1.3*f;S.cv='rain'};
   if(rage){echoR();return T}
-  if(final){echoR();volley(5,2);wail();return T}
-  const p0=[()=>volley(2,0),()=>volley(3,1),wail,()=>volley(3,0),()=>{wail();volley(2,1)},()=>rain(3)];
-  const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},()=>rain(5),()=>{rain(3);volley(3,1)}];
-  pick(stage?p1:p0)();return T;
+  // last Echo: two reflections, each a volley then a cry, then it shatters; the finish is the classic counter on the Voice
+  if(final){[1,2].forEach(src=>{volley(VOICE.vol[dk][0],1,src);wail(src);shatter(src,VOICE.last[dk])});S.cv='volley';return T}
+  const p0=[()=>volley(2,0),()=>volley(3,1),()=>wail(),()=>volley(3,0),()=>{wail();volley(2,1)},rain];
+  const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
+  pick(stage?p1:p0)();
+  // Hard: the permanent echo beside the Voice copies each of her spells (same draw) VOICE.twin.dt s later
+  if(dk==='hard'){const dt=VOICE.twin.dt;for(const th of T.slice()){const own=(th.k==='orb'||th.k==='wail')&&th.src===0||th.k==='shard'&&th.si!=null;if(!own)continue;
+    const c=Object.assign({},th,{t0:th.t0+dt,tl:th.tl+dt,ti:th.ti+dt,twin:1});if(th.k!=='shard')c.src=3;if(th.k==='wail')c.x0=fieldX(VPOS[3].x-VOICE.wail.mouth);if(th.si!=null)c.si=(th.si+8)%SHARDS.length;T.push(c)}}
+  return T;
 }
 /* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and
    comes back as a real attack once he can dodge again (action + recovery + DG.backWin). Dodging a reflection is not a fault:
    the series stays clean unless the Watcher takes the returning blow (the 'hit' branches of update() set pat.ok=false) */
 function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
   const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}
-function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
+function shardPos(si){const s=SHARDS[si],m=VOICE.field+s.s;return{x:clamp(s.x+Math.sin(rt*.4+s.o)*12,m,W-m),y:clamp(s.y+Math.cos(rt*.5+s.o)*8,m,GY-m),s:s.s}}
 function drawOrbs(){
   for(const th of S.threats){
     if(gt<th.t0)continue;
@@ -215,6 +234,7 @@ function drawOrbs(){
       else{p=(gt-th.tl)/(th.ti-th.tl);
         if(th.done){if(th.res==='hit'||th.res==='pass'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.45)}}
         x=lerp(h.x,tx,p);y=lerp(h.y,ty,p)-Math.sin(Math.PI*Math.min(p,1))*(th.k==='back'?20:46)}
+      x=fieldX(x);y=fieldY(y);
       if(a<=0)continue;
       ctx.save();ctx.globalAlpha=a;
       if(th.real&&gt>=th.tl){const sh=clamp(1-(GY-y)/400,.25,1);ell(x,GY+3,r*1.6*sh,4*sh,`rgba(0,0,0,${.5*sh})`)}
@@ -227,14 +247,21 @@ function drawOrbs(){
       if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);x=o.x;y=o.y;ang=Math.atan2(ty-y,tx-x);glow(x,y,30,'rgba(220,200,255,.9)',.8*k)}
       else{let p=(gt-th.tl)/(th.ti-th.tl);if(th.done){if(th.res==='hit'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.3);if(!th.sf){th.sf=1;burst(tx+30,ty-20,10,'#f2ecff',5,.4)}}}
         p=Math.min(p,1);x=lerp(o.x,tx,ein(p));y=lerp(o.y,ty,ein(p));ang=Math.atan2(ty-o.y,tx-o.x)}
+      // the Watcher's ray breaks the reflection once its attacks are dodged (none of them hit him)
+      if(th.ray&&gt>=th.t0-VOICE.ray&&gt<th.t0+.06&&S.orbX!=null&&!S.threats.some(o=>o.pat===th.pat&&o.src===th.from&&o.res==='hit')){const v=voicePos(th.from),e=clamp((gt-th.t0+VOICE.ray)/VOICE.ray,0,1);
+        ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(255,244,190,${.95-.5*e})`;ctx.lineWidth=6*(1-e)+2;ctx.beginPath();ctx.moveTo(S.orbX,S.orbY);ctx.lineTo(lerp(S.orbX,v.x,Math.min(1,e*2.5)),lerp(S.orbY,v.y-84,Math.min(1,e*2.5)));ctx.stroke();ctx.restore()}
+      x=fieldX(x);y=fieldY(y);
       if(a<=0)continue;
       ctx.save();ctx.globalAlpha=a;ctx.translate(x,y);ctx.rotate(ang+Math.PI/2);const s=o.s*.8;
       const gr=ctx.createLinearGradient(0,-s,0,s);gr.addColorStop(0,'rgba(245,240,255,.95)');gr.addColorStop(1,'rgba(150,120,210,.7)');ctx.fillStyle=gr;
       ctx.beginPath();ctx.moveTo(0,-s*1.2);ctx.lineTo(s*.45,s*.4);ctx.lineTo(0,s*.9);ctx.lineTo(-s*.45,s*.4);ctx.closePath();ctx.fill();ctx.strokeStyle='#ffffff';ctx.lineWidth=1.2;ctx.stroke();ctx.restore();
     }else if(th.k==='wail'&&gt>=th.tl){
-      let p=(gt-th.tl)/(th.ti-th.tl),a=1;if(th.done){if(th.res==='hit')continue;a=Math.max(0,1-(gt-th.okT)/.4)}
-      const x=lerp(650,HX,Math.min(p,1.25));ctx.save();ctx.globalAlpha=a;
-      for(let i=0;i<4;i++){ctx.strokeStyle=`rgba(200,160,255,${.75-i*.17})`;ctx.lineWidth=5-i;ctx.beginPath();ctx.ellipse(x+i*16,GY-90,22+i*4,110,0,Math.PI*.55,Math.PI*1.45);ctx.stroke()}
+      // outward: from the mouth (x0) past the Watcher to the screen edge; back: from the edge past the Watcher to its caster
+      const e=VOICE.wail.edge,p=(gt-th.tl)/(th.ti-th.tl);let a=1,x;
+      if(!th.ret){if(th.done&&th.res==='hit')continue;x=lerp(th.x0,HX,p);if(x<=e)continue}
+      else{if(th.done&&th.res==='hit')continue;x=lerp(e,HX,p);if(x>=th.x0)continue;a=Math.min(1,(th.x0-x)/80)}
+      x=fieldX(x);const dir=th.ret?-1:1;ctx.save();ctx.globalAlpha=a;
+      for(let i=0;i<4;i++){ctx.strokeStyle=`rgba(200,160,255,${.75-i*.17})`;ctx.lineWidth=5-i;ctx.beginPath();ctx.ellipse(x+dir*i*16,GY-90,22+i*4,110,0,th.ret?-Math.PI*.45:Math.PI*.55,th.ret?Math.PI*.45:Math.PI*1.45);ctx.stroke()}
       ctx.restore();
     }
   }

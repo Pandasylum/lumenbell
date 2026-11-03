@@ -2,9 +2,38 @@
 function drawCounter(){
   if(!S.cnt)return;const k=(gt-S.cnt.t)/S.cnt.dur;ctx.save();ctx.globalCompositeOperation='lighter';
   if(S.cnt.k===1){if(k>.32&&k<.62){const e=(k-.32)/.3;ctx.strokeStyle=`rgba(255,240,170,${1-e})`;ctx.lineWidth=10*(1-e)+2;ctx.beginPath();ctx.arc(640,GY-150,110,-2.2+e*.5,.6+e*.5);ctx.stroke()}}
-  else if(S.cnt.k===2){if(k>.22&&k<.7){const e=(k-.22)/.48,p=voicePos(0);ctx.strokeStyle=`rgba(255,244,190,${1-e*.8})`;ctx.lineWidth=8*(1-e)+2;ctx.beginPath();ctx.moveTo(S.orbX,S.orbY);ctx.lineTo(lerp(S.orbX,p.x,Math.min(1,e*3)),lerp(S.orbY,p.y-84,Math.min(1,e*3)));ctx.stroke()}}
+  else if(S.cnt.k===2)drawCounter2(k);
   else if(S.cnt.k===3){if(k>.2&&k<.6)bolt(S.orbX,S.orbY,LX,S.form===2?ECY:LY,(k*7|0)/7,'rgba(255,250,238,.95)',4)}
   ctx.restore();
+}
+
+/* counters of the Hollow Voice, one per spell (decision 2026-11-03-ch2-voix-creuse), chosen by the last spell of the series
+   (S.cv, set by P2): volley = straight beam at the Voice; rain = a thin beam bouncing on a mirror shard (`mirror`) then
+   on her; wail = the scepter's bell sends a wave that shakes her; echo (end of the Echoes) = a great orb she dodges, which
+   bounces on the mirror shard and comes back into her head (she reels). Fractions of the counter's length (R_CNT[2].dur;
+   the hit lands at its hitAt .4): beam [a, b]; echo: orb reaches her `toV`, the mirror `toM`, her head `toH`; she leans
+   aside `lean` px from `dodge[0]` to `dodge[1]`, reels `reel` px until `reelEnd`. */
+const CNT2={mirror:{x:480,y:70},beam:[.22,.7],toV:.2,toM:.3,toH:.4,dodge:[.1,.34],lean:46,reel:7,reelEnd:.85};
+function voiceSway(){
+  if(!S.cnt||S.cnt.k!==2)return null;const C=CNT2,k=(gt-S.cnt.t)/S.cnt.dur;
+  if(S.cv==='echo'&&k>C.dodge[0]&&k<C.dodge[1])return{x:C.lean*Math.sin(Math.PI*(k-C.dodge[0])/(C.dodge[1]-C.dodge[0])),y:-12*Math.sin(Math.PI*(k-C.dodge[0])/(C.dodge[1]-C.dodge[0]))};
+  if((S.cv==='echo'||S.cv==='wail')&&k>C.toH&&k<C.reelEnd)return{x:Math.sin(gt*38)*C.reel*(1-(k-C.toH)/(C.reelEnd-C.toH)),y:0};
+  return null;
+}
+function drawCounter2(k){
+  const C=CNT2,ox=S.orbX,oy=S.orbY,p=voicePos(0),hx=p.x,hy=p.y-84,M=C.mirror;
+  const seg=(x0,y0,x1,y1,e,w,a)=>{ctx.strokeStyle=`rgba(255,244,190,${a})`;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(lerp(x0,x1,e),lerp(y0,y1,e));ctx.stroke()};
+  if(S.cv==='rain'){if(k>C.beam[0]&&k<C.beam[1]){const e=(k-C.beam[0])/(C.beam[1]-C.beam[0]),q=Math.min(1,e*3),a=1-e*.8,w=4*(1-e)+1.5;
+      seg(ox,oy,M.x,M.y,Math.min(1,q*2),w,a);if(q>.5){seg(M.x,M.y,hx,hy,(q-.5)*2,w,a);glow(M.x,M.y,18,'rgba(255,250,220,.9)',a)}}}
+  else if(S.cv==='wail'){if(k>C.beam[0]&&k<C.beam[1]){const e=(k-C.beam[0])/(C.beam[1]-C.beam[0]),ang=Math.atan2(hy-oy,hx-ox);
+      for(let j=0;j<3;j++){const q=clamp(e*1.6-j*.25,0,1);if(q<=0||q>=1)continue;const x=lerp(ox,hx,q),y=lerp(oy,hy,q);ctx.strokeStyle=`rgba(255,240,170,${1-q})`;ctx.lineWidth=4*(1-q)+1.5;ctx.beginPath();ctx.arc(x,y,10+34*q,ang-.9,ang+.9);ctx.stroke()}}}
+  else if(S.cv==='echo'){const v0=VPOS[0],vx=v0.x,vy=v0.y-84;let x=null,y;
+      if(k>.04&&k<C.toV){const e=(k-.04)/(C.toV-.04);x=lerp(ox,vx,e);y=lerp(oy,vy,e)}
+      else if(k>=C.toV&&k<C.toM){const e=(k-C.toV)/(C.toM-C.toV);x=lerp(vx,M.x,e);y=lerp(vy,M.y,e)}
+      else if(k>=C.toM&&k<C.toH){const e=(k-C.toM)/(C.toH-C.toM);x=lerp(M.x,hx,e);y=lerp(M.y,hy,e)}
+      if(k>=C.toM&&k<C.toM+.05)glow(M.x,M.y,26,'rgba(255,250,220,.95)',.9);
+      if(x!=null){glow(x,y,48,'rgba(255,240,170,.95)',.9);ell(x,y,16,16,'#fff6d0')}}
+  else if(k>C.beam[0]&&k<C.beam[1]){const e=(k-C.beam[0])/(C.beam[1]-C.beam[0]);seg(ox,oy,hx,hy,Math.min(1,e*3),8*(1-e)+2,1-e*.8)}
 }
 
 /* ---------- visual help ---------- */
