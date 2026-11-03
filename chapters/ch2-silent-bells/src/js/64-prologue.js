@@ -185,7 +185,8 @@ function spawn(){
 }
 /* ---- Phase I · the Hollow Voice (decision docs/decisions/2026-11-03-ch2-voix-creuse.md) ---- */
 /* numbers per difficulty (easy / normal / hard): vol = orbs of a volley [min, max] (each pattern's count is clamped into it);
-   rain = shards of a shard rain; echo = orbs, then shards, of each reflection in the Echoes (rages); last = shards of each
+   rain = shards of a shard rain; echoOrb / echoShard = orbs, then shards, of each reflection in the Echoes (rages);
+   rageVoice = orbs the Voice casts herself between the two reflections; last = shards of each
    reflection of the last Echo (final assault) when it shatters; real = chance that an orb of the Echoes is real (else illusory); twin = Hard's permanent echo beside the Voice: it copies
    `of` blows in `every` of the Voice's spells (same draw, real or illusory) at least `dt` s later (not scaled by f), pushed back by `step` s until
    every copied impact is at least `gap`*f (the spacing of a volley's orbs) from every other impact of the series (at most `max` s; with no room left, the copies come
@@ -194,8 +195,8 @@ function spawn(){
    inside the visible field; orb = an orb grows in the hand until `tl`*f and lands at `ti`*f (was 1.3: slower flight, same
    spacing between orbs); shardCharge = extra charge of every shard (rain, Echoes, copies) before it flies, in s (not scaled); shards (Echoes, last Echo, copies) are never closer than the shard rain's minimum spacing (RAIN, per
    difficulty: the Hard grace after a shard needs it); ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
-const VOICE={vol:{easy:[2,3],normal:[3,5],hard:[3,5]},rain:{easy:2,normal:3,hard:3},echo:{easy:1,normal:2,hard:2},
-  last:{easy:1,normal:2,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.44,step:.02,max:6,of:2,every:3},orb:{tl:.45,ti:1.45},shardCharge:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
+const VOICE={vol:{easy:[2,3],normal:[3,5],hard:[3,5]},rain:{easy:2,normal:3,hard:3},echoOrb:{easy:1,normal:1,hard:1},echoShard:{easy:1,normal:1,hard:1},rageVoice:{easy:1,normal:2,hard:2},
+  last:{easy:1,normal:1,hard:1},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.44,step:.02,max:6,of:2,every:3},orb:{tl:.45,ti:1.45},shardCharge:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
 const voiceDk=()=>S.dk==='easy'?'easy':S.d.u.length>1?'hard':'normal';
 const fieldX=x=>clamp(x,VOICE.field,W-VOICE.field), fieldY=y=>clamp(y,VOICE.field,GY);
 function P2(stage,f,b,final,rage){
@@ -210,14 +211,12 @@ function P2(stage,f,b,final,rage){
   // a reflection shatters once its attacks are dodged (the Watcher's ray breaks it), sending n shards at the Watcher
   const shatter=(src,n)=>{const E=SP.echo,g=Math.max((E.break2-E.break1)*f,G[0]);let s=hitT+E.break1*f,end=s;for(let i=0;i<n;i++){T.push({k:'shard',t0:s,tl:s+E.tl*f+C,ti:s+E.ti*f+C,from:src,ray:!i});end=s+E.ti*f+C;s+=g}hitT=end;t=Math.max(t,end-O.ti*f+Math.max(.4*f,G[0]))};
   // Echoes (rages): each reflection casts its orbs (nature drawn at random), then shatters into as many shards
-  const echoR=()=>{const n=VOICE.echo[dk];[1,2].sort(()=>Math.random()-.5).forEach(src=>{for(let i=0;i<n;i++){orb(Math.random()<VOICE.real[dk],src);t+=.1*f}t+=.9*f;shatter(src,n)});S.cv='echo'};
+  // Echoes (rages): a reflection casts its orbs (nature drawn at random) and shatters into its shards; then the Voice casts her own
+  // orbs; then the other reflection does the same (decision 2026-11-03-ch2-voix-creuse)
+  const echoOne=src=>{for(let i=0;i<VOICE.echoOrb[dk];i++){orb(Math.random()<VOICE.real[dk],src);t+=.1*f}t+=.9*f;shatter(src,VOICE.echoShard[dk])};
+  const echoR=()=>{const [a,b2]=[1,2].sort(()=>Math.random()-.5);echoOne(a);for(let i=0;i<VOICE.rageVoice[dk];i++)orb(Math.random()<VOICE.real[dk],0);t+=.9*f;echoOne(b2);S.cv='echo'};
   const rain=()=>{const n=VOICE.rain[dk];let s=t;for(let i=0;i<n;i++){if(i)s+=G[0]+Math.random()*(G[1]-G[0]);S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f+C,ti:s+.95*f+C,si:S.shardNext})}hitT=Math.max(hitT,s+.95*f+C);t=s+1.3*f+C;S.cv='rain'};
-  if(rage){echoR();return T}
-  // last Echo: two reflections, each a volley then a cry, then it shatters; the finish is the classic counter on the Voice
-  if(final){[1,2].forEach(src=>{volley(VOICE.vol[dk][0],1,src);wail(src);shatter(src,VOICE.last[dk])});S.cv='volley';return T}
-  const p0=[()=>volley(2,0),()=>volley(3,1),()=>wail(),()=>volley(3,0),()=>{wail();volley(2,1)},rain];
-  const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
-  pick(stage?p1:p0)();
+  const twin=()=>{
   // Hard: the permanent echo beside the Voice copies each of her spells (same draw) VOICE.twin.dt s later
   if(dk==='hard'){const W2=VOICE.twin,gap=W2.gap*f,own=th=>(th.k==='orb'||th.k==='wail')&&th.src===0||th.k==='shard'&&th.si!=null;
     // only `of` blows in `every` are copied (a cry and its return are one blow), from a random start in each series
@@ -228,7 +227,13 @@ function P2(stage,f,b,final,rage){
     if(clash(dt))dt=Math.max(...T.map(o=>o.ti))-Math.min(...mine.map(m=>m.ti))+Math.max(gap,G[0]);   // no room: the echo replays after the whole series
     for(const th of mine){
     const c=Object.assign({},th,{t0:th.t0+dt,tl:th.tl+dt,ti:th.ti+dt,twin:1});if(th.k!=='shard')c.src=3;if(th.k==='wail')c.x0=fieldX(VPOS[3].x-VOICE.wail.mouth);if(th.si!=null)c.si=(th.si+8)%SHARDS.length;T.push(c)}}
-  return T;
+  return T};
+  if(rage){echoR();return twin()}
+  // last Echo: two reflections, each a volley then a cry, then it shatters; the finish is the classic counter on the Voice
+  if(final){[1,2].forEach(src=>{volley(VOICE.vol[dk][0],1,src);wail(src);shatter(src,VOICE.last[dk])});S.cv='volley';return T}
+  const p0=[()=>volley(2,0),()=>volley(3,1),()=>wail(),()=>volley(3,0),()=>{wail();volley(2,1)},rain];
+  const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
+  pick(stage?p1:p0)();return twin();
 }
 /* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and
    comes back as a real attack once he can dodge again (action + recovery + DG.backWin). Dodging a reflection is not a fault:
