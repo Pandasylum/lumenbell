@@ -10,6 +10,7 @@ Décision de Kevin, 3 novembre. Branche `ch2/voix-creuse`.
 - Nature des orbes des Échos (3 novembre, après mesure) : Facile 50 % réelles ; Normal et Difficile 75 % réelles, 25 % illusoires (à garder même si le Difficile devient plus dur).
 - Rage 2 (Difficile seulement) : Échos de nouveau, mêmes contres.
 - Rage finale, dernier Écho : deux illusions, chacune lance une volée puis une plainte, puis éclate (1 éclat Facile, 2 Normal et Difficile). Contre : rayon sur chaque illusion après l'esquive de son combo, puis finish classique sur la Voix.
-- Difficile : un écho permanent à côté de la Voix double tous les sorts : il COPIE le tirage de la Voix (même nature de chaque orbe, réelle ou illusoire), décalé de 0,3 s, porté à 0,45 s le 3 novembre après mesure (le joueur parfait ne pouvait pas tout esquiver à 0,3 s). Les éclats des échos qui meurent ne sont pas doublés. Aucun autre nombre ne change.
+- Difficile : un écho permanent à côté de la Voix double tous les sorts : il COPIE le tirage de la Voix (même nature de chaque orbe, réelle ou illusoire), décalé de 0,3 s, porté à 0,45 s puis ajusté par série (au moins 0,44 f entre deux impacts), et il ne double que 2 coups sur 3 (une plainte et son retour comptent pour un coup) le 3 novembre après mesure (le joueur parfait ne pouvait pas tout esquiver à 0,3 s). Les éclats des échos qui meurent ne sont pas doublés. Aucun autre nombre ne change.
+- Éclats (pluie, Échos, copies) : 0,5 s de charge en plus avant de partir, dans toutes les difficultés (3 novembre).
 - Lisibilité : aucun éclat, orbe ni cri ne naît ou ne passe hors du champ visible.
 - À valider : Difficile jugé trop dur par Kevin ; seuil du bot ~60 % de victoires à 40 ms ; sinon réduire l'écho.
