@@ -167,4 +167,4 @@
 
 - Joueur : rien de visible (test de fumée du Chapitre II seul : la carte de défaite est fermée avant de cliquer la frise des phases).
 
-- Joueur : intro et outro du Chapitre II refaites dans la grammaire du Chapitre I : silhouettes plates sur ciel étoilé avec lune, une seule lumière par plan (la lueur turquoise de la gardienne qui pulse), caméra qui avance lentement, particules qui montent ; outro : aube sur le Phare, vallée sous les étoiles, forêt et Flèche qui faiblit ; le carton « À suivre » montre des bois de cerf à la couleur du Chapitre III, plus de tour.
+- Joueur : l'intro et l'outro du Chapitre II restent comme avant ; seul le carton « À suivre » change : des bois de cerf aux racines, à la couleur du Chapitre III, à la place de la forêt et de la Flèche.

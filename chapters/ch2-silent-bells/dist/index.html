@@ -2887,59 +2887,43 @@ function village(x0,y,lit){ctx.fillStyle='#071014';
   ctx.fillStyle='#0c1a1c';ctx.beginPath();ctx.moveTo(x0+294,y-70);ctx.quadraticCurveTo(x0+303,y-84,x0+312,y-70);ctx.lineTo(x0+313,y-62);ctx.lineTo(x0+293,y-62);ctx.fill()}
 /* a boat pulled up on the sand, keel up */
 function boat(x,y,s,up){ctx.save();ctx.translate(x,y);ctx.scale(s,up?-s:s);ctx.fillStyle='#120d09';ctx.beginPath();ctx.moveTo(-50,-14);ctx.quadraticCurveTo(0,8,50,-18);ctx.lineTo(44,-4);ctx.quadraticCurveTo(0,10,-44,-2);ctx.closePath();ctx.fill();ctx.restore()}
-/* ---- grammar of Chapter I (76-cine-intro.js): flat Path2D silhouettes, sky in three tones with stars and moon, one strong light
-   per shot, a continuous camera push (cCam), motes rising; here the cold palette of the coast and the turquoise of the keeper ---- */
-const C_HEAD=new Path2D('M-80 330 L-80 250 Q40 236 150 262 Q260 288 340 330Z');
-const C_SHOREA=new Path2D('M-80 540 L-80 392 Q200 366 480 384 Q760 402 1040 372 L1040 540Z');
-const C_BEACH=new Path2D('M-80 540 L-80 410 Q400 388 1040 416 L1040 540Z');
-const C_LH=new Path2D('M-34 -14 L-22 -250 L-32 -250 L-32 -258 L-16 -258 L-16 -296 L-20 -296 L0 -318 L20 -296 L16 -296 L16 -258 L32 -258 L32 -250 L22 -250 L34 -14Z M-80 0 L-56 -18 L-20 -22 L30 -16 L70 -6 L90 0Z');
-const C_STARS=(()=>{const R=mulberry(29);return[...Array(90)].map(()=>({x:R()*960,y:R()*300,r:.5+R()*1,p:R()*6.28}))})();
-const C_MOTES=(()=>{const R=mulberry(41);return[...Array(46)].map(()=>({x:R()*960,v:6+R()*14,s:1+R()*1.6,p:R()*540,ph:R()*6.28}))})();
-function cCam(z,fx,fy,dx,dy){ctx.translate(fx,fy);ctx.scale(z,z);ctx.translate(-fx+(dx||0),-fy+(dy||0))}
-function cSky(top,mid,bot){const g=ctx.createLinearGradient(0,-60,0,H);g.addColorStop(0,top);g.addColorStop(.6,mid);g.addColorStop(1,bot);ctx.fillStyle=g;ctx.fillRect(-200,-200,W+400,H+400)}
-function cStars(t,a){ctx.fillStyle='#e8f1ee';for(const s of C_STARS){ctx.globalAlpha=a*(.3+.3*Math.sin(t*1.1+s.p));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);ctx.fill()}ctx.globalAlpha=1}
-function cMoon(x,y,a){ctx.fillStyle=`rgba(220,235,235,${a})`;ctx.beginPath();ctx.arc(x,y,30,0,6.283);ctx.fill()}
-function cSea(y0,c0,c1,a){const g=ctx.createLinearGradient(0,y0,0,H);g.addColorStop(0,c0);g.addColorStop(1,c1);ctx.fillStyle=g;ctx.fillRect(-200,y0,W+400,H-y0+200);
-  ctx.strokeStyle=`rgba(170,235,225,${a})`;ctx.lineWidth=1.2;for(let i=0;i<5;i++){const y=y0+10+i*i*3.5,ph=rt*.35+i;ctx.beginPath();for(let x=-200;x<=W+200;x+=40){const yy=y+Math.sin(x*.012+ph)*(1+i*.4);x>-200?ctx.lineTo(x,yy):ctx.moveTo(x,yy)}ctx.stroke()}}
-function cMotes(t,k){ctx.fillStyle='rgba(190,240,232,1)';for(const m of C_MOTES){const y=540-((m.p+t*m.v)%580),x=m.x+Math.sin(t*.6+m.ph)*14;ctx.globalAlpha=k*clamp((540-y)/120,0,1)*clamp(y/140+.15,0,1);ctx.beginPath();ctx.arc(x,y,m.s,0,6.283);ctx.fill()}ctx.globalAlpha=1}
-/* the Lighthouse as a flat silhouette; glim = the keeper's turquoise glimmer in the lantern room (0..1) */
-function cLight(x,y,s,glim){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.fillStyle='#03080a';ctx.fill(C_LH);
-  if(glim>0){ctx.globalCompositeOperation='lighter';glow(0,-278,70,'rgba(79,224,204,.9)',glim*.8);ell(0,-278,3,4.5,`rgba(220,255,248,${glim})`)}ctx.restore()}
 function drawPrologue(t){
-  const shot=PRO_SHOTS.filter(s=>t>=s).length-1,ts=t-PRO_SHOTS[shot],p=clamp(ts/CINE_D.intro[shot],0,1);
+  const shot=PRO_SHOTS.filter(s=>t>=s).length-1,ts=t-PRO_SHOTS[shot],drift=ts*5;
   ctx.save();
   if(shot===0){ // A: the coast in the mist
-    ctx.save();cCam(1+.1*p,480,330,-24*p,0);
-    cSky('#05080c','#0f1e24','#2c4a4e');cStars(t,.55);cMoon(760,105,.14);
-    ctx.fillStyle='#0a161a';ctx.fill(C_HEAD);
-    cSea(330,'#1b3438','#05100f',.09);
-    ctx.fillStyle='#050b0d';ctx.fill(C_SHOREA);village(560,386,.2);
-    mist(340,2,.24,6);cMotes(t,.45);ctx.restore()}
-  else if(shot===1){ // B: the Lighthouse alone, dark, in the middle of the sea
-    ctx.save();cCam(1+.2*p,480,230,0,-10*p);
-    cSky('#04070a','#0d1b21','#25434a');cStars(t,.7);cMoon(300,120,.13);
-    cSea(300,'#16292e','#04090b',.1);
-    cLight(480,310,.7,0);
-    for(let i=0;i<3;i++){const k=(rt*.2+i*.33)%1;ctx.strokeStyle=`rgba(220,245,240,${.2*Math.sin(Math.PI*k)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(480,311,44+k*30,3+k*2,0,Math.PI,0);ctx.stroke()}
-    mist(302,2,.18,5);cMotes(t,.4);ctx.restore()}
-  else if(shot===2){ // C: the beach, two boats keel up, the moorings empty, the Lighthouse far away
-    ctx.save();cCam(1+.08*p,480,350,-30*p,0);
-    cSky('#05080c','#0f1d23','#2b484e');cStars(t,.55);cMoon(210,110,.12);
-    cSea(320,'#18303a','#050b0d',.09);
-    cLight(800,322,.24,0);
-    ctx.fillStyle='#0b0a08';ctx.fill(C_BEACH);
-    for(const x of[600,690,780]){ctx.fillStyle='#050403';ctx.fillRect(x,356,6,60);ctx.strokeStyle='rgba(60,40,24,.8)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+3,372);ctx.quadraticCurveTo(x+22,400,x+40,384);ctx.stroke()}
-    boat(230,432,1.4,true);boat(420,442,1.15,true);
-    mist(366,2,.16,5);cMotes(t,.35);ctx.restore()}
-  else{ // D: the keeper's glimmer pulses at the top; E: the same, the Watcher comes onto the shore
-    const q=eio(clamp((t-PRO_SHOTS[3])/13,0,1)),pul=.6+.3*Math.sin(t*2.2);
-    ctx.save();cCam(1+.12*q,700,330,0,-14*q);
-    cSky('#03070a','#0b1a20','#22403f');cStars(t,.7);cMoon(240,100,.1);
-    cSea(330,'#12282c','#04090b',.1);
-    ctx.save();ctx.globalCompositeOperation='lighter';glow(700,336-278*.95,190,'rgba(79,224,204,.8)',.3*pul);ctx.restore();
-    cLight(700,336,.95,pul);
-    mist(404,2,.14,5);cMotes(t,.4);ctx.restore();
-    ctx.fillStyle='#050b0d';ctx.beginPath();ctx.moveTo(-40,H);ctx.lineTo(-40,GY-8);ctx.quadraticCurveTo(300,GY-16,520,GY+6);ctx.quadraticCurveTo(580,GY+40,640,H);ctx.fill();
+    skyGrad('#070c10','#2a3a3e',330);mist(150,4,.18,10);
+    ctx.translate(-drift,0);
+    ctx.fillStyle='#0b1619';ctx.beginPath();ctx.moveTo(-40,300);[[120,280],[300,292],[480,276],[700,290],[1000,284]].forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(1000,330);ctx.lineTo(-40,330);ctx.fill();
+    seaBand(330,'#1d3236','#071214',.14);
+    ctx.fillStyle='#0a1012';ctx.beginPath();ctx.moveTo(-40,H);ctx.lineTo(-40,380);ctx.quadraticCurveTo(300,350,560,372);ctx.quadraticCurveTo(760,392,1000,360);ctx.lineTo(1000,H);ctx.fill();
+    village(120,372,.25);
+    ctx.translate(drift,0);mist(330,5,.32,16);mist(420,4,.28,-12)}
+  else if(shot===1){ // B: the Lighthouse out at sea, dark
+    skyGrad('#05090c','#1c2c30',300);mist(120,3,.14,8);
+    seaBand(300,'#14292d','#040b0d',.16);
+    lighthouse(640-drift*.6,306,.62,0);
+    for(let i=0;i<4;i++){const k=(rt*.3+i*.25)%1;ctx.strokeStyle=`rgba(220,245,240,${.25*Math.sin(Math.PI*k)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(640-drift*.6,307,40+k*30,3+k*2,0,Math.PI,0);ctx.stroke()}
+    mist(290,5,.26,14)}
+  else if(shot===2){ // C: the beach, boats keel up, empty moorings
+    skyGrad('#060a0d','#22343a',310);mist(170,3,.15,9);
+    seaBand(310,'#18303a','#050c0e',.15);
+    lighthouse(860,312,.22,0);
+    ctx.translate(-drift,0);
+    ctx.fillStyle='#14110d';ctx.beginPath();ctx.moveTo(-40,H);ctx.lineTo(-40,400);ctx.quadraticCurveTo(400,382,1000,410);ctx.lineTo(1000,H);ctx.fill();
+    for(const x of[120,190,620,700,770]){ctx.fillStyle='#0a0806';ctx.fillRect(x,350,6,64);ctx.strokeStyle='rgba(60,40,24,.8)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+3,366);ctx.quadraticCurveTo(x+40,400,x+80,374);ctx.stroke()}
+    boat(330,420,1.3,true);boat(480,432,1.1,true);boat(880,424,1,false);
+    ctx.fillStyle='#071014';for(const x of[560,590]){ctx.beginPath();ctx.moveTo(x,412);ctx.lineTo(x+6,370);ctx.arc(x+8,362,7,0,Math.PI*2);ctx.lineTo(x+16,412);ctx.closePath();ctx.fill()}
+    ctx.translate(drift,0);
+    ctx.fillStyle='#0a0f10';ctx.fillRect(760-drift*.3,320,3,-60);ctx.fillRect(748-drift*.3,288,26,2); // a mast out of the water
+    mist(360,4,.22,12)}
+  else{ // D: the Lighthouse's top, a glimmer; E: the same, the Watcher comes onto the shore
+    skyGrad('#04080b','#1a2b30',330);mist(110,3,.12,8);
+    seaBand(330,'#132a2e','#040b0d',.15);
+    const z=1+.06*eio(clamp((t-PRO_SHOTS[3])/8,0,1));ctx.save();ctx.translate(700,330);ctx.scale(z,z);ctx.translate(-700,-330);
+    lighthouse(700,336,.95,.55+.35*Math.sin(t*2.2));ctx.restore();
+    ctx.fillStyle='#0a1012';ctx.beginPath();ctx.moveTo(-40,H);ctx.lineTo(-40,GY-8);ctx.quadraticCurveTo(300,GY-16,520,GY+6);ctx.quadraticCurveTo(580,GY+40,640,H);ctx.fill();
+    ctx.strokeStyle='rgba(220,245,240,.3)';ctx.lineWidth=1.5;for(let i=0;i<3;i++){const k=(rt*.3+i*.33)%1;ctx.beginPath();ctx.moveTo(520-k*40,GY+10+i*8);ctx.quadraticCurveTo(700,GY+20+i*12,W+40,GY+14+i*12);ctx.stroke()}
+    mist(400,3,.2,10);
     if(shot>=4){const walk=eio(clamp(ts/PRO_T.walk,0,1)),hx=lerp(-40,W/2-60,walk);
     LB.drawWatcher(ctx,hx,GY,walk<1?'walk':'idle',walk<1?t:rt);   // the Watcher of the series (shared/js/20-watcher.js)
     if(ts>=PRO_T.walk&&once('land'))burst(W/2-60,GY,14,'#9fb6a0',3,.7,.3)}}
@@ -3424,46 +3408,46 @@ const EFXL=[[.2,'swell'],[EPI_SHOTS[1],'glints'],[EPI_SHOTS[2],'rumble'],[EPI_DA
 function drawEpilogue(t){
   const shot=EPI_SHOTS.filter(s=>t>=s).length-1,ts=t-EPI_SHOTS[shot];
   ctx.save();
-  if(shot===0){ // the morning: the Lighthouse stands, mute; the Watcher on the shore, the bell at his feet
-    const p=clamp(ts/CINE_D.outro[0],0,1);
-    ctx.save();cCam(1+.08*p,480,330,-16*p,0);
-    cSky('#12202e','#5a6672','#e2aa80');cStars(t,.25);
-    ctx.save();ctx.globalCompositeOperation='lighter';glow(W*.2,318,320,'rgba(255,190,130,.9)',.4);ctx.restore();
-    cSea(318,'#4a6068','#0d1c20',.12);
-    cLight(690,330,.85,0);
-    mist(262,2,.1,4);cMotes(t,.25);ctx.restore();
-    ctx.fillStyle='#050b0d';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,GY-6);ctx.quadraticCurveTo(300,GY-20,560,GY+4);ctx.quadraticCurveTo(620,GY+40,680,H);ctx.fill();
+  if(shot===0){ // the morning: the Lighthouse stands, mute; the Watcher on the reef, the bell at his feet
+    const g=ctx.createLinearGradient(0,0,0,320);g.addColorStop(0,'#1c2a3a');g.addColorStop(.6,'#6a6670');g.addColorStop(1,'#d8a882');ctx.fillStyle=g;ctx.fillRect(0,0,W,320);
+    glow(W*.2,300,260,'rgba(255,200,140,.8)',.35);mist(250,3,.12,6);
+    seaBand(318,'#4a6068','#0d1c20',.18);
+    lighthouse(690,330,.85,0);
+    ctx.fillStyle='#0a1114';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,GY-6);ctx.quadraticCurveTo(300,GY-20,560,GY+4);ctx.quadraticCurveTo(620,GY+40,680,H);ctx.fill();
+    for(const [x,y,r,k] of[[400,GY-4,.4,'ring'],[460,GY-2,-.3,'seg'],[250,GY-6,.2,'ring']])drawP(k,x,y,r);
     drawP('head',330,GY-6,-.28,.85);
     LB.drawWatcher(ctx,220,GY,'idle',rt)}
-  else if(shot===1){ // close-up of the bell: the signs, the crack, the word; a slow push-in
+  else if(shot===1){ // close-up of the bell: the signs, the crack, the word
     const g=ctx.createRadialGradient(W/2,H*.45,40,W/2,H*.45,520);g.addColorStop(0,'#2a3a3c');g.addColorStop(1,'#05090a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#070c0d';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,380);ctx.quadraticCurveTo(480,350,W,390);ctx.lineTo(W,H);ctx.fill();
-    const z=4.2+.3*eio(clamp(ts/6,0,1));ctx.save();ctx.translate(W/2,372);ctx.scale(z,z);ctx.rotate(-.12);pHead(.85,bellMarks());ctx.restore();
-    glow(W/2+60,200,160,'rgba(255,210,160,.6)',.16+.04*Math.sin(t*1.1))}
-  else if(shot===2){ // the valley of Chapter I: the earth keeps trembling, one tower goes dark, the others falter
-    const sh=ts<3.9?(1.2+1.2*Math.abs(Math.sin(t*2))):0;ctx.translate(Math.sin(t*23)*sh,Math.cos(t*19)*sh);
-    cSky('#05070d','#14141c','#1e1a1a');cStars(t,.5);
+    const z=4.2+.35*eio(clamp(ts/4,0,1));ctx.save();ctx.translate(W/2,372);ctx.scale(z,z);ctx.rotate(-.12);pHead(.85,bellMarks());ctx.restore();
+    glow(W/2+60,200,160,'rgba(255,210,160,.6)',.18+.08*Math.sin(t*1.3))}
+  else if(shot===2){ // the valley of Chapter I: the earth does not stop trembling, one tower goes dark, the others falter
+    if(ts<3.9)S.shake=Math.max(S.shake||0,2+3*Math.abs(Math.sin(t*3)));
+    const sx=(Math.random()-.5)*(S.shake||0),sy=(Math.random()-.5)*(S.shake||0);ctx.translate(sx,sy);
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0a0c14');g.addColorStop(.7,'#1e1c22');g.addColorStop(1,'#120e0c');ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);
     ctx.fillStyle='#0d0f14';ctx.beginPath();ctx.moveTo(-20,330);[[120,220],[260,280],[420,190],[560,260],[720,200],[880,270],[980,240]].forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(980,H);ctx.lineTo(-20,H);ctx.fill();
     ctx.fillStyle='#14120f';ctx.beginPath();ctx.moveTo(-20,H);ctx.lineTo(-20,400);ctx.quadraticCurveTo(480,360,980,410);ctx.lineTo(980,H);ctx.fill();
     // the stone bridge of Chapter I, small, down in the valley
     ctx.fillStyle='#0a0908';ctx.fillRect(380,384,200,10);for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(390+i*64,394);ctx.quadraticCurveTo(422+i*64,372,454+i*64,394);ctx.lineTo(454+i*64,410);ctx.lineTo(390+i*64,410);ctx.fill()}
-    VTOW.forEach(([x,h],i)=>{const base=i%2?330:300,top=base-h;ctx.fillStyle='#08090c';ctx.beginPath();ctx.moveTo(x-9,base);ctx.lineTo(x-5,top);ctx.lineTo(x+5,top);ctx.lineTo(x+9,base);ctx.closePath();ctx.fill();
-      let a;if(i===TOWER_OUT)a=t<EPI_DARK?.85:Math.max(0,.85-(t-EPI_DARK)/1.4);else a=.6+.2*Math.sin(t*(1.2+i*.3)+i*2);
-      if(a>0){ctx.save();ctx.globalCompositeOperation='lighter';glow(x,top-6,34,i===0?'rgba(255,170,90,.9)':'rgba(230,225,200,.9)',a);ell(x,top-6,2.5,3,`rgba(255,250,235,${a})`);ctx.restore()}});
-    for(const c of VCRACKS){const k=clamp((t-c.t0)/.9,0,1);if(k<=0)continue;const n=Math.max(2,Math.ceil(c.pts.length*k));ctx.strokeStyle='#020202';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<n;i++)i?ctx.lineTo(c.pts[i][0],c.pts[i][1]):ctx.moveTo(c.pts[i][0],c.pts[i][1]);ctx.stroke()}}
-  else if(t<EPI_TITLE){ // the forest: a Bound Spire among the trees, its light failing slowly; the title of the next chapter
-    cSky('#04060a','#080c0c','#0d120d');cStars(t,.35);
-    const P=SPIRE,dim=lerp(P.a0,P.a1,eio(clamp(ts/P.fade,0,1))),fl=dim*(.85+.15*Math.sin(t*1.7));
+    VTOW.forEach(([x,h],i)=>{const base=i%2?330:300,top=base-h,sway=Math.sin(t*9+i)*1.5;ctx.fillStyle='#08090c';ctx.beginPath();ctx.moveTo(x-9,base);ctx.lineTo(x-5+sway,top);ctx.lineTo(x+5+sway,top);ctx.lineTo(x+9,base);ctx.closePath();ctx.fill();
+      let a;if(i===TOWER_OUT)a=t<EPI_DARK?.9:Math.max(0,.9-(t-EPI_DARK)/.8)*(Math.sin(t*40)>0?1:.3);else a=.55+.35*Math.sin(t*(5+i)+i*2)*Math.sin(t*13+i);
+      if(a>0){ctx.save();ctx.globalCompositeOperation='lighter';glow(x+sway,top-6,34,i===0?'rgba(255,170,90,.9)':'rgba(230,225,200,.9)',a);ell(x+sway,top-6,2.5,3,`rgba(255,250,235,${a})`);ctx.restore()}});
+    for(const c of VCRACKS){const k=clamp((t-c.t0)/.6,0,1);if(k<=0)continue;const n=Math.max(2,Math.ceil(c.pts.length*k));ctx.strokeStyle='#020202';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<n;i++)i?ctx.lineTo(c.pts[i][0],c.pts[i][1]):ctx.moveTo(c.pts[i][0],c.pts[i][1]);ctx.stroke();
+      if(k<1&&Math.random()<.5)burst(c.pts[n-1][0],c.pts[n-1][1],2,'#6a5a48',3,.6,.3)}}
+  else if(t<EPI_TITLE){ // the forest: a Bound Spire among the trees, its light failing; the title of the next chapter
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#05070a');g.addColorStop(1,'#0b0e0a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    const P=SPIRE,dim=lerp(P.a0,P.a1,eio(clamp(ts/P.fade,0,1))),fl=dim*Math.max(.15,.75+.25*Math.sin(t*7)*Math.sin(t*3.1)-(Math.sin(t*2.3)>.92?.6:0));
     const light=()=>{const sg=ctx.createLinearGradient(P.x-16,0,P.x+16,0);sg.addColorStop(0,'#0c110c');sg.addColorStop(.45,'#263022');sg.addColorStop(1,'#0a0e0a');ctx.fillStyle=sg;ctx.beginPath();ctx.moveTo(P.x-16,H);ctx.lineTo(P.x-7,P.top+18);ctx.lineTo(P.x,P.top);ctx.lineTo(P.x+7,P.top+18);ctx.lineTo(P.x+16,H);ctx.closePath();ctx.fill();
       ctx.save();ctx.globalCompositeOperation='lighter';glow(P.x,P.top+8,130,'rgba(185,207,90,.9)',.55*fl);ell(P.x,P.top+8,3,4,`rgba(240,245,210,${.9*fl})`);ctx.restore()};
-    const R=mulberry(616);for(let layer=0;layer<3;layer++){if(layer===1)light();ctx.fillStyle=['#0b0f0c','#070a08','#030504'][layer];for(let i=0;i<6;i++){const x=R()*W,w=10+layer*12+R()*14;if(layer&&Math.abs(x-P.x)<60)continue;  // the Spire stays visible between the near trunks
+    const R=mulberry(616);for(let layer=0;layer<3;layer++){if(layer===1)light();ctx.fillStyle=['#0b0f0c','#070a08','#030504'][layer];for(let i=0;i<8;i++){const x=R()*W,w=10+layer*12+R()*14;if(layer&&Math.abs(x-P.x)<40)continue;  // the Spire stays visible between the near trunks
       ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
-    mist(420,2,.07,4);}
+    mist(420,4,.08,6)}
   else{ // carton 5: no tower any more, a symbol: antlers rising from roots, in Chapter III's colour (as the bell in Chapter I)
     const q=t-EPI_TITLE,a=clamp(q/2.2,0,1)*(.88+.12*Math.sin(t*1.6));
-    ctx.save();cCam(1+.04*clamp(q/8,0,1),480,200,0,0);cSky('#04060a','#08100f','#0d150f');cStars(t,.3);
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#04060a');g.addColorStop(1,'#0d150f');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     ctx.save();ctx.globalCompositeOperation='lighter';glow(W/2,200,260,CH_COL[3],.18*a);ctx.restore();
-    ctx.translate(W/2,250);ctx.lineCap='round';ctx.strokeStyle=CH_COL[3];ctx.shadowColor=CH_COL[3];ctx.shadowBlur=14;ctx.globalAlpha=a;
+    ctx.save();ctx.translate(W/2,250);ctx.lineCap='round';ctx.strokeStyle=CH_COL[3];ctx.shadowColor=CH_COL[3];ctx.shadowBlur=14;ctx.globalAlpha=a;
     for(const g of[-1,1]){
       ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(g*8,0);ctx.bezierCurveTo(g*60,-10,g*92,-70,g*62,-140);ctx.bezierCurveTo(g*50,-165,g*38,-185,g*30,-205);ctx.stroke();
       ctx.lineWidth=3;ctx.beginPath();
