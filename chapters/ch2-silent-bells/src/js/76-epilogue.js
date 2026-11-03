@@ -47,15 +47,27 @@ function drawEpilogue(t){
       if(a>0){ctx.save();ctx.globalCompositeOperation='lighter';glow(x+sway,top-6,34,i===0?'rgba(255,170,90,.9)':'rgba(230,225,200,.9)',a);ell(x+sway,top-6,2.5,3,`rgba(255,250,235,${a})`);ctx.restore()}});
     for(const c of VCRACKS){const k=clamp((t-c.t0)/.6,0,1);if(k<=0)continue;const n=Math.max(2,Math.ceil(c.pts.length*k));ctx.strokeStyle='#020202';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<n;i++)i?ctx.lineTo(c.pts[i][0],c.pts[i][1]):ctx.moveTo(c.pts[i][0],c.pts[i][1]);ctx.stroke();
       if(k<1&&Math.random()<.5)burst(c.pts[n-1][0],c.pts[n-1][1],2,'#6a5a48',3,.6,.3)}}
-  else{ // the forest: a Bound Spire among the trees, its light failing; the title of the next chapter
+  else if(t<EPI_TITLE){ // the forest: a Bound Spire among the trees, its light failing; the title of the next chapter
     const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#05070a');g.addColorStop(1,'#0b0e0a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     const P=SPIRE,dim=lerp(P.a0,P.a1,eio(clamp(ts/P.fade,0,1))),fl=dim*Math.max(.15,.75+.25*Math.sin(t*7)*Math.sin(t*3.1)-(Math.sin(t*2.3)>.92?.6:0));
     const light=()=>{const sg=ctx.createLinearGradient(P.x-16,0,P.x+16,0);sg.addColorStop(0,'#0c110c');sg.addColorStop(.45,'#263022');sg.addColorStop(1,'#0a0e0a');ctx.fillStyle=sg;ctx.beginPath();ctx.moveTo(P.x-16,H);ctx.lineTo(P.x-7,P.top+18);ctx.lineTo(P.x,P.top);ctx.lineTo(P.x+7,P.top+18);ctx.lineTo(P.x+16,H);ctx.closePath();ctx.fill();
       ctx.save();ctx.globalCompositeOperation='lighter';glow(P.x,P.top+8,130,'rgba(185,207,90,.9)',.55*fl);ell(P.x,P.top+8,3,4,`rgba(240,245,210,${.9*fl})`);ctx.restore()};
     const R=mulberry(616);for(let layer=0;layer<3;layer++){if(layer===1)light();ctx.fillStyle=['#0b0f0c','#070a08','#030504'][layer];for(let i=0;i<8;i++){const x=R()*W,w=10+layer*12+R()*14;if(layer&&Math.abs(x-P.x)<40)continue;  // the Spire stays visible between the near trunks
       ctx.fillRect(x-w/2,0,w,H);ctx.beginPath();ctx.moveTo(x-w/2,H-60);ctx.quadraticCurveTo(x-w*1.6,H-10,x-w*2,H);ctx.lineTo(x+w*2,H);ctx.quadraticCurveTo(x+w*1.6,H-10,x+w/2,H-60);ctx.fill()}}
-    mist(420,4,.08,6);
-    LB.nextCard(ctx,t-EPI_TITLE,{n:3,name:'Hollow Roots',col:CH_COL[3]})}   // next-chapter card over the forest (same layout as Chapter I)
+    mist(420,4,.08,6)}
+  else{ // carton 5: no tower any more, a symbol: antlers rising from roots, in Chapter III's colour (as the bell in Chapter I)
+    const q=t-EPI_TITLE,a=clamp(q/2.2,0,1)*(.88+.12*Math.sin(t*1.6));
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#04060a');g.addColorStop(1,'#0d150f');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    ctx.save();ctx.globalCompositeOperation='lighter';glow(W/2,200,260,CH_COL[3],.18*a);ctx.restore();
+    ctx.save();ctx.translate(W/2,250);ctx.lineCap='round';ctx.strokeStyle=CH_COL[3];ctx.shadowColor=CH_COL[3];ctx.shadowBlur=14;ctx.globalAlpha=a;
+    for(const g of[-1,1]){
+      ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(g*8,0);ctx.bezierCurveTo(g*60,-10,g*92,-70,g*62,-140);ctx.bezierCurveTo(g*50,-165,g*38,-185,g*30,-205);ctx.stroke();
+      ctx.lineWidth=3;ctx.beginPath();
+      for(const [x0,y0,x1,y1] of[[22,-6,42,-72],[70,-62,114,-92],[80,-104,124,-150],[64,-140,88,-186]]){ctx.moveTo(g*x0,y0);ctx.lineTo(g*x1,y1)}
+      ctx.stroke();
+      ctx.globalAlpha=a*.55;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(g*6,4);ctx.bezierCurveTo(g*20,30,g*50,40,g*58,70);ctx.moveTo(g*4,6);ctx.bezierCurveTo(g*2,34,g*16,56,g*10,84);ctx.stroke();ctx.globalAlpha=a}
+    ctx.restore();
+    LB.nextCard(ctx,q,{n:3,name:'Hollow Roots',col:CH_COL[3]})}   // next-chapter card (same layout as Chapter I)
   ctx.restore();
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});

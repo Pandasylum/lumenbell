@@ -169,3 +169,5 @@
 - Partie 2 : les cloches restent à leur poste et seule leur bouche pivote avec le faisceau ; les éclairs partent toujours des cloches.
 - Le faisceau sort désormais toujours de la bouche de la cloche qui éclaire, en combat comme dans la cinématique d'allumage : même point, même angle, aussi au démarrage, à l'arrêt et au retour au poste.
 - Joueur : rien de visible (test de fumée du Chapitre II seul : la carte de défaite est fermée avant de cliquer la frise des phases).
+
+- Joueur : l'intro et l'outro du Chapitre II restent comme avant ; seul le carton « À suivre » change : des bois de cerf aux racines, à la couleur du Chapitre III, à la place de la forêt et de la Flèche.
