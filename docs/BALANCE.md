@@ -6,7 +6,7 @@
 
 - **Cellule Facile / Normal / Difficile** : `prép. / fenêtre / durée` en secondes, multiplicateurs appliqués. **prép.** = du début de l'attaque à son premier impact (ou au début de la tenue pour un faisceau) ; **fenêtre** = temps pendant lequel un appui arrête l'attaque (voir ci-dessous) ; **durée** = voir le titre de chaque table.
 - **Fenêtre d'un tap** = `act + grâce` (`LB.hero.stops`, `shared/js/16-hero.js:58`) : appui au plus `act` avant l'impact (le Veilleur est en action), ou dans la grâce de sa récupération. Fenêtre de **tenue** (C2, faisceaux) = tb − ta.
-- **C2 — facteur f** : toutes les durées d'un motif sont multipliées par `f = 1 / (sp × (1 + .1 × stage))`, `stage` = 0 avant la première rage, 1 ensuite (`64-prologue.js:168`). Chaque cellule C2 est donc `avant rage ⟹ après rage` (la fenêtre d'un tap ne change pas ; les rages et le dernier assaut sont toujours en stage 1).
+- **C2 — facteur f** : toutes les durées d'un motif sont multipliées par `f = 1 / (sp × (1 + .1 × stage))`, `stage` = 0 avant la première rage, 1 ensuite (`64-prologue.js:172`). Chaque cellule C2 est donc `avant rage ⟹ après rage` (la fenêtre d'un tap ne change pas ; les rages et le dernier assaut sont toujours en stage 1).
 - **prov.** = O quand le code lui-même marque la valeur « PROVISOIRE ». **contre** : riposte du Veilleur (C1 phase III seulement).
 - Ordre des phases C2 à l'écran : I Voix Creuse (interne P2), II Ancien de Rouille (interne P1), III Phare (interne P3, formes I et II) — `ORDER=[2,1,3]`, `64-prologue.js:95`.
 
@@ -124,7 +124,7 @@ Déclencheurs (`rNext`, 44-p3-belfry-logic.js:128) : PV Colosse ≤ 1 → rage f
 | Nombre de rages / dernier assaut | 1 / à PV ≤ 1 | 1 / à PV ≤ 1 | 2 / à PV ≤ 1 | `64-prologue.js:130,138` |
 | Rugissement de rage (`RAGE.dur` / `dur2`) · `RAGE.finalHp` = `FINAL_AT` | 1.6 / .8 · 1 | idem | idem | `64-prologue.js:130,138` |
 | Vitesse d'attaque `sp` | .85 | 1 | 1.18 | `02-core.js:35-37` |
-| f avant rage (1 / sp) · après rage (1 / (sp × 1.1)) | 1.176 · 1.069 | 1 · .909 | .847 · .770 | `64-prologue.js:170` |
+| f avant rage (1 / sp) · après rage (1 / (sp × 1.1)) | 1.176 · 1.069 | 1 · .909 | .847 · .770 | `64-prologue.js:172` |
 | PV rendus entre phases (`heal`) | tous | tous | tous | `02-core.js:35-37` |
 | Phase III forme I : dernier assaut | aucun (`rageMarks`) | aucun | aucun | `64-prologue.js:131` |
 
