@@ -20,8 +20,8 @@ function drawAnchorQ(q){ctx.save();if(q.clip){ctx.beginPath();ctx.rect(0,0,W,GY+
 function drawEcl(P,A,J,tentA,on,gapQ,LQ,sw){
   base();if(sw==null)sw=1;
   const L0=LQ||(J?lampPoses(J.x,J.y,J.r/36):null),D={};let Ld=L0;
-  if(L0&&sw>0){Ld=L0.map((l,k)=>{const a=P[SBELLS[k]];return{x:lerp(l.x,a.x,sw),y:lerp(l.y,a.y,sw),r:lerp(l.r,a.r,sw)}});
-    SBELLS.forEach((i,k)=>{const a=P[i],l=L0[k];D[i]={...a,x:lerp(a.x,l.x,sw),y:lerp(a.y,l.y,sw),r:lerp(a.r,l.r,sw),z:sw>.5?-.01:a.z}})}
+  if(L0&&sw>0){Ld=L0.map((l,k)=>{const a=P[SBELLS[k]];return{x:lerp(l.x,a.x,sw),y:lerp(l.y,a.y,sw),r:lerp(l.r,a.r,sw)}});}
+  // no swap any more (3 Nov 2026): the shoulder bells are the lamps, they stay at P[SBELLS] where form II's beams and rings leave from
   const Q=i=>D[i]||P[i];
   if(J)glow(J.x,J.y,260,'rgba(90,220,255,.55)',.6*on+.05);
   const link=(x,y,front)=>{if(!J||tentA<=0)return;ctx.save();ctx.globalAlpha=tentA;tent(J.x,J.y,(J.x+x)/2,J.y+(front?30:-40),(J.x+x)/2,y,x,y,3,front?.9:.6);ctx.restore()};
