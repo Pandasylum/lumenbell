@@ -31,7 +31,7 @@ LB.cine=(()=>{
     const st=document.createElement('style');st.textContent=LB.CINE_CSS;document.head.appendChild(st);
     box=document.createElement('div');box.className='cine';box.id='cine';box.hidden=true;
     box.innerHTML='<div class="cbox"><canvas id="cineC" aria-hidden="true"></canvas></div><p class="ccap" id="cineCap" aria-live="polite"></p><button type="button" class="btn ghost" id="cineSkip">Skip ›</button>';
-    document.body.appendChild(box);
+    document.body.appendChild(box);if(LB.hdr)LB.hdr.watch(box);
     cvs=box.querySelector('canvas');cap=box.querySelector('.ccap');sk=box.querySelector('button');cx=cvs.getContext('2d');
     const coarse=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
     K=Math.min(2,coarse?1.25:(window.devicePixelRatio||1));cvs.width=960*K;cvs.height=540*K;

@@ -290,7 +290,7 @@ function rEnd(){
   desc:sp?_(`The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while.`,`Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps.`):win?_(`The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch.`,`Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore.`):_(`Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again.`,`La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus.`),
   go:sp?_('Back to menu','Retour au menu'):win?_('Replay from Phase I','Rejouer depuis la phase I'):_('Retry Phase III','Réessayer la phase III')};
   if(sp&&RUN.on){o.eye=_('Trial by Fire · Complete','Épreuve du feu · Terminée');o.stats='';o.table=runTable()}
-  if(sp)LB.hubEnd(o,1,RUN.on);   /* ouvert depuis le hub, hors Épreuve : « Chapitres » ramène au hub */
+  if(sp)LB.hubEnd(o,1,RUN.on,R.outroAgain,toMenu);   /* ouvert depuis le hub, hors Épreuve : « Chapitres » ramène au hub */
   LB.card.show(win?o:deathCard(o));
 }
 function chargeX(t){
@@ -414,7 +414,9 @@ function rFinale(dt){
   if(t>=FIN.hero+1.1&&!f.hs3){f.hs3=1;tone(262,1.6,'sine',.05,0)}
   if(t>=FIN.hero+1.65&&!f.hs4){f.hs4=1;tone(349,1.6,'sine',.05,0)}
   if(t>=FIN.hero+2.2&&!f.hs5){f.hs5=1;say(_('All but one.','Toutes, sauf une.'))}
-  if(t>=FIN.space){R.mode='space';R.st=0;R.outro=true;say(_('Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I.','Au large, le Phare Noyé reste muet. Fin du chapitre I.'));
-    OUTRO.play(()=>{if(!R)return;R.outro=false;if(R.mode==='space'&&!R.cardShown){R.cardShown=true;rEnd()}})}
+  if(t>=FIN.space){R.mode='space';R.st=0;say(_('Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I.','Au large, le Phare Noyé reste muet. Fin du chapitre I.'));
+    R.outroAgain=LB.hubAgain(RUN.on,OUTRO);   /* l'outro ne se joue qu'à la première vraie fin hors Épreuve ; en Épreuve, ni outro ni drapeau */
+    if(RUN.on||R.outroAgain){R.cardShown=true;rEnd();return}
+    R.outro=true;OUTRO.play(()=>{if(!R)return;R.outro=false;if(R.mode==='space'&&!R.cardShown){R.cardShown=true;rEnd()}})}
 }
 

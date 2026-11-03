@@ -4,9 +4,9 @@
 //    carte de la phase I affichee (Chapitre II : cinematique d'entree de la phase I, bouton #skip du jeu) ; rechargement -> Normal ne rejoue pas l'intro ; Chapitre II : nouvelle partie depuis le menu
 //    sans prologue. Anciennes cles du Chapitre I (eb-intro) lues comme avant. Drapeau deja pose (bureau et telephone) : bouton
 //    « ▶ Intro » visible dans le menu des deux chapitres, il rejoue l'intro puis rend le menu ; Chapitre II : une partie en pause est gardee.
-// 2. outro des deux chapitres (bouton « ▶ Outro » du menu, cache sans la vraie fin, visible avec lb-chN-end) : passe par Espace, retour au menu, aucun drapeau ecrit, rejouable.
+// 2. outro des deux chapitres (bouton « ▶ Outro » du menu, cache sans la vraie fin, visible avec lb-chN-end) : passe par Espace, retour au menu, drapeau lb-chN-outro ecrit au passage, rejouable.
 // 3. copies de test a crochets (pas fixe, LB.cine.manual) : intro jouee jusqu'au bout -> drapeau ecrit sans passer ; rejeu
-//    (replay) d'une intro deja vue ; epilogue du Chapitre II : passe par Espace, rappel appele, pas de drapeau ; dernier carton
+//    (replay) d'une intro deja vue ; epilogue du Chapitre II : passe par Espace, rappel appele, drapeau lb-ch2-outro ecrit ; dernier carton
 //    de l'epilogue teinte de la couleur du Chapitre III.
 // 4. garde du carton « a suivre » : LB.nextCard seule implementation (aucune chaine « LUMENBELL · CHAPTER/CHAPITRE » dessinee ailleurs que dans shared/js/24-cine.js,
 //    un seul appel par chapitre) ; dernier carton des Chapitres I et II rendu au meme instant : meme geometrie, LUMEN = CH_COL[n], BELL creme, legende au meme format.
@@ -109,7 +109,7 @@ const CARD={};
   for(const k of [1,2]){await pg.click('#outroBtn');await pg.waitForTimeout(500);let v=await pg.evaluate(()=>!document.getElementById('cine').hidden);check(v,ch+' outro : ne se lance pas ('+k+')');
    await pg.keyboard.press('Space');await pg.waitForTimeout(300);v=await pg.evaluate(()=>!document.getElementById('cine').hidden&&!document.getElementById('menu').hidden);check(!v,ch+' outro : Espace ne passe pas ('+k+')')}
   const m=await pg.evaluate(()=>!document.getElementById('menu').hidden);check(m,ch+' outro : pas de retour au menu');
-  const keys=await pg.evaluate(()=>Object.keys(localStorage).filter(k=>/outro|intro/.test(k)));check(!keys.length,ch+' outro : drapeau ecrit '+keys);
+  const keys=await pg.evaluate(()=>Object.keys(localStorage).filter(k=>/outro|intro/.test(k)));check(keys.length===1&&keys[0]==='lb-'+ch+'-outro',ch+' outro : drapeau attendu lb-'+ch+'-outro, trouve '+keys);
   console.log(ch,'outro      lancee deux fois, passee par Espace ; cles intro/outro :',keys);await ctx.close()}
  // 2b. dernier carton de l'outro du Chapitre I : dist publie en temps reel (OUTRO n'est pas expose a la copie de test)
  {const ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});await ctx.addInitScript(()=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem('lb-ch1-end','1')}});
@@ -146,7 +146,7 @@ const CARD={};
   if(ch==='ch1')check(r.done,'ch1 crochets : rappel de fin non appele');
   if(ch==='ch2'){check(!r.seen0,'ch2 crochets : prologue vu avant d\'etre joue');check(r.mode!=='prologue','ch2 crochets : mode '+r.mode+' apres le prologue');
    check(r.epi.vis,'ch2 epilogue : absent');check(/rgb\(185, 207, 90\)/.test(r.epi.col)&&r.epi.txt==='Chapitre III · Hollow Roots. À suivre.','ch2 epilogue : dernier carton '+JSON.stringify([r.epi.txt,r.epi.col]));
-   check(r.epi.hidden&&r.epi.mode!=='epilogue','ch2 epilogue : Espace ne passe pas');check(!r.epi.flags.length,'ch2 epilogue : drapeau ecrit '+r.epi.flags)}
+   check(r.epi.hidden&&r.epi.mode!=='epilogue','ch2 epilogue : Espace ne passe pas');check(r.epi.flags.includes('lb-ch2-outro'),'ch2 epilogue : drapeau lb-ch2-outro non ecrit '+r.epi.flags)}
   await ctx.close()}
 
  {CARD.ch1.col=CARD.ch2.col;const C1=CARD.ch1,C2=CARD.ch2,hex=c=>{const m=/^rgb\((\d+), (\d+), (\d+)\)$/.exec(c);return m?'#'+[1,2,3].map(i=>(+m[i]).toString(16).padStart(2,'0')).join(''):c};
