@@ -13,15 +13,14 @@ LB.input.bind({press:down,release:up,pause:()=>{if(S.mode==='play')setPause(!S.p
 window.addEventListener('blur',()=>{if(S.mode==='play')setPause(true)});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(S.mode==='play')setPause(true);MUSIC.stop();MUSIC.bedStop()}else if(!$('menu').hidden)setTheme(4)});
 $('go').addEventListener('click',()=>ensureAudio());
-LB.pause.bind({onResume:()=>setPause(false),onMenu:showMenu});
+LB.pause.bind({onResume:()=>setPause(false),onMenu:()=>{S.mode='menu';lastCard=null;showMenu()}});   // « Menu du chapitre » après confirmation : le combat en pause est perdu (pas de Reprendre)
 $('pauseBtn').addEventListener('click',()=>{if(S.mode==='play')setPause(!S.paused)});
 $('retryBtn').addEventListener('click',retryKey);
 $('menuBtn').addEventListener('click',e=>{showMenu();e.currentTarget.blur()});
 document.querySelectorAll('#phases button').forEach(b=>b.addEventListener('click',()=>jumpPhase(+b.dataset.ph)));
-LB.help.mount();$('optSnd').checked=LB.audio.sound;$('optMus').checked=LB.audio.music;   // help: LB.help (lb-help, unticked by default)
-function syncAudio(){LB.audio.setSound($('optSnd').checked);LB.audio.setMusic($('optMus').checked);MUSIC.setMus($('optMus').checked);
-  if($('optMus').checked){if(!$('menu').hidden)setTheme(4);else if(S.mode==='play'&&!S.paused)setTheme(S.phase)}}
-['optHelp','optSnd','optMus'].forEach(id=>{const el=$(id);el.addEventListener('change',()=>{if(id!=='optHelp')syncAudio();el.blur()})});
+LB.help.mount();   // help: LB.help (lb-help, off by default); Music, Sound effects, Visual help: the settings wheel of the menu (LB.settings)
+function syncAudio(id){if(id!=='mus')return;MUSIC.setMus(LB.audio.music);
+  if(LB.audio.music){if(!$('menu').hidden)setTheme(4);else if(S.mode==='play'&&!S.paused)setTheme(S.phase)}}
 // menu music starts on the first interaction (browsers block sound before that)
 document.addEventListener('pointerdown',()=>{if(!$('menu').hidden&&MUSIC.cur!==4)setTheme(4)});
 document.addEventListener('keydown',()=>{if(!$('menu').hidden&&MUSIC.cur!==4)setTheme(4)});

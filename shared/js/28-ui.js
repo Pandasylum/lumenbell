@@ -43,6 +43,9 @@ LB.motion={
   apply(){try{document.documentElement.classList.toggle(LB.MOTION.cls,LB.motion.reduced())}catch(e){}}};
 LB.motion.apply();
 try{const mq=matchMedia('(prefers-reduced-motion: reduce)'),f=()=>LB.motion.apply();if(mq.addEventListener)mq.addEventListener('change',f);else if(mq.addListener)mq.addListener(f)}catch(e){}
+/* Roue de réglages (décision docs/decisions/2026-11-02-chapter-settings.md) : mesures du panneau, les mêmes que le hub (HUB_T.set et
+   HUB_T.touch) ; les lignes sont dans LB.SETTINGS_T (plus bas), le panneau dans LB.settings. */
+LB.SET_T={w:'min(92vw,380px)',gear:24,touch:48};
 LB.MENU_T={
   /* placement commun à tous les chapitres (aucune position propre à un chapitre) : largeur de la carte et des difficultés, lignes réservées
      de l'accroche et du mode d'emploi (px ; réservées même si le chapitre n'en a pas, pour que les boutons restent au même endroit) */
@@ -58,7 +61,7 @@ LB.MENU_T={
   spray:{id:'mSnow',cls:'msn',key:'mfall',n:34,dur:[7,8],delay:12,size:[1.5,2.5],dx:120,rise:'-45vh',peak:.7,w:3,col:'#e8f8ff',glow:'0 0 6px 1px rgba(159,242,255,.6)'}
 };
 LB.tx=o=>o==null?'':typeof o==='function'?o():typeof o==='string'?o:LB._(o.en,o.fr);
-LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],c=C.color,c2=C.color2,rgb=C.rgb;
+LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.menu.particles],S=LB.SET_T,c=C.color,c2=C.color2,rgb=C.rgb;
  return '.bar span i{font-style:normal}\n'+
  ':root{--chc:'+c+';--chc2:'+c2+';--chr:'+rgb+'}   /* couleur du chapitre pour la carte (#ov) */\n'+
  '#ov [hidden]{display:none!important}\n'+
@@ -118,6 +121,27 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.ver{margin:6px 0 0;font-size:11px;letter-spacing:.14em;color:var(--muted);opacity:.6;text-align:center}\n'+
  '.mph button[aria-disabled=true]{opacity:.45;cursor:not-allowed}\n'+
  '.mlink:hover{background:'+M.back.hover+'}\n'+
+ /* roue de réglages et panneau : mêmes classes et mêmes mesures que le hub (site/src/page/style.css), aux couleurs du chapitre */
+ '.langs{align-items:center}\n'+
+ '.langs button.gear{display:grid;place-items:center;width:'+S.touch+'px;height:'+S.touch+'px;min-width:0;padding:0;border:0;border-radius:50%;background:none;color:var(--muted)}\n'+
+ '.langs button.gear svg{width:'+S.gear+'px;height:'+S.gear+'px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}\n'+
+ '.langs button.gear:hover,.langs button.gear[aria-expanded="true"]{color:var(--fg)}\n'+
+ '.hset{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(8,6,13,.6);outline:none}\n'+
+ '.hset[hidden]{display:none}\n'+
+ '.hsbox{position:relative;width:'+S.w+';max-height:100%;overflow:auto;display:grid;gap:10px;padding:18px 20px;background:rgba(14,10,20,.96);border:1px solid var(--line);border-top:3px solid '+c+';box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 30px rgba('+rgb+',.12)}\n'+
+ '.hsbox h2{margin:0;padding-right:44px;font-family:var(--font-display);font-weight:800;font-size:26px;line-height:1.2;letter-spacing:.05em;text-transform:uppercase;color:'+c+'}\n'+
+ '.hsx{position:absolute;top:6px;right:6px;width:'+S.touch+'px;height:'+S.touch+'px;border:0;background:none;color:var(--muted);font-size:26px;line-height:1;cursor:pointer}\n'+
+ '.hsx:hover{color:var(--fg)}\n'+
+ '.hsrows{display:grid;gap:10px}\n'+
+ '.hsrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px}\n'+
+ '.hsrow>span{font-size:15px}\n'+
+ '.hsopts{display:flex;gap:4px}\n'+
+ '.hsopts button{font-family:var(--font-display);font-weight:700;font-size:15px;line-height:1;letter-spacing:.1em;text-transform:uppercase;min-width:'+S.touch+'px;min-height:'+S.touch+'px;padding:6px 12px;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(255,255,255,.22);border-radius:4px;cursor:pointer}\n'+
+ '.hsopts button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.18);color:#fff}\n'+
+ '.hsopts button:disabled{opacity:.45;cursor:not-allowed}\n'+
+ '.hsopts button:focus-visible,.hsx:focus-visible,.langs button.gear:focus-visible{outline:2px solid '+c+';outline-offset:2px}\n'+
+ '#pause [hidden]{display:none!important}\n'+
+ '#pause #pBody{margin:0;color:var(--fg)}\n'+
  '#introBtn{position:absolute;top:calc('+M.top.intro+'px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
  '#outroBtn{position:absolute;top:calc('+M.top.outro+'px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:3;background:rgba(10,7,16,.6)}\n'+
  '.langs{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:3}\n'+
@@ -166,20 +190,40 @@ LB.card=(()=>{
   return{el,mount,show,hide(){if(el.ov)el.ov.hidden=true},visible(){return!!el.ov&&!el.ov.hidden},go(){if(onGo)onGo()},setGo(f){onGo=f},setGo2(f){onGo2=f}};
 })();
 
-/* ---------- LB.pause : carte de pause (Reprendre, Menu) ---------- */
+/* ---------- LB.pause : carte de pause (Reprendre, Menu) ----------
+   « Menu » ouvre deux choix sous Reprendre : « Menu du chapitre » et, depuis le hub (LB.fromHub), « Chapitres » (LB.toHub). Chaque
+   choix demande une confirmation (Quitter / Rester) : le combat en pause est perdu. Vues : main, choices, confirm (LB.pause.view).
+   stay() : Échap / P sur la confirmation = Rester (rend true s'il a pris la touche) ; enter() : Entrée / Espace sans bouton focalisé
+   = Rester sur la confirmation, sinon Reprendre. Un seul bouton est focalisé à la fois (celui de la vue). hh.onMenu : menu du chapitre. */
 LB.pause=(()=>{
-  let ov=null,h={};
+  let ov=null,h={},view='main',exit='';
+  const q=s=>ov.querySelector(s);
+  const BTN={main:['#pResume','#pMenu'],choices:['#pResume','#pChap','#pHub'],confirm:['#pLeave','#pStay']},ALL=['#pResume','#pMenu','#pChap','#pHub','#pLeave','#pStay'],FOCUS={main:'#pResume',choices:'#pChap',confirm:'#pStay'};
+  function setView(v,focus){view=v;if(!ov)return;
+    for(const id of ALL)q(id).hidden=!BTN[v].includes(id)||(id==='#pHub'&&!LB.fromHub);
+    q('#pBody').hidden=v!=='confirm';lang();
+    if(focus)try{q(FOCUS[v]).focus({preventScroll:true})}catch(e){}}
   function mount(stage,after,hh){
     h=hh||{};if(ov)return ov;
-    ov=LB.ui.mk('div',{class:'ov',id:'pause',hidden:''},'<div class="card"><p class="eyebrow">Pause</p><h2 id="pTitle">Fight paused</h2><button class="btn" id="pResume" type="button">Resume</button><button class="btn ghost" id="pMenu" type="button">Menu</button></div>');
+    ov=LB.ui.mk('div',{class:'ov',id:'pause',hidden:''},'<div class="card"><p class="eyebrow">Pause</p><h2 id="pTitle">Fight paused</h2><p id="pBody" hidden></p><button class="btn" id="pResume" type="button">Resume</button><button class="btn ghost" id="pMenu" type="button">Menu</button><button class="btn ghost" id="pChap" type="button" hidden>Chapter menu</button><button class="btn ghost" id="pHub" type="button" hidden>Chapters</button><button class="btn" id="pLeave" type="button" hidden>Leave</button><button class="btn ghost" id="pStay" type="button" hidden>Stay</button></div>');
     stage.insertBefore(ov,after?after.nextSibling:null);
-    ov.querySelector('#pResume').addEventListener('click',()=>{if(h.onResume)h.onResume()});
-    ov.querySelector('#pMenu').addEventListener('click',()=>{if(h.onMenu)h.onMenu()});
+    q('#pResume').addEventListener('click',()=>{if(h.onResume)h.onResume()});
+    q('#pMenu').addEventListener('click',()=>setView('choices',true));
+    q('#pChap').addEventListener('click',()=>{exit='chapter';setView('confirm',true)});
+    q('#pHub').addEventListener('click',()=>{exit='hub';setView('confirm',true)});
+    q('#pStay').addEventListener('click',()=>setView('main',true));
+    q('#pLeave').addEventListener('click',()=>{const e=exit;setView('main');if(e==='hub'){try{LB.toHub(LB.menu.C.n)}catch(x){}}else if(h.onMenu)h.onMenu()});
+    setView('main');
     return ov;
   }
-  function lang(){if(!ov)return;ov.querySelector('#pTitle').textContent=LB._('Fight paused','Combat en pause');ov.querySelector('#pResume').textContent=LB._('Resume','Reprendre')}
-  return{mount,lang,bind(hh){h=hh},show(){ov.hidden=false;try{ov.querySelector('#pResume').focus({preventScroll:true})}catch(e){}},hide(){if(ov)ov.hidden=true},
-    visible(){return!!ov&&!ov.hidden},resume(){if(h.onResume)h.onResume()},get el(){return ov}};
+  function lang(){if(!ov)return;
+    q('#pTitle').textContent=view==='confirm'?LB._('Leave the fight?','Quitter le combat ?'):LB._('Fight paused','Combat en pause');
+    q('#pBody').textContent=LB._('The current fight will be lost.','Le combat en cours sera perdu.');
+    q('#pResume').textContent=LB._('Resume','Reprendre');q('#pChap').textContent=LB._('Chapter menu','Menu du chapitre');q('#pHub').textContent=LB._('Chapters','Chapitres');
+    q('#pLeave').textContent=LB._('Leave','Quitter');q('#pStay').textContent=LB._('Stay','Rester')}
+  return{mount,lang,bind(hh){h=hh},show(){setView('main');ov.hidden=false;try{q('#pResume').focus({preventScroll:true})}catch(e){}},hide(){if(ov){ov.hidden=true;setView('main')}},
+    visible(){return!!ov&&!ov.hidden},resume(){if(h.onResume)h.onResume()},get view(){return view},
+    stay(){if(view!=='confirm')return false;setView('main',true);return true},enter(){if(!this.stay())this.resume()},get el(){return ov}};
 })();
 
 /* ---------- LB.gate : écran de démarrage (Commencer + langues) ; le clic débloque le son (comme au Chapitre I) ---------- */
@@ -201,7 +245,7 @@ LB.gate=(()=>{
    « ▶ Outro » (après la vraie fin), langues, puis la carte : « Lumen|bell », la ligne du chapitre dessous, accroche,
    Reprendre, les quatre difficultés, le sous-menu de l'Épreuve (Normal, Difficile, Retour) et sa note, mode d'emploi, version,
    « Chapitres » vers le hub (seulement si LB.fromHub) ; aussi l'écran de démarrage (LB.gate), la carte (LB.card) et la pause (LB.pause) s'ils manquent.
-   h : {onDiff(dk), onIntro(), onOutro(), onResume(), onLang(), onStart()}. show(reprendre), hide(), visible(), lang(),
+   h : {onDiff(dk), onIntro(), onOutro(), onResume(), onLang(), onStart(), onSet(id)} (onSet : un réglage de la roue a changé). show(reprendre), hide(), visible(), lang(),
    update() (verrou de l'Épreuve, records, « ▶ Outro »), trial(on). Depuis le hub, l'écran de démarrage reste masqué : le son est
    relancé (LB.audio.ensure ; si le navigateur le bloque, il part au premier appui) et onStart est appelé comme après « Commencer ». */
 LB.menu=(()=>{
@@ -224,7 +268,8 @@ LB.menu=(()=>{
     m.appendChild(particles());
     m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'introBtn'},'▶ Intro'));
     m.appendChild(LB.ui.mk('button',{type:'button',class:'mbtn',id:'outroBtn',hidden:''},'▶ Outro'));
-    m.appendChild(LB.ui.mk('div',{class:'langs',id:'langs',role:'group','aria-label':'Language'},LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')));
+    m.appendChild(LB.ui.mk('div',{class:'langs',id:'langs',role:'group','aria-label':'Language'},LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')+LB.gearBtn()));
+    LB.settings.mount(stage,$('mGear'),h.onSet);
     const b=(dk,pr)=>'<button type="button" data-diff="'+dk+'"'+(pr?' aria-pressed="true"':'')+'><b></b><span></span></button>';
     card=LB.ui.mk('div',{class:'mcard'},'<h2><span>Lumen</span><i>bell</i></h2><p class="eyebrow chap" id="mEye"></p><p class="tag"></p>'+
       '<button class="btn ghost" id="mResume" type="button" hidden>Resume</button>'+
@@ -248,7 +293,7 @@ LB.menu=(()=>{
     $('introBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onIntro)h.onIntro()});
     $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onOutro)h.onOutro()});
     if(LB.fromHub)$('mHub').addEventListener('click',e=>{e.currentTarget.blur();LB.toHub(C.n)});   /* une seule navigation, même au double appui */
-    document.querySelectorAll('#langs button,#gateLangs button').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
+    document.querySelectorAll('#langs button[data-lang],#gateLangs button').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
     lang();
     return m;
   }
@@ -277,8 +322,8 @@ LB.menu=(()=>{
     if(LB.fromHub){$('mHub').querySelector('.nm').textContent=LB._('Chapters','Chapitres');$('mHub').setAttribute('aria-label',LB._('Back to the chapters','Retour aux chapitres'))}
     $('mphM').setAttribute('aria-label',LB._('Choose difficulty','Choisir la difficulté'));$('mphT').setAttribute('aria-label',LB.tx(C.trial.name));
     document.querySelectorAll('#langs,#gateLangs').forEach(e=>e.setAttribute('aria-label',LB._('Language','Langue')));
-    document.querySelectorAll('#langs button,#gateLangs button').forEach(bt=>bt.setAttribute('aria-pressed',String(bt.dataset.lang===LB.lang.cur)));
-    LB.pause.lang();
+    document.querySelectorAll('#langs button[data-lang],#gateLangs button').forEach(bt=>bt.setAttribute('aria-pressed',String(bt.dataset.lang===LB.lang.cur)));
+    LB.pause.lang();LB.settings.lang();
   }
   function trial(on){update();$('mphM').hidden=on;$('mphT').hidden=!on;$('trialNote').hidden=!on;
     try{(on?$('mphT').querySelector('button'):$('mphM').querySelector('[data-diff=normal]')).focus({preventScroll:true})}catch(e){}}
@@ -304,15 +349,16 @@ LB.input=(()=>{
     window.addEventListener('blur',rel);
     window.addEventListener('keyup',e=>{if(ACT.includes(e.key)||e.key==='Enter')rel()});   /* Entrée : bouton d'action focalisé (clic clavier) */
     window.addEventListener('keydown',e=>{
-      if(LB.gate.visible())return;   /* écran de démarrage : seul le bouton agit */
+      if(LB.gate.visible()||LB.settings.visible())return;   /* écran de démarrage : seul le bouton agit ; panneau de réglages : ses boutons et ses touches (LB.settings) */
       const k=e.key,a=document.activeElement;
       if(a&&a.tagName==='INPUT')return;
       if(h.skip&&h.skip(e))return;
       if(e.repeat){if(ACT.includes(k)&&!LB.menu.visible())e.preventDefault();return}
       if(k==='r'||k==='R'){if(!LB.menu.visible()&&h.retry){e.preventDefault();h.retry()}return}
-      if(k==='p'||k==='P'||k==='Escape'){if(!LB.menu.visible()&&h.pause){e.preventDefault();h.pause()}return}
+      if(k==='p'||k==='P'||k==='Escape'){if(LB.pause.visible()&&LB.pause.stay()){e.preventDefault();return}   /* confirmation : Rester */
+        if(!LB.menu.visible()&&h.pause){e.preventDefault();h.pause()}return}
       const ok=k===' '||k==='Enter';
-      if(LB.pause.visible()){if(ok&&a!==document.getElementById('pMenu')){e.preventDefault();LB.pause.resume()}return}
+      if(LB.pause.visible()){if(ok&&!(a&&LB.pause.el.contains(a)&&a.tagName==='BUTTON')){e.preventDefault();LB.pause.enter()}return}
       if(LB.menu.visible()){const mn=document.getElementById('menu');if(ok&&!mn.contains(a)){e.preventDefault();mn.querySelector('#mphM [data-diff=normal]').click()}return}
       if(LB.card.visible()){if(ok&&!(a&&LB.card.el.ov.contains(a)&&a.tagName==='BUTTON')){e.preventDefault();LB.card.el.go.click()}return}
       if(ACT.includes(k)){e.preventDefault();if(h.press)h.press()}
@@ -342,18 +388,21 @@ LB.hud={
       if(b){b.disabled=!!o.trial||(o.unl!=null&&i+1>o.unl);b.title=o.trial?LB._('Not available in the trial',"Indisponible dans l'épreuve"):''}})}
 };
 
-/* ---------- LB.help : case « Aide » (décision n° 3 du 28 octobre) ----------
-   Décochée par défaut, mémorisée (lb-help), activable dans toutes les difficultés ; désactivée (et décochée, sans toucher à
-   lb-help) en Épreuve. use(d) au choix de la difficulté ; defeat(facile) : true à la 3e défaite en Facile sans aide (le chapitre
-   propose alors « Activer l'aide visuelle » sur la carte de défaite) ; enable() coche et mémorise ; on() : l'aide est active. */
+/* ---------- LB.help : aide visuelle (décision n° 3 du 28 octobre ; réglage de la roue, LB.SETTINGS_T) ----------
+   Désactivée par défaut, mémorisée (lb-help), activable dans toutes les difficultés ; verrouillée (et décochée à l'écran, sans
+   toucher à lb-help) en Épreuve. mount() lit lb-help ; use(d) au choix de la difficulté ; set(v) : réglage de la roue ; defeat(facile) :
+   true à la 3e défaite en Facile sans aide (le chapitre propose alors « Activer l'aide visuelle » sur la carte de défaite) ;
+   enable() active et mémorise ; on() : l'aide est active ; locked() : Épreuve. */
 LB.help=(()=>{
-  let box=null,deaths=0;const stored=()=>LB.store.get(LB.key('help'),'0')==='1';
+  let deaths=0,lock=false,val=false;const stored=()=>LB.store.get(LB.key('help'),'0')==='1';
   return{
-    mount(){box=document.getElementById('optHelp');if(!box)return;box.checked=stored();box.addEventListener('change',()=>{LB.store.set(LB.key('help'),box.checked?'1':'0')})},
-    on(){return!!box&&box.checked&&!box.disabled},
-    use(d){deaths=0;if(!box)return;if(d&&d.trial){box.disabled=true;box.checked=false}else{box.disabled=false;box.checked=stored()}},
+    mount(){val=stored()},
+    on(){return val&&!lock},
+    locked(){return lock},
+    set(v){if(lock)return;val=!!v;LB.store.set(LB.key('help'),val?'1':'0')},
+    use(d){deaths=0;if(d&&d.trial)lock=true;else{lock=false;val=stored()}},
     defeat(easy){if(!easy||LB.help.on())return false;return++deaths===3},
-    enable(){if(!box)return;box.disabled=false;box.checked=true;LB.store.set(LB.key('help'),'1')},
+    enable(){lock=false;val=true;LB.store.set(LB.key('help'),'1')},
     get deaths(){return deaths}
   };
 })();
@@ -375,3 +424,48 @@ LB.cue.bar=function(ctx,cx,y,k,open){const T=LB.CUE_T,w=T.bar.w,h=T.bar.h,x=cx-w
 LB.cue.ring=function(ctx,cx,cy,r,open){const T=LB.CUE_T;
   ctx.save();ctx.lineWidth=open?5:3;ctx.strokeStyle=open?T.open:T.near;if(open){ctx.shadowColor=T.open;ctx.shadowBlur=12}
   ctx.beginPath();ctx.arc(cx,cy,r,0,6.283);ctx.stroke();ctx.restore()};
+
+/* ---------- LB.settings : roue de réglages du menu des chapitres (décision docs/decisions/2026-11-02-chapter-settings.md) ----------
+   Même panneau et même style que le hub (classes hset, hsbox, hsrow…). Lignes : LB.SETTINGS_T (Musique lb-mus, Bruitages lb-snd,
+   Aide visuelle lb-help), au même format que SETTINGS_T du hub (type toggle : get, set) ; off() : ligne verrouillée (aide en Épreuve,
+   affichée Off sans toucher à lb-help). La roue est dans #langs du menu (LB.gearBtn). mount(stage, bouton, onSet) ; onSet(id) après
+   un changement. Échap ferme, Tab reste dans le panneau, le focus revient à la roue. */
+LB.SETTINGS_T=[
+  {id:'mus',type:'toggle',label:['Music','Musique'],get:()=>LB.audio.music,set:v=>LB.audio.setMusic(v)},
+  {id:'snd',type:'toggle',label:['Sound effects','Bruitages'],get:()=>LB.audio.sound,set:v=>LB.audio.setSound(v)},
+  {id:'help',type:'toggle',label:['Visual help','Aide visuelle'],get:()=>LB.help.on(),set:v=>LB.help.set(v),off:()=>LB.help.locked()}
+];
+LB.gearBtn=()=>'<button class="gear" id="mGear" type="button" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.4L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.7h4l.4-2.7a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.4z"/><circle cx="12" cy="12" r="3"/></svg></button>';
+LB.settings=(()=>{
+  let box=null,gear=null,hook=null,open=false;
+  const OPTS=[[true,'On','Oui'],[false,'Off','Non']];
+  function sync(){if(!box)return;
+    for(const S of LB.SETTINGS_T){const row=box.querySelector('.hsrow[data-id="'+S.id+'"]');if(!row)continue;
+      const off=!!(S.off&&S.off()),v=String(off?false:S.get());row.firstChild.textContent=LB._(S.label[0],S.label[1]);
+      row.querySelectorAll('.hsopts button').forEach((b,i)=>{b.textContent=LB._(OPTS[i][1],OPTS[i][2]);b.disabled=off;b.setAttribute('aria-pressed',String(b.dataset.v===v))})}}
+  function lang(){if(!box)return;const st=LB._('Settings','Réglages');
+    box.querySelector('#lbSetT').textContent=st;box.querySelector('#lbSetX').setAttribute('aria-label',LB._('Close','Fermer'));
+    if(gear){gear.setAttribute('aria-label',st);gear.title=st}sync()}
+  function toggle(on){if(!box||on===open)return;open=on;box.hidden=!on;gear.setAttribute('aria-expanded',String(on));
+    if(on){sync();try{box.querySelector('#lbSetX').focus({preventScroll:true})}catch(e){}}else try{gear.focus({preventScroll:true})}catch(e){}}
+  function mount(stage,btn,onSet){
+    hook=onSet||null;if(box)return box;gear=btn;
+    box=LB.ui.mk('div',{class:'hset',id:'lbSet',role:'dialog','aria-modal':'true','aria-labelledby':'lbSetT',tabindex:'-1',hidden:''},'<div class="hsbox"><h2 id="lbSetT"></h2><button class="hsx" id="lbSetX" type="button">×</button><div class="hsrows"></div></div>');
+    const rows=box.querySelector('.hsrows');
+    for(const S of LB.SETTINGS_T){const row=document.createElement('div');row.className='hsrow';row.dataset.id=S.id;
+      row.innerHTML='<span id="hsl-'+S.id+'"></span><div class="hsopts" role="group" aria-labelledby="hsl-'+S.id+'"></div>';
+      for(const o of OPTS){const b=document.createElement('button');b.type='button';b.dataset.v=String(o[0]);
+        b.addEventListener('click',()=>{S.set(o[0]);sync();if(hook)hook(S.id)});row.lastChild.appendChild(b)}
+      rows.appendChild(row)}
+    stage.appendChild(box);
+    gear.addEventListener('click',e=>{e.stopPropagation();toggle(!open)});
+    box.querySelector('#lbSetX').addEventListener('click',()=>toggle(false));
+    box.addEventListener('click',e=>{if(e.target===box)toggle(false)});
+    window.addEventListener('keydown',e=>{if(!open)return;
+      if(e.key==='Escape'){e.preventDefault();toggle(false)}
+      else if(e.key==='Tab'){const f=[...box.querySelectorAll('button:not(:disabled)')],i=f.indexOf(document.activeElement);e.preventDefault();try{f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus()}catch(x){}}});
+    lang();
+    return box;
+  }
+  return{mount,lang,sync,toggle,visible(){return open},get el(){return box}};
+})();

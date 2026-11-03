@@ -34,7 +34,7 @@ const CH1=[
  {nom:'ch1 aucune cle',set:{},want:{trial:'false',outro:false},   // Epreuve du feu ouverte pendant les tests (TRIAL_OPEN, 31 octobre) : plus verrouillee sans la vraie fin ; pour la verrouiller : TRIAL_OPEN=false et trial:'true'
  keys:{'lb-ch1-end':null,'lb-ch1-intro':null,'lb-ch1-best-tn':null}},
 ];
-const state=ch=>()=>{const q=s=>document.querySelector(s),o={lang:document.documentElement.lang,snd:q('#optSnd').checked,mus:q('#optMus').checked,help:q('#optHelp').checked};
+const state=ch=>()=>{const q=s=>document.querySelector(s),o={lang:document.documentElement.lang,snd:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('snd').on,mus:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('mus').on,help:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help').on};   // cases retirees : roue de reglages (#mGear, #lbSet)
  if(q('#gate')){const t=q('#mphM [data-diff=trial]');o.trial=t.getAttribute('aria-disabled');o.outro=!q('#outroBtn').hidden;
   const sp=n=>{const e=q('#mphT [data-diff='+n+'] span');return e?e.textContent:null};o.bestTn=sp('tn');o.bestTh=sp('th')}
  return o};
@@ -60,18 +60,18 @@ for(const [ch,c] of [...COMMON.flatMap(c=>[['ch1',c],['ch2',c]]),...CH1.map(c=>[
 // Chapitre I : aide memorisee d'une difficulte a l'autre, disponible aussi en Difficile (decision n° 3 du 28 octobre, session menu/common) ;
 // l'Epreuve (case desactivee) est controlee par help.js
 {const c={nom:'aide'};const {ctx,pg}=await open(b,'ch1',c);
- await pg.click('#gateBtn');await pg.evaluate(()=>document.getElementById('optHelp').click());
+ await pg.click('#gateBtn');await pg.evaluate(()=>((id,v)=>{const g=document.getElementById('mGear');g.click();document.querySelector('#lbSet [data-id='+id+'] [data-v='+v+']').click();g.click()})('help',true));
  const r=[];for(const d of ['easy','hard','normal']){await pg.evaluate(()=>{const m=document.getElementById('menuBtn');if(m&&m.offsetParent)m.click()});
   await pg.evaluate(d=>document.querySelector('#mphM [data-diff='+d+']').click(),d);await pg.waitForTimeout(200);
-  r.push(await pg.evaluate(()=>({help:document.getElementById('optHelp').checked,hidden:document.getElementById('optHelp').closest('label').hidden,key:localStorage.getItem('lb-help')})))}
+  r.push(await pg.evaluate(()=>({help:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help').on,key:localStorage.getItem('lb-help')})))}
  console.log('ch1 aide',JSON.stringify(r));
- const want=[{help:true,hidden:false,key:'1'},{help:true,hidden:false,key:'1'},{help:true,hidden:false,key:'1'}];
+ const want=[{help:true,key:'1'},{help:true,key:'1'},{help:true,key:'1'}];
  if(JSON.stringify(r)!==JSON.stringify(want))errs.push('ch1 aide : '+JSON.stringify(r)+' au lieu de '+JSON.stringify(want));await ctx.close()}
 // Ecriture dans chaque chapitre : cles lb-* seulement ; puis l'autre chapitre (meme origine file://) relit le choix
 for(const [ch,other] of [['ch1','ch2'],['ch2','ch1']]){
  const c={nom:'ecriture',locale:'fr-FR',keep:true};const {ctx,pg}=await open(b,ch,c);   // keep : pas de script d'init (il viderait le stockage vu par la 2e page)
  await pg.click('#gateBtn');   // ecran de demarrage, les deux chapitres (LB.gate)
- await pg.click('#langs button[data-lang=en]');await pg.evaluate(()=>{optSnd.click();optMus.click();optHelp.click()});
+ await pg.click('#langs button[data-lang=en]');await pg.evaluate(()=>{const s=((id,v)=>{const g=document.getElementById('mGear');g.click();document.querySelector('#lbSet [data-id='+id+'] [data-v='+v+']').click();g.click()});s('snd',false);s('mus',false);s('help',true)});
  const k=await pg.evaluate(()=>{const o={...localStorage};delete o.__init;return o});console.log(ch,'ecriture',JSON.stringify(k));
  if(k['lb-lang']!=='en'||k['lb-snd']!=='0'||k['lb-mus']!=='0'||k['lb-help']!=='1')errs.push(ch+' ecriture : cles lb-* non ecrites');
  if(Object.keys(k).some(x=>/^(pn|db|eb)-/.test(x)))errs.push(ch+' ecriture : ancienne cle ecrite');

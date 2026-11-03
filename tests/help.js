@@ -13,13 +13,13 @@ const F={ch1:path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html'),ch2:pat
 const OFFER={fr:"Activer l'aide visuelle",en:'Enable visual help'};
 const errs=[],check=(c,m)=>{if(!c)errs.push(m)};
 const card=()=>({vis:!document.getElementById('ov').hidden,go2:document.getElementById('go2').hidden?null:document.getElementById('go2').textContent,desc:document.getElementById('ovDesc').textContent,
- help:document.getElementById('optHelp').checked,key:localStorage.getItem('lb-help')});
+ help:window.__t.LB.help.on(),key:localStorage.getItem('lb-help')});
 const SPY=()=>{const L=window.__t.LB;window.__c={bar:0,ring:0,cue:0,easy:0};const B=L.cue.bar,R=L.cue.ring,C=L.cue;
  L.cue=function(ctx,o){window.__c.cue++;if(o.easy)window.__c.easy++;return C.apply(this,arguments)};L.cue.bar=function(){window.__c.bar++;return B.apply(this,arguments)};L.cue.ring=function(){window.__c.ring++;return R.apply(this,arguments)}};
 (async()=>{const b=await launch();
  // 1. dist
  for(const ch of ['ch1','ch2']){const ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+': pageerror: '+e.message));
-  await pg.goto('file://'+F[ch]);await pg.waitForTimeout(300);const st=()=>pg.evaluate(()=>{const o=document.getElementById('optHelp');return{on:o.checked,dis:o.disabled,hid:o.closest('label').hidden||getComputedStyle(o.closest('label')).display==='none'}});
+  await pg.goto('file://'+F[ch]);await pg.waitForTimeout(300);const st=()=>pg.evaluate(()=>{const r=((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help');return{on:r.on,dis:r.dis,hid:false}   /* cases retirees : roue de reglages */});
   const s0=await st();await pg.click('#gateBtn');
   const r={};for(const d of ['easy','hard']){await pg.evaluate(()=>{const m=document.getElementById('menuBtn');if(document.getElementById('menu').hidden)m.click()});
    await pg.evaluate(d=>document.querySelector('#mphM [data-diff='+d+']').click(),d);await pg.waitForTimeout(300);
@@ -45,7 +45,7 @@ const SPY=()=>{const L=window.__t.LB;window.__c={bar:0,ring:0,cue:0,easy:0};cons
   // repere : Normal et Facile, aide cochee puis decochee
   await pg.evaluate(SPY);
   for(const [d,on] of [['normal',true],['easy',true],['normal',false]]){
-   await pg.evaluate(([d,on])=>{const T=window.__t;T.applyDiff(d);const o=document.getElementById('optHelp');if(o.checked!==on)o.click();T.goPhase(1);T.start();T.adv(4.2);T.getG().php=99;window.__c={bar:0,ring:0,cue:0,easy:0}},[d,on]);
+   await pg.evaluate(([d,on])=>{const T=window.__t;T.applyDiff(d);if(T.LB.help.on()!==on){T.LB.settings.toggle(true);document.querySelector('#lbSet [data-id=help] [data-v='+on+']').click();T.LB.settings.toggle(false)}T.goPhase(1);T.start();T.adv(4.2);T.getG().php=99;window.__c={bar:0,ring:0,cue:0,easy:0}},[d,on]);
    await pg.waitForTimeout(3500);const c=await pg.evaluate(()=>window.__c);
    if(!on)check(c.bar+c.ring===0,'ch1 sans aide : repere dessine '+JSON.stringify(c));else if(d==='normal')check(c.bar>0&&c.ring===0,'ch1 Normal : '+JSON.stringify(c));else check(c.ring>0&&c.bar===0,'ch1 Facile : '+JSON.stringify(c));
    console.log('ch1 repere',d,on?'aide':'sans aide',JSON.stringify(c))}
@@ -66,7 +66,7 @@ const SPY=()=>{const L=window.__t.LB;window.__c={bar:0,ring:0,cue:0,easy:0};cons
    console.log('ch2',d,'propositions',JSON.stringify(offers))}
   await pg.evaluate(SPY);
   for(const [d,on] of [['normal',true],['easy',true],['normal',false]]){
-   await pg.evaluate(([d,on])=>{const T=window.__t;T.LB.help.use(T.DIFFS[d]);const o=document.getElementById('optHelp');if(o.checked!==on)o.click();T.startRun(d,true)},[d,on]);
+   await pg.evaluate(([d,on])=>{const T=window.__t;T.LB.help.use(T.DIFFS[d]);if(T.LB.help.on()!==on){T.LB.settings.toggle(true);document.querySelector('#lbSet [data-id=help] [data-v='+on+']').click();T.LB.settings.toggle(false)}T.startRun(d,true)},[d,on]);
    for(let i=0;i<30&&await pg.evaluate(()=>window.__t.S.mode)!=='card';i++)await step(.5);await pg.evaluate(()=>window.__t.go());
    await pg.evaluate(()=>{const S=window.__t.S;S.hp=S.hpMax=99;window.__c={bar:0,ring:0,cue:0,easy:0}});await step(12,true);const c=await pg.evaluate(()=>window.__c);
    if(!on)check(c.cue===0,'ch2 sans aide : repere dessine '+JSON.stringify(c));else if(d==='normal')check(c.bar>0&&c.easy===0,'ch2 Normal : '+JSON.stringify(c));else check(c.easy>0&&c.bar===0,'ch2 Facile : '+JSON.stringify(c));

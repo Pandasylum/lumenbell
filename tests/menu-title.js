@@ -28,14 +28,14 @@ for(const ch of ['ch1','ch2'])for(const [nm,w,h,lang] of [['desk',1100,760,'en']
   return{gate:q('#gate').hidden,focus:document.activeElement&&document.activeElement.dataset.diff,h2:h2.textContent,chap:chap.textContent,first:h2.compareDocumentPosition(chap)&Node.DOCUMENT_POSITION_FOLLOWING?'h2':'chap',
    rh2:R(h2),rchap:R(chap),rmph:R(mph),rintro:R(intro),rlangs:R(langs),introVis:!intro.hidden&&cs(intro).display!=='none',outro:q('#outroBtn').hidden,
    font:cs(h2).fontFamily,weight:cs(h2).fontWeight,size:cs(h2).fontSize,chapSize:cs(chap).fontSize,chapLs:cs(chap).letterSpacing,lumen:cs(sp).color,bSize:cs(q('#mphM button b')).fontSize,
-   langOrder:[...document.querySelectorAll('#langs button')].map(x=>x.textContent).join(',')}});
+   langOrder:[...document.querySelectorAll('#langs button')].map(x=>x.textContent.trim()).filter(Boolean).join(','),wheel:[...document.querySelectorAll('#langs button')].filter(x=>!x.textContent.trim()).length}});
  const ov=(a,c)=>a.l<c.r&&c.l<a.r&&a.t<c.b&&c.t<a.b;
  check(r.gate&&r.focus==='normal',tag+': apres l\'ecran de demarrage, focus '+r.focus);
  check(r.h2==='Lumenbell'&&r.first==='h2'&&r.rchap.t>=r.rh2.b-6,tag+': ordre du titre (Lumenbell puis le chapitre dessous) '+JSON.stringify([r.first,r.rh2,r.rchap]));
  check(CHAP[ch].includes(r.chap),tag+': ligne du chapitre « '+r.chap+' »');
  check(/Big Shoulders/.test(r.font)&&r.weight==='800'&&r.chapSize==='16px'&&r.lumen===COL[ch],tag+': polices et couleur '+JSON.stringify([r.font,r.weight,r.chapSize,r.lumen]));
  check(!ov(r.rh2,r.rmph)&&!ov(r.rchap,r.rmph)&&!ov(r.rintro,r.rlangs)&&!ov(r.rintro,r.rh2)&&!ov(r.rlangs,r.rh2),tag+': chevauchement '+JSON.stringify(r));
- check(r.introVis&&r.outro&&r.langOrder==='EN,FR',tag+': boutons du menu '+JSON.stringify([r.introVis,r.outro,r.langOrder]));
+ check(r.introVis&&r.outro&&r.langOrder==='EN,FR'&&r.wheel===1,tag+': boutons du menu '+JSON.stringify([r.introVis,r.outro,r.langOrder,r.wheel]));
  sizes[tag]=[r.size,r.chapSize,r.bSize].join(' ');
  await pg.screenshot({path:__dirname+'/shots/lum_'+ch+'_'+nm+'.png'});
  // Entree, focus hors du menu : Normal

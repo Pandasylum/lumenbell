@@ -90,6 +90,3 @@ Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/d
 | 84 | Retry | Réessayer |
 | 85 | Skip › | Passer › |
 | 86 | Space, up arrow or tap the screen · P pause · R retry · Enter to skip | Espace, flèche haut ou toucher l'écran · P pause · R réessayer · Entrée pour passer |
-| 87 | Visual help | Aide visuelle |
-| 88 | Sound | Son |
-| 89 | Music | Musique |
