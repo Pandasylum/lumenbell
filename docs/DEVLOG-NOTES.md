@@ -150,3 +150,4 @@
 - En pause, « Menu » propose « Menu du chapitre » (et « Chapitres » si le jeu a été ouvert depuis le hub) ; chaque choix demande « Quitter le combat ? » avant de partir.
 
 - Chapitre II : le menu n'affiche plus les cases « Aide visuelle », « Son » et « Musique » ; les réglages se trouvent sur la roue commune, à côté de EN/FR.
+- En plein combat, une roue de réglages (Musique, Bruitages, Aide visuelle) apparaît à côté de MENU en portrait et à côté de Pause / Réessayer en paysage ; l'ouvrir met le jeu en pause.

@@ -11,3 +11,4 @@ Décision de Kevin (2 novembre). Périmètre : `shared/js/28-ui.js` et les menus
 - Choix : Menu du chapitre / Chapter menu ; Chapitres / Chapters.
 - Confirmation : « Quitter le combat ? » / "Leave the fight?" ; « Le combat en cours sera perdu. » / "The current fight will be lost." ; boutons Quitter / Leave, Rester / Stay.
 - Aucun mot d'annonce à l'écran.
+- **Roue aussi en jeu (2 novembre 2026)** : la même roue et le même panneau, dans les deux chapitres (une seule implémentation, `LB.settings.attach`). Portrait : en haut à droite, à droite de MENU, mêmes bords haut et bas ; paysage bas : à droite de Pause et Réessayer, même ligne. L'ouvrir met la partie en pause (comme la touche P, sans effet déjà en pause) ; la fermer ne reprend pas : la carte de pause reste. Placement dans `LB.MENU_T.gameGear`. L'aide reste verrouillée en Épreuve.
