@@ -33,25 +33,32 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
-      - name: Construire le jeu depuis la source
+      - name: Construire le site (chapitres puis hub)
         working-directory: .
-        run: python3 build/build.py
-      - name: Prepare www
+        run: |
+          python3 build/build.py
+          python3 build/build_ch2.py
+          python3 build/build_site.py
+      - name: Prepare www (site/ entier, sans site/src)
         run: |
           rm -rf www
           mkdir www
-          cp ../chapters/ch1-ember-bridge/dist/index.html www/index.html
-          ls -la www
+          cp -r ../site/. www/
+          rm -rf www/src www/NOTES.md
+          find www -type f | sort
       - name: Securiser la page (CSP + minification)
         run: |
           cat > /tmp/protect.js <<'JS'
           const fs = require('fs');
-          const f = 'www/index.html';
+          const files = [];
+          (function walk(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = d + '/' + e.name; if (e.isDirectory()) walk(p); else if (p.endsWith('.html')) files.push(p); } })('www');
+          for (const f of files) {
           let h = fs.readFileSync(f, 'utf8');
           const csp = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
           if (!/Content-Security-Policy/i.test(h)) h = h.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="' + csp + '">');
           fs.writeFileSync(f, h);
-          console.log('CSP ajoutee');
+          console.log('CSP ajoutee', f);
+          }
           JS
           sed -i 's/^          //' /tmp/protect.js
           node /tmp/protect.js
@@ -63,7 +70,9 @@ jobs:
           const fs = require('fs');
           const { minify } = require('/tmp/min/node_modules/terser');
           (async () => {
-            const f = process.env.GITHUB_WORKSPACE + '/apk/www/index.html';
+            const files = [];
+            (function walk(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = d + '/' + e.name; if (e.isDirectory()) walk(p); else if (p.endsWith('.html')) files.push(p); } })(process.env.GITHUB_WORKSPACE + '/apk/www');
+            for (const f of files) {
             let h = fs.readFileSync(f, 'utf8');
             const m = h.match(/<script>([\s\S]*)<\/script>/);
             if (!m) throw new Error('script introuvable');
@@ -72,13 +81,19 @@ jobs:
             new (require('vm').Script)(r.code); // verifie que le code minifie est valide
             h = h.replace(m[0], () => '<script>' + r.code + '</script>');
             fs.writeFileSync(f, h);
-            console.log('minifie :', m[1].length, '->', r.code.length);
+            console.log('minifie', f, ':', m[1].length, '->', r.code.length);
+            }
           })().catch(e => { console.error(e); process.exit(1); });
           JS
           sed -i 's/^          //' /tmp/min/min.js
           node /tmp/min/min.js
       - run: npm install
       - run: npx cap add android
+      - name: Verifier le package (com.lumenbell.game, aucune trace de l'ancien)
+        run: |
+          grep -n 'applicationId' android/app/build.gradle
+          grep -q 'applicationId "com.lumenbell.game"' android/app/build.gradle
+          ! grep -rq 'emberbridge' android/app/src android/app/build.gradle capacitor.config.json
       - name: Durcir la configuration Capacitor
         run: |
           node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('capacitor.config.json','utf8'));c.android=Object.assign({},c.android,{allowMixedContent:false,webContentsDebuggingEnabled:false});fs.writeFileSync('capacitor.config.json',JSON.stringify(c,null,2));console.log(fs.readFileSync('capacitor.config.json','utf8'))"
@@ -117,6 +132,10 @@ jobs:
           public class MainActivity extends BridgeActivity {
             @Override public void onCreate(Bundle b) {
               super.onCreate(b);
+              // Musique du hub sans geste, localStorage actif (progression des chapitres).
+              android.webkit.WebSettings ws = getBridge().getWebView().getSettings();
+              ws.setMediaPlaybackRequiresUserGesture(false);
+              ws.setDomStorageEnabled(true);
               getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
               WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
               if (android.os.Build.VERSION.SDK_INT >= 28) {
@@ -152,6 +171,13 @@ jobs:
           cp android/app/build/outputs/bundle/release/app-release.aab Lumenbell.aab
           jarsigner -keystore /tmp/ember.jks -storepass:env KEY_PASS -keypass:env KEY_PASS -sigalg SHA256withRSA -digestalg SHA-256 Lumenbell.aab ember
           jarsigner -verify Lumenbell.aab | head -n 3
+      - name: Zip itch.io (site entier)
+        working-directory: .
+        run: ls -la build/out/lumenbell-site.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lumenbell-itch
+          path: build/out/lumenbell-site.zip
       - uses: actions/upload-artifact@v4
         with:
           name: lumenbell-android
