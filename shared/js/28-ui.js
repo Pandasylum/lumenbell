@@ -32,8 +32,12 @@ LB.hubIcon=()=>{const I=LB.HUB_ICON,c=I.size/2;let s='<svg class="hubico" aria-h
   return s+'<circle cx="'+c+'" cy="'+c+'" r="'+I.core+'" fill="'+I.core0+'" opacity=".55"/></svg>'};
 LB.toHub=(()=>{let gone=false;return n=>{if(gone)return false;gone=true;try{location.replace(LB.HUB.path+'?'+LB.HUB.back+'='+n)}catch(e){gone=false}return true}})();
 /* Vraie fin d'un chapitre ouvert depuis le hub (outro terminé, hors Épreuve) : le bouton de la dernière carte ramène au hub
-   (« Chapitres »), qui allume la tour avec sa cloche. Épreuve ou chapitre ouvert seul : carte inchangée. o : options de LB.card.show. */
-LB.hubEnd=(o,n,trial)=>{if(LB.fromHub&&!trial){o.go=LB._('Chapters','Chapitres');o.onGo=()=>LB.toHub(n)}return o};
+   (« Chapitres »), qui allume la tour avec sa cloche. Épreuve ou chapitre ouvert seul : carte inchangée. o : options de LB.card.show.
+   again : l'outro était déjà vue (drapeau lb-chN-outro lu avant la fin) : la carte garde aussi « Menu » (menu = sa fonction) ; sinon « Chapitres » seul.
+   Décision docs/decisions/2026-11-03-outro-une-fois.md. */
+/* LB.hubAgain(trial, cine) : chapitre ouvert depuis le hub, hors Épreuve, outro déjà vue (à lire avant de jouer l'outro) */
+LB.hubAgain=(trial,cine)=>!!(LB.fromHub&&!trial&&cine.seen());
+LB.hubEnd=(o,n,trial,again,menu)=>{if(LB.fromHub&&!trial){o.go=LB._('Chapters','Chapitres');o.onGo=()=>LB.toHub(n);o.onMenu=again?(menu||o.onMenu||null):null}return o};
 /* ---------- LB.motion : mouvement réduit = préférence du système (prefers-reduced-motion), sans réglage ni clé de sauvegarde ----------
    apply() pose la classe LB.MOTION.cls sur <html> quand le mouvement est réduit : les règles « mouvement réduit » du CSS s'écrivent
    .lb-rm …, jamais @media (prefers-reduced-motion). reduced() : JS. */

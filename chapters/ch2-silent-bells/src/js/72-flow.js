@@ -46,7 +46,7 @@ function phaseCleared(){
 }
 function clearedCard(id){S.mode='card';S.still=id;const next=ORDER[gpOf(id)];
   showCard({eye:[null,_('Phase II cleared','Phase II terminée'),_('Phase I cleared','Phase I terminée'),_('Phase III cleared','Phase III terminée')][id],title:PH[id].boss(),desc:PH[id].end(),
-    go:_('Continue','Continuer'),onGo:id===3?()=>playEpilogue(victory):()=>enterPhase(next),onMenu:id===3?null:showMenu});
+    go:_('Continue','Continuer'),onGo:id===3?()=>{S.epAgain=LB.hubAgain(S.d.trial,EPI);if(S.epAgain)victory();else playEpilogue(victory)}:()=>enterPhase(next),onMenu:id===3?null:showMenu});
 }
 function fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0')}
 function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
@@ -57,7 +57,7 @@ function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
   showCard(LB.hubEnd({eye:_('Victory','Victoire')+' · '+S.d[LB.lang.cur],title:_('Chapter II · Silent Bells','Chapitre II · Silent Bells'),
     table:[[_('Time','Temps'),fmt(t)],[_('Hits taken','Coups reçus'),S.hits],[_('Perfects','Parfaits'),S.perfects],[_('Best','Record'),best?fmt(best):'—',true]],
     desc:(isRec?_('New record. ','Nouveau record. '):'')+(S.full?'':_('Records only count for runs started from the beginning.','Le record ne compte que pour une partie lancée depuis le début.')),
-    go:_('Play again','Rejouer'),onGo:()=>startRun(S.dk),onMenu:showMenu},2,S.d.trial));   // from the hub, outside the Trial: « Chapters » goes back to the hub
+    go:_('Play again','Rejouer'),onGo:()=>startRun(S.dk),onMenu:showMenu},2,S.d.trial,S.epAgain,showMenu));   // from the hub, outside the Trial: « Chapters » goes back to the hub
 }
 function deathCard(){MUSIC.stop();const tr=S.d.trial;
   const o={eye:_('Defeat','Défaite'),title:_('The Watcher is down.','Le Veilleur est à terre.'),

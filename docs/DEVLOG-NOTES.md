@@ -158,3 +158,5 @@
 - Le hub et les deux chapitres sont dans le même APK ; la musique doit partir sans nouveau toucher.
 
 - Joueur : rien de nouveau à l'écran dans ce lot (feuille de route et statuts des changements uniquement, aucun changement de jeu).
+
+- Depuis le hub, la première vraie fin enchaîne l'outro puis n'offre que « Chapitres » ; les fois suivantes, la fin saute l'outro et propose « Chapitres » et « Menu » (« ▶ Outro » reste au menu).
