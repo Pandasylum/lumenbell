@@ -18,7 +18,7 @@ L'Ancien peut être redessiné pour être plus esthétique, mais chaque pièce d
 |---|---|
 | Cloche de tête | Lanterne du sommet, la méduse brille dedans ; elle tombe quand la tour éclate |
 | Cloches du torse | Étages de la tour |
-| Cloches d'épaules | Phares du sommet : elles tournent autour du Phare, sous la méduse, et la lumière les suit ; les éclairs en partent, annoncés par un crépitement |
+| Cloches d'épaules | Phares du sommet. Partie 1 : immobiles à leur poste, elles tournent autour du Phare seulement pendant l'attaque des faisceaux (la cloche qui éclaire suit le faisceau), puis reviennent doucement à leur poste. Partie 2 : fixes à leur poste, seul leur côté lumineux pivote avec le faisceau, au même angle. Les éclairs en partent, annoncés par un crépitement |
 | Bras | Arcs-boutants |
 | Ancre | Plantée au pied de la tour, elle l'amarre |
 | Chaînes | Amarres vers les récifs |

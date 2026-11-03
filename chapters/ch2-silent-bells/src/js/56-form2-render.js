@@ -14,9 +14,8 @@ function ecPose(T){let ri=0,si=0,bi=0;return TOWER.map(p=>{
 function ecAnchor(T){const a=T*.4;return{x:LX+Math.cos(a)*190,y:ECY+72+Math.sin(a)*46,a:a+2,sc:.7,z:Math.sin(a)}}
 function ecGap(T){const a=T*.55+12*Math.PI/7;return{x:LX+Math.cos(a)*112,y:ECY+Math.sin(a)*36}}
 function drawAnchorQ(q){ctx.save();if(q.clip){ctx.beginPath();ctx.rect(0,0,W,GY+6);ctx.clip()}ctx.translate(q.x,q.y);ctx.scale(q.sc,q.sc);drawAnchor(0,0,Math.cos(q.a),Math.sin(q.a),0);ctx.restore()}
-/* LQ: poses of the two side lanterns around the jellyfish (default: scaled by its radius); sw (default 1): in form II the lanterns
-   and the shoulder bells swap places (they look alike): the lanterns are held up high by the upper tentacles, where the shoulder
-   bells were, and the shoulder bells sit by the jellyfish. 0 = no swap (tower), in between = on the way */
+/* LQ, sw: kept for the callers; there are no side lanterns any more (3 November 2026), the shoulder bells are the lamps and
+   stay at P[SBELLS], their mouth turned by ecAim */
 function drawEcl(P,A,J,tentA,on,gapQ,LQ,sw){
   base();if(sw==null)sw=1;
   const L0=LQ||(J?lampPoses(J.x,J.y,J.r/36):null),D={};let Ld=L0;
@@ -26,7 +25,7 @@ function drawEcl(P,A,J,tentA,on,gapQ,LQ,sw){
   if(J)glow(J.x,J.y,260,'rgba(90,220,255,.55)',.6*on+.05);
   const link=(x,y,front)=>{if(!J||tentA<=0)return;ctx.save();ctx.globalAlpha=tentA;tent(J.x,J.y,(J.x+x)/2,J.y+(front?30:-40),(J.x+x)/2,y,x,y,3,front?.9:.6);ctx.restore()};
   const order=P.map((q,i)=>i).sort((a,b)=>Q(a).z-Q(b).z);
-  const piece=i=>{const q=Q(i),k=TOWER[i].k;if(q.hide)return;if(!FIXED(k)&&!D[i])link(q.x,q.y,q.z>=0);ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);if(q.sc)ctx.scale(q.sc,q.sc);PDRAW[k](.85,q.o);ctx.restore()};
+  const piece=i=>{const q=Q(i),k=TOWER[i].k;if(q.hide)return;if(!FIXED(k)&&!D[i])link(q.x,q.y,q.z>=0);ctx.save();ctx.translate(q.x,q.y);ctx.rotate(k==='sbell'?ecAim(i,q):q.r);if(q.sc)ctx.scale(q.sc,q.sc);PDRAW[k](.85,q.o);ctx.restore()};
   order.filter(i=>Q(i).z<0).forEach(piece);
   if(A&&A.z<0){link(A.x,A.y,false);drawAnchorQ(A)}
   if(Ld){SBELLS.forEach((i,k)=>{if(D[i]&&!P[i].hide)link(P[i].x,P[i].y,P[i].z>=0)});drawLamps(Ld,1)}
@@ -36,6 +35,17 @@ function drawEcl(P,A,J,tentA,on,gapQ,LQ,sw){
   order.filter(i=>Q(i).z>=0).forEach(piece);
   if(A&&A.z>=0){link(A.x,A.y,true);drawAnchorQ(A)}
 }
+/* form II (correction of Kevin, 3 November 2026): the shoulder bells stay at their post; only the mouth pivots with the side
+   beam that leaves from it, at the same angle (beam towards the reef at bx), then eases back. Reads the side-beam threats only
+   (side, t0, ts, D, no tl: the rings have tl), never writes them; ecMem keeps the end of a sweep for the return */
+const ecMem={};
+function ecAim(i,q){const k=SBELLS.indexOf(i),ra=bx=>Math.atan2(-(bx-q.x),GY-q.y);let r=q.r,on=false;
+  for(const th of S.threats){if(th.side!==k||th.D==null||th.ts==null||th.tl!=null||gt<th.t0)continue;const e=th.ts+th.D;if(gt>e+SPIN.back)continue;on=true;ecMem[k]=e;
+    if(gt<th.ts)r=lerp(q.r,ra(940),eio(clamp((gt-th.t0)/(th.ts-th.t0),0,1)));
+    else if(gt<=e)r=ra(940-1000*clamp((gt-th.ts)/th.D,0,1));
+    else r=lerp(ra(-60),q.r,eio((gt-e)/SPIN.back))}
+  if(!on&&ecMem[k]!=null&&gt>=ecMem[k]&&gt<ecMem[k]+SPIN.back)r=lerp(ra(-60),q.r,eio((gt-ecMem[k])/SPIN.back));
+  return r}
 function drawEclIdle(T){drawEcl(ecPose(T),ecAnchor(T),{x:LX,y:ECY+Math.sin(T*1.1)*4,r:44*(1+Math.sin(T*2.6)*.1)},1,1,null)}
 /* finale timing: the orbit stops with the gap facing the Watcher */
 const EPHI05=Math.PI-12*Math.PI/7;
@@ -260,7 +270,7 @@ function cineBoss(){
   if(ph===3&&k==='in'){
     if(t<1.5){drawLamps(LAMP_FLOOR,1);ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();S.heroDY=0}
     else if(t<11.5){S.heroDY=0;S.tfT=S.cine.t0+1.5;drawTransform()}
-    else{drawBoss3();const s=clamp((t-11.7)/1.4,0,1);if(s>0&&s<1){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*s,.8);ctx.restore()}}
+    else{const s=clamp((t-11.7)/1.4,0,1);drawBoss3({dir:-1,pre:(t-11.7+SPIN.pre)/SPIN.pre,s,post:(t-13.1)/SPIN.back});if(s>0&&s<1){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*s,.8);ctx.restore()}}
     return}
   if(ph===3&&k==='out'){ecFinale(t);return}
   if(ph===3&&k==='p2'){ecTransition(t);return}

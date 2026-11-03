@@ -165,4 +165,5 @@
 
 - Hub : la carte d'entrée devient sobre : cadre fin à la couleur du chapitre sur fond sombre translucide, nom petit et espacé, « Entrer » en bouton à fin contour qui se remplit doucement au survol, au focus et au toucher ; la carte « À venir » reprend le cadre, estompé, sans bouton.
 
-- Chapitre II, phase III : plus de lanternes sur la plage ; les deux cloches d'épaules de l'Ancien montent au sommet du Phare et tournent sous la méduse, un cône de lumière tournant avec elles ; le faisceau et les éclairs partent de la cloche qui passe du bon côté.
+- Chapitre II, phase III : plus de lanternes sur la plage ; les cloches d'épaules de l'Ancien sont les phares du sommet. Partie 1 : immobiles, elles tournent autour du Phare pendant l'attaque des faisceaux, la cloche qui éclaire suivant le faisceau, puis reviennent doucement à leur poste.
+- Partie 2 : les cloches restent à leur poste et seule leur bouche pivote avec le faisceau ; les éclairs partent toujours des cloches.

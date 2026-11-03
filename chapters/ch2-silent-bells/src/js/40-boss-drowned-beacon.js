@@ -44,12 +44,30 @@ function pHarp(){harpoon(0,72,Math.PI/2,112)}
 const PDRAW={tb0:pTb0,tb1:pTb1,tb2:pTb2,ring:pRing,sbell:pSmallBell,head:pHead,seg:pSeg,fist:pFist,harp:pHarp};
 /* the tower's lights (decision of Kevin, 3 November 2026): the Elder's two shoulder bells, carried to the summit, are the
    lighthouse's lamps; there is no other lantern. When the tower works they turn round it under the jellyfish and the light
-   follows them. SPIN: rendering only (w = rad/s, rx/ry = orbit radii, y = drop below the jellyfish, d = depth scale).
+   follows them. Correction of Kevin (3 November 2026): in form I they orbit only during the beam attack, the bell that
+   casts the beam aimed at it, then ease back to their post; in form II they stay at their post and only their mouth pivots
+   with the beam. SPIN: rendering only (rx/ry = orbit radii, y = drop below the jellyfish, d = depth scale, span = px of reef
+   per unit of aim, pre = ease-in before a cinematic sweep, back = s of the easy return to the post).
    lampPoses keeps its old contract (index 0 = left, 1 = right at rest, point = middle of the mouth, s = side) so the beams,
    bolts and form II keep reading the bells from it */
-const SPIN={w:1.3,rx:70,ry:12,y:24,d:.14};
-let spinAng=0;   // last angle: set by drawBoss3 while the tower works, frozen otherwise, 0 during the construction
-const spinA=()=>spinAng;
+const SPIN={rx:70,ry:12,y:24,d:.14,span:500,pre:.5,back:.8};
+let spinAng=0;   // orbit angle, set by drawBoss3 (0 = at the post), 0 during the construction
+const spinA=()=>spinAng,TAU=Math.PI*2;
+/* orbit angle that aims the casting bell at the reef point bx (dir < 0: right bell, sweeping leftwards; dir > 0: left bell),
+   the bell passing in front of the tower */
+function aimA(dir,bx){const c=clamp((bx-LX)/SPIN.span,-1,1);return dir<0?Math.acos(c):-Math.acos(-c)}
+/* one sweep: pre 0..1 (the tell), s 0..1 (the sweep, same bx as drawBeacon), post 0..1 (easy return to the post) */
+function sweepA(dir,pre,s,post){const b0=dir<0?940:-60,b1=dir<0?-60:940;
+  if(post>0){const Ae=aimA(dir,b1);return lerp(Ae,Math.round(Ae/TAU)*TAU,eio(clamp(post,0,1)))}
+  if(s>0)return aimA(dir,lerp(b0,b1,s));
+  return aimA(dir,b0)*eio(clamp(pre,0,1))}
+/* reads the beam threats (never writes them); spinMem keeps the end of the last sweep for the return */
+let spinMem=null;
+function beamSpin(){let A=null;
+  for(const th of S.threats){if(th.k!=='beam'||gt<th.t0)continue;const e=th.ts+th.D;if(gt>e+SPIN.back)continue;spinMem={dir:th.dir,e};
+    A=sweepA(th.dir,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1,gt<th.ts?0:clamp((gt-th.ts)/th.D,0,1),gt>e?(gt-e)/SPIN.back:0)}
+  if(A==null&&spinMem&&gt>=spinMem.e&&gt<spinMem.e+SPIN.back)A=sweepA(spinMem.dir,1,1,(gt-spinMem.e)/SPIN.back);
+  return A||0}
 function lampPoses(jx,jy,k,spread){const sp=spread||0,kk=k||1,A=spinA();return[0,1].map(i=>{const a=A+(i?0:Math.PI),c=Math.cos(a),z=Math.sin(a),s=i?1:-1;
   return{x:jx+c*SPIN.rx*kk+s*95*sp,y:jy+(SPIN.y+z*SPIN.ry)*kk-30*sp,r:-c*Math.PI/2+s*.6*sp,s,c,z,sc:1+z*SPIN.d}})}
 /* the bells are TOWER pieces (sbell): the old side-lantern hooks stay as no-ops for the callers of form II and the stills */
@@ -95,7 +113,10 @@ function piecePose(p,t){
 }
 function drawPieces(t,heat,noS){
   const out=[];
-  for(const p of TOWER){const q=piecePose(p,t);out.push(q);if(t==null&&S.hide&&S.hide.has(p))continue;if(noS&&p.k==='sbell')continue;ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);PDRAW[p.k](heat);ctx.restore()}
+  for(const p of TOWER){let q=piecePose(p,t);
+    // the standing tower draws its bells where the light leaves from (lampPoses), not at a fixed pose
+    if(t==null&&p.k==='sbell'){const l=lampPoses(LX,LY,1)[p.e.x<LX?0:1];q={x:l.x,y:l.y,r:l.r,f:1,sc:l.sc}}
+    out.push(q);if(t==null&&S.hide&&S.hide.has(p))continue;if(noS&&p.k==='sbell')continue;ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);if(q.sc)ctx.scale(q.sc,q.sc);PDRAW[p.k](heat);ctx.restore()}
   return out;
 }
 function anchorPose(t){if(t==null)return{...ANCH.e,f:1};const e=eio(clamp((t-ANCH.t)/ANCH.d,0,1));const ex=t>2?eout(clamp((t-2)/.5,0,1))*20:0;
@@ -130,7 +151,8 @@ function jelly(x,y,r,on,t){
   ctx.strokeStyle=`rgba(200,250,255,${.6*on+.2})`;ctx.lineWidth=1;for(let k=-3;k<=3;k++){ctx.beginPath();ctx.moveTo(x+k*r*.22,y-r*.95);ctx.quadraticCurveTo(x+k*r*.3,y-10,x+k*r*.36,y+4);ctx.stroke()}
 }
 function moorings(a){if(a<=0)return;ctx.save();ctx.globalAlpha*=a;chainLinks(LX-20,GY-150,590,GY-104,24,'#4a2a18');chainLinks(LX+20,GY-150,945,GY-2,30,'#4a2a18');ctx.restore()}
-function drawBoss3(){
+/* cine (optional): a sweep played by a cinematic, {dir, pre, s, post} as in sweepA; otherwise the bells follow the beam threats */
+function drawBoss3(cine){
   const B=beaconState();const ko=S.mode==='ko'&&S.phase===3?clamp((gt-S.koT)/2,0,1):0;
   const on=(ko?Math.max(0,1-ko*1.6)*(Math.sin(gt*30)>0?1:.3):1)*(B.dim?.35:1);
   ell(LX,GY+8,150,18,'#050e12');
@@ -138,7 +160,7 @@ function drawBoss3(){
   glow(LX,LY,190+B.charge*90,'rgba(90,220,255,.5)',(.4+B.charge*.5)*on);
   ctx.save();if(hasFilter&&gt-S.bossFlash<.15)ctx.filter='brightness(1.9)';
   moorings(1);drawAnchorAt(anchorPose(null));
-  if(!ko)spinAng=rt*SPIN.w;spinBells(false,on,B.charge);
+  spinAng=cine?sweepA(cine.dir,cine.pre,cine.s,cine.post):beamSpin();spinBells(false,on,B.charge);
   drawPieces(null,.85,true);
   bindings(on,1);
   for(const [side,ph] of[[-1,0],[1,1.7]]){const sw=Math.sin(rt*1.8+ph);ctx.strokeStyle=`rgba(111,232,255,${.45*on+.1})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LX+side*20,LY+6);ctx.bezierCurveTo(LX+side*90,LY-30+sw*20,LX+side*140,LY+30-sw*30,LX+side*(170+sw*20),LY+80+sw*20);ctx.stroke()}
