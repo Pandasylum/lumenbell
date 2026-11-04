@@ -1,3 +1,6 @@
+/* Écran de démarrage : la scène du menu reste masquée dès le premier rendu (avant tout JS) et ne se révèle qu'une fois l'écran de démarrage masqué (Commencer, ouverture depuis le hub, copie de test). Décision docs/decisions/2026-11-04-ecran-demarrage.md */
+#menu .mscene{visibility:hidden}
+#gate[hidden]~#menu .mscene{visibility:visible}
 /* Layout: the Ember Bridge shell, one centered column: header with the phase track, two health bars,
    the 16:9 arena, then the single action button. The accent follows the boss:
    Chapter II colour code: tide turquoise in every phase (docs/CH2-SPEC.md). Single dark look by choice. */

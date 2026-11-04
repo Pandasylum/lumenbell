@@ -34,9 +34,9 @@ const W=960,H=540,GY=430,HX=230,HY=GY-70;
 const DIFFS={
   easy:{sp:.85,boss:6,u:[3],heal:true,fr:'Facile',en:'Easy'},
   normal:{sp:1,boss:8,u:[4],heal:true,fr:'Normal',en:'Normal'},
-  hard:{sp:1.18,boss:10,u:[7,4],heal:true,fr:'Difficile',en:'Hard'},
+  hard:{sp:1.18,boss:10,u:[7,4],heal:true,hard:true,fr:'Difficile',en:'Hard'},
   tn:{sp:1,boss:8,u:[4],trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{sp:1.18,boss:10,u:[7,4],trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  th:{sp:1.18,boss:10,u:[7,4],hard:true,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
 for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;

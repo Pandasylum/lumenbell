@@ -57,15 +57,15 @@ for(const [ch,c] of [...COMMON.flatMap(c=>[['ch1',c],['ch2',c]]),...CH1.map(c=>[
  await pg.click('#gateBtn');await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(300);
  const cine=await pg.evaluate(()=>!document.getElementById('cine').hidden);console.log('ch1 intro vue : cinematique',cine);
  if(cine)errs.push('ch1 intro vue (eb-intro) : la cinematique se rejoue');await ctx.close()}
-// Chapitre I : aide memorisee d'une difficulte a l'autre, disponible aussi en Difficile (decision n° 3 du 28 octobre, session menu/common) ;
-// l'Epreuve (case desactivee) est controlee par help.js
+// Chapitre I : aide memorisee d'une difficulte a l'autre ; Difficile et Epreuve la verrouillent (case desactivee, Off, lb-help intact : decision 2026-11-04-aide-difficile) ;
+// la case verrouillee est controlee par help.js
 {const c={nom:'aide'};const {ctx,pg}=await open(b,'ch1',c);
  await pg.click('#gateBtn');await pg.evaluate(()=>((id,v)=>{const g=document.getElementById('mGear');g.click();document.querySelector('#lbSet [data-id='+id+'] [data-v='+v+']').click();g.click()})('help',true));
  const r=[];for(const d of ['easy','hard','normal']){await pg.evaluate(()=>{const m=document.getElementById('menuBtn');if(m&&m.offsetParent)m.click()});
   await pg.evaluate(d=>document.querySelector('#mphM [data-diff='+d+']').click(),d);await pg.waitForTimeout(200);
   r.push(await pg.evaluate(()=>({help:((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help').on,key:localStorage.getItem('lb-help')})))}
  console.log('ch1 aide',JSON.stringify(r));
- const want=[{help:true,key:'1'},{help:true,key:'1'},{help:true,key:'1'}];
+ const want=[{help:true,key:'1'},{help:false,key:'1'},{help:true,key:'1'}];   // Facile, Difficile (verrouille, Off, cle intacte), Normal
  if(JSON.stringify(r)!==JSON.stringify(want))errs.push('ch1 aide : '+JSON.stringify(r)+' au lieu de '+JSON.stringify(want));await ctx.close()}
 // Ecriture dans chaque chapitre : cles lb-* seulement ; puis l'autre chapitre (meme origine file://) relit le choix
 for(const [ch,other] of [['ch1','ch2'],['ch2','ch1']]){
