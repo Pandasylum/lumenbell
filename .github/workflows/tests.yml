@@ -1,24 +1,8 @@
 name: Tests
 # PR : « smoke » + les seuls périmètres touchés (job « changes », voir sa table plus bas).
-# Push sur main : « smoke » seul. Lancement manuel : suite complète.
+# Pas de push sur main. Lancement manuel : périmètres au choix (entrée « scopes »), bot en option.
 # PR en brouillon : rien ne tourne. La CI se lance à la mise en prêt (ready_for_review).
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      # Documentation seule : pas de CI. Les .md lus par un test ou un build ne sont PAS listes
-      # (docs/CH2-SPEC.md, chapters/ch2-silent-bells/TEXTES.md) et declenchent donc la CI.
-      - '*.md'
-      - 'chapters/*/NOTES.md'
-      - 'shared/NOTES.md'
-      - 'docs/AUDIT-*.md'
-      - 'docs/COMMUN.md'
-      - 'docs/DEVLOG-NOTES.md'
-      - 'docs/GLOSSAIRE.md'
-      - 'docs/LORE.md'
-      - 'docs/TEXTES-CH1.md'
-      - 'docs/decisions/**'
-      - 'archives/**'
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
     paths-ignore:
@@ -36,19 +20,28 @@ on:
       - 'docs/decisions/**'
       - 'archives/**'
   workflow_dispatch:
+    inputs:
+      scopes:
+        description: 'Périmètres à tester (shared ch2 hub)'
+        type: string
+        default: 'shared ch2 hub'
+      bot:
+        description: 'Lancer ch2-bot (100 parties, --check)'
+        type: boolean
+        default: false
 concurrency:
   group: tests-${{ github.ref }}
-  # Les pushes sur main ne sont jamais annules : chaque commit de main doit aller au bout.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   # Calcule les périmètres à tester. Sur PR : fichiers modifiés par rapport à la base.
-  # Sur lancement manuel : tous les périmètres. Sur push vers main : aucun (seul « smoke » tourne).
+  # Sur lancement manuel : l'entrée « scopes ».
   #   shared/**, build/**, tests/**, ce workflow  -> tous les périmètres
   #   chapters/ch2-silent-bells/**                -> ch2
   #   site/**                                     -> hub
   #   chapters/ch1-ember-bridge/**                -> aucun périmètre dédié (couvert par « smoke »)
   changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       scopes: ${{ steps.scopes.outputs.scopes }}
     steps:
@@ -59,15 +52,11 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          INPUT_SCOPES: ${{ inputs.scopes }}
         run: |
           ALL="shared ch2 hub"
-          if [ "$EVENT" = "push" ]; then
-            # Push sur main : aucun périmètre, les étapes « Tests » et builds sont sautés.
-            echo "scopes=" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
           if [ "$EVENT" != "pull_request" ]; then
-            echo "scopes=$ALL" >> "$GITHUB_OUTPUT"
+            echo "scopes=$INPUT_SCOPES" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           if ! FILES=$(git diff --name-only "$BASE_SHA"...HEAD); then
@@ -86,6 +75,7 @@ jobs:
   smoke:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -146,65 +136,22 @@ jobs:
           if-no-files-found: error
 
   tests:
-    name: ${{ matrix.name }}
+    name: Tests
     needs: changes
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    # Périmètres vides : le job ne démarre pas. Brouillon : rien ne tourne.
+    if: needs.changes.outputs.scopes != '' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Commun (cles, audio, Epreuve, entrees, aide, annonces, cinematiques)
-            scope: shared
-            run: |
-              node keys.js
-              node audio.js
-              node trial.js
-              node input.js
-              node inputs.js
-              node help.js
-              node announce.js
-              node cine.js
-          - name: menu-layout
-            scope: shared
-            run: |
-              node menu-layout.js
-              node menu-title.js
-          - name: Chapitre II (textes, cles, fumee, Epreuve)
-            scope: ch2
-            run: |
-              node ch2-texts.js
-              node ch2-keys.js
-              node ch2-smoke.js
-              node ch2-trial.js
-          - name: Chapitre II (entrees, titre, retouches, annonces, bot)
-            scope: ch2
-            run: |
-              node ch2-input.js
-              node ch2-title.js
-              node ch2-retouches3.js
-              node ch2-announce.js
-              node ch2-bot.js 100 --check
-          - name: Hub (site assemble)
-            scope: hub
-            run: |
-              node hub.js
-              node hub-site.js
+    timeout-minutes: 25
     steps:
-      # Un périmètre non touché saute toutes les étapes (pas de build, pas de Playwright).
       - uses: actions/checkout@v4
-        if: contains(needs.changes.outputs.scopes, matrix.scope)
       - uses: actions/setup-node@v4
-        if: contains(needs.changes.outputs.scopes, matrix.scope)
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: tests/package-lock.json
       - uses: actions/setup-python@v5
-        if: contains(needs.changes.outputs.scopes, matrix.scope)
         with: { python-version: '3.12' }
       - name: Builds (ils alimentent la version de test)
-        if: contains(needs.changes.outputs.scopes, matrix.scope)
         run: |
           python3 build/build.py
           python3 build/build_ch2.py
@@ -212,13 +159,11 @@ jobs:
           python3 build/build_test.py
       - name: Cache des navigateurs Playwright
         id: pw
-        if: contains(needs.changes.outputs.scopes, matrix.scope)
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
       - name: Installer Playwright
-        if: contains(needs.changes.outputs.scopes, matrix.scope)
         working-directory: tests
         run: |
           npm ci
@@ -227,7 +172,47 @@ jobs:
           else
             npx playwright install --with-deps chromium
           fi
-      - name: Tests
-        if: contains(needs.changes.outputs.scopes, matrix.scope)
+      - name: Commun (cles, audio, Epreuve, entrees, aide, annonces, cinematiques)
+        if: contains(needs.changes.outputs.scopes, 'shared')
         working-directory: tests
-        run: ${{ matrix.run }}
+        run: |
+          node keys.js
+          node audio.js
+          node trial.js
+          node input.js
+          node inputs.js
+          node help.js
+          node announce.js
+          node cine.js
+      - name: menu-layout
+        if: contains(needs.changes.outputs.scopes, 'shared')
+        working-directory: tests
+        run: |
+          node menu-layout.js
+          node menu-title.js
+      - name: Chapitre II (textes, cles, fumee, Epreuve)
+        if: contains(needs.changes.outputs.scopes, 'ch2')
+        working-directory: tests
+        run: |
+          node ch2-texts.js
+          node ch2-keys.js
+          node ch2-smoke.js
+          node ch2-trial.js
+      - name: Chapitre II (entrees, titre, retouches, annonces)
+        if: contains(needs.changes.outputs.scopes, 'ch2')
+        working-directory: tests
+        run: |
+          node ch2-input.js
+          node ch2-title.js
+          node ch2-retouches3.js
+          node ch2-announce.js
+      - name: Chapitre II - bot (lancement manuel seulement)
+        if: github.event_name == 'workflow_dispatch' && inputs.bot
+        working-directory: tests
+        run: node ch2-bot.js 100 --check
+      - name: Hub (site assemble)
+        if: contains(needs.changes.outputs.scopes, 'hub')
+        working-directory: tests
+        run: |
+          node hub.js
+          node hub-site.js
