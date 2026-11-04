@@ -128,7 +128,8 @@ function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
    then his rage spell (the signature spell of the phase), then the second-half patterns; the final assault comes at
    RAGE.finalHp. The boss bar marks the thresholds (pips underlined, as in Ember Bridge). */
 const RAGE={dur:1.6,dur2:.8,finalHp:1};
-const rageMarks=()=>LB.hud.marks(S.d.u,S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
+const rageAt=()=>S.phase===3?S.d.u3:S.d.u;   // rage thresholds of the current phase
+const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
   else if(S.phase===1){banner(_('Blue heart','Cœur bleu'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
@@ -167,11 +168,11 @@ const SP={
 };
 function spawn(){
   const d=S.d,id=S.phase,f2=id===3&&S.form===2,gen=f2?P3b:[P1,P2,P3][id-1];
-  const n=d.u.filter(x=>S.bossHp<=x).length;
-  /* as in Ember Bridge (a fury restarts while the Colossus's HP are still at its threshold): a rage or final assault whose counter
-     failed (HP not lower than when the roar began) starts again; the counter that lowers the HP closes it */
+  const n=rageAt().filter(x=>S.bossHp<=x).length;
+  /* a rage fires once per threshold crossed (rageN counts them), then normal attacks resume; it is not restarted when the counter
+     fails (that restart made the rage repeat on every attack). The final assault still restarts until the boss falls. */
   if(!S.rageNext){
-    if(S.rageHp0!=null){if(S.bossHp>=S.rageHp0&&S.rageN>0)S.rageN--;S.rageHp0=null}
+    S.rageHp0=null;
     if(S.finalDone&&S.bossHp>0)S.finalDone=false;
   }
   if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.rageHp0=S.bossHp;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
