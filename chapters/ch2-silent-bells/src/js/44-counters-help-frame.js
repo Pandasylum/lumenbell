@@ -1,8 +1,44 @@
 /* ---------- counters ---------- */
+/* phase I riposte: window of the laser / wave (share of the riposte), and the part of it the head needs to reach the Voice */
+const CNT2={from:.22,to:.7,reach:3};
+/* the ricochet of the rain riposte: orb -> a mirror of the hall (chosen once) -> the Voice */
+function rainPath(){
+  const c=S.cnt,vp=voicePos(0);if(c.mi==null)c.mi=mirrorPick(1,HX+150,640)[0];
+  const A={x:S.orbX,y:S.orbY},M=shardPos(c.mi),V={x:vp.x,y:vp.y-84},l1=Math.hypot(M.x-A.x,M.y-A.y),l2=Math.hypot(V.x-M.x,V.y-M.y);
+  return{A,M,V,l1,L:l1+l2}}
+function counterRain(k){
+  if(!(k>CNT2.from&&k<CNT2.to))return;
+  const e=(k-CNT2.from)/(CNT2.to-CNT2.from),P=rainPath(),u=Math.min(1,e*CNT2.reach)*P.L;
+  ctx.strokeStyle=`rgba(255,244,190,${1-e*.8})`;ctx.lineWidth=3.5*(1-e)+1.5;ctx.beginPath();ctx.moveTo(P.A.x,P.A.y);
+  if(u<=P.l1){const q=u/P.l1;ctx.lineTo(lerp(P.A.x,P.M.x,q),lerp(P.A.y,P.M.y,q))}
+  else{const q=(u-P.l1)/(P.L-P.l1);ctx.lineTo(P.M.x,P.M.y);ctx.lineTo(lerp(P.M.x,P.V.x,q),lerp(P.M.y,P.V.y,q))}
+  ctx.stroke();
+  if(u>=P.l1)glow(P.M.x,P.M.y,50,'rgba(255,244,190,.95)',Math.max(0,.9-(e-P.l1/P.L/CNT2.reach)*2.5))}
+function counterWail(k){
+  if(!(k>CNT2.from&&k<CNT2.to))return;
+  const e=(k-CNT2.from)/(CNT2.to-CNT2.from),vp=voicePos(0),bx=S.orbX+24,by=S.orbY-30,u=Math.min(1,e*CNT2.reach),env=1-e;
+  // the little bell of the staff swings and rings
+  ctx.save();ctx.translate(bx,by);ctx.rotate(Math.sin(gt*55)*.45*env);ctx.fillStyle=`rgba(255,236,170,${.35+.65*env})`;
+  ctx.beginPath();ctx.moveTo(-9,6);ctx.quadraticCurveTo(-9,-8,0,-10);ctx.quadraticCurveTo(9,-8,9,6);ctx.closePath();ctx.fill();ctx.fillRect(-1.5,6,3,3);ctx.restore();
+  // the soft wave travelling to the Voice (crescents like the wail's, light and slow), then a calm glow on her
+  const x=lerp(bx,vp.x-70,eout(u));
+  for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(255,244,200,${(.7-i*.2)*(1-e*.7)})`;ctx.lineWidth=4-i;ctx.beginPath();ctx.ellipse(x-i*14,lerp(by,vp.y-60,u),16+i*3+e*20,60+e*40,0,-Math.PI*.45,Math.PI*.45);ctx.stroke()}
+  if(u>=1)glow(vp.x,vp.y-90,80,'rgba(150,255,235,.8)',.5*Math.sin(Math.PI*clamp((e-1/CNT2.reach)/(1-1/CNT2.reach),0,1)))}
+/* one-shot sounds of the riposte variants, at the moment the laser / wave leaves, and at the ricochet */
+function counterVariantFx(){
+  const c=S.cnt;if(!c||c.k!==2)return;const k=(gt-c.t)/c.dur;
+  if(k>=CNT2.from&&!c.s1){c.s1=1;if(c.spell==='wail')MUSIC.fx('bellChime')}
+  if(c.spell==='rain'&&!c.s2){const P=rainPath(),e=(k-CNT2.from)/(CNT2.to-CNT2.from);if(e>=P.l1/P.L/CNT2.reach){c.s2=1;MUSIC.fx('glints')}}}
 function drawCounter(){
   if(!S.cnt)return;const k=(gt-S.cnt.t)/S.cnt.dur;ctx.save();ctx.globalCompositeOperation='lighter';
   if(S.cnt.k===1){if(k>.32&&k<.62){const e=(k-.32)/.3;ctx.strokeStyle=`rgba(255,240,170,${1-e})`;ctx.lineWidth=10*(1-e)+2;ctx.beginPath();ctx.arc(640,GY-150,110,-2.2+e*.5,.6+e*.5);ctx.stroke()}}
-  else if(S.cnt.k===2){if(k>.22&&k<.7){const e=(k-.22)/.48,p=voicePos(0);ctx.strokeStyle=`rgba(255,244,190,${1-e*.8})`;ctx.lineWidth=8*(1-e)+2;ctx.beginPath();ctx.moveTo(S.orbX,S.orbY);ctx.lineTo(lerp(S.orbX,p.x,Math.min(1,e*3)),lerp(S.orbY,p.y-84,Math.min(1,e*3)));ctx.stroke()}}
+  else if(S.cnt.k===2){
+    /* phase I riposte, one variant per spell (same window and same hit moment, only the drawing and the sound change):
+       volley = a laser straight at the Voice; rain = a small laser that ricochets on a mirror of the hall, then hits the Voice;
+       wail = the bell of the staff rings and sends a light wave that unsettles the Voice and calms the despair */
+    const sp=S.cnt.spell;
+    if(sp==='rain')counterRain(k);else if(sp==='wail')counterWail(k);
+    else if(k>.22&&k<.7){const e=(k-.22)/.48,p=voicePos(0);ctx.strokeStyle=`rgba(255,244,190,${1-e*.8})`;ctx.lineWidth=8*(1-e)+2;ctx.beginPath();ctx.moveTo(S.orbX,S.orbY);ctx.lineTo(lerp(S.orbX,p.x,Math.min(1,e*3)),lerp(S.orbY,p.y-84,Math.min(1,e*3)));ctx.stroke()}}
   else if(S.cnt.k===3){if(k>.2&&k<.6)bolt(S.orbX,S.orbY,LX,S.form===2?ECY:LY,(k*7|0)/7,'rgba(255,250,238,.95)',4)}
   ctx.restore();
 }

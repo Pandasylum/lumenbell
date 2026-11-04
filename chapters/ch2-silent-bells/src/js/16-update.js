@@ -24,6 +24,7 @@ function update(dt){
     }
     if(S.mode==='play'&&S.pat&&S.pat.ths.every(t=>t.done))closePat();
     if(S.cnt&&!S.cnt.hit&&gt>=S.cnt.t+S.cnt.hitAt){S.cnt.hit=true;damageBoss(S.cnt.dmg)}
+    counterVariantFx();
     if(S.cnt&&gt>=S.cnt.t+S.cnt.dur){S.cnt=null;S.bossHurtT=gt}
   }
   if(S.mode==='ko'&&gt>S.koT+2.6&&!S.koShown){S.koShown=true;phaseCleared()}
@@ -42,7 +43,7 @@ function closePat(){
   const p=S.pat;S.pat=null;
   if(p.ok){
     const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=R_CNT[S.phase];
-    S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
+    S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase,spell:p.spell};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
     say(S.phase===1?_('Series blocked. The Watcher counters.','Série bloquée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
   }else S.nextAt=gt+R_CNT.nextFail;
 }
