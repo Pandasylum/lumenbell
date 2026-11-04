@@ -255,7 +255,8 @@ LB.pause=(()=>{
 /* ---------- Premier rendu : le voile CSS (style.css de la page : html:not(.lb-go) body * masqué, sauf #gate) est levé ici, dès que
    l'écran de démarrage #gate du HTML est masqué (Commencer, ouverture depuis le hub, retour du hub, copie de test) ou absent.
    Décision docs/decisions/2026-11-04-premier-rendu.md ---------- */
-(()=>{const R=document.documentElement,g=document.getElementById('gate'),go=()=>R.classList.add('lb-go');
+(()=>{const R=document.documentElement,g=document.getElementById('gate'),go=LB.lift=()=>R.classList.add('lb-go');   /* LB.lift : levée immédiate, avant un focus() (un élément masqué ne prend pas le focus) */
+  
   if(!g||g.hidden){go();return}
   const mo=new MutationObserver(()=>{if(g.hidden){go();mo.disconnect()}});mo.observe(g,{attributes:true,attributeFilter:['hidden']})})();
 /* ---------- LB.gate : écran de démarrage (Commencer + langues) ; le clic débloque le son (comme au Chapitre I) ---------- */
@@ -267,11 +268,11 @@ LB.gate=(()=>{
     if(g){if(g.parentNode!==stage)stage.insertBefore(g,before||null)}else{
     g=LB.ui.mk('div',{class:'gate',id:'gate'},'<div class="langs" id="gateLangs" role="group" aria-label="Language">'+LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')+'</div><button class="btn big" id="gateBtn" type="button">Start</button>');
     stage.insertBefore(g,before||null)}
-    g.querySelector('#gateBtn').addEventListener('click',()=>{LB.audio.ensure();g.hidden=true;try{document.querySelector('#menu [data-diff=normal]').focus({preventScroll:true})}catch(e){}if(h.onStart)h.onStart()});
+    g.querySelector('#gateBtn').addEventListener('click',()=>{LB.audio.ensure();g.hidden=true;LB.lift();try{document.querySelector('#menu [data-diff=normal]').focus({preventScroll:true})}catch(e){}if(h.onStart)h.onStart()});
     return g;
   }
   /* écran masqué (chapitre ouvert depuis le hub) : le focus va à « Normal » du menu */
-  return{mount,visible(){return!!g&&!g.hidden},focus(){try{(g&&!g.hidden?g.querySelector('#gateBtn'):document.querySelector('#menu [data-diff=normal]')).focus({preventScroll:true})}catch(e){}},get el(){return g}};
+  return{mount,visible(){return!!g&&!g.hidden},focus(){try{if(!g||g.hidden)LB.lift();(g&&!g.hidden?g.querySelector('#gateBtn'):document.querySelector('#menu [data-diff=normal]')).focus({preventScroll:true})}catch(e){}},get el(){return g}};
 })();
 
 /* ---------- LB.menu : menu de la série ----------
@@ -297,7 +298,7 @@ LB.menu=(()=>{
     m=$('menu');const stage=m.parentNode;
     if(!LB.card.el.ov)LB.card.mount(stage,m);
     LB.gate.mount(stage,m,{onStart:()=>{if(h.onStart)h.onStart()}});
-    if(LB.fromHub){LB.gate.el.hidden=true;LB.audio.ensure();setTimeout(()=>{if(h.onStart)h.onStart()},0)}   /* après la fin du démarrage du chapitre */
+    if(LB.fromHub){LB.gate.el.hidden=true;LB.lift();LB.audio.ensure();setTimeout(()=>{if(h.onStart)h.onStart()},0)}   /* après la fin du démarrage du chapitre */
     if(!LB.pause.el)LB.pause.mount(stage,m);
     ['ov','pause','cine'].forEach(id=>LB.hdr.watch($(id)));
     m.appendChild(particles());
