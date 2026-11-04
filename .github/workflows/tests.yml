@@ -1,6 +1,7 @@
 name: Tests
 # PR : « smoke » + les seuls périmètres touchés (job « changes », voir sa table plus bas).
 # Push sur main : « smoke » seul. Lancement manuel : suite complète.
+# PR en brouillon : rien ne tourne. La CI se lance à la mise en prêt (ready_for_review).
 on:
   push:
     branches: [main]
@@ -19,6 +20,7 @@ on:
       - 'docs/decisions/**'
       - 'archives/**'
   pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
     paths-ignore:
       # Documentation seule : pas de CI. Les .md lus par un test ou un build ne sont PAS listes
       # (docs/CH2-SPEC.md, chapters/ch2-silent-bells/TEXTES.md) et declenchent donc la CI.
@@ -78,6 +80,7 @@ jobs:
           done <<< "$FILES"
           echo "scopes=$S" >> "$GITHUB_OUTPUT"
   smoke:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -142,6 +145,7 @@ jobs:
     name: ${{ matrix.name }}
     if: github.event_name != 'push'
     needs: changes
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
