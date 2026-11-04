@@ -207,15 +207,15 @@ function spawn(){
     if(S.rageHp0!=null){if(S.bossHp>=S.rageHp0&&S.rageN>0)S.rageN--;S.rageHp0=null}
     if(S.finalDone&&S.bossHp>0)S.finalDone=false;
   }
-  if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.rageHp0=S.bossHp;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;S.peOff=1;return}
+  if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.rageHp0=S.bossHp;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
   const go=l=>{const q=sched(l);q.spell=l.spell;return q};   // the spell shown by the riposte (set by P2)
   const stage=S.rageN?1:0,f=1/(d.sp*(1+.1*stage));
-  if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;S.peOff=1;go(gen(stage,f,gt+.25,false,r));return}
+  if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;go(gen(stage,f,gt+.25,false,r));return}
   if(!S.finalDone&&S.bossHp<=FINAL_AT&&(id!==3||f2)){
     S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=RAGE.dur2;S.shake=10;
     banner(_('Final assault','Dernier assaut'),[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
-    S.peOff=1;go(gen(1,f,gt+1.6,true));return}
-  S.peOff=0;go(gen(stage,f,gt+.25));
+    go(gen(1,f,gt+1.6,true));return}
+  go(gen(stage,f,gt+.25));
 }
 /* ---- Phase I · the Hollow Voice ---- */
 function P2(stage,f,b,final,rage){
@@ -252,9 +252,9 @@ function P2(stage,f,b,final,rage){
     const p1=[()=>volley(4,1),()=>volley(5,2),()=>{volley(3,0);wail()},()=>{rain();wail()},()=>{volley(3,1);rain()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
     pick(stage?p1:p0)();
     // the echo only comes during the rages, never in this rotation
-    // Hard: the permanent echo fires one orb after each spell (the rages and the final assault have none: it fades, then returns)
-    if(K==='hard')spacePE(T,casts,f,gap);
   }
+  // Hard: the permanent echo fires one orb after each spell, rages and final assault included
+  if(K==='hard')spacePE(T,casts,f,gap);
   spaceImpacts(T,gap);
   // the spell the riposte shows: a wail, a rain of fragments, otherwise a volley (echo and dance included)
   T.spell=T.some(x=>x.k==='wail')?'wail':T.some(x=>x.k==='shard'&&x.fly&&!x.dn)?'rain':'volley';
@@ -282,10 +282,10 @@ function noteImpact(ti){
 function spacePE(T,casts,f,gap){
   const reals=()=>T.filter(isRealImpact),wails=()=>T.filter(x=>x.k==='wail'),P=VX.pe;
   for(const c of casts){
-    if(c.w||!c.ths.length)continue;
+    if(!c.ths.length)continue;   // every spell, a wail included (the orb itself never falls during a wail)
     let t0=Math.max(...c.ths.map(x=>x.tl))+P.lag,th;
-    for(let i=0;i<80;i++,t0+=.1){
-      th={k:'orb',t0,tl:t0+.45*f,ti:t0+1.3*f,real:true,src:1,pe:1};
+    for(let i=0;i<300;i++,t0+=.1){   // too close to a real impact or inside a wail: shifted later, never dropped
+      th={k:'orb',t0,tl:t0+.45*f,ti:t0+1.3*f,real:true,src:3,pe:1};
       if(!reals().some(r=>Math.abs(r.ti-th.ti)<gap)&&!wails().some(w=>th.tl<w.ti+P.wail&&th.ti>w.tl-P.wail))break}
     T.push(th)}}
 /* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and

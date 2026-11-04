@@ -10,7 +10,7 @@ function voiceAnim(){
   let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&!th.pe&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
   return{cast,echo};
 }
-const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160}];
+const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160},{x:470,y:292}];   // the Voice, the two reflections of the rages, the permanent echo (Hard)
 function voicePos(i){const v=VPOS[i];return{x:v.x,y:v.y+Math.sin(rt*1.6+i*2)*8}}
 function voiceHand(i,cast){const p=voicePos(i);return cast?{x:p.x-84,y:p.y-62}:{x:p.x-46,y:p.y+30}}
 function drawBoss2(){
@@ -22,10 +22,10 @@ function drawBoss2(){
     const br=S.threats.find(t=>t.k==='shard'&&t.from===i&&gt>=t.t0);
     if(br){if(!br.bk){br.bk=1;const p=voicePos(i);burst(p.x,p.y-80,26,'#ece4ff',6,.9,.2);burst(p.x,p.y-20,16,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass')}continue}
     const has=S.threats.some(t=>t.k==='orb'&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,S.echoA*.5,has?1:0,0)}}
-  // permanent echo (Hard): a reflection stands beside the Voice and fires the orb after each spell; it fades during the rages
-  // and the final assault, then returns
-  if(S.d.hard){const on=!S.peOff&&S.mode==='play';S.peA=on?Math.min(1,(S.peA||0)+.04):Math.max(0,(S.peA||0)-.05);
-    if(S.peA>0&&!(S.echoA>0))drawVoice(1,S.peA*.5,S.threats.some(t=>t.pe&&gt>=t.t0&&gt<=t.tl+.15)?1:0,0)}
+  // permanent echo (Hard): its own body (slot 3) stays beside the Voice all fight, rages and final assault included,
+  // and fires the orb after each spell
+  if(S.d.hard){const on=S.mode==='play';S.peA=on?Math.min(1,(S.peA||0)+.04):Math.max(0,(S.peA||0)-.05);
+    if(S.peA>0)drawVoice(3,S.peA*.5,S.threats.some(t=>t.pe&&gt>=t.t0&&gt<=t.tl+.15)?1:0,0)}
   // the Illusion of the wail: appears on the left, throws the second wave towards the Watcher, vanishes
   const iw=S.threats.find(t=>t.k==='wail'&&t.ill&&gt>=t.t0&&gt<=t.ti+.7);
   if(iw){const a=Math.min(clamp((gt-iw.t0)/.35,0,1),clamp((iw.ti+.7-gt)/.5,0,1)),I=SP.wail.ill;

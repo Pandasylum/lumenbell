@@ -198,3 +198,4 @@
 - La Voix : rien de visible côté jeu (mesure seule) ; l’écart entre impacts réels est désormais consigné pour tous les projectiles, reflets revenants compris.
 - La Voix : l'Echo de rage n'apparaît plus que pendant les rages ; les clones tirent dans le désordre, orbes réelles ou illusoires au hasard. Le reflet qui revient atteint visiblement le Veilleur à l'impact.
 - La Voix : la plainte revient en sens inverse portée par une Illusion ; la pluie vient d'un miroir qui explose ; la rage finale est une danse de miroirs ; en Difficile l'écho permanent se voit à côté de la Voix. Les ripostes changent selon le sort (laser, ricochet sur un miroir, clochette).
+- En Difficile, l'écho permanent reste à côté de la Voix tout le combat, rages et dernier assaut compris, et lance son orbe après chaque sort (jamais pendant une plainte).
