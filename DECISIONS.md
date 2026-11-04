@@ -122,3 +122,4 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 - [2026-11-04 · `fix/ui-pause-gate-help` : « Menu » de la pause ouvre directement « Quitter le combat ? » ; plus de sous-choix « Menu du chapitre » / « Chapitres »](docs/decisions/2026-11-04-pause-menu.md)
 - [2026-11-04 · `fix/ui-pause-gate-help` : la scène du menu est masquée dès le premier rendu (CSS) ; l'écran de démarrage est le premier visuel](docs/decisions/2026-11-04-ecran-demarrage.md)
 - [2026-11-04 · `fix/ui-pause-gate-help` : aide visuelle verrouillée en Difficile comme en Épreuve (Off, `lb-help` intact, aucun repère) ; remplace « activable partout » (n° 3 du 28 octobre)](docs/decisions/2026-11-04-aide-difficile.md)
+- [2026-11-04 · `fix/first-paint` : premier rendu des deux chapitres et du hub = seul l'écran « Commencer »  (dans le HTML, voile CSS levé par le JS) ; mesuré avant/après](docs/decisions/2026-11-04-premier-rendu.md)

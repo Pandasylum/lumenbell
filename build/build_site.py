@@ -32,7 +32,7 @@ def hub_source():
 
 s = hub_source()
 assert s.startswith("<!doctype html>\n<html lang=\"en\">\n<head>\n")
-assert s.count("<style>\n") == 1 and s.count("<script>") == 1 and s.count("</script>") == 1
+assert s.count("<style>\n") == 1 and s.count("<script>") == 2 and s.count("</script>") == 2  # 2 : le petit script de langue de l'ecran de demarrage (premier rendu) + le jeu
 assert "fonts.googleapis" not in s and "fonts.gstatic" not in s
 s = s.replace("<style>\n", "<style>\n" + (ROOT / "build/fonts.css").read_text(encoding="utf-8") + "\n", 1)
 low = s.lower()

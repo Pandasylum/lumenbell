@@ -252,13 +252,21 @@ LB.pause=(()=>{
     stay(){if(view!=='confirm')return false;setView('main',true);return true},enter(){if(!this.stay())this.resume()},get el(){return ov}};
 })();
 
+/* ---------- Premier rendu : le voile CSS (style.css de la page : html:not(.lb-go) body * masqué, sauf #gate) est levé ici, dès que
+   l'écran de démarrage #gate du HTML est masqué (Commencer, ouverture depuis le hub, retour du hub, copie de test) ou absent.
+   Décision docs/decisions/2026-11-04-premier-rendu.md ---------- */
+(()=>{const R=document.documentElement,g=document.getElementById('gate'),go=()=>R.classList.add('lb-go');
+  if(!g||g.hidden){go();return}
+  const mo=new MutationObserver(()=>{if(g.hidden){go();mo.disconnect()}});mo.observe(g,{attributes:true,attributeFilter:['hidden']})})();
 /* ---------- LB.gate : écran de démarrage (Commencer + langues) ; le clic débloque le son (comme au Chapitre I) ---------- */
 LB.gate=(()=>{
   let g=null,h={};
   function mount(stage,before,hh){
     h=hh||{};if(g)return g;
+    g=document.getElementById('gate');   /* écran de démarrage déjà dans le HTML de départ (premier rendu) ; créé ici seulement s'il manque */
+    if(g){if(g.parentNode!==stage)stage.insertBefore(g,before||null)}else{
     g=LB.ui.mk('div',{class:'gate',id:'gate'},'<div class="langs" id="gateLangs" role="group" aria-label="Language">'+LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')+'</div><button class="btn big" id="gateBtn" type="button">Start</button>');
-    stage.insertBefore(g,before||null);
+    stage.insertBefore(g,before||null)}
     g.querySelector('#gateBtn').addEventListener('click',()=>{LB.audio.ensure();g.hidden=true;try{document.querySelector('#menu [data-diff=normal]').focus({preventScroll:true})}catch(e){}if(h.onStart)h.onStart()});
     return g;
   }

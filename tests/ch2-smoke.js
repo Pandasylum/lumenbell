@@ -11,7 +11,7 @@ const FILE=path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html'
 const errs=[];
 const html=fs.readFileSync(FILE,'utf8');let nScript=0;
 for(const m of html.matchAll(/<script>([\s\S]*?)<\/script>/g)){nScript++;try{new Function(m[1])}catch(e){errs.push('syntaxe: '+e.message)}}
-if(nScript!==1)errs.push('scripts: '+nScript+' au lieu de 1');
+if(nScript!==2)errs.push('scripts: '+nScript+' au lieu de 2');   // 2 : petit script de langue de l'ecran de demarrage (premier rendu) + le jeu
 console.log('syntaxe',errs.length?'KO':'OK');
 // statique : aucune URL externe ni API reseau dans le fichier publie
 {const n=errs.length;

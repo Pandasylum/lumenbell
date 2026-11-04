@@ -189,3 +189,4 @@
 - En pause, « Menu » ouvre tout de suite « Quitter le combat ? » (Quitter / Rester), sans écran intermédiaire.
 - À l'ouverture d'un chapitre, l'écran « Commencer » est seul : la scène du menu n'apparaît plus un instant avant.
 - En Difficile, comme à l'Épreuve : « Aide visuelle » grisée et sur Off (menu et roue en jeu), aucun repère affiché ; ton choix revient en Facile ou Normal.
+- Ouvrir un chapitre ou le hub : seul l'écran « Commencer » apparaît d'abord, sans scène ni contenu qui se décale ; le reste se montre après « Commencer ».
