@@ -184,3 +184,5 @@
 
 - Aucun changement visible, CI seulement.
 - Aucun changement visible, règles seulement (CI : plus de test sur push main, tests lourds sur lancement manuel).
+
+- Rien de visible : doc seule (règle de l'aide en Difficile et en Épreuve, désactivée et décochée).
