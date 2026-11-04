@@ -224,17 +224,23 @@ function P2(stage,f,b,final,rage){
 }
 const isRealImpact=x=>x.k==='shard'||x.k==='wail'||(x.k==='orb'&&x.real);
 /* pushes every impact back so that two real ones (and the first one after the previous pattern) are never closer than `gap` s;
-   the lowest spacing obtained is logged in S.gapLog (read by the ch2-bot run) */
+   each real impact is noted by noteImpact (S.gapLog = gaps between consecutive real impacts, all sources, read by the ch2-bot run) */
 function spaceImpacts(T,gap){
   T.sort((a,b)=>a.ti-b.ti);
-  let prev=-99,d=0,mn=99;
+  let prev=-99,d=0;
   for(const x of S.threats)if(isRealImpact(x)&&x.ti!=null)prev=Math.max(prev,x.ti);
   for(const x of T){
     if(d){x.t0+=d;x.tl+=d;x.ti+=d}
     if(!isRealImpact(x))continue;
     if(x.ti-prev<gap){const e=gap-(x.ti-prev);x.t0+=e;x.tl+=e;x.ti+=e;d+=e}
-    if(prev>-90)mn=Math.min(mn,x.ti-prev);prev=x.ti}
-  (S.gapLog||(S.gapLog=[])).push(mn)}
+    prev=x.ti;noteImpact(x.ti)}}
+/* records a real impact time in sorted order and logs the gap to each neighbour (S.gapLog, one value per new adjacent pair) */
+function noteImpact(ti){
+  const L=S.impTi||(S.impTi=[]),G=S.gapLog||(S.gapLog=[]);
+  let i=0;while(i<L.length&&L[i]<ti)i++;
+  L.splice(i,0,ti);
+  if(i>0)G.push(ti-L[i-1]);
+  if(i<L.length-1)G.push(L[i+1]-ti)}
 function spacePE(T,casts,f,gap){
   const reals=()=>T.filter(isRealImpact),wails=()=>T.filter(x=>x.k==='wail'),P=VX.pe;
   for(const c of casts){
@@ -248,7 +254,7 @@ function spacePE(T,casts,f,gap){
    comes back as a real attack once he can dodge again (action + recovery + DG.backWin). Dodging a reflection is not a fault:
    the series stays clean unless the Watcher takes the returning blow (the 'hit' branches of update() set pat.ok=false) */
 function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
-  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}
+  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);noteImpact(nt.ti);say(_('The reflection comes back.','Le reflet revient.'))}
 function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
 function drawOrbs(){
   for(const th of S.threats){
