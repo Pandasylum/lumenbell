@@ -32,7 +32,7 @@ s = cut(s, '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 fonts = (ROOT / "build/fonts.css").read_text(encoding="utf-8")
 s = cut(s, "<title>Lumenbell · Silent Bells</title>\n<style>\n", "<title>Lumenbell · Silent Bells</title>\n<style>\n" + fonts + "\n")
 assert "fonts.googleapis" not in s and "fonts.gstatic" not in s
-assert s.count("<script>") == 2 and s.count("</script>") == 2  # 2 : le petit script de langue de l'ecran de demarrage (premier rendu) + le jeu
+assert s.count("<script>") == 1 and s.count("</script>") == 2  # le jeu + le petit script de langue <script id="fpLang"> (premier rendu)
 DIST.parent.mkdir(parents=True, exist_ok=True)
 DIST.write_text(s, encoding="utf-8")
 OUT.mkdir(parents=True, exist_ok=True)

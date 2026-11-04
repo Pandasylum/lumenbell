@@ -173,7 +173,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
   <div class="stage" id="stage">
     <canvas id="c" role="img" aria-label="Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre"></canvas>
         <div class="gate" id="gate"><div class="langs" id="gateLangs" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></div><button class="btn big" id="gateBtn" type="button">Start</button></div>
-    <script>(function(){try{var l=localStorage.getItem('lb-lang'),f=l?l==='fr':/^fr/i.test((navigator.languages&&navigator.languages[0])||navigator.language||'');if(f){document.getElementById('gateBtn').textContent='Commencer';var b=document.querySelectorAll('#gateLangs button');for(var i=0;i<b.length;i++)b[i].setAttribute('aria-pressed',String(b[i].dataset.lang==='fr'))}else{var e=document.querySelector('#gateLangs button[data-lang=en]');if(e)e.setAttribute('aria-pressed','true')}}catch(e){}})()</script>
+    <script id="fpLang">(function(){try{var l=localStorage.getItem('lb-lang'),f=l?l==='fr':/^fr/i.test((navigator.languages&&navigator.languages[0])||navigator.language||'');if(f){document.getElementById('gateBtn').textContent='Commencer';var b=document.querySelectorAll('#gateLangs button');for(var i=0;i<b.length;i++)b[i].setAttribute('aria-pressed',String(b[i].dataset.lang==='fr'))}else{var e=document.querySelector('#gateLangs button[data-lang=en]');if(e)e.setAttribute('aria-pressed','true')}}catch(e){}})()</script>
     <div class="ov menu" id="menu" hidden>
     <svg class="mscene" viewBox="0 0 960 540" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
       <defs>

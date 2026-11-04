@@ -32,7 +32,7 @@ def hub_source():
 
 s = hub_source()
 assert s.startswith("<!doctype html>\n<html lang=\"en\">\n<head>\n")
-assert s.count("<style>\n") == 1 and s.count("<script>") == 2 and s.count("</script>") == 2  # 2 : le petit script de langue de l'ecran de demarrage (premier rendu) + le jeu
+assert s.count("<style>\n") == 1 and s.count("<script>") == 1 and s.count("</script>") == 2  # le jeu + le petit script de langue <script id="fpLang"> (premier rendu)
 assert "fonts.googleapis" not in s and "fonts.gstatic" not in s
 # couleur de la lanterne pour le premier rendu : lue dans la table (une seule source), jamais ecrite en dur dans le CSS
 _lt = re.search(r"lantern:\{idle:'(#[0-9a-fA-F]{6})'", (ROOT / "shared/js/20-watcher.js").read_text(encoding="utf-8")).group(1)
