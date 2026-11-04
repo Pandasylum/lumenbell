@@ -177,5 +177,5 @@
 - Joueur : rien de visible (règle de build ajoutée aux consignes et aux pièges ; aucun changement de source).
 
 - Chapitre II, Voix Creuse : chaque sort a sa riposte (laser direct, laser qui ricoche sur un miroir, onde de la clochette) ; la plainte rebondit sur le bord de l'écran et revient, il faut l'esquiver deux fois.
-- Pendant les Échos, chaque illusion lance une orbe puis éclate sous ton rayon, et la Voix tire ses propres orbes entre les deux ; le dernier assaut fait combattre deux illusions l'une après l'autre ; une grande orbe ricoche sur un miroir et frappe la Voix à la tête.
+- Pendant les Échos, les deux illusions et la Voix lancent leurs orbes, puis ton rayon se divise en deux et fait exploser les deux illusions, dont les éclats partent l'un après l'autre ; le dernier assaut fait combattre deux illusions l'une après l'autre ; une grande orbe ricoche sur un miroir et frappe la Voix à la tête.
 - En Difficile, un écho reste à côté de la Voix et répond à une attaque sur deux de la Voix par une orbe ; les orbes sont plus grosses, et les illusoires se reconnaissent à leur anneau creux en pointillé.

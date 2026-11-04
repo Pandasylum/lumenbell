@@ -215,10 +215,14 @@ function P2(stage,f,b,final,rage){
   // a reflection shatters once its attacks are dodged (the Watcher's ray breaks it), sending n shards at the Watcher
   const shatter=(src,n)=>{const E=SP.echo,g=Math.max((E.break2-E.break1)*f,G[0],VOICE.shardGap);let s=hitT+E.break1*f,end=s;for(let i=0;i<n;i++){T.push({k:'shard',t0:s,tl:s+E.tl*f+C,ti:s+E.tl*f+C+SF*f,from:src,ray:!i});end=s+E.tl*f+C+SF*f;s+=g}hitT=end;t=Math.max(t,end-O.ti*f+Math.max(.4*f,G[0]))};
   // Echoes (rages): each reflection casts its orbs (nature drawn at random), then shatters into as many shards
-  // Echoes (rages): a reflection casts its orbs (nature drawn at random) and shatters into its shards; then the Voice casts her own
-  // orbs; then the other reflection does the same (decision 2026-11-03-ch2-voix-creuse)
-  const echoOne=src=>{for(let i=0;i<VOICE.echoOrb[dk];i++){orb(Math.random()<VOICE.real[dk],src);t+=.1*f}t+=.9*f;shatter(src,VOICE.echoShard[dk])};
-  const echoR=()=>{const [a,b2]=[1,2].sort(()=>Math.random()-.5);echoOne(a);for(let i=0;i<VOICE.rageVoice[dk];i++)orb(Math.random()<VOICE.real[dk],0);t+=.9*f;echoOne(b2);S.cv='echo'};
+  // Echoes (rages): every orb first (one reflection, then the Voice, then the other reflection; nature drawn at random); once they
+  // are all dodged the Watcher's ray splits in two and both reflections shatter together; their shards leave one after the
+  // other, VOICE.shardGap apart (decision 2026-11-03-ch2-voix-creuse, 4 November)
+  const echoOrbs=src=>{for(let i=0;i<VOICE.echoOrb[dk];i++){orb(Math.random()<VOICE.real[dk],src);t+=.1*f}t+=.9*f};
+  const shatterBoth=srcs=>{const E=SP.echo,g=Math.max((E.break2-E.break1)*f,G[0],VOICE.shardGap),s=hitT+E.break1*f;let end=s;
+    srcs.forEach((src,j)=>{for(let i=0;i<VOICE.echoShard[dk];i++){const k=j*VOICE.echoShard[dk]+i,tl=s+E.tl*f+C+k*g;T.push({k:'shard',t0:s,tl,ti:tl+SF*f,from:src,ray:k?0:2,rayTo:srcs});end=tl+SF*f}});
+    hitT=end;t=Math.max(t,end-O.ti*f+Math.max(.4*f,G[0]))};
+  const echoR=()=>{const [a,b2]=[1,2].sort(()=>Math.random()-.5);echoOrbs(a);for(let i=0;i<VOICE.rageVoice[dk];i++)orb(Math.random()<VOICE.real[dk],0);t+=.9*f;echoOrbs(b2);shatterBoth([a,b2]);S.cv='echo'};
   const rain=()=>{const n=VOICE.rain[dk];let s=t;for(let i=0;i<n;i++){if(i){const lo=Math.max(G[0],VOICE.shardGap),hi=Math.max(G[1],lo)+VOICE.shardSpread;s+=lo+Math.random()*(hi-lo)}S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f+C,ti:s+.42*f+C+SF*f,si:S.shardNext})}hitT=Math.max(hitT,s+.42*f+C+SF*f);t=s+1.3*f+C+(SF-.53)*f;S.cv='rain'};
   const twin=()=>{
   /* Hard: the permanent echo beside the Voice answers `of` of her blows in `every` (any spell: orb, cry, shard; a cry and its
@@ -282,8 +286,14 @@ function drawOrbs(){
       else{let p=(gt-th.tl)/(th.ti-th.tl);if(th.done){if(th.res==='hit'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.3);if(!th.sf){th.sf=1;burst(tx+30,ty-20,10,'#f2ecff',5,.4)}}}
         p=Math.min(p,1);x=lerp(o.x,tx,ein(p));y=lerp(o.y,ty,ein(p));ang=Math.atan2(ty-o.y,tx-o.x)}
       // the Watcher's ray breaks the reflection once its attacks are dodged (none of them hit him)
-      if(th.ray&&gt>=th.t0-VOICE.ray&&gt<th.t0+.06&&S.orbX!=null&&!S.threats.some(o=>o.pat===th.pat&&o.src===th.from&&o.res==='hit')){const v=voicePos(th.from),e=clamp((gt-th.t0+VOICE.ray)/VOICE.ray,0,1);
-        ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(255,244,190,${.95-.5*e})`;ctx.lineWidth=6*(1-e)+2;ctx.beginPath();ctx.moveTo(S.orbX,S.orbY);ctx.lineTo(lerp(S.orbX,v.x,Math.min(1,e*2.5)),lerp(S.orbY,v.y-84,Math.min(1,e*2.5)));ctx.stroke();ctx.restore()}
+      if(th.ray&&gt>=th.t0-VOICE.ray&&gt<th.t0+.06&&S.orbX!=null&&!S.threats.some(o=>o.pat===th.pat&&(th.ray===2?o.k==='orb':o.src===th.from)&&o.res==='hit')){const e=clamp((gt-th.t0+VOICE.ray)/VOICE.ray,0,1);
+        ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(255,244,190,${.95-.5*e})`;ctx.lineWidth=6*(1-e)+2;ctx.beginPath();
+        if(th.ray===2){   // one ray from the Watcher, splitting in two towards both reflections
+          const vs=th.rayTo.map(i=>voicePos(i)),mx=(vs[0].x+vs[1].x)/2-90,my=(vs[0].y+vs[1].y)/2-60,q=Math.min(1,e*2.5),q1=Math.min(1,q*2),q2=Math.max(0,q*2-1);
+          ctx.moveTo(S.orbX,S.orbY);ctx.lineTo(lerp(S.orbX,mx,q1),lerp(S.orbY,my,q1));
+          if(q2>0)for(const v of vs){ctx.moveTo(mx,my);ctx.lineTo(lerp(mx,v.x,q2),lerp(my,v.y-84,q2))}}
+        else{const v=voicePos(th.from);ctx.moveTo(S.orbX,S.orbY);ctx.lineTo(lerp(S.orbX,v.x,Math.min(1,e*2.5)),lerp(S.orbY,v.y-84,Math.min(1,e*2.5)))}
+        ctx.stroke();ctx.restore()}
       x=fieldX(x);y=fieldY(y);
       if(a<=0)continue;
       ctx.save();ctx.globalAlpha=a;ctx.translate(x,y);ctx.rotate(ang+Math.PI/2);const s=o.s*.8;
