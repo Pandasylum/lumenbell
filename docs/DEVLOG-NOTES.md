@@ -194,3 +194,4 @@
 - La rage ne part plus qu'une fois à chaque repère franchi ; entre deux, les attaques normales reprennent.
 - Rien de visible : refactor sans changement.
 - La Voix en Difficile : rien de visible (rapport d'analyse seul).
+- La Voix : les orbes sont plus grandes ; les illusoires sont un anneau creux en pointillé épais. Les impacts réels sont espacés (Facile 0,6 s · Normal 0,75 s · Difficile 1,05 s), les volées et pluies sont plus courtes en Facile, et en Difficile un écho lance une orbe après chaque sort.

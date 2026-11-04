@@ -3070,8 +3070,22 @@ const RAIN={normal:[.32,.62],hard:[.55,.9],grace:.13,hurt:.14};
    storm (III, form II, rage): `n` rings fired in turn from the two side lanterns, every `gap` (= ring .34), each `tl` /
                `ti` (= ring .5 / .95); then the trap bell, `trapGap` later: hovers until `trapTl`, presses from `trapTa` to
                `trapTb` (hold; = trap .75 / 1.3, +.5 held), next attack `after` later;
-   echo  (I, rage): after the three orbs of the echo, the two reflections shatter `break1` / `break2` after the last orb,
-               each sending a shard (= shard rain .42 / .95). */
+   echo  (I, rage): after the last orb of the echo, the two reflections shatter one by one, the first `break1` after it,
+               the next ones `VX.gap` s apart (the minimum between two real impacts), each sending shards (= shard rain .42 / .95). */
+/* Hollow Voice balancing (phase I), per difficulty (Hard = Normal values unless stated). Seconds, NOT scaled by f.
+   gap    minimum between two REAL impacts, all spells together (orb, shard, wail); enforced for every pattern in P2;
+   volley number of orbs of a volley [min, max]; rain number of shards of a shard rain;
+   echoOrbs / echoShards  orbs fired and shards dropped by each echo during the echo rage;
+   pe     permanent echo (Hard only): fires one orb `lag` s after the end of each spell, never within `wail` s of a wail */
+const VX={
+  gap:{easy:.6,normal:.75,hard:1.05},
+  volley:{easy:[2,3],normal:[3,5],hard:[3,5]},
+  rain:{easy:2,normal:3,hard:3},
+  echoOrbs:{easy:1,normal:2,hard:2},
+  echoShards:{easy:1,normal:2,hard:2},
+  pe:{lag:.7,wail:.25}
+};
+const vdk=()=>S.d.hard?'hard':S.dk==='easy'?'easy':'normal';
 const SP={
   wave:{land:.55,hit:1.05,fall1:.8,fall2:1.15,after:1.6},
   dwave:{gap:.55},
@@ -3079,7 +3093,7 @@ const SP={
   kwave:{ts:.95,D:1.6,after:.35},
   tide:{spike1:.8,spike2:1.15,gap:.35,after:1.15},
   storm:{n:5,gap:.34,tl:.5,ti:.95,trapGap:.4,trapTl:.75,trapTa:1.3,trapTb:1.8,after:.7},
-  echo:{break1:.2,break2:.65,tl:.42,ti:.95}
+  echo:{break1:.2,tl:.42,ti:.95}
 };
 function spawn(){
   const d=S.d,id=S.phase,f2=id===3&&S.form===2,gen=f2?P3b:[P1,P2,P3][id-1];
@@ -3101,20 +3115,50 @@ function spawn(){
 }
 /* ---- Phase I · the Hollow Voice ---- */
 function P2(stage,f,b,final,rage){
-  const T=[];let t=b;
+  const T=[],K=vdk(),gap=VX.gap[K],casts=[];let t=b;
+  const cast=(fn,w)=>(...a)=>{const n=T.length;fn(...a);casts.push({ths:T.slice(n),w})};
   const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+.45*f,ti:t+1.3*f,real,src:src||0});t+=.44*f};
-  const volley=(n,ill)=>{const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i));t+=.9*f};
-  const echo=()=>{const real=Math.floor(Math.random()*3);[0,1,2].sort(()=>Math.random()-.5).forEach(s=>{orb(s===real,s);t+=.1*f});t+=.9*f};
-  // rage: the echo, then the two reflections shatter one by one, each sending a shard at the Watcher
-  const echoR=()=>{const t0=t;echo();const last=t0+2*.54*f+1.3*f,E=SP.echo;[1,2].forEach((src,j)=>{const s=last+E['break'+(j+1)]*f;T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src})});t=Math.max(t,last+E.break2*f+E.ti*f+.4*f)};
-  const wail=()=>{T.push({k:'wail',t0:t,tl:t+.8*f,ti:t+1.9*f,real:true});t+=1.3*f};
-  const rain=n=>{const G=RAIN[S.d.m<1?'hard':'normal'];let s=t;for(let i=0;i<n;i++){if(i)s+=G[0]+Math.random()*(G[1]-G[0]);S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f,ti:s+.95*f,si:S.shardNext})}t=s+1.3*f};
-  if(rage){echoR();return T}
-  if(final){echoR();volley(5,2);wail();return T}
-  const p0=[()=>volley(2,0),()=>volley(3,1),wail,()=>volley(3,0),()=>{wail();volley(2,1)},()=>rain(3)];
-  const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},()=>rain(5),()=>{rain(3);volley(3,1)}];
-  pick(stage?p1:p0)();return T;
+  const volley=cast((n,ill)=>{const [lo,hi]=VX.volley[K];n=clamp(n,lo,hi);ill=Math.min(ill,n-1);const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i));t+=.9*f});
+  const echo=()=>{const real=Math.floor(Math.random()*3);[0,1,2].sort(()=>Math.random()-.5).forEach(s=>{for(let k=0;k<VX.echoOrbs[K];k++)orb(s===real,s);t+=.1*f});t+=.9*f};
+  // rage: the echo, then the two reflections shatter one by one, each dropping its shards at the Watcher (spaced by `gap`)
+  const echoR=cast(()=>{const E=SP.echo,nS=VX.echoShards[K];echo();const last=T[T.length-1].ti;let end=last;
+    [1,2].forEach((src,j)=>{for(let k=0;k<nS;k++){const s=last+E.break1*f+(j*nS+k)*gap;T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src});end=Math.max(end,s+E.ti*f)}});t=Math.max(t,end+.4*f)});
+  const wail=cast(()=>{T.push({k:'wail',t0:t,tl:t+.8*f,ti:t+1.9*f,real:true});t+=1.3*f},1);
+  const rain=cast(()=>{const G=RAIN[S.d.m<1?'hard':'normal'];let s=t;for(let i=0;i<VX.rain[K];i++){if(i)s+=G[0]+Math.random()*(G[1]-G[0]);S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f,ti:s+.95*f,si:S.shardNext})}t=s+1.3*f});
+  if(rage)echoR();
+  else if(final){echoR();volley(5,2);wail()}
+  else{
+    const p0=[()=>volley(2,0),()=>volley(3,1),wail,()=>volley(3,0),()=>{wail();volley(2,1)},rain];
+    const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
+    pick(stage?p1:p0)();
+    // Hard: the permanent echo fires one orb after each spell (the rages and the final assault have none: it fades, then returns)
+    if(K==='hard')spacePE(T,casts,f,gap);
+  }
+  spaceImpacts(T,gap);
+  return T;
 }
+const isRealImpact=x=>x.k==='shard'||x.k==='wail'||(x.k==='orb'&&x.real);
+/* pushes every impact back so that two real ones (and the first one after the previous pattern) are never closer than `gap` s;
+   the lowest spacing obtained is logged in S.gapLog (read by the ch2-bot run) */
+function spaceImpacts(T,gap){
+  T.sort((a,b)=>a.ti-b.ti);
+  let prev=-99,d=0,mn=99;
+  for(const x of S.threats)if(isRealImpact(x)&&x.ti!=null)prev=Math.max(prev,x.ti);
+  for(const x of T){
+    if(d){x.t0+=d;x.tl+=d;x.ti+=d}
+    if(!isRealImpact(x))continue;
+    if(x.ti-prev<gap){const e=gap-(x.ti-prev);x.t0+=e;x.tl+=e;x.ti+=e;d+=e}
+    if(prev>-90)mn=Math.min(mn,x.ti-prev);prev=x.ti}
+  (S.gapLog||(S.gapLog=[])).push(mn)}
+function spacePE(T,casts,f,gap){
+  const reals=()=>T.filter(isRealImpact),wails=()=>T.filter(x=>x.k==='wail'),P=VX.pe;
+  for(const c of casts){
+    if(c.w||!c.ths.length)continue;
+    let t0=Math.max(...c.ths.map(x=>x.tl))+P.lag,th;
+    for(let i=0;i<80;i++,t0+=.1){
+      th={k:'orb',t0,tl:t0+.45*f,ti:t0+1.3*f,real:true,src:1,pe:1};
+      if(!reals().some(r=>Math.abs(r.ti-th.ti)<gap)&&!wails().some(w=>th.tl<w.ti+P.wail&&th.ti>w.tl-P.wail))break}
+    T.push(th)}}
 /* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and
    comes back as a real attack once he can dodge again (action + recovery + DG.backWin). Dodging a reflection is not a fault:
    the series stays clean unless the Watcher takes the returning blow (the 'hit' branches of update() set pat.ok=false) */
@@ -3126,17 +3170,20 @@ function drawOrbs(){
     if(gt<th.t0)continue;
     if(th.k==='orb'||th.k==='back'){
       const back=th.k==='back',h=back?{x:HX-110,y:HY-56}:voiceHand(th.src,1),tx=HX+14,ty=HY;
-      let x,y,r=13,a=1,p=0,dash=th.real?0:1;
-      if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);if(back){const e=eout(k);x=lerp(tx,h.x,e);y=lerp(ty,h.y,e)-Math.sin(Math.PI*k)*30;dash=1-k}else{x=h.x;y=h.y;r=4+9*k}}
+      let x,y,r=17,a=1,p=0,dash=th.real?0:1;
+      if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);if(back){const e=eout(k);x=lerp(tx,h.x,e);y=lerp(ty,h.y,e)-Math.sin(Math.PI*k)*30;dash=1-k}else{x=h.x;y=h.y;r=5+12*k}}
       else{p=(gt-th.tl)/(th.ti-th.tl);
         if(th.done){if(th.res==='hit'||th.res==='pass'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.45)}}
         x=lerp(h.x,tx,p);y=lerp(h.y,ty,p)-Math.sin(Math.PI*Math.min(p,1))*(th.k==='back'?20:46)}
       if(a<=0)continue;
       ctx.save();ctx.globalAlpha=a;
-      if(th.real&&gt>=th.tl){const sh=clamp(1-(GY-y)/400,.25,1);ell(x,GY+3,r*1.6*sh,4*sh,`rgba(0,0,0,${.5*sh})`)}
+      if(th.real&&gt>=th.tl){const sh=clamp(1-(GY-y)/400,.25,1);ell(x,GY+3,r*1.6*sh,5*sh,`rgba(0,0,0,${.5*sh})`)}
       // every orb is full; an illusory one (clones' included) has a dotted outline, a real one casts its shadow (above)
-      glow(x,y,r*3,'rgba(176,124,255,.95)',th.real?.85:.6);ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff');
-      if(dash>0){ctx.save();ctx.globalAlpha*=dash;ctx.setLineDash([3,4]);ctx.lineDashOffset=-gt*12;ctx.strokeStyle='#f4ecff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.stroke();ctx.restore()}
+      // an illusory orb is a hollow ring (no bright centre) with a paler halo; a real one is solid
+      glow(x,y,r*50/17,'rgba(176,124,255,.95)',th.real?.85:.45);
+      if(th.real){ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff')}
+      else{ctx.save();ctx.strokeStyle='#c9a8ff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ctx.restore()}
+      if(dash>0){ctx.save();ctx.globalAlpha*=dash;ctx.setLineDash([6,5]);ctx.lineDashOffset=-gt*12;ctx.strokeStyle='#f4ecff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.stroke();ctx.restore()}
       ctx.restore();
     }else if(th.k==='shard'){
       const o=th.from!=null?{x:voicePos(th.from).x,y:voicePos(th.from).y-90,s:24}:shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;
