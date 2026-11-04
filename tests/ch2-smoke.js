@@ -54,7 +54,8 @@ const play=async(lbl,ph,hp)=>{let s=await toCard(lbl);
  if(s.ph!==String(ph))errs.push(lbl+': phase interne '+s.ph+' au lieu de '+ph);
  if(s.menu)errs.push(lbl+': menu affiche');
  if(!s.hp.endsWith('/'+hp))errs.push(lbl+': PV '+s.hp+' (max attendu '+hp+')')};
-const closeCard=async()=>{await pg.evaluate(()=>{const o=document.getElementById('ov');if(o&&!o.hidden)document.getElementById('go').click()});await pg.waitForTimeout(100)};
+const closeCard=async()=>{for(let i=0;i<24;i++){const r=await pg.evaluate(()=>({dead:/^0\//.test(document.getElementById('hpPn').textContent),card:!document.getElementById('ov').hidden}));if(!r.dead||r.card)break;await pg.waitForTimeout(250)}   // PV a 0 : la carte de defaite arrive apres l'animation de mort ; on l'attend avant de la fermer (sinon elle intercepte le clic suivant)
+ await pg.evaluate(()=>{const o=document.getElementById('ov');if(o&&!o.hidden)document.getElementById('go').click()});await pg.waitForTimeout(100)};
 console.log('menu',JSON.stringify(await st()));
 if(await pg.evaluate(()=>localStorage.getItem('db-unl'))!=='3')errs.push('db-unl non pose');
 for(const [dk,hp] of [['normal',4],['hard',3]]){
