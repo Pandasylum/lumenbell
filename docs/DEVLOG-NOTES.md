@@ -175,3 +175,4 @@
 - Chapitre II : si tu rates la riposte pendant une rage ou un dernier assaut, le boss relance la rage jusqu'à ce que tu le touches, comme au Chapitre I.
 
 - Joueur : rien de visible (règle de build ajoutée aux consignes et aux pièges ; aucun changement de source).
+- Ce que le joueur verra : rien de changé dans le jeu ; seule la CI est plus légère sur les pull requests.
