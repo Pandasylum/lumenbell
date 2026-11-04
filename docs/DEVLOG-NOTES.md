@@ -191,7 +191,7 @@
 - En Difficile, comme à l'Épreuve : « Aide visuelle » grisée et sur Off (menu et roue en jeu), aucun repère affiché ; ton choix revient en Facile ou Normal.
 - Ouvrir un chapitre ou le hub : seul l'écran « Commencer » apparaît d'abord, sans scène ni contenu qui se décale ; le reste se montre après « Commencer ».
 - Chapitre II : le boss a 8 / 10 / 14 PV (8 / 10 / 12 en phase III) ; en Difficile, la jauge marque 10 et 5 en phases I et II, 8 et 5 en phase III.
-- La rage ne part plus qu'une fois à chaque repère franchi ; entre deux, les attaques normales reprennent.
+- La rage d'un repère franchi se relance à chaque attaque tant que le boss n'a pas perdu de PV ; dès qu'il est touché, les attaques normales reprennent jusqu'au repère suivant.
 - Rien de visible : refactor sans changement.
 - La Voix en Difficile : rien de visible (rapport d'analyse seul).
 - La Voix : les orbes sont plus grandes ; les illusoires sont un anneau creux en pointillé épais. Les impacts réels sont espacés (Facile 0,6 s · Normal 0,75 s · Difficile 1,05 s), les volées et pluies sont plus courtes en Facile, et en Difficile un écho lance une orbe après chaque sort.
