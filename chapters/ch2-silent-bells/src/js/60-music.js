@@ -43,9 +43,10 @@ const MUSIC=(()=>{
     1:{bpm:64,ambP:.08,vol:1.6,bed(){layerNoise('lowpass',90,.7,.1,.03,25);layerOsc('sawtooth',36.7,.035,140)},
       start(){layerOsc('sawtooth',36.7,.075,150,-6,.05,.25);layerOsc('sawtooth',36.9,.055,130,7);layerOsc('triangle',55,.03,200,0,.04,.3);layerNoise('lowpass',85,.7,.1,.03,20)},
       step(s,t){const b=s%16;
-        if(b===0||b===6||b===8){osc('sine',90,t,.004,.6,.6,.15,32);nz(t,.24,.16,'lowpass',260)}
+        if(b===0||b===6||b===8){osc('sine',90,t,.004,.6,.6,.15,32);nz(t,.24,.16,'lowpass',260);FX.chainStep(t+.03)}
         if(b===12){nz(t,.5,.14,'lowpass',320,1.5,.3);osc('sine',120,t,.004,.16,.45,.3,70)}
         if(s%64===40){osc('triangle',73.4,t,.4,.06,1.8,.5);osc('triangle',103.8,t,.4,.05,1.8,.5)}
+        if(s%64===51)FX.bellDull(t);if(s%128===24)FX.anchorDrag(t);
         if(s%128===112){for(let i=0;i<4;i++){osc('sine',90,t+i*.11,.004,.45,.45,.2,32);nz(t+i*.11,.22,.12,'lowpass',260)}}},
       amb(t){const r=Math.random();
         if(r<.45){const n=3+Math.floor(Math.random()*4);for(let i=0;i<n;i++){const tt=t+i*(.06+Math.random()*.05),f=1150+Math.random()*850;osc('sine',f,tt,.003,.011,.2,.65);osc('sine',f*1.5,tt,.003,.0025,.12,.65)}nz(t,.4+n*.05,.007,'bandpass',1500,6,.5)}
@@ -92,6 +93,35 @@ const MUSIC=(()=>{
       osc('sine',698,t+.55,.2,.045,1.1,.85,466);osc('sine',702,t+.55,.2,.03,1.1,.85,468);osc('sine',523,t+1.1,.15,.04,1.2,.85,330);
       nz(t,1.8,.05,'bandpass',1100,10,.8,650,.4);nz(t+.6,1.2,.03,'bandpass',1500,8,.8,800,.2)},
     wailEcho:t=>far(t,{vol:.4,lp:1300,delay:.22},FX.wailCry),
+    /* Voice arrival: far, very sad weeping (sliding sobs, a low moan, breaths), no words */
+    weepFar:t=>far(t,{vol:.6,lp:1300,delay:0},tt=>{[0,.85,1.7,2.5,3.2].forEach((d,i)=>{const f=560-i*34;osc('triangle',f,tt+d,.3,.05-i*.005,.9,.9,f*.66);osc('triangle',f+4,tt+d+.02,.3,.03,.9,.9,f*.66)});
+      osc('sine',196,tt,.9,.035,3.6,.8,150);nz(tt,3.8,.04,'bandpass',1000,9,.8,600,.8)}),
+    /* last lament of the Voice as she disappears: the wail, one more slide down, then a murmur without words that fades out */
+    wailLast:t=>far(t,{vol:.7,lp:1200,delay:0},tt=>{FX.wailCry(tt);osc('triangle',440,tt+1.7,.4,.03,2.2,.9,262);osc('triangle',444,tt+1.72,.4,.02,2.2,.9,264);
+      for(let i=0;i<5;i++)nz(tt+2.3+i*.55,1,.026-i*.005,'bandpass',620+i*55,7,.85,420,.45)}),
+    /* the turquoise lantern falls into the water (muffled), then sinks pulsing: a dull beat that slows down */
+    lanternSplash:t=>{nz(t,.4,.16,'lowpass',520,1,.4,170,.01);osc('sine',300,t,.004,.09,.3,.5,110);nz(t+.08,.3,.06,'lowpass',360,1,.35,140)},
+    lanternSink:t=>{let d=0,g=.28;for(let i=0;i<7;i++){osc('sine',72,t+d,.01,.13*(1-i*.1),.4,.5,50);osc('sine',900,t+d,.02,.012*(1-i*.12),.6,.9,700);d+=g;g*=1.2}
+      nz(t,d+.4,.025,'lowpass',240,1,.5,110,.4)},
+    /* the hero lantern flame lowers */
+    flameDim:t=>{nz(t,1.1,.07,'bandpass',1100,2,.4,180,.05);osc('sawtooth',140,t,.04,.02,1.1,.3,70);for(let i=0;i<4;i++)nz(t+i*.22,.03,.05,'highpass',3500)},
+    /* the rusted chained hatch gives way: chain creaking, damp wood */
+    hatchGroan:t=>{for(let i=0;i<6;i++){const f=420+Math.random()*180;osc('sawtooth',f,t+i*.12,.03,.022,.16,.3,f*.72)}
+      osc('sawtooth',88,t,.4,.035,1,.3,64);nz(t,1.1,.12,'lowpass',320,1.5,.3,120,.3);nz(t+.5,.5,.05,'bandpass',900,6,.3,500,.1)},
+    /* the hold: dripping water and echo */
+    bilge:t=>{for(let i=0;i<5;i++){const f=900+Math.random()*700,tt=t+i*.5+Math.random()*.3;osc('sine',f,tt,.003,.035,.45,.97,f*.55)}nz(t,3,.04,'lowpass',210,1,.9,100,.8)},
+    /* the Rust King: chains jingling at each step, the anchor dragged on the wood, the head bell dull and off the beat (no Lumen in it) */
+    chainStep:t=>{for(let i=0;i<4;i++)clang(t+i*.05,260+Math.random()*120,.03,.55)},
+    anchorDrag:t=>{nz(t,1.8,.08,'lowpass',260,1,.3,120,.5);nz(t,1.8,.04,'bandpass',700,5,.3,350,.4);osc('sawtooth',48,t,.4,.02,1.4,.2,40)},
+    bellDull:t=>far(t,{vol:.55,lp:420,delay:.17},tt=>clang(tt,182,.09,1.7)),
+    /* true silence: the ambience fades out */
+    hush:t=>bedStop(),
+    /* only the hero lantern vibrates (dry, nothing answers) */
+    lanternHum:t=>{osc('sine',880,t,.5,.028,2,0);osc('sine',884.5,t,.5,.022,2,0);osc('sine',1320,t+.2,.4,.008,1.6,0)},
+    /* the cracked bell: a single broken note (two close, out-of-tune partials that beat) */
+    crackedBell:t=>{[[1,.1],[2.41,.05],[3.7,.025]].forEach(([m,p])=>{osc('sine',233*m,t,.004,p,3.2,.7);osc('sine',233*m*1.043,t+.01,.004,p*.8,2.2,.7,233*m*.98)});nz(t,.5,.03,'bandpass',2400,8,.5)},
+    /* a distant tide */
+    tideFar:t=>{[0,3.1].forEach(d=>nz(t+d,3.4,.05,'lowpass',280,1,.7,130,1.5));nz(t,6,.006,'highpass',3000,1,.3,null,2)},
     /* the reflections of a rage arrive: a glassy pulse that comes back three times, each repeat farther and duller (echo timbre) */
     echoArrive:t=>{[0,.2,.42].forEach((d,i)=>far(t+d,{vol:.75-i*.25,lp:3600-i*1200,delay:0},tt=>{osc('sine',392,tt,.01,.06,.9,.8,330);osc('sine',784,tt,.01,.03,.7,.8,660);osc('sine',1081,tt,.005,.012,.5,.9)}));
       nz(t,.6,.05,'bandpass',900,3,.6,2600,.3)},

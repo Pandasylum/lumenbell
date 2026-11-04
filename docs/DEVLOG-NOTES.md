@@ -203,3 +203,6 @@
 - Esquiver un reflet laisse récupérer deux fois plus vite, et la Voix attaque 10 % plus vite ; les trois ripostes ajoutent un son et des étincelles propres à chaque sort à l'impact sur elle.
 - Pluie d'éclats : le miroir éclate et ses fragments sont projetés dans toute la salle, changent de direction 2 ou 3 fois avant de foncer sur le Veilleur, dans un ordre imprévisible, un peu plus vite.
 - Son : les reflets de rage arrivent avec une impulsion de verre qui s'éloigne en écho.
+- Son : la Voix arrive en pleurant au loin ; à sa fin, une dernière complainte s'éteint en murmure, la lanterne turquoise tombe dans l'eau et coule en battant de plus en plus lentement pendant que la flamme du Veilleur faiblit.
+- Son : la trappe cède dans un grincement de chaîne et l'écho de la cale ; le Roi de Rouille fait tinter ses chaînes à chaque pas et traîner son ancre, sa cloche sourde en décalage ; à sa chute, un silence où seule la lanterne vibre.
+- Son : la cloche fêlée rend une seule note brisée, puis le silence, puis la marée lointaine du Phare au matin.
