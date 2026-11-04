@@ -6,7 +6,7 @@ function mirrorLight(){if(S.phase!==2)return 0;const G=MIRROR_GLOW;
   if(S.cine&&S.cine.k==='out'){const t=gt-S.cine.t0;return t<CINE_P1.drop?lerp(G.max,G.end,clamp(t/CINE_P1.drop,0,1)):0}
   if(S.mode==='play'||S.mode==='ko'||S.mode==='dead')return G.base+(G.max-G.base)*(1-S.bossHp/S.bossMax);return G.base}
 function voiceAnim(){
-  let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&!th.ill&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
+  let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&!th.ill&&!th.pe&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
   let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&!th.pe&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
   return{cast,echo};
 }
@@ -16,7 +16,7 @@ function voiceHand(i,cast){const p=voicePos(i);return cast?{x:p.x-84,y:p.y-62}:{
 function drawBoss2(){
   const A=voiceAnim();
   let ko=S.mode==='ko'&&S.phase===2?clamp((gt-S.koT)/2,0,1):0;
-  if(A.echo){S.echoA=Math.min(1,(S.echoA||0)+.06)}else S.echoA=Math.max(0,(S.echoA||0)-.05);
+  if(A.echo){if(!(S.echoA>0))MUSIC.fx('echoArrive');S.echoA=Math.min(1,(S.echoA||0)+.06)}else S.echoA=Math.max(0,(S.echoA||0)-.05);
   if(S.echoA>0){for(const i of[1,2]){
     // rage: a reflection shatters, sending a shard at the Watcher
     const br=S.threats.find(t=>t.k==='shard'&&t.from===i&&gt>=t.t0);

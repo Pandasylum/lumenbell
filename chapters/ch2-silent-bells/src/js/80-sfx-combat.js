@@ -5,7 +5,7 @@ const SFX_HIT={wave:'plant',sring:'clank',slam:'slam',sweep:'plant',chain:'clank
 function combatSfx(){
   if(S.mode!=='play'||S.paused)return;
   for(const th of S.threats){
-    if(!th.a0&&gt>=th.t0){th.a0=1;const n=SFX_START[th.k];if(n&&th.real!==false)MUSIC.fx(n)}
+    if(!th.a0&&gt>=th.t0){th.a0=1;const n=th.k==='wail'?(th.ill||th.pe?'wailEcho':'wailCry'):SFX_START[th.k];if(n&&th.real!==false)MUSIC.fx(n)}   // the Voice's wail, then the same one far and soft (Illusion, echo)
     const mt=th.k==='toll'?th.tw:(th.k==='slam'||th.k==='sweep')?th.ti-.3:th.tl;
     if(mt!=null&&!th.a1&&gt>=mt){th.a1=1;const n=SFX_MID[th.k];if(n)MUSIC.fx(n)}
     if(!th.hold&&th.ti!=null&&!th.a2&&gt>=th.ti&&th.real!==false){th.a2=1;const n=SFX_HIT[th.k];if(n)MUSIC.fx(n)}
