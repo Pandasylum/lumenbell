@@ -193,3 +193,4 @@
 - Chapitre II : le boss a 8 / 10 / 14 PV (8 / 10 / 12 en phase III) ; en Difficile, la jauge marque 10 et 5 en phases I et II, 8 et 5 en phase III.
 - La rage ne part plus qu'une fois à chaque repère franchi ; entre deux, les attaques normales reprennent.
 - Rien de visible : refactor sans changement.
+- La Voix en Difficile : rien de visible (rapport d'analyse seul).
