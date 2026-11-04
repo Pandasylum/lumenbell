@@ -148,7 +148,7 @@ const CSFX=(()=>{const L={'2:in':[[0,'glints'],[.3,'weepFar'],[1.1,'swell'],[1.9
   TOWER.forEach(p=>L['3:in'].push([1.5+p.t+(p.d||.9),'clank']));
   Object.values(FALL).forEach(F=>L['3:out'].push([F.ft+.55,'chunk']));
   return L})();
-CSFX['3:out']=[[0,'charge'],...ZAPS.map(z=>[z,'zap']),[1.95,'swell'],[2.7,'thunder'],[2.72,'explosion'],[2.9,'scream'],[5.3,'whooshDown'],[5.75,'plant'],[5.9,'fallWhine'],[7.5,'dissolve'],[7.6,'stars'],[10.8,'sting']];Object.entries(EFALL).forEach(([i,F])=>{CSFX['3:out'].push([F.ft+2.7,'chunk']);CSFX['3:out'].push([F.ft+2.7,+i===EHEAD?'bellBig':'bellHit'])});CSFX['3:out'].push([5.75,'bellHit']);CSFX['3:out'].push([9.2,'crackedBell'],[10,'hush'],[10.4,'tideFar']);
+CSFX['3:out']=[[0,'charge'],...ZAPS.map(z=>[z,'zap']),[1.95,'swell'],[2.7,'thunder'],[2.72,'explosion'],[2.9,'scream'],[5.3,'whooshDown'],[5.75,'plant'],[5.9,'fallWhine'],[7.5,'dissolve'],[7.6,'stars'],[9.2,'sting']];Object.entries(EFALL).forEach(([i,F])=>{CSFX['3:out'].push([F.ft+2.7,'chunk']);CSFX['3:out'].push([F.ft+2.7,+i===EHEAD?'bellBig':'bellHit'])});CSFX['3:out'].push([5.75,'bellHit']);CSFX['3:out'].push([9.2,'crackedBell'],[10,'hush'],[10.4,'tideFar']);
 CSFX['3:p2']=[[0,'rumble'],[1,'chunk'],[1.02,'bellSoft'],[2.12,'bellCascade'],[2.6,'bellSoft'],[2.85,'bellSoft'],[3.1,'bellSoft'],[3.35,'bellSoft'],[4.45,'bellChime'],[4.75,'bellHit'],[1.6,'heart'],[2.1,'burst'],[2.15,'creature'],[2.2,'refill'],[2.4,'chainSlip'],[2.45,'plant'],[3.4,'swell'],[4.6,'ignite'],[5.8,'sting']];
 function cineSfx(t,key){const L=CSFX[key];if(!L)return;L.forEach((c,i)=>{if(t>=c[0]&&once('fx'+i))MUSIC.fx(c[1])})}
 function cineBoss(){

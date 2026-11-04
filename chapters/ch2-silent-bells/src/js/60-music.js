@@ -13,6 +13,9 @@ const MUSIC=(()=>{
   function send(g,wet){if(wet){const w=ac.createGain();w.gain.value=wet*farV;g.connect(w);w.connect(rev)}}
   function far(t,o,fn){const lp=ac.createBiquadFilter(),g=ac.createGain();lp.type='lowpass';lp.frequency.value=o.lp;lp.Q.value=.7;g.gain.value=o.vol;lp.connect(g);g.connect(out);
     dst=lp;farV=o.vol;try{fn(t+o.delay)}finally{dst=null;farV=1}}
+  /* dry(): sounds played inside it bypass the music bus (so they survive a hush) */
+  function dry(fn){const g=ac.createGain();g.connect(LB.audio.dest);dst=g;try{fn()}finally{dst=null}}
+  function duck(t,tc){out.gain.cancelScheduledValues(t);out.gain.setTargetAtTime(.0001,t,tc)}
   function osc(type,f,t,a,p,d,wet,f2,det){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+a+d);if(det)o.detune.value=det;env(g,t,a,p,d);o.connect(g);g.connect(dst||out);send(g,wet);o.start(t);o.stop(t+a+d+.1)}
   function nz(t,d,p,type,f,q,wet,f2,a){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+(a||.005)+d);fl.Q.value=q||1;const g=ac.createGain();env(g,t,a||.005,p,d);s.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet);s.start(t);s.stop(t+(a||.005)+d+.1)}
   function lfo(rate,depth,target){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=rate;lg.gain.value=depth;l.connect(lg);lg.connect(target);l.start();return l}
@@ -89,10 +92,10 @@ const MUSIC=(()=>{
     glassRain:t=>tinkle(t,30,2.4,.025),
     voice:t=>{[440,523.3].forEach(f=>osc('sine',f,t,.6,.03,2.2,.85));nz(t,1.6,.05,'bandpass',1100,10,.8,700,.4)},
     /* the wail of the Voice: she weeps and laments (sliding sobs, a low moan, a breath); the same wail, far and soft, when the Illusion or the echo throws it */
-    wailCry:t=>{osc('triangle',587,t,.35,.05,1.5,.85,392);osc('triangle',592,t+.02,.35,.04,1.5,.85,395);osc('sine',220,t,.5,.035,1.8,.7,160);
-      osc('sine',698,t+.55,.2,.045,1.1,.85,466);osc('sine',702,t+.55,.2,.03,1.1,.85,468);osc('sine',523,t+1.1,.15,.04,1.2,.85,330);
-      nz(t,1.8,.05,'bandpass',1100,10,.8,650,.4);nz(t+.6,1.2,.03,'bandpass',1500,8,.8,800,.2)},
-    wailEcho:t=>far(t,{vol:.4,lp:1300,delay:.22},FX.wailCry),
+    wailCry:t=>{const k=.94+Math.random()*.12;   // soft and short, a slightly different pitch each time
+      osc('triangle',587*k,t,.3,.03,1,.85,392*k);osc('triangle',592*k,t+.02,.3,.022,1,.85,395*k);osc('sine',220*k,t,.4,.02,1.1,.7,160*k);
+      osc('sine',698*k,t+.4,.2,.025,.7,.85,466*k);nz(t,1,.022,'bandpass',1100*k,10,.8,650,.4)},
+    wailEcho:t=>far(t,{vol:.35,lp:1100,delay:.22},FX.wailCry),
     /* Voice arrival: far, very sad weeping (sliding sobs, a low moan, breaths), no words */
     weepFar:t=>far(t,{vol:.6,lp:1300,delay:0},tt=>{[0,.85,1.7,2.5,3.2].forEach((d,i)=>{const f=560-i*34;osc('triangle',f,tt+d,.3,.05-i*.005,.9,.9,f*.66);osc('triangle',f+4,tt+d+.02,.3,.03,.9,.9,f*.66)});
       osc('sine',196,tt,.9,.035,3.6,.8,150);nz(tt,3.8,.04,'bandpass',1000,9,.8,600,.8)}),
@@ -115,13 +118,13 @@ const MUSIC=(()=>{
     anchorDrag:t=>{nz(t,1.8,.08,'lowpass',260,1,.3,120,.5);nz(t,1.8,.04,'bandpass',700,5,.3,350,.4);osc('sawtooth',48,t,.4,.02,1.4,.2,40)},
     bellDull:t=>far(t,{vol:.55,lp:420,delay:.17},tt=>clang(tt,182,.09,1.7)),
     /* true silence: the ambience fades out */
-    hush:t=>bedStop(),
+    hush:t=>{bedStop();duck(t,.2)},
     /* only the hero lantern vibrates (dry, nothing answers) */
-    lanternHum:t=>{osc('sine',880,t,.5,.028,2,0);osc('sine',884.5,t,.5,.022,2,0);osc('sine',1320,t+.2,.4,.008,1.6,0)},
+    lanternHum:t=>dry(()=>{osc('sine',880,t,.5,.028,2,0);osc('sine',884.5,t,.5,.022,2,0);osc('sine',1320,t+.2,.4,.008,1.6,0)}),
     /* the cracked bell: a single broken note (two close, out-of-tune partials that beat) */
     crackedBell:t=>{[[1,.1],[2.41,.05],[3.7,.025]].forEach(([m,p])=>{osc('sine',233*m,t,.004,p,3.2,.7);osc('sine',233*m*1.043,t+.01,.004,p*.8,2.2,.7,233*m*.98)});nz(t,.5,.03,'bandpass',2400,8,.5)},
     /* a distant tide */
-    tideFar:t=>{[0,3.1].forEach(d=>nz(t+d,3.4,.05,'lowpass',280,1,.7,130,1.5));nz(t,6,.006,'highpass',3000,1,.3,null,2)},
+    tideFar:t=>dry(()=>{[0,3.1].forEach(d=>nz(t+d,3.4,.05,'lowpass',280,1,0,130,1.5));nz(t,6,.006,'highpass',3000,1,0,null,2)}),
     /* the reflections of a rage arrive: a glassy pulse that comes back three times, each repeat farther and duller (echo timbre) */
     echoArrive:t=>{[0,.2,.42].forEach((d,i)=>far(t+d,{vol:.75-i*.25,lp:3600-i*1200,delay:0},tt=>{osc('sine',392,tt,.01,.06,.9,.8,330);osc('sine',784,tt,.01,.03,.7,.8,660);osc('sine',1081,tt,.005,.012,.5,.9)}));
       nz(t,.6,.05,'bandpass',900,3,.6,2600,.3)},
@@ -158,6 +161,8 @@ const MUSIC=(()=>{
   function bedStop(){if(!ac)return;clearInterval(bedTimer);bedTimer=null;bedId=null;const t=ac.currentTime;bedLayers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+1);setTimeout(L.stop,1200)});bedLayers=[]}
   function tick(){const th=THEMES[cur];if(!th)return;const spb=60/th.bpm/4;if(next<ac.currentTime){const miss=Math.ceil((ac.currentTime-next)/spb);next+=miss*spb;step+=miss}while(next<ac.currentTime+.6){th.step(step,next);if(Math.random()<th.ambP)th.amb(next+Math.random()*spb);next+=spb;step++}}
   function stop(){if(!ac)return;clearInterval(timer);timer=null;cur=null;out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);const t=ac.currentTime;layers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+.8);setTimeout(L.stop,1000)});layers=[]}
+  /* fadeStop(sec): the theme fades out smoothly, then stops (immediate stop if nothing plays) */
+  function fadeStop(sec){if(!ac||cur==null){stop();return}clearInterval(timer);timer=null;const keep=cur,t=ac.currentTime;out.gain.cancelScheduledValues(t);out.gain.setTargetAtTime(.0001,t,sec/4);setTimeout(()=>{if(cur===keep&&timer===null)stop()},sec*1000+100)}
   function play(id){if(!LB.audio.music){stop();bedStop();return}if(!init())return;stop();bedStop();cur=id;step=0;next=ac.currentTime+.15;out.gain.setTargetAtTime(.5*(THEMES[id].vol||1),ac.currentTime,.3);THEMES[id].start();timer=setInterval(tick,100)}
-  return{play,stop,fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
+  return{play,stop,fadeStop,fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
 })();

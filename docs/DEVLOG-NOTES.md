@@ -205,4 +205,5 @@
 - Son : les reflets de rage arrivent avec une impulsion de verre qui s'éloigne en écho.
 - Son : la Voix arrive en pleurant au loin ; à sa fin, une dernière complainte s'éteint en murmure, la lanterne turquoise tombe dans l'eau et coule en battant de plus en plus lentement pendant que la flamme du Veilleur faiblit.
 - Son : la trappe cède dans un grincement de chaîne et l'écho de la cale ; le Roi de Rouille fait tinter ses chaînes à chaque pas et traîner son ancre, sa cloche sourde en décalage ; à sa chute, un silence où seule la lanterne vibre.
-- Son : la cloche fêlée rend une seule note brisée, puis le silence, puis la marée lointaine du Phare au matin.
+- Son : la cloche fêlée rend une seule note brisée (avec le coup final), puis le silence complet : la musique du menu s'éteint en fondu et seule la marée lointaine accompagne le Phare au matin ; la musique revient au plan suivant.
+- Son : à chaque plainte de la Voix, de doux pleurs d'une hauteur un peu différente, plus lointains et plus doux quand l'Illusion ou l'écho la relance.

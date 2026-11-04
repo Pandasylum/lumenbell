@@ -16,7 +16,7 @@ const SPIRE={x:500,top:170,a0:.9,a1:.25,fade:6};
 /* shot 3: the valley's towers (x, height); TOWER_OUT goes dark at EPI_DARK; the earth cracks along VCRACKS */
 const VTOW=[[150,150],[300,110],[470,170],[640,120],[800,140]],TOWER_OUT=3,EPI_DARK=EPI_SHOTS[2]+1.3;
 const VCRACKS=(()=>{const R=mulberry(808);return[...Array(5)].map((_,i)=>{const pts=[];let x=80+i*190,y=430;for(let k=0;k<7;k++){pts.push([x,y]);x+=(R()-.5)*60;y+=14+R()*10}return{pts,t0:EPI_SHOTS[2]+.6+i*.45}})})();
-const EFXL=[[.2,'swell'],[.4,'tideFar'],[EPI_SHOTS[1],'glints'],[EPI_SHOTS[2],'rumble'],[EPI_DARK,'crackRun'],[EPI_SHOTS[2]+2.1,'rumble'],[EPI_SHOTS[3],'glints'],[EPI_SHOTS[3]+2.3,'heart'],[EPI_TITLE+.6,'sting']];
+const EFXL=[[.4,'tideFar'],[EPI_SHOTS[1],'glints'],[EPI_SHOTS[2],'rumble'],[EPI_DARK,'crackRun'],[EPI_SHOTS[2]+2.1,'rumble'],[EPI_SHOTS[3],'glints'],[EPI_SHOTS[3]+2.3,'heart'],[EPI_TITLE+.6,'sting']];
 function drawEpilogue(t){
   const shot=EPI_SHOTS.filter(s=>t>=s).length-1,ts=t-EPI_SHOTS[shot];
   ctx.save();
@@ -71,11 +71,12 @@ function drawEpilogue(t){
   ctx.restore();
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
+  if(t>=EPI_SHOTS[1]&&once('epmus'))setTheme(4);   // the menu theme comes back after the silent first shot
 }
 /* the epilogue in the series frame; flag lb-ch2-outro (written at the end or on Skip, not to be confused with lb-ch2-end): it plays only at the first true ending outside the Trial (hub or alone), then only by ▶ Outro */
 const EPI=LB.cine.create({key:'outro',scenes:()=>CINE_D.outro.map((d,i)=>({d,txt:()=>ECAP_TXT()[i],col:i===4?CH_COL[3]:'',draw:cineScene(drawEpilogue)})),
   onTick:t=>{if(!$('menu').hidden)gt=S.epT0+t}});
-function playEpilogue(cb){MUSIC.stop();MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();setTheme(4);$('skip').hidden=true;$('hdEye').textContent=_('Epilogue','Épilogue');EPI.play(endEpilogue)}
+function playEpilogue(cb){MUSIC.fadeStop(1.5);MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();$('skip').hidden=true;$('hdEye').textContent=_('Epilogue','Épilogue');EPI.play(endEpilogue)}
 function endEpilogue(){if(S.mode!=='epilogue')return;const cb=S.epCb;S.epCb=null;$('skip').hidden=true;S.mode='card';cb&&cb()}
 
 
