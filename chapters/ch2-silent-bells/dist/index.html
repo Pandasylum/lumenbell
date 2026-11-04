@@ -3119,7 +3119,8 @@ function P2(stage,f,b,final,rage){
   const cast=(fn,w)=>(...a)=>{const n=T.length;fn(...a);casts.push({ths:T.slice(n),w})};
   const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+.45*f,ti:t+1.3*f,real,src:src||0});t+=.44*f};
   const volley=cast((n,ill)=>{const [lo,hi]=VX.volley[K];n=clamp(n,lo,hi);ill=Math.min(ill,n-1);const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i));t+=.9*f});
-  const echo=()=>{const real=Math.floor(Math.random()*3);[0,1,2].sort(()=>Math.random()-.5).forEach(s=>{for(let k=0;k<VX.echoOrbs[K];k++)orb(s===real,s);t+=.1*f});t+=.9*f};
+  // the clones' shots come in random order (all sources mixed), each one real or illusory at random, at least one real per echo
+  const echo=()=>{const n=VX.echoOrbs[K],sh=[];for(let s=0;s<3;s++)for(let k=0;k<n;k++)sh.push(s);sh.sort(()=>Math.random()-.5);const rl=sh.map(()=>Math.random()<.5),any=Math.floor(Math.random()*sh.length);rl[any]=true;sh.forEach((s,i)=>{orb(rl[i],s);if(i%n===n-1)t+=.1*f});t+=.9*f};
   // rage: the echo, then the two reflections shatter one by one, each dropping its shards at the Watcher (spaced by `gap`)
   const echoR=cast(()=>{const E=SP.echo,nS=VX.echoShards[K];echo();const last=T[T.length-1].ti;let end=last;
     [1,2].forEach((src,j)=>{for(let k=0;k<nS;k++){const s=last+E.break1*f+(j*nS+k)*gap;T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src});end=Math.max(end,s+E.ti*f)}});t=Math.max(t,end+.4*f)});
@@ -3129,8 +3130,9 @@ function P2(stage,f,b,final,rage){
   else if(final){echoR();volley(5,2);wail()}
   else{
     const p0=[()=>volley(2,0),()=>volley(3,1),wail,()=>volley(3,0),()=>{wail();volley(2,1)},rain];
-    const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
+    const p1=[()=>volley(4,1),()=>volley(5,2),()=>{volley(3,0);wail()},()=>{rain();wail()},()=>{volley(3,1);rain()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
     pick(stage?p1:p0)();
+    // the echo only comes during the rages, never in this rotation
     // Hard: the permanent echo fires one orb after each spell (the rages and the final assault have none: it fades, then returns)
     if(K==='hard')spacePE(T,casts,f,gap);
   }
@@ -3175,7 +3177,7 @@ function drawOrbs(){
   for(const th of S.threats){
     if(gt<th.t0)continue;
     if(th.k==='orb'||th.k==='back'){
-      const back=th.k==='back',h=back?{x:HX-110,y:HY-56}:voiceHand(th.src,1),tx=HX+14,ty=HY;
+      const back=th.k==='back',h=back?{x:HX-110,y:HY-56}:voiceHand(th.src,1),tx=HX+(back?30:14),ty=HY; // a returning reflection lands on the real hit point (HX+30, as HIT elsewhere), not on the Watcher's centre
       let x,y,r=17,a=1,p=0,dash=th.real?0:1;
       if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);if(back){const e=eout(k);x=lerp(tx,h.x,e);y=lerp(ty,h.y,e)-Math.sin(Math.PI*k)*30;dash=1-k}else{x=h.x;y=h.y;r=5+12*k}}
       else{p=(gt-th.tl)/(th.ti-th.tl);
