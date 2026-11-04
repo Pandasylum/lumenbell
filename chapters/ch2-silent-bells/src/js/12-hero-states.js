@@ -59,9 +59,8 @@ function hurt(th){
    recoilDecay per s), then staggered `hurt` s once the riposte is over. All values taken from Ember Bridge. */
 const SHOCK={shake:13,hitstop:.11,flash:.4,flashDecay:2.2,ringLife:.35,recoilPx:20,recoilDecay:3.5,hurt:.55,
   final:{shake:16,hitstop:.14,flash:.8},
-  /* the Voice's three ripostes (volley / rain / wail), kept sober: a very short stop, a light shake and flash (not the last blow),
-     plus a spell-specific impact on her (sound `fx`, `n` warm sparks of colour `col`); timing and riposte rules unchanged */
-  voice:{shake:6,hitstop:.06,flash:.3},
+  /* the Voice's three ripostes (volley / rain / wail) keep the shock above (stop, shake, flash of Ember Bridge) and add a
+     spell-specific impact on her (sound `fx`, `n` warm sparks of colour `col`); timing and riposte rules unchanged */
   hit:{volley:{fx:'impactLight',col:'#fff4be',n:10},rain:{fx:'glints',col:'#fff4be',n:12},wail:{fx:'bellChime',col:'#fff1c8',n:8}},
   tint:{2:['#ffffff','#dffcf6','#8fe8d8'],1:['#ffffff','#e2d2ff','#b48cff'],3:['#ffffff','#b8fff4','#4fe0cc']},
   /* phase III, per form (sound `snd` with `body`, bell or wet fx `fx`, particles `tint` n each of speed `spd`, life `life`, gravity `g`):
@@ -71,7 +70,7 @@ const SHOCK={shake:13,hitstop:.11,flash:.4,flashDecay:2.2,ringLife:.35,recoilPx:
         2:{snd:'squelch',fx:'jellyHit',tint:['rgba(210,250,255,.55)','rgba(120,225,255,.45)','rgba(90,190,235,.4)'],n:[8,14,14],spd:5,life:.9,g:.9}}};
 function damageBoss(n){
   S.bossHp=Math.max(0,S.bossHp-n);S.bossFlash=gt;
-  const F=S.bossHp<=0?SHOCK.final:S.phase===2&&S.cnt?SHOCK.voice:SHOCK,col=SHOCK.tint[S.phase],VH=S.phase===2&&S.cnt?SHOCK.hit[S.cnt.spell]:null;
+  const F=S.bossHp<=0?SHOCK.final:SHOCK,col=SHOCK.tint[S.phase],VH=S.phase===2&&S.cnt?SHOCK.hit[S.cnt.spell]:null;
   S.shake=Math.max(S.shake,F.shake*2);S.hitstop=F.hitstop;S.flashHit=F.flash;S.recoil=1;
   const FM=S.phase===3?SHOCK.form[S.form===2?2:1]:null,pw=S.bossHp<=0?1.6:1.2;
   play(FM?FM.snd:'thud',pw);MUSIC.fx(FM?FM.fx:[null,'bellHit','crackGlass'][S.phase]);
