@@ -267,9 +267,9 @@ $('hub').addEventListener('click',e=>{if(card&&!e.target.closest('.tw,.hcard,.hf
 $('setBtn').addEventListener('click',e=>{e.stopPropagation();settings(!setOpen)});
 $('hsClose').addEventListener('click',()=>settings(false));
 $('hset').addEventListener('click',e=>{if(e.target===$('hset'))settings(false)});
-$('gateBtn').addEventListener('click',()=>{LB.audio.ensure();$('gate').hidden=true;arrive()});
+$('gateBtn').addEventListener('click',()=>{LB.audio.ensure();$('gate').hidden=true;LB.lift();arrive()});
 document.addEventListener('keydown',keys);
 addEventListener('resize',layout);
 addEventListener('pageshow',e=>{if(e.persisted){leaving=false;$('hcGo').disabled=false;if($('gate').hidden){bed.nodes=null;bed.start()}}});   // retour arrière du navigateur (page gardée en mémoire)
 lang();
-if(backN){$('gate').hidden=true;back()}else{try{$('gateBtn').focus({preventScroll:true})}catch(e){}}
+if(backN){$('gate').hidden=true;LB.lift();back()}else{try{$('gateBtn').focus({preventScroll:true})}catch(e){}}
