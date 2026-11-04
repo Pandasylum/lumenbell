@@ -1500,7 +1500,7 @@ function damageBoss(n){
   const p=bossCore();if(FM)FM.tint.forEach((c,i)=>burst(p.x,p.y,FM.n[i],c,FM.spd,FM.life,FM.g));else col.forEach((c,i)=>burst(p.x,p.y,i?12:10,c,7,.7));(S.rings||(S.rings=[])).push({x:p.x,y:p.y,life:SHOCK.ringLife,c:col[2]});
   if(VH){MUSIC.fx(VH.fx);burst(p.x,p.y,VH.n,VH.col,6,.6)}
   hud();
-  if(S.bossHp<=0){S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
+  if(S.bossHp<=0){if(S.phase===2)MUSIC.fx('murmur');S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
     say([null,_('The Rust Elder collapses.',"L'Ancien de Rouille s'effondre."),_('The Hollow Voice\'s mirror shatters.','Le miroir de la Voix Creuse éclate.'),_('The lantern goes dark.','La lanterne s\'éteint.')][S.phase]);
     }
 }
@@ -2028,7 +2028,7 @@ function voiceHand(i,cast){const p=voicePos(i);return cast?{x:p.x-84,y:p.y-62}:{
 function drawBoss2(){
   const A=voiceAnim();
   let ko=S.mode==='ko'&&S.phase===2?clamp((gt-S.koT)/2,0,1):0;
-  if(A.echo){S.echoA=Math.min(1,(S.echoA||0)+.06)}else S.echoA=Math.max(0,(S.echoA||0)-.05);
+  if(A.echo){if(!(S.echoA>0))MUSIC.fx('echoArrive');S.echoA=Math.min(1,(S.echoA||0)+.06)}else S.echoA=Math.max(0,(S.echoA||0)-.05);
   if(S.echoA>0){for(const i of[1,2]){
     // rage: a reflection shatters, sending a shard at the Watcher
     const br=S.threats.find(t=>t.k==='shard'&&t.from===i&&gt>=t.t0);
@@ -2943,6 +2943,15 @@ const MUSIC=(()=>{
       osc('sine',698,t+.55,.2,.045,1.1,.85,466);osc('sine',702,t+.55,.2,.03,1.1,.85,468);osc('sine',523,t+1.1,.15,.04,1.2,.85,330);
       nz(t,1.8,.05,'bandpass',1100,10,.8,650,.4);nz(t+.6,1.2,.03,'bandpass',1500,8,.8,800,.2)},
     wailEcho:t=>far(t,{vol:.4,lp:1300,delay:.22},FX.wailCry),
+    /* the Voice weeps as the fight begins: two slow sobs sliding down over a low moan, a breath of voice */
+    voiceWeep:t=>{osc('triangle',494,t,.6,.04,1.8,.9,330);osc('triangle',498,t+.03,.6,.03,1.8,.9,332);osc('sine',196,t,.8,.03,2.4,.8,147);
+      osc('sine',587,t+1.2,.3,.04,1.4,.9,392);nz(t,2.4,.04,'bandpass',950,9,.9,600,.5);nz(t+1.3,1.4,.025,'bandpass',1300,8,.9,700,.3)},
+    /* her death: a whisper of voices spreads (filtered breath opening up, faint choir) then dies out */
+    murmur:t=>{nz(t,3.2,.07,'bandpass',650,3,.95,1900,1.3);nz(t+.4,2.8,.045,'bandpass',1700,4,.95,520,1.1);
+      [330,392,494].forEach((f,i)=>osc('sine',f,t+i*.35,1.5,.02,2.6,.95,f*.85))},
+    /* the reflections of a rage arrive: a glassy pulse that comes back three times, each repeat farther and duller (echo timbre) */
+    echoArrive:t=>{[0,.2,.42].forEach((d,i)=>far(t+d,{vol:.75-i*.25,lp:3600-i*1200,delay:0},tt=>{osc('sine',392,tt,.01,.06,.9,.8,330);osc('sine',784,tt,.01,.03,.7,.8,660);osc('sine',1081,tt,.005,.012,.5,.9)}));
+      nz(t,.6,.05,'bandpass',900,3,.6,2600,.3)},
     rumble:t=>nz(t,2,.2,'lowpass',140,1,.4,60,1),
     chainSlip:t=>{for(let i=0;i<8;i++)osc('triangle',1800+Math.random()*1500,t+i*.05,.002,.04,.1,.4);nz(t,.6,.08,'bandpass',900,3,.3,300)},
     plant:t=>{thump(t,65,.8,.8);clang(t,170,.1,1.4);nz(t+.05,.6,.07,'highpass',2800,1,.5)},
@@ -3173,7 +3182,10 @@ const SP={
      settling) before darting at the Watcher; dance (I, final assault): the volley goes through the mirrors, orbs leave the mirror
      after `split` of their flight, `settle` s after the last orb the mirrors explode */
   wail:{lag:.1,tl:.8,r1:1.1,r2:.9,run:.85,after:.6,x0:110,edge:22,reach:30,ill:{x:62,y:248}},
-  mirror:{fly:1.5,size:15,draw:1.3},   // draw = drawing scale of the fragments (phone), hitbox unchanged
+  /* rain (I): the mirror bursts, its fragments are thrown across the hall for `fly` s (1.5 x .85: a little quicker), changing direction
+     `turns` [min, max] times at random spots of `area`, then settle above the mirror and dart one after the other in random order.
+     The mirror dance (final assault) keeps its own flight `flyDance` and its old wander. draw = drawing scale of the fragments (phone). */
+  mirror:{fly:1.275,flyDance:1.5,size:15,draw:1.3,turns:[2,3],area:{x0:50,x1:W-50,y0:50,y1:GY-40}},
   dance:{split:.45,settle:.6}
 };
 /* the mirrors of the hall are the floating shards of the background (SHARDS): n distinct ones, in the right-hand half of the hall */
@@ -3218,8 +3230,12 @@ function P2(stage,f,b,final,rage){
     T.push({k:'wail',t0:t,tl:t+Wl.tl*f,ti:t1,real:true});
     T.push({k:'wail',ill:1,t0:t2,tl:t2+Wl.tl*f,ti:i2,real:true});t=i2-Wl.after*f},1);
   // a mirror of the hall explodes into n fragments: they fly (SP.mirror.fly), settle, then dart one after the other
-  const shatter=(si,n,gaps,off,dn)=>{const M=SP.mirror,fd=M.fly*f;let s=t+fd+(off||0);
-    for(let k=0;k<n;k++){if(k)s+=gaps();T.push({k:'shard',fly:1,dn:dn?1:0,si,fi:k,fn:n,fd,tw:.42*f,t0:t,tl:s+.42*f,ti:s+.95*f})}
+  const scatter=()=>{const M=SP.mirror,A=M.area,nW=M.turns[0]+Math.floor(Math.random()*(M.turns[1]-M.turns[0]+1)),w=[];
+    while(w.length<nW){let q;for(let i=0;i<8;i++){q={x:A.x0+Math.random()*(A.x1-A.x0),y:A.y0+Math.random()*(A.y1-A.y0)};const p=w[w.length-1];if(!p||Math.hypot(q.x-p.x,q.y-p.y)>200)break}w.push(q)}return w};
+  // arrival order of the fragments at random (slot times in order, handed out to the fragments in a shuffled order)
+  const shatter=(si,n,gaps,off,dn)=>{const M=SP.mirror,fd=(dn?M.flyDance:M.fly)*f,ord=[...Array(n).keys()].sort(()=>Math.random()-.5),sl=[];let s=t+fd+(off||0);
+    for(let k=0;k<n;k++){if(k)s+=gaps();sl.push(s)}
+    for(let k=0;k<n;k++){const a=sl[ord[k]];T.push({k:'shard',fly:1,dn:dn?1:0,si,fi:k,fn:n,fd,way:dn?null:scatter(),tw:.42*f,t0:t,tl:a+.42*f,ti:a+.95*f})}
     return s};
   const rain=cast(()=>{const G=RAIN[S.d.m<1?'hard':'normal'];const s=shatter(mirrorPick(1)[0],VX.rain[K],()=>G[0]+Math.random()*(G[1]-G[0]));t=s+1.3*f});
   // final assault, mirror dance: a volley goes through the mirrors (orbs leave by 1 mirror in Easy, 2 in Normal and Hard), then
@@ -3284,6 +3300,9 @@ function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool
 /* a fragment of an exploding mirror: leaves the mirror, wanders (shrinking wobble) then settles at its own spot above it */
 function fragPos(th,at){
   const m=shardPos(th.si),k=clamp((at-th.t0)/th.fd,0,1),hx=m.x+(th.fi-(th.fn-1)/2)*46,hy=m.y-34+(th.fi%2)*18,e=eout(k),w=60*(1-k)*Math.min(1,k*6);
+  if(th.way){   // rain: thrown from the mirror to random spots of the hall (a burst, slowing, then a new direction), then home
+    const Q=[m,...th.way,{x:hx,y:hy}],L=Q.length-1,u=Math.min(k*L,L-1e-6),i=Math.floor(u),q=eout(u-i),j=10*Math.min(1,k*6)*(1-k);
+    return{x:lerp(Q[i].x,Q[i+1].x,q)+Math.sin(rt*9+th.fi*2.1)*j+(k>=1?Math.sin(rt*1.7+th.fi)*3:0),y:lerp(Q[i].y,Q[i+1].y,q)+Math.cos(rt*8+th.fi*1.3)*j*.8+(k>=1?Math.cos(rt*1.3+th.fi)*3:0)}}
   return{x:lerp(m.x,hx,e)+Math.sin(rt*6+th.fi*2.1)*w+(k>=1?Math.sin(rt*1.7+th.fi)*3:0),y:lerp(m.y,hy,e)+Math.cos(rt*5+th.fi*1.3)*w*.8+(k>=1?Math.cos(rt*1.3+th.fi)*3:0)}}
 function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
 function drawOrbs(){
@@ -3314,7 +3333,7 @@ function drawOrbs(){
     }else if(th.k==='shard'){
       if(th.fly){   // the mirror explodes (once), hidden from the hall until its fragments are gone
         (S.shardGone||(S.shardGone={}))[th.si]=Math.max(S.shardGone[th.si]||0,th.ti+1.2);
-        if(!th.bk0){th.bk0=1;if(!th.fi){const m=shardPos(th.si);burst(m.x,m.y,22,'#ece4ff',6,.9,.2);burst(m.x,m.y,12,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass')}}}
+        if(!th.bk0){th.bk0=1;if(!th.fi){const m=shardPos(th.si);burst(m.x,m.y,22,'#ece4ff',6,.9,.2);burst(m.x,m.y,12,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass');if(!th.dn)S.shake=Math.max(S.shake,7)}}}
       const o=th.from!=null?{x:voicePos(th.from).x,y:voicePos(th.from).y-90,s:24}:th.fly?{...fragPos(th,Math.min(gt,th.t0+th.fd)),s:SP.mirror.size}:shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;
       if(gt<th.tl){const k=th.fly?clamp(1-(th.tl-gt)/th.tw,0,1):(gt-th.t0)/(th.tl-th.t0);x=o.x;y=o.y;ang=Math.atan2(ty-y,tx-x);glow(x,y,30*SP.mirror.draw,'rgba(220,200,255,.9)',.8*k)}
       else{let p=(gt-th.tl)/(th.ti-th.tl);if(th.done){if(th.res==='hit'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.3);if(!th.sf){th.sf=1;burst(tx+30,ty-20,10,'#f2ecff',5,.4)}}}
@@ -3594,7 +3613,7 @@ function enterPhase(id,o){o=o||{};
   hud();playCine(id,'in',()=>introCard(id));
 }
 function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:P.boss(),desc:P.desc(),go:_('Start','Commencer'),onGo:beginPlay})}
-function beginPlay(){hideCard();S.mode='play';S.paused=false;S.nextAt=gt+1.1;setTheme(S.phase);try{$('ward').focus({preventScroll:true})}catch(e){};hud();say(PH[S.phase].head())}
+function beginPlay(){hideCard();S.mode='play';if(S.phase===2)MUSIC.fx('voiceWeep');S.paused=false;S.nextAt=gt+1.1;setTheme(S.phase);try{$('ward').focus({preventScroll:true})}catch(e){};hud();say(PH[S.phase].head())}
 function phaseCleared(){
   MUSIC.stop();const id=S.phase;
   if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();hud();beginPlay()});return}

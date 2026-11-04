@@ -78,7 +78,7 @@ function damageBoss(n){
   const p=bossCore();if(FM)FM.tint.forEach((c,i)=>burst(p.x,p.y,FM.n[i],c,FM.spd,FM.life,FM.g));else col.forEach((c,i)=>burst(p.x,p.y,i?12:10,c,7,.7));(S.rings||(S.rings=[])).push({x:p.x,y:p.y,life:SHOCK.ringLife,c:col[2]});
   if(VH){MUSIC.fx(VH.fx);burst(p.x,p.y,VH.n,VH.col,6,.6)}
   hud();
-  if(S.bossHp<=0){S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
+  if(S.bossHp<=0){if(S.phase===2)MUSIC.fx('murmur');S.mode='ko';S.koT=gt;S.threats=[];S.pat=null;S.cnt=null;S.holding=false;play('ko');
     say([null,_('The Rust Elder collapses.',"L'Ancien de Rouille s'effondre."),_('The Hollow Voice\'s mirror shatters.','Le miroir de la Voix Creuse éclate.'),_('The lantern goes dark.','La lanterne s\'éteint.')][S.phase]);
     }
 }

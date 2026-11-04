@@ -92,6 +92,15 @@ const MUSIC=(()=>{
       osc('sine',698,t+.55,.2,.045,1.1,.85,466);osc('sine',702,t+.55,.2,.03,1.1,.85,468);osc('sine',523,t+1.1,.15,.04,1.2,.85,330);
       nz(t,1.8,.05,'bandpass',1100,10,.8,650,.4);nz(t+.6,1.2,.03,'bandpass',1500,8,.8,800,.2)},
     wailEcho:t=>far(t,{vol:.4,lp:1300,delay:.22},FX.wailCry),
+    /* the Voice weeps as the fight begins: two slow sobs sliding down over a low moan, a breath of voice */
+    voiceWeep:t=>{osc('triangle',494,t,.6,.04,1.8,.9,330);osc('triangle',498,t+.03,.6,.03,1.8,.9,332);osc('sine',196,t,.8,.03,2.4,.8,147);
+      osc('sine',587,t+1.2,.3,.04,1.4,.9,392);nz(t,2.4,.04,'bandpass',950,9,.9,600,.5);nz(t+1.3,1.4,.025,'bandpass',1300,8,.9,700,.3)},
+    /* her death: a whisper of voices spreads (filtered breath opening up, faint choir) then dies out */
+    murmur:t=>{nz(t,3.2,.07,'bandpass',650,3,.95,1900,1.3);nz(t+.4,2.8,.045,'bandpass',1700,4,.95,520,1.1);
+      [330,392,494].forEach((f,i)=>osc('sine',f,t+i*.35,1.5,.02,2.6,.95,f*.85))},
+    /* the reflections of a rage arrive: a glassy pulse that comes back three times, each repeat farther and duller (echo timbre) */
+    echoArrive:t=>{[0,.2,.42].forEach((d,i)=>far(t+d,{vol:.75-i*.25,lp:3600-i*1200,delay:0},tt=>{osc('sine',392,tt,.01,.06,.9,.8,330);osc('sine',784,tt,.01,.03,.7,.8,660);osc('sine',1081,tt,.005,.012,.5,.9)}));
+      nz(t,.6,.05,'bandpass',900,3,.6,2600,.3)},
     rumble:t=>nz(t,2,.2,'lowpass',140,1,.4,60,1),
     chainSlip:t=>{for(let i=0;i<8;i++)osc('triangle',1800+Math.random()*1500,t+i*.05,.002,.04,.1,.4);nz(t,.6,.08,'bandpass',900,3,.3,300)},
     plant:t=>{thump(t,65,.8,.8);clang(t,170,.1,1.4);nz(t+.05,.6,.07,'highpass',2800,1,.5)},

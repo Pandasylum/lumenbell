@@ -16,7 +16,7 @@ function voiceHand(i,cast){const p=voicePos(i);return cast?{x:p.x-84,y:p.y-62}:{
 function drawBoss2(){
   const A=voiceAnim();
   let ko=S.mode==='ko'&&S.phase===2?clamp((gt-S.koT)/2,0,1):0;
-  if(A.echo){S.echoA=Math.min(1,(S.echoA||0)+.06)}else S.echoA=Math.max(0,(S.echoA||0)-.05);
+  if(A.echo){if(!(S.echoA>0))MUSIC.fx('echoArrive');S.echoA=Math.min(1,(S.echoA||0)+.06)}else S.echoA=Math.max(0,(S.echoA||0)-.05);
   if(S.echoA>0){for(const i of[1,2]){
     // rage: a reflection shatters, sending a shard at the Watcher
     const br=S.threats.find(t=>t.k==='shard'&&t.from===i&&gt>=t.t0);
