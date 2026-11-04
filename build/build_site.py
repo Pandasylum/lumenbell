@@ -10,7 +10,7 @@ import hashlib, re, sys, zipfile
 from pathlib import Path
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from assemble import ROOT, _listed, _read, _svg, _no_stray, shared_parts
+from assemble import ROOT, _listed, _read, _svg, _no_stray, shared_parts, gate_expand
 SITE = ROOT / "site"
 SRC = SITE / "src"
 OUT = ROOT / "build/out"
@@ -28,7 +28,8 @@ def hub_source():
         out.append((o[0], _svg(o[1], o[0])))
         own.add(o[0])
     _no_stray(SRC, own)
-    return "".join(t for _, t in out)
+    # ecran de demarrage : regles de shared/css/gate.css ; le halo du bouton lit --lanternRgb (posee ci-dessous depuis LB.WATCHER_T)
+    return "".join(t for _, t in gate_expand(out, rgb="var(--lanternRgb)"))
 
 s = hub_source()
 assert s.startswith("<!doctype html>\n<html lang=\"en\">\n<head>\n")
