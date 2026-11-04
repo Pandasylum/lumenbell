@@ -176,3 +176,4 @@
 
 - Joueur : rien de visible (règle de build ajoutée aux consignes et aux pièges ; aucun changement de source).
 - Ce que le joueur verra : rien de changé dans le jeu ; seule la CI est plus légère sur les pull requests.
+- Rien ne change dans le jeu : la CI est plus légère (plus de test à chaque envoi de brouillon) ; le joueur ne voit pas de différence.
