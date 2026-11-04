@@ -187,7 +187,8 @@ function spawn(){
 /* numbers per difficulty (easy / normal / hard): vol = orbs of a volley [min, max] (each pattern's count is clamped into it);
    rain = shards of a shard rain; echoOrb / echoShard = orbs, then shards, of each reflection in the Echoes (rages);
    rageVoice = orbs the Voice casts herself between the two reflections; last = shards of each
-   reflection of the last Echo (final assault) when it shatters; real = chance that an orb of the Echoes is real (else illusory); twin = Hard's permanent echo beside the Voice: it copies
+   reflection of the last Echo (final assault) when it shatters; lastVol = orbs of the volley
+   each reflection of the last Echo casts first; real = chance that an orb of the Echoes is real (else illusory); twin = Hard's permanent echo beside the Voice: it copies
    `of` blows in `every` of the Voice's spells (same draw, real or illusory) at least `dt` s later (not scaled by f), pushed back by `step` s until
    every copied impact is at least `gap`*f (the spacing of a volley's orbs) from every other impact of the series (at most `max` s; with no room left, the copies come
    after the last attack of the series); wail: the cry bounces on the screen
@@ -197,14 +198,14 @@ function spawn(){
    between two shards leaving (s, every difficulty); a spell after a cry starts once the returning cry has passed the Watcher; shards (Echoes, last Echo, copies) are never closer than the shard rain's minimum spacing (RAIN, per
    difficulty: the Hard grace after a shard needs it); ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
 const VOICE={vol:{easy:[2,3],normal:[3,4],hard:[3,4]},rain:{easy:2,normal:3,hard:3},echoOrb:{easy:1,normal:1,hard:1},echoShard:{easy:1,normal:1,hard:1},rageVoice:{easy:1,normal:2,hard:2},
-  last:{easy:1,normal:1,hard:1},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.5,step:.02,max:6,of:1,every:3},orb:{tl:.45,ti:1.45,gap:.5},shardCharge:.5,shardGap:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
+  last:{easy:1,normal:1,hard:1},lastVol:{easy:2,normal:3,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.5,step:.02,max:6,of:1,every:3},orb:{tl:.45,ti:1.45,gap:.5},shardCharge:.5,shardGap:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
 const voiceDk=()=>S.dk==='easy'?'easy':S.d.u.length>1?'hard':'normal';
 const fieldX=x=>clamp(x,VOICE.field,W-VOICE.field), fieldY=y=>clamp(y,VOICE.field,GY);
 function P2(stage,f,b,final,rage){
   const T=[],dk=voiceDk();let t=b,hitT=b;
   const O=VOICE.orb,C=VOICE.shardCharge,G=RAIN[S.d.m<1?'hard':'normal'];
   const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+O.tl*f,ti:t+O.ti*f,real,src:src||0});hitT=Math.max(hitT,t+O.ti*f);t+=O.gap*f};
-  const volley=(n,ill,src)=>{const V=VOICE.vol[dk];n=clamp(n,V[0],V[1]);ill=Math.min(ill,n-1);const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i),src);t+=.9*f;S.cv='volley'};
+  const volley=(n,ill,src,free)=>{const V=VOICE.vol[dk];if(!free)n=clamp(n,V[0],V[1]);ill=Math.min(ill,n-1);const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i),src);t+=.9*f;S.cv='volley'};
   // the cry leaves the mouth, crosses the Watcher, bounces on the screen edge and comes back towards its caster (two dodges)
   const wail=src=>{src=src||0;const x0=fieldX(VPOS[src].x-VOICE.wail.mouth),e=VOICE.wail.edge,ti=t+1.9*f,v=(x0-HX)/(1.1*f),d=(HX-e)/v;
     T.push({k:'wail',t0:t,tl:t+.8*f,ti,real:true,src,x0,ret:0});T.push({k:'wail',t0:ti,tl:ti+d,ti:ti+2*d,real:true,src,x0,ret:1});
@@ -234,7 +235,7 @@ function P2(stage,f,b,final,rage){
   return T};
   if(rage){echoR();return twin()}
   // last Echo: two reflections, each a volley then a cry, then it shatters; the finish is the classic counter on the Voice
-  if(final){[1,2].forEach(src=>{volley(VOICE.vol[dk][0],1,src);wail(src);shatter(src,VOICE.last[dk])});S.cv='volley';return T}
+  if(final){[1,2].forEach(src=>{volley(VOICE.lastVol[dk],1,src,true);wail(src);shatter(src,VOICE.last[dk])});S.cv='volley';return T}
   const p0=[()=>volley(2,0),()=>volley(3,1),()=>wail(),()=>volley(3,0),()=>{wail();volley(2,1)},rain];
   const p1=[()=>volley(4,1),()=>volley(5,2),echoR,()=>{echoR();wail()},()=>{volley(3,1);echoR()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
   pick(stage?p1:p0)();return twin();

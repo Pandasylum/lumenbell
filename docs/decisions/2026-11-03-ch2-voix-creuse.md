@@ -15,5 +15,6 @@ Décision de Kevin, 3 novembre. Branche `ch2/voix-creuse`.
 - Éclats (pluie, Échos, copies) : 0,5 s de charge en plus avant de partir, dans toutes les difficultés (3 novembre).
 - Révision du 4 novembre (Kevin) : au moins 0,5 s entre les départs de deux éclats (toutes difficultés, pluie comprise) ; après une plainte, le sort suivant ne part qu'une fois le cri revenu au-delà du Veilleur (copies de l'écho comprises) ; 1 éclat à la mort des illusions en Normal et Difficile (déjà en place).
 - Révision du 4 novembre, suite (Kevin) : orbes plus grosses pour les petits écrans (rayon 13 → 17 px) ; orbes illusoires en anneau creux sans point clair, pointillé plus épais et plus long, halo plus pâle ; tir un peu plus lent entre deux orbes (0,44 f → 0,5 f) ; volée de 4 orbes au plus en Normal et Difficile ; l'écho permanent du Difficile ne copie plus qu'1 coup sur 3.
+- Dernier Écho (4 novembre, Kevin) : la volée de chaque illusion passe à 2 orbes en Difficile (Facile 2, Normal 3 inchangés).
 - Lisibilité : aucun éclat, orbe ni cri ne naît ou ne passe hors du champ visible.
 - À valider : Difficile jugé trop dur par Kevin ; seuil du bot ~60 % de victoires à 40 ms ; sinon réduire l'écho.
