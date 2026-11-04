@@ -1,8 +1,8 @@
 /* Premier rendu (décision docs/decisions/2026-11-04-premier-rendu.md) : tant que le JS n'a pas levé le voile (classe lb-go sur <html>, posée par shared/js/28-ui.js quand #gate se masque), seul l'écran de démarrage #gate du HTML est visible : le hub se met en place derrière, sans qu'on le voie bouger. */
 html:not(.lb-go) body *{visibility:hidden}
 html:not(.lb-go) #gate,html:not(.lb-go) #gate *{visibility:visible}
-/* Le bouton de l'écran de démarrage a besoin de la couleur de la lanterne dès le premier rendu (le JS ne la pose qu'ensuite) : même valeur que LB.BRAND.lantern (LB.WATCHER_T.lantern.idle, shared/js/20-watcher.js) */
-#gate .btn{--lantern:#ffe066;--lanternRgb:255,224,102}
+/* Le bouton de l'écran de démarrage a besoin de la couleur de la lanterne dès le premier rendu (le JS ne la pose qu'ensuite) : build/build_site.py remplace les deux repères par LB.BRAND.lantern (LB.WATCHER_T.lantern.idle, shared/js/20-watcher.js) */
+#gate .btn{--lantern:__LANTERN__;--lanternRgb:__LANTERN_RGB__}
 /* Hub de la série (site/index.html) : fond sombre, figure vue d'en haut (six tours en cercle, VII au centre), titre, réglages
    (roue en haut à droite), langues, version (coin bas droit). Mêmes polices, boutons et ombres que les menus des chapitres. Les mesures et les couleurs viennent des
    tables du hub (HUB_T, LB.CH_COL, LB.BRAND) : posées en variables CSS par js/10-hub.js, aucune valeur de réglage ici. */

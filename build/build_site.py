@@ -6,7 +6,7 @@ Sortie : site/index.html (hub), site/ch1/index.html, site/ch2/index.html, build/
 Reproductible : meme entree, memes octets (zip a date fixe) ; l'empreinte du site est affichee a la fin.
 Un chapitre de plus : une ligne dans CHAPTERS (et son entree dans HUB_CH, site/src/js/10-hub.js).
 """
-import hashlib, sys, zipfile
+import hashlib, re, sys, zipfile
 from pathlib import Path
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -34,6 +34,10 @@ s = hub_source()
 assert s.startswith("<!doctype html>\n<html lang=\"en\">\n<head>\n")
 assert s.count("<style>\n") == 1 and s.count("<script>") == 2 and s.count("</script>") == 2  # 2 : le petit script de langue de l'ecran de demarrage (premier rendu) + le jeu
 assert "fonts.googleapis" not in s and "fonts.gstatic" not in s
+# couleur de la lanterne pour le premier rendu : lue dans la table (une seule source), jamais ecrite en dur dans le CSS
+_lt = re.search(r"lantern:\{idle:'(#[0-9a-fA-F]{6})'", (ROOT / "shared/js/20-watcher.js").read_text(encoding="utf-8")).group(1)
+s = s.replace("__LANTERN_RGB__", ",".join(str(int(_lt[i:i + 2], 16)) for i in (1, 3, 5))).replace("__LANTERN__", _lt)
+assert "__LANTERN" not in s
 s = s.replace("<style>\n", "<style>\n" + (ROOT / "build/fonts.css").read_text(encoding="utf-8") + "\n", 1)
 low = s.lower()
 assert "couronne" not in low and "crown" not in low, "nom secret du lore dans le hub"
