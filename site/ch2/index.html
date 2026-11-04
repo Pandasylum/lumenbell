@@ -3184,8 +3184,8 @@ const SP={
   wail:{lag:.1,tl:.8,r1:1.1,r2:.9,run:.85,after:.6,x0:110,edge:22,reach:30,ill:{x:62,y:248}},
   /* rain (I): the mirror bursts, its fragments are thrown across the hall for `fly` s (1.5 x .85: a little quicker), changing direction
      `turns` [min, max] times at random spots of `area`, then settle above the mirror and dart one after the other in random order.
-     The mirror dance (final assault) keeps its own flight `flyDance` and its old wander. draw = drawing scale of the fragments (phone). */
-  mirror:{fly:1.275,flyDance:1.5,size:15,draw:1.3,turns:[2,3],area:{x0:50,x1:W-50,y0:50,y1:GY-40}},
+     Same for the mirror dance (final assault). draw = drawing scale of the fragments (phone). */
+  mirror:{fly:1.275,size:15,draw:1.3,turns:[2,3],area:{x0:50,x1:W-50,y0:50,y1:GY-40}},
   dance:{split:.45,settle:.6}
 };
 /* the mirrors of the hall are the floating shards of the background (SHARDS): n distinct ones, in the right-hand half of the hall */
@@ -3233,9 +3233,9 @@ function P2(stage,f,b,final,rage){
   const scatter=()=>{const M=SP.mirror,A=M.area,nW=M.turns[0]+Math.floor(Math.random()*(M.turns[1]-M.turns[0]+1)),w=[];
     while(w.length<nW){let q;for(let i=0;i<8;i++){q={x:A.x0+Math.random()*(A.x1-A.x0),y:A.y0+Math.random()*(A.y1-A.y0)};const p=w[w.length-1];if(!p||Math.hypot(q.x-p.x,q.y-p.y)>200)break}w.push(q)}return w};
   // arrival order of the fragments at random (slot times in order, handed out to the fragments in a shuffled order)
-  const shatter=(si,n,gaps,off,dn)=>{const M=SP.mirror,fd=(dn?M.flyDance:M.fly)*f,ord=[...Array(n).keys()].sort(()=>Math.random()-.5),sl=[];let s=t+fd+(off||0);
+  const shatter=(si,n,gaps,off,dn)=>{const M=SP.mirror,fd=M.fly*f,ord=[...Array(n).keys()].sort(()=>Math.random()-.5),sl=[];let s=t+fd+(off||0);
     for(let k=0;k<n;k++){if(k)s+=gaps();sl.push(s)}
-    for(let k=0;k<n;k++){const a=sl[ord[k]];T.push({k:'shard',fly:1,dn:dn?1:0,si,fi:k,fn:n,fd,way:dn?null:scatter(),tw:.42*f,t0:t,tl:a+.42*f,ti:a+.95*f})}
+    for(let k=0;k<n;k++){const a=sl[ord[k]];T.push({k:'shard',fly:1,dn:dn?1:0,si,fi:k,fn:n,fd,way:scatter(),tw:.42*f,t0:t,tl:a+.42*f,ti:a+.95*f})}
     return s};
   const rain=cast(()=>{const G=RAIN[S.d.m<1?'hard':'normal'];const s=shatter(mirrorPick(1)[0],VX.rain[K],()=>G[0]+Math.random()*(G[1]-G[0]));t=s+1.3*f});
   // final assault, mirror dance: a volley goes through the mirrors (orbs leave by 1 mirror in Easy, 2 in Normal and Hard), then
@@ -3333,7 +3333,7 @@ function drawOrbs(){
     }else if(th.k==='shard'){
       if(th.fly){   // the mirror explodes (once), hidden from the hall until its fragments are gone
         (S.shardGone||(S.shardGone={}))[th.si]=Math.max(S.shardGone[th.si]||0,th.ti+1.2);
-        if(!th.bk0){th.bk0=1;if(!th.fi){const m=shardPos(th.si);burst(m.x,m.y,22,'#ece4ff',6,.9,.2);burst(m.x,m.y,12,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass');if(!th.dn)S.shake=Math.max(S.shake,7)}}}
+        if(!th.bk0){th.bk0=1;if(!th.fi){const m=shardPos(th.si);burst(m.x,m.y,22,'#ece4ff',6,.9,.2);burst(m.x,m.y,12,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass');S.shake=Math.max(S.shake,7)}}}
       const o=th.from!=null?{x:voicePos(th.from).x,y:voicePos(th.from).y-90,s:24}:th.fly?{...fragPos(th,Math.min(gt,th.t0+th.fd)),s:SP.mirror.size}:shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;
       if(gt<th.tl){const k=th.fly?clamp(1-(th.tl-gt)/th.tw,0,1):(gt-th.t0)/(th.tl-th.t0);x=o.x;y=o.y;ang=Math.atan2(ty-y,tx-x);glow(x,y,30*SP.mirror.draw,'rgba(220,200,255,.9)',.8*k)}
       else{let p=(gt-th.tl)/(th.ti-th.tl);if(th.done){if(th.res==='hit'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.3);if(!th.sf){th.sf=1;burst(tx+30,ty-20,10,'#f2ecff',5,.4)}}}
