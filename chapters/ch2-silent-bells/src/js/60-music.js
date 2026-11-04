@@ -8,9 +8,13 @@ const MUSIC=(()=>{
     const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out);return true}
   const nbuf=()=>{if(!NB){NB=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return NB};
   function env(g,t,a,p,d){a=Math.max(a,.01);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(p,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
-  function send(g,wet){if(wet){const w=ac.createGain();w.gain.value=wet;g.connect(w);w.connect(rev)}}
-  function osc(type,f,t,a,p,d,wet,f2,det){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+a+d);if(det)o.detune.value=det;env(g,t,a,p,d);o.connect(g);g.connect(out);send(g,wet);o.start(t);o.stop(t+a+d+.1)}
-  function nz(t,d,p,type,f,q,wet,f2,a){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+(a||.005)+d);fl.Q.value=q||1;const g=ac.createGain();env(g,t,a||.005,p,d);s.connect(fl);fl.connect(g);g.connect(out);send(g,wet);s.start(t);s.stop(t+(a||.005)+d+.1)}
+  /* far(): sounds played inside it go through a low-pass filter and a quieter bus (distance: the Illusion's / the echo's voice) */
+  let dst=null,farV=1;
+  function send(g,wet){if(wet){const w=ac.createGain();w.gain.value=wet*farV;g.connect(w);w.connect(rev)}}
+  function far(t,o,fn){const lp=ac.createBiquadFilter(),g=ac.createGain();lp.type='lowpass';lp.frequency.value=o.lp;lp.Q.value=.7;g.gain.value=o.vol;lp.connect(g);g.connect(out);
+    dst=lp;farV=o.vol;try{fn(t+o.delay)}finally{dst=null;farV=1}}
+  function osc(type,f,t,a,p,d,wet,f2,det){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+a+d);if(det)o.detune.value=det;env(g,t,a,p,d);o.connect(g);g.connect(dst||out);send(g,wet);o.start(t);o.stop(t+a+d+.1)}
+  function nz(t,d,p,type,f,q,wet,f2,a){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+(a||.005)+d);fl.Q.value=q||1;const g=ac.createGain();env(g,t,a||.005,p,d);s.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet);s.start(t);s.stop(t+(a||.005)+d+.1)}
   function lfo(rate,depth,target){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=rate;lg.gain.value=depth;l.connect(lg);lg.connect(target);l.start();return l}
   function layerNoise(type,f,q,vol,rate,depth,wet){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+2.5);s.connect(fl);fl.connect(g);g.connect(out);send(g,wet);const l=rate?lfo(rate,depth,fl.frequency):null;s.start();(ARR||layers).push({g,stop:()=>{try{s.stop();l&&l.stop()}catch(e){}}})}
   function layerOsc(type,f,vol,lp,det,rate,depth,wet){const o=ac.createOscillator();o.type=type;o.frequency.value=f;if(det)o.detune.value=det;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=lp;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+3);const g2=ac.createGain();g2.gain.value=1;o.connect(fl);fl.connect(g);g.connect(g2);g2.connect(out);send(g2,wet);const l=rate?lfo(rate,depth,g2.gain):null;o.start();(ARR||layers).push({g,stop:()=>{try{o.stop();l&&l.stop()}catch(e){}}})}
@@ -83,6 +87,11 @@ const MUSIC=(()=>{
     explosion:t=>{thump(t,48,1,1.6);nz(t,2,.5,'lowpass',1600,1,.5,200);nz(t,1,.3,'highpass',2500,1,.7);tinkle(t+.05,20,1.2,.05);osc('sine',2093,t,.003,.06,2.5,.9)},
     glassRain:t=>tinkle(t,30,2.4,.025),
     voice:t=>{[440,523.3].forEach(f=>osc('sine',f,t,.6,.03,2.2,.85));nz(t,1.6,.05,'bandpass',1100,10,.8,700,.4)},
+    /* the wail of the Voice: she weeps and laments (sliding sobs, a low moan, a breath); the same wail, far and soft, when the Illusion or the echo throws it */
+    wailCry:t=>{osc('triangle',587,t,.35,.05,1.5,.85,392);osc('triangle',592,t+.02,.35,.04,1.5,.85,395);osc('sine',220,t,.5,.035,1.8,.7,160);
+      osc('sine',698,t+.55,.2,.045,1.1,.85,466);osc('sine',702,t+.55,.2,.03,1.1,.85,468);osc('sine',523,t+1.1,.15,.04,1.2,.85,330);
+      nz(t,1.8,.05,'bandpass',1100,10,.8,650,.4);nz(t+.6,1.2,.03,'bandpass',1500,8,.8,800,.2)},
+    wailEcho:t=>far(t,{vol:.4,lp:1300,delay:.22},FX.wailCry),
     rumble:t=>nz(t,2,.2,'lowpass',140,1,.4,60,1),
     chainSlip:t=>{for(let i=0;i<8;i++)osc('triangle',1800+Math.random()*1500,t+i*.05,.002,.04,.1,.4);nz(t,.6,.08,'bandpass',900,3,.3,300)},
     plant:t=>{thump(t,65,.8,.8);clang(t,170,.1,1.4);nz(t+.05,.6,.07,'highpass',2800,1,.5)},

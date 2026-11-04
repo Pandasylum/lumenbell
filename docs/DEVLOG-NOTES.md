@@ -199,3 +199,5 @@
 - La Voix : l'Echo de rage n'apparaît plus que pendant les rages ; les clones tirent dans le désordre, orbes réelles ou illusoires au hasard. Le reflet qui revient atteint visiblement le Veilleur à l'impact.
 - La Voix : la plainte revient en sens inverse portée par une Illusion ; la pluie vient d'un miroir qui explose ; la rage finale est une danse de miroirs ; en Difficile l'écho permanent se voit à côté de la Voix. Les ripostes changent selon le sort (laser, ricochet sur un miroir, clochette).
 - En Difficile, l'écho permanent reste à côté de la Voix tout le combat, rages et dernier assaut compris, et lance son orbe après chaque sort (jamais pendant une plainte).
+- La Voix : sa plainte va un peu plus vite, la vague touche visiblement le Veilleur à l'instant de l'esquive, et elle pleure ; l'écho lointain, en Difficile, la relance en écho plus doux. Les éclats de miroir sont plus gros.
+- Esquiver un reflet laisse récupérer deux fois plus vite, et la Voix attaque 10 % plus vite ; les trois ripostes ont un impact bref sur elle (arrêt très court, léger tremblement, étincelles, son).
