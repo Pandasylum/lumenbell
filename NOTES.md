@@ -27,9 +27,10 @@
 - CI : artefact **`jeu-apercu`** (les deux `dist/index.html`, 14 jours) téléchargeable depuis chaque exécution du workflow Tests.
 - CI, règle de quota (cible, `tests.yml`) : un seul job de tests. Sur PR non brouillon, « smoke » tourne toujours ; `ch2-bot`, `visual-shots` et `trial-*` ne tournent que par lancement manuel (`workflow_dispatch`), de même que les périmètres `shared/`, Chapitre II et hub (plus de déclenchement automatique selon les fichiers touchés). Android : tag `v*` ou lancement manuel uniquement. Chaque job a un `timeout-minutes`.
 - CI, règle de quota (suite) : équilibrage = PR brouillon, branche `bal/…` ; CI à la mise en prêt.
-- Brouillon : aucun job ne tourne (garde `draft == false` sur chaque job) ; `push` ne vise que `main`, `workflow_dispatch` lance la suite complète.
-- Concurrence : une exécution remplacée par un nouveau push sur PR ; `main` n'est jamais annulé.
-- Push sur `main` et lancement manuel : suite complète, sans annulation. Sur PR, un nouveau push annule l'exécution précédente de la même branche.- Vérification de syntaxe du fichier final (le Chapitre II la fait dans `ch2-smoke.js`) : `node -e 'const h=require("fs").readFileSync("chapters/ch1-ember-bridge/dist/index.html","utf8");for(const m of h.matchAll(/<script>([\s\S]*?)<\/script>/g))new Function(m[1]);console.log("syntaxe OK")'`.
+- Brouillon : aucun job ne tourne (garde `draft == false` sur chaque job) ; pas de `push` déclencheur (cible), seul `workflow_dispatch` lance les tests lourds.
+- Concurrence : une exécution remplacée par un nouveau push sur PR ; le lancement manuel (`workflow_dispatch`) n'est jamais annulé.
+- Lancement manuel : suite complète, sans annulation. Sur PR, un nouveau push annule l'exécution précédente de la même branche.
+- Vérification de syntaxe du fichier final (le Chapitre II la fait dans `ch2-smoke.js`) : `node -e 'const h=require("fs").readFileSync("chapters/ch1-ember-bridge/dist/index.html","utf8");for(const m of h.matchAll(/<script>([\s\S]*?)<\/script>/g))new Function(m[1]);console.log("syntaxe OK")'`.
 - Captures d'écran : utiliser une horloge simulée, sinon le rendu varie. `page.clock` de Playwright ne suffit pas (origine décalée de 1 à 2 ms d'une exécution à l'autre) : remplacer `requestAnimationFrame`, `performance.now` et `Date.now` par un pas fixe de 1/60 s piloté par le test, fixer `Math.random`, couper l'audio, `animations:'disabled'`, et ramener la souris dans un coin avant chaque capture (sinon un survol change selon la mise en page). Voir le Chapitre II `NOTES.md`.
 - Mesure de fluidité : ~60 fps (P2 lac un peu plus lourd). Un « lag » vu dans l'aperçu Claude n'est pas celui du jeu.
 
