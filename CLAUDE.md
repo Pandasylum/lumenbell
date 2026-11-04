@@ -12,7 +12,7 @@ Jeu canvas HTML5, série de combats de boss. Lis d'abord `BIBLE.md`, `NOTES.md` 
 7. **Tout texte en deux langues** : `_('anglais','français')` ou `{d,en,fr}`. Aucun mot d'annonce à l'écran (« Parade ! », « Touché ! »…). Ce qui se déduit du combat reste déduit (lore non explicite).
 8. **Texte, lore ou design : proposer avant de modifier** quand l'utilisateur dit « on discute / ne modifie pas ». L'utilisateur est perfectionniste et itère beaucoup : c'est normal.
 9. **Réglages de timing dans des tables** (`T`, `R_T`, `DG`, `DIFFS`…), jamais en dur. Ne touche pas à une phase non demandée.
-10. **Rien n'est publié sans test, mais la CI tient lieu de test pour la doc, le texte et le visuel** : ne rien lancer en local dans ces cas (la CI fait déjà build reproductible + smoke sur chaque PR). Logique d'un chapitre : `smoke` + le test ciblé. `shared/` : les deux chapitres + `keys` et `audio`. Jamais par défaut : `visual-shots.js`, bots (`bot.js`, `ch2-bot.js`), `trial-*`. Lire TOUTE la sortie d'un test (`errs []` attendu) et relancer UNIQUEMENT le test en échec. Une chaîne FR avec apostrophe dans une chaîne JS entre apostrophes casse tout le jeu : utiliser des guillemets doubles.
+10. **Rien n'est publié sans test** : `smoke` sur chaque PR non brouillon ; avant un tag `v*` ou un envoi sur itch.io, lancement manuel de la CI « Tests » (périmètres `shared ch2 hub`) sur `main`. Pour la doc, le texte et le visuel, ne rien lancer en local (la CI tient lieu de test). Logique d'un chapitre : `smoke` + le test ciblé. `shared/` : les deux chapitres + `keys` et `audio`. Jamais par défaut : `visual-shots.js`, bots (`bot.js`, `ch2-bot.js`), `trial-*`. Lire TOUTE la sortie d'un test (`errs []` attendu) et relancer UNIQUEMENT le test en échec. Une chaîne FR avec apostrophe dans une chaîne JS entre apostrophes casse tout le jeu : utiliser des guillemets doubles.
 11. **Le build doit rester reproductible** : `python3 build/build.py` doit redonner exactement `chapters/ch1-ember-bridge/dist/index.html` tant qu'on n'a pas voulu le changer.
 12. **Jamais de clés** (`*.jks`, mots de passe, base64 du keystore) dans le dépôt, les logs ou les messages.
 13. Le feu de l'élément s'écrit « braise » (minuscule) ; « Braise » désigne l'élément, pas un nom propre.
@@ -21,6 +21,7 @@ Jeu canvas HTML5, série de combats de boss. Lis d'abord `BIBLE.md`, `NOTES.md` 
 16. Session documentation seule : ne lire que les fichiers cités, aucun build, aucun test.
 17. Ne surveille jamais la CI et ne fais aucun polling (`gh run watch`, relectures en boucle) : termine après le push.
 18. Après tout changement de source du Chapitre II : lance `build.py`, `build_ch2.py` puis `build_site.py` et commite les fichiers générés, sinon la CI échoue (build reproductible).
+19. **Tests lourds et CI** : `ch2-bot`, `visual-shots`, `trial-*` et les périmètres `shared/`, Chapitre II, hub ne tournent que par lancement manuel de la CI (`workflow_dispatch`), jamais par défaut. Android : tag `v*` ou lancement manuel uniquement. Chaque job a un `timeout-minutes`.
 
 ## Fin de session
 Tests passés, `NOTES.md` et `DECISIONS.md` à jour, fichiers déposés sur la branche, résumé des changements.

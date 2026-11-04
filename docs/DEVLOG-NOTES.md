@@ -183,3 +183,4 @@
 - Rien ne change dans le jeu : la CI est plus légère (plus de test à chaque envoi de brouillon) ; le joueur ne voit pas de différence.
 
 - Aucun changement visible, CI seulement.
+- Aucun changement visible, règles seulement (CI : plus de test sur push main, tests lourds sur lancement manuel).
