@@ -58,7 +58,7 @@ function sim(o){
     T.step(dt,o.drawEvery&&f%o.drawEvery===0);f++;
     if(o.debug&&T.S.hits>h0)(log.dbg=log.dbg||[]).push({k:T.S.threats.filter(x=>x.res==='hit'&&Math.abs(x.okT-T.gt)<.02).map(x=>x.k+'['+[x._bp,x.ti,x._pr,x.t0].map(v=>v==null?v:+(+v).toFixed(2)).join(',')+']').join('+'),s:ps,t:+(pt||0).toFixed(2),held:hd,last:T._lp&&{ago:+(T.gt-T._lp.t).toFixed(2),s:T._lp.s,pt:T._lp.pt}});
   }
-  const S=T.S;return{res,t:+S.runT.toFixed(1),hits:S.hits,hp:S.hp,hpMax:S.hpMax,boss:S.bossHp,phase:S.phase,form:S.form||1,forms:log.forms,hpAt:log.hpAt,dbg:log.dbg,mode:S.mode,trial:!!S.d.trial};
+  const S=T.S;return{res,t:+S.runT.toFixed(1),hits:S.hits,hp:S.hp,hpMax:S.hpMax,boss:S.bossHp,phase:S.phase,form:S.form||1,forms:log.forms,hpAt:log.hpAt,dbg:log.dbg,mode:S.mode,trial:!!S.d.trial,gapMin:S.gapLog&&S.gapLog.length?+Math.min(...S.gapLog).toFixed(3):null};
 }
 
 async function open(b){const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true});
@@ -69,7 +69,17 @@ async function open(b){const ctx=await b.newContext({viewport:{width:1100,height
 async function run(pg,o){return pg.evaluate(sim,o)}
 module.exports={open,run,go:pg=>pg.evaluate(()=>{__t.go();const S=__t.S;return{phase:S.phase,mode:S.mode,hp:S.hp,hpMax:S.hpMax,trial:!!S.d.trial}})};
 
-if(require.main===module)(async()=>{
+// node tests/ch2-bot.js --voix [parties] [difficulte] [sigma] : phase I (la Voix) seule ; ecart minimal mesure entre impacts reels par partie
+if(require.main===module&&process.argv.includes('--voix'))(async()=>{
+  const a=process.argv.filter(x=>!x.startsWith('--')).slice(2),N=+a[0]||20,dk=a[1]||'hard',sigma=a[2]!=null?+a[2]:.03,b=await launch(),{pg,errs}=await open(b);
+  let w=0,d=0,hits=[],gaps=[],why={},kinds={};
+  for(let i=0;i<N;i++){const r=await run(pg,{dk,phase:1,sigma,seed:1000+i,debug:true,untilPhase:1});why[r.res]=(why[r.res]||0)+1;
+    if(r.res==='win'||r.res==='phase'||r.res==='cleared')w++;else if(r.res==='dead')d++;hits.push(r.hits);if(r.gapMin!=null)gaps.push(r.gapMin);
+    for(const h of r.dbg||[])kinds[h.k]=(kinds[h.k]||0)+1;
+    console.log('partie',i+1,r.res,'coups',r.hits,'ecart min',r.gapMin,'s')}
+  console.log(dk,'sigma',sigma,'victoires(phase passee)',w+'/'+N,'morts',d,'coups moyens',(hits.reduce((x,y)=>x+y,0)/N).toFixed(2),'ecart min global',gaps.length?Math.min(...gaps):'-',JSON.stringify(why));
+  console.log('coups par projectile',JSON.stringify(kinds));console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',['exception: '+e.message]);process.exit(1)});
+else if(require.main===module)(async()=>{
   const N=+process.argv[2]||40,b=await launch(),{pg,errs}=await open(b);
   console.log('Phase III (formes I et II, depuis la frise), '+N+' parties par case ; sigma = erreur de timing du bot (ecart-type)');
   for(const dk of ['normal','hard'])for(const sigma of [.04,.07,.1]){
