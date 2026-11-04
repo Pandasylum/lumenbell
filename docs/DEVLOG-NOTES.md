@@ -184,6 +184,8 @@
 
 - Aucun changement visible, CI seulement.
 - Aucun changement visible, règles seulement (CI : plus de test sur push main, tests lourds sur lancement manuel).
+
+- Rien de visible : doc seule (règle de l'aide en Difficile et en Épreuve, désactivée et décochée).
 - En pause, « Menu » ouvre tout de suite « Quitter le combat ? » (Quitter / Rester), sans écran intermédiaire.
 - À l'ouverture d'un chapitre, l'écran « Commencer » est seul : la scène du menu n'apparaît plus un instant avant.
 - En Difficile, comme à l'Épreuve : « Aide visuelle » grisée et sur Off (menu et roue en jeu), aucun repère affiché ; ton choix revient en Facile ou Normal.
