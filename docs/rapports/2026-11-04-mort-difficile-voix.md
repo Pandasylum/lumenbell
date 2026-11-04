@@ -24,6 +24,15 @@ Mode `sloppy` (40 touches) : orbes réelles 28 (rage 0), éclats pluie 5, ondes 
 - Cas de 3 sorts imbriqués (lancé au plus tard à l'impact) : 7 touches orbes en rage 0 et 4 en rage 1.
 - Le bot n'a qu'un bouton : si action + récupération dépasse ~0,37 s en Difficile, la 2e orbe d'une volée est inesquivable après avoir paré la 1re. **Non vérifié** : la durée d'action/récupération en Difficile n'a pas été lue (périmètre de lecture).
 
+## Complément : sensibilité à la précision (2e lancement, 20 parties par ligne, Difficile, m = 0,6)
+| Erreur de timing du bot | Morts | Coups reçus (moy.) | Temps moyen |
+|---|---|---|---|
+| 0,03 s | 1 / 20 | 0,6 | 74,5 s (19 parties vont au bout du délai de 400 s, le bot n'attaquant pas le boss) |
+| 0,07 s (1er lancement) | 20 / 20 | 3 | 5 à 49 s |
+| 0,10 s | 20 / 20 | 3 | 19,1 s |
+
+Lecture : avec 0,03 s d'erreur le bot survit presque toujours ; à 0,07 s il meurt à chaque partie. La mort vient donc de la précision demandée (visée à 0,075 s avant l'impact, milieu de la fenêtre), pas d'une séquence impossible. Combiné aux écarts de 0,35–0,37 s ci-dessus, une erreur de 70 ms sur une orbe décale aussi la suivante, d'où les 3 coups rapides. Cela renforce les hypothèses 1 et 2 ; les ondes et la pluie ne sont pas prioritaires. La largeur de la fenêtre n'est pas lue dans le code, seulement déduite du `m` = 0,6 et de la visée.
+
 ## Hypothèses de correction (à valider, pas de code)
 1. Écart minimal entre deux impacts réels ≥ action + récupération + marge dans `P2` (volées : `.44*f`) en Difficile, via la table de timing existante (`SP`, `RAIN`, `DG`), pas en dur.
 2. Écho et éclats de reflet brisé : espacer `E.break1/break2` pour passer de 0,35 s à ≥ 0,5 s.
