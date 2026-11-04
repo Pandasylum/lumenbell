@@ -2,22 +2,14 @@ name: Build Android (APK + AAB)
 on:
   workflow_dispatch:
   push:
-    branches: [main]
     tags: ['v*']
-    # Seulement si le jeu livre ou l'Android change (pas sur doc ou test seuls).
-    # Les tags sont construits dans tous les cas.
-    paths:
-      - 'chapters/*/dist/**'
-      - 'shared/**'
-      - 'site/**'
-      - 'apk/**'
-      - '.github/workflows/android.yml'
 concurrency:
   group: android-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: apk
