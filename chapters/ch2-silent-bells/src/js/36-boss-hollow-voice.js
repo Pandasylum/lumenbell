@@ -6,11 +6,11 @@ function mirrorLight(){if(S.phase!==2)return 0;const G=MIRROR_GLOW;
   if(S.cine&&S.cine.k==='out'){const t=gt-S.cine.t0;return t<CINE_P1.drop?lerp(G.max,G.end,clamp(t/CINE_P1.drop,0,1)):0}
   if(S.mode==='play'||S.mode==='ko'||S.mode==='dead')return G.base+(G.max-G.base)*(1-S.bossHp/S.bossMax);return G.base}
 function voiceAnim(){
-  let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
-  let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
+  let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&!th.ill&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
+  let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&!th.pe&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
   return{cast,echo};
 }
-const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160}];
+const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160},{x:470,y:292}];   // the Voice, the two reflections of the rages, the permanent echo (Hard)
 function voicePos(i){const v=VPOS[i];return{x:v.x,y:v.y+Math.sin(rt*1.6+i*2)*8}}
 function voiceHand(i,cast){const p=voicePos(i);return cast?{x:p.x-84,y:p.y-62}:{x:p.x-46,y:p.y+30}}
 function drawBoss2(){
@@ -22,15 +22,23 @@ function drawBoss2(){
     const br=S.threats.find(t=>t.k==='shard'&&t.from===i&&gt>=t.t0);
     if(br){if(!br.bk){br.bk=1;const p=voicePos(i);burst(p.x,p.y-80,26,'#ece4ff',6,.9,.2);burst(p.x,p.y-20,16,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass')}continue}
     const has=S.threats.some(t=>t.k==='orb'&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,S.echoA*.5,has?1:0,0)}}
+  // permanent echo (Hard): its own body (slot 3) stays beside the Voice all fight, rages and final assault included,
+  // and fires the orb after each spell
+  if(S.d.hard){const on=S.mode==='play';S.peA=on?Math.min(1,(S.peA||0)+.04):Math.max(0,(S.peA||0)-.05);
+    if(S.peA>0)drawVoice(3,S.peA*.5,S.threats.some(t=>t.pe&&gt>=t.t0&&gt<=t.tl+.15)?1:0,0)}
+  // the Illusion of the wail: appears on the left, throws the second wave towards the Watcher, vanishes
+  const iw=S.threats.find(t=>t.k==='wail'&&t.ill&&gt>=t.t0&&gt<=t.ti+.7);
+  if(iw){const a=Math.min(clamp((gt-iw.t0)/.35,0,1),clamp((iw.ti+.7-gt)/.5,0,1)),I=SP.wail.ill;
+    ctx.save();ctx.translate(2*I.x,0);ctx.scale(-1,1);drawVoice(1,a*.5,gt<=iw.tl+.2?1.4:0,0,{x:I.x,y:I.y+Math.sin(rt*1.6)*8});ctx.restore()}
   ctx.save();
   if(hasFilter&&gt-S.bossFlash<.15)ctx.filter='brightness(1.8)';
   drawVoice(0,1-clamp((ko-.4)/.6,0,1),A.cast,ko);
   ctx.restore();
   if(ko>0&&!S.koBurst){S.koBurst=true;const p=voicePos(0);for(let i=0;i<4;i++)burst(p.x,p.y-82,16,'#f2ecff',7,1.6,.25)}
 }
-function drawVoice(i,alpha,cast,ko){
+function drawVoice(i,alpha,cast,ko,pos){
   if(alpha<=0)return;
-  const p=voicePos(i),x=p.x,y=p.y-ko*60;
+  const p=pos||voicePos(i),x=p.x,y=p.y-ko*60;
   ctx.save();ctx.globalAlpha*=alpha;
   // shadow tendrils curling from below
   ctx.lineCap='round';

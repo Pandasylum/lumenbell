@@ -104,7 +104,7 @@ function bg2(){
   // drips from the vault
   for(let i=0;i<9;i++){const x=60+i*103,k=(rt*.5+i*.37)%1;ell(x,k*GY,1.4,3,`rgba(170,235,230,${.35*(1-k)})`)}
   // floating mirror shards (same positions as the shard rain)
-  for(const s of SHARDS){ctx.save();ctx.translate(s.x+Math.sin(rt*.4+s.o)*12,s.y+Math.cos(rt*.5+s.o)*8);ctx.rotate(s.r+rt*s.v);
+  for(const [si,s] of SHARDS.entries()){if(S.shardGone&&S.shardGone[si]>gt)continue;ctx.save();ctx.translate(s.x+Math.sin(rt*.4+s.o)*12,s.y+Math.cos(rt*.5+s.o)*8);ctx.rotate(s.r+rt*s.v);
     g=ctx.createLinearGradient(-s.s,-s.s,s.s,s.s);g.addColorStop(0,'rgba(225,248,245,.30)');g.addColorStop(.5,'rgba(100,170,170,.08)');g.addColorStop(1,'rgba(225,248,245,.22)');
     ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s.s);ctx.lineTo(s.s*.6,0);ctx.lineTo(s.s*.1,s.s*.8);ctx.lineTo(-s.s*.5,s.s*.1);ctx.closePath();ctx.fill();
     ctx.strokeStyle='rgba(235,252,250,.35)';ctx.lineWidth=1;ctx.stroke();ctx.restore()}

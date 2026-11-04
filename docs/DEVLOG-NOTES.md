@@ -191,9 +191,11 @@
 - En Difficile, comme à l'Épreuve : « Aide visuelle » grisée et sur Off (menu et roue en jeu), aucun repère affiché ; ton choix revient en Facile ou Normal.
 - Ouvrir un chapitre ou le hub : seul l'écran « Commencer » apparaît d'abord, sans scène ni contenu qui se décale ; le reste se montre après « Commencer ».
 - Chapitre II : le boss a 8 / 10 / 14 PV (8 / 10 / 12 en phase III) ; en Difficile, la jauge marque 10 et 5 en phases I et II, 8 et 5 en phase III.
-- La rage ne part plus qu'une fois à chaque repère franchi ; entre deux, les attaques normales reprennent.
+- La rage d'un repère franchi se relance à chaque attaque tant que le boss n'a pas perdu de PV ; dès qu'il est touché, les attaques normales reprennent jusqu'au repère suivant.
 - Rien de visible : refactor sans changement.
 - La Voix en Difficile : rien de visible (rapport d'analyse seul).
 - La Voix : les orbes sont plus grandes ; les illusoires sont un anneau creux en pointillé épais. Les impacts réels sont espacés (Facile 0,6 s · Normal 0,75 s · Difficile 1,05 s), les volées et pluies sont plus courtes en Facile, et en Difficile un écho lance une orbe après chaque sort.
 - La Voix : rien de visible côté jeu (mesure seule) ; l’écart entre impacts réels est désormais consigné pour tous les projectiles, reflets revenants compris.
 - La Voix : l'Echo de rage n'apparaît plus que pendant les rages ; les clones tirent dans le désordre, orbes réelles ou illusoires au hasard. Le reflet qui revient atteint visiblement le Veilleur à l'impact.
+- La Voix : la plainte revient en sens inverse portée par une Illusion ; la pluie vient d'un miroir qui explose ; la rage finale est une danse de miroirs ; en Difficile l'écho permanent se voit à côté de la Voix. Les ripostes changent selon le sort (laser, ricochet sur un miroir, clochette).
+- En Difficile, l'écho permanent reste à côté de la Voix tout le combat, rages et dernier assaut compris, et lance son orbe après chaque sort (jamais pendant une plainte).

@@ -1,4 +1,4 @@
-# Chapitre II : PV et rages calqués sur le Chapitre I, bug de rage corrigé
+# Chapitre II : PV et rages calqués sur le Chapitre I, rage : voir la décision de relance
 
 Date : 2026-11-04 · Branche : `fix/ch2-rage-pv` · Périmètre : `chapters/ch2-silent-bells`
 
@@ -8,8 +8,8 @@ Date : 2026-11-04 · Branche : `fix/ch2-rage-pv` · Périmètre : `chapters/ch2-
 - Inchangés : dernier assaut à PV ≤ 1, nombre de rages (1 / 1 / 2), sorts de rage, vitesse d'attaque, PV du Veilleur, soin entre phases.
 - Tables : `DIFFS` (`boss`, `boss3`, `u`, `u3`) ; les épreuves reprennent Normal / Difficile.
 
-## Bug corrigé
-Après un seuil, `spawn()` relançait la rage à chaque attaque tant que les PV du boss n'avaient pas baissé (`rageHp0` : rage « ratée » rejouée). Désormais une rage part une seule fois par seuil franchi (`rageN`), puis les attaques normales reprennent. Remise à zéro à chaque phase et à chaque réessai (`resetPhaseState`).
+## Rage : règle remplacée
+La section « Bug corrigé » (une seule rage par seuil) est remplacée par `2026-11-04-c2-rage-relance-c1.md` : la rage se relance comme au Chapitre I.
 
 ## À valider
 Le dernier assaut (PV ≤ 1) est rejoué tant que le boss n'est pas tombé (comportement conservé, comme au Chapitre I) : il n'est pas limité à un seul déclenchement.
