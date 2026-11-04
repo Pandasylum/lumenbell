@@ -1,6 +1,5 @@
 /* Premier rendu (décision docs/decisions/2026-11-04-premier-rendu.md) : tant que le JS n'a pas levé le voile (classe lb-go sur <html>, posée par shared/js/28-ui.js quand #gate se masque), seul l'écran de démarrage #gate du HTML est visible : le hub se met en place derrière, sans qu'on le voie bouger. */
-html:not(.lb-go) body *{visibility:hidden}
-html:not(.lb-go) #gate,html:not(.lb-go) #gate *{visibility:visible}
+@gate veil
 /* Le bouton de l'écran de démarrage a besoin de la couleur de la lanterne dès le premier rendu (le JS ne la pose qu'ensuite) : build/build_site.py remplace les deux repères par LB.BRAND.lantern (LB.WATCHER_T.lantern.idle, shared/js/20-watcher.js) */
 #gate .btn{--lantern:__LANTERN__;--lanternRgb:__LANTERN_RGB__}
 /* Hub de la série (site/index.html) : fond sombre, figure vue d'en haut (six tours en cercle, VII au centre), titre, réglages
@@ -108,8 +107,7 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .hshold b,.hshold small{position:relative}
 .hshold small{font-family:var(--font-body);font-weight:400;font-size:12px;letter-spacing:.06em;text-transform:none;color:var(--muted)}
 /* écran de démarrage : un seul bouton */
-.gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(8,6,13,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-.gate .btn{box-shadow:0 0 36px rgba(var(--lanternRgb),.45)}
+@gate gate gatebtnbare
 @media (max-height:520px) and (orientation:landscape){.hfoot{padding-top:2px}}
 /* mouvement réduit (LB.motion : préférence du système seule ; classe .lb-rm sur <html>) : rien ne bouge ; les trois états gardent leur
    forme (à jouer = point plein et fin cercle ; terminé = point plein sans cercle ; fermé = cercle éteint sans point) */

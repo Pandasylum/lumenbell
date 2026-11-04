@@ -1,14 +1,10 @@
 /* Écran de démarrage : la scène du menu reste masquée dès le premier rendu (avant tout JS) et ne se révèle qu'une fois l'écran de démarrage masqué (Commencer, ouverture depuis le hub, copie de test). Décision docs/decisions/2026-11-04-ecran-demarrage.md */
-#menu .mscene{visibility:hidden}
-#gate[hidden]~#menu .mscene{visibility:visible}
+@gate scene
 /* Premier rendu (décision docs/decisions/2026-11-04-premier-rendu.md) : tant que le JS n'a pas levé le voile (classe lb-go sur <html>, posée par shared/js/28-ui.js quand #gate se masque), seul l'écran de démarrage #gate du HTML est visible : ni scène, ni menu, ni barres. */
-html:not(.lb-go) body *{visibility:hidden}
-html:not(.lb-go) #gate,html:not(.lb-go) #gate *{visibility:visible}
+@gate veil
 /* Écran de démarrage présent dans le HTML : mêmes règles que LB.UI_CSS (shared/js/28-ui.js), pour que le premier rendu soit déjà définitif */
-.gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(8,6,13,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-.gate[hidden]{display:none}
-.gate .btn{padding:14px 44px;font-size:24px;letter-spacing:.12em;box-shadow:0 0 36px rgba(255,122,43,.45)}
-.btn.big{font-size:24px;padding:12px 38px}
+@gate gate gatehidden gatebtn
+@gate btnbig
 .langs{align-items:center;position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:3}
 .langs button{font-family:inherit;font-weight:700;font-size:13px;line-height:1;letter-spacing:.12em;padding:7px 11px;min-width:42px;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(241,227,207,.3);border-radius:4px;cursor:pointer}
 .langs button[aria-pressed="true"]{border-color:#ff7a2b;background:rgba(255,122,43,.22);color:#fff}

@@ -1,0 +1,23 @@
+/* SOURCE UNIQUE des règles de l'écran de démarrage (#gate) et du voile de premier rendu. Une règle à changer = ici, nulle part ailleurs.
+   Injectée par build/assemble.py : dans le style.css de chaque chapitre et du hub (ligne « @gate <blocs> »), dans LB.UI_CSS
+   (shared/js/28-ui.js, ligne « @gate-js <blocs> », forme chaîne JS) ; build/assemble.py échoue si une règle est recopiée à la main ailleurs.
+   Format : « /*@bloc*/ » ouvre un bloc, une règle par ligne. @RGB@ = couleur du chapitre (table CHAPTER : rgb) ou de la lanterne du hub (LB.WATCHER_T.lantern.idle) ;
+   @GLOW@ = le halo du bouton (bloc glow). Décisions : docs/decisions/2026-11-04-gate-css-source-unique.md */
+/*@scene*/
+#menu .mscene{visibility:hidden}
+#gate[hidden]~#menu .mscene{visibility:visible}
+/*@veil*/
+html:not(.lb-go) body *{visibility:hidden}
+html:not(.lb-go) #gate,html:not(.lb-go) #gate *{visibility:visible}
+/*@gate*/
+.gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(8,6,13,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+/*@gatehidden*/
+.gate[hidden]{display:none}
+/*@gatebtn*/
+.gate .btn{padding:14px 44px;font-size:24px;letter-spacing:.12em;box-shadow:@GLOW@}
+/*@gatebtnbare*/
+.gate .btn{box-shadow:@GLOW@}
+/*@btnbig*/
+.btn.big{font-size:24px;padding:12px 38px}
+/*@glow*/
+0 0 36px rgba(@RGB@,.45)
