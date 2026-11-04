@@ -1,3 +1,6 @@
+/* Écran de démarrage : la scène du menu reste masquée dès le premier rendu (avant tout JS) et ne se révèle qu'une fois l'écran de démarrage masqué (Commencer, ouverture depuis le hub, copie de test). Décision docs/decisions/2026-11-04-ecran-demarrage.md */
+#menu .mscene{visibility:hidden}
+#gate[hidden]~#menu .mscene{visibility:visible}
 /* Layout: one centered column. Header with the phase track, two health bars, the 16:9 arena,
    then the single action button and options. Menu and phase cards are overlays in the arena (full screen on phones).
    Single dark look by choice: the whole scene is lit by lava. */

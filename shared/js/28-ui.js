@@ -219,35 +219,33 @@ LB.hdr=(()=>{const ws=[];
   return{watch,sync}})();
 
 /* ---------- LB.pause : carte de pause (Reprendre, Menu) ----------
-   « Menu » ouvre deux choix sous Reprendre : « Menu du chapitre » et, depuis le hub (LB.fromHub), « Chapitres » (LB.toHub). Chaque
-   choix demande une confirmation (Quitter / Rester) : le combat en pause est perdu. Vues : main, choices, confirm (LB.pause.view).
+   « Menu » ouvre directement la confirmation (Quitter / Rester) : le combat en pause est perdu. « Quitter » mène au menu du
+   chapitre (hh.onMenu), « Rester » rend la carte de pause. Vues : main, confirm (LB.pause.view). Décision docs/decisions/2026-11-04-pause-menu.md.
    stay() : Échap / P sur la confirmation = Rester (rend true s'il a pris la touche) ; enter() : Entrée / Espace sans bouton focalisé
-   = Rester sur la confirmation, sinon Reprendre. Un seul bouton est focalisé à la fois (celui de la vue). hh.onMenu : menu du chapitre. */
+   = Rester sur la confirmation, sinon Reprendre. Un seul bouton est focalisé à la fois (celui de la vue). */
 LB.pause=(()=>{
-  let ov=null,h={},view='main',exit='';
+  let ov=null,h={},view='main';
   const q=s=>ov.querySelector(s);
-  const BTN={main:['#pResume','#pMenu'],choices:['#pResume','#pChap','#pHub'],confirm:['#pLeave','#pStay']},ALL=['#pResume','#pMenu','#pChap','#pHub','#pLeave','#pStay'],FOCUS={main:'#pResume',choices:'#pChap',confirm:'#pStay'};
+  const BTN={main:['#pResume','#pMenu'],confirm:['#pLeave','#pStay']},ALL=['#pResume','#pMenu','#pLeave','#pStay'],FOCUS={main:'#pResume',confirm:'#pStay'};
   function setView(v,focus){view=v;if(!ov)return;
-    for(const id of ALL)q(id).hidden=!BTN[v].includes(id)||(id==='#pHub'&&!LB.fromHub);
+    for(const id of ALL)q(id).hidden=!BTN[v].includes(id);
     q('#pBody').hidden=v!=='confirm';lang();
     if(focus)try{q(FOCUS[v]).focus({preventScroll:true})}catch(e){}}
   function mount(stage,after,hh){
     h=hh||{};if(ov)return ov;
-    ov=LB.ui.mk('div',{class:'ov',id:'pause',hidden:''},'<div class="card"><p class="eyebrow">Pause</p><h2 id="pTitle">Fight paused</h2><p id="pBody" hidden></p><button class="btn" id="pResume" type="button">Resume</button><button class="btn ghost" id="pMenu" type="button">Menu</button><button class="btn ghost" id="pChap" type="button" hidden>Chapter menu</button><button class="btn ghost" id="pHub" type="button" hidden>Chapters</button><button class="btn" id="pLeave" type="button" hidden>Leave</button><button class="btn ghost" id="pStay" type="button" hidden>Stay</button></div>');
+    ov=LB.ui.mk('div',{class:'ov',id:'pause',hidden:''},'<div class="card"><p class="eyebrow">Pause</p><h2 id="pTitle">Fight paused</h2><p id="pBody" hidden></p><button class="btn" id="pResume" type="button">Resume</button><button class="btn ghost" id="pMenu" type="button">Menu</button><button class="btn" id="pLeave" type="button" hidden>Leave</button><button class="btn ghost" id="pStay" type="button" hidden>Stay</button></div>');
     stage.insertBefore(ov,after?after.nextSibling:null);
     q('#pResume').addEventListener('click',()=>{if(h.onResume)h.onResume()});
-    q('#pMenu').addEventListener('click',()=>setView('choices',true));
-    q('#pChap').addEventListener('click',()=>{exit='chapter';setView('confirm',true)});
-    q('#pHub').addEventListener('click',()=>{exit='hub';setView('confirm',true)});
+    q('#pMenu').addEventListener('click',()=>setView('confirm',true));
     q('#pStay').addEventListener('click',()=>setView('main',true));
-    q('#pLeave').addEventListener('click',()=>{const e=exit;setView('main');if(e==='hub'){try{LB.toHub(LB.menu.C.n)}catch(x){}}else if(h.onMenu)h.onMenu()});
+    q('#pLeave').addEventListener('click',()=>{setView('main');if(h.onMenu)h.onMenu()});
     setView('main');
     return ov;
   }
   function lang(){if(!ov)return;
     q('#pTitle').textContent=view==='confirm'?LB._('Leave the fight?','Quitter le combat ?'):LB._('Fight paused','Combat en pause');
     q('#pBody').textContent=LB._('The current fight will be lost.','Le combat en cours sera perdu.');
-    q('#pResume').textContent=LB._('Resume','Reprendre');q('#pChap').textContent=LB._('Chapter menu','Menu du chapitre');q('#pHub').textContent=LB._('Chapters','Chapitres');
+    q('#pResume').textContent=LB._('Resume','Reprendre');q('#pMenu').textContent=LB._('Menu','Menu');
     q('#pLeave').textContent=LB._('Leave','Quitter');q('#pStay').textContent=LB._('Stay','Rester')}
   return{mount,lang,bind(hh){h=hh},show(){setView('main');ov.hidden=false;try{q('#pResume').focus({preventScroll:true})}catch(e){}},hide(){if(ov){ov.hidden=true;setView('main')}},
     visible(){return!!ov&&!ov.hidden},resume(){if(h.onResume)h.onResume()},get view(){return view},
@@ -421,18 +419,21 @@ LB.hud={
 };
 
 /* ---------- LB.help : aide visuelle (décision n° 3 du 28 octobre ; réglage de la roue, LB.SETTINGS_T) ----------
-   Désactivée par défaut, mémorisée (lb-help), activable dans toutes les difficultés ; verrouillée (et décochée à l'écran, sans
-   toucher à lb-help) en Épreuve. mount() lit lb-help ; use(d) au choix de la difficulté ; set(v) : réglage de la roue ; defeat(facile) :
+   Désactivée par défaut, mémorisée (lb-help), activable en Facile et Normal ; verrouillée (et décochée à l'écran, sans
+   toucher à lb-help) en Difficile et en Épreuve (décision docs/decisions/2026-11-04-aide-difficile.md). mount() lit lb-help ; use(d) au choix de la difficulté ; set(v) : réglage de la roue ; defeat(facile) :
    true à la 3e défaite en Facile sans aide (le chapitre propose alors « Activer l'aide visuelle » sur la carte de défaite) ;
-   enable() active et mémorise ; on() : l'aide est active ; locked() : Épreuve. */
+   enable() active et mémorise ; on() : l'aide est active (aucun repère LB.cue quand elle est verrouillée) ; locked() : Difficile ou Épreuve.
+   Point de règle unique : LB.help.LOCKED(d). */
 LB.help=(()=>{
   let deaths=0,lock=false,val=false;const stored=()=>LB.store.get(LB.key('help'),'0')==='1';
+  const LOCKED=d=>!!(d&&(d.trial||d.hard));   /* la règle : Épreuve (trial) et Difficile (hard) */
   return{
+    LOCKED,
     mount(){val=stored()},
     on(){return val&&!lock},
     locked(){return lock},
     set(v){if(lock)return;val=!!v;LB.store.set(LB.key('help'),val?'1':'0')},
-    use(d){deaths=0;if(d&&d.trial)lock=true;else{lock=false;val=stored()}},
+    use(d){deaths=0;if(LOCKED(d))lock=true;else{lock=false;val=stored()}},
     defeat(easy){if(!easy||LB.help.on())return false;return++deaths===3},
     enable(){lock=false;val=true;LB.store.set(LB.key('help'),'1')},
     get deaths(){return deaths}
@@ -459,7 +460,7 @@ LB.cue.ring=function(ctx,cx,cy,r,open){const T=LB.CUE_T;
 
 /* ---------- LB.settings : roue de réglages du menu des chapitres (décision docs/decisions/2026-11-02-chapter-settings.md) ----------
    Même panneau et même style que le hub (classes hset, hsbox, hsrow…). Lignes : LB.SETTINGS_T (Musique lb-mus, Bruitages lb-snd,
-   Aide visuelle lb-help), au même format que SETTINGS_T du hub (type toggle : get, set) ; off() : ligne verrouillée (aide en Épreuve,
+   Aide visuelle lb-help), au même format que SETTINGS_T du hub (type toggle : get, set) ; off() : ligne verrouillée (aide en Difficile et en Épreuve,
    affichée Off sans toucher à lb-help). La roue est dans #langs du menu (LB.gearBtn). mount(stage, bouton, onSet) ; onSet(id) après
    un changement. Échap ferme, Tab reste dans le panneau, le focus revient à la roue. */
 LB.SETTINGS_T=[

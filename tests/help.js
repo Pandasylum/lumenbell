@@ -1,11 +1,11 @@
 // Aide visuelle commune (LB.help, LB.cue, shared/js/28-ui.js ; decisions n° 3 et 8 du 28 octobre, session menu/common).
 //  1. dist, sans cle : case decochee au chargement ; Facile ne la coche pas (Chapitre II : plus d'aide cochee d'office) ;
-//     Difficile : case visible et active (Chapitre I : plus de noHelp) ;
+//     Difficile : case desactivee, decochee, Off, lb-help intact (comme l'Epreuve ; decision 2026-11-04-aide-difficile) ;
 //  2. copies de test : 3e defaite en Facile sans aide -> la carte propose « Activer l'aide visuelle » (go2), pas avant ; le
 //     bouton coche la case, ecrit lb-help et relance la phase ; une fois l'aide active, plus de proposition ; Normal et Epreuve :
 //     jamais ;
 //  3. repere : avec l'aide, barre au-dessus de la tete en Normal (LB.cue.bar), cercle en Facile (pas de barre) ; sans l'aide,
-//     rien (Chapitre I : trois secondes de la phase I en temps reel ; Chapitre II : phase I au pas fixe, dessin compris).
+//     rien, y compris en Difficile meme si lb-help vaut oui (Chapitre I : trois secondes de la phase I en temps reel ; Chapitre II : phase I au pas fixe, dessin compris).
 // Sortie attendue : errs []
 const path=require('path');const launch=require('./launch');const {testPage}=require('./ch2-lib');
 const ROOT=path.resolve(__dirname,'..');
@@ -25,7 +25,7 @@ const SPY=()=>{const L=window.__t.LB;window.__c={bar:0,ring:0,cue:0,easy:0};cons
    await pg.evaluate(d=>document.querySelector('#mphM [data-diff='+d+']').click(),d);await pg.waitForTimeout(300);
    if(await pg.evaluate(()=>!!document.getElementById('cine')&&!document.getElementById('cine').hidden)){await pg.keyboard.press('Escape');await pg.waitForTimeout(200)}
    r[d]=await st()}
-  check(!s0.on,ch+': aide cochee au chargement sans cle');check(!r.easy.on&&!r.easy.dis,ch+': Facile '+JSON.stringify(r.easy));check(!r.hard.on&&!r.hard.dis&&!r.hard.hid,ch+': Difficile '+JSON.stringify(r.hard));
+  check(!s0.on,ch+': aide cochee au chargement sans cle');check(!r.easy.on&&!r.easy.dis,ch+': Facile '+JSON.stringify(r.easy));check(!r.hard.on&&r.hard.dis&&!r.hard.hid,ch+': Difficile '+JSON.stringify(r.hard));
   console.log(ch,'case',JSON.stringify({chargement:s0,...r}));await ctx.close()}
  // 2. et 3. Chapitre I
  {const ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push('ch1: pageerror: '+e.message));
@@ -44,10 +44,10 @@ const SPY=()=>{const L=window.__t.LB;window.__c={bar:0,ring:0,cue:0,easy:0};cons
    console.log('ch1',d,'propositions',JSON.stringify(offers))}
   // repere : Normal et Facile, aide cochee puis decochee
   await pg.evaluate(SPY);
-  for(const [d,on] of [['normal',true],['easy',true],['normal',false]]){
-   await pg.evaluate(([d,on])=>{const T=window.__t;T.applyDiff(d);if(T.LB.help.on()!==on){T.LB.settings.toggle(true);document.querySelector('#lbSet [data-id=help] [data-v='+on+']').click();T.LB.settings.toggle(false)}T.goPhase(1);T.start();T.adv(4.2);T.getG().php=99;window.__c={bar:0,ring:0,cue:0,easy:0}},[d,on]);
+  for(const [d,on] of [['normal',true],['easy',true],['normal',false],['hard',true]]){
+   await pg.evaluate(([d,on])=>{const T=window.__t;T.applyDiff(d==='hard'?'normal':d);if(T.LB.help.on()!==on){T.LB.settings.toggle(true);document.querySelector('#lbSet [data-id=help] [data-v='+on+']').click();T.LB.settings.toggle(false)}if(d==='hard')T.applyDiff('hard');T.goPhase(1);T.start();T.adv(4.2);T.getG().php=99;window.__c={bar:0,ring:0,cue:0,easy:0}},[d,on]);
    await pg.waitForTimeout(3500);const c=await pg.evaluate(()=>window.__c);
-   if(!on)check(c.bar+c.ring===0,'ch1 sans aide : repere dessine '+JSON.stringify(c));else if(d==='normal')check(c.bar>0&&c.ring===0,'ch1 Normal : '+JSON.stringify(c));else check(c.ring>0&&c.bar===0,'ch1 Facile : '+JSON.stringify(c));
+   if(!on||d==='hard')check(c.bar+c.ring===0,'ch1 '+(on?'Difficile (lb-help oui)':'sans aide')+' : repere dessine '+JSON.stringify(c));else if(d==='normal')check(c.bar>0&&c.ring===0,'ch1 Normal : '+JSON.stringify(c));else check(c.ring>0&&c.bar===0,'ch1 Facile : '+JSON.stringify(c));
    console.log('ch1 repere',d,on?'aide':'sans aide',JSON.stringify(c))}
   await ctx.close()}
  // 2. et 3. Chapitre II
@@ -65,11 +65,11 @@ const SPY=()=>{const L=window.__t.LB;window.__c={bar:0,ring:0,cue:0,easy:0};cons
    else check(!offers.some(x=>x),'ch2 '+d+' : proposition hors Facile '+JSON.stringify(offers));
    console.log('ch2',d,'propositions',JSON.stringify(offers))}
   await pg.evaluate(SPY);
-  for(const [d,on] of [['normal',true],['easy',true],['normal',false]]){
-   await pg.evaluate(([d,on])=>{const T=window.__t;T.LB.help.use(T.DIFFS[d]);if(T.LB.help.on()!==on){T.LB.settings.toggle(true);document.querySelector('#lbSet [data-id=help] [data-v='+on+']').click();T.LB.settings.toggle(false)}T.startRun(d,true)},[d,on]);
+  for(const [d,on] of [['normal',true],['easy',true],['normal',false],['hard',true]]){
+   await pg.evaluate(([d,on])=>{const T=window.__t;T.LB.help.use(T.DIFFS[d==='hard'?'normal':d]);if(T.LB.help.on()!==on){T.LB.settings.toggle(true);document.querySelector('#lbSet [data-id=help] [data-v='+on+']').click();T.LB.settings.toggle(false)}if(d==='hard')T.LB.help.use(T.DIFFS.hard);T.startRun(d,true)},[d,on]);
    for(let i=0;i<30&&await pg.evaluate(()=>window.__t.S.mode)!=='card';i++)await step(.5);await pg.evaluate(()=>window.__t.go());
    await pg.evaluate(()=>{const S=window.__t.S;S.hp=S.hpMax=99;window.__c={bar:0,ring:0,cue:0,easy:0}});await step(12,true);const c=await pg.evaluate(()=>window.__c);
-   if(!on)check(c.cue===0,'ch2 sans aide : repere dessine '+JSON.stringify(c));else if(d==='normal')check(c.bar>0&&c.easy===0,'ch2 Normal : '+JSON.stringify(c));else check(c.easy>0&&c.bar===0,'ch2 Facile : '+JSON.stringify(c));
+   if(!on||d==='hard')check(c.cue===0,'ch2 '+(on?'Difficile (lb-help oui)':'sans aide')+' : repere dessine '+JSON.stringify(c));else if(d==='normal')check(c.bar>0&&c.easy===0,'ch2 Normal : '+JSON.stringify(c));else check(c.easy>0&&c.bar===0,'ch2 Facile : '+JSON.stringify(c));
    console.log('ch2 repere',d,on?'aide':'sans aide',JSON.stringify(c))}
   await ctx.close()}
  console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});
