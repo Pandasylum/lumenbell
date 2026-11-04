@@ -219,35 +219,33 @@ LB.hdr=(()=>{const ws=[];
   return{watch,sync}})();
 
 /* ---------- LB.pause : carte de pause (Reprendre, Menu) ----------
-   « Menu » ouvre deux choix sous Reprendre : « Menu du chapitre » et, depuis le hub (LB.fromHub), « Chapitres » (LB.toHub). Chaque
-   choix demande une confirmation (Quitter / Rester) : le combat en pause est perdu. Vues : main, choices, confirm (LB.pause.view).
+   « Menu » ouvre directement la confirmation (Quitter / Rester) : le combat en pause est perdu. « Quitter » mène au menu du
+   chapitre (hh.onMenu), « Rester » rend la carte de pause. Vues : main, confirm (LB.pause.view). Décision docs/decisions/2026-11-04-pause-menu.md.
    stay() : Échap / P sur la confirmation = Rester (rend true s'il a pris la touche) ; enter() : Entrée / Espace sans bouton focalisé
-   = Rester sur la confirmation, sinon Reprendre. Un seul bouton est focalisé à la fois (celui de la vue). hh.onMenu : menu du chapitre. */
+   = Rester sur la confirmation, sinon Reprendre. Un seul bouton est focalisé à la fois (celui de la vue). */
 LB.pause=(()=>{
-  let ov=null,h={},view='main',exit='';
+  let ov=null,h={},view='main';
   const q=s=>ov.querySelector(s);
-  const BTN={main:['#pResume','#pMenu'],choices:['#pResume','#pChap','#pHub'],confirm:['#pLeave','#pStay']},ALL=['#pResume','#pMenu','#pChap','#pHub','#pLeave','#pStay'],FOCUS={main:'#pResume',choices:'#pChap',confirm:'#pStay'};
+  const BTN={main:['#pResume','#pMenu'],confirm:['#pLeave','#pStay']},ALL=['#pResume','#pMenu','#pLeave','#pStay'],FOCUS={main:'#pResume',confirm:'#pStay'};
   function setView(v,focus){view=v;if(!ov)return;
-    for(const id of ALL)q(id).hidden=!BTN[v].includes(id)||(id==='#pHub'&&!LB.fromHub);
+    for(const id of ALL)q(id).hidden=!BTN[v].includes(id);
     q('#pBody').hidden=v!=='confirm';lang();
     if(focus)try{q(FOCUS[v]).focus({preventScroll:true})}catch(e){}}
   function mount(stage,after,hh){
     h=hh||{};if(ov)return ov;
-    ov=LB.ui.mk('div',{class:'ov',id:'pause',hidden:''},'<div class="card"><p class="eyebrow">Pause</p><h2 id="pTitle">Fight paused</h2><p id="pBody" hidden></p><button class="btn" id="pResume" type="button">Resume</button><button class="btn ghost" id="pMenu" type="button">Menu</button><button class="btn ghost" id="pChap" type="button" hidden>Chapter menu</button><button class="btn ghost" id="pHub" type="button" hidden>Chapters</button><button class="btn" id="pLeave" type="button" hidden>Leave</button><button class="btn ghost" id="pStay" type="button" hidden>Stay</button></div>');
+    ov=LB.ui.mk('div',{class:'ov',id:'pause',hidden:''},'<div class="card"><p class="eyebrow">Pause</p><h2 id="pTitle">Fight paused</h2><p id="pBody" hidden></p><button class="btn" id="pResume" type="button">Resume</button><button class="btn ghost" id="pMenu" type="button">Menu</button><button class="btn" id="pLeave" type="button" hidden>Leave</button><button class="btn ghost" id="pStay" type="button" hidden>Stay</button></div>');
     stage.insertBefore(ov,after?after.nextSibling:null);
     q('#pResume').addEventListener('click',()=>{if(h.onResume)h.onResume()});
-    q('#pMenu').addEventListener('click',()=>setView('choices',true));
-    q('#pChap').addEventListener('click',()=>{exit='chapter';setView('confirm',true)});
-    q('#pHub').addEventListener('click',()=>{exit='hub';setView('confirm',true)});
+    q('#pMenu').addEventListener('click',()=>setView('confirm',true));
     q('#pStay').addEventListener('click',()=>setView('main',true));
-    q('#pLeave').addEventListener('click',()=>{const e=exit;setView('main');if(e==='hub'){try{LB.toHub(LB.menu.C.n)}catch(x){}}else if(h.onMenu)h.onMenu()});
+    q('#pLeave').addEventListener('click',()=>{setView('main');if(h.onMenu)h.onMenu()});
     setView('main');
     return ov;
   }
   function lang(){if(!ov)return;
     q('#pTitle').textContent=view==='confirm'?LB._('Leave the fight?','Quitter le combat ?'):LB._('Fight paused','Combat en pause');
     q('#pBody').textContent=LB._('The current fight will be lost.','Le combat en cours sera perdu.');
-    q('#pResume').textContent=LB._('Resume','Reprendre');q('#pChap').textContent=LB._('Chapter menu','Menu du chapitre');q('#pHub').textContent=LB._('Chapters','Chapitres');
+    q('#pResume').textContent=LB._('Resume','Reprendre');q('#pMenu').textContent=LB._('Menu','Menu');
     q('#pLeave').textContent=LB._('Leave','Quitter');q('#pStay').textContent=LB._('Stay','Rester')}
   return{mount,lang,bind(hh){h=hh},show(){setView('main');ov.hidden=false;try{q('#pResume').focus({preventScroll:true})}catch(e){}},hide(){if(ov){ov.hidden=true;setView('main')}},
     visible(){return!!ov&&!ov.hidden},resume(){if(h.onResume)h.onResume()},get view(){return view},
