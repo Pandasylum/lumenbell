@@ -3119,7 +3119,7 @@ function spawn(){
    between two shards leaving (s, every difficulty); a spell after a cry starts once the returning cry has passed the Watcher; shards (Echoes, last Echo, copies) are never closer than the shard rain's minimum spacing (RAIN, per
    difficulty: the Hard grace after a shard needs it); ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
 const VOICE={vol:{easy:[2,3],normal:[3,4],hard:[3,4]},rain:{easy:2,normal:3,hard:3},echoOrb:{easy:1,normal:1,hard:1},echoShard:{easy:1,normal:1,hard:1},rageVoice:{easy:1,normal:2,hard:2},
-  last:{easy:1,normal:1,hard:1},lastVol:{easy:2,normal:3,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.5,step:.02,max:6,of:1,every:2},orb:{tl:.45,ti:1.45,gap:.5},shardCharge:.5,shardGap:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
+  last:{easy:1,normal:1,hard:1},lastVol:{easy:2,normal:2,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.5,step:.02,max:6,of:1,every:2},orb:{tl:.45,ti:1.45,gap:.5},shardCharge:.5,shardGap:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
 const voiceDk=()=>S.dk==='easy'?'easy':S.d.u.length>1?'hard':'normal';
 const fieldX=x=>clamp(x,VOICE.field,W-VOICE.field), fieldY=y=>clamp(y,VOICE.field,GY);
 function P2(stage,f,b,final,rage){
