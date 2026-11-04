@@ -202,4 +202,4 @@
 - La Voix : sa plainte va un peu plus vite, la vague touche visiblement le Veilleur à l'instant de l'esquive, et elle pleure ; l'écho lointain, en Difficile, la relance en écho plus doux. Les éclats de miroir sont plus gros.
 - Esquiver un reflet laisse récupérer deux fois plus vite, et la Voix attaque 10 % plus vite ; les trois ripostes ont un impact bref sur elle (arrêt très court, léger tremblement, étincelles, son).
 - Pluie d'éclats : le miroir éclate et ses fragments sont projetés dans toute la salle, changent de direction 2 ou 3 fois avant de foncer sur le Veilleur, dans un ordre imprévisible, un peu plus vite.
-- Sons : la Voix pleure quand le combat commence, un murmure s'étale à sa mort, et les reflets de rage arrivent avec une impulsion de verre qui s'éloigne en écho.
+- Son : les reflets de rage arrivent avec une impulsion de verre qui s'éloigne en écho.

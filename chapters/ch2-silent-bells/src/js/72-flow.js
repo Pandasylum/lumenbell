@@ -36,7 +36,7 @@ function enterPhase(id,o){o=o||{};
   hud();playCine(id,'in',()=>introCard(id));
 }
 function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:P.boss(),desc:P.desc(),go:_('Start','Commencer'),onGo:beginPlay})}
-function beginPlay(){hideCard();S.mode='play';if(S.phase===2)MUSIC.fx('voiceWeep');S.paused=false;S.nextAt=gt+1.1;setTheme(S.phase);try{$('ward').focus({preventScroll:true})}catch(e){};hud();say(PH[S.phase].head())}
+function beginPlay(){hideCard();S.mode='play';S.paused=false;S.nextAt=gt+1.1;setTheme(S.phase);try{$('ward').focus({preventScroll:true})}catch(e){};hud();say(PH[S.phase].head())}
 function phaseCleared(){
   MUSIC.stop();const id=S.phase;
   if(id===3&&S.form===1){playCine(3,'p2',()=>{S.form=2;S.bossHp=S.bossMax;resetPhaseState();hud();beginPlay()});return}
