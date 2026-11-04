@@ -419,18 +419,21 @@ LB.hud={
 };
 
 /* ---------- LB.help : aide visuelle (décision n° 3 du 28 octobre ; réglage de la roue, LB.SETTINGS_T) ----------
-   Désactivée par défaut, mémorisée (lb-help), activable dans toutes les difficultés ; verrouillée (et décochée à l'écran, sans
-   toucher à lb-help) en Épreuve. mount() lit lb-help ; use(d) au choix de la difficulté ; set(v) : réglage de la roue ; defeat(facile) :
+   Désactivée par défaut, mémorisée (lb-help), activable en Facile et Normal ; verrouillée (et décochée à l'écran, sans
+   toucher à lb-help) en Difficile et en Épreuve (décision docs/decisions/2026-11-04-aide-difficile.md). mount() lit lb-help ; use(d) au choix de la difficulté ; set(v) : réglage de la roue ; defeat(facile) :
    true à la 3e défaite en Facile sans aide (le chapitre propose alors « Activer l'aide visuelle » sur la carte de défaite) ;
-   enable() active et mémorise ; on() : l'aide est active ; locked() : Épreuve. */
+   enable() active et mémorise ; on() : l'aide est active (aucun repère LB.cue quand elle est verrouillée) ; locked() : Difficile ou Épreuve.
+   Point de règle unique : LB.help.LOCKED(d). */
 LB.help=(()=>{
   let deaths=0,lock=false,val=false;const stored=()=>LB.store.get(LB.key('help'),'0')==='1';
+  const LOCKED=d=>!!(d&&(d.trial||d.hard));   /* la règle : Épreuve (trial) et Difficile (hard) */
   return{
+    LOCKED,
     mount(){val=stored()},
     on(){return val&&!lock},
     locked(){return lock},
     set(v){if(lock)return;val=!!v;LB.store.set(LB.key('help'),val?'1':'0')},
-    use(d){deaths=0;if(d&&d.trial)lock=true;else{lock=false;val=stored()}},
+    use(d){deaths=0;if(LOCKED(d))lock=true;else{lock=false;val=stored()}},
     defeat(easy){if(!easy||LB.help.on())return false;return++deaths===3},
     enable(){lock=false;val=true;LB.store.set(LB.key('help'),'1')},
     get deaths(){return deaths}
@@ -457,7 +460,7 @@ LB.cue.ring=function(ctx,cx,cy,r,open){const T=LB.CUE_T;
 
 /* ---------- LB.settings : roue de réglages du menu des chapitres (décision docs/decisions/2026-11-02-chapter-settings.md) ----------
    Même panneau et même style que le hub (classes hset, hsbox, hsrow…). Lignes : LB.SETTINGS_T (Musique lb-mus, Bruitages lb-snd,
-   Aide visuelle lb-help), au même format que SETTINGS_T du hub (type toggle : get, set) ; off() : ligne verrouillée (aide en Épreuve,
+   Aide visuelle lb-help), au même format que SETTINGS_T du hub (type toggle : get, set) ; off() : ligne verrouillée (aide en Difficile et en Épreuve,
    affichée Off sans toucher à lb-help). La roue est dans #langs du menu (LB.gearBtn). mount(stage, bouton, onSet) ; onSet(id) après
    un changement. Échap ferme, Tab reste dans le panneau, le focus revient à la roue. */
 LB.SETTINGS_T=[
