@@ -1311,15 +1311,14 @@ LB.card.mount($('stage'),$('menu'));LB.pause.mount($('stage'),$('menu'));
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
 /* Difficulty. The Watcher's own settings (hp = HP 6 / 4 / 3, trial 4 at the start and +1 between phases, capped at 4; m = multiplier of his action,
    x2 / x1 / x0.6; rm = of his recovery, x1.2 in Hard) are LB.HERO_DIFF (shared/js/16-hero.js), merged into each entry by
-   LB.diff.apply (the trial entries 'tn' / 'th' take the base difficulty of Normal / Hard); sp = attack speed; boss = boss HP
-   (kept from the import until playtests); heal = HP refilled between phases (true = all, a number = that many, capped at the starting HP); u = boss HP at which a rage starts (one in Easy and
-   Normal, two in Hard, as in Ember Bridge, where Normal raged at 5 of 10 HP and Hard at 10 and 5 of 14: same proportions here). */
+   LB.diff.apply (the trial entries 'tn' / 'th' take the base difficulty of Normal / Hard); sp = attack speed; boss / boss3 = boss HP of phases I-II / phase III (8 / 10 / 14 and 8 / 10 / 12, as Ember Bridge); heal = HP refilled between phases (true = all, a number = that many, capped at the starting HP); u / u3 = boss HP at which a rage starts, phases I-II / III (one in Easy and
+   Normal, two in Hard: [4] / [5] / [10,5] and [4] / [5] / [8,5], as Ember Bridge). */
 const DIFFS={
-  easy:{sp:.85,boss:6,u:[3],heal:true,fr:'Facile',en:'Easy'},
-  normal:{sp:1,boss:8,u:[4],heal:true,fr:'Normal',en:'Normal'},
-  hard:{sp:1.18,boss:10,u:[7,4],heal:true,hard:true,fr:'Difficile',en:'Hard'},
-  tn:{sp:1,boss:8,u:[4],trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{sp:1.18,boss:10,u:[7,4],hard:true,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  easy:{sp:.85,boss:8,boss3:8,u:[4],u3:[4],heal:true,fr:'Facile',en:'Easy'},
+  normal:{sp:1,boss:10,boss3:10,u:[5],u3:[5],heal:true,fr:'Normal',en:'Normal'},
+  hard:{sp:1.18,boss:14,boss3:12,u:[10,5],u3:[8,5],heal:true,hard:true,fr:'Difficile',en:'Hard'},
+  tn:{sp:1,boss:10,boss3:10,u:[5],u3:[5],trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
+  th:{sp:1.18,boss:14,boss3:12,u:[10,5],u3:[8,5],hard:true,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
 for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
@@ -3021,7 +3020,8 @@ function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
    then his rage spell (the signature spell of the phase), then the second-half patterns; the final assault comes at
    RAGE.finalHp. The boss bar marks the thresholds (pips underlined, as in Ember Bridge). */
 const RAGE={dur:1.6,dur2:.8,finalHp:1};
-const rageMarks=()=>LB.hud.marks(S.d.u,S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
+const rageAt=()=>S.phase===3?S.d.u3:S.d.u;   // rage thresholds of the current phase
+const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
   else if(S.phase===1){banner(_('Blue heart','Cœur bleu'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
@@ -3060,11 +3060,11 @@ const SP={
 };
 function spawn(){
   const d=S.d,id=S.phase,f2=id===3&&S.form===2,gen=f2?P3b:[P1,P2,P3][id-1];
-  const n=d.u.filter(x=>S.bossHp<=x).length;
-  /* as in Ember Bridge (a fury restarts while the Colossus's HP are still at its threshold): a rage or final assault whose counter
-     failed (HP not lower than when the roar began) starts again; the counter that lowers the HP closes it */
+  const n=rageAt().filter(x=>S.bossHp<=x).length;
+  /* a rage fires once per threshold crossed (rageN counts them), then normal attacks resume; it is not restarted when the counter
+     fails (that restart made the rage repeat on every attack). The final assault still restarts until the boss falls. */
   if(!S.rageNext){
-    if(S.rageHp0!=null){if(S.bossHp>=S.rageHp0&&S.rageN>0)S.rageN--;S.rageHp0=null}
+    S.rageHp0=null;
     if(S.finalDone&&S.bossHp>0)S.finalDone=false;
   }
   if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.rageHp0=S.bossHp;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
@@ -3387,7 +3387,7 @@ function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,pa
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
 function resetPhaseState(){Object.assign(S,{angerShown:false,rageN:0,rageHp0:null,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
-  S.phase=id;S.form=1;S.bossMax=S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
+  S.phase=id;S.form=1;S.bossMax=id===3?S.d.boss3:S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
  resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
 }
