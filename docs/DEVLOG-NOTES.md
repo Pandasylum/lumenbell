@@ -196,3 +196,4 @@
 - La Voix en Difficile : rien de visible (rapport d'analyse seul).
 - La Voix : les orbes sont plus grandes ; les illusoires sont un anneau creux en pointillé épais. Les impacts réels sont espacés (Facile 0,6 s · Normal 0,75 s · Difficile 1,05 s), les volées et pluies sont plus courtes en Facile, et en Difficile un écho lance une orbe après chaque sort.
 - La Voix : rien de visible côté jeu (mesure seule) ; l’écart entre impacts réels est désormais consigné pour tous les projectiles, reflets revenants compris.
+- La Voix : l'Echo de rage n'apparaît plus que pendant les rages ; les clones tirent dans le désordre, orbes réelles ou illusoires au hasard. Le reflet qui revient atteint visiblement le Veilleur à l'impact.
