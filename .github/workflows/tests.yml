@@ -1,7 +1,7 @@
 name: Tests
 # PR : « smoke » + les seuls périmètres touchés (job « changes », voir sa table plus bas).
+# Push sur main : « smoke » seul. Lancement manuel : suite complète.
 # PR en brouillon : rien ne tourne. La CI se lance à la mise en prêt (ready_for_review).
-# Push sur main et lancement manuel : suite complète.
 on:
   push:
     branches: [main]
@@ -42,13 +42,12 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   # Calcule les périmètres à tester. Sur PR : fichiers modifiés par rapport à la base.
-  # Sur push / lancement manuel : tous les périmètres.
+  # Sur lancement manuel : tous les périmètres. Sur push vers main : aucun (seul « smoke » tourne).
   #   shared/**, build/**, tests/**, ce workflow  -> tous les périmètres
   #   chapters/ch2-silent-bells/**                -> ch2
   #   site/**                                     -> hub
   #   chapters/ch1-ember-bridge/**                -> aucun périmètre dédié (couvert par « smoke »)
   changes:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     outputs:
       scopes: ${{ steps.scopes.outputs.scopes }}
@@ -62,6 +61,11 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           ALL="shared ch2 hub"
+          if [ "$EVENT" = "push" ]; then
+            # Push sur main : aucun périmètre, les étapes « Tests » et builds sont sautés.
+            echo "scopes=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [ "$EVENT" != "pull_request" ]; then
             echo "scopes=$ALL" >> "$GITHUB_OUTPUT"
             exit 0
