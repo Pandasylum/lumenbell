@@ -1,5 +1,6 @@
 name: Tests
-# PR : tous les jobs. Push sur main : seul « smoke » (build reproductible + fumee + artefact).
+# PR : « smoke » + les seuls périmètres touchés (job « changes », voir sa table plus bas).
+# Push sur main et lancement manuel : suite complète.
 on:
   push:
     branches: [main]
@@ -32,11 +33,49 @@ on:
       - 'docs/TEXTES-CH1.md'
       - 'docs/decisions/**'
       - 'archives/**'
+  workflow_dispatch:
 concurrency:
   group: tests-${{ github.ref }}
+  # Les pushes sur main ne sont jamais annules : chaque commit de main doit aller au bout.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
-  # Controle obligatoire eventuel de la protection de branche : garder le nom « smoke ».
+  # Calcule les périmètres à tester. Sur PR : fichiers modifiés par rapport à la base.
+  # Sur push / lancement manuel : tous les périmètres.
+  #   shared/**, build/**, tests/**, ce workflow  -> tous les périmètres
+  #   chapters/ch2-silent-bells/**                -> ch2
+  #   site/**                                     -> hub
+  #   chapters/ch1-ember-bridge/**                -> aucun périmètre dédié (couvert par « smoke »)
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      scopes: ${{ steps.scopes.outputs.scopes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: scopes
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          ALL="shared ch2 hub"
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "scopes=$ALL" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! FILES=$(git diff --name-only "$BASE_SHA"...HEAD); then
+            echo "scopes=$ALL" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          S=""
+          while IFS= read -r f; do
+            case "$f" in
+              shared/*|build/*|tests/*|.github/workflows/tests.yml) S="$S $ALL" ;;
+              chapters/ch2-silent-bells/*) S="$S ch2" ;;
+              site/*) S="$S hub" ;;
+            esac
+          done <<< "$FILES"
+          echo "scopes=$S" >> "$GITHUB_OUTPUT"
   smoke:
     runs-on: ubuntu-latest
     steps:
@@ -100,13 +139,14 @@ jobs:
 
   tests:
     name: ${{ matrix.name }}
-    if: github.event_name == 'pull_request'
+    needs: changes
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: Commun (cles, audio, Epreuve, entrees, aide, annonces, cinematiques)
+            scope: shared
             run: |
               node keys.js
               node audio.js
@@ -117,16 +157,19 @@ jobs:
               node announce.js
               node cine.js
           - name: menu-layout
+            scope: shared
             run: |
               node menu-layout.js
               node menu-title.js
           - name: Chapitre II (textes, cles, fumee, Epreuve)
+            scope: ch2
             run: |
               node ch2-texts.js
               node ch2-keys.js
               node ch2-smoke.js
               node ch2-trial.js
           - name: Chapitre II (entrees, titre, retouches, annonces, bot)
+            scope: ch2
             run: |
               node ch2-input.js
               node ch2-title.js
@@ -134,19 +177,25 @@ jobs:
               node ch2-announce.js
               node ch2-bot.js 100 --check
           - name: Hub (site assemble)
+            scope: hub
             run: |
               node hub.js
               node hub-site.js
     steps:
+      # Un périmètre non touché saute toutes les étapes (pas de build, pas de Playwright).
       - uses: actions/checkout@v4
+        if: contains(needs.changes.outputs.scopes, matrix.scope)
       - uses: actions/setup-node@v4
+        if: contains(needs.changes.outputs.scopes, matrix.scope)
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: tests/package-lock.json
       - uses: actions/setup-python@v5
+        if: contains(needs.changes.outputs.scopes, matrix.scope)
         with: { python-version: '3.12' }
       - name: Builds (ils alimentent la version de test)
+        if: contains(needs.changes.outputs.scopes, matrix.scope)
         run: |
           python3 build/build.py
           python3 build/build_ch2.py
@@ -154,11 +203,13 @@ jobs:
           python3 build/build_test.py
       - name: Cache des navigateurs Playwright
         id: pw
+        if: contains(needs.changes.outputs.scopes, matrix.scope)
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
       - name: Installer Playwright
+        if: contains(needs.changes.outputs.scopes, matrix.scope)
         working-directory: tests
         run: |
           npm ci
@@ -168,5 +219,6 @@ jobs:
             npx playwright install --with-deps chromium
           fi
       - name: Tests
+        if: contains(needs.changes.outputs.scopes, matrix.scope)
         working-directory: tests
         run: ${{ matrix.run }}
