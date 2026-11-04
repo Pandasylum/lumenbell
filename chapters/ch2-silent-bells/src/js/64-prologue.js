@@ -188,8 +188,8 @@ function spawn(){
    rain = shards of a shard rain; echoOrb / echoShard = orbs, then shards, of each reflection in the Echoes (rages);
    rageVoice = orbs the Voice casts herself between the two reflections; last = shards of each
    reflection of the last Echo (final assault) when it shatters; lastVol = orbs of the volley
-   each reflection of the last Echo casts first; real = chance that an orb of the Echoes is real (else illusory); twin = Hard's permanent echo beside the Voice: it copies
-   `of` blows in `every` of the Voice's spells (same draw, real or illusory) at least `dt` s later (not scaled by f), pushed back by `step` s until
+   each reflection of the last Echo casts first; real = chance that an orb of the Echoes is real (else illusory); twin = Hard's permanent echo beside the Voice: it answers
+   `of` blows in `every` of the Voice's spells with one orb (same nature) at least `dt` s later (not scaled by f), pushed back by `step` s until
    every copied impact is at least `gap`*f (the spacing of a volley's orbs) from every other impact of the series (at most `max` s; with no room left, the copies come
    after the last attack of the series); wail: the cry bounces on the screen
    edge `edge` and comes back towards its caster (second dodge, same speed); field = margin keeping every orb, shard and cry
@@ -198,7 +198,7 @@ function spawn(){
    between two shards leaving (s, every difficulty); a spell after a cry starts once the returning cry has passed the Watcher; shards (Echoes, last Echo, copies) are never closer than the shard rain's minimum spacing (RAIN, per
    difficulty: the Hard grace after a shard needs it); ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
 const VOICE={vol:{easy:[2,3],normal:[3,4],hard:[3,4]},rain:{easy:2,normal:3,hard:3},echoOrb:{easy:1,normal:1,hard:1},echoShard:{easy:1,normal:1,hard:1},rageVoice:{easy:1,normal:2,hard:2},
-  last:{easy:1,normal:1,hard:1},lastVol:{easy:2,normal:3,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.5,step:.02,max:6,of:1,every:3},orb:{tl:.45,ti:1.45,gap:.5},shardCharge:.5,shardGap:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
+  last:{easy:1,normal:1,hard:1},lastVol:{easy:2,normal:3,hard:2},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.5,step:.02,max:6,of:1,every:2},orb:{tl:.45,ti:1.45,gap:.5},shardCharge:.5,shardGap:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
 const voiceDk=()=>S.dk==='easy'?'easy':S.d.u.length>1?'hard':'normal';
 const fieldX=x=>clamp(x,VOICE.field,W-VOICE.field), fieldY=y=>clamp(y,VOICE.field,GY);
 function P2(stage,f,b,final,rage){
@@ -219,19 +219,19 @@ function P2(stage,f,b,final,rage){
   const echoR=()=>{const [a,b2]=[1,2].sort(()=>Math.random()-.5);echoOne(a);for(let i=0;i<VOICE.rageVoice[dk];i++)orb(Math.random()<VOICE.real[dk],0);t+=.9*f;echoOne(b2);S.cv='echo'};
   const rain=()=>{const n=VOICE.rain[dk];let s=t;for(let i=0;i<n;i++){if(i){const lo=Math.max(G[0],VOICE.shardGap),hi=Math.max(G[1],lo);s+=lo+Math.random()*(hi-lo)}S.shardNext=((S.shardNext||0)+5)%SHARDS.length;T.push({k:'shard',t0:s,tl:s+.42*f+C,ti:s+.95*f+C,si:S.shardNext})}hitT=Math.max(hitT,s+.95*f+C);t=s+1.3*f+C;S.cv='rain'};
   const twin=()=>{
-  // Hard: the permanent echo beside the Voice copies each of her spells (same draw) VOICE.twin.dt s later
+  /* Hard: the permanent echo beside the Voice answers `of` of her blows in `every` (any spell: orb, cry, shard; a cry and its
+     return are one blow), from a random start in each series, with one orb of its own: same nature as the blow it answers
+     (a cry or a shard: real), landing at least VOICE.twin.dt s later, pushed back until it keeps `gap`*f from every impact
+     (the shard rain's minimum next to a shard) and flies outside any cry's way out and back */
   if(dk==='hard'){const W2=VOICE.twin,gap=W2.gap*f,own=th=>(th.k==='orb'||th.k==='wail')&&th.src===0||th.k==='shard'&&th.si!=null;
-    // only `of` blows in `every` are copied (a cry and its return are one blow), from a random start in each series
-    const blows=T.filter(th=>own(th)&&!th.ret).sort((a,b)=>a.ti-b.ti),ph=Math.floor(Math.random()*W2.every),keep=new Set();
-    blows.forEach((th,i)=>{if((i+ph)%W2.every<W2.of){keep.add(th);if(th.k==='wail')keep.add(T.find(o=>o.k==='wail'&&o.ret&&o.src===th.src&&Math.abs(o.t0-th.ti)<1e-6))}});
-    const mine=T.filter(th=>keep.has(th));
-    let dt=W2.dt;const near=(m,o,d)=>Math.abs(m.ti+d-o.ti)<(m.k==='shard'&&o.k==='shard'?Math.max(gap,G[0],VOICE.shardGap):m.k==='shard'||o.k==='shard'?Math.max(gap,G[0]):gap);
-    // a copied cry, from its start to its return past the Watcher, shares the screen with no other spell
-    const cry=(m,d)=>{if(m.k!=='wail'||m.ret)return false;const r=T.find(o=>o.k==='wail'&&o.ret&&o.src===m.src&&Math.abs(o.t0-m.ti)<1e-6),a=m.t0+d,b=(r?r.ti:m.ti)+d;return T.some(o=>o!==m&&o!==r&&o.t0<b&&o.ti>a)};
-    const clash=d=>mine.some(m=>cry(m,d)||T.some(o=>near(m,o,d)));while(clash(dt)&&dt<W2.dt+W2.max)dt+=W2.step;
-    if(clash(dt))dt=Math.max(...T.map(o=>o.ti))-Math.min(...mine.map(m=>m.ti))+Math.max(gap,G[0]);   // no room: the echo replays after the whole series
-    for(const th of mine){
-    const c=Object.assign({},th,{t0:th.t0+dt,tl:th.tl+dt,ti:th.ti+dt,twin:1});if(th.k!=='shard')c.src=3;if(th.k==='wail')c.x0=fieldX(VPOS[3].x-VOICE.wail.mouth);if(th.si!=null)c.si=(th.si+8)%SHARDS.length;T.push(c)}}
+    const blows=T.filter(th=>own(th)&&!th.ret).sort((a,b)=>a.ti-b.ti),ph=Math.floor(Math.random()*W2.every);
+    const mine=blows.filter((th,i)=>(i+ph)%W2.every<W2.of);
+    const cries=T.filter(o=>o.k==='wail'&&!o.ret).map(w=>{const r=T.find(o=>o.k==='wail'&&o.ret&&o.src===w.src&&Math.abs(o.t0-w.ti)<1e-6);return[w.t0,r?r.ti:w.ti]});
+    const near=(m,o,d)=>Math.abs(m.ti+d-o.ti)<(o.k==='shard'?Math.max(gap,G[0]):gap);
+    const inCry=(m,d)=>{const a=m.ti+d-O.ti*f,b=m.ti+d;return cries.some(([c0,c1])=>a<c1&&b>c0)};
+    let dt=W2.dt;const clash=d=>mine.some(m=>inCry(m,d)||T.some(o=>near(m,o,d)));while(clash(dt)&&dt<W2.dt+W2.max)dt+=W2.step;
+    if(clash(dt))dt=Math.max(...T.map(o=>o.ti))-Math.min(...mine.map(m=>m.ti))+Math.max(gap,G[0]);   // no room: the echo answers after the whole series
+    for(const th of mine){const ti=th.ti+dt;T.push({k:'orb',t0:ti-O.ti*f,tl:ti-(O.ti-O.tl)*f,ti,real:th.real!==false,src:3,twin:1})}}
   return T};
   if(rage){echoR();return twin()}
   // last Echo: two reflections, each a volley then a cry, then it shatters; the finish is the classic counter on the Voice
