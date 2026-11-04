@@ -178,4 +178,4 @@
 
 - Chapitre II, Voix Creuse : chaque sort a sa riposte (laser direct, laser qui ricoche sur un miroir, onde de la clochette) ; la plainte rebondit sur le bord de l'écran et revient, il faut l'esquiver deux fois.
 - Pendant les Échos, chaque illusion lance une orbe puis éclate sous ton rayon, et la Voix tire ses propres orbes entre les deux ; le dernier assaut fait combattre deux illusions l'une après l'autre ; une grande orbe ricoche sur un miroir et frappe la Voix à la tête.
-- En Difficile, un écho reste à côté de la Voix et répète deux de ses coups sur trois un peu plus tard.
+- En Difficile, un écho reste à côté de la Voix et répète un de ses coups sur trois un peu plus tard ; les orbes sont plus grosses, et les illusoires se reconnaissent à leur anneau creux en pointillé.

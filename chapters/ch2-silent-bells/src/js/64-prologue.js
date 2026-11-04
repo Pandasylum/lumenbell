@@ -192,18 +192,18 @@ function spawn(){
    every copied impact is at least `gap`*f (the spacing of a volley's orbs) from every other impact of the series (at most `max` s; with no room left, the copies come
    after the last attack of the series); wail: the cry bounces on the screen
    edge `edge` and comes back towards its caster (second dodge, same speed); field = margin keeping every orb, shard and cry
-   inside the visible field; orb = an orb grows in the hand until `tl`*f and lands at `ti`*f (was 1.3: slower flight, same
-   spacing between orbs); shardCharge = extra charge of every shard (rain, Echoes, copies) before it flies, in s (not scaled); shardGap = minimum time
+   inside the visible field; orb = an orb grows in the hand until `tl`*f and lands at `ti`*f (was 1.3: slower flight); `gap`*f between two orbs of a volley
+   (was .44); the twin's `gap` follows it; shardCharge = extra charge of every shard (rain, Echoes, copies) before it flies, in s (not scaled); shardGap = minimum time
    between two shards leaving (s, every difficulty); a spell after a cry starts once the returning cry has passed the Watcher; shards (Echoes, last Echo, copies) are never closer than the shard rain's minimum spacing (RAIN, per
    difficulty: the Hard grace after a shard needs it); ray = how long before a reflection shatters the Watcher's ray strikes it (s) */
-const VOICE={vol:{easy:[2,3],normal:[3,5],hard:[3,5]},rain:{easy:2,normal:3,hard:3},echoOrb:{easy:1,normal:1,hard:1},echoShard:{easy:1,normal:1,hard:1},rageVoice:{easy:1,normal:2,hard:2},
-  last:{easy:1,normal:1,hard:1},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.44,step:.02,max:6,of:2,every:3},orb:{tl:.45,ti:1.45},shardCharge:.5,shardGap:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
+const VOICE={vol:{easy:[2,3],normal:[3,4],hard:[3,4]},rain:{easy:2,normal:3,hard:3},echoOrb:{easy:1,normal:1,hard:1},echoShard:{easy:1,normal:1,hard:1},rageVoice:{easy:1,normal:2,hard:2},
+  last:{easy:1,normal:1,hard:1},real:{easy:.5,normal:.75,hard:.75},twin:{dt:.45,gap:.5,step:.02,max:6,of:1,every:3},orb:{tl:.45,ti:1.45,gap:.5},shardCharge:.5,shardGap:.5,backStep:.02,wail:{edge:24,mouth:85},field:24,ray:.28};
 const voiceDk=()=>S.dk==='easy'?'easy':S.d.u.length>1?'hard':'normal';
 const fieldX=x=>clamp(x,VOICE.field,W-VOICE.field), fieldY=y=>clamp(y,VOICE.field,GY);
 function P2(stage,f,b,final,rage){
   const T=[],dk=voiceDk();let t=b,hitT=b;
   const O=VOICE.orb,C=VOICE.shardCharge,G=RAIN[S.d.m<1?'hard':'normal'];
-  const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+O.tl*f,ti:t+O.ti*f,real,src:src||0});hitT=Math.max(hitT,t+O.ti*f);t+=.44*f};
+  const orb=(real,src)=>{T.push({k:'orb',t0:t,tl:t+O.tl*f,ti:t+O.ti*f,real,src:src||0});hitT=Math.max(hitT,t+O.ti*f);t+=O.gap*f};
   const volley=(n,ill,src)=>{const V=VOICE.vol[dk];n=clamp(n,V[0],V[1]);ill=Math.min(ill,n-1);const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i),src);t+=.9*f;S.cv='volley'};
   // the cry leaves the mouth, crosses the Watcher, bounces on the screen edge and comes back towards its caster (two dodges)
   const wail=src=>{src=src||0;const x0=fieldX(VPOS[src].x-VOICE.wail.mouth),e=VOICE.wail.edge,ti=t+1.9*f,v=(x0-HX)/(1.1*f),d=(HX-e)/v;
@@ -245,17 +245,21 @@ function P2(stage,f,b,final,rage){
 function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
   // the return is pushed back (by VOICE.backStep s) while it would land closer to another real attack than a volley's spacing
   // (the shard rain's minimum next to a shard), so the Watcher can always dodge both (decision 2026-11-03-ch2-voix-creuse)
-  const c=PT(),g=.44/S.d.sp,G0=RAIN[S.d.m<1?'hard':'normal'][0];let ti=gt+c.act+c.rec+DG.backWin;const ti0=ti;
+  const c=PT(),g=VOICE.orb.gap/S.d.sp,G0=RAIN[S.d.m<1?'hard':'normal'][0];let ti=gt+c.act+c.rec+DG.backWin;const ti0=ti;
   while(ti<ti0+3&&S.threats.some(o=>!o.done&&o!==th&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(o.ti-ti)<(o.k==='shard'?Math.max(g,G0):g)))ti+=VOICE.backStep;
   const nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);say(_('The reflection comes back.','Le reflet revient.'))}
 function shardPos(si){const s=SHARDS[si],m=VOICE.field+s.s;return{x:clamp(s.x+Math.sin(rt*.4+s.o)*12,m,W-m),y:clamp(s.y+Math.cos(rt*.5+s.o)*8,m,GY-m),s:s.s}}
+/* look of the Voice's orbs (decision 2026-11-03-ch2-voix-creuse, 4 November: bigger for small screens): r = radius (was 13),
+   glow = halo radius in r; aReal / aFake = halo strength of a real / illusory orb (was .85 / .6); an illusory orb is a hollow ring
+   with a dotted outline `dash` (was [3,4]) `dashW` px thick (was 2); a returning reflection keeps the old look (rBack) */
+const ORB_LOOK={r:17,glow:3,aReal:.85,aFake:.45,dash:[6,5],dashW:3,rBack:13};
 function drawOrbs(){
   for(const th of S.threats){
     if(gt<th.t0)continue;
     if(th.k==='orb'||th.k==='back'){
       const back=th.k==='back',h=back?{x:HX-110,y:HY-56}:voiceHand(th.src,1),tx=HX+14,ty=HY;
-      let x,y,r=13,a=1,p=0,dash=th.real?0:1;
-      if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);if(back){const e=eout(k);x=lerp(tx,h.x,e);y=lerp(ty,h.y,e)-Math.sin(Math.PI*k)*30;dash=1-k}else{x=h.x;y=h.y;r=4+9*k}}
+      const OL=ORB_LOOK,R=back?OL.rBack:OL.r;let x,y,r=R,a=1,p=0,dash=th.real?0:1;
+      if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);if(back){const e=eout(k);x=lerp(tx,h.x,e);y=lerp(ty,h.y,e)-Math.sin(Math.PI*k)*30;dash=1-k}else{x=h.x;y=h.y;r=4+(R-4)*k}}
       else{p=(gt-th.tl)/(th.ti-th.tl);
         if(th.done){if(th.res==='hit'||th.res==='pass'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.45)}}
         x=lerp(h.x,tx,p);y=lerp(h.y,ty,p)-Math.sin(Math.PI*Math.min(p,1))*(th.k==='back'?20:46)}
@@ -264,8 +268,10 @@ function drawOrbs(){
       ctx.save();ctx.globalAlpha=a;
       if(th.real&&gt>=th.tl){const sh=clamp(1-(GY-y)/400,.25,1);ell(x,GY+3,r*1.6*sh,4*sh,`rgba(0,0,0,${.5*sh})`)}
       // every orb is full; an illusory one (clones' included) has a dotted outline, a real one casts its shadow (above)
-      glow(x,y,r*3,'rgba(176,124,255,.95)',th.real?.85:.6);ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff');
-      if(dash>0){ctx.save();ctx.globalAlpha*=dash;ctx.setLineDash([3,4]);ctx.lineDashOffset=-gt*12;ctx.strokeStyle='#f4ecff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.stroke();ctx.restore()}
+      glow(x,y,r*OL.glow,'rgba(176,124,255,.95)',th.real?OL.aReal:OL.aFake);
+      if(th.real||back){ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff')}
+      else{ctx.save();ctx.strokeStyle='#c9a8ff';ctx.lineWidth=r*.45;ctx.beginPath();ctx.arc(x,y,r*.77,0,Math.PI*2);ctx.stroke();ctx.restore()}   // illusory: hollow ring, no bright core
+      if(dash>0){ctx.save();ctx.globalAlpha*=dash;ctx.setLineDash(back?[3,4]:OL.dash);ctx.lineDashOffset=-gt*12;ctx.strokeStyle='#f4ecff';ctx.lineWidth=back?2:OL.dashW;ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.stroke();ctx.restore()}
       ctx.restore();
     }else if(th.k==='shard'){
       const o=th.from!=null?{x:voicePos(th.from).x,y:voicePos(th.from).y-90,s:24}:shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;
