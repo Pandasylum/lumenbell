@@ -12,14 +12,14 @@ Section	Sujet	Statut	Date	PR
 D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	Fait (PR fusionnée)	28 octobre 2026 (mis à jour le 29)	https://github.com/Pandasylum/lumenbell/pull/31
 F	Documents à mettre à jour	En cours (CH2-SPEC et COMMUN faits ; BIBLE, DECISIONS, LORE restent)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
 G	Chapitre I · Lanterne du Colosse de braise	Fait (PR fusionnée)	29 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/31
-I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
+I	Chapitre II · Pleurs avant la Voix	Fait	29 octobre 2026	
 J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours : (a) et (b) fusionnés ; (c) en cours (textes reçus le 5 novembre, voir O)	30 octobre 2026 (mis à jour le 5 novembre)	branche `ch2/lore-changements` (a et b fusionnés) ; (c) branche `ch2/validations-5nov`
 
-K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	Fait (PR fusionnée)	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/31
-L	Chapitre I · Fausse fin de Facile supprimée	Fait (PR fusionnée)	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/31
+K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	Fait	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/31
+L	Chapitre I · Fausse fin de Facile supprimée	Fait	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/31
 
-M	Chapitre II · Phare Noyé : tour d'avant C1	À faire (validation à l'écran d'abord)	1er novembre 2026	
-N	Chapitre I · Phase II : esquive en pas de côté, contres au sol	Fait (PR fusionnée)	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/36
+M	Chapitre II · Phare Noyé : tour d'avant C1	Fait	1er novembre 2026	
+N	Chapitre I · Phase II : esquive en pas de côté, contres au sol	Fait	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/36
 O	Chapitre II · Validations de Kevin du 5 novembre (fin de phase II, cartes de défaite, fêlure, murmure, « Couronne »)	En cours	5 novembre 2026	branche `ch2/validations-5nov` (PR à ouvrir)
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
@@ -88,7 +88,7 @@ Lueur orange (code couleur de la braise), faible, avec une pulsation lente : le 
 Elle n'apparaît pas dans l'outro. Ce sont de simples indices : pas de texte, pas de bruitage, pas de zoom.
 Emplacement exact et forme : à choisir (près des équerres et des chaînes, lisible sur la cinématique) et à signaler dans la PR.
 Ne pas toucher à la silhouette du Colosse (validée) : la lanterne est un élément de décor, pas de son équipement.
-I. Chapitre II · Pleurs avant la Voix (à tenter)
+I. Chapitre II · Pleurs avant la Voix (Fait)
 Avant l'apparition de la Voix Creuse (phase I), ajouter un pleur étouffé dans le son. Tout le son est synthétisé : pas de fichier audio.
 Sobre et bref, sans texte : il porte la « profonde tristesse » que le texte d'entrée annonce sans la répéter à l'écran.
 À essayer : proposer deux variantes si possible ; Kevin choisit à l'écoute. Si l'essai ne convainc pas, le retirer.
@@ -125,7 +125,7 @@ Après :
 - Ne pas toucher : carte d'entrée (`00-core.js:57`), `36-p2:300` (transition), `36-p2:211`, `16-p1:319`.
 
 Raison : plus de chute ; aucun impact sur le lore ; texte lecteur d'écran uniquement.
-Statut : en cours, branche `ch1/foundry-floor` (PR à ouvrir). Lanterne visible pendant tout le combat de la phase II : voir section G.
+Statut : Fait (PR fusionnée), branche `ch1/foundry-floor`. Lanterne visible pendant tout le combat de la phase II : voir section G.
 
 L. Chapitre I · Fausse fin de Facile supprimée (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-idees-validees.md` § b)
 
@@ -147,7 +147,7 @@ Après :
 - Le libellé « Retour au menu » / "Back to menu" (ligne 322) ne doit rester que s'il sert encore à la vraie fin.
 - La logique `R.mode === 'fake'` (`44-p3-belfry-logic.js` lignes 212 et 375, `08-state.js` ligne 24, `48-p3-belfry-poses.js` lignes 122 et 356, `56-p3-belfry-render.js` ligne 540) est à retirer ou à adapter pour que la vraie fin s'affiche dans toutes les difficultés. Le comportement de chaque ligne est à relire avant le codage.
 
-Statut : en cours, branche `ch1/foundry-floor` (PR à ouvrir). Sans effet sur les autres textes.
+Statut : Fait (PR fusionnée), branche `ch1/foundry-floor`. Sans effet sur les autres textes.
 
 M. Chapitre II · Phare Noyé : sommet d'avant C1 (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-idees-validees.md` § e)
 
@@ -166,7 +166,7 @@ Ne pas toucher aux timings.
 
 À ne pas faire : modifier la silhouette du Colosse, ou toucher au Chapitre I.
 
-Statut : en cours, branche `ch2/phare-v1` (1er novembre). Comparaison faite par Kevin : les « 2 lampes en haut » sont les deux blocs sombres qui encadrent la méduse dans `2b75101`, supprimés par `0bad679`. Seul ce sommet est restauré (formes I et II) ; planche avant / après : `build/out/phare-v1/comparaison-phase3.png` (non suivie). Écart tranché par Kevin le 1er novembre : les deux blocs sont des lanternes latérales propres à la tour (phrase ajoutée sous le tableau de `docs/CH2-SPEC.md`). 2e passe : les lumières de la tour (faisceau, foudre, crépitement de charge, anneaux de la tempête) partent des deux lanternes, en formes I et II ; les deux pièces attendent sur la plage, au centre et séparées, à l'entrée du combat et servent à la construction. Planche : `build/out/phare-v2/comparaison-tirs.png` (non suivie). Détails : `chapters/ch2-silent-bells/NOTES.md`, « Lanternes latérales ».
+Statut : Fait (PR fusionnée), branche `ch2/phare-v1` (1er novembre). Comparaison faite par Kevin : les « 2 lampes en haut » sont les deux blocs sombres qui encadrent la méduse dans `2b75101`, supprimés par `0bad679`. Seul ce sommet est restauré (formes I et II) ; planche avant / après : `build/out/phare-v1/comparaison-phase3.png` (non suivie). Écart tranché par Kevin le 1er novembre : les deux blocs sont des lanternes latérales propres à la tour (phrase ajoutée sous le tableau de `docs/CH2-SPEC.md`). 2e passe : les lumières de la tour (faisceau, foudre, crépitement de charge, anneaux de la tempête) partent des deux lanternes, en formes I et II ; les deux pièces attendent sur la plage, au centre et séparées, à l'entrée du combat et servent à la construction. Planche : `build/out/phare-v2/comparaison-tirs.png` (non suivie). Détails : `chapters/ch2-silent-bells/NOTES.md`, « Lanternes latérales ».
 
 N. Chapitre I · Phase II : esquive en pas de côté, contres au sol (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-ch1-esquive-pas-de-cote.md`)
 
@@ -180,7 +180,7 @@ Rendu seulement : aucun timing ni réglage d'équilibrage ne change. `DG.drop` r
 
 Referme le point « Plongée d'esquive » de `docs/decisions/2026-11-01-ch1-foundry-floor-application.md`.
 
-Statut : en cours, branche `ch1/dodge-side` (PR à ouvrir).
+Statut : Fait (PR fusionnée), branche `ch1/dodge-side`.
 
 O. Chapitre II · Validations de Kevin du 5 novembre 2026 (voir `docs/decisions/2026-11-05-ch2-validations.md`)
 
