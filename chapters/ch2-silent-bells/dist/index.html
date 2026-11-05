@@ -755,9 +755,6 @@ LB.title=(c,t,t0,o)=>{
    Légende HTML (LB.cine, même forme pour tous) : « Chapitre N · Nom. À suivre. » / « Chapter N · Name. To be continued. », teintée LB.CH_COL[n].
    Toutes les valeurs sont dans LB.NEXT_T. */
 LB.CH_COL={1:'#ff7a2b',2:'#4fe0cc',3:'#b9cf5a'};   /* code couleur par chapitre (docs/GLOSSAIRE.md, CH_COL) ; IV et suivants s'ajoutent ici */
-/* teinte dérivée d'un chapitre (lien « chapitre suivant » du menu) : « r,g,b » et version éclaircie au survol */
-LB.chRgb=n=>{const h=LB.CH_COL[n]||'#8a8a9a';return[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(',')};
-LB.chHover=n=>{const h=LB.CH_COL[n]||'#8a8a9a';return'#'+[1,3,5].map(i=>Math.round(parseInt(h.slice(i,i+2),16)*.45+255*.55).toString(16).padStart(2,'0')).join('')};
 LB.NEXT_T={delay:1,in:1.5,y1:118,y2:182,size1:22,size2:62,x:480,ls1:2,ls2:2,
   head:'LUMEN',tail:['BELL · CHAPTER ','BELL · CHAPITRE '],roman:['','I','II','III','IV','V','VI','VII']};
 LB.nextCard=(c,s,o)=>{
@@ -875,7 +872,6 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.mcard .tnote[hidden]{display:none}\n'+
  '.mcard .tnote b{display:block;margin-bottom:6px;font-family:var(--font-display);font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:'+c2+'}\n'+
  '.mcard .tnote ul{margin:0;padding-left:18px;display:grid;gap:3px}\n'+
- '.btn.big{font-size:24px;padding:12px 38px}\n'+
  '.mph{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%}\n'+
  '.mph button{min-width:0;display:grid;gap:0;justify-items:center;padding:8px 6px;background:rgba(22,17,29,.8);border:1px solid var(--line);color:var(--fg);cursor:pointer;font:inherit}\n'+
  '.mph button b{font-family:var(--font-display);font-weight:800;font-size:'+M.btnFs+';line-height:1;white-space:nowrap;color:'+c+';text-transform:uppercase;letter-spacing:.05em}\n'+
@@ -884,7 +880,7 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.mph button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.16)}\n'+
  '.mph button:disabled{opacity:.45;cursor:not-allowed}\n'+
  '.mph[hidden]{display:none}\n'+
- '@media (max-width:560px){.mcard .tag,.mcard .how{display:none}.mcard{gap:8px}.mcard h2{font-size:34px}.btn.big{font-size:20px;padding:8px 26px}}\n'+
+ '@media (max-width:560px){.mcard .tag,.mcard .how{display:none}.mcard{gap:8px}.mcard h2{font-size:34px}}\n'+
  '@media (max-width:480px){.mph{gap:6px;grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}.mph button b{font-size:17px;letter-spacing:.04em}.mph button span{font-size:11px}.ov.menu{padding:16px 12px}.mcard h2{font-size:clamp(34px,11vw,48px)}}\n'+
  '@media (max-height:520px) and (orientation:landscape){.ov.menu{padding-block:8px}.mcard{gap:6px;padding:0}.mcard .tnote{padding:6px 12px;font-size:11px;line-height:1.3}.mcard .tnote b{margin-bottom:2px;font-size:14px}.mcard .tnote ul{gap:1px}.ver{margin:0}.ov.menu .mcard .tag,.ov.menu .mcard .how{display:none}.ov.menu .mcard .eyebrow,.ov.menu .mcard h2{transform:none}.mcard h2{font-size:clamp(30px,9vh,52px)}}\n'+
  '@media (max-height:'+M.tinyH+'px) and (orientation:landscape){.ov.menu{padding-block:4px}.mcard{gap:4px;padding:0}.mcard .tnote{line-height:1.2}.mcard h2{font-size:26px;line-height:.85}.mcard .eyebrow.chap{font-size:13px;margin-top:0}.mcard .tnote{padding:4px 10px}.mcard .tnote b{font-size:12px}.mcard .tnote ul{padding-left:14px}}\n'+
@@ -1082,7 +1078,7 @@ LB.menu=(()=>{
     $('introBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onIntro)h.onIntro()});
     $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onOutro)h.onOutro()});
     if(LB.fromHub)$('mHub').addEventListener('click',e=>{e.currentTarget.blur();LB.toHub(C.n)});   /* une seule navigation, même au double appui */
-    document.querySelectorAll('#langs button[data-lang],#gateLangs button').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
+    document.querySelectorAll('#langs button[data-lang]').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
     lang();
     return m;
   }
@@ -1100,7 +1096,6 @@ LB.menu=(()=>{
     $('mEye').textContent=LB.chapterName(C.n,C.title);
     m.querySelector('.mcard .tag').textContent=LB.tx(C.tag);
     $('mResume').textContent=LB._('Resume','Reprendre');
-    const gb=$('gateBtn');if(gb)gb.textContent=LB._('Start','Commencer');
     for(const dk of DK){const bt=m.querySelector('#mphM [data-diff='+dk+']');bt.querySelector('b').textContent=TX[dk]();bt.querySelector('span').textContent=TX['s'+dk[0].toUpperCase()+dk.slice(1)]()}
     m.querySelector('#mphT [data-diff=tn] b').textContent=TX.normal();m.querySelector('#mphT [data-diff=th] b').textContent=TX.hard();
     $('mBackT').querySelector('b').textContent=LB._('‹ Back','‹ Retour');$('mBackT').querySelector('span').textContent=LB._('Difficulties','Difficultés');
@@ -1110,8 +1105,8 @@ LB.menu=(()=>{
     $('introBtn').textContent='▶ Intro';$('outroBtn').textContent='▶ Outro';
     if(LB.fromHub){$('mHub').querySelector('.nm').textContent=LB._('Chapters','Chapitres');$('mHub').setAttribute('aria-label',LB._('Back to the chapters','Retour aux chapitres'))}
     $('mphM').setAttribute('aria-label',LB._('Choose difficulty','Choisir la difficulté'));$('mphT').setAttribute('aria-label',LB.tx(C.trial.name));
-    document.querySelectorAll('#langs,#gateLangs').forEach(e=>e.setAttribute('aria-label',LB._('Language','Langue')));
-    document.querySelectorAll('#langs button[data-lang],#gateLangs button').forEach(bt=>bt.setAttribute('aria-pressed',String(bt.dataset.lang===LB.lang.cur)));
+    document.querySelectorAll('#langs').forEach(e=>e.setAttribute('aria-label',LB._('Language','Langue')));
+    document.querySelectorAll('#langs button[data-lang]').forEach(bt=>bt.setAttribute('aria-pressed',String(bt.dataset.lang===LB.lang.cur)));
     LB.pause.lang();LB.settings.lang();
   }
   function trial(on){update();$('mphM').hidden=on;$('mphT').hidden=!on;$('trialNote').hidden=!on;
@@ -2290,7 +2285,6 @@ function drawBoss3(cine){
   ctx.restore();
 }
 /* transformation: the jellyfish bursts out of the King and rebuilds his parts into the tower */
-const TF_LEN=10;
 function drawTransform(){
   const t=gt-S.tfT;spinCine=null;
   if(t<2){ // the King, shaking, heart turning blue
@@ -2533,7 +2527,6 @@ const CINE_P2={haul:4.0,lift:4.35,slung:4.75,desc:1.8,descD:380,collapse:1.4,col
 const CINE_P3={zoom:9.4,zoomD:2.6,zoomZ:2.1,reveal:3.2,revealZ:1.7,revealX:HX,revealY:GY-60};
 function once(k){if(S.cineDone[k])return false;S.cineDone[k]=1;return true}
 function resetCine(s){s.hatchK=0;s.hatchSnap=0;s.lampDim=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
-function startCine(p,k){const s=p.s;resetCine(s);if(MUSIC.cur!==s.phase)MUSIC.bed(s.phase);s.demo=false;s.parts=[];s.pops=[];s.cine={k,t0:gt};s.tfBurst=s.tfFlash=s.tfAnch=false;s.tfId=(s.tfId||0)+1;s.flashT=-9}
 function fadeAll(a,c){if(a<=0)return;ctx.fillStyle=`rgba(${c||'0,0,0'},${clamp(a,0,1)})`;ctx.fillRect(0,0,W,H)}
 /* chapter colours (docs/CH2-SPEC.md): II tide turquoise, III roots moss green leaning yellow */
 const CH_COL=LB.CH_COL;   // table commune (shared/js/24-cine.js)
@@ -2594,7 +2587,6 @@ function ecAim(i,q){const k=SBELLS.indexOf(i),ra=bx=>Math.atan2(-(bx-q.x),GY-q.y
     else r=lerp(ra(-60),q.r,eio((gt-e)/SPIN.back))}
   if(!on&&ecMem[k]!=null&&gt>=ecMem[k]&&gt<ecMem[k]+SPIN.back)r=lerp(ra(-60),q.r,eio((gt-ecMem[k])/SPIN.back));
   return r}
-function drawEclIdle(T){drawEcl(ecPose(T),ecAnchor(T),{x:LX,y:ECY+Math.sin(T*1.1)*4,r:44*(1+Math.sin(T*2.6)*.1)},1,1,null)}
 /* finale timing: the orbit stops with the gap facing the Watcher */
 const EPHI05=Math.PI-12*Math.PI/7;
 function ePhi(t){if(t<.6)return EPHI05+.55*(t-.5);const d=Math.min(t-.6,1.2);return EPHI05+.055+.55*(d-d*d/2.4)}

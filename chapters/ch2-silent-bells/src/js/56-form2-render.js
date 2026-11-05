@@ -46,7 +46,6 @@ function ecAim(i,q){const k=SBELLS.indexOf(i),ra=bx=>Math.atan2(-(bx-q.x),GY-q.y
     else r=lerp(ra(-60),q.r,eio((gt-e)/SPIN.back))}
   if(!on&&ecMem[k]!=null&&gt>=ecMem[k]&&gt<ecMem[k]+SPIN.back)r=lerp(ra(-60),q.r,eio((gt-ecMem[k])/SPIN.back));
   return r}
-function drawEclIdle(T){drawEcl(ecPose(T),ecAnchor(T),{x:LX,y:ECY+Math.sin(T*1.1)*4,r:44*(1+Math.sin(T*2.6)*.1)},1,1,null)}
 /* finale timing: the orbit stops with the gap facing the Watcher */
 const EPHI05=Math.PI-12*Math.PI/7;
 function ePhi(t){if(t<.6)return EPHI05+.55*(t-.5);const d=Math.min(t-.6,1.2);return EPHI05+.055+.55*(d-d*d/2.4)}

@@ -27,6 +27,22 @@ Vérifié par `git grep` : aucune autre référence que cet audit. Non déplacé
 
 ---
 
+## B2 faite
+
+Classe moteur partagé. Builds régénérés (`build.py`, `build_ch2.py`, `build_site.py`). Tests : `smoke` (ch1 puis ch2), `keys`, `audio` : `errs []` partout (`keys.js` n'a pas été intermittent). Pas de bots, de `visual-shots` ni de `trial-*`.
+
+**Supprimé** (0 référence reprouvée par `git grep -w`, accès par chaîne `LB[…]` compris, tests compris) :
+- `LB.chRgb`, `LB.chHover` (`shared/js/24-cine.js`) ; `startCine`, `drawEclIdle`, `TF_LEN` (Chapitre II) ; `qlimb` (Chapitre I).
+- Reliquats « Commencer » : sélecteurs `#gateLangs` et branche `gateBtn` de `28-ui.js` ; boucle `fpLang` sur tableau vide (`site/src/page/body.html`) ; restes de `tests/menu-layout.js` (`gate`, `gEn`, `gFr`, `R.gate`) et de `tests/ch2-lib.js` (masquage de `#gate`) ; clics `#gateBtn` de `tests/visual-shots.js` sur les chapitres (non lancé) ; mentions de `LB.gate` dans `NOTES.md`, `shared/NOTES.md`, notes des deux chapitres et commentaire de `60-ui-menu.js`.
+- Bloc CSS `.btn.big` (`shared/css/gate.css`, ligne `@gate-js btnbig` et règle en media query de `28-ui.js`) et son cas particulier dans `build/assemble.py` (plus d'élément de chapitre ne porte la classe ; vérifié par grep : la carte d'ouverture de phase n'a pas `big`).
+- Ligne `store/` du tableau de `README.md`.
+
+**Déplacé** (`git mv`, sous-chemin gardé) vers `archives/` : `docs/AUDIT-2026-10-30.md`, `build/ch2_swap_args.py`, `chapters/ch2-silent-bells/shots/`. Renvois mis à jour : `README.md`, `docs/DEVLOG-NOTES.md`, `archives/DECISIONS-2026-10-27-28.md`, `ch2/NOTES.md`.
+
+**Laissé, et pourquoi** : le bouton de la carte d'ouverture de phase (vivant) ; le `#gate`, `#gateBtn` et la règle `.btn.big` propre du hub (vivants) ; `tests/cine.js:173` (garde inoffensive) ; `build/promo.js` (supprimé en B1) ; `legacy/silent-bells.source.html`, `docs/CH2-SPEC.md`, `CHANGEMENTS.md` (consigne) ; `docs/COMMUN.md` et `docs/decisions/*` (textes historiques ou hors lot : mentions de `LB.gate` conservées) ; `DECISIONS.md` (index) ; `build/promo-check.py`.
+
+---
+
 ## 1. Code mort et assets non référencés
 
 ### 1.1 Code (0 référence prouvée)

@@ -194,7 +194,6 @@ function drawBoss3(cine){
   ctx.restore();
 }
 /* transformation: the jellyfish bursts out of the King and rebuilds his parts into the tower */
-const TF_LEN=10;
 function drawTransform(){
   const t=gt-S.tfT;spinCine=null;
   if(t<2){ // the King, shaking, heart turning blue

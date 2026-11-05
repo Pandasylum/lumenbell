@@ -44,7 +44,6 @@ async function shots(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await
   const shot=async k=>{await pg.mouse.move(0,0);await pg.waitForTimeout(60);await pg.screenshot({path:path.join(dir,tag+'-'+k+'.png'),animations:'disabled'})};
   const click=async sel=>{await pg.evaluate(s=>{const e=document.querySelector(s);if(!e)throw new Error('absent: '+s);e.click()},sel)};
   await adv(30);
-  if(await pg.evaluate(()=>{const g=document.getElementById('gate');return!!g&&!g.hidden})){await shot('gate');await click('#gateBtn')}   // ecran de demarrage (LB.gate, les deux chapitres depuis menu/common)
   if(lang)await click('#langs button[data-lang='+lang+']');
   await adv(60);await shot('menu');
   if(nm==='old')continue;
@@ -78,7 +77,7 @@ async function menus(dir,files){fs.mkdirSync(dir,{recursive:true});const b=await
   const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' '+nm+': '+e.message));await pg.goto('file://'+files[ch]);
   const tag=ch+'-'+nm+'-'+lang,adv=n=>pg.evaluate(n=>window.__adv(n),n),click=s=>pg.evaluate(s=>document.querySelector(s).click(),s);
   const shot=async k=>{await pg.mouse.move(0,0);await pg.waitForTimeout(60);await pg.screenshot({path:path.join(dir,tag+'-'+k+'.png'),animations:'disabled'})};
-  await adv(30);await shot('gate');await click('#gateBtn');await adv(60);await shot('menu');
+  await adv(30);await adv(60);await shot('menu');
   await click('#mphM [data-diff=trial]');await adv(10);await shot('menu-trial');await ctx.close()}
  await b.close();return errs}
 async function hubShots(dir,file){fs.mkdirSync(dir,{recursive:true});const b=await launch();const errs=[];
@@ -206,7 +205,7 @@ async function cineShots(dir,files){fs.mkdirSync(dir,{recursive:true});const b=a
   let now=0;
   if(ch==='ch1'){
    const adv=n=>pg.evaluate(n=>window.__adv(n),n);
-   await adv(30);await click('#gateBtn');await click('#langs button[data-lang='+lang+']');await adv(30);
+   await adv(30);await click('#langs button[data-lang='+lang+']');await adv(30);
    await click(k==='intro'?'#mphM [data-diff=normal]':'#outroBtn');
    for(const t of CINE_AT.ch1[k]){await adv(Math.round((t-now)*60));now=Math.round(t*60)/60;await shot(t)}
   }else{

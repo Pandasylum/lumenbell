@@ -110,14 +110,8 @@ def gate_expand(items, rgb=None):
     # garde-fou : chaque regle de gate.css n'apparait qu'autant de fois qu'on l'a injectee (une copie a la main, meme identique, fait echouer)
     whole = "".join(t for _, t in res)
     assert "@gate" not in whole and "@GLOW@" not in whole and "@RGB@" not in whole, "repere @gate non resolu"
-    # ('.btn.big{' : le hub a sa propre regle de meme selecteur, differente : seule une copie identique a gate.css est refusee pour elle)
-    exact = {l.replace("@GLOW@", glow) for b in blocks.values() for l in b if "{" in l}
     for l in sorted({l.split("{")[0] + "{" for b in blocks.values() for l in b if "{" in l}):
-        if l == ".btn.big{":
-            pat = "|".join(re.escape(e) + "|'" + re.escape(e) + re.escape("\\n'+") for e in exact if e.startswith(l))
-            n = len(re.findall(r"(?m)^\s*(?:" + pat + ")$", whole))
-        else:
-            n = len(re.findall(r"(?m)^\s*'?" + re.escape(l), whole))
+        n = len(re.findall(r"(?m)^\s*'?" + re.escape(l), whole))
         assert n == used.get(l, 0), (f"regle '{l}...' de l'ecran de demarrage presente {n} fois pour {used.get(l, 0)} injection(s) : "
             "une copie recopiee a la main diverge de shared/css/gate.css ; la remplacer par une ligne '@gate <blocs>' (ou '@gate-js' dans LB.UI_CSS)")
     return res
