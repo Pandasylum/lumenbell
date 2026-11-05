@@ -230,3 +230,4 @@
 - Rien de visible : audit d'optimisation en lecture seule (`docs/AUDIT-OPTIM.md`), aucun code ni build touché.
 - Ce que le joueur verra : rien de visible.
 - Ce que le joueur verra : rien de visible (archivage de fichiers et de documentation, aucun changement de jeu).
+- Ce que le joueur verra : rien de visible (liens de documentation vers le fichier archivé).
