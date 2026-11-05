@@ -3448,9 +3448,9 @@ function P1(stage,f,b,final,rage){
   const decor=()=>{if(Math.random()<.5)rafter(t);else{T.push({k:'dchain',t0:t,ti:t+SP.glas.chain*f});t+=(SP.glas.chain+SP.glas.after)*f}};
   if(rage){(rage>1?dwave:rust)();T.spell=sp;return T}
   if(final){const left=Math.max(1,SP.glas.need[K]-(S.glasN||0));for(let i=0;i<left;i++){if((S.glasN||0)+i>0)decor();glas()}T.spell='glas';return T}
-  // one counter per series: Easy = one spell per series; Normal = 3 single spells and 3 combos (before and after the rage); Hard = always a combo
+  // one counter per series: Easy = one spell per series; Normal = 3 single spells and 3 combos, then only combos after the rage; Hard = combos of 2 spells, of 3 after the second rage
   const one=[harpoon,sweep,surge],duo=[()=>{harpoon();sweep()},()=>{sweep();surge()},()=>{surge();harpoon()}],trio=[()=>{sweep();surge();harpoon()},()=>{surge();sweep();harpoon()},()=>{harpoon();surge();sweep()}];
-  const p0=K==='easy'?one:K==='hard'?duo:[...one,...duo],p1=K==='easy'?one:K==='hard'?[...duo,...trio]:p0;
+  const p0=K==='easy'?one:K==='hard'?duo:[...one,...duo],p1=K==='easy'?one:K==='hard'?((S.rageN||0)>=2?trio:duo):[...duo,trio[0]];
   pick(stage?p1:p0)();T.spell=sp;return T;
 }
 /* the plank torn out by the harpoon (phase II): stuck in the wood behind the Watcher (q), then flown to his head (a: first block) and
