@@ -137,6 +137,8 @@ const MUSIC=(()=>{
     iceCrack:t=>{nz(t,.1,.3,'highpass',2200);osc('sine',85,t,.003,.25,.6,.8,38)},
     land:t=>{thump(t,90,.5,.5);nz(t,.4,.12,'highpass',1800,1,.3)},
     burst:t=>{nz(t,.6,.3,'bandpass',700,1.5,.5,180);osc('sine',320,t,.005,.2,.6,.5,70);nz(t,.1,.25,'highpass',3000)},
+    /* birth of form II: a deep, wide, low murmur, no words (synthesised; nothing announced) */
+    murmur:t=>{[46,55,62,73,82].forEach((f,i)=>osc('sine',f,t+i*.1,1.3,.06-i*.007,2.8,.85,f*.9,(i-2)*8));nz(t,3.8,.045,'bandpass',170,2,.85,95,1.5)},
     creature:t=>{osc('sine',260,t,.3,.05,1.4,.8,520,0);osc('sine',263,t+.05,.3,.04,1.3,.8,480)},
     jellyHit:t=>{osc('sine',210,t,.01,.07,.5,.7,70);osc('sine',140,t+.04,.01,.04,.45,.7,55);nz(t,.35,.09,'lowpass',700,1,.4,220,.3)},
     clank:t=>{clang(t,150+Math.random()*160,.07,.9);thump(t,120,.2,.25)},

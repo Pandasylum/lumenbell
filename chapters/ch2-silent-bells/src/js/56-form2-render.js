@@ -58,6 +58,7 @@ const EHEAD=TOWER.findIndex(p=>p.k==='head');
 /* the bell after the last blow: lying in the wreckage; the crack is born during the Remanence (CRACK_BORN: start, duration, seconds of the cinematic);
    the word « Crown » is no longer engraved here: it only shows in the close-up of the outro (76-epilogue.js) */
 const CRACK_BORN={from:5.3,dur:2.5};
+const LAMP_DIM_BIRTH={t:2.1,d:1.8};   // lantern of the Watcher at the birth of form II (cinematic 3:p2 only)
 const bellMarks=(crack)=>({crack:crack===undefined?true:crack});
 function ecTransition(t){
   const lean=t<2.1?.05*eio(clamp(t/1.2,0,1)):0;
@@ -79,6 +80,7 @@ function ecTransition(t){
   const Ah={x:lerp(Ap.x,As.x,ay),y:lerp(Ap.y,As.y,ay),a:lerp(Ap.a,As.a,ay),sc:lerp(1,.62,ay)};
   const A={x:lerp(Ah.x,A0.x,gl),y:lerp(Ah.y,A0.y,gl),a:lerp(Ah.a,A0.a,gl),sc:lerp(Ah.sc,A0.sc,gl),z:gl>.5?A0.z:1,clip:ay<.25};
   if(t>=2.4&&once('yank')){burst(LX+118,GY,26,'#dff8ff',6,.8,.4);S.shake=12}
+  S.lampDim=LAMP_DIM_BIRTH.d>0?Math.sin(Math.PI*clamp((t-LAMP_DIM_BIRTH.t)/LAMP_DIM_BIRTH.d,0,1)):0;   // the Watcher's lantern pales for a moment (rendering only)
   const J={x:LX,y:lerp(LY,ECY,eio(clamp((t-2.1)/1.2,0,1))),r:lerp(36,44,sc)};
   drawEcl(P,A,J,1,1,null,lampPoses(J.x,J.y,J.r/36,sc*(1-gl)),gl);
 }
@@ -151,7 +153,7 @@ const CSFX=(()=>{const L={'2:in':[[0,'glints'],[.3,'weepFar'],[1.1,'swell'],[1.9
   Object.values(FALL).forEach(F=>L['3:out'].push([F.ft+.55,'chunk']));
   return L})();
 CSFX['3:out']=[[0,'charge'],...ZAPS.map(z=>[z,'zap']),[1.95,'swell'],[2.7,'thunder'],[2.72,'explosion'],[2.9,'scream'],[5.3,'whooshDown'],[5.75,'plant'],[5.9,'fallWhine'],[7.5,'dissolve'],[7.6,'stars'],[9.2,'sting']];Object.entries(EFALL).forEach(([i,F])=>{CSFX['3:out'].push([F.ft+2.7,'chunk']);CSFX['3:out'].push([F.ft+2.7,+i===EHEAD?'bellBig':'bellHit'])});CSFX['3:out'].push([5.75,'bellHit']);CSFX['3:out'].push([9.2,'crackedBell'],[10,'hush'],[10.4,'tideFar']);
-CSFX['3:p2']=[[0,'rumble'],[1,'chunk'],[1.02,'bellSoft'],[2.12,'bellCascade'],[2.6,'bellSoft'],[2.85,'bellSoft'],[3.1,'bellSoft'],[3.35,'bellSoft'],[4.45,'bellChime'],[4.75,'bellHit'],[1.6,'heart'],[2.1,'burst'],[2.15,'creature'],[2.2,'refill'],[2.4,'chainSlip'],[2.45,'plant'],[3.4,'swell'],[4.6,'ignite'],[5.8,'sting']];
+CSFX['3:p2']=[[0,'rumble'],[1,'chunk'],[1.02,'bellSoft'],[2.12,'bellCascade'],[2.6,'bellSoft'],[2.85,'bellSoft'],[3.1,'bellSoft'],[3.35,'bellSoft'],[4.45,'bellChime'],[4.75,'bellHit'],[1.6,'heart'],[2.1,'burst'],[2.1,'murmur'],[2.15,'creature'],[2.2,'refill'],[2.4,'chainSlip'],[2.45,'plant'],[3.4,'swell'],[4.6,'ignite'],[5.8,'sting']];
 function cineSfx(t,key){const L=CSFX[key];if(!L)return;L.forEach((c,i)=>{if(t>=c[0]&&once('fx'+i))MUSIC.fx(c[1])})}
 function cineBoss(){
   const t=gt-S.cine.t0,k=S.cine.k,ph=S.phase;
