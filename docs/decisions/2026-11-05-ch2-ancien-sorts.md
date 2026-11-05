@@ -29,3 +29,6 @@ Un seul mouvement lié, sans retour au repos entre les coups : l'ancre se lève 
 Les combos de sorts dans une même série donnent un seul contre, à la fin. Choix : Facile = un seul sort par série ; Normal = 3 séries simples sur 6 et 3 combos sur 6, avant et après la rage ; Difficile = toujours un combo (deux sorts, trois sorts après la rage). Constaté (non modifié, hors périmètre) : la Voix Creuse a 1 série mixte sur 6 puis 5 sur 8 après la rage ; le Phare Noyé 4 sur 9 puis 8 sur 9. Le Chapitre I n'enchaîne pas ainsi : choix de Kevin de le garder.
 
 **Révision (Kevin, 5 nov.)** : Normal = 3 simples / 3 combos avant la rage, que des combos après (dont un à 3 sorts). Difficile = combos de 2 sorts avant et après la rage 1, combos de 3 sorts après la rage 2.
+
+**Rage 1, précision (Kevin, 5 nov.)** : le nuage recouvre aussi le Veilleur (voile `RUST_HAZE`, provisoire ; les attaques sont dessinées par-dessus). Au contre, il lève le bâton : un flash révèle sa moitié d'écran (x < 400, bord doux jusqu'à 500), l'Ancien reste dans la rouille. Le nuage se referme à la fin du contre (à valider : sinon, moitié dégagée jusqu'au KO).
+

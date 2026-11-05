@@ -83,7 +83,7 @@ function draw(){
   if(S.cine)cineBoss();
   else{const rc=(S.mode==='play'||S.mode==='ko')?S.recoil*SHOCK.recoilPx:0,hk=gt-(S.bossHurtT==null?-9:S.bossHurtT),hu=hk>=0&&hk<SHOCK.hurt?Math.sin(Math.PI*hk/SHOCK.hurt):0;
     const body=f=>{if(!rc&&!hu){f();return}const c=bossCore();ctx.save();ctx.translate(c.x+rc,GY);ctx.rotate(hu*.035);ctx.translate(-c.x,-GY);f();ctx.restore()};
-    if(ph===1){body(drawBoss1);drawRust();drawToll();drawKingFx()}
+    if(ph===1){body(drawBoss1);drawRust()}
     else if(ph===2){body(drawBoss2)}
     else if(S.form===2)body(drawEclGame);else{beaconHide();body(drawBoss3);drawBeacon();drawBeaconFx()}}
   if(S.mode!=='dead'||gt-S.deadT<.6){ctx.save();ctx.translate(S.heroDX||0,S.heroDY||0);drawHero();ctx.restore()}
@@ -92,7 +92,7 @@ function draw(){
   if(ph===2)hatchRing();
   if(ph===2){mirrorFloor();if(S.cine&&S.cine.k==='out')sinkGlow(gt-S.cine.t0)}
   if(ph===2)drawOrbs();
-  if(ph===1)drawRustHaze();
+  if(ph===1&&!S.cine){drawRustHaze();drawToll();drawKingFx()}   // the veil covers the Watcher too; the attacks are drawn over it (never hidden)
   drawCounter();
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';
