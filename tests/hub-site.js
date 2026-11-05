@@ -56,8 +56,8 @@ async function back(pg){await Promise.all([pg.waitForNavigation({waitUntil:'load
  for(const [nm,f] of [['site/ch1',BASE.file+'ch1/index.html'],['site/ch2',BASE.file+'ch2/index.html'],['site/ch1 http',BASE.http+'ch1/index.html'],
    ['dist ch1','file://'+path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')],['dist ch2','file://'+path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html')]]){
   const tag='seul '+nm,{ctx,pg}=await page(b,tag);await pg.goto(f);await pg.waitForTimeout(300);const S=await st(pg);
-  check(S.gate&&!S.back,tag+' : ecran de demarrage et pas de Retour '+JSON.stringify(S));
-  await pg.click('#gateBtn');await pg.waitForTimeout(150);check(await pg.evaluate(()=>!document.getElementById('mHub')&&!document.querySelector('.mfoot')),tag+' : menu sans lien');
+  check(!S.gate&&!S.back,tag+' : demarrage direct, sans ecran ni Retour '+JSON.stringify(S));
+  check(await pg.evaluate(()=>!document.getElementById('mHub')&&!document.querySelector('.mfoot')),tag+' : menu sans lien');
   console.log(tag.padEnd(22),'ok');await ctx.close()}
  // 3. 5 allers-retours : pas d'accumulation
  {const tag='allers-retours',{ctx,pg}=await page(b,tag);const cdp=await ctx.newCDPSession(pg);
