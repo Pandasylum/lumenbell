@@ -1,6 +1,5 @@
 /* ---------- audio : tout passe par LB.audio (shared/js/12-audio.js), un seul contexte pour la série ---------- */
-const ensureAudio=()=>LB.audio.ensure();
-const tone=(...a)=>LB.audio.tone(...a),noise=(...a)=>LB.audio.noise(...a);
+const ensureAudio=LB.audio.ensure,tone=LB.audio.tone,noise=LB.audio.noise;
 const sfx={
   block(p){tone(p?1046:880,.5,'sine',.22);tone(p?1568:1318,.35,'sine',.1);tone(2217,.2,'triangle',.05);if(p)tone(2093,.6,'sine',.07)},
   dodge(p){noise(.22,.25,'bandpass',600,2,null,null,2600);if(p)tone(1760,.25,'sine',.06)},

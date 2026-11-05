@@ -4,7 +4,8 @@
    Réglages Son / Musique : lb-snd, lb-mus lus par LB.store (load, appelé par LB.setup), écrits par setSound / setMusic.
    Arrière-plan (onglet caché, écran verrouillé, page quittée) : le contexte est suspendu, relancé au retour ou au premier geste. */
 LB.audio=(()=>{
-  let ctx=null,master=null,sfx=null,mus=null,bg=false,nb=null;
+  let ctx=null,master=null,sfx=null,mus=null,bg=false;
+  const nbs=new Map(); /* tampons de bruit blanc en cache, par durée (s) ; vidés si le contexte est recréé */
   const lv={master:1,sfx:1,mus:1},A={sound:true,music:true,stat:{tone:0,noise:0,made:0}};
   /* smooth : le bus musique suit en fondu (constante de temps 0,12 s, celle de l'arrêt de la musique du Chapitre I) ; sinon il prend sa valeur d'un coup (création du contexte) */
   const apply=smooth=>{if(!ctx)return;master.gain.value=lv.master;sfx.gain.value=A.sound?lv.sfx:0;
@@ -12,7 +13,7 @@ LB.audio=(()=>{
   function ensure(){
     try{
       if(bg&&!document.hidden)bg=false; /* garde-fou : l'arrière-plan ne peut pas durer quand la page est visible (un événement de retour perdu bloquerait le son) */
-      if(ctx&&ctx.state==='closed'){ctx=null;nb=null}
+      if(ctx&&ctx.state==='closed'){ctx=null;nbs.clear()}
       if(!ctx){
         const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
         try{ctx=new C({latencyHint:'playback'})}catch(e){ctx=new C()}
@@ -42,14 +43,20 @@ LB.audio=(()=>{
     if(!ctx||(!dest&&!A.sound))return;
     if(ctx.state!=='running')ensure();
     try{
-      if(!nb){nb=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
       const t=when||ctx.currentTime,atk=o&&o.atk||0,end=o&&o.end||.0005;
       const s=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain();
-      s.buffer=nb;s.loop=true;fl.type=ft;fl.frequency.setValueAtTime(ff,t);if(ff2)fl.frequency.exponentialRampToValueAtTime(ff2,t+dur);fl.Q.value=q||1;
+      s.buffer=noiseBuf(1);s.loop=true;fl.type=ft;fl.frequency.setValueAtTime(ff,t);if(ff2)fl.frequency.exponentialRampToValueAtTime(ff2,t+dur);fl.Q.value=q||1;
       if(atk>0){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+atk)}else g.gain.setValueAtTime(vol,t);
       g.gain.exponentialRampToValueAtTime(end,t+dur);
       s.connect(fl);fl.connect(g);g.connect(dest||sfx);s.start(t);s.stop(t+dur+.05);A.stat.noise++;
     }catch(e){}
+  }
+  /* tampon de bruit blanc mono de dur secondes (un seul par durée, partagé par les bruitages et les musiques) ; null sans contexte */
+  function noiseBuf(dur){
+    if(!ctx)return null;
+    let b=nbs.get(dur);
+    if(!b){b=ctx.createBuffer(1,Math.round(ctx.sampleRate*dur),ctx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;nbs.set(dur,b)}
+    return b;
   }
   /* le navigateur n'autorise le son qu'après un vrai geste : on crée / relance le contexte à chacun d'eux tant qu'il ne tourne pas, et on joue un son muet pour l'amorcer */
   function unlock(){
@@ -61,7 +68,7 @@ LB.audio=(()=>{
   window.addEventListener('pagehide',()=>background(true));window.addEventListener('pageshow',()=>background(document.hidden));
   window.addEventListener('blur',()=>{if(document.hidden)background(true)});window.addEventListener('focus',()=>{if(!document.hidden)background(false)});
   Object.assign(A,{
-    ensure,background,tone,noise,
+    ensure,background,tone,noise,noiseBuf,
     config(o){Object.assign(lv,o||{});apply()},
     load(){A.sound=LB.store.get(LB.key('snd'),'1')==='1';A.music=LB.store.get(LB.key('mus'),'1')==='1';apply()},
     setSound(on){A.sound=!!on;LB.store.set(LB.key('snd'),A.sound?'1':'0');apply();if(A.sound)ensure()},

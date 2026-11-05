@@ -8,10 +8,11 @@
 ## Contenu
 | Fichier | Contenu |
 |---|---|
-| `js/00-lb.js` | `const LB={}` ; `LB.FONT` (`display` : Big Shoulders Display, `body` : DM Sans, piles de repli des canvas) |
-| `js/04-store.js` | `LB.COMMON`, `LB.OLD_KEYS`, `LB.key(nom)`, `LB.store.get(clé, défaut)` / `LB.store.set(clé, valeur)`, `LB.setup({id, old, oldPrefix})` |
+| `js/00-lb.js` | `const LB={}` ; `LB.FONT` (`display` : Big Shoulders Display, `body` : DM Sans, piles de repli des canvas) ; `LB.coarse` (`pointer:coarse`), `LB.dpr` (plafond 1,25 tactile / 2), `LB.$`, `LB.cacheLayer(w,h,draw,{k,y0,round})` (calque hors écran) |
+| `js/04-store.js` | `LB.COMMON`, `LB.OLD_KEYS`, `LB.key(nom)`, `LB.store.get(clé, défaut)` / `LB.store.set(clé, valeur)`, `LB.endSeen()`, `LB.setup({id, old, oldPrefix})` |
 | `js/08-lang.js` | `LB.LANGS` (ordre des boutons : EN, FR), `LB.lang.cur`, `LB.lang.init()`, `LB.lang.set(l)`, `LB._(en, fr)` |
-| `js/12-audio.js` | `LB.audio` : contexte unique, `tone`, `noise`, réglages Son / Musique, suspension en arrière-plan |
+| `js/12-audio.js` | `LB.audio` : contexte unique, `tone`, `noise`, `noiseBuf(durée)` (bruit blanc en cache), réglages Son / Musique, suspension en arrière-plan |
+| `js/14-quality.js` | `LB.QUALITY_T`, `LB.quality` (`attach(ctx)` : surcharge de `shadowBlur`, `watch(ms, paused)`, `level`) : qualité adaptative des lueurs, adoptée par le Chapitre I (prête pour le III) |
 | `js/16-hero.js` | `LB.HERO_T`, `LB.HERO_DIFF`, `LB.diff` (`apply`, `use`, `cur`), `LB.hero` (`create`, `press`, `release`, `step`, `stops`, `stopped`, `hurt`, `perfect`, `dur`), `LB.drawRecoveryBar`, `LB.DENY_COL` |
 | `js/20-watcher.js` | `LB.WATCHER_T`, `LB.WATCHER_POSES`, `LB.drawWatcher`, `LB.drawWatcherBody`, `LB.drawLantern`, `LB.drawScepter`, `LB.lanternBeam`, `LB.drawBlock`, `LB.watcherLanternCol`, `LB.WATCHER_SIL`, `LB.drawWatcherSil` |
 | `js/24-cine.js` | `LB.CINE_T`, `LB.CINE_CSS`, `LB.cine` (`create`, `mount`, `step`, `skip`, `active`, `manual`), `LB.TITLE_T`, `LB.title`, `LB.rgba`, `LB.CH_COL`, `LB.NEXT_T`, `LB.nextCard` |

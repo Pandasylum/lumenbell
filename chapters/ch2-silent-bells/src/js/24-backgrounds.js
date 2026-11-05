@@ -12,21 +12,18 @@ const TCR=[...Array(6)].map(()=>{const pts=[];let x=760+(R3()-.5)*50,y=GY-250;fo
    rotated (a_cine zoom), the layers are not used: the same drawing runs live, exactly as before. */
 const BGC={};
 function bgOK(){const m=ctx.getTransform();return Math.abs(m.a-SC)<1e-6&&Math.abs(m.d-SC)<1e-6&&!m.b&&!m.c}
+/* LB.cacheLayer (shared/js/00-lb.js) : the drawing helpers of this chapter read the global ctx, so it is swapped to the layer's while fn runs */
+function bgCache(w,h,fn,o){return LB.cacheLayer(w,h,x=>{const keep=ctx;ctx=x;try{fn()}finally{ctx=keep}},o)}
 /* y0..y1: logical rows of the layer; fn draws it in logical coordinates (as the live code did) */
 function bgLayer(id,y0,y1,fn){
   if(!bgOK()){fn();return}
   const ty=Math.floor(y0*SC);let e=BGC[id];
-  if(!e||e.s!==SC){const c=document.createElement('canvas');c.width=Math.ceil(W*SC);c.height=Math.max(1,Math.ceil(y1*SC)-ty);
-    const keep=ctx;ctx=c.getContext('2d');ctx.setTransform(SC,0,0,SC,0,-ty);try{fn()}finally{ctx=keep}
-    e=BGC[id]={c,s:SC}}
+  if(!e||e.s!==SC)e=BGC[id]={c:bgCache(W,y1,fn,{k:SC,y0}),s:SC};
   ctx.drawImage(e.c,0,ty/SC,e.c.width/SC,e.c.height/SC)}
 /* soft cloud of the reefs, one sprite per band b (same radial gradient and ellipse as before, centred in a 344 x 84 box) */
 function cloudSprite(b){
   let e=BGC['cl'+b];
-  if(!e||e.s!==SC){const c=document.createElement('canvas');c.width=Math.ceil(344*SC);c.height=Math.ceil(84*SC);
-    const keep=ctx;ctx=c.getContext('2d');ctx.setTransform(SC,0,0,SC,0,0);
-    try{const cg=ctx.createRadialGradient(172,42,10,172,42,170);cg.addColorStop(0,`rgba(${18+b*6},${36+b*8},${42+b*8},.75)`);cg.addColorStop(1,'rgba(10,30,36,0)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(172,42,170,40,0,0,Math.PI*2);ctx.fill()}finally{ctx=keep}
-    e=BGC['cl'+b]={c,s:SC}}
+  if(!e||e.s!==SC)e=BGC['cl'+b]={s:SC,c:LB.cacheLayer(344,84,x=>{const cg=x.createRadialGradient(172,42,10,172,42,170);cg.addColorStop(0,`rgba(${18+b*6},${36+b*8},${42+b*8},.75)`);cg.addColorStop(1,'rgba(10,30,36,0)');x.fillStyle=cg;x.beginPath();x.ellipse(172,42,170,40,0,0,Math.PI*2);x.fill()},{k:SC})};
   return e.c}
 function rustG(x0,x1){const g=ctx.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'#1a0d07');g.addColorStop(.4,'#6a3218');g.addColorStop(.6,'#4a2412');g.addColorStop(1,'#140a05');return g}
 /* a rusted bell hanging from the deck beams of the hold */

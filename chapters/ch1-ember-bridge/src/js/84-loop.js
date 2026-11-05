@@ -1,5 +1,4 @@
 /* Chapitre II : verrouillé tant que la vraie fin n'a pas été vue (mémorisé dans le navigateur, quand c'est possible) */
-function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
 function trialOpen(){return TRIAL_OPEN||endSeen()} /* TRIAL_OPEN : 00-core.js */
 /* Épreuve du feu (records sous Normal et Difficile, verrou), « ▶ Outro » et chapitre suivant : LB.menu.update (CHAPTER.best, trialOpen, endSeen) */
 try{document.querySelector('#menu [data-diff=normal]').focus({preventScroll:true})}catch(e){}   /* démarrage direct : focus sur « Normal », posé en dernier */

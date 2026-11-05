@@ -22,6 +22,7 @@ DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true});DIFFS.th=Object.assign({},D
 for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 /* Épreuve du feu ouverte pendant les tests (décision du 28 octobre) ; false rétablit le verrou par la vraie fin (84-loop.js) */
 const TRIAL_OPEN=true;
+const endSeen=LB.endSeen; /* vraie fin vue : shared/js/04-store.js */
 /* PV du Colosse où part chaque rage, par phase (1 à 3) : repères de sa jauge (LB.hud.marks, plus la case du dernier PV) */
 const rageHp=(d,ph)=>ph===3?(d.u2?[d.ru,d.u2]:[d.ru]):(d.rages||[d.u]);
 /* Table du chapitre pour le cadre commun (menu, écran de démarrage, cartes, HUD : shared/js/28-ui.js, docs/COMMUN.md § 3.1) */
@@ -51,24 +52,12 @@ const DISPLAY=LB.FONT.display;
 
 const cv=document.getElementById('c');let ctx=cv.getContext('2d');
 const OFF=document.createElement('canvas'),OFFX=OFF.getContext('2d'); /* calque hors écran : la pétrification grise le Colosse en une seule opération */
-const COARSE=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
-const dpr=Math.min(COARSE?1.25:2,window.devicePixelRatio||1);
+const dpr=LB.dpr;
 cv.width=W*dpr;cv.height=H*dpr;
-/* Qualité adaptative : les lueurs (shadowBlur) coûtent cher sur smartphone. On les réduit d'emblée sur tactile,
-   puis on les coupe si la cadence reste basse. */
-let SBQ=COARSE?0.5:1,slowT=0,slowN=0,slowS=0;
-{const pr=CanvasRenderingContext2D.prototype,db=Object.getOwnPropertyDescriptor(pr,'shadowBlur'),dc=Object.getOwnPropertyDescriptor(pr,'shadowColor');
- if(db&&db.set&&dc&&dc.set){
-  Object.defineProperty(ctx,'shadowBlur',{get(){return db.get.call(this)},set(v){db.set.call(this,v*SBQ)},configurable:true});
-  Object.defineProperty(ctx,'shadowColor',{get(){return dc.get.call(this)},set(v){dc.set.call(this,SBQ>0?v:'rgba(0,0,0,0)')},configurable:true});
- }}
-function perfWatch(raw){
-  if(paused||raw>250||SBQ===0)return;
-  slowT+=raw;slowN++;if(raw>34)slowS++;
-  /* moyenne trop basse, ou saccades répétées (pics pendant les combos) : on allège les lueurs */
-  if(slowT>=2000){const avg=slowT/slowN;if(avg>23||slowS>=5)SBQ=SBQ>.3?.25:0;slowT=0;slowN=0;slowS=0}
-}
-const $=id=>document.getElementById(id);
+/* Qualité adaptative des lueurs (shadowBlur) : LB.quality (shared/js/14-quality.js), réduite d'emblée sur tactile puis coupée si la cadence reste basse. */
+LB.quality.attach(ctx);
+const perfWatch=raw=>LB.quality.watch(raw,paused);
+const $=LB.$;
 /* carte et pause communes (LB.card, LB.pause), créées avant `el` ; le menu et l'écran de démarrage le sont dans 60-ui-menu.js */
 LB.card.mount($('stage'),$('menu'));LB.pause.mount($('stage'),$('menu'));
 const el={hpP:$('hpP'),hpB:$('hpB'),ov:$('ov'),eye:$('ovEye'),title:$('ovTitle'),stats:$('ovStats'),table:$('ovTable'),desc:$('ovDesc'),go:$('go'),go2:$('go2'),ward:$('ward'),live:$('live')};

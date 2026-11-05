@@ -140,3 +140,19 @@ Base : `docs/AUDIT-NETTOYAGE.md` §2 (déjà fait, non répété). Ajouts mesur�
 - Commentaires `//` en fin de ligne : conservés (non prouvables sans analyseur complet dans le build).
 - `site/ch1`, `site/ch2` : toujours des copies (hors périmètre).
 - Tests lancés : `smoke` ch1 (`errs []`), `ch2-smoke` (`errs []`), `fonts-offline` (polices chargées).
+
+## S4 faite · Mutualisation dans `shared/` (axe 2, lot c)
+**Fait** (`shared/`, les deux chapitres, builds régénérés ; aucun changement de jeu attendu). Tests : `smoke` ch1, `ch2-smoke`, `keys`, `audio` : `errs []` chacun, une fois.
+- `LB.coarse` (`shared/js/00-lb.js`) : une seule détection `pointer:coarse`, lue au chargement. Utilisée par `fitMain` du Ch. II (1,25 / 2), par `24-cine.js` (formule inchangée) et par `LB.dpr` (= `min(coarse?1.25:2, devicePixelRatio)`, le `dpr` du Ch. I). Le Ch. I n'a plus de `COARSE` local.
+- `LB.audio.noiseBuf(durée)` : tampon de bruit blanc mono en cache par durée, vidé si le contexte est recréé. `noise()` de `shared` (1 s), `mNoise` du Ch. I (1 s) et `nbuf` du Ch. II (2 s) l'utilisent : les durées sont inchangées, trois tampons privés en moins (le 1 s est maintenant partagé entre `noise()` et la musique du Ch. I).
+- `LB.cacheLayer(w, h, draw, {k, y0, round})` : canvas hors écran avec `dpr`. `bgFar`, `bgBridge`, `vig` (Ch. I) et `bgLayer`/`cloudSprite` (Ch. II) l'utilisent. Mêmes tailles de canvas qu'avant : `round:Math.floor` au Ch. I (taille tronquée comme `c.width=W*dpr`), `Math.ceil` au Ch. II ; `y0` garde les calques en bande du Ch. II.
+- `LB.quality` (`shared/js/14-quality.js`, table `LB.QUALITY_T`) : surcharge de `shadowBlur`/`shadowColor` (`attach(ctx)`) et `perfWatch` (`watch(ms, paused)`), mêmes seuils (2 s, moyenne 23 ms, saccade 34 ms ×5, départ 0,5 sur tactile, 0,25 puis 0). Rien n'est installé tant qu'on n'appelle pas `attach` : le Ch. I seul l'appelle ; le Ch. II et le hub ne l'adoptent pas ; prêt pour le Chapitre III. `perfWatch` reste un alias local du Ch. I (`84-loop.js` inchangé).
+- Noyau : `$` (`LB.$`) et `endSeen` (`LB.endSeen`) étaient strictement identiques : mutualisés. `ensureAudio` (Ch. I) et `ensureAudio`/`tone`/`noise` (Ch. II) n'étaient que des enveloppes de `LB.audio` : remplacés par des alias directs.
+
+**Laissé, et pourquoi**
+- `_` : déjà `const _=LB._` dans les deux chapitres, rien à gagner.
+- `DIFFS`, `CHAPTER`, `TRIAL_OPEN` : tables et réglages propres à chaque chapitre (les valeurs et la forme diffèrent). `trialOpen` : une fonction au Ch. I, une ligne de `CHAPTER` au Ch. II, pas identiques. `applyLang` : le corps est propre à chaque chapitre.
+- `tone`/`noise` du Ch. I : enveloppes propres (`E_TONE`, attaque de `noise`), laissés pour ne pas changer les sons.
+- `cine` : garde `min(2, coarse?1.25:dpr)` (donne 1,25 même à dpr 1) ≠ `LB.dpr` ; non mutualisé pour rester identique.
+- Fonds du Ch. II : les calques en bande gardent leur taille de bande grâce à `y0` ; les dégradés mis en cache en S1 (éclats de miroir, cloche, bronze) sont des objets de dégradé, pas des canvas : laissés.
+- `LB.coarse`/`LB.dpr` sont lus au chargement de la page (le cine les lisait au premier montage) : sans effet hors émulation d'appareil changée en cours de page.

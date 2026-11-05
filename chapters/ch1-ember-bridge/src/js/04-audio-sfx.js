@@ -1,6 +1,6 @@
 /* ---------- audio : tout passe par LB.audio (shared/js/12-audio.js), un seul contexte pour la série ----------
    tone et noise gardent leur signature et leur enveloppe d'origine (E_TONE, noise ci-dessous) ; le contexte, la suspension en arrière-plan et le déverrouillage sont communs. */
-function ensureAudio(){return LB.audio.ensure()}
+const ensureAudio=LB.audio.ensure;
 const E_TONE={atk:0,end:.0001,tail:0};
 function tone(f,d,type,v,slide){LB.audio.tone(f,d,type,v||.05,null,null,slide?Math.max(30,f+slide):0,E_TONE)}
 const say=t=>{el.live.textContent=t};

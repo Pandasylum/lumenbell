@@ -187,6 +187,14 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 'use strict';
 const LB={};
 LB.FONT={display:'"Big Shoulders Display",Impact,sans-serif',body:'"DM Sans",system-ui,sans-serif'};
+LB.coarse=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
+LB.dpr=Math.min(LB.coarse?1.25:2,window.devicePixelRatio||1);
+LB.$=id=>document.getElementById(id);
+LB.cacheLayer=(w,h,draw,o)=>{
+  o=o||{};const k=o.k||LB.dpr,rd=o.round||Math.ceil,ty=Math.floor((o.y0||0)*k);
+  const c=document.createElement('canvas');c.width=rd(w*k);c.height=Math.max(1,rd(h*k)-ty);
+  const x=c.getContext('2d');x.setTransform(k,0,0,k,0,-ty);draw(x);return c;
+};
 LB.COMMON=['lang','snd','mus','help'];
 LB.OLD_KEYS={'lb-lang':['pn-lang','eb-lang'],'lb-snd':['db-optSnd'],'lb-mus':['db-optMus'],'lb-help':['db-optHelp']};
 LB.id='';LB.old={};LB.oldPrefix=[];
@@ -196,6 +204,7 @@ LB.oldKeys=k=>{const o=(LB.OLD_KEYS[k]||[]).concat(LB.old[k]||[]);
 LB.store={get(k,d){try{let v=localStorage.getItem(k);
   if(v==null)for(const o of LB.oldKeys(k)){v=localStorage.getItem(o);if(v!=null){try{localStorage.setItem(k,v)}catch(e){}break}}
   return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+LB.endSeen=()=>LB.store.get(LB.key('end'),'0')==='1';
 LB.setup=({id,old={},oldPrefix=[],audio})=>{LB.id=id;LB.old=old;LB.oldPrefix=oldPrefix;
   try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
     const want=Object.keys(LB.OLD_KEYS).concat(Object.keys(old));
@@ -209,14 +218,15 @@ LB.lang={cur:'en',
   set(l){if(!LB.LANGS.includes(l))return;LB.lang.cur=l;LB.store.set(LB.key('lang'),l)}};
 LB._=(en,fr)=>LB.lang.cur==='fr'?fr:en;
 LB.audio=(()=>{
-  let ctx=null,master=null,sfx=null,mus=null,bg=false,nb=null;
+  let ctx=null,master=null,sfx=null,mus=null,bg=false;
+  const nbs=new Map(); 
   const lv={master:1,sfx:1,mus:1},A={sound:true,music:true,stat:{tone:0,noise:0,made:0}};
   const apply=smooth=>{if(!ctx)return;master.gain.value=lv.master;sfx.gain.value=A.sound?lv.sfx:0;
     const m=A.music?lv.mus:0;if(smooth)mus.gain.setTargetAtTime(m,ctx.currentTime,.12);else mus.gain.value=m};
   function ensure(){
     try{
       if(bg&&!document.hidden)bg=false; 
-      if(ctx&&ctx.state==='closed'){ctx=null;nb=null}
+      if(ctx&&ctx.state==='closed'){ctx=null;nbs.clear()}
       if(!ctx){
         const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
         try{ctx=new C({latencyHint:'playback'})}catch(e){ctx=new C()}
@@ -244,14 +254,19 @@ LB.audio=(()=>{
     if(!ctx||(!dest&&!A.sound))return;
     if(ctx.state!=='running')ensure();
     try{
-      if(!nb){nb=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
       const t=when||ctx.currentTime,atk=o&&o.atk||0,end=o&&o.end||.0005;
       const s=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain();
-      s.buffer=nb;s.loop=true;fl.type=ft;fl.frequency.setValueAtTime(ff,t);if(ff2)fl.frequency.exponentialRampToValueAtTime(ff2,t+dur);fl.Q.value=q||1;
+      s.buffer=noiseBuf(1);s.loop=true;fl.type=ft;fl.frequency.setValueAtTime(ff,t);if(ff2)fl.frequency.exponentialRampToValueAtTime(ff2,t+dur);fl.Q.value=q||1;
       if(atk>0){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+atk)}else g.gain.setValueAtTime(vol,t);
       g.gain.exponentialRampToValueAtTime(end,t+dur);
       s.connect(fl);fl.connect(g);g.connect(dest||sfx);s.start(t);s.stop(t+dur+.05);A.stat.noise++;
     }catch(e){}
+  }
+  function noiseBuf(dur){
+    if(!ctx)return null;
+    let b=nbs.get(dur);
+    if(!b){b=ctx.createBuffer(1,Math.round(ctx.sampleRate*dur),ctx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;nbs.set(dur,b)}
+    return b;
   }
   function unlock(){
     ensure();
@@ -262,7 +277,7 @@ LB.audio=(()=>{
   window.addEventListener('pagehide',()=>background(true));window.addEventListener('pageshow',()=>background(document.hidden));
   window.addEventListener('blur',()=>{if(document.hidden)background(true)});window.addEventListener('focus',()=>{if(!document.hidden)background(false)});
   Object.assign(A,{
-    ensure,background,tone,noise,
+    ensure,background,tone,noise,noiseBuf,
     config(o){Object.assign(lv,o||{});apply()},
     load(){A.sound=LB.store.get(LB.key('snd'),'1')==='1';A.music=LB.store.get(LB.key('mus'),'1')==='1';apply()},
     setSound(on){A.sound=!!on;LB.store.set(LB.key('snd'),A.sound?'1':'0');apply();if(A.sound)ensure()},
@@ -272,6 +287,36 @@ LB.audio=(()=>{
   Object.defineProperties(A,{ctx:{get:()=>ctx},dest:{get:()=>ctx&&ctx.destination},sfx:{get:()=>sfx},mus:{get:()=>mus},master:{get:()=>master},
     state:{get:()=>ctx?ctx.state:'none'},bg:{get:()=>bg}});
   return A;
+})();
+LB.QUALITY_T={
+  coarse:.5,   
+  win:2000,    
+  avg:23,      
+  spike:34,    
+  spikes:5,    
+  skip:250,    
+  mid:.25,     
+  midAbove:.3  
+};
+LB.quality=(()=>{
+  const T=LB.QUALITY_T;
+  let q=LB.coarse?T.coarse:1,slowT=0,slowN=0,slowS=0;
+  const Q={
+    get level(){return q},
+    attach(cx){
+      const pr=CanvasRenderingContext2D.prototype,db=Object.getOwnPropertyDescriptor(pr,'shadowBlur'),dc=Object.getOwnPropertyDescriptor(pr,'shadowColor');
+      if(db&&db.set&&dc&&dc.set){
+        Object.defineProperty(cx,'shadowBlur',{get(){return db.get.call(this)},set(v){db.set.call(this,v*q)},configurable:true});
+        Object.defineProperty(cx,'shadowColor',{get(){return dc.get.call(this)},set(v){dc.set.call(this,q>0?v:'rgba(0,0,0,0)')},configurable:true});
+      }
+    },
+    watch(raw,paused){
+      if(paused||raw>T.skip||q===0)return;
+      slowT+=raw;slowN++;if(raw>T.spike)slowS++;
+      if(slowT>=T.win){const avg=slowT/slowN;if(avg>T.avg||slowS>=T.spikes)q=q>T.midAbove?T.mid:0;slowT=0;slowN=0;slowS=0}
+    }
+  };
+  return Q;
 })();
 LB.HERO_T={
   block:{act:.333,rec:.7,grace:.06,perf:.08},
@@ -520,8 +565,7 @@ LB.cine=(()=>{
     box.innerHTML='<div class="cbox"><canvas id="cineC" aria-hidden="true"></canvas></div><p class="ccap" id="cineCap" aria-live="polite"></p><button type="button" class="btn ghost" id="cineSkip">Skip ›</button>';
     document.body.appendChild(box);if(LB.hdr)LB.hdr.watch(box);
     cvs=box.querySelector('canvas');cap=box.querySelector('.ccap');sk=box.querySelector('button');cx=cvs.getContext('2d');
-    const coarse=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
-    K=Math.min(2,coarse?1.25:(window.devicePixelRatio||1));cvs.width=960*K;cvs.height=540*K;
+    K=Math.min(2,LB.coarse?1.25:(window.devicePixelRatio||1));cvs.width=960*K;cvs.height=540*K;
     sk.addEventListener('click',()=>{if(cur)cur.skip()});
     window.addEventListener('keydown',e=>{if(!cur)return;e.stopImmediatePropagation();e.preventDefault();if(T.keys.includes(e.key))cur.skip()},true);
     return{cx,K};
@@ -1010,13 +1054,13 @@ LB.settings=(()=>{
     if(where)where(btn);lang();return btn}
   return{mount,attach,lang,sync,toggle,visible(){return open},handled(e){return e===last},get el(){return box}};
 })();
-const $=id=>document.getElementById(id);
+const $=LB.$;
 LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']],audio:{master:.75,sfx:.9,mus:.3}});
 const UNLOCK_ALL=true;
 const unlocked=()=>UNLOCK_ALL?3:+LB.store.get(LB.key('unl'),1);
 const _=LB._;
 const TRIAL_OPEN=true;
-function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
+const endSeen=LB.endSeen; 
 const CHAPTER={n:2,id:'ch2',
   title:'Silent Bells',
   color:'#4fe0cc',color2:'#9fe4ff',rgb:'79,224,204',
@@ -1052,8 +1096,7 @@ function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card
 
 function say(t){$('live').textContent=t}
 
-const ensureAudio=()=>LB.audio.ensure();
-const tone=(...a)=>LB.audio.tone(...a),noise=(...a)=>LB.audio.noise(...a);
+const ensureAudio=LB.audio.ensure,tone=LB.audio.tone,noise=LB.audio.noise;
 const sfx={
   block(p){tone(p?1046:880,.5,'sine',.22);tone(p?1568:1318,.35,'sine',.1);tone(2217,.2,'triangle',.05);if(p)tone(2093,.6,'sine',.07)},
   dodge(p){noise(.22,.25,'bandpass',600,2,null,null,2600);if(p)tone(1760,.25,'sine',.06)},
@@ -1263,19 +1306,15 @@ const SPRAY=[...Array(60)].map(()=>({x:R3()*W,y:R3()*H,v:14+R3()*24,d:R3()*6}));
 const TCR=[...Array(6)].map(()=>{const pts=[];let x=760+(R3()-.5)*50,y=GY-250;for(let i=0;i<6;i++){pts.push([x,y]);x+=(R3()-.5)*22;y+=40}return pts});
 const BGC={};
 function bgOK(){const m=ctx.getTransform();return Math.abs(m.a-SC)<1e-6&&Math.abs(m.d-SC)<1e-6&&!m.b&&!m.c}
+function bgCache(w,h,fn,o){return LB.cacheLayer(w,h,x=>{const keep=ctx;ctx=x;try{fn()}finally{ctx=keep}},o)}
 function bgLayer(id,y0,y1,fn){
   if(!bgOK()){fn();return}
   const ty=Math.floor(y0*SC);let e=BGC[id];
-  if(!e||e.s!==SC){const c=document.createElement('canvas');c.width=Math.ceil(W*SC);c.height=Math.max(1,Math.ceil(y1*SC)-ty);
-    const keep=ctx;ctx=c.getContext('2d');ctx.setTransform(SC,0,0,SC,0,-ty);try{fn()}finally{ctx=keep}
-    e=BGC[id]={c,s:SC}}
+  if(!e||e.s!==SC)e=BGC[id]={c:bgCache(W,y1,fn,{k:SC,y0}),s:SC};
   ctx.drawImage(e.c,0,ty/SC,e.c.width/SC,e.c.height/SC)}
 function cloudSprite(b){
   let e=BGC['cl'+b];
-  if(!e||e.s!==SC){const c=document.createElement('canvas');c.width=Math.ceil(344*SC);c.height=Math.ceil(84*SC);
-    const keep=ctx;ctx=c.getContext('2d');ctx.setTransform(SC,0,0,SC,0,0);
-    try{const cg=ctx.createRadialGradient(172,42,10,172,42,170);cg.addColorStop(0,`rgba(${18+b*6},${36+b*8},${42+b*8},.75)`);cg.addColorStop(1,'rgba(10,30,36,0)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(172,42,170,40,0,0,Math.PI*2);ctx.fill()}finally{ctx=keep}
-    e=BGC['cl'+b]={c,s:SC}}
+  if(!e||e.s!==SC)e=BGC['cl'+b]={s:SC,c:LB.cacheLayer(344,84,x=>{const cg=x.createRadialGradient(172,42,10,172,42,170);cg.addColorStop(0,`rgba(${18+b*6},${36+b*8},${42+b*8},.75)`);cg.addColorStop(1,'rgba(10,30,36,0)');x.fillStyle=cg;x.beginPath();x.ellipse(172,42,170,40,0,0,Math.PI*2);x.fill()},{k:SC})};
   return e.c}
 function rustG(x0,x1){const g=ctx.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'#1a0d07');g.addColorStop(.4,'#6a3218');g.addColorStop(.6,'#4a2412');g.addColorStop(1,'#140a05');return g}
 let RUSTBELL_G=null;
@@ -2329,12 +2368,12 @@ function cineOverlay(){
   if(ph===3&&k==='p2'){const shat=_('The Bottomless','La Sans-Fond');title(t,5.8,PH[3].eye(),shat,CH_COL[2])}
 }
 const MUSIC=(()=>{
-  let ac=null,out,rev,cur=null,layers=[],bedLayers=[],bedId=null,bedTimer=null,timer=null,next=0,step=0,NB=null,ARR=null;
-  function init(){const c=LB.audio.ensure();if(!c)return false;if(ac===c)return true;ac=c;NB=null;
+  let ac=null,out,rev,cur=null,layers=[],bedLayers=[],bedId=null,bedTimer=null,timer=null,next=0,step=0,ARR=null;
+  function init(){const c=LB.audio.ensure();if(!c)return false;if(ac===c)return true;ac=c;
     out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(LB.audio.dest);
     rev=ac.createConvolver();const n=ac.sampleRate*3.8,b=ac.createBuffer(2,n,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}rev.buffer=b;
     const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out);return true}
-  const nbuf=()=>{if(!NB){NB=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return NB};
+  const nbuf=()=>LB.audio.noiseBuf(2); 
   function env(g,t,a,p,d){a=Math.max(a,.01);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(p,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
   let dst=null,farV=1;
   function send(g,wet){if(wet){const w=ac.createGain();w.gain.value=wet*farV;g.connect(w);w.connect(rev)}}
@@ -3273,7 +3312,7 @@ function applyLang(){
 }
 
 const ward=$('ward'),cvm=$('c'),ctxMain=cvm.getContext('2d');let SCm=1;
-const COARSE=window.matchMedia&&matchMedia('(pointer:coarse)').matches,DPR_MAX=COARSE?1.25:2;
+const DPR_MAX=LB.coarse?1.25:2;
 function fitMain(){const r=cvm.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,DPR_MAX);cvm.width=Math.max(1,Math.round(r.width*d));cvm.height=Math.max(1,Math.round(r.height*d));SCm=cvm.width/W}
 new ResizeObserver(fitMain).observe($('stage'));fitMain();
 function skip(){if(S.mode==='prologue'||S.mode==='epilogue')LB.cine.skip();else if(S.mode==='cine')endCine()}

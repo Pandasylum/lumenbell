@@ -30,9 +30,8 @@ function mChoir(c,dst,t,f,d,v,vowel){
   });
 }
 function mNoise(c,dst,t,d,v,f0,f1){
-  if(!c.__nb){const b=c.createBuffer(1,c.sampleRate,c.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;c.__nb=b}
   const src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
-  src.buffer=c.__nb;src.loop=true;f.type='bandpass';f.Q.value=.8;
+  src.buffer=LB.audio.noiseBuf(1);src.loop=true;f.type='bandpass';f.Q.value=.8;
   f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(Math.max(30,f1),t+d);
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);
   src.connect(f);f.connect(g);g.connect(dst);src.start(t);src.stop(t+d+.05);
