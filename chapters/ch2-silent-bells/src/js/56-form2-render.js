@@ -221,7 +221,7 @@ function cineBoss(){
     return}
   /* ===== Rust King (shown as Phase II) ===== */
   if(ph===1&&k==='in'){
-    const dust=(n,big)=>{for(let i=0;i<n;i++)S.parts.push({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*.25,vy:.2+Math.random()*.4,g:.28,t0:gt,life:1.4+Math.random()*.9,c:Math.random()<.25?'#6a5a48':'#9a8a76',r:big&&Math.random()<.3?3.5:1.6+Math.random()*1.4})};
+    const dust=(n,big)=>{for(let i=0;i<n;i++)addPart({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*.25,vy:.2+Math.random()*.4,g:.28,t0:gt,life:1.4+Math.random()*.9,c:Math.random()<.25?'#6a5a48':'#9a8a76',r:big&&Math.random()<.3?3.5:1.6+Math.random()*1.4})};
     // five heavy steps: slow lift, hard drop, the body sinks into each landing
     const N=5,T0=.3,TS=.8,u=clamp((t-T0)/(N*TS),0,1),si=Math.min(N-1,Math.floor(u*N)),f=u>=1?1:u*N-si;
     const dx=lerp(330,0,u),S2=24,H2=15;
