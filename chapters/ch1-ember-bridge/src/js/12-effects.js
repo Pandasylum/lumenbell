@@ -1,6 +1,8 @@
 /* ---------- effects ---------- */
-function burst(x,y,n,cols){for(let i=0;i<n;i++){const a=rand(0,6.283),v=rand(80,360),L=rand(.3,.7);G.sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,g:520,life:L,max:L,col:cols[i%cols.length],sz:rand(2,5)})}}
-function dust(x,y){for(let i=0;i<18;i++){const d=Math.random()<.5?-1:1,L=rand(.4,.8);G.sparks.push({x:x+rand(-20,20),y:y-2,vx:d*rand(40,220),vy:-rand(20,120),g:260,life:L,max:L,col:'#9a8a9e',sz:rand(3,6)})}}
+const FX={sparksMax:1500}; /* plafond d'étincelles vivantes (burst, dust, qBurst) : large, jamais atteint en jeu normal ; les tirages sont faits avant le test */
+function addSpark(a,o){if(a.length<FX.sparksMax)a.push(o)}
+function burst(x,y,n,cols){for(let i=0;i<n;i++){const a=rand(0,6.283),v=rand(80,360),L=rand(.3,.7);addSpark(G.sparks,{x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,g:520,life:L,max:L,col:cols[i%cols.length],sz:rand(2,5)})}}
+function dust(x,y){for(let i=0;i<18;i++){const d=Math.random()<.5?-1:1,L=rand(.4,.8);addSpark(G.sparks,{x:x+rand(-20,20),y:y-2,vx:d*rand(40,220),vy:-rand(20,120),g:260,life:L,max:L,col:'#9a8a9e',sz:rand(3,6)})}}
 function ring(x,y){G.rings.push({x,y,life:.35,max:.35})}
 /* Texte flottant : seules les onomatopées (coups, cris) et les titres de phase s'affichent ; tout mot d'annonce (BLOCAGE, ORBE, TOUCHÉ…) est supprimé pour garder un ton sombre. */
 const ONO={};
