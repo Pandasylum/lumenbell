@@ -216,3 +216,4 @@
 - Chapitre II : en Facile, Normal et Difficile, les attaques des trois boss gardent le même rythme interne (celui du Normal) ; la difficulté joue sur les PV, les rages, les pauses et le nombre de projectiles. En Difficile, le balayage de l'Ancien est un peu plus espacé.
 - Chapitre II, phase II : en Difficile, le dernier coup du balayage de l'Ancien plante l'ancre à la verticale devant lui pour lancer la vague, au lieu de frapper le Veilleur : ce coup-là ne se pare pas.
 - Chapitres I et II : plus d'écran « Commencer ». Depuis le hub, le chapitre s'ouvre directement sur son menu, sans aucun flash d'écran intermédiaire ; le son part au premier appui si le navigateur le bloque.
+- Aucun changement visible pour le joueur : audit de nettoyage (inventaire du code mort, des doublons et des fichiers à archiver, rien de modifié).
