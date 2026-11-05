@@ -10,6 +10,23 @@ Classe doc seule. **Aucun fichier de code ou de ressource modifié, déplacé ni
 
 ---
 
+## B1 faite
+
+Lot (a), déplacement seul (`git mv`, aucune suppression, aucun contenu modifié) :
+
+- `docs/rapports/2026-11-04-mort-difficile-voix.md` → `archives/docs/rapports/2026-11-04-mort-difficile-voix.md`
+
+Suppressions (`git rm`, matériel de promo itch.io récupéré et sauvegardé ailleurs par Kevin) :
+
+- `store/` entier : `cover-itch.png`, `ember-bridge-cover.png`, `screenshot-1-pont.png`, `screenshot-2-gouffre.png`, `screenshot-3-epee.png`, `screenshot-4-sommet.png`, `icon-sources/{bg.html,fg.svg,fgp.html,full.html,r.js}`
+- `build/promo.js` et `build/promo-check.py` (ne génèrent rien dans `store/` : sorties dans `build/out/promo/`)
+
+Référence restante signalée, non modifiée : `README.md:46` (tableau des dossiers, ligne `store/`) et `docs/decisions/2026-11-05-chapitres-sans-commencer.md:3` (mention de `build/promo.js`). Aucun workflow, test, build, `package.json` ni `apk/` ne référence `store/` ou `promo`.
+
+Vérifié par `git grep` : aucune autre référence que cet audit. Non déplacés, faute de 0 référence prouvée : `build/ch2_swap_args.py` (cité par `archives/DECISIONS-2026-10-27-28.md`), `chapters/ch2-silent-bells/legacy/silent-bells.source.html` (commentaire de `build/build_ch2.py`), `chapters/ch2-silent-bells/shots/` (`ch2/NOTES.md:105`), `docs/AUDIT-2026-10-30.md` (`README.md`, `DEVLOG-NOTES.md`), `store/` et `tests/trial-*` (exclus), `docs/CH2-SPEC.md` (lu par les tests).
+
+---
+
 ## 1. Code mort et assets non référencés
 
 ### 1.1 Code (0 référence prouvée)
