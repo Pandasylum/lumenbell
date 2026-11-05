@@ -1,6 +1,8 @@
 /* ---------- events ---------- */
 const ward=$('ward'),cvm=$('c'),ctxMain=cvm.getContext('2d');let SCm=1;
-function fitMain(){const r=cvm.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);cvm.width=Math.max(1,Math.round(r.width*d));cvm.height=Math.max(1,Math.round(r.height*d));SCm=cvm.width/W}
+/* pixel ratio cap: 1.25 on touch screens (as Chapter I, 00-core.js), 2 on computers */
+const COARSE=window.matchMedia&&matchMedia('(pointer:coarse)').matches,DPR_MAX=COARSE?1.25:2;
+function fitMain(){const r=cvm.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,DPR_MAX);cvm.width=Math.max(1,Math.round(r.width*d));cvm.height=Math.max(1,Math.round(r.height*d));SCm=cvm.width/W}
 new ResizeObserver(fitMain).observe($('stage'));fitMain();
 function skip(){if(S.mode==='prologue'||S.mode==='epilogue')LB.cine.skip();else if(S.mode==='cine')endCine()}
 $('skip').addEventListener('click',skip);

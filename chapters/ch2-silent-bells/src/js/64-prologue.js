@@ -90,7 +90,10 @@ function drawPrologue(t){
   LB.title(ctx,t,PRO_TITLE,{col:CH_COL[2],sub:_('Chapter II · Silent Bells','Chapitre II · Silent Bells')});
   PSFX.forEach((c,i)=>{if(t>=c[0]&&once('pfx'+i))MUSIC.fx(c[1])});
 }
-function lerpC(a,b,k){return`rgb(${a.map((v,i)=>Math.round(lerp(v,b[i],k))).join(',')})`}
+/* colour between a and b (3 channels): the string only depends on the three rounded values, so it is looked up in a small table (no array or string per particle and frame) */
+const LERPC_CACHE=new Map();
+function lerpC(a,b,k){const r=Math.round(lerp(a[0],b[0],k)),g=Math.round(lerp(a[1],b[1],k)),bl=Math.round(lerp(a[2],b[2],k)),key=((r+512)*2048+(g+512))*2048+(bl+512);
+  let s=LERPC_CACHE.get(key);if(s===undefined){if(LERPC_CACHE.size>4096)LERPC_CACHE.clear();s=`rgb(${r},${g},${bl})`;LERPC_CACHE.set(key,s)}return s}
 /* ================= GAME: Silent Bells (Ember Bridge, chapter II) ================= */
 const ORDER=[2,1,3];               // phase I = the Voice, II = the King, III = the Beacon
 const gpOf=id=>ORDER.indexOf(id)+1;
@@ -493,7 +496,7 @@ function drawKingFx(){
     if(th.k==='wave'&&gt>=th.tl){const big=th.big?1.35:1,k=clamp((gt-th.tl)/(th.ti-th.tl),0,1);
       if(gt<th.ti)drawWave(lerp(650,HX+40,eio(k)),lerp(14,86*big,eout(k)),1);
       else{const q=(gt-th.ti)/.55;if(q<1)drawWave(lerp(HX+40,-90,q),86*big*(th.res==='ok'?1-q*.6:1-q*.3),th.res==='ok'?1-q*.5:1);
-        if(!th.wf&&q>=.62){th.wf=1;S.shake=Math.max(S.shake,13);MUSIC.fx('rumble');for(let i=0;i<14;i++)S.parts.push({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*.25,vy:.3,g:.28,t0:gt,life:1.6,c:'#7a6a56',r:2})}
+        if(!th.wf&&q>=.62){th.wf=1;S.shake=Math.max(S.shake,13);MUSIC.fx('rumble');for(let i=0;i<14;i++)addPart({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*.25,vy:.3,g:.28,t0:gt,life:1.6,c:'#7a6a56',r:2})}
         if(!th.bf){th.bf=1;burst(HX+40,GY-50,th.res==='ok'?26:14,'#e6f8f2',6,.7,.3)}}}
   }
   drawRafter();drawPlank();drawDChain();drawEchoes();

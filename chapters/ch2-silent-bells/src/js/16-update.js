@@ -30,7 +30,7 @@ function update(dt){
   if(S.mode==='ko'&&gt>S.koT+2.6&&!S.koShown){S.koShown=true;phaseCleared()}
   if(S.mode==='dead'&&gt>S.deadT+1.1&&!S.deadShown){S.deadShown=true;deathCard()}
   S.threats=S.threats.filter(t=>gt<(t.tb||t.ti)+1.6);
-  S.parts=S.parts.filter(p=>gt-p.t0<p.life);
+  {const P=S.parts;let n=0;for(let i=0;i<P.length;i++){const p=P[i];if(gt-p.t0<p.life)P[n++]=p}P.length=n}   // in place: no array per frame
   S.pops=S.pops.filter(p=>gt-p.t0<1);
   S.shake*=Math.pow(.02,dt);
 }
