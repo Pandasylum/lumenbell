@@ -4,7 +4,6 @@ function qp(pts,fill,stroke,lw){
   if(fill){ctx.fillStyle=fill;ctx.fill()}
   if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw||2;ctx.lineJoin='round';ctx.stroke()}
 }
-function qlimb(a,b,w,col){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()}
 function qflame(x,y,w,h,ph,col){
   const t=R?R.time:Q?Q.time:G.time;
   ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x-w,y);

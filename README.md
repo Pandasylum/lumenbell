@@ -32,7 +32,7 @@ Variable `PW_CHROMIUM` : chemin d'un Chromium déjà installé (sinon celui de P
 | `docs/CH2-SPEC.md` | Cahier des charges du Chapitre II (lu par les tests) |
 | `docs/COMMUN.md` | Éléments communs entre chapitres : inventaire restant, API commune, plan des sessions moteur |
 | `docs/decisions/` | Décisions détaillées datées (une par fichier) |
-| `docs/AUDIT-2026-10-30.md` | Audit de la documentation (30 octobre 2026) |
+| `archives/docs/AUDIT-2026-10-30.md` | Audit de la documentation (30 octobre 2026) |
 | `docs/DEVLOG-NOTES.md` | Notes de communication : ce que le joueur verra |
 | `docs/TEXTES-CH1.md` | Tous les textes FR/EN du Chapitre I (extrait auto) |
 | `chapters/ch2-silent-bells/` | Chapitre II : `src/`, `dist/`, `legacy/`, `TEXTES.md` (textes validés, testés), `NOTES.md` |
@@ -43,7 +43,6 @@ Variable `PW_CHROMIUM` : chemin d'un Chromium déjà installé (sinon celui de P
 | `build/` | Scripts de construction |
 | `tests/` | Bots et tests (Playwright) |
 | `apk/` | Projet Capacitor (Android) |
-| `store/` | Visuels itch.io / stores |
 | `.github/workflows/` | `tests.yml` (tests) et `android.yml` (APK/AAB) |
 
 ## Secrets (jamais dans le dépôt)

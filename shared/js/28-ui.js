@@ -103,7 +103,6 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.mcard .tnote[hidden]{display:none}\n'+
  '.mcard .tnote b{display:block;margin-bottom:6px;font-family:var(--font-display);font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:'+c2+'}\n'+
  '.mcard .tnote ul{margin:0;padding-left:18px;display:grid;gap:3px}\n'+
- @gate-js btnbig
  '.mph{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%}\n'+
  '.mph button{min-width:0;display:grid;gap:0;justify-items:center;padding:8px 6px;background:rgba(22,17,29,.8);border:1px solid var(--line);color:var(--fg);cursor:pointer;font:inherit}\n'+
  '.mph button b{font-family:var(--font-display);font-weight:800;font-size:'+M.btnFs+';line-height:1;white-space:nowrap;color:'+c+';text-transform:uppercase;letter-spacing:.05em}\n'+
@@ -112,7 +111,7 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.mph button[aria-pressed="true"]{border-color:'+c+';background:rgba('+rgb+',.16)}\n'+
  '.mph button:disabled{opacity:.45;cursor:not-allowed}\n'+
  '.mph[hidden]{display:none}\n'+
- '@media (max-width:560px){.mcard .tag,.mcard .how{display:none}.mcard{gap:8px}.mcard h2{font-size:34px}.btn.big{font-size:20px;padding:8px 26px}}\n'+
+ '@media (max-width:560px){.mcard .tag,.mcard .how{display:none}.mcard{gap:8px}.mcard h2{font-size:34px}}\n'+
  '@media (max-width:480px){.mph{gap:6px;grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}.mph button b{font-size:17px;letter-spacing:.04em}.mph button span{font-size:11px}.ov.menu{padding:16px 12px}.mcard h2{font-size:clamp(34px,11vw,48px)}}\n'+
  '@media (max-height:520px) and (orientation:landscape){.ov.menu{padding-block:8px}.mcard{gap:6px;padding:0}.mcard .tnote{padding:6px 12px;font-size:11px;line-height:1.3}.mcard .tnote b{margin-bottom:2px;font-size:14px}.mcard .tnote ul{gap:1px}.ver{margin:0}.ov.menu .mcard .tag,.ov.menu .mcard .how{display:none}.ov.menu .mcard .eyebrow,.ov.menu .mcard h2{transform:none}.mcard h2{font-size:clamp(30px,9vh,52px)}}\n'+
  '@media (max-height:'+M.tinyH+'px) and (orientation:landscape){.ov.menu{padding-block:4px}.mcard{gap:4px;padding:0}.mcard .tnote{line-height:1.2}.mcard h2{font-size:26px;line-height:.85}.mcard .eyebrow.chap{font-size:13px;margin-top:0}.mcard .tnote{padding:4px 10px}.mcard .tnote b{font-size:12px}.mcard .tnote ul{padding-left:14px}}\n'+
@@ -310,7 +309,7 @@ LB.menu=(()=>{
     $('introBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onIntro)h.onIntro()});
     $('outroBtn').addEventListener('click',e=>{e.currentTarget.blur();if(h.onOutro)h.onOutro()});
     if(LB.fromHub)$('mHub').addEventListener('click',e=>{e.currentTarget.blur();LB.toHub(C.n)});   /* une seule navigation, même au double appui */
-    document.querySelectorAll('#langs button[data-lang],#gateLangs button').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
+    document.querySelectorAll('#langs button[data-lang]').forEach(bt=>bt.addEventListener('click',()=>{LB.lang.set(bt.dataset.lang);lang();if(h.onLang)h.onLang();bt.blur()}));
     lang();
     return m;
   }
@@ -328,7 +327,6 @@ LB.menu=(()=>{
     $('mEye').textContent=LB.chapterName(C.n,C.title);
     m.querySelector('.mcard .tag').textContent=LB.tx(C.tag);
     $('mResume').textContent=LB._('Resume','Reprendre');
-    const gb=$('gateBtn');if(gb)gb.textContent=LB._('Start','Commencer');
     for(const dk of DK){const bt=m.querySelector('#mphM [data-diff='+dk+']');bt.querySelector('b').textContent=TX[dk]();bt.querySelector('span').textContent=TX['s'+dk[0].toUpperCase()+dk.slice(1)]()}
     m.querySelector('#mphT [data-diff=tn] b').textContent=TX.normal();m.querySelector('#mphT [data-diff=th] b').textContent=TX.hard();
     $('mBackT').querySelector('b').textContent=LB._('‹ Back','‹ Retour');$('mBackT').querySelector('span').textContent=LB._('Difficulties','Difficultés');
@@ -338,8 +336,8 @@ LB.menu=(()=>{
     $('introBtn').textContent='▶ Intro';$('outroBtn').textContent='▶ Outro';
     if(LB.fromHub){$('mHub').querySelector('.nm').textContent=LB._('Chapters','Chapitres');$('mHub').setAttribute('aria-label',LB._('Back to the chapters','Retour aux chapitres'))}
     $('mphM').setAttribute('aria-label',LB._('Choose difficulty','Choisir la difficulté'));$('mphT').setAttribute('aria-label',LB.tx(C.trial.name));
-    document.querySelectorAll('#langs,#gateLangs').forEach(e=>e.setAttribute('aria-label',LB._('Language','Langue')));
-    document.querySelectorAll('#langs button[data-lang],#gateLangs button').forEach(bt=>bt.setAttribute('aria-pressed',String(bt.dataset.lang===LB.lang.cur)));
+    document.querySelectorAll('#langs').forEach(e=>e.setAttribute('aria-label',LB._('Language','Langue')));
+    document.querySelectorAll('#langs button[data-lang]').forEach(bt=>bt.setAttribute('aria-pressed',String(bt.dataset.lang===LB.lang.cur)));
     LB.pause.lang();LB.settings.lang();
   }
   function trial(on){update();$('mphM').hidden=on;$('mphT').hidden=!on;$('trialNote').hidden=!on;
