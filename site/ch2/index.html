@@ -2700,18 +2700,18 @@ function ecFinisher(tAll,T,P){
   ctx.restore();
   if(S.zapT&&gt-S.zapT<.12&&tAll<2.7){ctx.fillStyle=`rgba(255,247,214,${.2*(1-(gt-S.zapT)/.12)})`;ctx.fillRect(0,0,W,H)}
 }
-const CSFX=(()=>{const L={'2:in':[[0,'glints'],[1.1,'swell'],[1.95,'crackGlass'],[2.4,'shatter'],[3.1,'sting']],
-  '2:out':[[.3,'charge'],[1.45,'throw'],[1.75,'impactLight'],[1.8,'overload'],[3.1,'explosion'],[3.3,'glassRain'],[4.4,'voice'],[5.4,'rumble']],
-  '1:in':[[0,'rumble'],[4.5,'heart'],[4.8,'draw'],[5.5,'whoosh'],[5.75,'slam'],[6.3,'sting']],
-  '1:out':[[.6,'chainSlip'],[1.1,'plant'],[1.4,'tollLast'],[1.7,'heart'],[2.3,'crackRun'],[3.3,'rumble'],[4.75,'whooshDown'],[5.6,'iceCrack']],
+const CSFX=(()=>{const L={'2:in':[[0,'glints'],[.3,'weepFar'],[1.1,'swell'],[1.95,'crackGlass'],[2.4,'shatter'],[3.1,'sting']],
+  '2:out':[[.3,'charge'],[1.45,'throw'],[1.75,'impactLight'],[1.8,'overload'],[3.1,'explosion'],[3.15,'wailLast'],[3.3,'glassRain'],[3.75,'lanternSplash'],[3.8,'flameDim'],[3.9,'lanternSink'],[4.4,'voice'],[4.6,'hatchGroan'],[5.4,'rumble'],[5.6,'bilge']],
+  '1:in':[[0,'rumble'],[.1,'bilge'],[.5,'anchorDrag'],[4.5,'heart'],[4.8,'draw'],[5.5,'whoosh'],[5.75,'slam'],[6.3,'sting']],
+  '1:out':[[.6,'chainSlip'],[1.1,'plant'],[1.4,'tollLast'],[1.7,'heart'],[2.3,'crackRun'],[3.3,'rumble'],[4.75,'whooshDown'],[5.6,'iceCrack'],[5.9,'hush'],[6.4,'lanternHum']],
   '3:in':[[1.6,'heart'],[3.5,'burst'],[3.7,'creature'],[9.2,'plant'],[9.3,'creature'],[10.1,'ignite'],[11.7,'beam'],[12.3,'sting']],
   '3:out':[[.5,'thunder'],[.7,'scream'],[4.4,'fallWhine'],[5,'stars'],[6,'dissolve'],[8.3,'sting']]};
-  for(let i=0;i<5;i++)L['1:in'].push([.3+.8*(i+1),'step']);
+  for(let i=0;i<5;i++){L['1:in'].push([.3+.8*(i+1),'step']);L['1:in'].push([.33+.8*(i+1),'chainStep'])}
   for(let j=0;j<9;j++)L['1:out'].push([3.3+j*.17,'chunk']);
   TOWER.forEach(p=>L['3:in'].push([1.5+p.t+(p.d||.9),'clank']));
   Object.values(FALL).forEach(F=>L['3:out'].push([F.ft+.55,'chunk']));
   return L})();
-CSFX['3:out']=[[0,'charge'],...ZAPS.map(z=>[z,'zap']),[1.95,'swell'],[2.7,'thunder'],[2.72,'explosion'],[2.9,'scream'],[5.3,'whooshDown'],[5.75,'plant'],[5.9,'fallWhine'],[7.5,'dissolve'],[7.6,'stars'],[10.8,'sting']];Object.entries(EFALL).forEach(([i,F])=>{CSFX['3:out'].push([F.ft+2.7,'chunk']);CSFX['3:out'].push([F.ft+2.7,+i===EHEAD?'bellBig':'bellHit'])});CSFX['3:out'].push([5.75,'bellHit']);
+CSFX['3:out']=[[0,'charge'],...ZAPS.map(z=>[z,'zap']),[1.95,'swell'],[2.7,'thunder'],[2.72,'explosion'],[2.9,'scream'],[5.3,'whooshDown'],[5.75,'plant'],[5.9,'fallWhine'],[7.5,'dissolve'],[7.6,'stars'],[9.2,'sting']];Object.entries(EFALL).forEach(([i,F])=>{CSFX['3:out'].push([F.ft+2.7,'chunk']);CSFX['3:out'].push([F.ft+2.7,+i===EHEAD?'bellBig':'bellHit'])});CSFX['3:out'].push([5.75,'bellHit']);CSFX['3:out'].push([9.2,'crackedBell'],[10,'hush'],[10.4,'tideFar']);
 CSFX['3:p2']=[[0,'rumble'],[1,'chunk'],[1.02,'bellSoft'],[2.12,'bellCascade'],[2.6,'bellSoft'],[2.85,'bellSoft'],[3.1,'bellSoft'],[3.35,'bellSoft'],[4.45,'bellChime'],[4.75,'bellHit'],[1.6,'heart'],[2.1,'burst'],[2.15,'creature'],[2.2,'refill'],[2.4,'chainSlip'],[2.45,'plant'],[3.4,'swell'],[4.6,'ignite'],[5.8,'sting']];
 function cineSfx(t,key){const L=CSFX[key];if(!L)return;L.forEach((c,i)=>{if(t>=c[0]&&once('fx'+i))MUSIC.fx(c[1])})}
 function cineBoss(){
@@ -2863,6 +2863,9 @@ const MUSIC=(()=>{
   function send(g,wet){if(wet){const w=ac.createGain();w.gain.value=wet*farV;g.connect(w);w.connect(rev)}}
   function far(t,o,fn){const lp=ac.createBiquadFilter(),g=ac.createGain();lp.type='lowpass';lp.frequency.value=o.lp;lp.Q.value=.7;g.gain.value=o.vol;lp.connect(g);g.connect(out);
     dst=lp;farV=o.vol;try{fn(t+o.delay)}finally{dst=null;farV=1}}
+  /* dry(): sounds played inside it bypass the music bus (so they survive a hush) */
+  function dry(fn){const g=ac.createGain();g.connect(LB.audio.dest);dst=g;try{fn()}finally{dst=null}}
+  function duck(t,tc){out.gain.cancelScheduledValues(t);out.gain.setTargetAtTime(.0001,t,tc)}
   function osc(type,f,t,a,p,d,wet,f2,det){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+a+d);if(det)o.detune.value=det;env(g,t,a,p,d);o.connect(g);g.connect(dst||out);send(g,wet);o.start(t);o.stop(t+a+d+.1)}
   function nz(t,d,p,type,f,q,wet,f2,a){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+(a||.005)+d);fl.Q.value=q||1;const g=ac.createGain();env(g,t,a||.005,p,d);s.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet);s.start(t);s.stop(t+(a||.005)+d+.1)}
   function lfo(rate,depth,target){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=rate;lg.gain.value=depth;l.connect(lg);lg.connect(target);l.start();return l}
@@ -2893,9 +2896,10 @@ const MUSIC=(()=>{
     1:{bpm:64,ambP:.08,vol:1.6,bed(){layerNoise('lowpass',90,.7,.1,.03,25);layerOsc('sawtooth',36.7,.035,140)},
       start(){layerOsc('sawtooth',36.7,.075,150,-6,.05,.25);layerOsc('sawtooth',36.9,.055,130,7);layerOsc('triangle',55,.03,200,0,.04,.3);layerNoise('lowpass',85,.7,.1,.03,20)},
       step(s,t){const b=s%16;
-        if(b===0||b===6||b===8){osc('sine',90,t,.004,.6,.6,.15,32);nz(t,.24,.16,'lowpass',260)}
+        if(b===0||b===6||b===8){osc('sine',90,t,.004,.6,.6,.15,32);nz(t,.24,.16,'lowpass',260);FX.chainStep(t+.03)}
         if(b===12){nz(t,.5,.14,'lowpass',320,1.5,.3);osc('sine',120,t,.004,.16,.45,.3,70)}
         if(s%64===40){osc('triangle',73.4,t,.4,.06,1.8,.5);osc('triangle',103.8,t,.4,.05,1.8,.5)}
+        if(s%64===51)FX.bellDull(t);if(s%128===24)FX.anchorDrag(t);
         if(s%128===112){for(let i=0;i<4;i++){osc('sine',90,t+i*.11,.004,.45,.45,.2,32);nz(t+i*.11,.22,.12,'lowpass',260)}}},
       amb(t){const r=Math.random();
         if(r<.45){const n=3+Math.floor(Math.random()*4);for(let i=0;i<n;i++){const tt=t+i*(.06+Math.random()*.05),f=1150+Math.random()*850;osc('sine',f,tt,.003,.011,.2,.65);osc('sine',f*1.5,tt,.003,.0025,.12,.65)}nz(t,.4+n*.05,.007,'bandpass',1500,6,.5)}
@@ -2938,10 +2942,39 @@ const MUSIC=(()=>{
     glassRain:t=>tinkle(t,30,2.4,.025),
     voice:t=>{[440,523.3].forEach(f=>osc('sine',f,t,.6,.03,2.2,.85));nz(t,1.6,.05,'bandpass',1100,10,.8,700,.4)},
     /* the wail of the Voice: she weeps and laments (sliding sobs, a low moan, a breath); the same wail, far and soft, when the Illusion or the echo throws it */
-    wailCry:t=>{osc('triangle',587,t,.35,.05,1.5,.85,392);osc('triangle',592,t+.02,.35,.04,1.5,.85,395);osc('sine',220,t,.5,.035,1.8,.7,160);
-      osc('sine',698,t+.55,.2,.045,1.1,.85,466);osc('sine',702,t+.55,.2,.03,1.1,.85,468);osc('sine',523,t+1.1,.15,.04,1.2,.85,330);
-      nz(t,1.8,.05,'bandpass',1100,10,.8,650,.4);nz(t+.6,1.2,.03,'bandpass',1500,8,.8,800,.2)},
-    wailEcho:t=>far(t,{vol:.4,lp:1300,delay:.22},FX.wailCry),
+    wailCry:t=>{const k=.94+Math.random()*.12;   // soft and short, a slightly different pitch each time
+      osc('triangle',587*k,t,.3,.03,1,.85,392*k);osc('triangle',592*k,t+.02,.3,.022,1,.85,395*k);osc('sine',220*k,t,.4,.02,1.1,.7,160*k);
+      osc('sine',698*k,t+.4,.2,.025,.7,.85,466*k);nz(t,1,.022,'bandpass',1100*k,10,.8,650,.4)},
+    wailEcho:t=>far(t,{vol:.35,lp:1100,delay:.22},FX.wailCry),
+    /* Voice arrival: far, very sad weeping (sliding sobs, a low moan, breaths), no words */
+    weepFar:t=>far(t,{vol:.6,lp:1300,delay:0},tt=>{[0,.85,1.7,2.5,3.2].forEach((d,i)=>{const f=560-i*34;osc('triangle',f,tt+d,.3,.05-i*.005,.9,.9,f*.66);osc('triangle',f+4,tt+d+.02,.3,.03,.9,.9,f*.66)});
+      osc('sine',196,tt,.9,.035,3.6,.8,150);nz(tt,3.8,.04,'bandpass',1000,9,.8,600,.8)}),
+    /* last lament of the Voice as she disappears: the wail, one more slide down, then a murmur without words that fades out */
+    wailLast:t=>far(t,{vol:.7,lp:1200,delay:0},tt=>{FX.wailCry(tt);osc('triangle',440,tt+1.7,.4,.03,2.2,.9,262);osc('triangle',444,tt+1.72,.4,.02,2.2,.9,264);
+      for(let i=0;i<5;i++)nz(tt+2.3+i*.55,1,.026-i*.005,'bandpass',620+i*55,7,.85,420,.45)}),
+    /* the turquoise lantern falls into the water (muffled), then sinks pulsing: a dull beat that slows down */
+    lanternSplash:t=>{nz(t,.4,.16,'lowpass',520,1,.4,170,.01);osc('sine',300,t,.004,.09,.3,.5,110);nz(t+.08,.3,.06,'lowpass',360,1,.35,140)},
+    lanternSink:t=>{let d=0,g=.28;for(let i=0;i<7;i++){osc('sine',72,t+d,.01,.13*(1-i*.1),.4,.5,50);osc('sine',900,t+d,.02,.012*(1-i*.12),.6,.9,700);d+=g;g*=1.2}
+      nz(t,d+.4,.025,'lowpass',240,1,.5,110,.4)},
+    /* the hero lantern flame lowers */
+    flameDim:t=>{nz(t,1.1,.07,'bandpass',1100,2,.4,180,.05);osc('sawtooth',140,t,.04,.02,1.1,.3,70);for(let i=0;i<4;i++)nz(t+i*.22,.03,.05,'highpass',3500)},
+    /* the rusted chained hatch gives way: chain creaking, damp wood */
+    hatchGroan:t=>{for(let i=0;i<6;i++){const f=420+Math.random()*180;osc('sawtooth',f,t+i*.12,.03,.022,.16,.3,f*.72)}
+      osc('sawtooth',88,t,.4,.035,1,.3,64);nz(t,1.1,.12,'lowpass',320,1.5,.3,120,.3);nz(t+.5,.5,.05,'bandpass',900,6,.3,500,.1)},
+    /* the hold: dripping water and echo */
+    bilge:t=>{for(let i=0;i<5;i++){const f=900+Math.random()*700,tt=t+i*.5+Math.random()*.3;osc('sine',f,tt,.003,.035,.45,.97,f*.55)}nz(t,3,.04,'lowpass',210,1,.9,100,.8)},
+    /* the Rust King: chains jingling at each step, the anchor dragged on the wood, the head bell dull and off the beat (no Lumen in it) */
+    chainStep:t=>{for(let i=0;i<4;i++)clang(t+i*.05,260+Math.random()*120,.03,.55)},
+    anchorDrag:t=>{nz(t,1.8,.08,'lowpass',260,1,.3,120,.5);nz(t,1.8,.04,'bandpass',700,5,.3,350,.4);osc('sawtooth',48,t,.4,.02,1.4,.2,40)},
+    bellDull:t=>far(t,{vol:.55,lp:420,delay:.17},tt=>clang(tt,182,.09,1.7)),
+    /* true silence: the ambience fades out */
+    hush:t=>{bedStop();duck(t,.2)},
+    /* only the hero lantern vibrates (dry, nothing answers) */
+    lanternHum:t=>dry(()=>{osc('sine',880,t,.5,.028,2,0);osc('sine',884.5,t,.5,.022,2,0);osc('sine',1320,t+.2,.4,.008,1.6,0)}),
+    /* the cracked bell: a single broken note (two close, out-of-tune partials that beat) */
+    crackedBell:t=>{[[1,.1],[2.41,.05],[3.7,.025]].forEach(([m,p])=>{osc('sine',233*m,t,.004,p,3.2,.7);osc('sine',233*m*1.043,t+.01,.004,p*.8,2.2,.7,233*m*.98)});nz(t,.5,.03,'bandpass',2400,8,.5)},
+    /* a distant tide */
+    tideFar:t=>dry(()=>{[0,3.1].forEach(d=>nz(t+d,3.4,.05,'lowpass',280,1,0,130,1.5));nz(t,6,.006,'highpass',3000,1,0,null,2)}),
     /* the reflections of a rage arrive: a glassy pulse that comes back three times, each repeat farther and duller (echo timbre) */
     echoArrive:t=>{[0,.2,.42].forEach((d,i)=>far(t+d,{vol:.75-i*.25,lp:3600-i*1200,delay:0},tt=>{osc('sine',392,tt,.01,.06,.9,.8,330);osc('sine',784,tt,.01,.03,.7,.8,660);osc('sine',1081,tt,.005,.012,.5,.9)}));
       nz(t,.6,.05,'bandpass',900,3,.6,2600,.3)},
@@ -2978,8 +3011,10 @@ const MUSIC=(()=>{
   function bedStop(){if(!ac)return;clearInterval(bedTimer);bedTimer=null;bedId=null;const t=ac.currentTime;bedLayers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+1);setTimeout(L.stop,1200)});bedLayers=[]}
   function tick(){const th=THEMES[cur];if(!th)return;const spb=60/th.bpm/4;if(next<ac.currentTime){const miss=Math.ceil((ac.currentTime-next)/spb);next+=miss*spb;step+=miss}while(next<ac.currentTime+.6){th.step(step,next);if(Math.random()<th.ambP)th.amb(next+Math.random()*spb);next+=spb;step++}}
   function stop(){if(!ac)return;clearInterval(timer);timer=null;cur=null;out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);const t=ac.currentTime;layers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+.8);setTimeout(L.stop,1000)});layers=[]}
+  /* fadeStop(sec): the theme fades out smoothly, then stops (immediate stop if nothing plays) */
+  function fadeStop(sec){if(!ac||cur==null){stop();return}clearInterval(timer);timer=null;const keep=cur,t=ac.currentTime;out.gain.cancelScheduledValues(t);out.gain.setTargetAtTime(.0001,t,sec/4);setTimeout(()=>{if(cur===keep&&timer===null)stop()},sec*1000+100)}
   function play(id){if(!LB.audio.music){stop();bedStop();return}if(!init())return;stop();bedStop();cur=id;step=0;next=ac.currentTime+.15;out.gain.setTargetAtTime(.5*(THEMES[id].vol||1),ac.currentTime,.3);THEMES[id].start();timer=setInterval(tick,100)}
-  return{play,stop,fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
+  return{play,stop,fadeStop,fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
 })();
 /* ---------- Prologue: the silent coast (docs/CH2-SPEC.md, intro) ---------- */
 /* intro in the series frame (LB.cine, shared/js/24-cine.js, as in Ember Bridge): one shot per carton, durations in CINE_D
@@ -3673,7 +3708,7 @@ const SPIRE={x:500,top:170,a0:.9,a1:.25,fade:6};
 /* shot 3: the valley's towers (x, height); TOWER_OUT goes dark at EPI_DARK; the earth cracks along VCRACKS */
 const VTOW=[[150,150],[300,110],[470,170],[640,120],[800,140]],TOWER_OUT=3,EPI_DARK=EPI_SHOTS[2]+1.3;
 const VCRACKS=(()=>{const R=mulberry(808);return[...Array(5)].map((_,i)=>{const pts=[];let x=80+i*190,y=430;for(let k=0;k<7;k++){pts.push([x,y]);x+=(R()-.5)*60;y+=14+R()*10}return{pts,t0:EPI_SHOTS[2]+.6+i*.45}})})();
-const EFXL=[[.2,'swell'],[EPI_SHOTS[1],'glints'],[EPI_SHOTS[2],'rumble'],[EPI_DARK,'crackRun'],[EPI_SHOTS[2]+2.1,'rumble'],[EPI_SHOTS[3],'glints'],[EPI_SHOTS[3]+2.3,'heart'],[EPI_TITLE+.6,'sting']];
+const EFXL=[[.4,'tideFar'],[EPI_SHOTS[1],'glints'],[EPI_SHOTS[2],'rumble'],[EPI_DARK,'crackRun'],[EPI_SHOTS[2]+2.1,'rumble'],[EPI_SHOTS[3],'glints'],[EPI_SHOTS[3]+2.3,'heart'],[EPI_TITLE+.6,'sting']];
 function drawEpilogue(t){
   const shot=EPI_SHOTS.filter(s=>t>=s).length-1,ts=t-EPI_SHOTS[shot];
   ctx.save();
@@ -3728,11 +3763,12 @@ function drawEpilogue(t){
   ctx.restore();
   ctx.save();ctx.globalCompositeOperation='lighter';for(const p of S.parts){const q=gt-p.t0,k=1-q/p.life;ctx.globalAlpha=k;ctx.fillStyle=p.c;ctx.fillRect(p.x+p.vx*q*30,p.y+p.vy*q*30+p.g*q*q*300,p.r,p.r)}ctx.restore();
   EFXL.forEach((c,i)=>{if(t>=c[0]&&once('efx'+i))MUSIC.fx(c[1])});
+  if(t>=EPI_SHOTS[1]&&once('epmus'))setTheme(4);   // the menu theme comes back after the silent first shot
 }
 /* the epilogue in the series frame; flag lb-ch2-outro (written at the end or on Skip, not to be confused with lb-ch2-end): it plays only at the first true ending outside the Trial (hub or alone), then only by ▶ Outro */
 const EPI=LB.cine.create({key:'outro',scenes:()=>CINE_D.outro.map((d,i)=>({d,txt:()=>ECAP_TXT()[i],col:i===4?CH_COL[3]:'',draw:cineScene(drawEpilogue)})),
   onTick:t=>{if(!$('menu').hidden)gt=S.epT0+t}});
-function playEpilogue(cb){MUSIC.stop();MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();setTheme(4);$('skip').hidden=true;$('hdEye').textContent=_('Epilogue','Épilogue');EPI.play(endEpilogue)}
+function playEpilogue(cb){MUSIC.fadeStop(1.5);MUSIC.bedStop();S.mode='epilogue';S.epT0=gt;S.cineDone={};S.parts=[];S.pops=[];S.epCb=cb;resetCine(S);S.cineDone={};hideCard();$('skip').hidden=true;$('hdEye').textContent=_('Epilogue','Épilogue');EPI.play(endEpilogue)}
 function endEpilogue(){if(S.mode!=='epilogue')return;const cb=S.epCb;S.epCb=null;$('skip').hidden=true;S.mode='card';cb&&cb()}
 
 

@@ -1,0 +1,14 @@
+# 2026-11-05 · C2 : ambiance sonore des cinématiques (branche `claude/peaceful-galileo-44baus`)
+
+Synthèse audio existante du C2 seulement (`MUSIC.fx`, `60-music.js`). Aucun fichier externe, aucun texte, aucun mot intelligible, aucune emphase de combat. À vérifier à l'oreille sur `jeu-apercu`.
+
+1. Arrivée de la Voix (`2:in`) : `weepFar`, pleurs et lamentation lointains, très tristes (sanglots glissants, plainte grave, souffles), filtrés passe-bas. En combat, la plainte garde ses pleurs (`wailCry`) : doux, courts, hauteur légèrement différente (±6 %) à chaque plainte ; version plus lointaine et plus douce (`wailEcho`) quand l'Illusion ou l'écho la relance.
+2. Fin de la phase I (`2:out`) : `wailLast`, dernière complainte (la plainte puis une dernière glissade) qui s'éteint en murmure sans mots (bruit filtré, aucune voyelle).
+3. Fin de la phase I : `lanternSplash` (clapotis étouffé), `lanternSink` (battement sourd qui ralentit), `flameDim` (flamme qui baisse, calée sur l'affaiblissement de la lanterne du héros).
+4. Passage I → II : `hatchGroan` (chaîne qui grince, bois humide) puis `bilge` (gouttes et écho de la cale) ; `bilge` rejoue à l'entrée du Roi de Rouille.
+5. Phase II : `chainStep` (chaînes à chaque pas, en combat et dans l'entrée), `anchorDrag` (ancre qui traîne sur le bois), `bellDull` (cloche de tête sourde, décalée du temps et filtrée). Ambiance seule, non liée aux menaces.
+6. Fin de la phase II (`1:out`) : après l'effondrement, `hush` (ambiance coupée), puis `lanternHum` seul, sec, sans réponse.
+7. Fin de la phase III (`3:out`) : `crackedBell`, une seule note brisée (partiels désaccordés qui battent), le `sting` posé sur elle (9,2 s), puis `hush` (10 s : ambiance coupée et bus musical atténué, aucun son musical ensuite), puis `tideFar` (marée lointaine, hors bus musical), reprise au début de l'outro (Phare au matin). Outro : la musique du menu (thème 4) s'éteint en fondu de 1,5 s (`fadeStop`) à l'entrée, reste coupée pendant le premier plan (seule la marée), et revient au début du plan 2 comme avant ; le `swell` du début est retiré.
+
+Décision de Kevin du 05/11 au soir, plus récente que le retrait du 04/11 : les pleurs reviennent dans l'arrivée de la Voix et dans la plainte en combat.
+À valider : si l'outro est passée au plan 1, la musique du menu ne démarre qu'au menu suivant.
