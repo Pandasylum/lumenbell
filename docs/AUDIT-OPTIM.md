@@ -121,3 +121,22 @@ Base : `docs/AUDIT-NETTOYAGE.md` §2 (déjà fait, non répété). Ajouts mesur�
 - Autres sparks poussés directement (`08-state`, `16`, `44`, `48`, `56`) : hors fonctions d'effet, laissés.
 - Pause simple (`pauseEl`) : non figée, hors consigne.
 - `shared/` et Ch. II : rien touché.
+
+## S3 faite · Chaîne de build (axes 3 et 4, lot c)
+**Fait** (`build/`, `chapters/*/chapter.json`, builds régénérés ; aucun changement de jeu, `chapters/*/src` et `shared/` non touchés)
+- Commentaires retirés des sorties (`build/strip.py`, appelé par `build_chapter.py` et `build_site.py`) : balayage à états, pas une regex. JS : lignes entières `//` et blocs `/* */` hors chaînes, regex et gabarits ; **les `//` en fin de ligne sont laissés**. CSS : blocs `/* */` hors chaînes. HTML : `<!-- -->` hors script/style. Aucun test ne lit de commentaire dans les builds (greps sur `tests/` : marqueurs et regex portent sur du code).
+- Preuve : suite de jetons de chaque `<script>` comparée avant/après avec l'analyseur TypeScript (hors dépôt) : identique pour Ch. I (127 508 jetons), Ch. II (123 706) et hub (80 + 29 791), 0 erreur d'analyse. Reconstruire donne les mêmes octets (empreinte du site stable).
+- `build/build_chapter.py <id>` paramétré par `chapters/<id>/chapter.json` (`id`, `title`, `dist`, `zip`) ; `build.py` et `build_ch2.py` en sont les alias (mêmes commandes et chemins pour la CI). Les deux zips itch.io ont désormais une date fixe (celui du Ch. I n'en avait pas).
+- `assemble.py` : `CH1`/`CH2` supprimés ; `chapters()` découvre `chapters/*/src/parts.txt` ; `source()` sans argument = premier chapitre (ordre et sorties inchangés). Un Chapitre III = un dossier avec `src/parts.txt` et `chapter.json`, plus une ligne dans `CHAPTERS` de `build_site.py`.
+
+| Build | Avant (o) | Après (o) | gzip avant → après |
+|---|---|---|---|
+| Ch. I `dist` (= `site/ch1`) | 474 666 | 419 251 (−11,7 %) | 202 513 → 178 519 |
+| Ch. II `dist` (= `site/ch2`) | 482 272 | 402 261 (−16,6 %) | 210 197 → 177 015 |
+| Hub `site/index.html` | 238 570 | 199 777 (−16,3 %) | 124 000 → 108 140 |
+
+**Laissé, et pourquoi**
+- Polices (`build/fonts.css`) : 2 `@font-face` seulement (Big Shoulders Display 700-800, DM Sans 400-700, polices variables), aucun doublon ni graisse inutilisée prouvés. Pas de sous-ensemble (outil externe interdit ici) : rien changé. Le gain possible reste le sous-ensemble latin + accents FR, à faire hors dépôt.
+- Commentaires `//` en fin de ligne : conservés (non prouvables sans analyseur complet dans le build).
+- `site/ch1`, `site/ch2` : toujours des copies (hors périmètre).
+- Tests lancés : `smoke` ch1 (`errs []`), `ch2-smoke` (`errs []`), `fonts-offline` (polices chargées).
