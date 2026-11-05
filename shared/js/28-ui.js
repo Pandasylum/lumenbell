@@ -1,5 +1,5 @@
 /* ---------- Cadre commun des chapitres (session menu/common, 1er novembre 2026) ----------
-   LB.menu (menu de la série), LB.gate (écran de démarrage), LB.card (cartes #ov), LB.pause, LB.input (entrées), LB.hud
+   LB.menu (menu de la série), LB.card (cartes #ov), LB.pause, LB.input (entrées), LB.hud
    (barres, nom du boss, sourcil, frise), LB.cue (repère d'aide), LB.help (case « Aide »), LB.motion (mouvement réduit), LB.hubEnd, LB.MENU_T.
    Référence par élément (docs/COMMUN.md § 1) : le Chapitre I pour ce que le joueur voit (structure, ordre du titre, polices,
    tailles, écran de démarrage, boutons de rejeu, Entrée / Espace au menu, repère d'aide), le Chapitre II pour l'outillage
@@ -99,7 +99,6 @@ LB.UI_CSS=C=>{const M=Object.assign({},LB.MENU_T,(C.menu&&C.menu.t)||{}),P=M[C.m
  '.mcard .eyebrow.chap{font-size:16px;letter-spacing:.2em;color:'+c2+';margin-top:-4px}\n'+
  '.mcard .tag{margin:0;color:var(--muted);font-size:14px;max-width:46ch;min-height:'+M.tagH+'px}\n'+
  '.mcard .how{margin:0;font-size:12px;color:var(--muted);min-height:'+M.howH+'px}\n'+
- @gate-js gate gatehidden gatebtn
  '.mcard .tnote{width:100%;max-width:420px;box-sizing:border-box;text-align:left;padding:12px 16px;background:rgba(22,17,29,.8);border:1px solid var(--line);border-left:3px solid '+c+';font-size:13px;line-height:1.45;color:var(--muted)}\n'+
  '.mcard .tnote[hidden]{display:none}\n'+
  '.mcard .tnote b{display:block;margin-bottom:6px;font-family:var(--font-display);font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:'+c2+'}\n'+
@@ -250,37 +249,21 @@ LB.pause=(()=>{
     stay(){if(view!=='confirm')return false;setView('main',true);return true},enter(){if(!this.stay())this.resume()},get el(){return ov}};
 })();
 
-/* ---------- Premier rendu : le voile CSS (style.css de la page : html:not(.lb-go) body * masqué, sauf #gate) est levé ici, dès que
-   l'écran de démarrage #gate du HTML est masqué (Commencer, ouverture depuis le hub, retour du hub, copie de test) ou absent.
+/* ---------- Premier rendu : le voile CSS (style.css de la page : html:not(.lb-go) body * masqué, sauf #gate du hub) est levé ici, dès que
+   l'écran de démarrage #gate du hub est masqué ou absent (chapitres : toujours absent, levée immédiate).
    Décision docs/decisions/2026-11-04-premier-rendu.md ---------- */
 (()=>{const R=document.documentElement,g=document.getElementById('gate'),go=LB.lift=()=>R.classList.add('lb-go');   /* LB.lift : levée immédiate, avant un focus() (un élément masqué ne prend pas le focus) */
   
   if(!g||g.hidden){go();return}
   const mo=new MutationObserver(()=>{if(g.hidden){go();mo.disconnect()}});mo.observe(g,{attributes:true,attributeFilter:['hidden']})})();
-/* ---------- LB.gate : écran de démarrage (Commencer + langues) ; le clic débloque le son (comme au Chapitre I) ---------- */
-LB.gate=(()=>{
-  let g=null,h={};
-  function mount(stage,before,hh){
-    h=hh||{};if(g)return g;
-    g=document.getElementById('gate');   /* écran de démarrage déjà dans le HTML de départ (premier rendu) ; créé ici seulement s'il manque */
-    if(g){if(g.parentNode!==stage)stage.insertBefore(g,before||null)}else{
-    g=LB.ui.mk('div',{class:'gate',id:'gate'},'<div class="langs" id="gateLangs" role="group" aria-label="Language">'+LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('')+'</div><button class="btn big" id="gateBtn" type="button">Start</button>');
-    stage.insertBefore(g,before||null)}
-    g.querySelector('#gateBtn').addEventListener('click',()=>{LB.audio.ensure();g.hidden=true;LB.lift();try{document.querySelector('#menu [data-diff=normal]').focus({preventScroll:true})}catch(e){}if(h.onStart)h.onStart()});
-    return g;
-  }
-  /* écran masqué (chapitre ouvert depuis le hub) : le focus va à « Normal » du menu */
-  return{mount,visible(){return!!g&&!g.hidden},focus(){try{if(!g||g.hidden)LB.lift();(g&&!g.hidden?g.querySelector('#gateBtn'):document.querySelector('#menu [data-diff=normal]')).focus({preventScroll:true})}catch(e){}},get el(){return g}};
-})();
-
 /* ---------- LB.menu : menu de la série ----------
    mount(C, h) : construit autour de la scène SVG du chapitre (déjà dans #menu, classe .mscene) les particules, « ▶ Intro »,
    « ▶ Outro » (après la vraie fin), langues, puis la carte : « Lumen|bell », la ligne du chapitre dessous, accroche,
    Reprendre, les quatre difficultés, le sous-menu de l'Épreuve (Normal, Difficile, Retour) et sa note, mode d'emploi, version,
-   « Chapitres » vers le hub (seulement si LB.fromHub) ; aussi l'écran de démarrage (LB.gate), la carte (LB.card) et la pause (LB.pause) s'ils manquent.
+   « Chapitres » vers le hub (seulement si LB.fromHub) ; aussi la carte (LB.card) et la pause (LB.pause) s'ils manquent.
    h : {onDiff(dk), onIntro(), onOutro(), onResume(), onLang(), onStart(), onSet(id)} (onSet : un réglage de la roue a changé). show(reprendre), hide(), visible(), lang(),
-   update() (verrou de l'Épreuve, records, « ▶ Outro »), trial(on). Depuis le hub, l'écran de démarrage reste masqué : le son est
-   relancé (LB.audio.ensure ; si le navigateur le bloque, il part au premier appui) et onStart est appelé comme après « Commencer ». */
+   update() (verrou de l'Épreuve, records, « ▶ Outro »), trial(on). Plus d'écran de démarrage : le son est
+   relancé (LB.audio.ensure ; si le navigateur le bloque, il part au premier appui) et onStart est appelé aussitôt (hub ou lien direct). */
 LB.menu=(()=>{
   let C=null,h={},m=null,card=null;const $=LB.ui.$;
   const DK=['easy','normal','hard'];
@@ -295,8 +278,7 @@ LB.menu=(()=>{
     LB.ui.style(C);
     m=$('menu');const stage=m.parentNode;
     if(!LB.card.el.ov)LB.card.mount(stage,m);
-    LB.gate.mount(stage,m,{onStart:()=>{if(h.onStart)h.onStart()}});
-    if(LB.fromHub){LB.gate.el.hidden=true;LB.lift();LB.audio.ensure();setTimeout(()=>{if(h.onStart)h.onStart()},0)}   /* après la fin du démarrage du chapitre */
+    LB.audio.ensure();setTimeout(()=>{if(h.onStart)h.onStart()},0)   /* démarrage direct (hub ou lien direct) : son relancé, au premier appui s'il est bloqué ; après la fin du démarrage du chapitre */
     if(!LB.pause.el)LB.pause.mount(stage,m);
     ['ov','pause','cine'].forEach(id=>LB.hdr.watch($(id)));
     m.appendChild(particles());
@@ -384,7 +366,7 @@ LB.input=(()=>{
     window.addEventListener('blur',rel);
     window.addEventListener('keyup',e=>{if(ACT.includes(e.key)||e.key==='Enter')rel()});   /* Entrée : bouton d'action focalisé (clic clavier) */
     window.addEventListener('keydown',e=>{
-      if(LB.gate.visible()||LB.settings.visible()||LB.settings.handled(e))return;   /* écran de démarrage : seul le bouton agit ; panneau de réglages : ses boutons et ses touches (LB.settings) */
+      if(LB.settings.visible()||LB.settings.handled(e))return;   /* écran de démarrage : seul le bouton agit ; panneau de réglages : ses boutons et ses touches (LB.settings) */
       const k=e.key,a=document.activeElement;
       if(a&&a.tagName==='INPUT')return;
       if(h.skip&&h.skip(e))return;
@@ -400,7 +382,7 @@ LB.input=(()=>{
     });
   }
   /* pause demandée hors clavier (roue de réglages en jeu) : comme P, sans rien faire déjà en pause, au menu ou sur l'écran de démarrage */
-  function pause(){if(LB.gate.visible()||LB.menu.visible()||LB.pause.visible()||!h.pause)return false;h.pause();return true}
+  function pause(){if(LB.menu.visible()||LB.pause.visible()||!h.pause)return false;h.pause();return true}
   return{bind,ACT,pause};
 })();
 

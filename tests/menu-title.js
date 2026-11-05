@@ -1,7 +1,6 @@
 // Menu commun des deux chapitres (LB.menu, shared/js/28-ui.js, session menu/common) : ecran de demarrage, titre, structure.
 // Pour chaque chapitre et chaque taille (bureau, telephone, paysage bas), dist publie :
-//  1. ecran de demarrage (LB.gate) visible au chargement, bouton « Start » / « Commencer » et langues EN, FR ; une touche
-//     (P, fleche haut) ne fait rien ; le clic le ferme et donne le focus a Normal ;
+//  1. plus d'ecran de demarrage : le menu est direct, focus a Normal (P, fleche haut ne changent rien) ;
 //  2. titre : « Lumenbell » (h2, « Lumen » en couleur du chapitre) puis la ligne du chapitre DESSOUS ; memes polices et tailles
 //     dans les deux chapitres (h2 Big Shoulders 800, ligne du chapitre 16 px, boutons de difficulte) ; rien ne se chevauche
 //     (titre, ligne, difficultes, « ▶ Intro », langues) ; « ▶ Intro » visible, « ▶ Outro » cache sans la vraie fin ;
@@ -18,19 +17,16 @@ for(const ch of ['ch1','ch2'])for(const [nm,w,h,lang] of [['desk',1100,760,'en']
  const tag=ch+' '+nm,ctx=await b.newContext({viewport:{width:w,height:h},isMobile:nm!=='desk',hasTouch:nm!=='desk',locale:lang});
  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(tag+': pageerror: '+e.message));
  await pg.goto('file://'+F[ch]);await pg.waitForTimeout(500);
- const g=await pg.evaluate(()=>{const g=document.getElementById('gate');return{vis:!!g&&!g.hidden,btn:(document.getElementById('gateBtn')||{}).textContent,langs:[...document.querySelectorAll('#gateLangs button')].map(x=>x.textContent).join(','),focus:document.activeElement&&document.activeElement.id}});
- check(g.vis&&g.btn===(lang==='fr'?'Commencer':'Start')&&g.langs==='EN,FR'&&g.focus==='gateBtn',tag+': ecran de demarrage '+JSON.stringify(g));
- await pg.keyboard.press('p');await pg.keyboard.press('ArrowUp');await pg.waitForTimeout(100);
- check(await pg.evaluate(()=>!document.getElementById('gate').hidden&&!document.getElementById('menu').hidden&&document.getElementById('pause').hidden),tag+': une touche agit sous l\'ecran de demarrage');
- await pg.click('#gateBtn');await pg.waitForTimeout(900);
+ check(await pg.evaluate(()=>!document.getElementById('gate')&&!document.getElementById('menu').hidden),tag+': aucun ecran de demarrage, menu direct');
+ await pg.keyboard.press('p');await pg.keyboard.press('ArrowUp');await pg.waitForTimeout(900);
  const r=await pg.evaluate(()=>{const q=s=>document.querySelector(s),R=e=>{const r=e.getBoundingClientRect();return{l:r.left,t:r.top,r:r.right,b:r.bottom,w:r.width,h:r.height}},cs=e=>getComputedStyle(e);
   const h2=q('#menu .mcard h2'),chap=q('#menu .mcard .eyebrow.chap'),mph=q('#mphM'),intro=q('#introBtn'),langs=q('#langs'),sp=q('#menu .mcard h2 span');
-  return{gate:q('#gate').hidden,focus:document.activeElement&&document.activeElement.dataset.diff,h2:h2.textContent,chap:chap.textContent,first:h2.compareDocumentPosition(chap)&Node.DOCUMENT_POSITION_FOLLOWING?'h2':'chap',
+  return{gate:!q('#gate'),focus:document.activeElement&&document.activeElement.dataset.diff,h2:h2.textContent,chap:chap.textContent,first:h2.compareDocumentPosition(chap)&Node.DOCUMENT_POSITION_FOLLOWING?'h2':'chap',
    rh2:R(h2),rchap:R(chap),rmph:R(mph),rintro:R(intro),rlangs:R(langs),introVis:!intro.hidden&&cs(intro).display!=='none',outro:q('#outroBtn').hidden,
    font:cs(h2).fontFamily,weight:cs(h2).fontWeight,size:cs(h2).fontSize,chapSize:cs(chap).fontSize,chapLs:cs(chap).letterSpacing,lumen:cs(sp).color,bSize:cs(q('#mphM button b')).fontSize,
    langOrder:[...document.querySelectorAll('#langs button')].map(x=>x.textContent.trim()).filter(Boolean).join(','),wheel:[...document.querySelectorAll('#langs button')].filter(x=>!x.textContent.trim()).length}});
  const ov=(a,c)=>a.l<c.r&&c.l<a.r&&a.t<c.b&&c.t<a.b;
- check(r.gate&&r.focus==='normal',tag+': apres l\'ecran de demarrage, focus '+r.focus);
+ check(r.gate&&r.focus==='normal',tag+': au demarrage direct, focus '+r.focus);
  check(r.h2==='Lumenbell'&&r.first==='h2'&&r.rchap.t>=r.rh2.b-6,tag+': ordre du titre (Lumenbell puis le chapitre dessous) '+JSON.stringify([r.first,r.rh2,r.rchap]));
  check(CHAP[ch].includes(r.chap),tag+': ligne du chapitre « '+r.chap+' »');
  check(/Big Shoulders/.test(r.font)&&r.weight==='800'&&r.chapSize==='16px'&&r.lumen===COL[ch],tag+': polices et couleur '+JSON.stringify([r.font,r.weight,r.chapSize,r.lumen]));

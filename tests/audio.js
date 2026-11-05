@@ -17,8 +17,8 @@ const SPY=`(()=>{window.__acs=[];window.__h=false;
  const st=AudioScheduledSourceNode.prototype.start;AudioScheduledSourceNode.prototype.start=function(...a){const c=this.context;c.__st=(c.__st||0)+1;return st.apply(this,a)};
  for(const k of ['createOscillator','createBufferSource']){const f=C.prototype[k];C.prototype[k]=function(...a){this.__src=(this.__src||0)+1;return f.apply(this,a)}}})();`;
 const CH={
- ch1:{dist:path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html'),src:path.join(ROOT,'chapters/ch1-ember-bridge/src/js'),gate:'#gateBtn'},
- ch2:{dist:lib.DIST,src:path.join(ROOT,'chapters/ch2-silent-bells/src/js'),gate:'#gateBtn'}};   // ecran de demarrage dans les deux chapitres (LB.gate, menu/common)
+ ch1:{dist:path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html'),src:path.join(ROOT,'chapters/ch1-ember-bridge/src/js')},
+ ch2:{dist:lib.DIST,src:path.join(ROOT,'chapters/ch2-silent-bells/src/js')}};
 async function page(b,file){const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true,locale:'en-US'});
  const p=await ctx.newPage();p.on('pageerror',e=>errs.push('pageerror '+e.message));
  await p.addInitScript(SPY);await p.goto('file://'+file);await sleep(400);return {ctx,p}}
@@ -37,7 +37,7 @@ const hide=(p,off)=>p.evaluate(off=>{window.__h=off;document.dispatchEvent(new E
  // 2. dist publies : contexte unique, musique du menu, suspension et reprise
  for(const [ch,c] of Object.entries(CH)){
   const {ctx,p}=await page(b,c.dist);
-  await p.click(c.gate).catch(()=>p.mouse.click(300,300));await sleep(1500);
+  await p.mouse.click(300,300);await sleep(1500);
   let s=await state(p);
   ok(s.n===1,ch+' dist : un seul contexte apres le premier geste ('+s.n+')');
   ok(await p.evaluate(()=>window.__hint)==='playback',ch+' dist : latencyHint playback (interactive craquait sur telephone)');

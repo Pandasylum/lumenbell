@@ -52,7 +52,6 @@ guardUi();
 async function state(pg,ch){return pg.evaluate(k=>({cine:!document.getElementById('cine').hidden,flag:localStorage.getItem(k),
  card:!document.getElementById('ov').hidden||!document.getElementById('skip')?.hidden&&!!document.getElementById('skip'),menu:!document.getElementById('menu').hidden}),KEY[ch])}
 async function startNormal(pg,ch){
- await pg.evaluate(()=>{const g=document.getElementById('gateBtn');if(g&&!document.getElementById('gate').hidden)g.click()})   // ecran de demarrage (LB.gate), les deux chapitres
  await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(400)}
 const CARD={};
 (async()=>{const b=await launch();
