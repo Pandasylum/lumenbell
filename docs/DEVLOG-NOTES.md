@@ -236,3 +236,6 @@
 - Chapitre II : image un peu moins fine sur téléphone (plafond 1,25 comme au Chapitre I), jeu plus fluide dans les phases chargées (fonds, nuages et particules allégés).
 - Ce que le joueur verra : fonds, nuages et effets inchangés ; seule la netteté sur téléphone baisse légèrement.
 - Chapitre I : le jeu est un peu plus fluide (menu ouvert, musique en veille, effets bornés) ; rien d'autre ne change.
+
+## 2026-11-05 · engine/build-chapitre
+- Ce que le joueur verra : rien ne change à l’écran ; les fichiers du jeu sont plus légers (environ 12 à 17 % de moins), donc un chargement un peu plus rapide.

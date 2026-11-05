@@ -10,6 +10,7 @@ import hashlib, re, sys, zipfile
 from pathlib import Path
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from strip import strip_page
 from assemble import ROOT, _listed, _read, _svg, _no_stray, shared_parts, gate_expand
 SITE = ROOT / "site"
 SRC = SITE / "src"
@@ -42,6 +43,7 @@ assert "__LANTERN" not in s
 s = s.replace("<style>\n", "<style>\n" + (ROOT / "build/fonts.css").read_text(encoding="utf-8") + "\n", 1)
 low = s.lower()
 assert "couronne" not in low and "crown" not in low, "nom secret du lore dans le hub"
+s = strip_page(s)  # commentaires JS/CSS/HTML retires de la sortie (les sources gardent les leurs)
 files = {"index.html": s}
 for d, dist in CHAPTERS:
     files[d + "/index.html"] = (ROOT / dist).read_text(encoding="utf-8")

@@ -12,14 +12,17 @@ Une ligne '@svg <fichier> <encre>' dans une page (HTML) est remplacee par le fra
 precedee de l'indentation du repere, {ink} remplace par <encre> (dessin commun a la serie : le Veilleur des menus).
 Une ligne '@gate <blocs>' (CSS) ou '@gate-js <blocs>' (chaine JS de LB.UI_CSS) est remplacee par les regles de shared/css/gate.css
 (source unique de l'ecran de demarrage) ; le build echoue si une de ces regles est recopiee a la main ailleurs (voir gate_expand).
-Usage : from assemble import source, parts   (source(CH2) pour le Chapitre II)
+Les chapitres ne sont pas listes ici : chapters() les decouvre par chapters/*/src/parts.txt (un nouveau chapitre n'exige aucune edition).
+Usage : from assemble import source, parts, chapters   (source('ch2-silent-bells') pour le Chapitre II ; sans argument : le premier chapitre)
 """
 import re
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
-CH1 = "ch1-ember-bridge"
-CH2 = "ch2-silent-bells"
 SHARED_DIR = ROOT / "shared"
+
+def chapters():
+    """Identifiants des chapitres, decouverts par chapters/*/src/parts.txt, tries par nom (ch1-..., ch2-..., ch3-...)."""
+    return sorted(p.parent.parent.name for p in (ROOT / "chapters").glob("*/src/parts.txt"))
 
 def _listed(base):
     """Morceaux listes dans base/parts.txt : liste de (ligne, chemin absolu)."""
@@ -122,8 +125,9 @@ def shared_parts():
     _no_stray(SHARED_DIR, {o[0] for o in out})
     return out
 
-def parts(chapter=CH1):
+def parts(chapter=None):
     """Liste ordonnee de (chemin relatif a la racine, texte) pour un chapitre."""
+    chapter = chapter or chapters()[0]
     src_dir = ROOT / "chapters" / chapter / "src"
     out, own = [], set()
     for line, p in _listed(src_dir):
@@ -138,5 +142,5 @@ def parts(chapter=CH1):
     _no_stray(src_dir, own)
     return gate_expand(out)
 
-def source(chapter=CH1):
+def source(chapter=None):
     return "".join(t for _, t in parts(chapter))
