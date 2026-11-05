@@ -20,3 +20,7 @@ Décision de Kevin (5 nov.). Vocabulaire : bloquer (jamais « parer »). Aucun t
 
 ## Balayage en combo (Kevin, 5 nov., après revue)
 Un seul mouvement lié, sans retour au repos entre les coups : l'ancre se lève puis retombe. Écarts entre impacts (`SP.sweep.d`, provisoires, après 0,72 s) : Facile 0,85 ; Normal 0,60 puis 0,95 ; Difficile 0,55, 0,90 puis 0,75. Un écart ≥ 0,7 est un délai : l'ancre reste levée en tremblant avant de tomber. Difficile : le 4ᵉ coup écrase le sol (vague). Points 1 à 6 ci-dessus validés par Kevin.
+
+## Retouches du 5 nov. (soir)
+- Rage 1 : le nuage couvre tout, le Veilleur compris (voile léger dessiné après lui) ; plus aucun éclaircissement permanent près de lui. Il ne se dégage qu'au contre (sceptre levé), puis le nuage revient.
+- Contre du harpon : la foudre part de la lanterne, frappe le harpon et monte le long de la chaîne jusqu'à la main. Contre plus lent (`R_CNT.harpoon` 1,6 s, impact 0,65 s) et rappel du harpon plus lent (`SP.harpoon.back` 0,9) pour la voir monter. Provisoire.

@@ -102,6 +102,7 @@ function drawBoss1(){
   else if(A.coil){const a=gt*9;tip={x:lh.x-20+Math.cos(a)*62,y:lh.y-20+Math.sin(a)*44}}
   else tip={x:lh.x-60,y:lh.y+40+Math.sin(rt*1.3)*3};
   {const a=Math.atan2(tip.y-lh.y,tip.x-lh.x);
+   S.harpTip=thrown?{x:tip.x+X,y:tip.y}:null;S.harpHand={x:lh.x+X,y:lh.y};   // (the counter's lightning climbs the chain)
    if(thrown){const ring=harpoon(tip.x,tip.y,a,74);chainLinks(lh.x,lh.y,ring[0],ring[1],A.chain?6:10,'#4a2a18')}
    else drawP('harp',lh.x,lh.y,a-Math.PI/2)}
   if(A.chain&&A.chain.k>.9)glow(tip.x,tip.y,30,A.chain.ok?'rgba(127,214,255,.9)':'rgba(230,200,150,.9)',.8);

@@ -36,7 +36,7 @@ function update(dt){
 }
 /* riposte after a clean series, in every phase (rule of Ember Bridge): dur = length of the Watcher's counter, hitAt = moment
    the boss is hit (s, internal phase number: 1 the King, 2 the Voice, 3 the Lighthouse); next = pause before the next series */
-const R_CNT={1:{dur:1.05,hitAt:.42},2:{dur:1.05,hitAt:.4},3:{dur:.95,hitAt:.32},next:1.45,nextFail:.95};
+const R_CNT={harpoon:{dur:1.6,hitAt:.65},1:{dur:1.05,hitAt:.42},2:{dur:1.05,hitAt:.4},3:{dur:.95,hitAt:.32},next:1.45,nextFail:.95};
 /* a press dodges a reflection only if it was aimed at it: closer to it than to any real attack still to come */
 function aimedAt(f){const a=S.pl.at,d=Math.abs(a-f.ti);return!S.threats.some(o=>!o.done&&o!==f&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(a-o.ti)<d)}
 /* the Finish (phase II): the Watcher's charged bell and the Elder's bell resonate, he rings louder and louder and falls at the last stroke (times: SP.finish) */
@@ -46,7 +46,8 @@ function closePat(){
   // final assault of phase II (glas): no riposte; the Finish comes once enough glas are countered (total count), otherwise the glas start again
   if(p.spell==='glas'&&S.phase===1){if((S.glasN||0)>=SP.glas.need[vdk()])finishStart();else S.nextAt=gt+(p.ok?R_CNT.next:R_CNT.nextFail);return}
   if(p.ok){
-    const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=R_CNT[S.phase];
+    const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=S.phase===1&&p.spell==='harpoon'?R_CNT.harpoon:R_CNT[S.phase];   // harpoon: slower, so that the ray is seen climbing the chain
+   
     S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase,spell:p.spell};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
     say(S.phase===1?_('Series blocked. The Watcher counters.','Série bloquée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
   }else S.nextAt=gt+R_CNT.nextFail;

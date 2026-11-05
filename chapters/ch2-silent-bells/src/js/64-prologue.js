@@ -188,7 +188,7 @@ const SP={
                after leaving (= old toll 1.0), next attack `after` later; `chain` = the falling chain between two glas (one block);
                `need` = glas to counter before the Finish (total count, not a series);
      finish: `strikes` resonance strikes from `first`, `step` apart, the Elder falls `hit` after the last, `tail` of calm after. */
-  harpoon:{fly:1.1,stick:1,pl1:.75,gap:.35,back:.5,after:.8},
+  harpoon:{fly:1.1,stick:1,pl1:.75,gap:.35,back:.9,after:.8},
   sweep:{d:{easy:[.85],normal:[.6,.95],hard:[.55,.9,.75]},long:.7,ts:.72,after:.5},
   rust:{strike:.7,grow:1.4,pause:.4},
   glas:{n:2,bell:.55,gap:.5,hit:1,after:.8,chain:1.1,need:{easy:3,normal:4,hard:5}},
@@ -545,8 +545,12 @@ function counterKing(k){
     for(let i=0;i<n;i++){const age=T-(F.first+i*F.step);if(age<0||age>.7)continue;const g=.4+.6*i/(n-1),r=age*(260+160*g),al=(1-age/.7)*g;
       ctx.strokeStyle=`rgba(255,244,200,${al})`;ctx.lineWidth=4*g+1;ctx.beginPath();ctx.arc(bx,by,r*.6,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.arc(h.x,h.y,r,0,Math.PI*2);ctx.stroke()}
     return}
-  if(sp==='harpoon'){   // an electric ray goes up the chain to the Elder's hand
-    if(k>.12&&k<.82){const hand={x:602,y:GY-118};bolt(A.x,A.y,lerp(A.x,hand.x,u),lerp(A.y,hand.y,u),(k*9|0)/9,`rgba(190,245,255,${.15+.8*a})`,3.5);if(u>=1)glow(hand.x,hand.y,50,'rgba(190,245,255,.9)',.7*a)}return}
+  if(sp==='harpoon'){   // the lightning leaves the lantern, strikes the harpoon and climbs the chain to the Elder's hand
+    const hk=c.hitAt/c.dur,tp=S.harpTip,hd=S.harpHand;
+    if(tp&&hd&&k>.04&&k<hk+.3){const cu=clamp((k-.1)/(hk-.1),0,1),fa=1-clamp((k-hk)/.3,0,1),sd=(k*12|0)/12;
+      if(k<.14)bolt(A.x,A.y,tp.x,tp.y,sd,`rgba(190,245,255,${.9*fa})`,3);
+      const ex=lerp(tp.x,hd.x,cu),ey=lerp(tp.y,hd.y,cu);bolt(tp.x,tp.y,ex,ey,sd,`rgba(190,245,255,${.95*fa})`,3.5);
+      glow(ex,ey,38,'rgba(190,245,255,.9)',.8*fa);if(cu>=1)glow(hd.x,hd.y,55,'rgba(190,245,255,.9)',.7*fa)}return}
   if(sp==='wave'){if(k>.12&&k<.85)groundRay(k,u,Math.max(a,.05),0);return}
   if(sp==='dwave'){if(k>.12&&k<.85){groundRay(k,u,Math.max(a,.05),0);const u2=clamp((k-.2)/.3,0,1);if(k>.2)groundRay(k,u2,Math.max(a,.05),-7)}return}
   // sweep (bell stroke) and rust (staff raised, light round the Watcher): the bell's echo crosses the hold to the Elder
@@ -575,11 +579,16 @@ function drawRust(){const R=S.rust;if(!R||gt<R.t0)return;
         near=(x,y)=>1-cl*clamp(1.25-Math.hypot(x-HX,y-(GY-90))/230,0,1);
   ctx.save();
   if(gt>=R.st&&gt<R.tc+.8){const am=7*Math.max(0,1-(gt-R.st)/(R.tc-R.st+.8));for(const x of[120,330,540,830])chainLinks(x,-10,x+Math.sin(gt*37+x)*am,150+(x%3)*40,0,'#4a2a18')}   // the chains tremble
-  for(let x=0;x<W;x+=40){const k=(.35+.65*eio(clamp((x-HX)/220,0,1)))*near(x+20,GY-90),g=ctx.createLinearGradient(0,front-160,0,front);g.addColorStop(0,`rgba(110,40,18,${.62*a*k})`);g.addColorStop(1,'rgba(110,40,18,0)');ctx.fillStyle=g;ctx.fillRect(x,0,40,front)}
-  for(const p of RUSTP){const x=(p.x+gt*p.v+W)%W,k=(x<HX+90?.3:1)*clamp((front-p.y)/90,0,1)*near(x,p.y);const rg=ctx.createRadialGradient(x,p.y,4,x,p.y,p.r);rg.addColorStop(0,`rgba(150,62,28,${.45*a*k})`);rg.addColorStop(1,'rgba(120,45,20,0)');ctx.fillStyle=rg;ctx.fillRect(x-p.r,p.y-p.r,p.r*2,p.r*2)}
+  for(let x=0;x<W;x+=40){const k=near(x+20,GY-90),g=ctx.createLinearGradient(0,front-160,0,front);g.addColorStop(0,`rgba(110,40,18,${.62*a*k})`);g.addColorStop(1,'rgba(110,40,18,0)');ctx.fillStyle=g;ctx.fillRect(x,0,40,front)}
+  for(const p of RUSTP){const x=(p.x+gt*p.v+W)%W,k=clamp((front-p.y)/90,0,1)*near(x,p.y);const rg=ctx.createRadialGradient(x,p.y,4,x,p.y,p.r);rg.addColorStop(0,`rgba(150,62,28,${.45*a*k})`);rg.addColorStop(1,'rgba(120,45,20,0)');ctx.fillStyle=rg;ctx.fillRect(x-p.r,p.y-p.r,p.r*2,p.r*2)}
   {const g=ctx.createRadialGradient(700,GY-150,20,700,GY-150,240);g.addColorStop(0,`rgba(96,36,16,${.55*a})`);g.addColorStop(1,'rgba(96,36,16,0)');ctx.fillStyle=g;ctx.fillRect(440,GY-400,520,420)}   // the Elder himself hardly shows in it
   for(let i=0;i<40;i++){const x=(i*97+gt*20)%W,y=(i*53+gt*40)%Math.max(front,1);ctx.fillStyle=`rgba(200,110,60,${.5*a*near(x,y)})`;ctx.fillRect(x,y,1.6,1.6)}
   ctx.restore()}
+/* the same cloud over the Watcher too (called after him): a thin haze everywhere; only the rage-1 counter opens a clear ring round him */
+function drawRustHaze(){const R=S.rust;if(!R||gt<R.st)return;
+  const a=clamp((gt-R.st)/(R.tc-R.st),0,1),kc=S.cnt&&S.cnt.k===1&&S.cnt.spell==='rust'?S.cnt:null,cl=kc?Math.sin(Math.PI*clamp(((gt-kc.t)/kc.dur-.05)/.8,0,1)):0;
+  const g=ctx.createRadialGradient(HX,GY-90,0,HX,GY-90,260);g.addColorStop(0,`rgba(120,46,22,${.24*a*(1-cl)})`);g.addColorStop(1,`rgba(120,46,22,${.24*a})`);
+  ctx.save();ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.restore()}
 /* ---- Phase III · Form I: the tower's tentacles and torn pieces ---- */
 function P3(stage,f,b,final,rage){
   const T=[];let t=b;

@@ -92,6 +92,7 @@ function draw(){
   if(ph===2)hatchRing();
   if(ph===2){mirrorFloor();if(S.cine&&S.cine.k==='out')sinkGlow(gt-S.cine.t0)}
   if(ph===2)drawOrbs();
+  if(ph===1)drawRustHaze();
   drawCounter();
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';
