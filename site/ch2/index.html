@@ -1569,6 +1569,7 @@ const ARM_REST=1.62,ARM_BACK=-1.9,BACK_DIR=2.11,TWO_PI=Math.PI*2;
 const ANCHOR_FLOOR={x:600,y:GY-40,a:Math.PI-.08};
 function anim1raw(){
   const r={lunge:0,armA:ARM_REST+Math.sin(rt*1.3)*.04,clap:BACK_DIR,onBack:true,chain:null,toll:0,coil:0,larm:0};
+  const cb=S.mode==='play'&&comboAct();if(cb){comboPose(r,cb);return r}   // the anchor combo (64-prologue.js)
   const th=curAct(['slam','sweep','chain','toll'],.75);
   if(!th||S.mode!=='play')return r;
   const p=clamp((gt-th.t0)/(th.ti-th.t0),0,1),af=gt-th.ti;
@@ -3215,15 +3216,17 @@ const SP={
      harpoon: flies `fly` (= old hpOut) and pierces the Watcher (block 1), sticks in the wood `stick` (Kevin: 1 s), is recalled tearing
                out a plank that arrives diagonally: first impact `pl1` after the recall, second `gap` later (= rafter gap), the hand
                takes the harpoon back in `back`, next attack `after` later (= old .8);
-     sweep:   the anchor strikes n times (n, gap, per difficulty; in Hard the last strike is a water wave, counted in the series),
-               each `ts` from its start to the impact (= old sweep .72), next attack `after` later;
+     sweep:   one fluid combo of the anchor (no return to rest between strikes): the first impact `ts` after the start (= old sweep
+               .72), then one impact every d[i] s (Easy 2 strikes, Normal 3, Hard 4; in Hard the last one smashes the ground and
+               sends a water wave, counted in the series). A gap >= `long` is a delay: the anchor is held up, trembling, then falls.
+               Next attack `after` after the last impact;
      rust (rage 1): he strikes the hull (`strike`), the cloud grows for `grow` and stays until the ship collapses, `pause`, then a sweep;
      glas (final assault): the head bell rings `bell` after the start, `n` echoes leave it `gap` apart, each reaches the Watcher `hit`
                after leaving (= old toll 1.0), next attack `after` later; `chain` = the falling chain between two glas (one block);
                `need` = glas to counter before the Finish (total count, not a series);
      finish: `strikes` resonance strikes from `first`, `step` apart, the Elder falls `hit` after the last, `tail` of calm after. */
   harpoon:{fly:1.1,stick:1,pl1:.75,gap:.35,back:.5,after:.8},
-  sweep:{n:{easy:2,normal:3,hard:4},gap:{easy:1.5,normal:1.3,hard:1.2},ts:.72,after:.5},
+  sweep:{d:{easy:[.85],normal:[.6,.95],hard:[.55,.9,.75]},long:.7,ts:.72,after:.5},
   rust:{strike:.7,grow:1.4,pause:.4},
   glas:{n:2,bell:.55,gap:.5,hit:1,after:.8,chain:1.1,need:{easy:3,normal:4,hard:5}},
   finish:{strikes:4,first:.6,step:.8,hit:.3,tail:.4},
@@ -3424,9 +3427,13 @@ function P1(stage,f,b,final,rage){
   // the vibrations drop a plank on the Watcher: two blocks
   const rafter=ti=>{T.push({k:'rafter',n:1,t0:ti,ti:ti+SP.wave.fall1*f});T.push({k:'rafter',n:2,t0:ti+.2*f,ti:ti+SP.wave.fall2*f});t=ti+SP.wave.after*f};
   const surge=()=>{rafter(wave());sp='wave'};
-  // the anchor sweeps 2 / 3 / 4 times; in Hard the 4th strike is a water wave, part of the series
-  const sweep=()=>{const Z=SP.sweep,n=Z.n[K],g=Z.gap[K];
-    for(let i=0;i<n;i++){if(K==='hard'&&i===n-1)t=wave(false,true)+Z.after*f;else{T.push({k:'sweep',t0:t,ti:t+Z.ts*f});t+=g*f}}sp='sweep'};
+  // the anchor combo: 2 / 3 / 4 linked strikes (impacts every SP.sweep.d[..]); in Hard the 4th smashes the ground: a water wave, part of the series
+  const sweep=()=>{const Z=SP.sweep,D=Z.d[K],n=D.length+1,hw=K==='hard',tis=[t+Z.ts*f];D.forEach(d=>tis.push(tis[tis.length-1]+d*f));
+    const cb={t0:t,tis,types:tis.map((x,i)=>i%2===0||(hw&&i===n-1)?'slam':'sweep'),lg:[false,...D.map(d=>d>=Z.long)],end:tis[n-1]+.95},t0=t;
+    for(let i=0;i<n;i++){
+      if(hw&&i===n-1){t=tis[i]-SP.wave.land*f;const n0=T.length,ti=wave(false,true);T.slice(n0).forEach(x=>x.cb=cb);t=ti+Z.after*f}
+      else T.push({k:'sweep',t0:i?tis[i-1]:t0,ti:tis[i],cb})}
+    if(!hw)t=tis[n-1]+Z.after*f;sp='sweep'};
   // rage 2 (Hard), double wave: foot 1 -> wave + plank, foot 2 -> wave + plank, then a harpoon (counted in the series, no counter of its own)
   const dwave=()=>{rafter(wave());rafter(wave(true));harpoon();sp='dwave'};
   // rage 1, rust cloud: he strikes the hull, the cloud grows and stays until the ship collapses; then a sweep. A cloud already there is kept
@@ -3449,6 +3456,26 @@ function plankPos(hp,at){const P=PLANK;
   if(at<=hp.rc)return{x:P.q.x,y:P.q.y};
   if(at<=hp.p1){const k=ein(clamp((at-hp.rc)/(hp.p1-hp.rc),0,1));return{x:lerp(P.q.x,P.a.x,k),y:lerp(P.q.y,P.a.y,k)}}
   const k=clamp((at-hp.p1)/(hp.p2-hp.p1),0,1);return{x:lerp(P.a.x,P.b.x,k),y:lerp(P.a.y,P.b.y,k)}}
+/* the anchor combo (sweep): a single linked movement, impact poses by strike type (slam = from above, sweep = from the side), no return to rest
+   between two strikes: after each impact the anchor is raised, held (trembling) if the gap is a delay, then falls. cb = {t0, tis, types, lg, end} */
+const SWP={slam:{mid:{a:-1.3,c:-1.3,l:-30},hit:{a:-3.5,c:-3.5,l:-175}},sweep:{mid:{a:.1,c:.1,l:20},hit:{a:2.7,c:2.7,l:-165}}};
+const comboAct=()=>{for(const t of S.threats)if(t.cb&&gt>=t.cb.t0&&gt<=t.cb.end)return t.cb;return null};
+function comboPose(r,cb){
+  const L=cb.tis,n=L.length;r.onBack=false;
+  if(gt>=L[n-1]){   // follow-through, then the anchor goes back to his back (as the single strikes did)
+    const af=gt-L[n-1],slam=cb.types[n-1]==='slam',hold=.22,ret=.5,e=eio(clamp((af-hold)/ret,0,1));
+    if(af>hold+ret){r.onBack=true;r.armA=lerp(ARM_BACK,ARM_REST,clamp((af-hold-ret)/.2,0,1));return}
+    if(slam){r.armA=lerp(-3.5,ARM_BACK,e);r.clap=lerp(-3.5,BACK_DIR-TWO_PI,e);r.lunge=lerp(-175,0,e)}
+    else{r.armA=lerp(2.7,ARM_BACK+TWO_PI,e);r.clap=lerp(2.7,BACK_DIR,e);r.lunge=lerp(-165,0,e)}
+    return}
+  let i=0;while(gt>=L[i])i++;
+  const T0=i?L[i-1]:cb.t0,p=(gt-T0)/(L[i]-T0),fr=!i?[.3,0,.42,.28]:cb.lg[i]?[.18,.3,.3,.22]:[.22,0,.5,.28],c1=fr[0],c2=c1+fr[1],c3=c2+fr[2],
+        P0=i?SWP[cb.types[i-1]].hit:{a:ARM_REST,c:BACK_DIR,l:0},RA={a:ARM_BACK,c:BACK_DIR,l:0},M=SWP[cb.types[i]].mid,Hh=SWP[cb.types[i]].hit;
+  const set=(A,B,e)=>{r.armA=lerp(A.a,B.a,e);r.clap=lerp(A.c,B.c,e);r.lunge=lerp(A.l,B.l,e)};
+  if(p<c1)set(P0,RA,eio(p/c1));
+  else if(p<c2){set(RA,RA,0);const w=Math.sin(gt*55)*.04;r.armA+=w;r.clap+=w}   // the delay: held up, trembling
+  else if(p<c3)set(RA,M,eio((p-c2)/fr[2]));
+  else set(M,Hh,ein((p-c3)/fr[3]))}
 function anim1(){
   const r=anim1raw();const th=curAct(['slam','sweep'],.75);if(th&&th.ls)r.lunge*=th.ls;
   if(S.cine)return r;

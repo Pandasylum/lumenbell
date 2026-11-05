@@ -17,3 +17,6 @@ Décision de Kevin (5 nov.). Vocabulaire : bloquer (jamais « parer »). Aucun t
 3. Décor entre deux glas : planche ou chaîne tirée au hasard ; planche = menace `plank` (2 blocages), chaîne = `chainDrop` (1 blocage).
 4. Le contre d'une série mêlée suit le dernier sort lancé de la série.
 5. Balayage à 4 coups : vague d'eau = 4e menace (`wave` simple, sans planche).
+
+## Balayage en combo (Kevin, 5 nov., après revue)
+Un seul mouvement lié, sans retour au repos entre les coups : l'ancre se lève puis retombe. Écarts entre impacts (`SP.sweep.d`, provisoires, après 0,72 s) : Facile 0,85 ; Normal 0,60 puis 0,95 ; Difficile 0,55, 0,90 puis 0,75. Un écart ≥ 0,7 est un délai : l'ancre reste levée en tremblant avant de tomber. Difficile : le 4ᵉ coup écrase le sol (vague). Points 1 à 6 ci-dessus validés par Kevin.
