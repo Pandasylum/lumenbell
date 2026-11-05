@@ -1,6 +1,6 @@
 # Lumenbell – Lore définitif
  
-Version consolidée du 1er novembre 2026 · Kevin
+Version consolidée du 5 novembre 2026 · Kevin
  
 Ce document ne contient que le lore **validé**. Il prime sur `docs/CH2-SPEC.md` pour tout ce qui touche au lore. Il se lit avec deux autres documents :
  
@@ -54,8 +54,8 @@ Les Veilleurs croient garder la lumière du monde ; ils gardent en réalité le 
 | Le Silence | The Hush | Une tour ne répond plus aux cloches : le silence qui suit l'extinction | Chapitre II |
 | La Retenue | Stillfall | Le monde retient son souffle après l'extinction | Écran de transition |
 | Le Déclin | The Waning | Le lent affaiblissement quand plusieurs tours se taisent | Fil général |
-| La Rémanence | Afterglow | L'évaporation du Lumen une fois la Sans-Fond terrassée (animation de fin du chapitre II) : il ne retourne pas dans la lanterne, il retourne à son état principal. La couleur du lumen s’éclaircit vers le blanc en montant : le blanc est l’état principal du Lumen, montré sans être dit. | Fil général |
-| Le murmure | (à définir) | Le son de l'Umbryn, un retour au son qui fait perdre la lumière des vivants : c'est la corruption. Elle peut être consentie. Les cloches la repoussent | Secret, jamais nommé à l'écran |
+| La Rémanence | Afterglow | L'évaporation du Lumen une fois la Sans-Fond terrassée (animation de fin du chapitre II) : il ne retourne pas dans la lanterne, il retourne à son état principal. La couleur du lumen s’éclaircit vers le blanc en montant : le blanc est l’état principal du Lumen, montré sans être dit. À l'image, une fêlure naît alors sur la cloche de tête : elle ne peut plus être rechargée. | Fil général |
+| Le murmure | (à définir) | Le son de l'Umbryn, un retour au son qui fait perdre la lumière des vivants : c'est la corruption. Elle peut être consentie. Les cloches la repoussent. Il s'entend, sans jamais être nommé, à la naissance de la forme II de la Sans-Fond (chapitre II). | Secret, jamais nommé à l'écran |
 | Les Sonneurs | The Bellringers | Rang de l'ordre : ceux qui réparent et entretiennent les cloches. Un Sonneur fixe la cloche : il fait en sorte qu'elle continue de sonner quand son pouvoir faiblit, et fait le lien entre la lumière et le son. Rang utilisé au chapitre III. « Fixer » = catalyser : le Sonneur fait résonner le Lumen de la cloche, il n’en fournit pas.  | À voir |
 | Les Doyens | The Priors | Les plus anciens de l'ordre, vivants, qui connaissent la vérité et se taisent | À voir |
  
@@ -190,7 +190,7 @@ Le Colosse de braise, premier Lié à se réveiller, atteint le pont. Le Veilleu
 | --- | --- |
 | Cloche de tête | Lanterne du sommet, la méduse brille dedans ; elle tombe quand la tour éclate |
 | Cloches du torse | Étages de la tour |
-| Épaules | Balcons |
+| Épaules | Phares du sommet : les faisceaux et les éclairs en partent |
 | Bras | Arcs-boutants |
 | Ancre | Plantée au pied de la tour, elle l'amarre |
 | Chaînes | Amarres vers les récifs |
@@ -265,7 +265,7 @@ Un petit vocabulaire d'objets que le joueur peut recouper sans explication.
 | La cape bleue | Lambeau sur l'Ancien (II) | Un Veilleur, de la même famille que le héros |
 | La cloche | Toutes les tours | Le verrou, qui reconnaît ce qu'il tient |
 | Le mot « Couronne » | Gravé (II) | Le réseau, jamais expliqué |
-| Le genou à terre | Le Colosse s'incline et la cloche lui répond (I) ; l'Ancien s'agenouille et rien ne lui répond (II) | Même geste, sens opposé : le premier garde ce qui reste de lui, le second est entièrement consumé |
+| Le genou à terre | Le Colosse s'incline et la cloche lui répond (I) ; l'Ancien s'agenouille et rien ne lui répond (II) | Même geste, sens opposé : le premier garde ce qui reste de lui, le second est entièrement consumé. L'Ancien attendait une réponse (voix, lumière ou son de cloche) : le texte de fin de phase II laisse l'ambiguïté ouverte. |
 | Le Lumen qui pulse | Lanterne de la gardienne (II) | La lumière vivante, par opposition à la lumière copiée, fixe |
 
 ### Grammaire de la lanterne
@@ -377,3 +377,11 @@ Précision pour le chant du chapitre III : synthétisé, sans mots intelligibles
 - Chapitre I, phase II : le combat se joue au fond de la Fonderie, plus de chute ni de scène de passerelle ; fin = le grand four engloutit le Colosse, qui s'envole par la cheminée. Aucun impact sur le lore.
 - Chapitre I : la lanterne orange du Colosse est visible pendant tout le combat de la phase II (avant : fin de phase II seulement).
 - Chapitre III : titre **Hollow Roots** (EN et FR : « Chapitre III · Hollow Roots », comme « Silent Bells »). Remplace le titre provisoire « Racines ». Écho voulu avec *The Hollow Voice* (II). Vérification TMview/INPI à ajouter à la liste des noms avant sortie publique.
+
+### 5 novembre 2026
+- Épaules de l'Ancien : ce sont les phares du sommet (les faisceaux et les éclairs en partent), plus des balcons.
+- Fin de phase II (chapitre II) : « Après des années d'attente, à la lueur de la lune, seul le silence lui répond. » L'ambiguïté reste ouverte : l'Ancien attendait une voix, une lumière (la lanterne) ou un son de cloche.
+- Chapitre II : une carte de défaite par phase (titre et corps affichés, comme au chapitre I).
+- Rémanence : une fêlure naît sur la cloche de tête gisant dans les décombres pendant l'évaporation du Lumen ; ni texte ni bruitage.
+- Naissance de la forme II de la Sans-Fond : le murmure (sans être nommé), et la lanterne du Veilleur pâlit un instant.
+- Le mot « Couronne » n'est visible qu'au gros plan de l'outro, plus pendant l'animation de fin de phase III.
