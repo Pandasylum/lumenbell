@@ -220,3 +220,5 @@
 
 ## 5 novembre 2026 · audit de nettoyage, lot B1 (doc seule)
 - Rien de visible dans le jeu : un rapport d'analyse interne est déplacé vers `archives/`, l'index de `DECISIONS.md` gagne la décision « chapitres sans Commencer ».
+
+- Rien de visible pour le joueur : suivi des changements mis à jour (sections I, K, L, M, N passées à « Fait »).
