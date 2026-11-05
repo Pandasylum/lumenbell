@@ -26,7 +26,7 @@ function pRing(){ctx.fillStyle=bronze(-23,23);rrect(-23,-13,46,26,5);ctx.fill();
 function pSmallBell(){ctx.fillStyle=bronze(-34,34);ctx.beginPath();ctx.moveTo(-34,0);ctx.quadraticCurveTo(-30,-46,0,-50);ctx.quadraticCurveTo(30,-46,34,0);ctx.closePath();ctx.fill();ctx.fillStyle='#0d1712';ctx.fillRect(-36,-4,72,6);
   ell(-12,-24,6,9,'rgba(128,54,22,.5)');ctx.strokeStyle='rgba(110,210,185,.3)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(10,-42);ctx.lineTo(12,-8);ctx.stroke()}
 /* the Lighthouse's bell (the King's head): angular signs round the waist, written once in RUNES and reused;
-   o.word: the word engraved in clear in the middle (Crown), o.crack: cracked (from the end of phase III on) */
+   o.word: the word engraved in clear in the middle (Crown; only in the close-up of the outro), o.crack: cracked (true, or 0..1 while the crack is being born) */
 const RUNES=[[[0,0],[3,-8],[6,0]],[[0,-8],[0,0],[5,-4]],[[0,0],[5,-8],[5,0],[0,-8]],[[0,-8],[5,-8],[2,0]],[[0,-4],[3,-8],[6,-4],[3,0],[0,-4]],[[0,0],[0,-8],[5,-8],[5,-3]],[[0,-8],[6,0],[6,-8]],[[1,0],[5,-8],[1,-6],[6,-2]]];
 function runes(x0,y,n,sc,seed){const R=mulberry(seed);ctx.lineCap='round';ctx.lineJoin='round';
   for(let i=0;i<n;i++){const g=RUNES[Math.floor(R()*RUNES.length)];ctx.beginPath();g.forEach((p,j)=>{const x=x0+i*9*sc+p[0]*sc,yy=y+p[1]*sc;j?ctx.lineTo(x,yy):ctx.moveTo(x,yy)});ctx.stroke()}}
@@ -36,7 +36,15 @@ function pHead(heat,o){o=o||{};ctx.strokeStyle='#1c2b24';ctx.lineWidth=6;ctx.beg
   ctx.save();ctx.strokeStyle='rgba(6,12,10,.85)';ctx.lineWidth=1.3;runes(-31,-8,7,1,7);ctx.strokeStyle='rgba(170,230,210,.22)';ctx.lineWidth=.8;runes(-30.5,-8.6,7,1,7);ctx.restore();
   if(o.word){const w=o.word.toUpperCase();ctx.save();ctx.textAlign='center';ctx.font='700 9px '+LB.FONT.body;{const m=ctx.measureText(w).width;if(m>50)ctx.font=`700 ${Math.floor(9*50/m)}px ${LB.FONT.body}`}
     ctx.fillStyle='rgba(170,230,210,.35)';ctx.fillText(w,.6,-27.4);ctx.fillStyle='rgba(6,12,10,.9)';ctx.fillText(w,0,-28);ctx.restore()}
-  if(o.crack){ctx.strokeStyle='#050a08';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(4,-55);ctx.lineTo(10,-46);ctx.lineTo(22,-39);ctx.lineTo(28,-25);ctx.lineTo(25,-13);ctx.lineTo(31,-2);ctx.stroke();ctx.strokeStyle='rgba(170,230,210,.3)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(5.5,-54);ctx.lineTo(11.5,-45);ctx.lineTo(23.5,-38);ctx.stroke()}}
+  if(o.crack){const k=o.crack===true?1:clamp(o.crack,0,1);
+    if(k>0){ctx.strokeStyle='#050a08';ctx.lineWidth=2.2;crackLine(CRACK,k);ctx.strokeStyle='rgba(170,230,210,.3)';ctx.lineWidth=.8;crackLine(CRACK_GLINT,k)}}}
+/* the crack of the head bell, drawn up to the fraction k of its length (it is born little by little at the Remanence) */
+const CRACK=[[4,-55],[10,-46],[22,-39],[28,-25],[25,-13],[31,-2]],CRACK_GLINT=[[5.5,-54],[11.5,-45],[23.5,-38]];
+function crackLine(pts,k){let L=0;for(let i=1;i<pts.length;i++)L+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);
+  let rest=L*k;ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=1;i<pts.length&&rest>0;i++){const d=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]),f=Math.min(1,rest/d);
+    ctx.lineTo(lerp(pts[i-1][0],pts[i][0],f),lerp(pts[i-1][1],pts[i][1],f));rest-=d}
+  ctx.stroke()}
 function pSeg(){seg(-24,0,24,0,20)}
 function pFist(){fist(0,0)}
 /* the harpoon in the King's left hand: origin at the grip, tip pointing down (+y) */

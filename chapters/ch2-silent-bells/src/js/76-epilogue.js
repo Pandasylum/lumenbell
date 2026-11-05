@@ -32,7 +32,7 @@ function drawEpilogue(t){
   else if(shot===1){ // close-up of the bell: the signs, the crack, the word
     const g=ctx.createRadialGradient(W/2,H*.45,40,W/2,H*.45,520);g.addColorStop(0,'#2a3a3c');g.addColorStop(1,'#05090a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#070c0d';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,380);ctx.quadraticCurveTo(480,350,W,390);ctx.lineTo(W,H);ctx.fill();
-    const z=4.2+.35*eio(clamp(ts/4,0,1));ctx.save();ctx.translate(W/2,372);ctx.scale(z,z);ctx.rotate(-.12);pHead(.85,bellMarks());ctx.restore();
+    const z=4.2+.35*eio(clamp(ts/4,0,1));ctx.save();ctx.translate(W/2,372);ctx.scale(z,z);ctx.rotate(-.12);pHead(.85,{...bellMarks(),word:_('Crown','Couronne')});ctx.restore();
     glow(W/2+60,200,160,'rgba(255,210,160,.6)',.18+.08*Math.sin(t*1.3))}
   else if(shot===2){ // the valley of Chapter I: the earth does not stop trembling, one tower goes dark, the others falter
     if(ts<3.9)S.shake=Math.max(S.shake||0,2+3*Math.abs(Math.sin(t*3)));

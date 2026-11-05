@@ -77,7 +77,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Sceptre-lanterne / lanterne | — | `lanternBeam` (rayon) | Seul outil du Veilleur ; tous ses contres viennent de lui | `BIBLE.md:31` ; `docs/CH2-SPEC.md:9` ; `chapters/ch1-ember-bridge/NOTES.md:24` |
 | Cloche | bell | `ringBell` (ch1), `pHead` (ch2) | Le verrou. Au Chapitre I, la grande cloche répond, étourdit (1,3 s) et désarme | `BIBLE.md:22,64,71` ; `chapters/ch1-ember-bridge/NOTES.md:31` |
 | Cloche de tête | — | `pHead` | La cloche du Phare, portée par le boss de la phase II ; signes anguleux (`RUNES`) | `docs/CH2-SPEC.md:33` ; `chapters/ch2-silent-bells/NOTES.md:98` |
-| Couronne | Crown | `o.word` | Mot gravé en clair sur la cloche, visible après le dernier coup de la phase III | `docs/CH2-SPEC.md:33,59` ; `chapters/ch2-silent-bells/NOTES.md:98` |
+| Couronne | Crown | `o.word` | Mot gravé en clair sur la cloche, visible seulement au gros plan de l'outro (carton 2) | `docs/CH2-SPEC.md:33,59` ; `chapters/ch2-silent-bells/NOTES.md:98` |
 | Couronne d'ancrage | The Anchor Crown | — | Cercle de six tours et une au centre. Nom secret, jamais expliqué | `BIBLE.md:20,26` ; `docs/LORE.md:46` |
 | Flèches liées | The Bound Spires | — | Ce que les Veilleurs disent de leurs tours | `BIBLE.md:22` ; `docs/LORE.md:47` ; `docs/TEXTES-CH1.md:240` |
 | Tour / flèche | tower / spire | — | Le lieu. Ne pas mélanger tour, Scellé et Couronne | `docs/LORE.md:40` |
@@ -86,7 +86,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Fonderie | Foundry | `Q`, `drawLake` | Décor de la phase II du Chapitre I | `BIBLE.md:9,53` |
 | Pont de pierre | stone bridge | `G` | Décor de la phase I du Chapitre I | `BIBLE.md:9,52` |
 | La salle des reflets / La cale / Les récifs | The Mirror Hall / The Hold / The Reefs | `ORDER=[2,1,3]` | Titres des trois phases du Chapitre II | `docs/CH2-SPEC.md:43,45,47,59` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:112,119,124,130` |
-| Rémanence | Afterglow | — | Évaporation du Lumen à la fin de la phase III du Chapitre II, sans texte ni bruitage | lore (`docs/LORE.md:57`) ; `CHANGEMENTS.md:131-133` |
+| Rémanence | Afterglow | — | Évaporation du Lumen à la fin de la phase III du Chapitre II, sans texte ni bruitage ; une fêlure naît alors sur la cloche de tête gisant dans les décombres | lore (`docs/LORE.md:57`) ; `CHANGEMENTS.md:131-133` |
 | Masse | mace | `demonBody` | L'arme du Colosse est une masse, pas un marteau | `BIBLE.md:45,68` |
 | Rage | rage | `rages`, `LB.rage(name)` (proposé) | Aucun nom à l'écran ; nom au lecteur d'écran. Chapitre I : Râle d'agonie, Fureur, Embrasement ; Difficile : Fureur de braise, Danse des chaînes, Embrasement final | `BIBLE.md:48` ; `archives/COMMUN-inventaire.md#s1-4` |
 

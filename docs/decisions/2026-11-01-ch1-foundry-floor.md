@@ -14,7 +14,7 @@ Décision de Kevin du 1er novembre 2026. Textes validés avec le projet Lore. Ap
 - Toutes les mécaniques restent, esquive comprise.
 - **À valider** : si la plongée d'esquive est illisible sur la plateforme, proposer une pose alternative. Ne pas l'implémenter sans validation de Kevin.
 
-## 3. Textes (lecteur d'écran uniquement, jamais affichés)
+## 3. Textes (carte de défaite affichée ; autres lignes : lecteur d'écran)
 
 | Où | EN | FR |
 |---|---|---|

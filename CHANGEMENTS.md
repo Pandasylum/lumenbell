@@ -13,13 +13,14 @@ D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	Fait (PR fus
 F	Documents à mettre à jour	En cours (CH2-SPEC et COMMUN faits ; BIBLE, DECISIONS, LORE restent)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
 G	Chapitre I · Lanterne du Colosse de braise	Fait (PR fusionnée)	29 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/31
 I	Chapitre II · Pleurs avant la Voix	À tenter	29 octobre 2026	
-J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours : (a) et (b) fusionnés ; (c) en attente des textes	30 octobre 2026	branche `ch2/lore-changements` (a et b fusionnés)
+J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	En cours : (a) et (b) fusionnés ; (c) en cours (textes reçus le 5 novembre, voir O)	30 octobre 2026 (mis à jour le 5 novembre)	branche `ch2/lore-changements` (a et b fusionnés) ; (c) branche `ch2/validations-5nov`
 
 K	Chapitre I · Phase II au fond de la Fonderie (plus de chute)	Fait (PR fusionnée)	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/31
 L	Chapitre I · Fausse fin de Facile supprimée	Fait (PR fusionnée)	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/31
 
 M	Chapitre II · Phare Noyé : tour d'avant C1	À faire (validation à l'écran d'abord)	1er novembre 2026	
 N	Chapitre I · Phase II : esquive en pas de côté, contres au sol	Fait (PR fusionnée)	1er novembre 2026	https://github.com/Pandasylum/lumenbell/pull/36
+O	Chapitre II · Validations de Kevin du 5 novembre (fin de phase II, cartes de défaite, fêlure, murmure, « Couronne »)	En cours	5 novembre 2026	branche `ch2/validations-5nov` (PR à ouvrir)
 
 Statuts possibles : À faire, En cours, Fait (PR fusionnée), Annulé (avec la raison).
 
@@ -95,12 +96,12 @@ J. Chapitre II · Validations de Kevin du 30 octobre (voir docs/decisions/2026-1
 Entrées À faire, non appliquées. Elles partent plus tard, dans la session unique du chapitre.
 (a) Bouton de la phase III : « Garde » / « Guard » devient « Bloquer » / « Block » (le geste reste le blocage tenu). Libellé initial et libellés changés en cours de phase dans le code du chapitre ; lecteur d'écran : « Ta garde est brisée » / "Your guard is broken." est conservé volontairement (tranché le 30 octobre, GLOSSAIRE n° 2) : ne pas le changer. Test d'annonce : relire tests/ch2-announce.js (liste BAN, qui contient « garde brisée » / « guard broken » et ne doit pas matcher « Bloquer » / « Block »), puis régénérer TEXTES.md (node tests/ch2-texts.js --write) et relire le diff.
 (b) Règle de série sur les illusions : esquiver une illusion n'est pas une faute de série. La faute n'existe que si le joueur reçoit le coup de retour, donc un dégât. Mettre à jour fooled() et la partie 4 de tests/ch2-input.js (aujourd'hui : l'illusion esquivée casse la série, même si le retour est esquivé). Ne pas toucher à DG.backTurn ni à DG.backWin (valeurs provisoires).
-(c) Carte de défaite du Chapitre II : un simple texte, sur le modèle du Chapitre I. Certaines versions cachent un conseil, par exemple contre la Voix : « Le Veilleur n'a pas su distinguer les illusions… » (exemple d'intention, pas un texte validé). Textes à fournir (projet Lore) : ne rien rédiger ni coder avant de les recevoir.
+(c) [En cours, voir section O ; textes reçus le 5 novembre] Carte de défaite du Chapitre II : un simple texte, sur le modèle du Chapitre I. Certaines versions cachent un conseil, par exemple contre la Voix : « Le Veilleur n'a pas su distinguer les illusions… » (exemple d'intention, pas un texte validé). Textes à fournir (projet Lore) : ne rien rédiger ni coder avant de les recevoir.
 Non concernés : valeurs provisoires (SP, DG.backWin, HULL, SHOCK.form), Difficile du Chapitre II, onomatopées CLANG / KRAKOOM / KRAAAK (validées, rien à changer).
 K. Chapitre I · Phase II au fond de la Fonderie (plus de chute) (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-ch1-foundry-floor.md`)
 
 Le combat de la phase II se joue au fond de la Fonderie : le Veilleur suit le Colosse par la brèche et combat sur une plateforme au bord de la lave ; le Colosse vole au-dessus de la lave. Plus de chute, plus de scène de passerelle. Fin de phase II : le grand four engloutit le Colosse, qui s'envole par la cheminée. Toutes les mécaniques restent, esquive comprise. Aucun impact sur le lore.
-Textes lecteur d'écran uniquement (jamais affichés), en anglais et en français.
+Les textes de la carte de défaite (titre et corps) sont affichés dans la carte, comme actuellement ; les autres lignes listées (32, 38, 133) restent pour le lecteur d'écran. En anglais et en français.
 
 Entrée : textes d'origine (`36-p2-foundry-logic.js`, ligne 32, 38, 133, 238, et carte de défaite).
 - Avant (EN, ligne 32) : "Arena: … fall down the Foundry shaft"
@@ -180,6 +181,17 @@ Rendu seulement : aucun timing ni réglage d'équilibrage ne change. `DG.drop` r
 Referme le point « Plongée d'esquive » de `docs/decisions/2026-11-01-ch1-foundry-floor-application.md`.
 
 Statut : en cours, branche `ch1/dodge-side` (PR à ouvrir).
+
+O. Chapitre II · Validations de Kevin du 5 novembre 2026 (voir `docs/decisions/2026-11-05-ch2-validations.md`)
+
+Textes validés par Kevin ; aucun changement de timing, d'équilibrage ni de silhouette.
+- Fin de phase II : EN "After years of waiting, by the light of the moon, only silence answers him." / FR « Après des années d'attente, à la lueur de la lune, seul le silence lui répond. » (remplace « Le navire s'effondre autour de l'Ancien… »).
+- Cartes de défaite (J c) : une par phase, surtitre « Defeat · Phase X » / « Défaite · Phase X », titre et corps affichés ; tableau dans `docs/CH2-SPEC.md`. Le « Defeat » seul et « The Watcher is down. » disparaissent ; le lecteur d'écran « Le Veilleur tombe. Défaite. » reste. En Épreuve, la phrase d'origine « Épreuve : une chute te renvoie à la phase I. » est ajoutée après le corps (gardée par Kevin le 5 novembre). Naissance de la forme II calée à 2,1 s de la cinématique `3:p2` (éclatement de la tour).
+- N° 47 : "Blue heart" / « Cœur bleu » devient "Turquoise heart" / « Cœur turquoise ».
+- Rémanence : une fêlure naît sur la cloche de tête gisant dans les décombres pendant l'évaporation du Lumen ; ni texte ni bruitage.
+- Murmure grave, large et bas à la naissance de la forme II (synthèse existante, aucun texte) ; au même instant, la lanterne du Veilleur pâlit un instant (rendu seulement, cinématique seulement).
+- « Couronne » : le mot n'est plus gravé pendant l'animation de fin de phase III ; il reste au gros plan de l'outro (carton 2). Entrée fournie par Kevin, statut : À faire (appliquée sur la branche ; passe à Fait à la fusion de la PR).
+Statut : en cours, branche `ch2/validations-5nov` (PR à ouvrir).
 
 Vérifications
 Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.
