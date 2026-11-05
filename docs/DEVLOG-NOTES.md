@@ -225,3 +225,7 @@
 - Rien de visible : nettoyage du code mort et des restes de l'écran « Commencer » des chapitres.
 - À regarder : l'ouverture d'une phase aux Chapitres I et II depuis le hub, et les menus, doivent rester identiques.
 - Ce que le joueur verra : rien de visible (nettoyage interne du dépôt, aucun changement de jeu).
+
+## 2026-11-05 · doc/audit-optim
+- Rien de visible : audit d'optimisation en lecture seule (`docs/AUDIT-OPTIM.md`), aucun code ni build touché.
+- Ce que le joueur verra : rien de visible.
