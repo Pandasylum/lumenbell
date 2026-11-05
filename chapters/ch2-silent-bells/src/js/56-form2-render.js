@@ -55,8 +55,10 @@ const EFALL=(()=>{const O=ecPose(ePhi(5)/.55),R=mulberry(73),out={};let rank=0;
     if(p.k==='sbell'){y=GY-34;r=(o.x<LX?-1:1)*Math.PI/2}else if(p.k==='seg'){y=GY-10;r=(R()-.5)*.3}else if(p.k==='head'){x=BELL_REST.x;y=BELL_REST.y;r=BELL_REST.r}
     out[i]={x,y,r,ft:p.k==='head'?3:2.2+rank*.08};rank++});return out})();
 const EHEAD=TOWER.findIndex(p=>p.k==='head');
-/* the bell after the last blow: cracked, lying in the wreckage, the word engraved in clear (o.word) */
-const bellMarks=()=>({crack:true,word:_('Crown','Couronne')});
+/* the bell after the last blow: lying in the wreckage; the crack is born during the Remanence (CRACK_BORN: start, duration, seconds of the cinematic);
+   the word « Crown » is no longer engraved here: it only shows in the close-up of the outro (76-epilogue.js) */
+const CRACK_BORN={from:5.3,dur:2.5};
+const bellMarks=(crack)=>({crack:crack===undefined?true:crack});
 function ecTransition(t){
   const lean=t<2.1?.05*eio(clamp(t/1.2,0,1)):0;
   if(t<2.1){
@@ -97,7 +99,7 @@ function ecFinale(tAll){
   if(t<5.3){const fe=ein(clamp((t-3.6)/1.6,0,1));J={x:lerp(LX,LX-40,fe)+(conv?Math.sin(t*50)*4:0),y:lerp(ECY,GY-16,fe),r:lerp(44,18,fe)+(conv?Math.sin(t*40)*4:0)}}
   else if(once('dis'))evaporate(LX-40,GY-16);
   const tentA=1-clamp((t-2)/.4,0,1);
-  if(t>=.5)P[EHEAD]={...P[EHEAD],o:bellMarks()};
+  if(t>=.5)P[EHEAD]={...P[EHEAD],o:bellMarks(eio(clamp((t-CRACK_BORN.from)/CRACK_BORN.dur,0,1)))};
   const lfe=clamp((t-EFALL[EHEAD].ft)/.5,0,1),LA=lampPoses(J?J.x:LX,J?J.y:ECY,J?J.r/36:1);
   const LQ=lfe<=0?LA:LAMP_REST.map((R,i)=>({x:lerp(LA[i].x,R.x,lfe),y:lerp(LA[i].y,R.y,ein(lfe)),r:lerp(LA[i].r,R.r,lfe)}));
   drawEcl(P,A,J,tentA,(S.zapT&&gt-S.zapT<.09&&t<.5)?.15:on,t>-.75&&t<.6?ecGap(T):null,LQ);
