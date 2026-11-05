@@ -125,7 +125,7 @@ const focusN=pg=>pg.evaluate(()=>{const a=document.activeElement;return a&&a.cla
   await pg.keyboard.press('Enter');await pg.keyboard.press('Enter').catch(()=>{});await pg.waitForLoadState('load');await pg.waitForTimeout(500);
   check(nav===1,tag+' : double Entree : '+nav+' navigations');
   check(/\/site\/ch2\/index\.html\?from=hub$/.test(pg.url()),tag+' : chapitre II ouvert '+pg.url());
-  check(await pg.evaluate(()=>document.getElementById('gate').hidden&&!!document.getElementById('mHub')),tag+' : chapitre sans ecran de demarrage, avec Chapitres');
+  check(await pg.evaluate(()=>!document.getElementById('gate')&&!!document.getElementById('mHub')),tag+' : chapitre sans ecran de demarrage, avec Chapitres');
   check((await pg.textContent('#mHub .nm'))===(F?'Chapitres':'Chapters'),tag+' : texte du lien Chapitres');
   check(await pg.evaluate(()=>!document.querySelector('.fsb,.fsm')&&!/fullscreen|plein .cran/i.test(document.body.innerText+[...document.querySelectorAll('[aria-label],[title]')].map(e=>e.getAttribute('aria-label')+e.title).join(' '))),tag+' : plein ecran absent du chapitre');
   nav=0;await pg.dblclick('#mHub');await pg.waitForLoadState('load');await pg.waitForTimeout(400);

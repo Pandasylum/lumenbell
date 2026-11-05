@@ -2,7 +2,7 @@
 function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
 function trialOpen(){return TRIAL_OPEN||endSeen()} /* TRIAL_OPEN : 00-core.js */
 /* Épreuve du feu (records sous Normal et Difficile, verrou), « ▶ Outro » et chapitre suivant : LB.menu.update (CHAPTER.best, trialOpen, endSeen) */
-LB.gate.focus();   /* écran de démarrage (LB.gate) : un clic obligatoire, qui débloque le son ; focus posé en dernier, comme avant */
+try{document.querySelector('#menu [data-diff=normal]').focus({preventScroll:true})}catch(e){}   /* démarrage direct : focus sur « Normal », posé en dernier */
 let last=performance.now();
 function frame(now){
   perfWatch(now-last);const dt=Math.min(.05,(now-last)/1000);last=now;

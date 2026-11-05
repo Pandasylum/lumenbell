@@ -24,7 +24,7 @@ for(const ch of ['ch1','ch2'])for(const lang of ['fr','en']){
  const tag=ch+' '+lang,ctx=await b.newContext({viewport:{width:1100,height:760},locale:lang==='fr'?'fr-FR':'en-US'});
  await ctx.addInitScript(()=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem('lb-help','1')}});
  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(tag+': pageerror: '+e.message));
- await pg.goto('file://'+F[ch]);await pg.waitForTimeout(300);await pg.click('#gateBtn');
+ await pg.goto('file://'+F[ch]);await pg.waitForTimeout(300);
  const m=await pg.evaluate(()=>[...document.querySelectorAll('#mphM button')].flatMap(x=>[x.querySelector('b').textContent,x.querySelector('span').textContent]));
  const want=[SUB[lang][0],SUB[lang][1],SUB[lang][2],SUB[lang][3],SUB[lang][4],SUB[lang][5],NAME[ch][lang],SUB[lang][6]];
  check(JSON.stringify(m)===JSON.stringify(want),tag+': difficultes '+JSON.stringify(m)+' au lieu de '+JSON.stringify(want));
@@ -49,7 +49,7 @@ for(const ch of ['ch1','ch2'])for(const end of [false,true]){
  const tag=ch+' verrou'+(end?' + vraie fin':''),ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});
  if(end)await ctx.addInitScript(k=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem(k,'1')}},'lb-'+ch+'-end');
  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(tag+': pageerror: '+e.message));
- await pg.goto('file://'+locked(ch));await pg.waitForTimeout(300);await pg.click('#gateBtn');
+ await pg.goto('file://'+locked(ch));await pg.waitForTimeout(300);
  const s0=await pg.evaluate(()=>{const t=document.querySelector('#mphM [data-diff=trial]');return{b:t.querySelector('b').textContent,s:t.querySelector('span').textContent,dis:t.getAttribute('aria-disabled'),outro:!document.getElementById('outroBtn').hidden}});
  await pg.evaluate(()=>document.querySelector('#mphM [data-diff=trial]').click());await pg.waitForTimeout(100);   // aria-disabled : Playwright refuse le clic
  const open=await pg.evaluate(()=>!document.getElementById('mphT').hidden);

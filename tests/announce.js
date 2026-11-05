@@ -22,7 +22,7 @@ const TXT=()=>{const out=[],seen=new Set();
   await ctx.addInitScript(k=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem(k,'1')}},'lb-'+ch+'-intro');
   const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(tag+': pageerror: '+e.message));
   await pg.goto('file://'+F[ch]);await pg.waitForTimeout(300);const all=new Set();const add=async()=>{for(const t of await pg.evaluate(TXT))all.add(t)};
-  await add();await pg.click('#gateBtn');await add();
+  await add();await add();
   await pg.evaluate(()=>document.querySelector('#mphM [data-diff=trial]').click());await add();await pg.click('#mBackT');
   await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(400);
   for(let i=0;i<20&&await pg.evaluate(()=>document.getElementById('ov').hidden);i++){await pg.keyboard.press('Enter');await pg.waitForTimeout(250)}   // Chapitre II : cinematique d'entree

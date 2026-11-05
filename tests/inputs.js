@@ -85,7 +85,7 @@ async function pause(pg,tag,step){
   const ctx=await b.newContext({viewport:{width:1100,height:760}});const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' gate: pageerror: '+e.message));
   await pg.goto('file://'+path.join(ROOT,f));await pg.waitForTimeout(300);
   await pg.evaluate(()=>document.activeElement&&document.activeElement.blur());
-  for(const k of ['p','ArrowUp',' ','Enter'])await pg.keyboard.press(k);await pg.waitForTimeout(300);
-  const s=await pg.evaluate(()=>({gate:!document.getElementById('gate').hidden,menu:!document.getElementById('menu').hidden,pause:!document.getElementById('pause').hidden,ov:!document.getElementById('ov').hidden,cine:!!document.getElementById('cine')&&!document.getElementById('cine').hidden}));
-  check(s.gate&&s.menu&&!s.pause&&!s.ov&&!s.cine,ch+': une touche agit sous l\'ecran de demarrage '+JSON.stringify(s));console.log(ch,'ecran de demarrage',JSON.stringify(s));await ctx.close()}
+  for(const k of ['p','ArrowUp'])await pg.keyboard.press(k);await pg.waitForTimeout(300);
+  const s=await pg.evaluate(()=>({gate:!!document.getElementById('gate'),menu:!document.getElementById('menu').hidden,pause:!document.getElementById('pause').hidden,ov:!document.getElementById('ov').hidden,cine:!!document.getElementById('cine')&&!document.getElementById('cine').hidden}));
+  check(!s.gate&&s.menu&&!s.pause&&!s.ov&&!s.cine,ch+': P et fleche haut sans effet au menu direct '+JSON.stringify(s));console.log(ch,'ecran de demarrage',JSON.stringify(s));await ctx.close()}
  console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});

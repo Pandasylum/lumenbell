@@ -24,10 +24,10 @@ for(const [nm,w,h,touch] of SIZES)for(const lang of ['fr','en'])for(const ch of 
  await ctx.addInitScript(k=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem(k[0],'1');localStorage.setItem(k[1],'1')}},['lb-'+ch+'-end','lb-'+ch+'-intro']);
  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' '+tag+': pageerror: '+e.message));
  await pg.goto('file://'+F[ch]);await pg.waitForTimeout(400);
- const R={};R.gate=await grab(pg,['gate','gEn','gFr']);
+ const R={};R.gate={};
  if(await pg.evaluate(()=>!!document.getElementById('mHub')))errs.push(ch+' '+tag+' : lien Chapitres present, chapitre ouvert seul');
  await pg.goto('file://'+F[ch]+'?from=hub');await pg.waitForTimeout(400);
- if(await pg.evaluate(()=>!document.getElementById('gate').hidden))errs.push(ch+' '+tag+' : ecran de demarrage visible depuis le hub');
+ if(await pg.evaluate(()=>!!document.getElementById('gate')))errs.push(ch+' '+tag+' : ecran de demarrage present');
  R.menu=await grab(pg,['intro','outro','langEn','langFr','easy','normal','hard','trial','hub','ver','h2','chap']);
  if(!R.menu.hub)errs.push(ch+' '+tag+' : lien Chapitres absent depuis le hub');
  if(await pg.evaluate(()=>!!document.querySelector('.fsb,.fsm')))errs.push(ch+' '+tag+' : bouton plein ecran encore present');

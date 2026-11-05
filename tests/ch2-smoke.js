@@ -47,7 +47,6 @@ pg.on('pageerror',e=>errs.push('pageerror: '+e.message));
 pg.on('console',m=>{if(m.type()==='error')errs.push('console: '+m.text())});
 pg.on('requestfailed',r=>errs.push('requestfailed: '+r.url()));
 await pg.goto('file://'+FILE);await pg.waitForTimeout(500);
-await pg.click('#gateBtn');await pg.waitForTimeout(200);   // ecran de demarrage (LB.gate, depuis menu/common)
 const st=()=>pg.evaluate(()=>({ph:document.body.dataset.ph,eye:document.getElementById('hdEye').textContent,
  menu:!document.getElementById('menu').hidden,card:!document.getElementById('ov').hidden,skip:!document.getElementById('skip').hidden||!!document.getElementById('cine')&&!document.getElementById('cine').hidden,
  ward:document.getElementById('ward').textContent,boss:document.getElementById('nmB').textContent,hp:document.getElementById('hpPn').textContent,
@@ -79,7 +78,7 @@ for(const [dk,hp] of [['normal',4],['hard',3]]){
 {const ctx2=await b.newContext({viewport:{width:1100,height:760},offline:true});
  await ctx2.route(u=>!/^(file|data|blob):/.test(u.href),r=>{errs.push('reseau: '+r.request().url());return r.abort()});
  pg=await ctx2.newPage();pg.on('pageerror',e=>errs.push('pageerror: '+e.message));
- await pg.goto('file://'+FILE);await pg.waitForTimeout(500);await pg.click('#gateBtn');await pg.waitForTimeout(200);
+ await pg.goto('file://'+FILE);await pg.waitForTimeout(500);await pg.waitForTimeout(200);
  if(await pg.evaluate(()=>localStorage.length))errs.push('sans cle : localStorage non vide');
  const s0=await st();console.log('sans cle, menu',JSON.stringify(s0));if(s0.locked!=='000')errs.push('sans cle : frise verrouillee '+s0.locked);
  for(const [dk,gp,ph,hp] of [['normal',3,3,4],['hard',2,1,3],['easy',3,3,6]]){
