@@ -213,3 +213,4 @@
 - Chapitre II, phase II : l'Ancien de Rouille a de nouveaux sorts (harpon qui arrache une planche, ancre à 2 à 4 coups, vague et planche, nuage de rouille qui ne se dissipe plus, double vague en Difficile), chacun avec son contre ; les échos du Glas se renvoient vers lui.
 - Chapitre II, phase II : la fin du combat est un Finish : la clochette du Veilleur entre en résonance avec la cloche de l'Ancien, qui sonne de plus en plus fort puis s'écroule.
 - Chapitre II, phase II : en Difficile l'Ancien laisse enfin respirer entre ses sorts (au moins 1 s entre deux coups de sorts différents, le combo d'ancre gardant son rythme serré) ; en Facile et Normal l'écart est plus court.
+- Chapitre II : en Facile, Normal et Difficile, les attaques des trois boss gardent le même rythme interne (celui du Normal) ; la difficulté joue sur les PV, les rages, les pauses et le nombre de projectiles. En Difficile, le balayage de l'Ancien est un peu plus espacé.
