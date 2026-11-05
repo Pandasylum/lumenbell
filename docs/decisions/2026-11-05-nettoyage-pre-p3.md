@@ -6,6 +6,7 @@
 - Archivage dans `archives/`, ignoré par la CI.
 - Suppression de `store/` et de `build/promo*` ; les supports itch.io sont sauvegardés hors dépôt.
 - Code mort et reliquats « Commencer » supprimés.
-- Conservés car référencés : `docs/CH2-SPEC.md`, `legacy/silent-bells.source.html`, `site/`, `dist/`.
+- Conservés car référencés : `docs/CH2-SPEC.md`, `site/`, `dist/`.
+- `legacy/silent-bells.source.html` (import d'origine du Chapitre II, figé) archivé dans `archives/chapters/ch2-silent-bells/legacy/`. Seul un commentaire de `build/build_ch2.py` le citait ; aucun build ni test ne le lit.
 
 Détail et inventaire : [docs/AUDIT-NETTOYAGE.md](docs/AUDIT-NETTOYAGE.md).

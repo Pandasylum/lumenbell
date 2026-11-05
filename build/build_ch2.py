@@ -1,7 +1,7 @@
 """Construit le jeu du Chapitre II (Silent Bells).
 Usage : python3 build/build_ch2.py
 Entree : morceaux de chapters/ch2-silent-bells/src/ (ordre : src/parts.txt, via build/assemble.py, avec les morceaux
-communs de shared/) ; legacy/silent-bells.source.html = import d'origine, fige
+communs de shared/) ; archives/chapters/ch2-silent-bells/legacy/silent-bells.source.html = import d'origine, fige (archive, non lu)
 Sortie : chapters/ch2-silent-bells/dist/index.html, build/out/silent-bells-itch.zip
 Seuls ecarts avec la source (voir chapters/ch2-silent-bells/NOTES.md) : meta propre a l'hebergeur
 d'artefacts retiree, polices Google remplacees par build/fonts.css inlinees.

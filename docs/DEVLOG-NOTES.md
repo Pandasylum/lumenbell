@@ -229,3 +229,4 @@
 ## 2026-11-05 · doc/audit-optim
 - Rien de visible : audit d'optimisation en lecture seule (`docs/AUDIT-OPTIM.md`), aucun code ni build touché.
 - Ce que le joueur verra : rien de visible.
+- Ce que le joueur verra : rien de visible (archivage de fichiers et de documentation, aucun changement de jeu).
