@@ -34,3 +34,9 @@ Les combos de sorts dans une même série donnent un seul contre, à la fin. Cho
 
 
 **Halo (Kevin, 5 nov.)** : la moitié dégagée devient un halo de lumière autour du Veilleur (dégradé radial, rayon `RUST_HALO` = 430 px, provisoire), sans coupure nette ; le flash a la même forme.
+
+## Rythme de l'Ancien (Kevin, 5 nov., soir)
+- Plancher entre impacts réels de sorts différents (combos compris), en secondes absolues (pas ×f) : `SP.floor` 0,6 / 0,75 / 1,05 (Facile / Normal / Difficile), comme `VX.gap` de la Voix. Chaque sort est un groupe : son rythme interne est gardé (chaîne, harpon + planche, vague + poutre, combo du balayage, glas) ; un écart trop court décale le sort entier, jamais supprimé.
+- Balayage en Difficile : écarts 0,55 / 0,90 / 0,75 en secondes réelles (`SP.sweep.real`).
+- Rotation Difficile : combos gardés, mais pause supplémentaire (`SP.rest.hard` 0,6 s) avant une série qui suit un combo. **À valider** : lecture de « pas deux de suite sans temps mort ».
+- Mesure (un seul ch2-bot, Ancien, Difficile, σ 0,03 s, 20 parties) : phase passée 18/20, 2 morts, 0,95 coup reçu en moyenne, 122,9 s en moyenne par réussite, `errs []`. `smoke` et `ch2-input` OK (joueur parfait : 0 coup).
