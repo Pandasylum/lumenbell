@@ -84,7 +84,7 @@ const CARD={};
   const tag=ch+' drapeau pose '+w+'x'+h,ctx=await b.newContext({viewport:{width:w,height:h},locale:'fr-FR'});
   await ctx.addInitScript(k=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem(k,'1')}},KEY[ch]);
   const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(tag+': pageerror: '+e.message));await pg.goto('file://'+DIST[ch]);await pg.waitForTimeout(200);
-  await pg.click('#gateBtn');await pg.waitForTimeout(150);
+  await pg.waitForTimeout(150);
   const btn=()=>pg.evaluate(()=>{const e=document.getElementById('introBtn');if(!e)return'absent';const r=e.getBoundingClientRect(),c=getComputedStyle(e),x=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
    return{vis:!e.hidden&&c.display!=='none'&&c.visibility!=='hidden'&&r.width>0&&r.right<=innerWidth&&r.bottom<=innerHeight&&r.top>=0,top:x===e||e.contains(x),txt:e.textContent}});
   let B=await btn();check(B!=='absent'&&B.vis&&B.top&&B.txt==='▶ Intro',tag+': bouton de rejeu '+JSON.stringify(B));
@@ -100,11 +100,11 @@ const CARD={};
   await ctx.close()}
  // 2. outro des deux chapitres : « ▶ Outro » au menu apres la vraie fin (lb-chN-end ; Chapitre II depuis menu/common), absent avant
  for(const ch of ['ch1','ch2']){
-  {const ctx=await b.newContext({viewport:{width:1100,height:760}});const pg=await ctx.newPage();await pg.goto('file://'+DIST[ch]);await pg.waitForTimeout(200);await pg.click('#gateBtn');
+  {const ctx=await b.newContext({viewport:{width:1100,height:760}});const pg=await ctx.newPage();await pg.goto('file://'+DIST[ch]);await pg.waitForTimeout(200);
    const hid=await pg.evaluate(()=>document.getElementById('outroBtn').hidden);check(hid,ch+' outro : bouton visible sans la vraie fin');await ctx.close()}
   const ctx=await b.newContext({viewport:{width:1100,height:760}});await ctx.addInitScript(k=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem(k,'1')}},'lb-'+ch+'-end');
   const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' outro: pageerror: '+e.message));await pg.goto('file://'+DIST[ch]);await pg.waitForTimeout(200);
-  await pg.click('#gateBtn');await pg.waitForTimeout(100);
+  await pg.waitForTimeout(100);
   for(const k of [1,2]){await pg.click('#outroBtn');await pg.waitForTimeout(500);let v=await pg.evaluate(()=>!document.getElementById('cine').hidden);check(v,ch+' outro : ne se lance pas ('+k+')');
    await pg.keyboard.press('Space');await pg.waitForTimeout(300);v=await pg.evaluate(()=>!document.getElementById('cine').hidden&&!document.getElementById('menu').hidden);check(!v,ch+' outro : Espace ne passe pas ('+k+')')}
   const m=await pg.evaluate(()=>!document.getElementById('menu').hidden);check(m,ch+' outro : pas de retour au menu');
@@ -112,7 +112,7 @@ const CARD={};
   console.log(ch,'outro      lancee deux fois, passee par Espace ; cles intro/outro :',keys);await ctx.close()}
  // 2b. dernier carton de l'outro du Chapitre I : dist publie en temps reel (OUTRO n'est pas expose a la copie de test)
  {const ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});await ctx.addInitScript(()=>{if(!sessionStorage.getItem('__i')){sessionStorage.setItem('__i','1');localStorage.setItem('lb-ch1-end','1')}});
-  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push('ch1 carton: pageerror: '+e.message));await pg.goto('file://'+DIST.ch1);await pg.waitForTimeout(200);await pg.click('#gateBtn');
+  const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push('ch1 carton: pageerror: '+e.message));await pg.goto('file://'+DIST.ch1);await pg.waitForTimeout(200);
   await pg.evaluate(()=>{window.__rec=[];const P=CanvasRenderingContext2D.prototype,f0=P.fillText;P.fillText=function(t,x,y){window.__rec.push({t:String(t),x,y,col:this.fillStyle,font:this.font,al:this.textAlign,w:this.measureText(String(t)).width,a:this.globalAlpha});if(window.__rec.length>400)window.__rec.shift();return f0.apply(this,arguments)}});
   await pg.click('#outroBtn');await pg.waitForFunction(()=>/suivre/.test(document.getElementById('cineCap').textContent),null,{timeout:90000});await pg.waitForTimeout(4500);
   const card=await pg.evaluate(()=>{const r=window.__rec,i=r.map(x=>x.t).lastIndexOf('LUMEN');return{cap:document.getElementById('cineCap').textContent,capCol:document.getElementById('cineCap').style.color,rec:i<0?[]:r.slice(i,i+3)}});

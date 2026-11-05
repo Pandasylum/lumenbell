@@ -20,7 +20,7 @@ const SPY=()=>{const L=window.__t.LB;window.__c={bar:0,ring:0,cue:0,easy:0};cons
  // 1. dist
  for(const ch of ['ch1','ch2']){const ctx=await b.newContext({viewport:{width:1100,height:760},locale:'fr-FR'});const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+': pageerror: '+e.message));
   await pg.goto('file://'+F[ch]);await pg.waitForTimeout(300);const st=()=>pg.evaluate(()=>{const r=((id)=>{const g=document.getElementById('mGear');g.click();const q=s=>document.querySelector('#lbSet [data-id='+id+'] '+s),b=q('button[aria-pressed=true]'),d=q('button').disabled;g.click();return{on:!!b&&b.dataset.v==='true',dis:d}})('help');return{on:r.on,dis:r.dis,hid:false}   /* cases retirees : roue de reglages */});
-  const s0=await st();await pg.click('#gateBtn');
+  const s0=await st();
   const r={};for(const d of ['easy','hard']){await pg.evaluate(()=>{const m=document.getElementById('menuBtn');if(document.getElementById('menu').hidden)m.click()});
    await pg.evaluate(d=>document.querySelector('#mphM [data-diff='+d+']').click(),d);await pg.waitForTimeout(300);
    if(await pg.evaluate(()=>!!document.getElementById('cine')&&!document.getElementById('cine').hidden)){await pg.keyboard.press('Escape');await pg.waitForTimeout(200)}
