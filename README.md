@@ -35,7 +35,7 @@ Variable `PW_CHROMIUM` : chemin d'un Chromium déjà installé (sinon celui de P
 | `archives/docs/AUDIT-2026-10-30.md` | Audit de la documentation (30 octobre 2026) |
 | `docs/DEVLOG-NOTES.md` | Notes de communication : ce que le joueur verra |
 | `docs/TEXTES-CH1.md` | Tous les textes FR/EN du Chapitre I (extrait auto) |
-| `chapters/ch2-silent-bells/` | Chapitre II : `src/`, `dist/`, `legacy/`, `TEXTES.md` (textes validés, testés), `NOTES.md` |
+| `chapters/ch2-silent-bells/` | Chapitre II : `src/`, `dist/`, `TEXTES.md` (textes validés, testés), `NOTES.md` |
 | `shared/` | Code commun aux chapitres (`LB.*` : langue, clés, audio), collé à la ligne `@shared` ; voir `shared/NOTES.md` |
 | `archives/` | Texte intégral des entrées archivées (décisions, demandes fermées, inventaire commun) ; ne se lit que sur demande |
 | `chapters/ch1-ember-bridge/src/` | Source découpée (ordre d'assemblage : `src/parts.txt`) |

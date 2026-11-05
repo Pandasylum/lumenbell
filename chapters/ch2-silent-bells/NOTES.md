@@ -1,13 +1,13 @@
 # Chapitre II · Silent Bells (notes du dossier)
 
-- **État** : import du 25 octobre (`legacy/silent-bells.source.html`, tag `ch2-import`), puis étapes A (écarts techniques), B (gameplay et textes), C1 (décors, sorts, intro et outro, retouches) faites ; historique des étapes : `DECISIONS.md` et `ROADMAP.md`.
+- **État** : import du 25 octobre (`archives/chapters/ch2-silent-bells/legacy/silent-bells.source.html`, tag `ch2-import`), puis étapes A (écarts techniques), B (gameplay et textes), C1 (décors, sorts, intro et outro, retouches) faites ; historique des étapes : `DECISIONS.md` et `ROADMAP.md`.
 - **Cahier des charges** : `docs/CH2-SPEC.md` (décisions de Kevin du 27 octobre 2026). Lore : `docs/LORE.md`.
 - **Pièges connus** : numéros de phase internes ≠ numéros affichés (voir `## Tests`).
 
 ## Fichiers
 - `src/` : **la source à modifier**, en morceaux (28 octobre 2026, branche `engine/shared`), comme au Chapitre I : `src/parts.txt` donne l'ordre d'assemblage (= ordre d'exécution, une seule IIFE ouverte dans `js/00-open.js` et fermée dans `js/96-loop.js`) ; `build/assemble.py` colle les morceaux octet pour octet. Ancienne page unique `src/silent-bells.html` retirée : les numéros de ligne `ch2:NNN` de `docs/COMMUN.md` renvoient à elle.
 - Carte : `page/head.html` (jusqu'au `<style>` ouvrant), `page/style.css`, `page/body.html` (de `</style>` au `<script>` ouvrant), `js/00-open.js` (ouverture de l'IIFE), `js/02-core.js` (clés, constantes, `DIFFS`, canvas, état), `04-audio-sfx.js`, `08-effects.js` (particules, motifs), `12-hero-states.js` (états du Veilleur), `16-update.js`, `20-draw-helpers.js`, `24-backgrounds.js`, `28-hero-draw.js` (choix de la pose du Veilleur commun : `drawHero`, `heroShape`), `32-boss-rust-king.js`, `36-boss-hollow-voice.js`, `40-boss-drowned-beacon.js`, `44-counters-help-frame.js`, `48-stills.js`, `52-cine-phases.js`, `56-form2-render.js`, `60-music.js`, `64-prologue.js`, `68-form2-logic.js`, `72-flow.js`, `76-epilogue.js`, `80-sfx-combat.js`, `88-lang.js`, `92-events.js`, `96-loop.js`, `page/end.html`. Coupes sur les commentaires de section ; la ligne vide qui précède reste à la fin du morceau précédent ; chaque morceau finit par un saut de ligne.
-- `legacy/silent-bells.source.html` : import d'origine, **ne pas modifier** (référence de `tests/ch2-texts.js`).
+- `archives/chapters/ch2-silent-bells/legacy/silent-bells.source.html` : import d'origine, archivé, **ne pas modifier**. Aucun test ne le lit ; seul un commentaire de `build/build_ch2.py` le cite.
 - `dist/index.html` : généré, suivi dans git ; à committer avec sa source.
 
 
