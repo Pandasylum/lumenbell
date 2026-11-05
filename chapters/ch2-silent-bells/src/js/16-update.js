@@ -39,8 +39,12 @@ function update(dt){
 const R_CNT={1:{dur:1.05,hitAt:.42},2:{dur:1.05,hitAt:.4},3:{dur:.95,hitAt:.32},next:1.45,nextFail:.95};
 /* a press dodges a reflection only if it was aimed at it: closer to it than to any real attack still to come */
 function aimedAt(f){const a=S.pl.at,d=Math.abs(a-f.ti);return!S.threats.some(o=>!o.done&&o!==f&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(a-o.ti)<d)}
+/* the Finish (phase II): the Watcher's charged bell and the Elder's bell resonate, he rings louder and louder and falls at the last stroke (times: SP.finish) */
+function finishStart(){const F=SP.finish,last=F.first+(F.strikes-1)*F.step;S.cnt={t:gt,dmg:1,dur:last+F.hit+F.tail,hitAt:last+F.hit,k:1,spell:'finish'};S.nextAt=gt+99;MUSIC.fx('swell')}
 function closePat(){
   const p=S.pat;S.pat=null;
+  // final assault of phase II (glas): no riposte; the Finish comes once enough glas are countered (total count), otherwise the glas start again
+  if(p.spell==='glas'&&S.phase===1){if((S.glasN||0)>=SP.glas.need[vdk()])finishStart();else S.nextAt=gt+(p.ok?R_CNT.next:R_CNT.nextFail);return}
   if(p.ok){
     const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=R_CNT[S.phase];
     S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase,spell:p.spell};S.nextAt=gt+R_CNT.next;play('counter');counterFx();

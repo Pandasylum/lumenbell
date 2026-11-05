@@ -1,7 +1,7 @@
 /* ---------- combat sound effects: wind-ups, releases and impacts ---------- */
-const SFX_START={wave:'rumble',rafter:'fallWhine',kwave:'swell',sring:'bellSoft',slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
+const SFX_START={wave:'rumble',rafter:'fallWhine',plank:'crackRun',dchain:'fallWhine',kwave:'swell',sring:'bellSoft',slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
 const SFX_MID={sring:'whoosh',orb:'throw',toll:'tollLast',ring:'whoosh',trap:'whooshDown',chunk:'clank',shard:'whoosh',sweep:'whoosh',slam:'whoosh'};
-const SFX_HIT={wave:'plant',sring:'clank',slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank'};
+const SFX_HIT={wave:'plant',sring:'clank',slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank',hpOut:'plant',plank:'chunk',dchain:'clank'};
 function combatSfx(){
   if(S.mode!=='play'||S.paused)return;
   for(const th of S.threats){

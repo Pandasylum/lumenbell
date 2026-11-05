@@ -192,3 +192,8 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 
 - 2026-11-02 (`menu/crown` A, `shared/` seulement) : ouvert depuis le hub (`site/chN/index.html?from=hub`), le chapitre n'a pas d'écran de démarrage et son menu montre « Retour » vers le hub ; ouvert seul, écran de démarrage et plus de lien en bas du menu (« chapitre suivant » retiré). `CHAPTER.next` retiré (2 novembre, `hub/cleanup`). `dist` reconstruit (seuls les morceaux communs changent).
 - 2026-11-02 (`menu/crown-fixes`, session moteur) : bouton plein écran retiré de l'en-tête et du menu ; mouvement réduit lu par `LB.motion` (réglage du hub, sinon le système) ; lien du menu « Chapitres » ; ouvert depuis le hub, la carte de la vraie fin (hors Épreuve) porte « Chapitres » et ramène au hub (`LB.hubEnd`). Voir `docs/decisions/2026-11-02-hub-fixes.md`.
+
+## Sorts de l'Ancien de Rouille (5 novembre, `ch2/ancien-sorts`)
+- Refonte de `P1` : harpon (`hpOut` + `plank` ×2), balayage 2 / 3 / 4 coups (en Difficile le 4e est une `wave` d'ancre), vague + poutre, rage 1 nuage de rouille (`S.rust` jusqu'au KO) + balayage, rage 2 double vague + harpon, rage finale Glas (`toll` à `gid`, décor `rafter` / `dchain`), Finish (`finishStart`, contre `finish`). Durées provisoires dans `SP`. `slam`, `chain`, `toll` hors de la rotation (noms gardés).
+- Contres : `counterKing(k)` (un par sort : `S.cnt.spell` = dernier sort de la série), Veilleur en pose `cast` sans ruée. Glas : `S.glasN` (total contré, pas une série), `S.echoes` (échos renvoyés) ; pas de riposte à dégâts en rage finale, seul le Finish termine.
+- Décision et points à valider : `docs/decisions/2026-11-05-ch2-ancien-sorts.md`. Tests : `ch2-smoke`, `ch2-input` (joueur parfait Normal et Difficile : 0 coup).

@@ -26,12 +26,13 @@ function counterWail(k){
   if(u>=1)glow(vp.x,vp.y-90,80,'rgba(150,255,235,.8)',.5*Math.sin(Math.PI*clamp((e-1/CNT2.reach)/(1-1/CNT2.reach),0,1)))}
 /* one-shot sounds of the riposte variants, at the moment the laser / wave leaves, and at the ricochet */
 function counterVariantFx(){
-  const c=S.cnt;if(!c||c.k!==2)return;const k=(gt-c.t)/c.dur;
+  const c=S.cnt;if(c&&c.k===1)return kingCounterFx(c);
+  if(!c||c.k!==2)return;const k=(gt-c.t)/c.dur;
   if(k>=CNT2.from&&!c.s1){c.s1=1;if(c.spell==='wail')MUSIC.fx('bellChime')}
   if(c.spell==='rain'&&!c.s2){const P=rainPath(),e=(k-CNT2.from)/(CNT2.to-CNT2.from);if(e>=P.l1/P.L/CNT2.reach){c.s2=1;MUSIC.fx('glints')}}}
 function drawCounter(){
   if(!S.cnt)return;const k=(gt-S.cnt.t)/S.cnt.dur;ctx.save();ctx.globalCompositeOperation='lighter';
-  if(S.cnt.k===1){if(k>.32&&k<.62){const e=(k-.32)/.3;ctx.strokeStyle=`rgba(255,240,170,${1-e})`;ctx.lineWidth=10*(1-e)+2;ctx.beginPath();ctx.arc(640,GY-150,110,-2.2+e*.5,.6+e*.5);ctx.stroke()}}
+  if(S.cnt.k===1)counterKing(k);   // one counter per spell of the Elder (64-prologue.js)
   else if(S.cnt.k===2){
     /* phase I riposte, one variant per spell (same window and same hit moment, only the drawing and the sound change):
        volley = a laser straight at the Voice; rain = a small laser that ricochets on a mirror of the hall, then hits the Voice;
