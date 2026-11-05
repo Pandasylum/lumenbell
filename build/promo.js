@@ -310,7 +310,7 @@ function social() {
   crop(E('p3-phare-forme1.png'), path.join(S, 'post-1600x900.png'), 0, 0, 1920, 1080, 1600, 900);
   crop(E('p1-reflets.png'), path.join(S, 'post-1080x1080.png'), 400, 0, 1080, 1080, 1080, 1080);
   crop(path.join(TMP, 'intro-phare-raw.png'), path.join(S, 'banner.png'), 0, 140, 1920, 640, 1920, 640);   // 3:1 ; la source fait 1920 px de large
-  crop(E('menu.png'), path.join(S, 'cover.png'), 280, 0, 1360, 1080, 630, 500);                      // titre du menu, meme recadrage 680 x 540 que le GIF
+  crop(E('menu.png'), path.join(S, 'cover.png'), 215, 0, 1360, 1080, 630, 500);                      // titre du menu, meme recadrage 680 x 540 que le GIF
 }
 
 module.exports = { social, clips, cover, ROOT, OUT, TMP, SEED, launch, open2, open1, frame, until, snap, shotStage, shotPage, settle, mk, pagePrelude, pageApi2, stage2, stage1, hub, LOG, log, clean, crop, py };
