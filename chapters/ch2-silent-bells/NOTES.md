@@ -53,7 +53,7 @@ Descriptions : en-tête de chaque fichier et `NOTES.md:Outillage` (lancement loc
 - Numéros de phase : interne `S.phase` 2 = Phase I (la Voix Creuse), 1 = Phase II (l'Ancien de Rouille), 3 = Phase III (le Phare Noyé) ; `ORDER=[2,1,3]`. Le test lit `document.body.dataset.ph` (interne) et `#hdEye` (affiché).
 
 ## Pièges
-- Les tests sur le `dist` cliquent d'abord `#gateBtn` (écran de démarrage, depuis `menu/common`) ; la copie de test de `ch2-lib.js` le masque.
+- Plus d'écran de démarrage (retiré le 5 novembre) : les tests ouvrent le chapitre directement.
 
 ## Mesures des états du Veilleur (27 octobre, `node tests/ch2-input.js`)
 | Cas | Résultat |
@@ -102,7 +102,7 @@ Avant l'étape B (main : 6 / 5 PV, fenêtres 0,2 / 0,155 s, contre-attaque à fr
 - **Cinématiques** : temps des nouveaux moments dans `CINE_P1` (lanterne : chute, enfoncement ; trappe), `CINE_P2` (ancre tirée du sol puis mise dans le dos ; lueur qui monte de l'épave), `CINE_P3` (zoom sur la cloche). Lanterne : `lanternPos()`, `keeperLantern()`, `sinkGlow()` (pulsation et trappe, posées après le reflet). Ancre au sol : `ANCHOR_FLOOR`.
 - **Pics de récif** : `spikeTell()` (annonce) et `reefSpikes()` (coup reçu), mêmes temps qu'avant.
 - **Menu** : le SVG garde sa construction ; aurore → brume, montagnes → mer et récifs, neige (`.msn`) → embruns qui montent.
-- **Planches avant/après** des PR de l'étape C1 : `shots/` (JPEG, avant à gauche = `main`, après à droite). Pièces de revue, à supprimer une fois les visuels validés.
+- **Planches avant/après** des PR de l'étape C1 : `archives/chapters/ch2-silent-bells/shots/` (archivées, JPEG, avant à gauche = `main`, après à droite). Pièces de revue, à supprimer une fois les visuels validés.
 
 ## Intro et outro (étape C1, partie 3, 28 octobre, `ch2/visuals-cinematics`)
 - `drawPrologue(t)` : plans `PRO_SHOTS` (côte et village, Phare au large, plage, haut du Phare + Veilleur + titre) ; cartons `PCAPF`, titre `PRO_TITLE` (inchangés) ; sons `PSFX`. `drawEpilogue(t)` : plans `EPI_SHOTS` (matin, gros plan de la cloche, vallée du Chapitre I, sous les vagues, forêt + titre) ; cartons `ECAPF`, titre `EPI_TITLE` (inchangés) ; sons `EFXL` ; tours de la vallée `VTOW`, tour qui s'éteint `TOWER_OUT` à `EPI_DARK`, fissures `VCRACKS`.

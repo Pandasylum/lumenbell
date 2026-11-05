@@ -51,7 +51,7 @@ function retryPhase(){
 $('retryBtn').addEventListener('click',e=>{e.currentTarget.blur();retryPhase()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)setPause(true)});
 /* Menu commun (LB.menu) : scène du chapitre (page/body.html), braises, boutons de rejeu, plein écran, langues, difficultés,
-   Épreuve du feu ; écran de démarrage (LB.gate). Les braises tirent Math.random ici, à la même place qu'avant. */
+   Épreuve du feu ; écran de démarrage du hub. Les braises tirent Math.random ici, à la même place qu'avant. */
 LB.menu.mount(CHAPTER,{
   onDiff:dk=>{applyDiff(dk);ensureAudio();if(CINE.seen())goPhase(1);else CINE.play(()=>goPhase(1))},
   onResume:()=>{hideMenu();try{if(!el.ov.hidden)el.go.focus({preventScroll:true})}catch(e){}},

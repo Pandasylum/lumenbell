@@ -11,7 +11,5 @@ html:not(.lb-go) #gate,html:not(.lb-go) #gate *{visibility:visible}
 .gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(8,6,13,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 /*@gatebtnbare*/
 .gate .btn{box-shadow:@GLOW@}
-/*@btnbig*/
-.btn.big{font-size:24px;padding:12px 38px}
 /*@glow*/
 0 0 36px rgba(@RGB@,.45)

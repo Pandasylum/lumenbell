@@ -3,7 +3,7 @@
 - Le vocabulaire de référence (bloquer / esquiver, Veilleur / Veilleure, braise, mots interdits à l'écran) est maintenant écrit au même endroit pour les prochaines sessions de texte.
 
 ## 2026-10-30 · docs/audit-coherence
-- Rien ne change à l'écran : cette session ne produit qu'un rapport d'audit de la documentation (`docs/AUDIT-2026-10-30.md`).
+- Rien ne change à l'écran : cette session ne produit qu'un rapport d'audit de la documentation (`archives/docs/AUDIT-2026-10-30.md`).
 - Il prépare un nettoyage qui réduira d'environ 40 % ce qu'il faut relire avant chaque session.
 
 ## 2026-10-30 · docs/decisions-30-oct
@@ -220,3 +220,7 @@
 
 ## 5 novembre 2026 · audit de nettoyage, lot B1 (doc seule)
 - Rien de visible dans le jeu : un rapport d'analyse interne est déplacé vers `archives/`, l'index de `DECISIONS.md` gagne la décision « chapitres sans Commencer ».
+
+## 2026-11-05 · cleanup/b2-moteur
+- Rien de visible : nettoyage du code mort et des restes de l'écran « Commencer » des chapitres.
+- À regarder : l'ouverture d'une phase aux Chapitres I et II depuis le hub, et les menus, doivent rester identiques.

@@ -22,7 +22,7 @@ function calls(code){const out=[];const re=/(?<![\w$.])_\(/g;let m;
  return out}
 function lit(a){if(!/^(['"`])[\s\S]*\1$/.test(a)||(a[0]==='`'&&a.includes('${')))return null;try{return Function('return '+a)()}catch(e){return null}}
 const END='S.d=DIFFS.normal;S.phase=2;applyLang();requestAnimationFrame(loop);';
-const HOOK='S.d=DIFFS.normal;S.phase=2;applyLang();if(LB.cine)LB.cine.manual=true;{const g=document.getElementById("gate");if(g)g.hidden=true}\n'+   // ecran de demarrage (LB.gate) masque, comme la copie de test du Chapitre I
+const HOOK='S.d=DIFFS.normal;S.phase=2;applyLang();if(LB.cine)LB.cine.manual=true;\n'+  
  'window.__t={LB,get S(){return S},get gt(){return gt},DIFFS,CINE_LEN,PRO_TITLE,down,up,startRun,jumpPhase,SHOCK,MUSIC,sfx,damageBoss,success,HULL,CINE_P3,ONO,'+
  'PRO:typeof PRO!=="undefined"?PRO:null,EPI:typeof EPI!=="undefined"?EPI:null,'+
  'playPrologue,playEpilogue,deathCard:typeof deathCard!=="undefined"?deathCard:null,go(){if(typeof onGo!=="undefined"){onGo&&onGo()}else LB.card.go()},step(dt,drawIt){rt+=dt;if(!S.paused&&["play","ko","dead","cine","prologue","epilogue"].includes(S.mode))gt+=dt;'+

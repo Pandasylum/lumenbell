@@ -36,7 +36,7 @@
 | `js/72-boot.js` | Démarrage (`buildStatic`, `newGame`, `showMenu`) |
 | `js/76-cine-intro.js` | Cinématique d'intro : scènes `DRAW`, cartons `SC` (durées), sons `CUE`, titre `LB.title` ; cadre `LB.cine` (`CINE`, drapeau `lb-ch1-intro`) |
 | `js/80-cine-outro.js` | Outro de la vraie fin : scènes, cartons `SC`, son `ENTER` ; cadre `LB.cine` (`OUTRO`, sans drapeau) |
-| `js/84-loop.js` | `endSeen`, `trialOpen`, focus de l'écran de démarrage (`LB.gate.focus`), boucle `frame`, **fermeture de l'IIFE** |
+| `js/84-loop.js` | `endSeen`, `trialOpen`, boucle `frame`, **fermeture de l'IIFE** |
 | `page/end.html` | `</script>` |
 
 Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien déplacé) : chercher dans `docs/TEXTES-CH1.md` pour trouver le fichier.
