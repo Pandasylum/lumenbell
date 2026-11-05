@@ -172,10 +172,11 @@ const VX={
   dance:{mirrors:{easy:1,normal:2,hard:2},frag:1}   // final assault: mirrors the volley leaves by, fragments per exploding mirror
 };
 const vdk=()=>S.d.hard?'hard':S.dk==='easy'?'easy':'normal';
-/* internal rhythm of every attack (gaps between strikes, tells, chains): always the Normal's, whatever the difficulty (rule of
-   Ember Bridge, CLAUDE.md « Difficulté et chapitres »). sp = speed of that rhythm (= Normal's, 1); rage = slowing factor of the rage
-   (x1.1) kept in Easy and Normal, neutralised in Hard. Never read the difficulty speed here. */
-const RHY={sp:1,rage:.1};
+/* internal rhythm of every attack (gaps between strikes, tells, chains): always the Normal's, in real seconds, whatever the difficulty
+   and the same before and after the rage (rule of Ember Bridge, CLAUDE.md « Difficulté et chapitres »). sp = speed of that rhythm (1);
+   rage = per-boss rage accelerator, by phase id (1 Elder, 2 Voice, 3 Lighthouse); 1 = no effect, nobody uses another value today:
+   any other value must be listed in docs/decisions. Never read the difficulty speed here. */
+const RHY={sp:1,rage:{1:1,2:1,3:1}};
 const SP={
   wave:{land:.55,hit:1.05,fall1:.8,fall2:1.15,after:1.6},
   dwave:{gap:.55},
@@ -240,7 +241,7 @@ function spawn(){
   }
   if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.rageHp0=S.bossHp;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
   const go=l=>{const q=sched(l);q.spell=l.spell;return q};   // the spell shown by the riposte (set by P2)
-  const stage=S.rageN?1:0,f=1/(RHY.sp*(id===2?VOICE_SPEED:1)*(d.hard?1:1+RHY.rage*stage));   // inside rhythm = Normal's, in real seconds, for every difficulty (the rage factor is dropped in Hard)
+  const stage=S.rageN?1:0,f=1/(RHY.sp*(id===2?VOICE_SPEED:1)*(stage?RHY.rage[id]:1));   // inside rhythm = Normal's, in real seconds, same before and after the rage, whatever the difficulty
   if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;go(gen(stage,f,gt+.25,false,r));return}
   if(!S.finalDone&&S.bossHp<=FINAL_AT&&(id!==3||f2)){
     S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=RAGE.dur2;S.shake=10;
