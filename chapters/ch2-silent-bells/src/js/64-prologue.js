@@ -555,7 +555,7 @@ function counterKing(k){
   if(sp==='wave'){if(k>.12&&k<.85)groundRay(k,u,Math.max(a,.05),0);return}
   if(sp==='dwave'){if(k>.12&&k<.85){groundRay(k,u,Math.max(a,.05),0);const u2=clamp((k-.2)/.3,0,1);if(k>.2)groundRay(k,u2,Math.max(a,.05),-7)}return}
   // sweep (bell stroke) and rust (staff raised, light round the Watcher): the bell's echo crosses the hold to the Elder
-  if(sp==='rust'){const l=Math.sin(Math.PI*clamp((k-.05)/.8,0,1)),fl=k>.08?clamp(1-(k-.08)/.15,0,1):0;if(fl>0){ctx.fillStyle=`rgba(255,248,220,${.55*fl})`;ctx.fillRect(0,0,500,H)}   // the flash
+  if(sp==='rust'){const l=Math.sin(Math.PI*clamp((k-.05)/.8,0,1)),fl=k>.08?clamp(1-(k-.08)/.15,0,1):0;if(fl>0){const g=ctx.createRadialGradient(HX,GY-90,0,HX,GY-90,RUST_HALO);for(let i=0;i<=10;i++)g.addColorStop(i/10,`rgba(255,248,220,${.55*fl*(1-halo(i/10))})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}   // the flash, as a halo
     glow(A.x,A.y,150,'rgba(255,244,200,.9)',.55*l);glow(A.x,A.y,60,'rgba(150,255,235,.9)',.6*l)}
   if(k>.1&&k<.8){const env=1-clamp((k-.1)/.7,0,1);ctx.save();ctx.translate(bx,by);ctx.rotate(Math.sin(gt*55)*.45*env);ctx.fillStyle=`rgba(255,236,170,${.35+.65*env})`;
     ctx.beginPath();ctx.moveTo(-9,6);ctx.quadraticCurveTo(-9,-8,0,-10);ctx.quadraticCurveTo(9,-8,9,6);ctx.closePath();ctx.fill();ctx.restore()}
@@ -581,7 +581,7 @@ function drawRust(){const R=S.rust;if(!R||gt<R.t0)return;
   const a=clamp((gt-R.st)/(R.tc-R.st),0,1),front=lerp(-40,H+60,eout(clamp((gt-R.st)/(R.tc-R.st+.5),0,1)));
   // counter of rage 1: the staff raised, the cloud thins out round the Watcher only (and comes back)
   const cl=rustClear(),
-        near=(x,y)=>1-cl*clamp((500-x)/100,0,1);   // the counter clears the Watcher's half of the screen (x < 400), not the Elder's
+        near=(x,y)=>1-cl*(1-halo(Math.hypot(x-HX,y-(GY-90))/RUST_HALO));   // the cleared halo round the Watcher (soft edge)
   ctx.save();
   if(gt>=R.st&&gt<R.tc+.8){const am=7*Math.max(0,1-(gt-R.st)/(R.tc-R.st+.8));for(const x of[120,330,540,830])chainLinks(x,-10,x+Math.sin(gt*37+x)*am,150+(x%3)*40,0,'#4a2a18')}   // the chains tremble
   for(let x=0;x<W;x+=40){const k=near(x+20,GY-90),g=ctx.createLinearGradient(0,front-160,0,front);g.addColorStop(0,`rgba(110,40,18,${.62*a*k})`);g.addColorStop(1,'rgba(110,40,18,0)');ctx.fillStyle=g;ctx.fillRect(x,0,40,front)}
@@ -589,13 +589,14 @@ function drawRust(){const R=S.rust;if(!R||gt<R.t0)return;
   {const g=ctx.createRadialGradient(700,GY-150,20,700,GY-150,240);g.addColorStop(0,`rgba(96,36,16,${.55*a})`);g.addColorStop(1,'rgba(96,36,16,0)');ctx.fillStyle=g;ctx.fillRect(440,GY-400,520,420)}   // the Elder himself hardly shows in it
   for(let i=0;i<40;i++){const x=(i*97+gt*20)%W,y=(i*53+gt*40)%Math.max(front,1);ctx.fillStyle=`rgba(200,110,60,${.5*a*near(x,y)})`;ctx.fillRect(x,y,1.6,1.6)}
   ctx.restore()}
-/* the same cloud over the Watcher too (called after him): he is covered like the rest. Only the rage-1 counter reveals his half of the screen
-   (a flash, then clear to x ~ 400, soft edge to 500) and stays clear; the Elder stays in the rust until the ship collapses */
+/* the same cloud over the Watcher too (called after him): he is covered like the rest. Only the rage-1 counter reveals a halo of light round him
+   (a flash, then a soft-edged clear zone, `RUST_HALO`) which stays; the Elder stays in the rust until the ship collapses */
 function drawRustHaze(){const R=S.rust;if(!R||gt<R.st)return;
   const a=clamp((gt-R.st)/(R.tc-R.st),0,1),cl=rustClear(),b=RUST_HAZE*a;
-  const g=ctx.createLinearGradient(0,0,W,0);g.addColorStop(0,`rgba(120,46,22,${b*(1-cl)})`);g.addColorStop(400/W,`rgba(120,46,22,${b*(1-cl)})`);g.addColorStop(500/W,`rgba(120,46,22,${b})`);g.addColorStop(1,`rgba(120,46,22,${b})`);
+  const g=ctx.createRadialGradient(HX,GY-90,0,HX,GY-90,RUST_HALO);for(let i=0;i<=10;i++)g.addColorStop(i/10,`rgba(120,46,22,${b*(1-cl*(1-halo(i/10)))})`);
   ctx.save();ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.restore()}
-const RUST_HAZE=.5;   // opacity of the veil over everything once the cloud is full (provisional)
+const RUST_HAZE=.5,RUST_HALO=430;   // RUST_HALO = radius (px) of the halo of light round the Watcher after the rage-1 counter (provisional)
+const halo=u=>{u=clamp((u-.25)/.75,0,1);return u*u*(3-2*u)};   // 0 in the core, 1 outside, smooth   // opacity of the veil over everything once the cloud is full (provisional)
 /* ---- Phase III · Form I: the tower's tentacles and torn pieces ---- */
 function P3(stage,f,b,final,rage){
   const T=[];let t=b;

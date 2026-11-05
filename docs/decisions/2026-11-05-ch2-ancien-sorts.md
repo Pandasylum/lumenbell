@@ -30,5 +30,7 @@ Les combos de sorts dans une même série donnent un seul contre, à la fin. Cho
 
 **Révision (Kevin, 5 nov.)** : Normal = 3 simples / 3 combos avant la rage, que des combos après (dont un à 3 sorts). Difficile = combos de 2 sorts avant et après la rage 1, combos de 3 sorts après la rage 2.
 
-**Rage 1, précision (Kevin, 5 nov.)** : le nuage recouvre aussi le Veilleur (voile `RUST_HAZE`, provisoire ; les attaques sont dessinées par-dessus). Au contre, il lève le bâton : un flash révèle sa moitié d'écran (x < 400, bord doux jusqu'à 500), l'Ancien reste dans la rouille. Choix B de Kevin : la moitié reste dégagée jusqu'au KO (seul l'Ancien reste caché), le flash ne se joue qu'une fois (`S.rust.clr`).
+**Rage 1, précision (Kevin, 5 nov.)** : le nuage recouvre aussi le Veilleur (voile `RUST_HAZE`, provisoire ; les attaques sont dessinées par-dessus). Au contre, il lève le bâton : un flash révèle sa moitié d'écran (halo doux autour de lui, rayon `RUST_HALO`, plus de coupure nette), l'Ancien reste dans la rouille. Choix B de Kevin : la moitié reste dégagée jusqu'au KO (seul l'Ancien reste caché), le flash ne se joue qu'une fois (`S.rust.clr`).
 
+
+**Halo (Kevin, 5 nov.)** : la moitié dégagée devient un halo de lumière autour du Veilleur (dégradé radial, rayon `RUST_HALO` = 430 px, provisoire), sans coupure nette ; le flash a la même forme.
