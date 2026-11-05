@@ -142,7 +142,7 @@ const FINAL_AT=RAGE.finalHp;
    shorter, so the rhythm is slower), not scaled by the attack speed; in Hard, `grace` s more after the impact (irregular
    rhythm); a shard that hits stuns only `hurt` s. PROVISIONAL, from Ember Bridge. */
 const RAIN={normal:[.32,.62],hard:[.55,.9],grace:.13,hurt:.14};
-/* new spells (docs/CH2-SPEC.md, « Sorts et rages »): times in seconds, multiplied by f (attack speed, like every pattern).
+/* new spells (docs/CH2-SPEC.md, « Sorts et rages »): times in seconds, multiplied by f (Normal's rhythm, see RHY: the same in every difficulty).
    PROVISIONAL values, taken from the neighbouring spells they replace or extend; to be set in the balancing session.
    wave  (II): stomp lands at `land` (the anchor's strike of the Hard sweep too), the wave reaches the Watcher at `hit` (= old stomp), the beam falls twice,
                `fall1` / `fall2` after the wave (= old stones .8 / 1.15), next attack `after` later (= old stomp 1.6);
@@ -172,10 +172,15 @@ const VX={
   dance:{mirrors:{easy:1,normal:2,hard:2},frag:1}   // final assault: mirrors the volley leaves by, fragments per exploding mirror
 };
 const vdk=()=>S.d.hard?'hard':S.dk==='easy'?'easy':'normal';
+/* internal rhythm of every attack (gaps between strikes, tells, chains): always the Normal's, in real seconds, whatever the difficulty
+   and the same before and after the rage (rule of Ember Bridge, CLAUDE.md « Difficulté et chapitres »). sp = speed of that rhythm (1);
+   rage = per-boss rage accelerator, by phase id (1 Elder, 2 Voice, 3 Lighthouse); 1 = no effect, nobody uses another value today:
+   any other value must be listed in docs/decisions. Never read the difficulty speed here. */
+const RHY={sp:1,rage:{1:1,2:1,3:1}};
 const SP={
   wave:{land:.55,hit:1.05,fall1:.8,fall2:1.15,after:1.6},
   dwave:{gap:.55},
-  /* Rust Elder (II), refonte du 5 novembre (docs/decisions/2026-11-05-ch2-ancien-sorts.md), all PROVISIONAL, x f:
+  /* Rust Elder (II), refonte du 5 novembre (docs/decisions/2026-11-05-ch2-ancien-sorts.md), all PROVISIONAL, x f (Normal's rhythm; Hard = Normal's seconds, f = 1 outside Voice):
      harpoon: flies `fly` (= old hpOut) and pierces the Watcher (block 1), sticks in the wood `stick` (Kevin: 1 s), is recalled tearing
                out a plank that arrives diagonally: first impact `pl1` after the recall, second `gap` later (= rafter gap), the hand
                takes the harpoon back in `back`, next attack `after` later (= old .8);
@@ -183,7 +188,7 @@ const SP={
                series (chain, harpoon + plank, wave + beam, sweep combo, glas) keeps its own rhythm inside; a gap that is too short is pushed
                back (whole spell), never dropped. rest: Hard, extra pause before the series that follows a combo;
      sweep:   one fluid combo of the anchor (no return to rest between strikes): the first impact `ts` after the start (= old sweep
-               .72), then one impact every d[i] s (`real`: the gaps of that difficulty are real seconds, not x f; Easy 2 strikes, Normal 3, Hard 4; in Hard the last one smashes the ground and
+               .72), then one impact every d[i] s (Easy 2 strikes, Normal 3, Hard 4; in Hard the last one smashes the ground and
                sends a water wave, counted in the series). A gap >= `long` is a delay: the anchor is held up, trembling, then falls.
                Next attack `after` after the last impact;
      rust (rage 1): he strikes the hull (`strike`), the cloud grows for `grow` and stays until the ship collapses, `pause`, then a sweep;
@@ -192,7 +197,7 @@ const SP={
                `need` = glas to counter before the Finish (total count, not a series);
      finish: `strikes` resonance strikes from `first`, `step` apart, the Elder falls `hit` after the last, `tail` of calm after. */
   harpoon:{fly:1.1,stick:1,pl1:.75,gap:.35,back:.9,after:.8},
-  sweep:{d:{easy:[.85],normal:[.6,.95],hard:[.55,.9,.75]},long:.7,ts:.72,after:.5,real:'hard'},
+  sweep:{d:{easy:[.85],normal:[.6,.95],hard:[.7,1,.85]},long:.7,ts:.72,after:.5},
   floor:{easy:.6,normal:.75,hard:1.05},   // minimum between two real impacts of different spells (s, NOT x f), like VX.gap of the Voice
   rest:{hard:.6},                          // Hard: pause before a series that follows a combo
   rust:{strike:.7,grow:1.4,pause:.4},
@@ -236,7 +241,7 @@ function spawn(){
   }
   if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.rageHp0=S.bossHp;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
   const go=l=>{const q=sched(l);q.spell=l.spell;return q};   // the spell shown by the riposte (set by P2)
-  const stage=S.rageN?1:0,f=1/(d.sp*(id===2?VOICE_SPEED:1)*(1+.1*stage));
+  const stage=S.rageN?1:0,f=1/(RHY.sp*(id===2?VOICE_SPEED:1)*(stage?RHY.rage[id]:1));   // inside rhythm = Normal's, in real seconds, same before and after the rage, whatever the difficulty
   if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;go(gen(stage,f,gt+.25,false,r));return}
   if(!S.finalDone&&S.bossHp<=FINAL_AT&&(id!==3||f2)){
     S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=RAGE.dur2;S.shake=10;
@@ -399,8 +404,8 @@ function P1(stage,f,b,final,rage){
   const rafter=ti=>{T.push({k:'rafter',n:1,t0:ti,ti:ti+SP.wave.fall1*f});T.push({k:'rafter',n:2,t0:ti+.2*f,ti:ti+SP.wave.fall2*f});t=ti+SP.wave.after*f};
   const surge=G(()=>{rafter(wave());sp='wave'});
   // the anchor combo: 2 / 3 / 4 linked strikes (impacts every SP.sweep.d[..]); in Hard the 4th smashes the ground: a water wave, part of the series
-  const sweep=G(()=>{const Z=SP.sweep,D=Z.d[K],n=D.length+1,hw=K==='hard',m=Z.real===K?1:f,tis=[t+Z.ts*f];D.forEach(d=>tis.push(tis[tis.length-1]+d*m));
-    const cb={t0:t,tis,types:tis.map((x,i)=>i%2===0||(hw&&i===n-1)?'slam':'sweep'),lg:[false,...D.map(d=>d>=Z.long)],end:tis[n-1]+.95},t0=t;
+  const sweep=G(()=>{const Z=SP.sweep,D=Z.d[K],n=D.length+1,hw=K==='hard',m=f,tis=[t+Z.ts*f];D.forEach(d=>tis.push(tis[tis.length-1]+d*m));
+    const cb={t0:t,tis,types:tis.map((x,i)=>hw&&i===n-1?'plant':i%2===0?'slam':'sweep'),lg:[false,...D.map(d=>d>=Z.long)],end:tis[n-1]+.95},t0=t;
     for(let i=0;i<n;i++){
       if(hw&&i===n-1){t=tis[i]-SP.wave.land*f;const n0=T.length,ti=wave(false,true);T.slice(n0).forEach(x=>x.cb=cb);t=ti+Z.after*f}
       else T.push({k:'sweep',t0:i?tis[i-1]:t0,ti:tis[i],cb})}
@@ -439,14 +444,16 @@ function plankPos(hp,at){const P=PLANK;
   const k=clamp((at-hp.p1)/(hp.p2-hp.p1),0,1);return{x:lerp(P.a.x,P.b.x,k),y:lerp(P.a.y,P.b.y,k)}}
 /* the anchor combo (sweep): a single linked movement, impact poses by strike type (slam = from above, sweep = from the side), no return to rest
    between two strikes: after each impact the anchor is raised, held (trembling) if the gap is a delay, then falls. cb = {t0, tis, types, lg, end} */
-const SWP={slam:{mid:{a:-1.3,c:-1.3,l:-30},hit:{a:-3.5,c:-3.5,l:-175}},sweep:{mid:{a:.1,c:.1,l:20},hit:{a:2.7,c:2.7,l:-165}}};
+const SWP={slam:{mid:{a:-1.3,c:-1.3,l:-30},hit:{a:-3.5,c:-3.5,l:-175}},
+  plant:{mid:{a:-1.3,c:-1.3,l:-30},hit:{a:-1.7,c:-4.71,l:-130}},   // Hard, last strike: planted upright in front of him (sets off the wave, does not hit the Watcher)
+  sweep:{mid:{a:.1,c:.1,l:20},hit:{a:2.7,c:2.7,l:-165}}};
 const comboAct=()=>{for(const t of S.threats)if(t.cb&&gt>=t.cb.t0&&gt<=t.cb.end)return t.cb;return null};
 function comboPose(r,cb){
   const L=cb.tis,n=L.length;r.onBack=false;
   if(gt>=L[n-1]){   // follow-through, then the anchor goes back to his back (as the single strikes did)
-    const af=gt-L[n-1],slam=cb.types[n-1]==='slam',hold=.22,ret=.5,e=eio(clamp((af-hold)/ret,0,1));
+    const af=gt-L[n-1],slam=cb.types[n-1]!=='sweep',Q=SWP[cb.types[n-1]].hit,hold=.22,ret=.5,e=eio(clamp((af-hold)/ret,0,1));
     if(af>hold+ret){r.onBack=true;r.armA=lerp(ARM_BACK,ARM_REST,clamp((af-hold-ret)/.2,0,1));return}
-    if(slam){r.armA=lerp(-3.5,ARM_BACK,e);r.clap=lerp(-3.5,BACK_DIR-TWO_PI,e);r.lunge=lerp(-175,0,e)}
+    if(slam){r.armA=lerp(Q.a,ARM_BACK,e);r.clap=lerp(Q.c,BACK_DIR-TWO_PI,e);r.lunge=lerp(Q.l,0,e)}
     else{r.armA=lerp(2.7,ARM_BACK+TWO_PI,e);r.clap=lerp(2.7,BACK_DIR,e);r.lunge=lerp(-165,0,e)}
     return}
   let i=0;while(gt>=L[i])i++;

@@ -19,6 +19,13 @@ console.log('syntaxe',errs.length?'KO':'OK');
  for(const m of html.matchAll(/\b(?:fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|serviceWorker|importScripts|import\s*\(|window\.open\s*\()/g))errs.push('API reseau: '+m[0]);
  for(const m of html.matchAll(/<(?:a|link|iframe|img|script|source|audio|video|embed|object|form)\b[^>]*\b(?:href|src|action|data)\s*=/gi))errs.push('ressource liee: '+m[0]);
  console.log('reseau (statique)',errs.length>n?'KO':'OK')}
+// statique : rythme uniforme (CLAUDE.md, « Difficulte et chapitres ») : la vitesse de la difficulte (d.sp) ne doit plus entrer dans les durees
+// internes des motifs, et f ne multiplie ni les planchers (VX.gap, SP.floor, gap) ni l'ecart de la pluie
+{const n=errs.length;
+ if(/\b(?:S\.d|d|D)\.sp\b/.test(html))errs.push('rythme: d.sp lu dans le script (la difficulte ne multiplie pas le rythme interne)');
+ if(!/f=1\/\(RHY\.sp\*/.test(html))errs.push('rythme: f n\'est plus calcule depuis RHY.sp');
+ for(const m of html.matchAll(/(?:(?<![.\w])gap|VX\.gap\[\w+\]|SP\.floor\[\w+\]|VX\.pe\.\w+|G\[[01]\])\s*\*\s*f\b/g))errs.push('rythme: plancher ou ecart multiplie par f: '+m[0]);
+ console.log('rythme uniforme (statique)',errs.length>n?'KO':'OK')}
 (async()=>{const b=await launch();
 const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true});
 await ctx.addInitScript(()=>{try{localStorage.setItem('db-unl','3')}catch(e){}});
