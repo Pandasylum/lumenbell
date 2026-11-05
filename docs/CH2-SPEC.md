@@ -26,7 +26,7 @@ L'Ancien peut être redessiné pour être plus esthétique, mais chaque pièce d
 La tour n'utilise que les pièces de l'Ancien, sans rien ajouter (décision du 3 novembre 2026) : plus de lanternes sur la plage.
 
 ## La cloche
-La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (écriture ancienne inventée, dessinée une seule fois et réutilisée) ; le mot **Couronne** (EN : **Crown**) est gravé en clair au centre, visible en gros plan dans l'outro. Le joueur peut croire que c'est lié à la tête du Roi : fausse piste voulue.
+La cloche de tête du Roi est la cloche du Phare. Signes anguleux sur le bord (écriture ancienne inventée, dessinée une seule fois et réutilisée) ; le mot **Couronne** (EN : **Crown**) est gravé en clair au centre, **visible seulement au gros plan de l'outro** (carton 2) : il n'est plus gravé pendant l'animation de fin de phase III (décision du 5 novembre 2026). À la Rémanence, une fêlure naît sur la cloche de tête gisant dans les décombres (ni texte ni bruitage). Le joueur peut croire que c'est lié à la tête du Roi : fausse piste voulue.
 
 ## Mécaniques
 - Phase I : esquiver sans mordre aux faux reflets (esquiver une illusion n'est pas une faute de série ; la faute n'existe que si le joueur reçoit le coup de retour, donc un dégât : validé le 30 octobre). Phase II : bloquer. Phase III : rester appuyé pour faire barrage, toucher pour la foudre et les pics.
@@ -40,7 +40,7 @@ Référence lue par tests/ch2-texts.js ; ne pas déplacer. Les nouveaux textes e
 
 **Phase I · La salle des reflets** (boss : la Voix Creuse) : entrée « Une étrange pesanteur enveloppe le pied du Phare. Des sonorités cristallines résonnent dans l'immensité. Parmi ces échos suspendus, une voix flotte dans l'air, empreinte d'une profonde tristesse. » ; fin « La Voix s'éteint dans un dernier murmure, familier au Veilleur. » (l'animation de la lanterne du Veilleur qui faiblit, la trappe, la chute de la lanterne turquoise et le miroir brisé sont montrés, pas écrits)
 
-**Phase II · La cale** (boss : l'Ancien de Rouille) : entrée « Sous le Phare, la coque d'un navire échoué. Le fer rongé par le sel semble reposer ici depuis des siècles. » ; fin « Le navire s'effondre autour de l'Ancien. La lune se reflète sur son armure, mais rien ne répond à sa lumière. » (le sol ne cède pas : c'est le navire qui s'écroule, la lueur turquoise vient de son cœur et se voit)
+**Phase II · La cale** (boss : l'Ancien de Rouille) : entrée « Sous le Phare, la coque d'un navire échoué. Le fer rongé par le sel semble reposer ici depuis des siècles. » ; fin « Après des années d'attente, à la lueur de la lune, seul le silence lui répond. » (le sol ne cède pas : c'est le navire qui s'écroule, la lueur turquoise vient de son cœur et se voit)
 
 **Phase III · Les récifs** (boss : le Phare Noyé ; forme II : la Sans-Fond, sans carton) : entrée « La mer s'est retirée. Les navires qu'elle a pris dorment sur le récif, leurs carcasses livrées à une présence qui ne connaît ni repos ni oubli. » ; fin « Dans les décombres gît la cloche du Phare, fêlée et muette. »
 
@@ -62,11 +62,20 @@ Titres et boss : Phase I · The Mirror Hall (The Hollow Voice) ; Phase II · The
 
 **Phase I** : entrée "A strange heaviness settles over the foot of the Lighthouse. Crystalline sounds ring out across the vastness. Among these suspended echoes, a voice drifts through the air, steeped in deep sorrow." ; fin "The Voice fades in a last murmur, familiar to the Watcher."
 
-**Phase II** : entrée "Beneath the Lighthouse, the hull of a stranded ship. The iron, eaten away by salt, seems to have lain here for centuries." ; fin "The ship collapses around the Elder. The moon gleams on his armor, but nothing answers his light."
+**Phase II** : entrée "Beneath the Lighthouse, the hull of a stranded ship. The iron, eaten away by salt, seems to have lain here for centuries." ; fin "After years of waiting, by the light of the moon, only silence answers him."
 
 **Phase III** : entrée "The sea has drawn back. The ships it took sleep on the reef, their wrecks given over to a presence that knows neither rest nor forgetting." ; fin "In the wreckage lies the Lighthouse's bell, cracked and silent."
 
 **Outro** : 1. "By morning, the Drowned Lighthouse still stands, mute. Its bell will never ring again." 2. "On it, a single word is engraved: Crown." 3. "And this time, the earth has not stopped trembling." 4. "In the heart of the forest, a Spire's light is failing." 5. "Chapter III · Hollow Roots. To be continued."
+
+## Cartes de défaite (décision de Kevin, 5 novembre 2026)
+Une carte par phase ; surtitre, titre et corps sont affichés (comme au Chapitre I). Le texte « Defeat » seul et « The Watcher is down. » n'existent plus ; la phrase du lecteur d'écran « The Watcher falls. Defeat. » reste.
+
+| Phase | Surtitre EN / FR | Titre EN / FR | Corps EN / FR |
+|---|---|---|---|
+| I | Defeat · Phase I / Défaite · Phase I | Lost in the Mirror Hall. / Perdu dans la salle des reflets. | Troubled by the echoes, he followed a light with no shadow. The water closes over his own. / Troublé par les échos, il a suivi une lueur sans ombre. L'eau se referme sur la sienne. |
+| II | Defeat · Phase II / Défaite · Phase II | Struck down in the Hold. / Terrassé dans la cale. | Swept into the rust, he hears only the Elder's toll. / Emporté dans la rouille, il n'entend plus que le glas de l'Ancien. |
+| III | Defeat · Phase III / Défaite · Phase III | Swept away on the Reefs. / Emporté sur les récifs. | The sea takes the Watcher, then keeps him. / La mer emporte le Veilleur, puis le garde. |
 
 ## Code couleur par chapitre
 Chapitre I : braise, orange chaud. Chapitre II : marée, turquoise. Chapitre III : racines, vert mousse tirant sur le jaune (distinct du turquoise). Chapitre IV : givre, bleu-blanc pâle. Chapitre V : gris argenté. Chapitre VI : violet profond. Chapitre VII : blanc. Héros : jaune neutre. Le titre « à suivre » et le point de la Couronne dans le menu suivent ce code.

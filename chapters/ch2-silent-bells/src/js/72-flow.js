@@ -59,9 +59,17 @@ function victory(){S.mode='won';if(MUSIC.cur!==4)setTheme(4);
     desc:(isRec?_('New record. ','Nouveau record. '):'')+(S.full?'':_('Records only count for runs started from the beginning.','Le record ne compte que pour une partie lancée depuis le début.')),
     go:_('Play again','Rejouer'),onGo:()=>startRun(S.dk),onMenu:showMenu},2,S.d.trial,S.epAgain,showMenu));   // from the hub, outside the Trial: « Chapters » goes back to the hub
 }
-function deathCard(){MUSIC.stop();const tr=S.d.trial;
-  const o={eye:_('Defeat','Défaite'),title:_('The Watcher is down.','Le Veilleur est à terre.'),
-    desc:tr?_('Trial: one fall sends you back to Phase I.','Épreuve : une chute te renvoie à la phase I.'):'',
+/* one defeat card per phase (decision of Kevin, 5 November 2026): eye, title and body are all shown, as in Chapter I; keyed by the game number 1..3 */
+const DEFEAT=[null,
+ {eye:()=>_('Defeat · Phase I','Défaite · Phase I'),title:()=>_('Lost in the Mirror Hall.','Perdu dans la salle des reflets.'),
+  body:()=>_('Troubled by the echoes, he followed a light with no shadow. The water closes over his own.',"Troublé par les échos, il a suivi une lueur sans ombre. L'eau se referme sur la sienne.")},
+ {eye:()=>_('Defeat · Phase II','Défaite · Phase II'),title:()=>_('Struck down in the Hold.','Terrassé dans la cale.'),
+  body:()=>_("Swept into the rust, he hears only the Elder's toll.","Emporté dans la rouille, il n'entend plus que le glas de l'Ancien.")},
+ {eye:()=>_('Defeat · Phase III','Défaite · Phase III'),title:()=>_('Swept away on the Reefs.','Emporté sur les récifs.'),
+  body:()=>_('The sea takes the Watcher, then keeps him.','La mer emporte le Veilleur, puis le garde.')}];
+function deathCard(){MUSIC.stop();const tr=S.d.trial,DF=DEFEAT[gpOf(S.phase)];
+  const o={eye:DF.eye(),title:DF.title(),
+    desc:DF.body()+(tr?' '+_('Trial: one fall sends you back to Phase I.','Épreuve : une chute te renvoie à la phase I.'):''),
     go:tr?_('Restart','Recommencer'):_('Retry phase','Réessayer la phase'),onGo:()=>tr?startRun(S.dk,true):retryPhase(),onMenu:showMenu};
   // Easy: on the 3rd defeat without help, the card offers to enable it (LB.help, decision 3 of 28 October), on a line under the buttons
   if(!tr&&LB.help.defeat(S.dk==='easy')){o.go2=LB.helpOffer();o.onGo2=()=>{LB.help.enable();retryPhase()}}

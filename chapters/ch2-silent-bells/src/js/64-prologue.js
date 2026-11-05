@@ -98,7 +98,7 @@ const gpOf=id=>ORDER.indexOf(id)+1;
 const PH=[null,
  {eye:()=>_('Phase II · The Hold','Phase II · La cale'),
   desc:()=>_('Beneath the Lighthouse, the hull of a stranded ship. The iron, eaten away by salt, seems to have lain here for centuries.',"Sous le Phare, la coque d'un navire échoué. Le fer rongé par le sel semble reposer ici depuis des siècles."),
-  end:()=>_('The ship collapses around the Elder. The moon gleams on his armor, but nothing answers his light.',"Le navire s'effondre autour de l'Ancien. La lune se reflète sur son armure, mais rien ne répond à sa lumière."),
+  end:()=>_('After years of waiting, by the light of the moon, only silence answers him.',"Après des années d'attente, à la lueur de la lune, seul le silence lui répond."),
   head:()=>_('Phase II of III · The Hold','Phase II sur III · La cale'),boss:()=>_('The Rust Elder',"L'Ancien de Rouille"),btn:()=>_('Block','Bloquer'),
   aria:()=>_("The Watcher facing the Rust Elder, a colossus of bells armed with an anchor","Le Veilleur face à l'Ancien de Rouille, un colosse de cloches armé d'une ancre")},
  {eye:()=>_('Phase I · The Mirror Hall','Phase I · La salle des reflets'),
@@ -132,7 +132,7 @@ const rageAt=()=>S.phase===3?S.d.u3:S.d.u;   // rage thresholds of the current p
 const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
-  else if(S.phase===1){banner(_('Blue heart','Cœur bleu'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
+  else if(S.phase===1){banner(_('Turquoise heart','Cœur turquoise'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
   else if(S.form===2)banner(_('Bell storm','Tempête de cloches'),_('The side lanterns fire rings in turn, then the trap bell falls.','Les lanternes latérales tirent des anneaux tour à tour, puis la cloche-piège tombe.'));
   else banner(_('Rising tide','Marée montante'),_('The wave floods the reefs; spikes rise as it ebbs.','La vague noie les récifs ; des pics jaillissent quand elle se retire.'));
 }
