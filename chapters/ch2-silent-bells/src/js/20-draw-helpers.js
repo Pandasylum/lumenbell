@@ -6,6 +6,7 @@ const ARM_REST=1.62,ARM_BACK=-1.9,BACK_DIR=2.11,TWO_PI=Math.PI*2;
 const ANCHOR_FLOOR={x:600,y:GY-40,a:Math.PI-.08};
 function anim1raw(){
   const r={lunge:0,armA:ARM_REST+Math.sin(rt*1.3)*.04,clap:BACK_DIR,onBack:true,chain:null,toll:0,coil:0,larm:0};
+  const cb=S.mode==='play'&&comboAct();if(cb){comboPose(r,cb);return r}   // the anchor combo (64-prologue.js)
   const th=curAct(['slam','sweep','chain','toll'],.75);
   if(!th||S.mode!=='play')return r;
   const p=clamp((gt-th.t0)/(th.ti-th.t0),0,1),af=gt-th.ti;

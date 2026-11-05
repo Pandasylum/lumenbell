@@ -11,15 +11,12 @@ function drawHero(){
   if(ph===2){const g=gt-S.dodgeT;if(g<.38){pose='dodgeSide';o={k:Math.sin(Math.PI*g/.38)}}}
   if(ph===3&&S.holding){pose='hold';o={}}
   if(ph===3&&gt<S.broken){pose='hurt';o={k:1}}
-  if(S.cnt){const k=(gt-S.cnt.t)/S.cnt.dur;
-    if(S.cnt.k===1){const out=k<.35?eout(k/.35):k<.6?1:1-eio((k-.6)/.4);ox+=360*out;pose='counter';o={k:k<.3?0:k<.55?eio((k-.3)/.25):k<.6?1:1-eio((k-.6)/.4)}}
-    else{pose='cast';o={rot:.06}}}
+  if(S.cnt){pose='cast';o={rot:.06}}   // the counters of the Elder (spells of the Elder: 64-prologue.js, counterKing) and of the other bosses: the sceptre raised
   if(S.heroPose){pose='raise';o={staffA:S.heroPose.staffA,rot:S.heroPose.lean||0,breath:true}}
   const x=HX+ox,y=GY;
   if(S.ghost){for(let i=1;i<4;i++){ctx.globalAlpha=.2/i;heroShape(x-i*34,y,pose,o,0,true)}ctx.globalAlpha=1}
   // afterimages (dodge)
   if(ph===2&&gt-S.dodgeT<.3){ctx.globalAlpha=.25;heroShape(x+24,y,pose,o,0,true);ctx.globalAlpha=1}
-  if(S.cnt&&S.cnt.k===1){const k=(gt-S.cnt.t)/S.cnt.dur;if(k<.4){for(let i=1;i<4;i++){ctx.globalAlpha=.18/i;heroShape(x-i*40,y,pose,o,0,true)}ctx.globalAlpha=1}}
   ell(x,y+2,30,6,'rgba(0,0,0,.45)');
   heroShape(x,y,pose,o,tint);
   // the shield of the block (phase II), as in Ember Bridge: it lasts as long as the action

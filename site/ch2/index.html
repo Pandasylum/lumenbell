@@ -1460,6 +1460,8 @@ function success(th,perfect){
   th.done=true;th.res='ok';th.okT=gt;th.perfect=perfect;S.okT=gt;
   if(perfect){th.pat.perf++;S.perfects++}
   const ph=S.phase;
+  // glas (final assault of phase II): a blocked echo is sent back at the Elder; a glas is countered when all its echoes are blocked (S.glasN: total, not a series)
+  if(ph===1&&th.k==='toll'&&th.gid!=null){(S.echoes||(S.echoes=[])).push({t0:gt,x:S.orbX,y:S.orbY});if(S.threats.filter(o=>o.gid===th.gid).every(o=>o.res==='ok'))S.glasN=(S.glasN||0)+1}
   if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('block',perfect);MUSIC.fx('clank');pop(ONO.block,perfect?'#f2fffb':'#bff3ea')}
   else if(ph===2){S.dodgeOk=gt;play('dodge',perfect)}
   else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
@@ -1470,7 +1472,7 @@ function hurt(th){
   // stun, cut short so that the next attack can still be stopped (LB.hero.hurt: min(base, max(.14, gap - .2)))
   {let nx=99;for(const o of S.threats)if(o!==th&&!o.done&&o.real!==false){const at=o.hold?o.ta:o.ti;if(at!=null&&at>gt)nx=Math.min(nx,at-gt)}
    LB.hero.hurt(S.pl,nx,{g:gest(),dur:th&&th.k==='shard'?RAIN.hurt:undefined})}
-  if(th&&th.k==='rafter')pop(ONO.crush,'#ff8a6b',HX-30,GY-190);
+  if(th&&(th.k==='rafter'||th.k==='plank'))pop(ONO.crush,'#ff8a6b',HX-30,GY-190);
   burst(HX,GY-70,18,'#ff6a5a',5,.55);play('hurt');MUSIC.fx('chunk');hud();
   if(S.hp<=0){S.mode='dead';S.deadT=gt;S.holding=false;say(_('The Watcher falls. Defeat.','Le Veilleur tombe. Défaite.'))}
 }
@@ -1543,13 +1545,18 @@ function update(dt){
 }
 /* riposte after a clean series, in every phase (rule of Ember Bridge): dur = length of the Watcher's counter, hitAt = moment
    the boss is hit (s, internal phase number: 1 the King, 2 the Voice, 3 the Lighthouse); next = pause before the next series */
-const R_CNT={1:{dur:1.05,hitAt:.42},2:{dur:1.05,hitAt:.4},3:{dur:.95,hitAt:.32},next:1.45,nextFail:.95};
+const R_CNT={harpoon:{dur:1.6,hitAt:.65},1:{dur:1.05,hitAt:.42},2:{dur:1.05,hitAt:.4},3:{dur:.95,hitAt:.32},next:1.45,nextFail:.95};
 /* a press dodges a reflection only if it was aimed at it: closer to it than to any real attack still to come */
 function aimedAt(f){const a=S.pl.at,d=Math.abs(a-f.ti);return!S.threats.some(o=>!o.done&&o!==f&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(a-o.ti)<d)}
+/* the Finish (phase II): the Watcher's charged bell and the Elder's bell resonate, he rings louder and louder and falls at the last stroke (times: SP.finish) */
+function finishStart(){const F=SP.finish,last=F.first+(F.strikes-1)*F.step;S.cnt={t:gt,dmg:1,dur:last+F.hit+F.tail,hitAt:last+F.hit,k:1,spell:'finish'};S.nextAt=gt+99;MUSIC.fx('swell')}
 function closePat(){
   const p=S.pat;S.pat=null;
+  // final assault of phase II (glas): no riposte; the Finish comes once enough glas are countered (total count), otherwise the glas start again
+  if(p.spell==='glas'&&S.phase===1){if((S.glasN||0)>=SP.glas.need[vdk()])finishStart();else S.nextAt=gt+(p.ok?R_CNT.next:R_CNT.nextFail);return}
   if(p.ok){
-    const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=R_CNT[S.phase];
+    const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=S.phase===1&&p.spell==='harpoon'?R_CNT.harpoon:R_CNT[S.phase];   // harpoon: slower, so that the ray is seen climbing the chain
+   
     S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase,spell:p.spell};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
     say(S.phase===1?_('Series blocked. The Watcher counters.','Série bloquée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
   }else S.nextAt=gt+R_CNT.nextFail;
@@ -1563,6 +1570,7 @@ const ARM_REST=1.62,ARM_BACK=-1.9,BACK_DIR=2.11,TWO_PI=Math.PI*2;
 const ANCHOR_FLOOR={x:600,y:GY-40,a:Math.PI-.08};
 function anim1raw(){
   const r={lunge:0,armA:ARM_REST+Math.sin(rt*1.3)*.04,clap:BACK_DIR,onBack:true,chain:null,toll:0,coil:0,larm:0};
+  const cb=S.mode==='play'&&comboAct();if(cb){comboPose(r,cb);return r}   // the anchor combo (64-prologue.js)
   const th=curAct(['slam','sweep','chain','toll'],.75);
   if(!th||S.mode!=='play')return r;
   const p=clamp((gt-th.t0)/(th.ti-th.t0),0,1),af=gt-th.ti;
@@ -1827,15 +1835,12 @@ function drawHero(){
   if(ph===2){const g=gt-S.dodgeT;if(g<.38){pose='dodgeSide';o={k:Math.sin(Math.PI*g/.38)}}}
   if(ph===3&&S.holding){pose='hold';o={}}
   if(ph===3&&gt<S.broken){pose='hurt';o={k:1}}
-  if(S.cnt){const k=(gt-S.cnt.t)/S.cnt.dur;
-    if(S.cnt.k===1){const out=k<.35?eout(k/.35):k<.6?1:1-eio((k-.6)/.4);ox+=360*out;pose='counter';o={k:k<.3?0:k<.55?eio((k-.3)/.25):k<.6?1:1-eio((k-.6)/.4)}}
-    else{pose='cast';o={rot:.06}}}
+  if(S.cnt){pose='cast';o={rot:.06}}   // the counters of the Elder (spells of the Elder: 64-prologue.js, counterKing) and of the other bosses: the sceptre raised
   if(S.heroPose){pose='raise';o={staffA:S.heroPose.staffA,rot:S.heroPose.lean||0,breath:true}}
   const x=HX+ox,y=GY;
   if(S.ghost){for(let i=1;i<4;i++){ctx.globalAlpha=.2/i;heroShape(x-i*34,y,pose,o,0,true)}ctx.globalAlpha=1}
   // afterimages (dodge)
   if(ph===2&&gt-S.dodgeT<.3){ctx.globalAlpha=.25;heroShape(x+24,y,pose,o,0,true);ctx.globalAlpha=1}
-  if(S.cnt&&S.cnt.k===1){const k=(gt-S.cnt.t)/S.cnt.dur;if(k<.4){for(let i=1;i<4;i++){ctx.globalAlpha=.18/i;heroShape(x-i*40,y,pose,o,0,true)}ctx.globalAlpha=1}}
   ell(x,y+2,30,6,'rgba(0,0,0,.45)');
   heroShape(x,y,pose,o,tint);
   // the shield of the block (phase II), as in Ember Bridge: it lasts as long as the action
@@ -1962,6 +1967,7 @@ function drawBoss1(){
   else if(A.coil){const a=gt*9;tip={x:lh.x-20+Math.cos(a)*62,y:lh.y-20+Math.sin(a)*44}}
   else tip={x:lh.x-60,y:lh.y+40+Math.sin(rt*1.3)*3};
   {const a=Math.atan2(tip.y-lh.y,tip.x-lh.x);
+   S.harpTip=thrown?{x:tip.x+X,y:tip.y}:null;S.harpHand={x:lh.x+X,y:lh.y};   // (the counter's lightning climbs the chain)
    if(thrown){const ring=harpoon(tip.x,tip.y,a,74);chainLinks(lh.x,lh.y,ring[0],ring[1],A.chain?6:10,'#4a2a18')}
    else drawP('harp',lh.x,lh.y,a-Math.PI/2)}
   if(A.chain&&A.chain.k>.9)glow(tip.x,tip.y,30,A.chain.ok?'rgba(127,214,255,.9)':'rgba(230,200,150,.9)',.8);
@@ -2415,12 +2421,13 @@ function counterWail(k){
   if(u>=1)glow(vp.x,vp.y-90,80,'rgba(150,255,235,.8)',.5*Math.sin(Math.PI*clamp((e-1/CNT2.reach)/(1-1/CNT2.reach),0,1)))}
 /* one-shot sounds of the riposte variants, at the moment the laser / wave leaves, and at the ricochet */
 function counterVariantFx(){
-  const c=S.cnt;if(!c||c.k!==2)return;const k=(gt-c.t)/c.dur;
+  const c=S.cnt;if(c&&c.k===1)return kingCounterFx(c);
+  if(!c||c.k!==2)return;const k=(gt-c.t)/c.dur;
   if(k>=CNT2.from&&!c.s1){c.s1=1;if(c.spell==='wail')MUSIC.fx('bellChime')}
   if(c.spell==='rain'&&!c.s2){const P=rainPath(),e=(k-CNT2.from)/(CNT2.to-CNT2.from);if(e>=P.l1/P.L/CNT2.reach){c.s2=1;MUSIC.fx('glints')}}}
 function drawCounter(){
   if(!S.cnt)return;const k=(gt-S.cnt.t)/S.cnt.dur;ctx.save();ctx.globalCompositeOperation='lighter';
-  if(S.cnt.k===1){if(k>.32&&k<.62){const e=(k-.32)/.3;ctx.strokeStyle=`rgba(255,240,170,${1-e})`;ctx.lineWidth=10*(1-e)+2;ctx.beginPath();ctx.arc(640,GY-150,110,-2.2+e*.5,.6+e*.5);ctx.stroke()}}
+  if(S.cnt.k===1)counterKing(k);   // one counter per spell of the Elder (64-prologue.js)
   else if(S.cnt.k===2){
     /* phase I riposte, one variant per spell (same window and same hit moment, only the drawing and the sound change):
        volley = a laser straight at the Voice; rain = a small laser that ricochets on a mirror of the hall, then hits the Voice;
@@ -2471,7 +2478,7 @@ function draw(){
   if(S.cine)cineBoss();
   else{const rc=(S.mode==='play'||S.mode==='ko')?S.recoil*SHOCK.recoilPx:0,hk=gt-(S.bossHurtT==null?-9:S.bossHurtT),hu=hk>=0&&hk<SHOCK.hurt?Math.sin(Math.PI*hk/SHOCK.hurt):0;
     const body=f=>{if(!rc&&!hu){f();return}const c=bossCore();ctx.save();ctx.translate(c.x+rc,GY);ctx.rotate(hu*.035);ctx.translate(-c.x,-GY);f();ctx.restore()};
-    if(ph===1){body(drawBoss1);drawRust();drawToll();drawKingFx()}
+    if(ph===1){body(drawBoss1);drawRust()}
     else if(ph===2){body(drawBoss2)}
     else if(S.form===2)body(drawEclGame);else{beaconHide();body(drawBoss3);drawBeacon();drawBeaconFx()}}
   if(S.mode!=='dead'||gt-S.deadT<.6){ctx.save();ctx.translate(S.heroDX||0,S.heroDY||0);drawHero();ctx.restore()}
@@ -2480,6 +2487,7 @@ function draw(){
   if(ph===2)hatchRing();
   if(ph===2){mirrorFloor();if(S.cine&&S.cine.k==='out')sinkGlow(gt-S.cine.t0)}
   if(ph===2)drawOrbs();
+  if(ph===1&&!S.cine){drawRustHaze();drawToll();drawKingFx()}   // the veil covers the Watcher too; the attacks are drawn over it (never hidden)
   drawCounter();
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';
@@ -3176,11 +3184,9 @@ const FINAL_AT=RAGE.finalHp;
 const RAIN={normal:[.32,.62],hard:[.55,.9],grace:.13,hurt:.14};
 /* new spells (docs/CH2-SPEC.md, « Sorts et rages »): times in seconds, multiplied by f (attack speed, like every pattern).
    PROVISIONAL values, taken from the neighbouring spells they replace or extend; to be set in the balancing session.
-   wave  (II): stomp lands at `land`, the wave reaches the Watcher at `hit` (= old stomp), the beam falls twice,
+   wave  (II): stomp lands at `land` (the anchor's strike of the Hard sweep too), the wave reaches the Watcher at `hit` (= old stomp), the beam falls twice,
                `fall1` / `fall2` after the wave (= old stones .8 / 1.15), next attack `after` later (= old stomp 1.6);
    dwave (II, rage): second, bigger wave `gap` after the first (chain spacing .4 + margin); the beam falls after it;
-   rust  (II, rage): the King shakes his bell for `cloud` (cloud descends), then advances: block at contact `hit` later
-               (anchor swing, lunge x `ls`); the cloud clears `fade` after the contact; next attack `after` later;
    kwave (III, form I): the King's wave crosses the reef like the beam (= sweep: `ts` .95, `D` 1.6, `after` .35); hold;
    tide  (III, form I, rage): the wave, then as it ebbs two reef spikes (taps) `spike1` / `spike2` after it (= spike .8,
                second +.35), `gap` between their tells, next attack `after` later (= spike 1.15);
@@ -3209,7 +3215,29 @@ const vdk=()=>S.d.hard?'hard':S.dk==='easy'?'easy':'normal';
 const SP={
   wave:{land:.55,hit:1.05,fall1:.8,fall2:1.15,after:1.6},
   dwave:{gap:.55},
-  rust:{cloud:.6,hit:1.55,ls:1.6,fade:2.2,after:1.4},
+  /* Rust Elder (II), refonte du 5 novembre (docs/decisions/2026-11-05-ch2-ancien-sorts.md), all PROVISIONAL, x f:
+     harpoon: flies `fly` (= old hpOut) and pierces the Watcher (block 1), sticks in the wood `stick` (Kevin: 1 s), is recalled tearing
+               out a plank that arrives diagonally: first impact `pl1` after the recall, second `gap` later (= rafter gap), the hand
+               takes the harpoon back in `back`, next attack `after` later (= old .8);
+     floor:   minimum gap (absolute seconds) between the real impacts of two different spells (a combo's spells included); a spell built as a
+               series (chain, harpoon + plank, wave + beam, sweep combo, glas) keeps its own rhythm inside; a gap that is too short is pushed
+               back (whole spell), never dropped. rest: Hard, extra pause before the series that follows a combo;
+     sweep:   one fluid combo of the anchor (no return to rest between strikes): the first impact `ts` after the start (= old sweep
+               .72), then one impact every d[i] s (`real`: the gaps of that difficulty are real seconds, not x f; Easy 2 strikes, Normal 3, Hard 4; in Hard the last one smashes the ground and
+               sends a water wave, counted in the series). A gap >= `long` is a delay: the anchor is held up, trembling, then falls.
+               Next attack `after` after the last impact;
+     rust (rage 1): he strikes the hull (`strike`), the cloud grows for `grow` and stays until the ship collapses, `pause`, then a sweep;
+     glas (final assault): the head bell rings `bell` after the start, `n` echoes leave it `gap` apart, each reaches the Watcher `hit`
+               after leaving (= old toll 1.0), next attack `after` later; `chain` = the falling chain between two glas (one block);
+               `need` = glas to counter before the Finish (total count, not a series);
+     finish: `strikes` resonance strikes from `first`, `step` apart, the Elder falls `hit` after the last, `tail` of calm after. */
+  harpoon:{fly:1.1,stick:1,pl1:.75,gap:.35,back:.9,after:.8},
+  sweep:{d:{easy:[.85],normal:[.6,.95],hard:[.55,.9,.75]},long:.7,ts:.72,after:.5,real:'hard'},
+  floor:{easy:.6,normal:.75,hard:1.05},   // minimum between two real impacts of different spells (s, NOT x f), like VX.gap of the Voice
+  rest:{hard:.6},                          // Hard: pause before a series that follows a combo
+  rust:{strike:.7,grow:1.4,pause:.4},
+  glas:{n:2,bell:.55,gap:.5,hit:1,after:.8,chain:1.1,need:{easy:3,normal:4,hard:5}},
+  finish:{strikes:4,first:.6,step:.8,hit:.3,tail:.4},
   kwave:{ts:.95,D:1.6,after:.35},
   tide:{spike1:.8,spike2:1.15,gap:.35,after:1.15},
   storm:{n:5,gap:.34,tl:.5,ti:.95,trapGap:.4,trapTl:.75,trapTa:1.3,trapTb:1.8,after:.7},
@@ -3395,27 +3423,80 @@ function drawOrbs(){
     }
   }
 }
-/* ---- Phase II · the Rust King ---- */
+/* ---- Phase II · the Rust Elder ---- */
 function P1(stage,f,b,final,rage){
-  const T=[];let t=b;
-  const slam=()=>{T.push({k:'slam',t0:t,ti:t+.95*f});t+=1.4*f};
-  const sweep=()=>{T.push({k:'sweep',t0:t,ti:t+.72*f});t+=1.17*f};
-  const chain=n=>{const t0=t;for(let i=0;i<n;i++)T.push({k:'chain',t0,ti:t0+.85*f+i*.4*f,i,n});t=t0+.85*f+(n-1)*.4*f+.55*f};
-  const toll=()=>{T.push({k:'toll',t0:t,tw:t+.55*f,ti:t+1.55*f});t+=1.05*f};
-  const harpoon=()=>{const ti=t+1.1*f,tb=ti+.7*f;T.push({k:'hpOut',t0:t,ti,tb,ret:tb+.5*f});T.push({k:'hpBack',t0:t,ti:tb});t=tb+.8*f};
-  // the water wave: he stamps, the wave grows towards the Watcher (block), hits the back wall, a beam falls twice (two blocks)
-  const wave=big=>{const ti=t+SP.wave.hit*f;T.push({k:'wave',t0:t,tl:t+SP.wave.land*f,ti,big:!!big});return ti};
+  const T=[],K=vdk();let t=b,sp='',gi=0;
+  // every spell is a group (g): its inside rhythm is kept, the floor applies between groups (see `space` below)
+  const G=fn=>(...a)=>{const n=T.length,g=gi++;fn(...a);for(let i=n;i<T.length;i++)T[i].g=T[i].g==null?g:T[i].g};
+  if(K==='hard'&&S.lastCombo)t+=SP.rest.hard;   // not two combos in a row without a pause
+  // harpoon: pierces the Watcher (block), sticks in the wood behind him, then is recalled tearing out a plank: two blocks, upper then lower
+  const harpoon=G(()=>{const H=SP.harpoon,ti=t+H.fly*f,rc=ti+H.stick*f,p1=rc+H.pl1*f,p2=p1+H.gap*f,ret=p2+H.back*f,hp={k:'hpOut',t0:t,ti,rc,p1,p2,tb:ret,ret};
+    T.push(hp);T.push({k:'plank',n:1,t0:rc,ti:p1,hp});T.push({k:'plank',n:2,t0:rc,ti:p2,hp});t=ret+H.after*f;sp='harpoon'});
+  // the water wave: he lifts his foot, the shock wave grows towards the Watcher (block); `anchor` = struck by the anchor (Hard sweep): no beam
+  const wave=(big,anchor)=>{const ti=t+SP.wave.hit*f;T.push({k:'wave',t0:t,tl:t+SP.wave.land*f,ti,big:!!big,anchor:anchor?1:0});
+    if(anchor)T.push({k:'slam',t0:t,ti:t+SP.wave.land*f,real:false,done:true});return ti};   // (the slam is only the anchor's picture)
+  // the vibrations drop a plank on the Watcher: two blocks
   const rafter=ti=>{T.push({k:'rafter',n:1,t0:ti,ti:ti+SP.wave.fall1*f});T.push({k:'rafter',n:2,t0:ti+.2*f,ti:ti+SP.wave.fall2*f});t=ti+SP.wave.after*f};
-  const surge=()=>rafter(wave());
-  const dwave=()=>{wave();t+=SP.dwave.gap*f;rafter(wave(true))};
-  // the rust cloud: he shakes his bell, red dust comes down over the hold, he advances: block at contact
-  const rust=()=>{const R=SP.rust,tc=t+R.cloud*f,ti=tc+R.hit*f;S.rust={t0:t,tc,end:ti+R.fade*f};T.push({k:'slam',t0:tc,ti,ls:R.ls,rust:1});t=ti+R.after*f};
-  if(rage){(rage>1?dwave:rust)();return T}
-  if(final){surge();slam();chain(3);toll();toll();return T}
-  const p0=[slam,sweep,()=>{slam();sweep()},()=>chain(3),toll,()=>{sweep();slam()},harpoon,surge];
-  const p1=[()=>{slam();chain(3)},()=>{sweep();slam();chain(3)},()=>{chain(3);toll()},()=>chain(5),harpoon,()=>{surge();slam()},()=>{harpoon();sweep()},dwave,rust,()=>{rust();sweep()}];
-  pick(stage?p1:p0)();if(stage)toll();return T;
+  const surge=G(()=>{rafter(wave());sp='wave'});
+  // the anchor combo: 2 / 3 / 4 linked strikes (impacts every SP.sweep.d[..]); in Hard the 4th smashes the ground: a water wave, part of the series
+  const sweep=G(()=>{const Z=SP.sweep,D=Z.d[K],n=D.length+1,hw=K==='hard',m=Z.real===K?1:f,tis=[t+Z.ts*f];D.forEach(d=>tis.push(tis[tis.length-1]+d*m));
+    const cb={t0:t,tis,types:tis.map((x,i)=>i%2===0||(hw&&i===n-1)?'slam':'sweep'),lg:[false,...D.map(d=>d>=Z.long)],end:tis[n-1]+.95},t0=t;
+    for(let i=0;i<n;i++){
+      if(hw&&i===n-1){t=tis[i]-SP.wave.land*f;const n0=T.length,ti=wave(false,true);T.slice(n0).forEach(x=>x.cb=cb);t=ti+Z.after*f}
+      else T.push({k:'sweep',t0:i?tis[i-1]:t0,ti:tis[i],cb})}
+    if(!hw)t=tis[n-1]+Z.after*f;sp='sweep'});
+  // rage 2 (Hard), double wave: foot 1 -> wave + plank, foot 2 -> wave + plank, then a harpoon (counted in the series, no counter of its own)
+  const wv=G(big=>rafter(wave(big))),dwave=()=>{wv();wv(true);harpoon();sp='dwave'};
+  // rage 1, rust cloud: he strikes the hull, the cloud grows and stays until the ship collapses; then a sweep. A cloud already there is kept
+  const rust=()=>{const R=SP.rust;if(S.rust)t+=R.pause*f;else{const st=t+R.strike*f,tc=st+R.grow*f;S.rust={t0:t,st,tc,end:Infinity};t=tc+R.pause*f}sweep();sp='rust'};
+  // final assault, glas: the head bell rings, echoes cross the ship towards the Watcher (each one blocked is sent back at the Elder)
+  const glas=G(()=>{const Q=SP.glas,id=S.glasId=(S.glasId||0)+1,tw0=t+Q.bell*f;let e=t;
+    for(let i=0;i<Q.n;i++){const tw=tw0+i*Q.gap*f,ti=tw+Q.hit*f;T.push({k:'toll',t0:t,tw,ti,gid:id});e=ti}t=e+Q.after*f});
+  // between two glas, a piece of the scenery falls: a plank (2 blocks) or a chain (1 block); a block, no counter
+  const decor=G(()=>{if(Math.random()<.5)rafter(t);else{T.push({k:'dchain',t0:t,ti:t+SP.glas.chain*f});t+=(SP.glas.chain+SP.glas.after)*f}});
+  // the floor: the first real impact of each group is at least SP.floor after the last one of the previous groups (whole group pushed back)
+  const fin=()=>{const fl=SP.floor[K],real=x=>x.real!==false&&x.ti!=null,seen=new Set();let prev=-99;
+    for(const x of S.threats)if(real(x)&&!x.done)prev=Math.max(prev,x.ti);
+    for(let g=0;g<gi;g++){const it=T.filter(x=>x.g===g);if(!it.length)continue;const re=it.filter(real);if(!re.length)continue;
+      const first=Math.min(...re.map(x=>x.ti)),e=Math.max(0,prev+fl-first);
+      if(e>0){for(const x of it){for(const k of['t0','tl','ti','tw','tb','rc','p1','p2','ret'])if(typeof x[k]==='number')x[k]+=e;
+        if(x.cb&&!seen.has(x.cb)){seen.add(x.cb);x.cb.t0+=e;x.cb.end+=e;x.cb.tis=x.cb.tis.map(v=>v+e)}}}
+      prev=Math.max(prev,...re.map(x=>x.ti))}
+    S.lastCombo=gi>1&&!final&&!rage;T.spell=sp;return T};
+  if(rage){(rage>1?dwave:rust)();return fin()}
+  if(final){const left=Math.max(1,SP.glas.need[K]-(S.glasN||0));for(let i=0;i<left;i++){if((S.glasN||0)+i>0)decor();glas()}sp='glas';return fin()}
+  // one counter per series: Easy = one spell per series; Normal = 3 single spells and 3 combos, then only combos after the rage; Hard = combos of 2 spells, of 3 after the second rage
+  const one=[harpoon,sweep,surge],duo=[()=>{harpoon();sweep()},()=>{sweep();surge()},()=>{surge();harpoon()}],trio=[()=>{sweep();surge();harpoon()},()=>{surge();sweep();harpoon()},()=>{harpoon();surge();sweep()}];
+  const p0=K==='easy'?one:K==='hard'?duo:[...one,...duo],p1=K==='easy'?one:K==='hard'?((S.rageN||0)>=2?trio:duo):[...duo,trio[0]];
+  pick(stage?p1:p0)();return fin();
 }
+/* the plank torn out by the harpoon (phase II): stuck in the wood behind the Watcher (q), then flown to his head (a: first block) and
+   down his body (b: second block), tilted by `ang`; the harpoon is planted in it */
+const PLANK={q:{x:HX-120,y:HY-24},a:{x:HX+24,y:HY-70},b:{x:HX+24,y:GY-46},ang:-.62,len:170};
+function plankPos(hp,at){const P=PLANK;
+  if(at<=hp.rc)return{x:P.q.x,y:P.q.y};
+  if(at<=hp.p1){const k=ein(clamp((at-hp.rc)/(hp.p1-hp.rc),0,1));return{x:lerp(P.q.x,P.a.x,k),y:lerp(P.q.y,P.a.y,k)}}
+  const k=clamp((at-hp.p1)/(hp.p2-hp.p1),0,1);return{x:lerp(P.a.x,P.b.x,k),y:lerp(P.a.y,P.b.y,k)}}
+/* the anchor combo (sweep): a single linked movement, impact poses by strike type (slam = from above, sweep = from the side), no return to rest
+   between two strikes: after each impact the anchor is raised, held (trembling) if the gap is a delay, then falls. cb = {t0, tis, types, lg, end} */
+const SWP={slam:{mid:{a:-1.3,c:-1.3,l:-30},hit:{a:-3.5,c:-3.5,l:-175}},sweep:{mid:{a:.1,c:.1,l:20},hit:{a:2.7,c:2.7,l:-165}}};
+const comboAct=()=>{for(const t of S.threats)if(t.cb&&gt>=t.cb.t0&&gt<=t.cb.end)return t.cb;return null};
+function comboPose(r,cb){
+  const L=cb.tis,n=L.length;r.onBack=false;
+  if(gt>=L[n-1]){   // follow-through, then the anchor goes back to his back (as the single strikes did)
+    const af=gt-L[n-1],slam=cb.types[n-1]==='slam',hold=.22,ret=.5,e=eio(clamp((af-hold)/ret,0,1));
+    if(af>hold+ret){r.onBack=true;r.armA=lerp(ARM_BACK,ARM_REST,clamp((af-hold-ret)/.2,0,1));return}
+    if(slam){r.armA=lerp(-3.5,ARM_BACK,e);r.clap=lerp(-3.5,BACK_DIR-TWO_PI,e);r.lunge=lerp(-175,0,e)}
+    else{r.armA=lerp(2.7,ARM_BACK+TWO_PI,e);r.clap=lerp(2.7,BACK_DIR,e);r.lunge=lerp(-165,0,e)}
+    return}
+  let i=0;while(gt>=L[i])i++;
+  const T0=i?L[i-1]:cb.t0,p=(gt-T0)/(L[i]-T0),fr=!i?[.3,0,.42,.28]:cb.lg[i]?[.18,.3,.3,.22]:[.22,0,.5,.28],c1=fr[0],c2=c1+fr[1],c3=c2+fr[2],
+        P0=i?SWP[cb.types[i-1]].hit:{a:ARM_REST,c:BACK_DIR,l:0},RA={a:ARM_BACK,c:BACK_DIR,l:0},M=SWP[cb.types[i]].mid,Hh=SWP[cb.types[i]].hit;
+  const set=(A,B,e)=>{r.armA=lerp(A.a,B.a,e);r.clap=lerp(A.c,B.c,e);r.lunge=lerp(A.l,B.l,e)};
+  if(p<c1)set(P0,RA,eio(p/c1));
+  else if(p<c2){set(RA,RA,0);const w=Math.sin(gt*55)*.04;r.armA+=w;r.clap+=w}   // the delay: held up, trembling
+  else if(p<c3)set(RA,M,eio((p-c2)/fr[2]));
+  else set(M,Hh,ein((p-c3)/fr[3]))}
 function anim1(){
   const r=anim1raw();const th=curAct(['slam','sweep'],.75);if(th&&th.ls)r.lunge*=th.ls;
   if(S.cine)return r;
@@ -3425,26 +3506,30 @@ function anim1(){
     if(gt<w){r.larm=eio(clamp((gt-hp.t0)/(w-hp.t0),0,1))}
     else{r.larm=1;let pos;
       if(gt<=hp.ti){const k=ein(clamp((gt-w)/(hp.ti-w),0,1));pos={x:lerp(hand.x,hero.x,k),y:lerp(hand.y,hero.y,k)-Math.sin(Math.PI*k)*40}}
-      else if(gt<=hp.tb){const u=(gt-hp.ti)/(hp.tb-hp.ti),mid={x:(hand.x+hero.x)/2+30,y:hero.y-130};pos=u<.4?{x:lerp(hero.x,mid.x,eout(u/.4)),y:lerp(hero.y,mid.y,eout(u/.4))}:{x:lerp(mid.x,hero.x,ein((u-.4)/.6)),y:lerp(mid.y,hero.y,ein((u-.4)/.6))}}
-      else{const k=eio(clamp((gt-hp.tb)/(hp.ret-hp.tb),0,1));pos={x:lerp(hero.x,hand.x,k),y:lerp(hero.y,hand.y,k)}}
+      else if(gt<hp.rc){const k=eout(clamp((gt-hp.ti)/.2,0,1));pos={x:lerp(hero.x,PLANK.q.x-700,k),y:lerp(hero.y,PLANK.q.y,k)}}   // planted in the wood behind the Watcher
+      else if(gt<=hp.p2){const q=plankPos(hp,gt);pos={x:q.x-700,y:q.y}}                                                            // carried by the plank
+      else{const q=plankPos(hp,hp.p2),k=eio(clamp((gt-hp.p2)/(hp.ret-hp.p2),0,1));pos={x:lerp(q.x-700,hand.x,k),y:lerp(q.y,hand.y,k)}}
       r.harp={x:pos.x,y:pos.y};
       if(!hp.sf&&gt>=w){hp.sf=1;MUSIC.fx('whoosh');MUSIC.fx('chainSlip')}}}
-  if(S.rust&&gt>=S.rust.t0&&gt<S.rust.tc+.2)r.toll=Math.max(r.toll,.8);
+  if(S.rust&&gt>=S.rust.t0&&gt<S.rust.st+.3)r.toll=Math.max(r.toll,.8);   // he strikes the hull, the bell shakes
+  const kc=S.cnt&&S.cnt.k===1?S.cnt:null;   // counters: the Elder's bell shakes (sweep: the echo; finish: the resonance, louder and louder)
+  if(kc&&kc.spell==='sweep'){const q=(gt-kc.t)/kc.dur;if(q>.3&&q<.8)r.toll=Math.max(r.toll,.5)}
+  if(kc&&kc.spell==='finish'){const F=SP.finish;r.toll=Math.max(r.toll,.35+.65*clamp((gt-kc.t)/(F.first+(F.strikes-1)*F.step),0,1))}
   if(gt<S.roarT+S.roarD)r.toll=Math.max(r.toll,.9);
-  const st=S.threats.find(t=>t.k==='wave'&&gt>=t.t0&&gt<=t.tl+.1);
+  const st=S.threats.find(t=>t.k==='wave'&&!t.anchor&&gt>=t.t0&&gt<=t.tl+.1);
   if(st){const up=st.tl-.18;r.stomp=gt<up?eout(clamp((gt-st.t0)/(up-st.t0),0,1))*46:lerp(46,0,ein(clamp((gt-up)/.18,0,1)))}
   return r;
 }
 function drawKingFx(){
   for(const th of S.threats){
-    if(th.k==='wave'&&gt>=th.tl&&!th.sf){th.sf=1;S.shake=Math.max(S.shake,10);MUSIC.fx('step');burst(662,GY,18,'#cff7ef',5,.6,.4)}
+    if(th.k==='wave'&&gt>=th.tl&&!th.sf){th.sf=1;S.shake=Math.max(S.shake,th.anchor?13:10);MUSIC.fx(th.anchor?'slam':'step');burst(662,GY,18,'#cff7ef',5,.6,.4)}
     if(th.k==='wave'&&gt>=th.tl){const big=th.big?1.35:1,k=clamp((gt-th.tl)/(th.ti-th.tl),0,1);
       if(gt<th.ti)drawWave(lerp(650,HX+40,eio(k)),lerp(14,86*big,eout(k)),1);
       else{const q=(gt-th.ti)/.55;if(q<1)drawWave(lerp(HX+40,-90,q),86*big*(th.res==='ok'?1-q*.6:1-q*.3),th.res==='ok'?1-q*.5:1);
         if(!th.wf&&q>=.62){th.wf=1;S.shake=Math.max(S.shake,13);MUSIC.fx('rumble');for(let i=0;i<14;i++)S.parts.push({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*.25,vy:.3,g:.28,t0:gt,life:1.6,c:'#7a6a56',r:2})}
         if(!th.bf){th.bf=1;burst(HX+40,GY-50,th.res==='ok'?26:14,'#e6f8f2',6,.7,.3)}}}
   }
-  drawRafter();
+  drawRafter();drawPlank();drawDChain();drawEchoes();
 }
 /* a breaking wave, crest towards the Watcher (left): front at x, height h, opacity a */
 function drawWave(x,h,a){if(a<=0||h<=1)return;ctx.save();ctx.globalAlpha*=a;
@@ -3472,18 +3557,103 @@ function drawRafter(){const r1=S.threats.find(t=>t.k==='rafter'&&t.n===1),r2=S.t
   const dx=B.x-A.x,dy=B.y-A.y,l=Math.hypot(dx,dy)||1;for(const t of[.2,.5,.8])ell(A.x+dx*t,A.y+dy*t,2,2,'#1a120b');
   ctx.fillStyle='#4a3320';ctx.beginPath();ctx.moveTo(B.x-dy/l*7,B.y+dx/l*7);ctx.lineTo(B.x+dx/l*14,B.y+dy/l*14-4);ctx.lineTo(B.x+dx/l*6,B.y+dy/l*6+2);ctx.lineTo(B.x+dx/l*12,B.y+dy/l*12+6);ctx.lineTo(B.x+dy/l*7,B.y-dx/l*7);ctx.fill();
   ctx.restore()}
-/* the rust cloud: red dust coming down over the hold. It hides the scenery, never the block signal: it thins out around the
-   Watcher, and the King's bell lamp and the anchor's head shine through it */
+/* a board: from A to B, thickness w (same look as the deck beam) */
+function board(A,B,w,al){ctx.save();ctx.globalAlpha*=al;ctx.lineCap='butt';ctx.strokeStyle='#120c08';ctx.lineWidth=w+7;ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();
+  ctx.strokeStyle='#4a3320';ctx.lineWidth=w;ctx.stroke();ctx.strokeStyle='rgba(200,160,110,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(A.x,A.y-3);ctx.lineTo(B.x,B.y-3);ctx.stroke();
+  const dx=B.x-A.x,dy=B.y-A.y;for(const t of[.25,.75])ell(A.x+dx*t,A.y+dy*t,2,2,'#1a120b');ctx.restore()}
+/* the plank torn out by the harpoon: stuck in the wood with the harpoon, then flown at the Watcher (upper then lower block), broken after the second */
+function drawPlank(){
+  for(const hp of S.threats){if(hp.k!=='hpOut'||gt<hp.ti||gt>hp.p2+.7)continue;
+    const P=PLANK,q=plankPos(hp,gt),c=Math.cos(P.ang),sn=Math.sin(P.ang),pk=S.threats.filter(o=>o.k==='plank'&&o.hp===hp);
+    if(!hp.sf2){hp.sf2=1;burst(P.q.x,P.q.y,10,'#cdb69a',4,.5,.3);MUSIC.fx('chunk')}
+    if(gt>=hp.rc&&!hp.rf){hp.rf=1;S.shake=Math.max(S.shake,5);MUSIC.fx('crackRun')}
+    let al=1,dy=0;if(gt>hp.p2){const u=(gt-hp.p2)/.7;al=1-u;dy=60*u*u}
+    const l=P.len/2;
+    if(gt>=hp.rc&&gt<=hp.p2)ell(HX+24,GY+3,34,4,'rgba(0,0,0,.3)');
+    board({x:q.x-c*l,y:q.y-sn*l+dy},{x:q.x+c*l,y:q.y+sn*l+dy},15,al);
+    for(const th of pk)if(th.done&&gt-th.okT<.12&&!th.bf){th.bf=1;burst(HX+30,th.n===1?HY-60:GY-50,th.res==='ok'?14:8,'#cdb69a',5,.4,.3)}}}
+/* a chain falling from the ceiling on the Watcher (between two glas): one block */
+function drawDChain(){
+  for(const th of S.threats){if(th.k!=='dchain'||gt<th.t0)continue;
+    const k=ein(clamp((gt-th.t0)/(th.ti-th.t0),0,1)),x=HX+16,y=lerp(-30,HY-70,k),al=th.done?Math.max(0,1-(gt-th.okT)/.4):1,y1=th.done&&th.res==='ok'?lerp(HY-70,GY-6,eio(clamp((gt-th.okT)/.4,0,1))):y;
+    ctx.save();ctx.globalAlpha*=al;chainLinks(x+6,-40,x,y1,0,'#4a2a18');ell(x,y1,5,7,'#2a1810');ctx.restore();
+    if(th.done&&!th.bf){th.bf=1;burst(HX+20,HY-60,10,'#b9a48c',4,.4,.3)}}}
+/* the blocked glas sent back at the Elder: an echo from the Watcher's bell to the Elder's head bell */
+function echoWave(x0,y0,x1,y1,u,a,sc){const x=lerp(x0,x1,eout(u)),y=lerp(y0,y1,eout(u)),ang=Math.atan2(y1-y0,x1-x0);
+  ctx.save();ctx.translate(x,y);ctx.rotate(ang);for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(255,244,200,${(.75-i*.2)*a})`;ctx.lineWidth=4-i;ctx.beginPath();ctx.ellipse(-i*14,0,(14+i*4)*sc,(50+i*12)*sc,0,-Math.PI*.45,Math.PI*.45);ctx.stroke()}ctx.restore()}
+const headPos=()=>S.kingHead||{x:694,y:GY-204};
+function drawEchoes(){
+  if(!S.echoes||!S.echoes.length)return;S.echoes=S.echoes.filter(e=>gt-e.t0<1);
+  for(const e of S.echoes){const age=gt-e.t0,u=clamp(age/.6,0,1),h=headPos();
+    if(u<1)echoWave(e.x,e.y,h.x-30,h.y,u,1,.8);
+    else{const q=(age-.6)/.4;ctx.strokeStyle=`rgba(255,244,200,${.7*(1-q)})`;ctx.lineWidth=3;ctx.beginPath();ctx.arc(h.x,h.y,20+60*q,0,Math.PI*2);ctx.stroke()}}}
+/* ---- counters of the Elder (S.cnt.k === 1; S.cnt.spell = the last spell of the series), drawn by drawCounter ---- */
+/* a ray along the ground from the Watcher to the Elder's foot: it splits the wave and bursts there */
+function groundRay(k,u,a,dy){const x0=HX+36,x1=640,x=lerp(x0,x1,u),y=GY-3+dy;
+  ctx.strokeStyle=`rgba(255,244,190,${a})`;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x,y);ctx.stroke();glow(x,y,46,'rgba(255,244,190,.9)',.7*a);
+  if(u<1)drawWave(lerp(x0+30,x1-10,eout(u)),70*(1-u*.7),a*.8);
+  else for(let i=0;i<5;i++){const s=(i-2)*16,h=(34+(i%2)*22)*a;ctx.strokeStyle=`rgba(200,245,235,${a})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x1+s,GY);ctx.lineTo(x1+s*1.5,GY-h);ctx.stroke()}}
+function counterKing(k){
+  const c=S.cnt,sp=c.spell,u=clamp((k-.12)/.3,0,1),a=1-clamp((k-.42)/.4,0,1),A={x:S.orbX,y:S.orbY},bx=S.orbX+24,by=S.orbY-30,h=headPos();
+  if(sp==='finish'){
+    const F=SP.finish,T=gt-c.t,n=F.strikes,p=clamp(T/(F.first+(n-1)*F.step),0,1);
+    // the Watcher's bell, charged with Lumen, and the Elder's bell answer each other: a trembling thread between them, rings at each strike (stronger and stronger)
+    glow(bx,by,40+50*p,'rgba(150,255,235,.9)',.35+.5*p);glow(h.x,h.y,40+60*p,'rgba(255,226,170,.9)',.2+.5*p);
+    ctx.strokeStyle=`rgba(230,250,240,${.25+.4*p})`;ctx.lineWidth=1.5+2*p;ctx.beginPath();for(let i=0;i<=24;i++){const q=i/24,x=lerp(bx,h.x,q),y=lerp(by,h.y,q)+Math.sin(q*30+gt*40)*(2+10*p)*Math.sin(Math.PI*q);i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
+    for(let i=0;i<n;i++){const age=T-(F.first+i*F.step);if(age<0||age>.7)continue;const g=.4+.6*i/(n-1),r=age*(260+160*g),al=(1-age/.7)*g;
+      ctx.strokeStyle=`rgba(255,244,200,${al})`;ctx.lineWidth=4*g+1;ctx.beginPath();ctx.arc(bx,by,r*.6,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.arc(h.x,h.y,r,0,Math.PI*2);ctx.stroke()}
+    return}
+  if(sp==='harpoon'){   // the lightning leaves the lantern, strikes the harpoon and climbs the chain to the Elder's hand
+    const hk=c.hitAt/c.dur,tp=S.harpTip,hd=S.harpHand;
+    if(tp&&hd&&k>.04&&k<hk+.3){const cu=clamp((k-.1)/(hk-.1),0,1),fa=1-clamp((k-hk)/.3,0,1),sd=(k*12|0)/12;
+      if(k<.14)bolt(A.x,A.y,tp.x,tp.y,sd,`rgba(190,245,255,${.9*fa})`,3);
+      const ex=lerp(tp.x,hd.x,cu),ey=lerp(tp.y,hd.y,cu);bolt(tp.x,tp.y,ex,ey,sd,`rgba(190,245,255,${.95*fa})`,3.5);
+      glow(ex,ey,38,'rgba(190,245,255,.9)',.8*fa);if(cu>=1)glow(hd.x,hd.y,55,'rgba(190,245,255,.9)',.7*fa)}return}
+  if(sp==='wave'){if(k>.12&&k<.85)groundRay(k,u,Math.max(a,.05),0);return}
+  if(sp==='dwave'){if(k>.12&&k<.85){groundRay(k,u,Math.max(a,.05),0);const u2=clamp((k-.2)/.3,0,1);if(k>.2)groundRay(k,u2,Math.max(a,.05),-7)}return}
+  // sweep (bell stroke) and rust (staff raised, light round the Watcher): the bell's echo crosses the hold to the Elder
+  if(sp==='rust'){const l=Math.sin(Math.PI*clamp((k-.05)/.8,0,1)),fl=k>.08?clamp(1-(k-.08)/.15,0,1):0;if(fl>0){const g=ctx.createRadialGradient(HX,GY-90,0,HX,GY-90,RUST_HALO);for(let i=0;i<=10;i++)g.addColorStop(i/10,`rgba(255,248,220,${.55*fl*(1-halo(i/10))})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}   // the flash, as a halo
+    glow(A.x,A.y,150,'rgba(255,244,200,.9)',.55*l);glow(A.x,A.y,60,'rgba(150,255,235,.9)',.6*l)}
+  if(k>.1&&k<.8){const env=1-clamp((k-.1)/.7,0,1);ctx.save();ctx.translate(bx,by);ctx.rotate(Math.sin(gt*55)*.45*env);ctx.fillStyle=`rgba(255,236,170,${.35+.65*env})`;
+    ctx.beginPath();ctx.moveTo(-9,6);ctx.quadraticCurveTo(-9,-8,0,-10);ctx.quadraticCurveTo(9,-8,9,6);ctx.closePath();ctx.fill();ctx.restore()}
+  if(k>.12&&k<.85){echoWave(bx,by,h.x-40,h.y+40,u,Math.max(a,.1),1);
+    if(sp==='sweep'&&u>=1){const q=clamp((k-.42)/.4,0,1);ctx.strokeStyle=`rgba(255,244,200,${.7*(1-q)})`;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(700,GY-150,40+90*q,60+110*q,0,0,Math.PI*2);ctx.stroke()}}   // the echo bounces on the Elder
+}
+/* one-shot sounds of the Elder's counters, and the strikes of the Finish */
+function kingCounterFx(c){
+  const k=(gt-c.t)/c.dur;
+  if(c.spell==='finish'){const F=SP.finish;while((c.fi||0)<F.strikes&&gt-c.t>=F.first+(c.fi||0)*F.step){const i=c.fi||0;c.fi=i+1;S.shake=Math.max(S.shake,5+i*4);MUSIC.fx(i===F.strikes-1?'bellHit':'bellChime')}return}
+  const sp=c.spell,fx={harpoon:'thunder',sweep:'bellChime',rust:'bellChime',wave:'plant',dwave:'plant'}[sp];
+  if(k>=.12&&!c.s1){c.s1=1;if(fx)MUSIC.fx(fx)}
+  if(sp==='rust'&&k>=.08&&S.rust&&S.rust.clr==null)S.rust.clr=gt;   // the flash: his half stays clear from now on
+  if(sp==='dwave'&&k>=.2&&!c.s2){c.s2=1;MUSIC.fx('plant')}
+  if(k>=.42&&!c.s3){c.s3=1;const e=sp==='wave'||sp==='dwave'?[640,GY]:[700,GY-150];burst(e[0],e[1],12,'#e6f8f2',5,.5,.3)}}
+/* the rust cloud (rage 1): red dust over the hold until the ship collapses. It hides the scenery and the Elder himself, never the
+   block signal: the attacks are drawn over it, and it thins out around the Watcher (clear round him during the rage-1 counter) */
 const RUSTP=(()=>{const R=mulberry(57);return[...Array(26)].map(()=>({x:R()*W,y:R()*GY,r:60+R()*90,v:(R()-.5)*14,o:R()*6}))})();
-function drawRust(){const R=S.rust;if(!R||gt<R.t0||gt>R.end)return;
-  const a=clamp((gt-R.t0)/(R.tc-R.t0),0,1)*(1-clamp((gt-(R.end-.9))/.9,0,1)),front=lerp(-40,H+60,eout(clamp((gt-R.t0)/(R.tc-R.t0+.5),0,1)));
+/* how far the Watcher's half of the screen is cleared (0..1): from the flash of the rage-1 counter on, for good (until the ship collapses) */
+const rustClear=()=>S.rust&&S.rust.clr!=null?eio(clamp((gt-S.rust.clr)/.35,0,1)):0;
+function drawRust(){const R=S.rust;if(!R||gt<R.t0)return;
+  if(gt>=R.st&&!R.sf){R.sf=1;S.shake=Math.max(S.shake,14);MUSIC.fx('rumble');MUSIC.fx('chainSlip')}   // the hull is struck
+  const a=clamp((gt-R.st)/(R.tc-R.st),0,1),front=lerp(-40,H+60,eout(clamp((gt-R.st)/(R.tc-R.st+.5),0,1)));
+  // counter of rage 1: the staff raised, the cloud thins out round the Watcher only (and comes back)
+  const cl=rustClear(),
+        near=(x,y)=>1-cl*(1-halo(Math.hypot(x-HX,y-(GY-90))/RUST_HALO));   // the cleared halo round the Watcher (soft edge)
   ctx.save();
-  for(let x=0;x<W;x+=40){const k=.35+.65*eio(clamp((x-HX)/220,0,1)),g=ctx.createLinearGradient(0,front-160,0,front);g.addColorStop(0,`rgba(110,40,18,${.62*a*k})`);g.addColorStop(1,'rgba(110,40,18,0)');ctx.fillStyle=g;ctx.fillRect(x,0,40,front)}
-  for(const p of RUSTP){const x=(p.x+gt*p.v+W)%W,k=(x<HX+90?.3:1)*clamp((front-p.y)/90,0,1);const rg=ctx.createRadialGradient(x,p.y,4,x,p.y,p.r);rg.addColorStop(0,`rgba(150,62,28,${.45*a*k})`);rg.addColorStop(1,'rgba(120,45,20,0)');ctx.fillStyle=rg;ctx.fillRect(x-p.r,p.y-p.r,p.r*2,p.r*2)}
-  for(let i=0;i<40;i++){const x=(i*97+gt*20)%W,y=(i*53+gt*40)%front;ctx.fillStyle=`rgba(200,110,60,${.5*a})`;ctx.fillRect(x,y,1.6,1.6)}
-  ctx.restore();
-  if(S.kingHead)glow(S.kingHead.x,S.kingHead.y,70,'rgba(255,220,160,.9)',.55*a+.2);
-  const sl=S.threats.find(t=>t.rust&&!t.done&&gt>=t.t0);if(sl&&S.clapTip)glow(S.clapTip.x,S.clapTip.y,50,'rgba(220,250,240,.9)',.7)}
+  if(gt>=R.st&&gt<R.tc+.8){const am=7*Math.max(0,1-(gt-R.st)/(R.tc-R.st+.8));for(const x of[120,330,540,830])chainLinks(x,-10,x+Math.sin(gt*37+x)*am,150+(x%3)*40,0,'#4a2a18')}   // the chains tremble
+  for(let x=0;x<W;x+=40){const k=near(x+20,GY-90),g=ctx.createLinearGradient(0,front-160,0,front);g.addColorStop(0,`rgba(110,40,18,${.62*a*k})`);g.addColorStop(1,'rgba(110,40,18,0)');ctx.fillStyle=g;ctx.fillRect(x,0,40,front)}
+  for(const p of RUSTP){const x=(p.x+gt*p.v+W)%W,k=clamp((front-p.y)/90,0,1)*near(x,p.y);const rg=ctx.createRadialGradient(x,p.y,4,x,p.y,p.r);rg.addColorStop(0,`rgba(150,62,28,${.45*a*k})`);rg.addColorStop(1,'rgba(120,45,20,0)');ctx.fillStyle=rg;ctx.fillRect(x-p.r,p.y-p.r,p.r*2,p.r*2)}
+  {const g=ctx.createRadialGradient(700,GY-150,20,700,GY-150,240);g.addColorStop(0,`rgba(96,36,16,${.55*a})`);g.addColorStop(1,'rgba(96,36,16,0)');ctx.fillStyle=g;ctx.fillRect(440,GY-400,520,420)}   // the Elder himself hardly shows in it
+  for(let i=0;i<40;i++){const x=(i*97+gt*20)%W,y=(i*53+gt*40)%Math.max(front,1);ctx.fillStyle=`rgba(200,110,60,${.5*a*near(x,y)})`;ctx.fillRect(x,y,1.6,1.6)}
+  ctx.restore()}
+/* the same cloud over the Watcher too (called after him): he is covered like the rest. Only the rage-1 counter reveals a halo of light round him
+   (a flash, then a soft-edged clear zone, `RUST_HALO`) which stays; the Elder stays in the rust until the ship collapses */
+function drawRustHaze(){const R=S.rust;if(!R||gt<R.st)return;
+  const a=clamp((gt-R.st)/(R.tc-R.st),0,1),cl=rustClear(),b=RUST_HAZE*a;
+  const g=ctx.createRadialGradient(HX,GY-90,0,HX,GY-90,RUST_HALO);for(let i=0;i<=10;i++)g.addColorStop(i/10,`rgba(120,46,22,${b*(1-cl*(1-halo(i/10)))})`);
+  ctx.save();ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.restore()}
+const RUST_HAZE=.5,RUST_HALO=430;   // RUST_HALO = radius (px) of the halo of light round the Watcher after the rage-1 counter (provisional)
+const halo=u=>{u=clamp((u-.25)/.75,0,1);return u*u*(3-2*u)};   // 0 in the core, 1 outside, smooth   // opacity of the veil over everything once the cloud is full (provisional)
 /* ---- Phase III · Form I: the tower's tentacles and torn pieces ---- */
 function P3(stage,f,b,final,rage){
   const T=[];let t=b;
@@ -3648,7 +3818,7 @@ function replayEpilogue(cb){if(EPI.playing())return;const keep={gt,t0:S.epT0,par
 function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
   S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if(LB.audio.music)MUSIC.bed(2);
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
-function resetPhaseState(){Object.assign(S,{shardGone:null,peA:0,angerShown:false,rageN:0,rageHp0:null,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+function resetPhaseState(){Object.assign(S,{shardGone:null,peA:0,angerShown:false,rageN:0,rageHp0:null,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=id===3?S.d.boss3:S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
  resetPhaseState();
@@ -3795,9 +3965,9 @@ function endEpilogue(){if(S.mode!=='epilogue')return;const cb=S.epCb;S.epCb=null
 
 
 /* ---------- combat sound effects: wind-ups, releases and impacts ---------- */
-const SFX_START={wave:'rumble',rafter:'fallWhine',kwave:'swell',sring:'bellSoft',slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
+const SFX_START={wave:'rumble',rafter:'fallWhine',plank:'crackRun',dchain:'fallWhine',kwave:'swell',sring:'bellSoft',slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
 const SFX_MID={sring:'whoosh',orb:'throw',toll:'tollLast',ring:'whoosh',trap:'whooshDown',chunk:'clank',shard:'whoosh',sweep:'whoosh',slam:'whoosh'};
-const SFX_HIT={wave:'plant',sring:'clank',slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank'};
+const SFX_HIT={wave:'plant',sring:'clank',slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank',hpOut:'plant',plank:'chunk',dchain:'clank'};
 function combatSfx(){
   if(S.mode!=='play'||S.paused)return;
   for(const th of S.threats){

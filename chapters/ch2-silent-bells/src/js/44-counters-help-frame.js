@@ -26,12 +26,13 @@ function counterWail(k){
   if(u>=1)glow(vp.x,vp.y-90,80,'rgba(150,255,235,.8)',.5*Math.sin(Math.PI*clamp((e-1/CNT2.reach)/(1-1/CNT2.reach),0,1)))}
 /* one-shot sounds of the riposte variants, at the moment the laser / wave leaves, and at the ricochet */
 function counterVariantFx(){
-  const c=S.cnt;if(!c||c.k!==2)return;const k=(gt-c.t)/c.dur;
+  const c=S.cnt;if(c&&c.k===1)return kingCounterFx(c);
+  if(!c||c.k!==2)return;const k=(gt-c.t)/c.dur;
   if(k>=CNT2.from&&!c.s1){c.s1=1;if(c.spell==='wail')MUSIC.fx('bellChime')}
   if(c.spell==='rain'&&!c.s2){const P=rainPath(),e=(k-CNT2.from)/(CNT2.to-CNT2.from);if(e>=P.l1/P.L/CNT2.reach){c.s2=1;MUSIC.fx('glints')}}}
 function drawCounter(){
   if(!S.cnt)return;const k=(gt-S.cnt.t)/S.cnt.dur;ctx.save();ctx.globalCompositeOperation='lighter';
-  if(S.cnt.k===1){if(k>.32&&k<.62){const e=(k-.32)/.3;ctx.strokeStyle=`rgba(255,240,170,${1-e})`;ctx.lineWidth=10*(1-e)+2;ctx.beginPath();ctx.arc(640,GY-150,110,-2.2+e*.5,.6+e*.5);ctx.stroke()}}
+  if(S.cnt.k===1)counterKing(k);   // one counter per spell of the Elder (64-prologue.js)
   else if(S.cnt.k===2){
     /* phase I riposte, one variant per spell (same window and same hit moment, only the drawing and the sound change):
        volley = a laser straight at the Voice; rain = a small laser that ricochets on a mirror of the hall, then hits the Voice;
@@ -82,7 +83,7 @@ function draw(){
   if(S.cine)cineBoss();
   else{const rc=(S.mode==='play'||S.mode==='ko')?S.recoil*SHOCK.recoilPx:0,hk=gt-(S.bossHurtT==null?-9:S.bossHurtT),hu=hk>=0&&hk<SHOCK.hurt?Math.sin(Math.PI*hk/SHOCK.hurt):0;
     const body=f=>{if(!rc&&!hu){f();return}const c=bossCore();ctx.save();ctx.translate(c.x+rc,GY);ctx.rotate(hu*.035);ctx.translate(-c.x,-GY);f();ctx.restore()};
-    if(ph===1){body(drawBoss1);drawRust();drawToll();drawKingFx()}
+    if(ph===1){body(drawBoss1);drawRust()}
     else if(ph===2){body(drawBoss2)}
     else if(S.form===2)body(drawEclGame);else{beaconHide();body(drawBoss3);drawBeacon();drawBeaconFx()}}
   if(S.mode!=='dead'||gt-S.deadT<.6){ctx.save();ctx.translate(S.heroDX||0,S.heroDY||0);drawHero();ctx.restore()}
@@ -91,6 +92,7 @@ function draw(){
   if(ph===2)hatchRing();
   if(ph===2){mirrorFloor();if(S.cine&&S.cine.k==='out')sinkGlow(gt-S.cine.t0)}
   if(ph===2)drawOrbs();
+  if(ph===1&&!S.cine){drawRustHaze();drawToll();drawKingFx()}   // the veil covers the Watcher too; the attacks are drawn over it (never hidden)
   drawCounter();
   // particles
   ctx.save();ctx.globalCompositeOperation='lighter';
