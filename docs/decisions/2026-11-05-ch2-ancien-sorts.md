@@ -24,3 +24,6 @@ Un seul mouvement lié, sans retour au repos entre les coups : l'ancre se lève 
 ## Retouches du 5 nov. (soir)
 - Rage 1 : le nuage couvre tout, le Veilleur compris (voile léger dessiné après lui) ; plus aucun éclaircissement permanent près de lui. Il ne se dégage qu'au contre (sceptre levé), puis le nuage revient.
 - Contre du harpon : la foudre part de la lanterne, frappe le harpon et monte le long de la chaîne jusqu'à la main. Contre plus lent (`R_CNT.harpoon` 1,6 s, impact 0,65 s) et rappel du harpon plus lent (`SP.harpoon.back` 0,9) pour la voir monter. Provisoire.
+
+## Séries (Kevin, 5 nov.) : un contre par série
+Les combos de sorts dans une même série donnent un seul contre, à la fin. Choix : Facile = un seul sort par série ; Normal = 3 séries simples sur 6 et 3 combos sur 6, avant et après la rage ; Difficile = toujours un combo (deux sorts, trois sorts après la rage). Constaté (non modifié, hors périmètre) : la Voix Creuse a 1 série mixte sur 6 puis 5 sur 8 après la rage ; le Phare Noyé 4 sur 9 puis 8 sur 9. Le Chapitre I n'enchaîne pas ainsi : choix de Kevin de le garder.
