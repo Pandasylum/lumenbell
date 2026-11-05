@@ -3445,7 +3445,7 @@ function P1(stage,f,b,final,rage){
   const surge=G(()=>{rafter(wave());sp='wave'});
   // the anchor combo: 2 / 3 / 4 linked strikes (impacts every SP.sweep.d[..]); in Hard the 4th smashes the ground: a water wave, part of the series
   const sweep=G(()=>{const Z=SP.sweep,D=Z.d[K],n=D.length+1,hw=K==='hard',m=f,tis=[t+Z.ts*f];D.forEach(d=>tis.push(tis[tis.length-1]+d*m));
-    const cb={t0:t,tis,types:tis.map((x,i)=>i%2===0||(hw&&i===n-1)?'slam':'sweep'),lg:[false,...D.map(d=>d>=Z.long)],end:tis[n-1]+.95},t0=t;
+    const cb={t0:t,tis,types:tis.map((x,i)=>hw&&i===n-1?'plant':i%2===0?'slam':'sweep'),lg:[false,...D.map(d=>d>=Z.long)],end:tis[n-1]+.95},t0=t;
     for(let i=0;i<n;i++){
       if(hw&&i===n-1){t=tis[i]-SP.wave.land*f;const n0=T.length,ti=wave(false,true);T.slice(n0).forEach(x=>x.cb=cb);t=ti+Z.after*f}
       else T.push({k:'sweep',t0:i?tis[i-1]:t0,ti:tis[i],cb})}
@@ -3484,14 +3484,16 @@ function plankPos(hp,at){const P=PLANK;
   const k=clamp((at-hp.p1)/(hp.p2-hp.p1),0,1);return{x:lerp(P.a.x,P.b.x,k),y:lerp(P.a.y,P.b.y,k)}}
 /* the anchor combo (sweep): a single linked movement, impact poses by strike type (slam = from above, sweep = from the side), no return to rest
    between two strikes: after each impact the anchor is raised, held (trembling) if the gap is a delay, then falls. cb = {t0, tis, types, lg, end} */
-const SWP={slam:{mid:{a:-1.3,c:-1.3,l:-30},hit:{a:-3.5,c:-3.5,l:-175}},sweep:{mid:{a:.1,c:.1,l:20},hit:{a:2.7,c:2.7,l:-165}}};
+const SWP={slam:{mid:{a:-1.3,c:-1.3,l:-30},hit:{a:-3.5,c:-3.5,l:-175}},
+  plant:{mid:{a:-1.3,c:-1.3,l:-30},hit:{a:-1.7,c:-4.71,l:-130}},   // Hard, last strike: planted upright in front of him (sets off the wave, does not hit the Watcher)
+  sweep:{mid:{a:.1,c:.1,l:20},hit:{a:2.7,c:2.7,l:-165}}};
 const comboAct=()=>{for(const t of S.threats)if(t.cb&&gt>=t.cb.t0&&gt<=t.cb.end)return t.cb;return null};
 function comboPose(r,cb){
   const L=cb.tis,n=L.length;r.onBack=false;
   if(gt>=L[n-1]){   // follow-through, then the anchor goes back to his back (as the single strikes did)
-    const af=gt-L[n-1],slam=cb.types[n-1]==='slam',hold=.22,ret=.5,e=eio(clamp((af-hold)/ret,0,1));
+    const af=gt-L[n-1],slam=cb.types[n-1]!=='sweep',Q=SWP[cb.types[n-1]].hit,hold=.22,ret=.5,e=eio(clamp((af-hold)/ret,0,1));
     if(af>hold+ret){r.onBack=true;r.armA=lerp(ARM_BACK,ARM_REST,clamp((af-hold-ret)/.2,0,1));return}
-    if(slam){r.armA=lerp(-3.5,ARM_BACK,e);r.clap=lerp(-3.5,BACK_DIR-TWO_PI,e);r.lunge=lerp(-175,0,e)}
+    if(slam){r.armA=lerp(Q.a,ARM_BACK,e);r.clap=lerp(Q.c,BACK_DIR-TWO_PI,e);r.lunge=lerp(Q.l,0,e)}
     else{r.armA=lerp(2.7,ARM_BACK+TWO_PI,e);r.clap=lerp(2.7,BACK_DIR,e);r.lunge=lerp(-165,0,e)}
     return}
   let i=0;while(gt>=L[i])i++;
