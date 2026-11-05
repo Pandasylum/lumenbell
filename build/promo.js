@@ -245,7 +245,7 @@ async function sequence(b, o) {
   return { dir, n, first, last };
 }
 function gifFrom(dir, out, fps, w, h, colors, dither, pre) {
-  const vf = `${pre || ''}scale=${w}:${h}:flags=lanczossplit[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=${dither}:diff_mode=rectangle`;
+  const vf = `${pre || ''}scale=${w}:${h}:flags=lanczos,split[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=${dither}:diff_mode=rectangle`;
   sh('ffmpeg', [...FF, '-framerate', String(fps), '-i', path.join(dir, '%04d.png'), '-vf', vf, '-loop', '0', '-map_metadata', '-1', '-fflags', '+bitexact', out]);
 }
 /* GIF sous 3 Mo : echelle de repli (taille, couleurs, images/s) jusqu'a passer sous le seuil */
