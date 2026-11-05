@@ -4,7 +4,7 @@ Textes validés par Kevin. Aucun changement de timing, d'équilibrage ni de silh
 
 ## A. Textes
 1. **Fin de phase II** : « Après des années d'attente, à la lueur de la lune, seul le silence lui répond. » / "After years of waiting, by the light of the moon, only silence answers him."
-2. **Cartes de défaite** (`CHANGEMENTS.md` J c) : une par phase, surtitre « Défaite · Phase X », titre et corps affichés (comme au Chapitre I). Les anciens « Defeat » seul et « The Watcher is down. » disparaissent ; la phrase du lecteur d'écran « Le Veilleur tombe. Défaite. » reste. Tableau dans `docs/CH2-SPEC.md`. En Épreuve, la phrase « Épreuve : une chute te renvoie à la phase I. » est ajoutée à la suite du corps (à valider).
+2. **Cartes de défaite** (`CHANGEMENTS.md` J c) : une par phase, surtitre « Défaite · Phase X », titre et corps affichés (comme au Chapitre I). Les anciens « Defeat » seul et « The Watcher is down. » disparaissent ; la phrase du lecteur d'écran « Le Veilleur tombe. Défaite. » reste. Tableau dans `docs/CH2-SPEC.md`. En Épreuve, la phrase d'origine « Épreuve : une chute te renvoie à la phase I. » est ajoutée après le corps (gardée par Kevin le 5 novembre).
 3. **Titre de la phase III** : « Cœur bleu » devient « Cœur turquoise » / "Turquoise heart".
 
 ## B. Image
@@ -23,3 +23,5 @@ Textes n° 11, 24, 31, 38, 39, 79, 81 de l'ancien `TEXTES.md`. Les épaules de l
 
 ## Moment exact de la naissance de la forme II
 Cinématique `3:p2` (`ecTransition`), à 2,1 s : l'éclatement de la tour, où la Sans-Fond sort. Si Kevin entendait un autre instant, c'est la valeur `[2.1,'murmur']` de `CSFX['3:p2']` et `LAMP_DIM_BIRTH.t`.
+
+Cartes de défaite : en Épreuve, la phrase d'origine « Épreuve : une chute te renvoie à la phase I. » est ajoutée après le corps (gardée par Kevin le 5 novembre). Naissance de la forme II calée à 2,1 s de la cinématique `3:p2` (éclatement de la tour).

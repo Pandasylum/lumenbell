@@ -186,7 +186,7 @@ O. Chapitre II · Validations de Kevin du 5 novembre 2026 (voir `docs/decisions/
 
 Textes validés par Kevin ; aucun changement de timing, d'équilibrage ni de silhouette.
 - Fin de phase II : EN "After years of waiting, by the light of the moon, only silence answers him." / FR « Après des années d'attente, à la lueur de la lune, seul le silence lui répond. » (remplace « Le navire s'effondre autour de l'Ancien… »).
-- Cartes de défaite (J c) : une par phase, surtitre « Defeat · Phase X » / « Défaite · Phase X », titre et corps affichés ; tableau dans `docs/CH2-SPEC.md`. Le « Defeat » seul et « The Watcher is down. » disparaissent ; le lecteur d'écran « Le Veilleur tombe. Défaite. » reste.
+- Cartes de défaite (J c) : une par phase, surtitre « Defeat · Phase X » / « Défaite · Phase X », titre et corps affichés ; tableau dans `docs/CH2-SPEC.md`. Le « Defeat » seul et « The Watcher is down. » disparaissent ; le lecteur d'écran « Le Veilleur tombe. Défaite. » reste. En Épreuve, la phrase d'origine « Épreuve : une chute te renvoie à la phase I. » est ajoutée après le corps (gardée par Kevin le 5 novembre). Naissance de la forme II calée à 2,1 s de la cinématique `3:p2` (éclatement de la tour).
 - N° 47 : "Blue heart" / « Cœur bleu » devient "Turquoise heart" / « Cœur turquoise ».
 - Rémanence : une fêlure naît sur la cloche de tête gisant dans les décombres pendant l'évaporation du Lumen ; ni texte ni bruitage.
 - Murmure grave, large et bas à la naissance de la forme II (synthèse existante, aucun texte) ; au même instant, la lanterne du Veilleur pâlit un instant (rendu seulement, cinématique seulement).

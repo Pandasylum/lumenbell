@@ -209,3 +209,4 @@
 - Son : à chaque plainte de la Voix, de doux pleurs d'une hauteur un peu différente, plus lointains et plus doux quand l'Illusion ou l'écho la relance.
 - Chapitre II : la fin de la phase II se lit « seul le silence lui répond » ; chaque phase a sa propre carte de défaite (titre et texte affichés).
 - Chapitre II : à la Rémanence, une fêlure naît sous les yeux du joueur sur la cloche de tête, et le mot « Couronne » n'apparaît plus qu'au gros plan de l'outro ; à la naissance de la Sans-Fond, un murmure grave monte et la lanterne du Veilleur pâlit un instant.
+- Chapitre II : en Épreuve, la carte de défaite de chaque phase garde la phrase « une chute te renvoie à la phase I » sous son texte.
