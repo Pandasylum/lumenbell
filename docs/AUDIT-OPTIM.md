@@ -95,3 +95,17 @@ Base : `docs/AUDIT-NETTOYAGE.md` §2 (déjà fait, non répété). Ajouts mesur�
 3. Faire de `LB.quality` un module de `shared/` avant le C3 (lot c).
 
 *Rien n'a été mesuré en FPS : tout gain de cette liste est à confirmer sur téléphone.*
+
+## S1 faite · Chapitre II, rendu et mise à jour (axe 1)
+**Fait** (`chapters/ch2-silent-bells/src/js/`, builds régénérés, `ch2-smoke` : `errs []`)
+- dpr (`92-events.js`) : plafond tactile 1,25 (même détection `pointer:coarse` que le Ch. I), 2 sur ordinateur.
+- Fonds (`24-backgrounds.js`) : couches statiques pré-rendues hors écran (`bgLayer`), recréées seulement quand l'échelle change (redimensionnement). Phase I (salle) : ciel, pierres, fonds des arches, contours, sol. Phase II (cale) : ciel, planches, membrures, poutres, sol. Phase III (récifs) : ciel, lune, mer, rochers, sol. L'ordre de peinture est conservé ; les éléments animés restent dessinés par-dessus. 18 dégradés radiaux des nuages : 3 sprites (un par bande) + `drawImage`. Gain annexe : dégradé des éclats de miroir, de la cloche rouillée et du bronze du bâton mis en cache.
+- Repli : si l'image est zoomée (cinématiques de la phase III), les couches ne servent pas, le dessin direct d'avant s'exécute (identique à l'ancien).
+- Particules : compactage en place (`16-update.js`) ; `lerpC` sans tableau ni chaîne par appel (table `Map` indexée par les trois valeurs arrondies, sortie strictement identique) ; plafond `PARTS_MAX=1500` (`08-effects.js`, helper `addPart`).
+- Plafond 1500 : le pire cas réel est de l'ordre de 300-400 (deux grosses salves de 70 + 40 plus poussières, vie ≤ 3,8 s). 1500 ne sert qu'à éviter un empilement. Les tirages aléatoires sont faits avant le test : la suite ne change pas.
+
+**Laissé, et pourquoi**
+- Portholes, éclat de lumière de la trappe, brume des arches, lueurs : dégradés dont les couleurs ou positions changent à chaque frame ; les mettre en cache changerait le rendu.
+- `includes` de `96-loop.js` : hors consigne de cette session.
+- Pendant un tremblement, les couches sont lues avec un décalage fractionnaire : léger lissage du fond (invisible sur ce fond sombre), à confirmer à l'œil.
+- `shared/` : rien touché.

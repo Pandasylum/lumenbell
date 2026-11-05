@@ -229,3 +229,7 @@
 ## 2026-11-05 · doc/audit-optim
 - Rien de visible : audit d'optimisation en lecture seule (`docs/AUDIT-OPTIM.md`), aucun code ni build touché.
 - Ce que le joueur verra : rien de visible.
+
+## 2026-11-05 · ch2/optim-rendu
+- Chapitre II : image un peu moins fine sur téléphone (plafond 1,25 comme au Chapitre I), jeu plus fluide dans les phases chargées (fonds, nuages et particules allégés).
+- Ce que le joueur verra : fonds, nuages et effets inchangés ; seule la netteté sur téléphone baisse légèrement.
