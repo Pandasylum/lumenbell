@@ -13,6 +13,7 @@
 - Règles communes : couleur du titre (`LB.BRAND`), carte de défaite, lien suivant et carton « à suivre ».
 - Chapitre I : phase II au fond de la Fonderie, esquive en pas de côté, lanterne du Colosse, fausse fin de Facile supprimée (`ch1/foundry-floor`, `ch1/dodge-side`).
 - Chapitre II : cartes « à suivre » communes, intros et outros communes (`ch2/cinematics`).
+- Nettoyage pré-P3 fait (5 nov. 2026) : code mort et reliquats « Commencer » retirés, `store/` et scripts promo sortis, archivage dans `archives/`, builds régénérés. Détail : docs/AUDIT-NETTOYAGE.md.
 
 ## Prochaines étapes
 1. Test sur téléphone (ressenti, lisibilité, fluidité), dont l'APK du hub (`apk/hub-package`).

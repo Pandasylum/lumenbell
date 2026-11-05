@@ -224,3 +224,4 @@
 ## 2026-11-05 · cleanup/b2-moteur
 - Rien de visible : nettoyage du code mort et des restes de l'écran « Commencer » des chapitres.
 - À regarder : l'ouverture d'une phase aux Chapitres I et II depuis le hub, et les menus, doivent rester identiques.
+- Ce que le joueur verra : rien de visible (nettoyage interne du dépôt, aucun changement de jeu).
