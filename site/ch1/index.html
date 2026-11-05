@@ -1515,8 +1515,10 @@ function showEnd(){
 }
 
 /* ---------- effects ---------- */
-function burst(x,y,n,cols){for(let i=0;i<n;i++){const a=rand(0,6.283),v=rand(80,360),L=rand(.3,.7);G.sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,g:520,life:L,max:L,col:cols[i%cols.length],sz:rand(2,5)})}}
-function dust(x,y){for(let i=0;i<18;i++){const d=Math.random()<.5?-1:1,L=rand(.4,.8);G.sparks.push({x:x+rand(-20,20),y:y-2,vx:d*rand(40,220),vy:-rand(20,120),g:260,life:L,max:L,col:'#9a8a9e',sz:rand(3,6)})}}
+const FX={sparksMax:1500}; /* plafond d'étincelles vivantes (burst, dust, qBurst) : large, jamais atteint en jeu normal ; les tirages sont faits avant le test */
+function addSpark(a,o){if(a.length<FX.sparksMax)a.push(o)}
+function burst(x,y,n,cols){for(let i=0;i<n;i++){const a=rand(0,6.283),v=rand(80,360),L=rand(.3,.7);addSpark(G.sparks,{x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,g:520,life:L,max:L,col:cols[i%cols.length],sz:rand(2,5)})}}
+function dust(x,y){for(let i=0;i<18;i++){const d=Math.random()<.5?-1:1,L=rand(.4,.8);addSpark(G.sparks,{x:x+rand(-20,20),y:y-2,vx:d*rand(40,220),vy:-rand(20,120),g:260,life:L,max:L,col:'#9a8a9e',sz:rand(3,6)})}}
 function ring(x,y){G.rings.push({x,y,life:.35,max:.35})}
 /* Texte flottant : seules les onomatopées (coups, cris) et les titres de phase s'affichent ; tout mot d'annonce (BLOCAGE, ORBE, TOUCHÉ…) est supprimé pour garder un ton sombre. */
 const ONO={};
@@ -2715,7 +2717,7 @@ function beginP2(noLore){
   say(_('Phase II. The Foundry. The button now dodges.','Phase II. La Fonderie. Le bouton sert maintenant à esquiver.'));
   hud();
 }
-function qBurst(x,y,n,cols){for(let i=0;i<n;i++){const a=rand(0,6.283),v=rand(80,380),L=rand(.3,.7);(R||Q).sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,g:300,life:L,max:L,col:cols[i%cols.length],sz:rand(2,5)})}}
+function qBurst(x,y,n,cols){for(let i=0;i<n;i++){const a=rand(0,6.283),v=rand(80,380),L=rand(.3,.7);addSpark((R||Q).sparks,{x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,g:300,life:L,max:L,col:cols[i%cols.length],sz:rand(2,5)})}}
 function qFloat(txt,x,y,col,sz,life){txt=ono(txt);if(!txt)return;(R||Q).floats.push({txt,x,y,col,sz:ONOSZ[txt]||sz||26,life:life||.9,max:life||.9})}
 function qFlameBurst(x,y,big,mega){
   (R||Q).fbs.push({x,y,t:0,big:big||1});
@@ -5187,8 +5189,11 @@ function musKind(){
   return S&&(S.mode==='play'||S.mode==='intro')&&el.ov.hidden?'game':null;
 }
 function musTick(){
+  const ac0=LB.audio.ctx;if(!ac0)return; /* pas de contexte audio */
+  const off=document.hidden||!LB.audio.sound;
+  if(off&&MUS.ctx===ac0&&MUS.cur===null)return; /* sortie rapide : déjà en silence (onglet masqué ou son coupé) ; la bascule vers le silence se fait une fois par le chemin normal, la reprise repart de zéro comme avant */
   try{
-    const k=musKind(),AC=LB.audio.ctx;
+    const k=off?null:musKind(),AC=ac0;
     if(MUS.ctx!==AC){
       MUS.ctx=AC;MUS.cur=null;
       const cp=AC.createDynamicsCompressor();cp.connect(LB.audio.mus);
@@ -5431,11 +5436,12 @@ function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
 function trialOpen(){return TRIAL_OPEN||endSeen()} /* TRIAL_OPEN : 00-core.js */
 /* Épreuve du feu (records sous Normal et Difficile, verrou), « ▶ Outro » et chapitre suivant : LB.menu.update (CHAPTER.best, trialOpen, endSeen) */
 try{document.querySelector('#menu [data-diff=normal]').focus({preventScroll:true})}catch(e){}   /* démarrage direct : focus sur « Normal », posé en dernier */
-let last=performance.now();
+let last=performance.now(),menuDrawn=false;
 function frame(now){
   perfWatch(now-last);const dt=Math.min(.05,(now-last)/1000);last=now;
   if(RUN.on&&!paused&&el.ov.hidden&&menuEl.hidden){const S=R||Q||G;if(S&&S.mode==='play'){RUN.t+=dt;RUN.pt[R?2:Q?1:0]+=dt}}
-  if(R){if(!paused)rStep(dt);renderR()}else if(Q){if(!paused)qStep(dt);renderQ()}else{if(!paused)step(dt);render()}
+  const drawOk=menuEl.hidden||!menuDrawn;menuDrawn=!menuEl.hidden; /* menu ouvert : une seule image, puis la scène (en pause, donc figée) reste telle quelle sous le voile */
+  if(R){if(!paused)rStep(dt);if(drawOk)renderR()}else if(Q){if(!paused)qStep(dt);if(drawOk)renderQ()}else{if(!paused)step(dt);if(drawOk)render()}
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

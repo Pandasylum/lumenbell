@@ -39,7 +39,7 @@ function beginP2(noLore){
   say(_('Phase II. The Foundry. The button now dodges.','Phase II. La Fonderie. Le bouton sert maintenant à esquiver.'));
   hud();
 }
-function qBurst(x,y,n,cols){for(let i=0;i<n;i++){const a=rand(0,6.283),v=rand(80,380),L=rand(.3,.7);(R||Q).sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,g:300,life:L,max:L,col:cols[i%cols.length],sz:rand(2,5)})}}
+function qBurst(x,y,n,cols){for(let i=0;i<n;i++){const a=rand(0,6.283),v=rand(80,380),L=rand(.3,.7);addSpark((R||Q).sparks,{x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,g:300,life:L,max:L,col:cols[i%cols.length],sz:rand(2,5)})}}
 function qFloat(txt,x,y,col,sz,life){txt=ono(txt);if(!txt)return;(R||Q).floats.push({txt,x,y,col,sz:ONOSZ[txt]||sz||26,life:life||.9,max:life||.9})}
 function qFlameBurst(x,y,big,mega){
   (R||Q).fbs.push({x,y,t:0,big:big||1});

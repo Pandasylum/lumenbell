@@ -235,3 +235,4 @@
 ## 2026-11-05 · ch2/optim-rendu
 - Chapitre II : image un peu moins fine sur téléphone (plafond 1,25 comme au Chapitre I), jeu plus fluide dans les phases chargées (fonds, nuages et particules allégés).
 - Ce que le joueur verra : fonds, nuages et effets inchangés ; seule la netteté sur téléphone baisse légèrement.
+- Chapitre I : le jeu est un peu plus fluide (menu ouvert, musique en veille, effets bornés) ; rien d'autre ne change.

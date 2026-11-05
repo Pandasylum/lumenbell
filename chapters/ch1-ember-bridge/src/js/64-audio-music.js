@@ -172,8 +172,11 @@ function musKind(){
   return S&&(S.mode==='play'||S.mode==='intro')&&el.ov.hidden?'game':null;
 }
 function musTick(){
+  const ac0=LB.audio.ctx;if(!ac0)return; /* pas de contexte audio */
+  const off=document.hidden||!LB.audio.sound;
+  if(off&&MUS.ctx===ac0&&MUS.cur===null)return; /* sortie rapide : déjà en silence (onglet masqué ou son coupé) ; la bascule vers le silence se fait une fois par le chemin normal, la reprise repart de zéro comme avant */
   try{
-    const k=musKind(),AC=LB.audio.ctx;
+    const k=off?null:musKind(),AC=ac0;
     if(MUS.ctx!==AC){
       MUS.ctx=AC;MUS.cur=null;
       const cp=AC.createDynamicsCompressor();cp.connect(LB.audio.mus);

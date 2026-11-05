@@ -109,3 +109,15 @@ Base : `docs/AUDIT-NETTOYAGE.md` §2 (déjà fait, non répété). Ajouts mesur�
 - `includes` de `96-loop.js` : hors consigne de cette session.
 - Pendant un tremblement, les couches sont lues avec un décalage fractionnaire : léger lissage du fond (invisible sur ce fond sombre), à confirmer à l'œil.
 - `shared/` : rien touché.
+
+## S2 faite · Chapitre I, rendu, boucle et audio (axe 1)
+**Fait** (`chapters/ch1-ember-bridge/src/js/`, builds régénérés, `smoke` ch1 : `errs []`)
+- Menu ouvert (`84-loop.js`) : le menu est un voile translucide (.74) mais la scène dessous est en pause (`paused`) et son rendu ne dépend que de l'état, pas de l'horloge : elle est donc figée, sauf le tremblement aléatoire. On dessine une seule image à l'ouverture, puis plus rien tant que le menu reste ouvert (au démarrage, la scène s'affiche une fois derrière le voile).
+- `musTick` (`64-audio-music.js`) : sortie rapide quand il n'y a pas de contexte audio, ou quand la page est masquée / le son coupé **et** que la musique est déjà au silence. La bascule vers le silence (fondu des bus, `MUS.cur=null`) passe une fois par le chemin normal, donc au retour `MUS.t`, `MUS.s` repartent de zéro comme avant.
+- Particules (`12-effects.js`, `36-p2-foundry-logic.js`) : table `FX.sparksMax=1500` et helper `addSpark` pour `burst`, `dust` et `qBurst`. Les tirages sont faits avant le test, la suite aléatoire ne change pas. Valeur choisie par cohérence avec le Ch. II (`PARTS_MAX=1500`) : les plus grosses salves font ~50-70 étincelles de vie ≤ 1,1 s, très loin du plafond. `evaporate` n'existe pas au Ch. I (Ch. II seulement).
+
+**Laissé, et pourquoi**
+- Pétrification (`56-p3-belfry-render.js:511`) : la ligne Ch. I de l'audit propose un voile `saturation`/`luminosity`, pas un calque `lighter` (celui-là vise les flashs de boss du Ch. II). Le gris + assombrissement (`grayscale`, `brightness .6`) ne se reproduit pas fidèlement par un voile blanc translucide. Laissé tel quel (le filtre ne tourne que pendant la séquence de finale).
+- Autres sparks poussés directement (`08-state`, `16`, `44`, `48`, `56`) : hors fonctions d'effet, laissés.
+- Pause simple (`pauseEl`) : non figée, hors consigne.
+- `shared/` et Ch. II : rien touché.
