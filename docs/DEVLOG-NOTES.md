@@ -252,4 +252,10 @@
 - Ce que le joueur verra : rien de visible. PV et seuils de rage des boss viennent maintenant d une table commune aux deux chapitres ; les valeurs sont identiques.
 ## 2026-11-06 · shared/boss-rules
 - Ce que le joueur verra : rien de visible. Dernier assaut, durée du rugissement, relance de rage du Chapitre II et plafonnement du soin viennent maintenant du code commun ; les valeurs sont identiques.
+
+## 2026-11-06 · docs/audit-docs
+- Ce que le joueur verra : rien de visible. Audit de cohérence des documents (`docs/AUDIT-DOCS.md`) et un lien d'index corrigé dans `DECISIONS.md`.
+
+## 2026-11-06 · docs/audit-docs (corrections factuelles)
+- Ce que le joueur verra : rien de visible. Renvois et état de la CI mis à jour dans `docs/COMMUN.md`, `NOTES.md`, `CHANGEMENTS.md` et les notes du Chapitre II.
 - Rien de visible : documentation (note BALANCE, décisions remplacées archivées).

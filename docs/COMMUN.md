@@ -2,7 +2,7 @@
 
 Session `engine/audit` (28 octobre 2026). **Aucun code de jeu modifié** : ce fichier est l'inventaire de ce qui doit être identique d'un chapitre à l'autre, des écarts constatés entre le Chapitre I et le Chapitre II, d'une API commune minimale et d'un plan en sessions. Rien n'est appliqué ; les recommandations marquées **(à trancher)** ont été tranchées le 28 octobre : voir `docs/decisions/2026-10-28-engine-shared.md`, §1.
 
-Références : `ch1:` = `chapters/ch1-ember-bridge/src/` (fichiers découpés, numéros de ligne propres à chaque fichier) ; `ch2:` = `chapters/ch2-silent-bells/src/silent-bells.html` (numéro de ligne seul).
+Références : `ch1:` = `chapters/ch1-ember-bridge/src/` (fichiers découpés, numéros de ligne propres à chaque fichier) ; `ch2:` = ancienne page unique `silent-bells.html` du Chapitre II, retirée le 28 octobre 2026 (numéro de ligne seul, plus de fichier à ouvrir ; la source est découpée dans `chapters/ch2-silent-bells/src/`).
 
 ## Synthèse
 - **Déjà commun** : canevas 960 × 540, polices (Big Shoulders Display + DM Sans, `build/fonts.css` inliné), variables CSS de police, structure HTML (en-tête, frise `#phases`, barres `.bars`/`.pips`, `#ov`, `#pause`, `#menu`, `.controls`, `#ward`), `_(en, fr)`, principe des états `ready` → action → `recover` et durées de base (0,333 s / 0,7 s, `deny` 0,25 s), multiplicateurs `m`/`rm`, PV du Veilleur 6 / 4 / 3, onomatopées seules à l'écran, rages sans texte (lecteur d'écran seulement).
@@ -79,7 +79,7 @@ Décision du 28 octobre (`docs/CH2-SPEC.md:98`) : un seul geste **bloquer** (*bl
 | Positions | Remontée du titre `translateY(-9vh)` | Ch. II : centrage `place-items:center`, variante portrait propre (ch2:`83`, `101-104`) ; Ch. I : boutons Intro/Outro/plein écran en haut à gauche (`style.css:177-193`) ; langues : `.langs` avec zones sûres au Ch. II seulement (ch1:`style.css:200`, ch2:`120`) | **C2** pour les zones sûres et le portrait, **C1** pour les boutons |
 | Ordre des langues | — | EN puis FR (ch1:`body.html:67`) ↔ FR puis EN (ch2:`245`) | **T** |
 | Langue par défaut | — | Langue de l'appareil, sinon anglais (ch1:`00-core.js:3-6`) ↔ français (ch2:`297`) | **C1** |
-| Écran de démarrage | — | Ch. I : `#gate` (Commencer + langues), clic obligatoire qui débloque le son (ch1:`body.html:32`, `style.css:97-99`, `84-loop.js:12-13`). Ch. II : aucun ; musique au premier geste (ch2:`2092-2093`) | **C1** |
+| Écran de démarrage | — | Aucun dans les chapitres (retiré le 5 novembre 2026 : ils s'ouvrent uniquement depuis le hub, qui garde son propre `#gate`, voir § Hub) ; la musique démarre au premier geste | **C1** |
 | Animations et durées | Scintillement `mglow`, `mblink` identiques | Particules : 26 braises montantes 5-12 s ↔ 34 flocons descendants 7-15 s (ch1:`60-ui-menu.js:76`, ch2:`2105`, CSS `mrise` / `mfall`) ; balayage du faisceau `msweep` au Ch. II | Durées dans une table `MENU_T`, type de particule par chapitre |
 | Navigation clavier | — | Ch. I : Entrée/Espace lancent Normal depuis le menu (ch1:`60-ui-menu.js:115-117`) ; Ch. II : clavier ignoré dans le menu (ch2:`2065`) | **C1** |
 | Code mort | — | Ch. II : `renderMenu` lit `#mc`, absent du HTML, jamais appelé (ch2:`2023-2035`) | À retirer avec le menu commun |
@@ -161,7 +161,7 @@ const CHAPTER={
 | Effets | `LB.ono(word,x,y,col)`, `LB.rage(name,desc)` (lecteur d'écran + sting, rien à l'écran), `LB.say(txt)` |
 | Cartes | `LB.card.show({eye,title,desc,table,go,onGo,onMenu,go2,onGo2})`, `LB.card.hide()` |
 | Cinématiques | `LB.cine.create({key,scenes,onEnd})` → `{play(done), seen(), playing()}` ; bouton « Passer », Échap/Entrée/Espace ; `LB.title(ctx,t,t0)` (« Lumenbell » en grand, chapitre dessous, couleur du chapitre) |
-| Menu | `LB.menu.mount(CHAPTER,{onDiff,onTrial,onIntro,onOutro})`, `LB.menu.show(fromGame)`, `LB.menu.hide()`, `LB.gate.mount()` |
+| Menu | `LB.menu.mount(CHAPTER,{onDiff,onTrial,onIntro,onOutro})`, `LB.menu.show(fromGame)`, `LB.menu.hide()` |
 | Pause, entrées | `LB.input.bind({press,release,retry,pause,skip})` (Espace, flèche haut, W, Z, toucher ; P/Échap ; R ; Entrée), `LB.pause.set(on)` |
 | Boucle | `LB.loop.start(step,render)` (dt borné à 0,05 s, `perfWatch` du Ch. I) |
 | Test | `LB.testHooks(extra)` → `window.__t` de forme commune, ajouté seulement par le build de test |
