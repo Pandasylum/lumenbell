@@ -16,6 +16,7 @@ const sfx={
   charge(){tone(220,.8,'sawtooth',.04,null,null,880)},
   bolt(){noise(.35,.35,'highpass',1800);tone(60,.4,'sine',.25,null,null,30)},
   snap(p){const Z=GUARD_SND.snap;noise(.05,Z.vol,'highpass',3200,1);tone(1900,.04,'square',Z.vol*.5,null,null,700);tone(300,.07,'triangle',Z.vol*.6,null,null,110);if(p)tone(3100,.05,'sine',Z.vol*.35)},
+  shatter(){noise(.18,.28,'highpass',2500,1);tone(2400,.12,'triangle',.08,null,null,900);tone(160,.2,'sine',.14,null,null,70)},
   shield(){tone(660,.15,'sine',.05);tone(990,.15,'sine',.03)},
   counter(){tone(330,.4,'triangle',.12,null,null,990);noise(.3,.12,'bandpass',2000,3)},
   ko(){tone(110,2,'sine',.3,null,null,40);noise(1.4,.25,'lowpass',900,1,null,null,100)},

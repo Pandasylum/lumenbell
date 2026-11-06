@@ -8,33 +8,37 @@ const RINGS=TOWER.map((p,i)=>p.k==='ring'?i:-1).filter(i=>i>=0);
 const SBELLS=TOWER.map((p,i)=>p.k==='sbell'?i:-1).filter(i=>i>=0);
 const MOV=TOWER.map((p,i)=>(p.k==='ring'||p.k==='seg'||p.k==='sbell')?i:-1).filter(i=>i>=0);
 function P3b(stage,f,b,final,rage){
-  const T=[],BF=BEACON_FX;let t=b,sp='';
-  const ring=n=>{const t0=t;for(let i=0;i<n;i++){const s=t0+i*.34*f;S.ringNext=((S.ringNext||0)+1)%6;T.push({k:'ring',t0:s,tl:s+.5*f,ti:s+.95*f,ri:S.ringNext})}t=t0+(n-1)*.34*f+1.35*f;sp='ring'};
+  const T=[],BF=BEACON_FX,Q=PD(),TL=Q.tell;let t=b,sp='';   // TL: x on the warning times (PHARE_DIFF)
+  const ring=n=>{const t0=t;for(let i=0;i<n;i++){const s=t0+i*.34*f;S.ringNext=((S.ringNext||0)+1)%6;T.push({k:'ring',t0:s,tl:s+.5*TL*f,ti:s+(.5*TL+.45)*f,ri:S.ringNext})}t=t0+(n-1)*.34*f+1.35*f;sp='ring'};
   // the anchor: a sweep (hold), the Watcher releases, the chain rings as the anchor lifts, then the blow (tap): "hold... release... tap"
-  const moon=()=>{const A=BF.anchor,ts=t+.9*f,D=1.25*f,e=ts+D;T.push({k:'moon',t0:t,ts,D,ta:ts+D*((1000-(HX+90))/1080),tb:ts+D*((1000-(HX-70))/1080),hold:true});
+  const moon=()=>{const A=BF.anchor,ts=t+.9*TL*f,D=1.25*f,e=ts+D;T.push({k:'moon',t0:t,ts,D,ta:ts+D*((1000-(HX+90))/1080),tb:ts+D*((1000-(HX-70))/1080),hold:true});
     T.push({k:'anch',t0:e,tl:e+A.rel*f,ti:e+(A.rel+A.lift)*f,real:true});t=e+(A.rel+A.lift+.45)*f;sp='anchor'};
   // the beam played twice (there and back), `cross.dark` s of black between the two to let go
-  const cross=()=>{for(let i=0;i<2;i++){const ts=t+.75*f,D=1.25*f;T.push({k:'lbeam',side:i?0:1,t0:t,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});t=ts+D+(i?0:BF.cross.dark*f)}t+=.7*f;sp='cross'};
+  // Hard signature (sig, Part 2 only): a bolt lands `sig.at` s after the end of the first sweep: release, tap, hold again
+  const cross=sig=>{for(let i=0;i<2;i++){const ts=t+.75*TL*f,D=1.25*f;T.push({k:'lbeam',side:i?0:1,t0:t,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});
+    if(sig&&!i){const Z=BF.bolt,ti=ts+D+BF.sig.at*f;T.push({k:'bolt',t0:ti-(Z.tell*TL+Z.fly)*f,tell:Z.tell*TL*f,ti,real:true,seed:Math.random(),side:Math.random()<.5?0:1})}
+    t=ts+D+(i?0:Q.crossDark*f)}t+=.7*f;sp='cross'};
   // the big bell (hold): its shadow grows on the Watcher, three blows each with a visible ring
-  const trap=()=>{const Q=BF.bell,ta=t+Q.ta*f;T.push({k:'trap',t0:t,tl:t+Q.tl*f,ta,tb:ta+Q.span*f,hold:true,blows:Q.blows,step:Q.step*f});t=ta+Q.span*f+Q.after*f;sp='bell'};
+  const trap=()=>{const Z=BF.bell,span=bellSpan(Q),ta=t+Z.ta*TL*f;T.push({k:'trap',t0:t,tl:t+Z.tl*TL*f,ta,tb:ta+span*f,hold:true,blows:Q.blows,step:Z.step*f});t=ta+span*f+Z.after*f;sp='bell'};
   // the shard of the tower (hold): a glow climbs in the cracks, then the blast
-  const burstOut=()=>{const Z=BF.shard;T.push({k:'burst',t0:t,ta:t+Z.glow*f,tb:t+(Z.glow+Z.blast)*f,hold:true});t+=(Z.glow+Z.blast+.5)*f;sp='shard'};
-  const reform=()=>{const tr=t+.9*f,ts=tr+.35*f,D=1.5*f;T.push({k:'reform',t0:t,tr,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});const td=ts+D+.5*f;T.push({k:'disp',t0:ts+D,ti:td,rf:1});t=td+.7*f;sp='cross'};
+  const burstOut=()=>{const Z=BF.shard,g=Z.glow*TL;T.push({k:'burst',t0:t,ta:t+g*f,tb:t+(g+Z.blast)*f,hold:true});t+=(g+Z.blast+.5)*f;sp='shard'};
+  const reform=()=>{const tr=t+.9*TL*f,ts=tr+.35*f,D=1.5*f;T.push({k:'reform',t0:t,tr,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});const td=ts+D+.5*f;T.push({k:'disp',t0:ts+D,ti:td,rf:1});t=td+.7*f;sp='cross'};
   // sound wave (tap per wave): 4-6 concentric waves, the delay between them shrinking
-  const sonic=()=>{const Z=BF.sonic,n=Z.n[0]+Math.floor(Math.random()*(Z.n[1]-Z.n[0]+1));let s=t+Z.first*f,d=Z.d0;for(let i=0;i<n;i++){T.push({k:'sonic',t0:s-Z.fly*f,ti:s});s+=d*f;d*=Z.shrink}t=s+.3*f;sp='sonic'};
+  const sonic=()=>{const Z=BF.sonic,N=Q.sonic,n=N.n[0]+Math.floor(Math.random()*(N.n[1]-N.n[0]+1));let s=t+Z.first*f,d=Z.d0;for(let i=0;i<n;i++){T.push({k:'sonic',t0:s-Z.fly*TL*f,ti:s});s+=d*f;d*=N.shrink}t=s+.3*f;sp='sonic'};
   // rage, the bell storm (kept in the rotation): rings fired in turn from the two side lanterns (taps), then the trap bell (hold)
   const storm=()=>{const Q=SP.storm;for(let i=0;i<Q.n;i++){const s=t+i*Q.gap*f;T.push({k:'sring',side:i%2,t0:s,tl:s+Q.tl*f,ti:s+Q.ti*f})}t+=(Q.n-1)*Q.gap*f+Q.ti*f+Q.trapGap*f;
     T.push({k:'trap',t0:t,tl:t+Q.trapTl*f,ta:t+Q.trapTa*f,tb:t+Q.trapTb*f,hold:true});t+=Q.trapTb*f+Q.after*f;sp='bell'};
   // rage 1, Bell storm: a rhythmic rain of small bells (taps). Hard rage 2: the big bell (hold), then the waves (taps)
-  const rain=()=>{const Z=BF.rain;let s=t+.5*f;for(let i=0;i<Z.n;i++){T.push({k:'sbl',t0:s-Z.fall*f,tl:s-Z.fall*f+.15*f,ti:s,x:HX+20+((i*7)%3-1)*14});s+=Z.pattern[i%Z.pattern.length]*f}t=s+.2*f;sp='rain'};
+  const rain=()=>{const Z=BF.rain;let s=t+.5*f;for(let i=0;i<Z.n;i++){T.push({k:'sbl',t0:s-Z.fall*TL*f,tl:s-Z.fall*TL*f+.15*f,ti:s,x:HX+20+((i*7)%3-1)*14});s+=Z.pattern[i%Z.pattern.length]*f}t=s+.2*f;sp='rain'};
   const bellWaves=()=>{trap();sonic()};
   // rage 3, Knell: n knells at a tempo that slows down (taps), the last one is held in a bubble (the implosion) then released as a wave that breaks the bell
-  const glas=()=>{const Z=BF.glas;let s=t+Z.pre*f,d=Z.g0;for(let i=0;i<Z.n;i++){T.push({k:'sbl',knell:1,t0:s-Z.fall*f,tl:s-Z.fall*f+.1*f,ti:s,x:HX+12});s+=d*f;d*=Z.k}
+  const glas=()=>{const Z=BF.glas;let s=t+Z.pre*f,d=Z.g0;for(let i=0;i<Q.glas;i++){T.push({k:'sbl',knell:1,t0:s-Z.fall*TL*f,tl:s-Z.fall*TL*f+.1*f,ti:s,x:HX+12});s+=d*f;d*=Z.k}
     T.push({k:'implode',t0:s-d/Z.k*f+.2*f,ta:s-d/Z.k*f+1.9*f,tb:s-d/Z.k*f+2.5*f,hold:true});t=s-d/Z.k*f+3*f;sp='glas'};
   if(rage){(rage>1?bellWaves:rain)();T.spell=sp;return T}
   if(final){glas();T.spell=sp;return T}
   const p0=[()=>ring(3),moon,trap,()=>{ring(2);trap()},cross,burstOut,reform];
   const p1=[()=>ring(5),()=>{moon();ring(3)},()=>{trap();trap()},()=>{cross();ring(2)},()=>{burstOut();moon()},()=>{ring(3);cross()},()=>{reform();ring(2)},storm,sonic];
+  if(Q.sig)p1.push(()=>cross(true));   // Hard signature, in the normal rotation (not in the rages)
   pick(stage?p1:p0)();
   T.spell=sp;return T;
 }
@@ -62,7 +66,7 @@ function drawEclGame(){
       if(post>0&&post<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,245,255,${1-post})`;ctx.lineWidth=8*(1-post)+1;ctx.beginPath();ctx.arc(J.x,J.y,post*900,0,Math.PI*2);ctx.stroke();ctx.restore()}}
   }
   const on=1;
-  const hit={x:HX+20,y:GY-80},tells=[],beams=[],fx=[],srings=[],sonics=[],sbls=[];let trapQ=null;
+  const hit={x:HX+20,y:GY-80},tells=[],bolts=[],beams=[],fx=[],srings=[],sonics=[],sbls=[];let trapQ=null;
   for(const th of S.threats){
     if(gt<th.t0)continue;
     if(th.done&&th.res==='ok'&&!th.sfx){th.sfx=1;if(th.k==='ring')MUSIC.fx('bellHit');if(th.k==='trap')MUSIC.fx('bellBig')}
@@ -95,6 +99,7 @@ function drawEclGame(){
       if(!th.done){const lk=gt<th.tl+up?eio((gt-th.tl)/up):1,dp=gt<th.tl+up?0:ein((gt-th.tl-up)/.3);ax=lerp(A0.x,HX+40,lk);ay=lerp(A0.y,GY-300,lk)+dp*230}
       else{const q=eio(clamp((gt-th.okT)/.8,0,1)),fy=th.res==='ok'?GY-300:GY-70;ax=lerp(HX+40,A0.x,q);ay=lerp(fy,A0.y,q)}
       A={x:ax,y:ay,a:A0.a,sc:.9,z:3}}
+    else if(th.k==='bolt')bolts.push(th);
     else if(th.k==='sonic')sonics.push(th);
     else if(th.k==='sbl')sbls.push(th);
     else if(th.k==='lbeam')beams.push(th);
@@ -107,6 +112,10 @@ function drawEclGame(){
   for(const th of beams){const o=P[SBELLS[th.side]];
     if(gt<th.ts){const k=(gt-th.t0)/(th.ts-th.t0);glow(o.x,o.y,60,'rgba(110,235,255,.9)',.4+.5*k);beamFrom(o.x,o.y,940,.12+.25*k)}
     else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D;beamFrom(o.x,o.y,940-1000*s,1);glow(o.x,o.y,70,'rgba(200,250,255,.9)',.8)}}
+  // Hard signature: a bolt from a shoulder bell (crackle = the tell, tap), as in form I
+  for(const th of bolts){const o=P[SBELLS[th.side]];
+    if(!th.done){const k=clamp((th.ti-gt)/(th.ti-th.t0),0,1);ctx.strokeStyle=`rgba(180,250,255,${.85-k*.4})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(HX,GY,24+60*k,6+14*k,0,0,Math.PI*2);ctx.stroke();crackle(o,clamp((gt-th.t0)/(th.ti-th.t0),0,1))}
+    else if(gt-th.okT<.22)bolt(o.x,o.y,th.res==='ok'?HX+6:HX,th.res==='ok'?GY-150:GY-40,th.seed,'rgba(220,250,255,.95)',4)}
   for(const t of tells)glow(t[0],t[1],46,'rgba(200,250,255,.95)',.9*t[2]);
   // rings of the bell storm, from the two side lanterns in turn (th.side alternates)
   for(const th of srings){const o=P[SBELLS[th.side]];

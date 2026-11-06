@@ -18,18 +18,19 @@
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
-  chunk:{dust:.7,fly:.6,gap:1.05,salvo:[2,3]},
-  spike:{tell:.8,seq:[0,1.05,1.45],after:1.0,corals:9},
-  night:{n:3,lit:.3,gap:1.0},
+  chunk:{dust:.7,fly:.6,gap:1.05},   // salvo per difficulty: PHARE_DIFF
+  spike:{tell:.8,after:1.0,corals:9},   // seq (the spikes after the first) per difficulty: PHARE_DIFF
+  night:{gap:1.0},   // n bolts and `lit` per difficulty: PHARE_DIFF
   morse:{long:{dark:.2,cone:.4,D:.9,after:.15},seq:['L','c','c'],reps:1,gap:.15},
-  cross:{dark:.4},
+  cross:{},   // dark between the two sweeps per difficulty: PHARE_DIFF
   anchor:{rel:.4,lift:.8},
-  bell:{tl:.75,ta:1.3,blows:3,step:.28,span:.66,after:.6},
+  bell:{tl:.75,ta:1.3,step:.28,tail:.1,after:.6},   // blows and span (= (blows-1) x step + tail) per difficulty: PHARE_DIFF
   shard:{glow:1.2,blast:.6},
-  sonic:{n:[4,6],first:.8,d0:.5,shrink:.88,fly:.7},
+  sonic:{first:.8,d0:.5,fly:.7},   // n and shrink per difficulty: PHARE_DIFF
   rain:{n:6,pattern:[.55,.55,.3,.8,.55,.45],fall:.7},
-  glas:{n:6,g0:.6,k:1.16,pre:.7,fall:.5},
+  glas:{g0:.6,k:1.16,pre:.7,fall:.5},   // n knells per difficulty: PHARE_DIFF
   dazzle:{n:3,dark:.3,cone:.5,D:1.1,after:.2},
+  sig:{at:.6},   // Hard, Part 2: a bolt lands `at` s after the end of the first sweep of a crossing (release, tap, hold again)
   direct:true};
 /* riposte of phase III, visual only (rule unchanged: clean series, riposte, boss -1 HP). Yellow-white of the lantern. One drawing per spell
    (C3 below, window win[spell] = [from, to] of the riposte progress k); the spells without one keep the generic streak (tap) or wave (hold). */
@@ -40,6 +41,25 @@ const COUNTER3={col:'255,246,204',tap:[.2,.45],hold:[.2,.75],
 /* guard of phase III, visual only (decision of 6 Nov 2026, to tune by eye). TAP = an arc of light in front of the Watcher, turned towards the
    threat, `arc.dur` s, sparks at the point of impact, no bubble. HOLD = the blue dome, only while the gesture is held: it appears after `dome.delay` s
    (so that a tap never shows it), fades in over `dome.fade` s, thin outline, `dome.fill` of opacity inside, gone at once on release. */
+/* DIFFICULTY of the Lighthouse, phase III (decision of 6 Nov 2026, section D; easy / normal / hard, vdk()). No speed multiplier: the rhythm between hits stays Normal's
+   in real seconds. tell = x on the warning time of each spell (bolt, beam dark + cone, dust, spike front, anchor and crossing sweeps, bell shadow, shard glow, wave and knell
+   flights...; `night.lit` and the Morse have their own); tapWin = s after the press during which a tap threat is stopped; holdTol = s of grace after a beam has passed
+   for a late release (see stops); tapInBubble = a tap threat landing while the bubble is held is stopped (Easy only; Normal and Hard: not stopped).
+   Elements: night = bolts of the Night of the Lighthouse and the lamp's lighting before the shot; crossDark = black between the two sweeps; salvo = stones; spike = start of each spike
+   in the series (s from the first; Hard: a fourth, off the beat); blows = knells of the held bell; sonic = waves (n, shrink 1 = constant pace); glas = knells; sig = Hard signature.
+   Fatigue of the hold (FATIGUE below): max = longest hold a spell of the level asks for (holdNeed) + margin; rest = s without guard once the dome bursts. */
+const PHARE_DIFF={
+  easy:{tell:1.5,tapWin:.4,holdTol:.2,tapInBubble:true,night:{n:3,lit:.5},crossDark:.6,salvo:[2,2],spike:[0,1.05],blows:2,sonic:{n:[3,4],shrink:1},glas:5,sig:false,margin:1.5,rest:.6},
+  normal:{tell:1,tapWin:.2,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
+  hard:{tell:.7,tapWin:.2,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
+/* fatigue of the hold: the count starts again when the gesture has been released for more than `reset` s; the dome warns at `warn` of the max (trembles, amber outline) */
+const FATIGUE={reset:.15,warn:.75,amber:'255,190,90'};
+const PD=()=>PHARE_DIFF[vdk()];
+const bellSpan=Z=>(Z.blows-1)*BEACON_FX.bell.step+BEACON_FX.bell.tail;
+/* longest hold a spell of the level asks for (s the guard must cover: tb - ta of its hold threats): beams (176 px of reef round the Watcher over the sweep), bell, shard, knell, tower waves */
+function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
+  return Math.max(w(B.beam.D),w(B.dazzle.D),w(B.morse.long.D),w(SP.kwave.D),1.25*160/1080,1.25*160/1000,1.5*160/1000,bellSpan(Z),B.shard.blast,SP.storm.trapTb-SP.storm.trapTa,.6)}
+const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
 const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
 const LX=760,LY=GY-333;
 function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0))}

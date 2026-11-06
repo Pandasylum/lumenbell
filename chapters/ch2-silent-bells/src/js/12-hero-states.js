@@ -24,16 +24,32 @@ function down(){
 }
 function up(){S.held=false;LB.hero.release(S.pl);$('ward').classList.remove('down')}
 /* is the attack stopped at its impact? (a shard of the rain gets a wider grace in Hard) */
-function stops(th){return LB.hero.stops(S.pl,{graceAdd:th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0})}
+function stops(th){const gr=th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0;
+  if(S.phase===3&&th&&!th.hold){   // a tap threat of the Lighthouse: window per difficulty (PHARE_DIFF.tapWin); a bubble held past it stops it in Easy only (late release: holdTol after a beam's passage)
+    const Z=PD(),p=S.pl;
+    if(p.s==='act'&&S.held&&p.t>Z.tapWin&&(Z.tapInBubble||gt-S.holdEnd<=Z.holdTol))return true;
+    return LB.hero.stops(p,{win:Z.tapWin,graceAdd:gr})}
+  return LB.hero.stops(S.pl,{graceAdd:gr})}
 /* the Watcher's state over time (phase III: the guard is held while the button is down) */
 function plStep(dt){
-  const p=S.pl;
+  const p=S.pl,f3=S.phase===3;
+  if(f3)p.stam=1;   // phase III: the shared endurance never trips, the fatigue of the hold is this chapter's (fatStep)
   if(LB.hero.step(p,dt,{gesture:gest(),held:S.held})==='broken'){S.broken=gt+PT().broken;say(_('Your guard is broken.','Ta garde est brisée.'))}
   // dodge aimed at a reflection (fooled): the recovery that follows this action is shortened (DG.foolRec); any other end of the action drops the mark
   if(p.fr){if(p.s==='recover'&&p.rk==='act'){p.rd*=DG.foolRec;p.fr=0}else if(p.s!=='act')p.fr=0}
   S.holding=S.phase===3&&p.s==='act';
   S.domeT0=S.holding&&S.held?(S.domeT0==null?gt:S.domeT0):null;   // since when the gesture is held (dome of phase III, GUARD_FX.dome)
+  if(f3)fatStep(dt);
 }
+/* fatigue of the hold (phase III, decision of 6 Nov 2026): continuous time of the held gesture, back to 0 once released for more than FATIGUE.reset s; past
+   fatMax(difficulty) the dome bursts and the Watcher is out of breath (no block, no hold) for PHARE_DIFF.rest s, no HP lost. S.pl.stam only feeds the bar (1 = rested). */
+function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk());
+  if(S.holding&&S.held){F.t+=dt;F.rel=0}else{F.rel+=dt;if(F.rel>FATIGUE.reset)F.t=0}
+  if(F.t>max){const rest=PD().rest;F.t=0;F.rel=0;p.s='recover';p.t=0;p.rd=rest;p.rk='broken';S.holding=false;S.domeT0=null;S.broken=gt+rest;S.domeBurst=gt;
+    burst(HX,GY-50,28,'#bff0ff',8,.7);burst(HX,GY-50,12,'#ffffff',5,.5);pop(ONO.crush,'#bff0ff');play('shatter');say(_('Your guard is broken.','Ta garde est brisée.'))}
+  p.stam=clamp(1-F.t/max,0,1)}
+/* the dome warns when the hold has reached FATIGUE.warn of the max */
+const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
 /* opacity 0..1 of the dome of the held guard: nothing for a tap (released before GUARD_FX.dome.delay), then it fades in; none once released */
 function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
 /* where a threat of phase III comes from (to turn the arc of a tap towards it) */

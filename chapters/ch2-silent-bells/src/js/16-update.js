@@ -12,7 +12,7 @@ function update(dt){
       if(th.done)continue;
       if(th.hold){
         if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
-        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;if(S.pl.s==='act')LB.hero.stopped(S.pl)}
+        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;S.holdEnd=th.tb;if(S.pl.s==='act')LB.hero.stopped(S.pl)}
         continue;
       }
       if(gt>=th.ti){

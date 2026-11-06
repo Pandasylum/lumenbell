@@ -22,10 +22,12 @@ function drawHero(){
   // the shield of the block (phase II), as in Ember Bridge: it lasts as long as the action
   if(ph===1&&p.s==='act'&&play)LB.drawBlock(ctx,x,y,p.t,PT().act);
   // phase III, hold: the blue dome, only while the gesture is held (domeAlpha: fade-in, nothing for a tap), thin outline, light fill, the Watcher stays visible
-  const da=domeAlpha();
-  if(da>0){const flick=S.pl.stam<.25?(Math.sin(gt*40)>0?.5:1):1,Z=GUARD_FX.dome;ctx.save();ctx.globalAlpha=da*flick;
-    ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x,y,92,Math.PI,0);ctx.fill();
-    ctx.strokeStyle=`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
+  const da=domeAlpha(),warn=domeWarn();
+  if(da>0){const Z=GUARD_FX.dome,jx=warn?Math.sin(gt*70)*2.2:0,jy=warn?Math.cos(gt*83)*1.4:0;ctx.save();ctx.globalAlpha=da;
+    ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x+jx,y+jy,92,Math.PI,0);ctx.fill();
+    ctx.strokeStyle=warn?`rgba(${FATIGUE.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
+  // the dome bursts when the hold is too long (fatigue): shards of the outline fly off
+  if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,92+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
   // phase III, tap: an arc of light (yellow-white of the lantern) in front of the Watcher, turned towards the threat
   if(ph===3&&S.arc&&gt-S.arc.t0<GUARD_FX.arc.dur){const G=GUARD_FX.arc,u=(gt-S.arc.t0)/G.dur,cx=x+16,cy=y-80,r=G.r*(.85+.15*eout(u));
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';

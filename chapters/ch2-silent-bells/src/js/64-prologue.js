@@ -769,28 +769,28 @@ const RUST_HAZE=.5,RUST_HALO=430;   // RUST_HALO = radius (px) of the halo of li
 const halo=u=>{u=clamp((u-.25)/.75,0,1);return u*u*(3-2*u)};   // 0 in the core, 1 outside, smooth   // opacity of the veil over everything once the cloud is full (provisional)
 /* ---- Phase III · Form I: the tower's tentacles and torn pieces ---- */
 function P3(stage,f,b,final,rage){
-  const T=[],BF=BEACON_FX;let t=b,sp='',side=0,cri=null;
+  const T=[],BF=BEACON_FX,Q=PD(),TL=Q.tell;let t=b,sp='',side=0,cri=null;   // TL: x on the warning times (PHARE_DIFF)
   const R=88;
   // sweep (hold): lamp dark, thin cone, sweep; B = the timings (BEACON_FX.beam, or the short beam of the Morse rage)
-  const beamAt=(dir,B)=>{const ts=t+(B.dark+B.cone)*f,D=B.D*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
-    T.push({k:'beam',t0:t,dark:B.dark*f,ts,D,dir,ta:ts+D*s0,tb:ts+D*s1,real:true,hold:true});t=ts+D+B.after*f;sp='beam';side=dir<0?1:0};
+  const beamAt=(dir,B)=>{const ts=t+(B.dark+B.cone)*TL*f,D=B.D*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
+    T.push({k:'beam',t0:t,dark:B.dark*TL*f,ts,D,dir,ta:ts+D*s0,tb:ts+D*s1,real:true,hold:true});t=ts+D+B.after*f;sp='beam';side=dir<0?1:0};
   const sweep=dir=>beamAt(dir,BF.beam);
   // bolt (tap): one lamp at a time, left then right; `tell` s of crackling round it
-  const bolt=(tell,night)=>{const Z=BF.bolt;tell=tell==null?Z.tell:tell;side=S.boltSide=1-(S.boltSide==null?1:S.boltSide);
+  const bolt=(tell,night)=>{const Z=BF.bolt;tell=tell==null?Z.tell*TL:tell;side=S.boltSide=1-(S.boltSide==null?1:S.boltSide);
     T.push({k:'bolt',t0:t,tell:tell*f,ti:t+(tell+Z.fly)*f,real:true,seed:Math.random(),side,night:night?1:0});t+=Z.gap*f;sp='bolt'};
   // reef spikes (tap): swirl, then three spikes "tap... tap-tap"
-  const spike=()=>{const Z=BF.spike,ti0=t+Z.tell*f;let prev=t;Z.seq.forEach((o,i)=>{const ti=ti0+o*f;T.push({k:'spike',t0:ti-Z.tell*f,ti,real:true,seed:Math.random()});prev=ti});t=ti0+Z.seq[Z.seq.length-1]*f+Z.after*f;sp='spike'};
-  const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*f,side:Math.random()<.5?-1:1});t+=1.2*f;sp='whip'};
+  const spike=()=>{const Z=BF.spike,seq=Q.spike,tl=Z.tell*TL*f,ti0=t+tl;seq.forEach(o=>{const ti=ti0+o*f;T.push({k:'spike',t0:ti-tl,ti,real:true,seed:Math.random()})});t=ti0+seq[seq.length-1]*f+Z.after*f;sp='spike'};
+  const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*TL*f,side:Math.random()<.5?-1:1});t+=(.3+.9*TL)*f;sp='whip'};
   // pieces of the tower (tap): the tentacle coils, the stone cracks and throws dust, salvo of 2-3
-  const chunk=()=>{const Z=BF.chunk,n=Z.salvo[0]+Math.floor(Math.random()*(Z.salvo[1]-Z.salvo[0]+1));
-    for(let i=0;i<n;i++){const s=t+i*Z.gap*f;cri=RINGS[Math.floor(Math.random()*6)];T.push({k:'chunk',t0:s,tl:s+Z.dust*f,ti:s+(Z.dust+Z.fly)*f,ri:cri})}
-    t+=((n-1)*Z.gap+Z.dust+Z.fly+.25)*f;sp='chunk'};
+  const chunk=()=>{const Z=BF.chunk,n=Q.salvo[0]+Math.floor(Math.random()*(Q.salvo[1]-Q.salvo[0]+1));
+    for(let i=0;i<n;i++){const s=t+i*Z.gap*f;cri=RINGS[Math.floor(Math.random()*6)];T.push({k:'chunk',t0:s,tl:s+Z.dust*TL*f,ti:s+(Z.dust*TL+Z.fly)*f,ri:cri})}
+    t+=((n-1)*Z.gap+Z.dust*TL+Z.fly+.25)*f;sp='chunk'};
   // the King's wave (hold), crossing the reef like the beam
-  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;sp='kwave';return th};
+  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*TL*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;sp='kwave';return th};
   // rage, the rising tide: the wave (hold), then reef spikes rise in its wake as it ebbs (taps) (kept in the rotation)
   const tide=()=>{const w=kwave(),e=w.ts+w.D,P=SP.tide;T.push({k:'spike',t0:e,ti:e+P.spike1*f,real:true,seed:Math.random(),tide:1});T.push({k:'spike',t0:e+P.gap*f,ti:e+P.spike2*f,real:true,seed:Math.random(),tide:1});t=e+P.spike2*f+P.after*f;sp='tide'};
   // rage 1, Night of the Lighthouse: lamps out, each lights `lit` s before it fires, bolts in a chain (taps)
-  const night=()=>{const Z=BF.night;for(let i=0;i<Z.n;i++)bolt(Z.lit,true);t+=.4*f};
+  const night=()=>{const Z=BF.night;for(let i=0;i<Q.night.n;i++)bolt(Q.night.lit,true);t+=.4*f};
   // rage 2 (Hard), Morse: long (short beam, hold) - short - short (bolt, tap), each signal announced by its own shape
   const morse=()=>{const M=BF.morse;for(let r=0;r<M.reps;r++)for(const g of M.seq){if(g==='L')beamAt(r%2?1:-1,M.long);else{bolt();t-=(BF.bolt.gap-M.gap)*f}}};
   const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()},whip,chunk,()=>{whip();bolt()},kwave];

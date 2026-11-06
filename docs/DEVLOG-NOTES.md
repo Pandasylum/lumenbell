@@ -288,3 +288,4 @@
 ## 2026-11-06 · feat/ch2-phare-finitions
 - Ce que le joueur verra : au Phare, un tap ouvre un arc de lumière jaune-blanc tourné vers la menace (claquement sec), un maintien ouvre un dôme bleu discret avec un bourdonnement ; chaque sort a son contre propre (lampe qui s'éteint, tentacule qui recule, maillon coupé, cloche fissurée…).
 - Ce que le joueur verra : la dernière rage de la Partie 1 se termine par la lumière renvoyée sur le phare central, qui se brise et lance la Partie 2.
+- Ce que le joueur verra : au Phare, Facile laisse plus de temps et moins d'éléments par sort, Difficile en demande plus et plus vite à repérer ; tenir trop longtemps fait trembler le dôme (ambre) puis l'éclate, et le Veilleur reste sans garde un instant.
