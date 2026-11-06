@@ -26,6 +26,8 @@ console.log('syntaxe',errs.length?'KO':'OK');
  if(!/f=1\/\(RHY\.sp\*/.test(html))errs.push('rythme: f n\'est plus calcule depuis RHY.sp');
  for(const m of html.matchAll(/(?:(?<![.\w])gap|VX\.gap\[\w+\]|SP\.floor\[\w+\]|VX\.pe\.\w+|G\[[01]\])\s*\*\s*f\b/g))errs.push('rythme: plancher ou ecart multiplie par f: '+m[0]);
  console.log('rythme uniforme (statique)',errs.length>n?'KO':'OK')}
+// statique : PV et seuils des boss de LB.BOSS_DIFF (forme de la table, aucune copie locale)
+{const n=errs.length;errs.push(...require('./boss-diff-static')(html,'ch2'));console.log('boss-diff (statique)',errs.length>n?'KO':'OK')}
 (async()=>{const b=await launch();
 const ctx=await b.newContext({viewport:{width:1100,height:760},offline:true});
 await ctx.addInitScript(()=>{try{localStorage.setItem('db-unl','3')}catch(e){}});

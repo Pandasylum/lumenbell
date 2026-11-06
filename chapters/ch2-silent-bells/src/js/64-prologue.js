@@ -126,12 +126,12 @@ function hud(){
 /* ================= spells, anger and final assaults ================= */
 /* rages and final assaults: nothing written on screen (the sound and the attacks tell it); the screen reader gets the name */
 function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
-/* rages, as in Ember Bridge (00-core.js DIFFS u / rages / mk, 36-p2-foundry-logic.js qTurn / qRage): when the boss's HP has
-   reached a threshold of DIFFS[..].u, his next turn is a roar (RAGE.dur, RAGE.dur2 for the next ones: shake, flash, sting),
+/* rages, as in Ember Bridge (shared/js/18-boss-diff.js LB.BOSS_DIFF, 36-p2-foundry-logic.js qTurn / qRage): when the boss's HP has
+   reached a threshold of S.d.bd.rages (rages3 in phase III), his next turn is a roar (RAGE.dur, RAGE.dur2 for the next ones: shake, flash, sting),
    then his rage spell (the signature spell of the phase), then the second-half patterns; the final assault comes at
    RAGE.finalHp. The boss bar marks the thresholds (pips underlined, as in Ember Bridge). */
 const RAGE={dur:1.6,dur2:.8,finalHp:1};
-const rageAt=()=>S.phase===3?S.d.u3:S.d.u;   // rage thresholds of the current phase
+const rageAt=()=>LB.rageHp(S.d.bd,S.phase);   // rage thresholds of the current phase
 const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
