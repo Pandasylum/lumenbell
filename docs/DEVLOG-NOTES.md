@@ -258,3 +258,4 @@
 
 ## 2026-11-06 · docs/audit-docs (corrections factuelles)
 - Ce que le joueur verra : rien de visible. Renvois et état de la CI mis à jour dans `docs/COMMUN.md`, `NOTES.md`, `CHANGEMENTS.md` et les notes du Chapitre II.
+- Rien de visible : documentation (note BALANCE, décisions remplacées archivées).
