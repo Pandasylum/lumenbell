@@ -1,3 +1,5 @@
+⚠ Périmé pour le Chapitre II depuis le 2026-11-04. Valeurs actuelles : voir docs/decisions (2026-11-04-c2-pv-rage-calque-c1, 2026-11-04-c2-rage-relance-c1, 2026-11-05-rythme-uniforme, 2026-11-06-voix-vitesse-x1, 2026-11-06-boss-rules) et LB.BOSS_DIFF / LB.BOSS_RULES (shared/js/18-boss-diff.js). Périmé : PV et seuils de boss du C2, facteur f (sp, ×1,1 de rage, vitesse de la Voix), rythme interne des attaques, durées « avant ⟹ après rage ». Valable : Partie 1 (Chapitre I), gestes du Veilleur (shared). Les tableaux C2 ne sont régénérés que lors du prochain rééquilibrage d'un boss, à la demande de Kevin.
+
 # BALANCE — Lumenbell, Chapitres I et II
 
 *Doc seule, généré par lecture du code (branche `main`) — aucune valeur inventée. Les valeurs du code sont recopiées ; une valeur dérivée porte sa formule. Hors périmètre : `docs/` uniquement.*
