@@ -54,14 +54,14 @@ Hors `archives/`, `docs/decisions/` et journaux datés (`docs/DEVLOG-NOTES.md`, 
 | `CLAUDE.md` | 18-19 | règles 18 et 19 : `build_chapter.py`, `build_site.py`, `ch2-smoke`, `ch2-bot`, `visual-shots`, `trial-*`, `boss-diff-static.js` existent | aucun écart |
 | `CLAUDE.md` | 15 | périmètres `shared ch2 hub` = défaut de `workflow_dispatch` dans `.github/workflows/tests.yml` | aucun écart |
 | `README.md`, `NOTES.md` | — | `build_chapter.py`, `build_site.py`, `build_test.py`, `extract_texts.py`, `node smoke.js`, `npm ci` (scripts `smoke`, `bot`, `fonts` de `tests/package.json`) : tous valides | aucun écart |
-| `NOTES.md` | 19, 26, 28 | décrivent la CI comme « cible » alors que `tests.yml` la met déjà en œuvre | ligne 26 corrigée (6 nov., `paths-ignore` réel) ; ligne 28 laissée : à valider, elle contredit `tests.yml` (périmètres automatiques sur PR, un seul job, pas de `trial-*` ni `visual-shots` dans le workflow) |
+| `NOTES.md` | 19, 26, 28 | décrivent la CI comme « cible » alors que `tests.yml` la met déjà en œuvre | corrigé (6 nov. : lignes 26, 28 et 30 alignées sur `tests.yml` ; règle 19 de `CLAUDE.md` réécrite, décision de Kevin du 6 nov.) |
 | `CLAUDE.md` | 18 vs 30 | `d.sp` / `RHY` / `64-prologue.js` cités ; non vérifié dans le code (hors périmètre) | à laisser |
 
 ## 5. Doublons et contradictions (liste seule)
 
 | Documents | Constat | Action |
 |---|---|---|
-| `CLAUDE.md` r.10 · `NOTES.md` 19, 26, 28 · `README.md` 14 | règle des tests/CI écrite dans trois documents, formulations différentes (liste des fichiers de `tests/` complétée dans `NOTES.md:19` le 6 nov.) | à valider : copies non identiques à `CLAUDE.md` (règle 19), aucune remplacée par un renvoi |
+| `CLAUDE.md` r.10 · `NOTES.md` 19, 26, 28 · `README.md` 14 | règle des tests/CI écrite dans trois documents, formulations différentes (liste des fichiers de `tests/` complétée dans `NOTES.md:19` le 6 nov.) | `NOTES.md` 26, 28 : corrigé (renvoi à la règle 19, 6 nov.) ; `README.md` 14 : aucun écart ; reste à valider : `CLAUDE.md` r.10 |
 | `CLAUDE.md` « Difficulté » · `docs/BALANCE.md` · `shared/NOTES.md` | règles de difficulté et `BOSS_DIFF` exprimées à plusieurs endroits ; contradictions : `docs/BALANCE.md:9` (durées multipliées par `f = 1/(sp×(1+.1×stage))`) et `BIBLE.md:36-39` (PV Colosse 8/10/14) contre `CLAUDE.md` (pas d'accélération par rage, PV via `LB.BOSS_DIFF`) | `BALANCE.md` (ligne 11 en réalité) et `chapters/ch2-silent-bells/NOTES.md:23` corrigés (6 nov.) ; `BIBLE.md:36-39` : ancien écart seulement pour Difficile phase III (12), non modifié (BIBLE intouchable) |
 | `CLAUDE.md` r.2 · `CHANGEMENTS.md` 25 | statuts : « Fait (PR fusionnée) » identiques ; mais le tableau contient aussi « Fait » seul, « Fait à la fusion de la PR », « Fait\t<date>\t<PR> » | à valider |
 | `docs/COMMUN.md` · `shared/NOTES.md` | inventaire du cadre commun (`LB.menu`, `LB.card`, `LB.pause`…) décrit deux fois, `COMMUN.md` corrigé pour `LB.gate` (6 nov.) ; détails non identiques, aucun renvoi posé | à valider |
@@ -90,7 +90,8 @@ Hors `archives/`, `docs/decisions/` et journaux datés (`docs/DEVLOG-NOTES.md`, 
 - Passe du 6 novembre : `docs/COMMUN.md` 5, 82, 164 ; `chapters/ch2-silent-bells/NOTES.md` 185 ; `NOTES.md` 19, 26 ; `CHANGEMENTS.md` 169 : corrigés.
 
 **À valider**
-- `NOTES.md` 28 : règle de quota décrite en « cible », en désaccord avec `tests.yml`.
+- ~~`NOTES.md` 28 : règle de quota en « cible »~~ : corrigé (6 nov.).
+- `docs/AUDIT-OPTIM.md:86` (« CI manuelle `ch2-bot` / `visual-shots` », règle 19) et `docs/AUDIT-NETTOYAGE.md:202` (hub `hub.js`, `hub-site.js` « (manuel) ») : formulations ambiguës, périmètres désormais automatiques sur PR ; non modifiées (audits datés).
 - `CHANGEMENTS.md` : statuts non uniformes ; « À faire » / « En cours » résiduels (sections F, J, O).
 - Doublons du § 5 (règle des tests/CI, difficulté, cadre commun).
 - Croissance : `docs/DEVLOG-NOTES.md` (254) et `CHANGEMENTS.md` (214).

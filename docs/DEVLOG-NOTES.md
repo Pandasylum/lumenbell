@@ -265,3 +265,6 @@
 
 ## 2026-11-06 · docs/balance-pv
 - Ce que le joueur verra : rien de visible. Règle de rythme et renvoi `LB.BOSS_DIFF` mis à jour dans `docs/BALANCE.md` et les notes du Chapitre II.
+
+## 2026-11-06 · docs/classe-doc-workflow-align
+- Ce que le joueur verra : rien de visible. Règle 19 de `CLAUDE.md` et notes de la CI alignées sur `tests.yml` (périmètres touchés automatiques sur PR).
