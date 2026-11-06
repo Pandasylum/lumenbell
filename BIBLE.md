@@ -5,11 +5,12 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 ## Pitch et identité
 - **Série** : *Lumenbell* est le nom du jeu et de la série. À la fin de l'intro il s'affiche en grand ; « Chapitre I – Ember Bridge » marque seulement le début du premier chapitre.
 - **Chapitre I** : Ember Bridge, le Veilleur contre le Colosse de braise (*Ember Colossus*), en trois décors : le pont de pierre, la Fonderie, puis le Clocher.
-- **Chapitre II** : Silent Bells (dans le dépôt, menu commun). Dans le menu : badge verrouillé « À venir ».
+- **Chapitre II** : Silent Bells (fusionné, menu commun).
 - **Format** : HTML5 canvas 960 × 540, itch.io puis Android (Capacitor, `com.emberbridge.game`, nom d'app *Lumenbell*), peut-être Google Play et iOS.
 - **Langues** : anglais et français, chaque texte dans les deux via `_('anglais','français')`.
 
 ## Univers et ton
+- **Principe directeur** : le jeu se comprend par l'image et la voix ; le texte est un renfort. Si ça peut être montré, ça l'est ; si c'est montré, ce n'est pas redit.
 - Ouverture du chapitre : « Le Colosse a atteint le pont. Derrière le Veilleur, il n'y a plus que la route des vallées. Une seule règle : ne pas reculer d'un pas. »
 - Ton grave et sobre, pas d'humour. **Aucun mot d'annonce à l'écran** : seulement les onomatopées des coups et cris (BAM, CLANG, KRAAAK, GRAAAH…) et les titres de phase. Les phrases descriptives ne servent qu'au lecteur d'écran.
 - Le Veilleur ne parle pas. Le Colosse rugit, il ne s'explique pas.
@@ -19,11 +20,12 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 ## Lore de fond (validé le 26 octobre 2026)
 - **Le secret** : les Veilleurs croient garder la lumière du monde ; ils gardent le monde fermé. Les tours forment la *Couronne d'ancrage* : six en cercle, une au centre.
 - **Les Scellés** : sous chaque tour, un ancien Veilleur enchaîné pour tenir l'*Umbryn* fermée, puis corrompu par elle. Les Veilleurs disent « les Scellés » ; leur vrai nom, « les Liés » (*The Bound*), n'apparaît que dans des textes écrits. Le Colosse de braise est le premier.
-- **Vocabulaire** : tour/flèche (*The Bound Spires*, « Flèches liées »), Scellé, Couronne d'ancrage, *Lumen* (flamme du Veilleur), cloche (le verrou).
-- **La vérité n'est jamais dite** : le joueur la reconstitue par fragments (objets, lieux, détails). Un fragment par chapitre, davantage dans le premier. Aucun texte ne formule « les Scellés étaient des Veilleurs ».
+- **Vocabulaire** : tour/flèche (*The Bound Spires*, « Flèches liées »), Scellé, Couronne d'ancrage, *Lumen* : flamme du Veilleur. Sa vraie couleur est le blanc ; chaque tour le teinte de son élément. Le héros a un jaune neutre, qui vire au jaune-blanc dans ses tirs. Cloche (le verrou).
+- **La vérité n'est jamais dite** : le joueur la reconstitue par fragments (objets, lieux, détails). Un fragment principal par chapitre (le fil du lore principal), davantage au chapitre I qui plante le monde. Le reste d'un chapitre est de la construction, qui ne compte pas dans la règle. Aucun texte ne formule « les Scellés étaient des Veilleurs ».
 - **Arc** : sept chapitres en trois actes ; seuls I et II existent. Fin choisie par la famille du dernier contre : verrouiller (cloche), briser (rayon), porter (éclats).
 - **À ne pas employer** : « Gloamfall », « Mournhold », « Watchlight » comme terme.
-- Noms à vérifier (TMview/INPI) avant sortie publique : Lumenbell, Ember Bridge, Umbryn, Anchor Crown, Bound Spires, Lumen.
+- Noms : Lumenbell est validé. Ember Bridge, Umbryn, Anchor Crown, Bound Spires et Lumen sont des noms communs, risque jugé faible par Kevin ; vérification possible avant la sortie publique.
+- Nom anglais du Phare Noyé : the Drowned Lighthouse, partout (jamais Beacon, mot jugé peu joli). Le mot « beacon » reste employé pour le fanal du Clocher (Chapitre I).
 
 ## Le Veilleur et ses règles
 - **Un seul bouton** : Espace, flèche haut, Z ou W, ou toucher l'écran. P pause, R recommencer.
@@ -51,7 +53,7 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 | Phase | Décor | Fin de phase |
 |---|---|---|
 | I | Le pont de pierre | Il plonge par la brèche dans la fonderie cachée sous l'arche ; le Veilleur saute à sa poursuite |
-| II | La Fonderie (puits, chaînes, lac de lave) | Le grand four engloutit le Colosse ; ravivé, il s'envole par la cheminée |
+| II | La Fonderie (chaînes, lac de lave) | Le grand four engloutit le Colosse ; ravivé, il s'envole par la cheminée |
 | III | Le sommet du Clocher | Scène de fin |
 
 Textes exacts : `docs/TEXTES-CH1.md`.

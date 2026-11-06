@@ -21,7 +21,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Aucun mot d'annonce à l'écran ; seulement onomatopées et titres de phase ; les phrases descriptives servent au lecteur d'écran | `BIBLE.md:16` ; `docs/CH2-SPEC.md:6` |
 | Ce qui se déduit du combat reste déduit | `BIBLE.md:19` ; `docs/CH2-SPEC.md:7` |
 | « Phare » prend sa majuscule partout ; le navire est masculin | `CHANGEMENTS.md:34` |
-| Nom EN du Phare Noyé : toujours *Drowned Lighthouse* ; « beacon » ne désigne que le fanal du Clocher (Chapitre I) | `CHANGEMENTS.md:70` |
+| Nom EN du Phare Noyé : toujours *the Drowned Lighthouse*, jamais « Beacon » (mot jugé peu joli) ; « beacon » reste réservé au fanal du Clocher (Chapitre I) | `CHANGEMENTS.md:70` |
 | Une lanterne s'éteint, elle n'est jamais « brisée » | `docs/LORE.md:118` |
 | « LumenBell » : nom du jeu et de la série | `BIBLE.md:8` ; `docs/CH2-SPEC.md:8` |
 | Titre affiché du menu : « LUMENBELL » (majuscules) ; partout ailleurs « LumenBell » | `docs/decisions/2026-11-02-version-et-titre.md` ; `ROADMAP.md` (renommage) |
@@ -81,7 +81,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Couronne d'ancrage | The Anchor Crown | — | Cercle de six tours et une au centre. Nom secret, jamais expliqué | `BIBLE.md:20,26` ; `docs/LORE.md:46` |
 | Flèches liées | The Bound Spires | — | Ce que les Veilleurs disent de leurs tours | `BIBLE.md:22` ; `docs/LORE.md:47` ; `docs/TEXTES-CH1.md:240` |
 | Tour / flèche | tower / spire | — | Le lieu. Ne pas mélanger tour, Scellé et Couronne | `docs/LORE.md:40` |
-| Fanal | beacon (Bell Tower beacon) | `drawFanal`, `R.fanalAt` | Fanal du Clocher (Chapitre I), allumé à la fin ; ne pas confondre avec le Phare Noyé | `chapters/ch1-ember-bridge/src/js/52-p3-belfry-decor.js:3-4` ; `docs/TEXTES-CH1.md:224` |
+| Fanal | beacon (Bell Tower beacon) | `drawFanal`, `R.fanalAt` | Fanal du Clocher (Chapitre I), allumé à la fin ; « beacon » lui est réservé (le Phare Noyé s'écrit *the Drowned Lighthouse*, jamais « Beacon », mot jugé peu joli) | `chapters/ch1-ember-bridge/src/js/52-p3-belfry-decor.js:3-4` ; `docs/TEXTES-CH1.md:224` |
 | Clocher des Veilleurs | The Watchers' Bell Tower | `R` (phase III), `belfry` | Décor de la phase III du Chapitre I | `DECISIONS.md` (« Refonte du lore Ch. I ») ; `docs/TEXTES-CH1.md:14` |
 | Fonderie | Foundry | `Q`, `drawLake` | Décor de la phase II du Chapitre I | `BIBLE.md:9,53` |
 | Pont de pierre | stone bridge | `G` | Décor de la phase I du Chapitre I | `BIBLE.md:9,52` |
