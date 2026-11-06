@@ -669,11 +669,15 @@ function drawPlank(){
     const l=P.len/2;
     if(gt>=hp.rc&&gt<=hp.p2)ell(HX+24,GY+3,34,4,'rgba(0,0,0,.3)');
     board({x:q.x-c*l,y:q.y-sn*l+dy},{x:q.x+c*l,y:q.y+sn*l+dy},15,al);
-    for(const th of pk){   // a nail at each strike point; it lights up just before its shock (first the upper one, then the lower one)
-      const N=HARPOON_FX.nail,at=th.n===1?P.a:P.b,lit=!th.done&&gt>=th.ti-N.lead;
-      if(th.done&&gt-th.okT>.25)continue;
-      if(lit)glow(at.x,at.y,N.glow,'rgba(255,214,150,.95)',.4+.5*clamp((gt-(th.ti-N.lead))/N.lead,0,1));
-      ell(at.x,at.y,N.r+1.5,N.r+1.5,'#120c08');ell(at.x,at.y,N.r,N.r,lit?'#ffe2a8':'#7a6a58');ell(at.x-1.5,at.y-1.5,N.r*.35,N.r*.35,lit?'#fffbe8':'#b7a58f')}
+    // two rusty nails stick out of the plank, towards the Watcher (they are why it wounds); each lights up just before its shock (first the upper one, then the lower one)
+    for(const th of pk){const N=HARPOON_FX.nail,u=(th.n===1?1:-1)*N.off*P.len,bx=q.x+c*u,by=q.y+sn*u+dy,nx=sn,ny=-c,tx=bx+nx*N.len,ty=by+ny*N.len,lit=!th.done&&gt>=th.ti-N.lead;
+      if(th.done&&gt-th.okT>.25&&gt>hp.p2)continue;
+      ctx.save();ctx.globalAlpha*=al;ctx.lineCap='round';
+      if(lit)glow(tx,ty,N.glow,'rgba(255,214,150,.95)',.4+.5*clamp((gt-(th.ti-N.lead))/N.lead,0,1));
+      ctx.strokeStyle='#120c08';ctx.lineWidth=N.r+3;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
+      ctx.strokeStyle=lit?'#ffcf86':'#7a3d1c';ctx.lineWidth=N.r;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
+      ctx.strokeStyle=lit?'#fff3d0':'#a85c2c';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(bx+1,by);ctx.lineTo(tx+1,ty);ctx.stroke();
+      ell(bx,by,N.r+2,N.r+2,'#2b1a10');ctx.restore()}
     for(const th of pk)if(th.done&&gt-th.okT<.12&&!th.bf){th.bf=1;burst(HX+30,th.n===1?HY-60:GY-50,th.res==='ok'?14:8,'#cdb69a',5,.4,.3)}}}
 /* a chain falling from the ceiling on the Watcher (between two glas): one block */
 function drawDChain(){
