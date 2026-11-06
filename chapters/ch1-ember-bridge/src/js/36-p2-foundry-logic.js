@@ -33,7 +33,7 @@ function setPhaseUI(n){
   cv.setAttribute('aria-label',n===1?_('Arena: the Watcher faces the Ember Colossus on a stone bridge','Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre'):n===2?_('Arena: the Watcher and the winged Ember Colossus face each other at the bottom of the Foundry',"Arène du combat : le Veilleur et le Colosse de braise ailé s'affrontent au fond de la Fonderie"):_('Arena: the Watcher faces the Ember Colossus atop the snowy Watchers\' Bell Tower','Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs'));
 }
 function beginP2(noLore){
-  if(RUN.on&&G&&G.mode==='won'){RUN.cur=Math.min(RUN.max,G.php+DIFF.heal);RUN.st[1]={p:G.blocks,h:G.grabs}}
+  if(RUN.on&&G&&G.mode==='won'){RUN.cur=LB.healFor(DIFF.heal,RUN.max,G.php);RUN.st[1]={p:G.blocks,h:G.grabs}}
   R=null;Q=qNew();setPhaseUI(2);lastP=-1;lastB=-1;
   el.ov.hidden=true;if(!noLore)showLore(2);
   say(_('Phase II. The Foundry. The button now dodges.','Phase II. La Fonderie. Le bouton sert maintenant à esquiver.'));
@@ -65,7 +65,7 @@ function qPick(){
 function qIdle(){const b=Q.boss;b.s='idle';b.t=0;b.wait=DIFF.hard?rand(DIFF.waitMin,DIFF.waitMax):rand(.8,1.4)}
 function qTurn(){
   const b=Q.boss;
-  if(Q.bhp===1){
+  if(Q.bhp===LB.BOSS_RULES.finalHp){
     Q.chain=DIFF.q2?['claws','wings','rocks','roar']:['claws','wings','rocks'];Q.chainMiss=false;
     qRage(1.3,'chain');
   }else if(DIFF.q2){
@@ -73,7 +73,7 @@ function qTurn(){
     if(n>Q.rn){Q.rn=n;if(n>=2)Q.rage2=true;qRoar(n>=2?_('RAGE!','RAGE !'):_('ENRAGED','ENRAGEMENT'),n)}
     else qLaunch(qPick());
   }else if(Q.bhp===DIFF.bd.rages[0]){
-    qRage(Q.enraged?.8:1.6,'rand');
+    qRage(Q.enraged?LB.BOSS_RULES.rageDur2:LB.BOSS_RULES.rageDur,'rand');
   }else qLaunch(qPick());
 }
 function qRage(dur,after){
@@ -81,7 +81,7 @@ function qRage(dur,after){
   b.s='rage';b.t=0;b.dur=dur;b.after=after;Q.enraged=true;
   Q.shake=reduce?0:10;Q.flash=.35;
   tone(70,dur,'sawtooth',.09,60);tone(140,dur*.8,'square',.04,100);
-  say(Q.bhp===1?(DIFF.q2?_('Final assault: claws, wings, debris, then a final roar.','Dernier assaut : griffes, ailes, débris, puis un dernier cri.'):_('Final assault: the Colossus will chain his three attacks.','Dernier assaut : le Colosse va enchaîner ses trois attaques.')):_('The Colossus enrages. A flaming tail will end each attack.','Le Colosse s\'enrage. Une queue enflammée terminera chaque attaque.'));
+  say(Q.bhp===LB.BOSS_RULES.finalHp?(DIFF.q2?_('Final assault: claws, wings, debris, then a final roar.','Dernier assaut : griffes, ailes, débris, puis un dernier cri.'):_('Final assault: the Colossus will chain his three attacks.','Dernier assaut : le Colosse va enchaîner ses trois attaques.')):_('The Colossus enrages. A flaming tail will end each attack.','Le Colosse s\'enrage. Une queue enflammée terminera chaque attaque.'));
 }
 function qLaunch(kind){
   if(kind==='roar'){qRoar();return}

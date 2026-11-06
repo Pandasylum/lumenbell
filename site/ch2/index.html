@@ -376,6 +376,20 @@ LB.bossDiff=(name,chap,boss)=>{
   const O=LB.BOSS_OVERRIDE[chap]||{},o=Object.assign({},LB.BOSS_DIFF[name],(O['*']||{})[name],boss?(O[boss]||{})[name]:null);
   return{hp:o.hp,hp3:o.hp3!=null?o.hp3:o.hp,rages:o.rages.slice(),rages3:(o.rages3||o.rages).slice()}};
 LB.rageHp=(b,phase)=>phase===3?b.rages3:b.rages;
+LB.BOSS_RULES={finalHp:1,rageDur:1.6,rageDur2:.8};
+LB.rageState={
+  fresh:()=>({rageN:0,rageHp0:null,rageNext:0,finalDone:false}),
+  isFinal:(S,withFinal)=>withFinal&&S.bossHp<=LB.BOSS_RULES.finalHp,
+  dur:n=>n>1?LB.BOSS_RULES.rageDur2:LB.BOSS_RULES.rageDur,
+  check:(S,thr,withFinal)=>{
+    const n=thr.filter(x=>S.bossHp<=x).length;
+    if(!S.rageNext){
+      if(S.rageHp0!=null){if(S.bossHp>=S.rageHp0&&S.rageN>0)S.rageN--;S.rageHp0=null}
+      if(S.finalDone&&S.bossHp>0)S.finalDone=false}
+    if(n>S.rageN&&!LB.rageState.isFinal(S,withFinal)){S.rageN=n;S.rageHp0=S.bossHp;S.rageNext=n;return n}
+    return 0}
+};
+LB.healFor=(heal,startHp,hp)=>heal===true?startHp:heal?Math.min(startHp,hp+heal):hp;
 LB.WATCHER_T={
   breath:{bob:1.2,bobF:2,fl:1.5,flF:4},            
   walk:{bob:4,f:9.8},                               
@@ -2630,16 +2644,14 @@ function hud(){
 }
 
 function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
-const RAGE={dur:1.6,dur2:.8,finalHp:1};
 const rageAt=()=>LB.rageHp(S.d.bd,S.phase);   // rage thresholds of the current phase
-const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
+const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?LB.BOSS_RULES.finalHp:null);   // form I of phase III has no final assault
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
   else if(S.phase===1){banner(_('Turquoise heart','Cœur turquoise'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
   else if(S.form===2)banner(_('Bell storm','Tempête de cloches'),_('The side lanterns fire rings in turn, then the trap bell falls.','Les lanternes latérales tirent des anneaux tour à tour, puis la cloche-piège tombe.'));
   else banner(_('Rising tide','Marée montante'),_('The wave floods the reefs; spikes rise as it ebbs.','La vague noie les récifs ; des pics jaillissent quand elle se retire.'));
 }
-const FINAL_AT=RAGE.finalHp;
 const RAIN={normal:[.32,.62],hard:[.55,.9],grace:.13,hurt:.14};
 const VX={
   gap:{easy:.6,normal:.75,hard:1.05},
@@ -2677,17 +2689,13 @@ function mirrorPick(n,x0,x1){
   return c.sort(()=>Math.random()-.5).slice(0,n)}
 function spawn(){
   const d=S.d,id=S.phase,f2=id===3&&S.form===2,gen=f2?P3b:[P1,P2,P3][id-1];
-  const n=rageAt().filter(x=>S.bossHp<=x).length;
-  if(!S.rageNext){
-    if(S.rageHp0!=null){if(S.bossHp>=S.rageHp0&&S.rageN>0)S.rageN--;S.rageHp0=null}
-    if(S.finalDone&&S.bossHp>0)S.finalDone=false;
-  }
-  if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.rageHp0=S.bossHp;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
+  const hasFinal=id!==3||f2,n=LB.rageState.check(S,rageAt(),hasFinal);
+  if(n){S.angerShown=true;S.roarT=gt;S.roarD=LB.rageState.dur(n);S.nextAt=gt+S.roarD;S.shake=10;rageBanner();return}
   const go=l=>{const q=sched(l);q.spell=l.spell;return q};   // the spell shown by the riposte (set by P2)
   const stage=S.rageN?1:0,f=1/(RHY.sp*(id===2?VOICE_SPEED:1)*(stage?RHY.rage[id]:1));   // inside rhythm = Normal's, in real seconds, same before and after the rage, whatever the difficulty
   if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;go(gen(stage,f,gt+.25,false,r));return}
-  if(!S.finalDone&&S.bossHp<=FINAL_AT&&(id!==3||f2)){
-    S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=RAGE.dur2;S.shake=10;
+  if(!S.finalDone&&LB.rageState.isFinal(S,hasFinal)){
+    S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=LB.BOSS_RULES.rageDur2;S.shake=10;
     banner(_('Final assault','Dernier assaut'),[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
     go(gen(1,f,gt+1.6,true));return}
   go(gen(stage,f,gt+.25));
@@ -3157,9 +3165,9 @@ function replayEpilogue(cb){if(EPI.playing())return;const keep={gt,t0:S.epT0,par
 function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
   S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if(LB.audio.music)MUSIC.bed(2);
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
-function resetPhaseState(){Object.assign(S,{shardGone:null,peA:0,angerShown:false,rageN:0,rageHp0:null,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
-  S.phase=id;S.form=1;S.bossMax=id===3?S.d.bd.hp3:S.d.bd.hp;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
+  S.phase=id;S.form=1;S.bossMax=id===3?S.d.bd.hp3:S.d.bd.hp;S.bossHp=S.bossMax;S.hp=o.first?S.hpMax:LB.healFor(S.d.heal,S.hpMax,S.hp);   // heal rule shared: true = full refill, a number = that many HP capped at the starting HP (trial: +1)
  resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
 }

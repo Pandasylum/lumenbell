@@ -127,19 +127,17 @@ function hud(){
 /* rages and final assaults: nothing written on screen (the sound and the attacks tell it); the screen reader gets the name */
 function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
 /* rages, as in Ember Bridge (shared/js/18-boss-diff.js LB.BOSS_DIFF, 36-p2-foundry-logic.js qTurn / qRage): when the boss's HP has
-   reached a threshold of S.d.bd.rages (rages3 in phase III), his next turn is a roar (RAGE.dur, RAGE.dur2 for the next ones: shake, flash, sting),
+   reached a threshold of S.d.bd.rages (rages3 in phase III), his next turn is a roar (LB.BOSS_RULES.rageDur, rageDur2 for the next ones: shake, flash, sting),
    then his rage spell (the signature spell of the phase), then the second-half patterns; the final assault comes at
-   RAGE.finalHp. The boss bar marks the thresholds (pips underlined, as in Ember Bridge). */
-const RAGE={dur:1.6,dur2:.8,finalHp:1};
+   LB.BOSS_RULES.finalHp. The boss bar marks the thresholds (pips underlined, as in Ember Bridge). */
 const rageAt=()=>LB.rageHp(S.d.bd,S.phase);   // rage thresholds of the current phase
-const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
+const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?LB.BOSS_RULES.finalHp:null);   // form I of phase III has no final assault
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
   else if(S.phase===1){banner(_('Turquoise heart','Cœur turquoise'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
   else if(S.form===2)banner(_('Bell storm','Tempête de cloches'),_('The side lanterns fire rings in turn, then the trap bell falls.','Les lanternes latérales tirent des anneaux tour à tour, puis la cloche-piège tombe.'));
   else banner(_('Rising tide','Marée montante'),_('The wave floods the reefs; spikes rise as it ebbs.','La vague noie les récifs ; des pics jaillissent quand elle se retire.'));
 }
-const FINAL_AT=RAGE.finalHp;
 /* shard rain (phase I), aligned on Ember Bridge's stone rain (36-p2-foundry-logic.js qRoar / qResolve / qHurt):
    spacing between two shards drawn at random in [lo, hi] s (Normal and Easy .32-.62, Hard .55-.9: the Hard window is
    shorter, so the rhythm is slower), not scaled by the attack speed; in Hard, `grace` s more after the impact (irregular
@@ -234,20 +232,16 @@ function mirrorPick(n,x0,x1){
   return c.sort(()=>Math.random()-.5).slice(0,n)}
 function spawn(){
   const d=S.d,id=S.phase,f2=id===3&&S.form===2,gen=f2?P3b:[P1,P2,P3][id-1];
-  const n=rageAt().filter(x=>S.bossHp<=x).length;
   /* as in Ember Bridge (a fury restarts while the Colossus's HP are still at its threshold): a rage whose counter failed
      (HP not lower than when the roar began) starts again at every attack; once the boss is hit, normal attacks resume until the
-     next threshold. Thresholds already passed never restart (rageN). The final assault restarts until the boss falls. */
-  if(!S.rageNext){
-    if(S.rageHp0!=null){if(S.bossHp>=S.rageHp0&&S.rageN>0)S.rageN--;S.rageHp0=null}
-    if(S.finalDone&&S.bossHp>0)S.finalDone=false;
-  }
-  if(n>S.rageN&&!(S.bossHp<=FINAL_AT&&(id!==3||f2))){S.rageN=n;S.rageHp0=S.bossHp;S.angerShown=true;S.roarT=gt;S.roarD=n>1?RAGE.dur2:RAGE.dur;S.nextAt=gt+S.roarD;S.shake=10;rageBanner();S.rageNext=n;return}
+     next threshold. Thresholds already passed never restart. The final assault restarts until the boss falls (LB.rageState, shared). */
+  const hasFinal=id!==3||f2,n=LB.rageState.check(S,rageAt(),hasFinal);
+  if(n){S.angerShown=true;S.roarT=gt;S.roarD=LB.rageState.dur(n);S.nextAt=gt+S.roarD;S.shake=10;rageBanner();return}
   const go=l=>{const q=sched(l);q.spell=l.spell;return q};   // the spell shown by the riposte (set by P2)
   const stage=S.rageN?1:0,f=1/(RHY.sp*(id===2?VOICE_SPEED:1)*(stage?RHY.rage[id]:1));   // inside rhythm = Normal's, in real seconds, same before and after the rage, whatever the difficulty
   if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;go(gen(stage,f,gt+.25,false,r));return}
-  if(!S.finalDone&&S.bossHp<=FINAL_AT&&(id!==3||f2)){
-    S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=RAGE.dur2;S.shake=10;
+  if(!S.finalDone&&LB.rageState.isFinal(S,hasFinal)){
+    S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=LB.BOSS_RULES.rageDur2;S.shake=10;
     banner(_('Final assault','Dernier assaut'),[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
     go(gen(1,f,gt+1.6,true));return}
   go(gen(stage,f,gt+.25));

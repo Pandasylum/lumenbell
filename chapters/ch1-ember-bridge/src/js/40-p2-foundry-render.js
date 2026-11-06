@@ -170,7 +170,7 @@ function drawPaw(P){
 function drawBoss2(){
   const t=Q.time,b=Q.boss;
   ctx.save();ctx.translate(Q.bx,Q.by);
-  const big=Q.enraged?(Q.bhp===1?1.35:1):.7;
+  const big=Q.enraged?(Q.bhp===LB.BOSS_RULES.finalHp?1.35:1):.7;
   const ag=ctx.createRadialGradient(0,-20,10,0,-20,300*big);
   ag.addColorStop(0,'rgba(255,120,40,'+(.3*big)+')');ag.addColorStop(1,'rgba(255,90,30,0)');
   ctx.fillStyle=ag;ctx.beginPath();ctx.arc(0,-20,300*big,0,6.283);ctx.fill();
@@ -180,13 +180,13 @@ function drawBoss2(){
     drawWing([sd*60,-40],wa,1,'#4a1219',Q.wo,fire,sd);
   }
   ctx.save();ctx.translate(0,148);ctx.scale(.78,.78);
-  demonBody({stow:1,t,warm:Q.enraged?(Q.bhp===1?1.6:1.3):1,jaw:b.s==='rage'||(Q.atk&&Q.atk.kind==='roar')?14:(Q.atk&&Q.atk.hits.some(h=>h.k==='fire'&&Q.atk.t>h.at-.5&&Q.atk.t<h.at+.15)?12:Q.atk?4:0),hurt:Q.recoil>.3});
+  demonBody({stow:1,t,warm:Q.enraged?(Q.bhp===LB.BOSS_RULES.finalHp?1.6:1.3):1,jaw:b.s==='rage'||(Q.atk&&Q.atk.kind==='roar')?14:(Q.atk&&Q.atk.hits.some(h=>h.k==='fire'&&Q.atk.t>h.at-.5&&Q.atk.t<h.at+.15)?12:Q.atk?4:0),hurt:Q.recoil>.3});
   ctx.restore();
   const pA=pawPos('A'),pB=pawPos('B');
   drawArm(pA.sh,pA.p,62,-1);drawArm(pB.sh,pB.p,62,1);
   drawPaw(pA);drawPaw(pB);
   if(Q.enraged){
-    const sz=Q.bhp===1?1.5:1;
+    const sz=Q.bhp===LB.BOSS_RULES.finalHp?1.5:1;
     [[-88,-45],[88,-45],[-60,-40],[60,-40],[-30,-30],[30,-30],[-100,-18],[100,-18],[-50,60],[50,60],[0,-112],[-30,-105],[30,-105],[-70,20],[70,20]].forEach((q,i)=>{
       const h=(26+20*Math.abs(Math.sin(t*9+i*1.7)))*sz,w=(8+3*Math.abs(Math.sin(t*7+i)))*sz;
       qflame(q[0],q[1],w,h,i,i%2?'rgba(255,196,90,.88)':'rgba(255,100,40,.88)');
