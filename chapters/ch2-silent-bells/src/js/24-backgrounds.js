@@ -139,10 +139,11 @@ function bg2(){
   // drips from the vault
   for(let i=0;i<9;i++){const x=60+i*103,k=(rt*.5+i*.37)%1;ell(x,k*GY,1.4,3,`rgba(170,235,230,${.35*(1-k)})`)}
   // floating mirror shards (same positions as the shard rain)
-  for(const [si,s] of SHARDS.entries()){if(S.shardGone&&S.shardGone[si]>gt)continue;ctx.save();ctx.translate(s.x+Math.sin(rt*.4+s.o)*12,s.y+Math.cos(rt*.5+s.o)*8);ctx.rotate(s.r+rt*s.v);
+  roomTick();   // the hall closes in (36-boss-hollow-voice.js): the mirrors count the rages
+  for(const [si,s] of SHARDS.entries()){if(S.shardGone&&S.shardGone[si]>gt)continue;const ra=roomShard(si);if(ra<=0)continue;ctx.save();ctx.globalAlpha*=ra;ctx.translate(s.x+Math.sin(rt*.4+s.o)*12,s.y+Math.cos(rt*.5+s.o)*8);ctx.rotate(s.r+rt*s.v);
     g=s.g||(s.g=ctx.createLinearGradient(-s.s,-s.s,s.s,s.s),s.g.addColorStop(0,'rgba(225,248,245,.30)'),s.g.addColorStop(.5,'rgba(100,170,170,.08)'),s.g.addColorStop(1,'rgba(225,248,245,.22)'),s.g);
     ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s.s);ctx.lineTo(s.s*.6,0);ctx.lineTo(s.s*.1,s.s*.8);ctx.lineTo(-s.s*.5,s.s*.1);ctx.closePath();ctx.fill();
-    ctx.strokeStyle='rgba(235,252,250,.35)';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+    ctx.strokeStyle='rgba(235,252,250,.35)';ctx.lineWidth=1;ctx.stroke();roomCrack(si,s.s);ctx.restore()}
   // the flooded floor: dark water over flagstones (the reflection is laid on it later)
   bgLayer('2c',GY-4,H,()=>{
     const g=ctx.createLinearGradient(0,GY,0,H);g.addColorStop(0,'#0c2b2f');g.addColorStop(1,'#020708');ctx.fillStyle=g;ctx.fillRect(0,GY,W,H-GY);
@@ -158,6 +159,7 @@ function mirrorFloor(){
   ctx.save();ctx.globalAlpha=MIRROR.a;ctx.translate(0,GY);ctx.scale(1,-.5);try{ctx.drawImage(c,0,Math.round((GY-h)*sc),c.width,Math.round(h*sc),0,-h,W,h)}catch(e){}ctx.restore();
   const g=ctx.createLinearGradient(0,GY,0,H);g.addColorStop(0,'rgba(20,80,82,.18)');g.addColorStop(1,'rgba(2,8,9,.75)');ctx.fillStyle=g;ctx.fillRect(0,GY,W,H-GY);
   ctx.strokeStyle='rgba(170,240,230,.10)';ctx.lineWidth=1;for(let i=0;i<9;i++){const y=GY+5+i*i*1.3,o=Math.sin(rt*1.2+i)*20;ctx.beginPath();ctx.moveTo(-20+o,y);ctx.lineTo(W+20+o,y);ctx.stroke()}
+  voiceStretch();
   ctx.restore();
   ctx.strokeStyle='rgba(205,250,245,.35)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,GY+.5);ctx.lineTo(W,GY+.5);ctx.stroke();
 }
