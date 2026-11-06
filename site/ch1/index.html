@@ -388,6 +388,20 @@ LB.bossDiff=(name,chap,boss)=>{
   const O=LB.BOSS_OVERRIDE[chap]||{},o=Object.assign({},LB.BOSS_DIFF[name],(O['*']||{})[name],boss?(O[boss]||{})[name]:null);
   return{hp:o.hp,hp3:o.hp3!=null?o.hp3:o.hp,rages:o.rages.slice(),rages3:(o.rages3||o.rages).slice()}};
 LB.rageHp=(b,phase)=>phase===3?b.rages3:b.rages;
+LB.BOSS_RULES={finalHp:1,rageDur:1.6,rageDur2:.8};
+LB.rageState={
+  fresh:()=>({rageN:0,rageHp0:null,rageNext:0,finalDone:false}),
+  isFinal:(S,withFinal)=>withFinal&&S.bossHp<=LB.BOSS_RULES.finalHp,
+  dur:n=>n>1?LB.BOSS_RULES.rageDur2:LB.BOSS_RULES.rageDur,
+  check:(S,thr,withFinal)=>{
+    const n=thr.filter(x=>S.bossHp<=x).length;
+    if(!S.rageNext){
+      if(S.rageHp0!=null){if(S.bossHp>=S.rageHp0&&S.rageN>0)S.rageN--;S.rageHp0=null}
+      if(S.finalDone&&S.bossHp>0)S.finalDone=false}
+    if(n>S.rageN&&!LB.rageState.isFinal(S,withFinal)){S.rageN=n;S.rageHp0=S.bossHp;S.rageNext=n;return n}
+    return 0}
+};
+LB.healFor=(heal,startHp,hp)=>heal===true?startHp:heal?Math.min(startHp,hp+heal):hp;
 LB.WATCHER_T={
   breath:{bob:1.2,bobF:2,fl:1.5,flF:4},            
   walk:{bob:4,f:9.8},                               
@@ -2433,7 +2447,7 @@ function setPhaseUI(n){
   cv.setAttribute('aria-label',n===1?_('Arena: the Watcher faces the Ember Colossus on a stone bridge','Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre'):n===2?_('Arena: the Watcher and the winged Ember Colossus face each other at the bottom of the Foundry',"Arène du combat : le Veilleur et le Colosse de braise ailé s'affrontent au fond de la Fonderie"):_('Arena: the Watcher faces the Ember Colossus atop the snowy Watchers\' Bell Tower','Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs'));
 }
 function beginP2(noLore){
-  if(RUN.on&&G&&G.mode==='won'){RUN.cur=Math.min(RUN.max,G.php+DIFF.heal);RUN.st[1]={p:G.blocks,h:G.grabs}}
+  if(RUN.on&&G&&G.mode==='won'){RUN.cur=LB.healFor(DIFF.heal,RUN.max,G.php);RUN.st[1]={p:G.blocks,h:G.grabs}}
   R=null;Q=qNew();setPhaseUI(2);lastP=-1;lastB=-1;
   el.ov.hidden=true;if(!noLore)showLore(2);
   say(_('Phase II. The Foundry. The button now dodges.','Phase II. La Fonderie. Le bouton sert maintenant à esquiver.'));
@@ -2464,7 +2478,7 @@ function qPick(){
 function qIdle(){const b=Q.boss;b.s='idle';b.t=0;b.wait=DIFF.hard?rand(DIFF.waitMin,DIFF.waitMax):rand(.8,1.4)}
 function qTurn(){
   const b=Q.boss;
-  if(Q.bhp===1){
+  if(Q.bhp===LB.BOSS_RULES.finalHp){
     Q.chain=DIFF.q2?['claws','wings','rocks','roar']:['claws','wings','rocks'];Q.chainMiss=false;
     qRage(1.3,'chain');
   }else if(DIFF.q2){
@@ -2472,7 +2486,7 @@ function qTurn(){
     if(n>Q.rn){Q.rn=n;if(n>=2)Q.rage2=true;qRoar(n>=2?_('RAGE!','RAGE !'):_('ENRAGED','ENRAGEMENT'),n)}
     else qLaunch(qPick());
   }else if(Q.bhp===DIFF.bd.rages[0]){
-    qRage(Q.enraged?.8:1.6,'rand');
+    qRage(Q.enraged?LB.BOSS_RULES.rageDur2:LB.BOSS_RULES.rageDur,'rand');
   }else qLaunch(qPick());
 }
 function qRage(dur,after){
@@ -2480,7 +2494,7 @@ function qRage(dur,after){
   b.s='rage';b.t=0;b.dur=dur;b.after=after;Q.enraged=true;
   Q.shake=reduce?0:10;Q.flash=.35;
   tone(70,dur,'sawtooth',.09,60);tone(140,dur*.8,'square',.04,100);
-  say(Q.bhp===1?(DIFF.q2?_('Final assault: claws, wings, debris, then a final roar.','Dernier assaut : griffes, ailes, débris, puis un dernier cri.'):_('Final assault: the Colossus will chain his three attacks.','Dernier assaut : le Colosse va enchaîner ses trois attaques.')):_('The Colossus enrages. A flaming tail will end each attack.','Le Colosse s\'enrage. Une queue enflammée terminera chaque attaque.'));
+  say(Q.bhp===LB.BOSS_RULES.finalHp?(DIFF.q2?_('Final assault: claws, wings, debris, then a final roar.','Dernier assaut : griffes, ailes, débris, puis un dernier cri.'):_('Final assault: the Colossus will chain his three attacks.','Dernier assaut : le Colosse va enchaîner ses trois attaques.')):_('The Colossus enrages. A flaming tail will end each attack.','Le Colosse s\'enrage. Une queue enflammée terminera chaque attaque.'));
 }
 function qLaunch(kind){
   if(kind==='roar'){qRoar();return}
@@ -2856,7 +2870,7 @@ function drawPaw(P){
 function drawBoss2(){
   const t=Q.time,b=Q.boss;
   ctx.save();ctx.translate(Q.bx,Q.by);
-  const big=Q.enraged?(Q.bhp===1?1.35:1):.7;
+  const big=Q.enraged?(Q.bhp===LB.BOSS_RULES.finalHp?1.35:1):.7;
   const ag=ctx.createRadialGradient(0,-20,10,0,-20,300*big);
   ag.addColorStop(0,'rgba(255,120,40,'+(.3*big)+')');ag.addColorStop(1,'rgba(255,90,30,0)');
   ctx.fillStyle=ag;ctx.beginPath();ctx.arc(0,-20,300*big,0,6.283);ctx.fill();
@@ -2866,13 +2880,13 @@ function drawBoss2(){
     drawWing([sd*60,-40],wa,1,'#4a1219',Q.wo,fire,sd);
   }
   ctx.save();ctx.translate(0,148);ctx.scale(.78,.78);
-  demonBody({stow:1,t,warm:Q.enraged?(Q.bhp===1?1.6:1.3):1,jaw:b.s==='rage'||(Q.atk&&Q.atk.kind==='roar')?14:(Q.atk&&Q.atk.hits.some(h=>h.k==='fire'&&Q.atk.t>h.at-.5&&Q.atk.t<h.at+.15)?12:Q.atk?4:0),hurt:Q.recoil>.3});
+  demonBody({stow:1,t,warm:Q.enraged?(Q.bhp===LB.BOSS_RULES.finalHp?1.6:1.3):1,jaw:b.s==='rage'||(Q.atk&&Q.atk.kind==='roar')?14:(Q.atk&&Q.atk.hits.some(h=>h.k==='fire'&&Q.atk.t>h.at-.5&&Q.atk.t<h.at+.15)?12:Q.atk?4:0),hurt:Q.recoil>.3});
   ctx.restore();
   const pA=pawPos('A'),pB=pawPos('B');
   drawArm(pA.sh,pA.p,62,-1);drawArm(pB.sh,pB.p,62,1);
   drawPaw(pA);drawPaw(pB);
   if(Q.enraged){
-    const sz=Q.bhp===1?1.5:1;
+    const sz=Q.bhp===LB.BOSS_RULES.finalHp?1.5:1;
     [[-88,-45],[88,-45],[-60,-40],[60,-40],[-30,-30],[30,-30],[-100,-18],[100,-18],[-50,60],[50,60],[0,-112],[-30,-105],[30,-105],[-70,20],[70,20]].forEach((q,i)=>{
       const h=(26+20*Math.abs(Math.sin(t*9+i*1.7)))*sz,w=(8+3*Math.abs(Math.sin(t*7+i)))*sz;
       qflame(q[0],q[1],w,h,i,i%2?'rgba(255,196,90,.88)':'rgba(255,100,40,.88)');
@@ -3227,7 +3241,7 @@ function rNew(){
     rage:0,u5:false,u55:false,u1:false,healed:false,cycle:1,stacked:0,cut:0,fall:[],fin:null,st:0,ibn:-1,introHx:-20,iclash:false,roared:false};
 }
 function beginP3(noLore){
-  if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=Math.min(RUN.max,Q.php+DIFF.heal);RUN.st[2]={p:Q.dodges,h:Q.taken}}
+  if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=LB.healFor(DIFF.heal,RUN.max,Q.php);RUN.st[2]={p:Q.dodges,h:Q.taken}}
   Q=null;R=rNew();el.ov.classList.remove('clear');setPhaseUI(3);lastP=-1;lastB=-1;
   el.ov.hidden=true;if(!noLore)showLore(3);
   say(_('Phase III. The Bell Tower. The button raises your guard to block.','Phase III. Le Clocher. Le bouton lève ta garde pour bloquer.'));
@@ -3304,7 +3318,7 @@ function rUlt(lv){
   rLaunch(rPickFrom(R.healed?allPool():BASE),{ult:u,lv});
 }
 function rNext(){
-  if(R.bhp<=1&&!R.u1)return rUlt(1);
+  if(R.bhp<=LB.BOSS_RULES.finalHp&&!R.u1)return rUlt(1);
   if(R.bhp<=DIFF.bd.rages3[0]&&!R.u5)return rUlt(5);
   if(DIFF.bd.rages3[1]&&R.u5&&!R.u55&&R.bhp<=DIFF.bd.rages3[1])return rUlt(55);
   rLaunch(rPick());
@@ -3377,7 +3391,7 @@ function rDamage(k,c){
     qFlameBurst(tg[0],tg[1],1.5,true);R.shake=reduce?0:20;
     tone(90,.6,'sawtooth',.14,-40);tone(1200,.3,'sine',.07,-600);
     if(R.healed&&R.hornAt==null){R.hornAt=R.time;R.hornX=R.bx;noise(.3,.22,5000,900);tone(900,.25,'square',.06,-600);qBurst(R.bx+105,DECK-340,16,['#ffc15a','#ff7a2b','#ffffff'])}
-    if(R.bhp<=1){
+    if(R.bhp<=LB.BOSS_RULES.finalHp){
       if(!R.healed&&!DIFF.easy){ 
         R.healed=true;R.wdAt=R.time;R.cycle=2;R.u5=false;
         qBurst(R.bx-110,DECK-300,24,['#ffc15a','#ff7a2b','#ffffff']);qBurst(R.bx+110,DECK-300,24,['#ffc15a','#ff7a2b','#ffffff']);noise(.6,.16,3200,500);R.u55=false;R.u1=false;R.rk5=null;R.cn=null;R.pl.s='ready';R.pl.t=0;

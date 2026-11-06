@@ -122,7 +122,7 @@ Déclencheurs (`rNext`, 44-p3-belfry-logic.js:128) : PV Colosse ≤ 1 → rage f
 | PV du boss (`boss`, « gardés de l'import jusqu'aux playtests ») | 6 | 8 | 10 | `02-core.js:35-37` |
 | Seuils de rage (`u`) | [3] | [4] | [7, 4] | `02-core.js:35-37` |
 | Nombre de rages / dernier assaut | 1 / à PV ≤ 1 | 1 / à PV ≤ 1 | 2 / à PV ≤ 1 | `64-prologue.js:130,138` |
-| Rugissement de rage (`RAGE.dur` / `dur2`) · `RAGE.finalHp` = `FINAL_AT` | 1.6 / .8 · 1 | idem | idem | `64-prologue.js:130,138` |
+| Rugissement de rage (`LB.BOSS_RULES.rageDur` / `rageDur2`) · `LB.BOSS_RULES.finalHp` | 1.6 / .8 · 1 | idem | idem | `shared/js/18-boss-diff.js` |
 | Vitesse d'attaque `sp` | .85 | 1 | 1.18 | `02-core.js:35-37` |
 | f avant rage (1 / sp) · après rage (1 / (sp × 1.1)) | 1.176 · 1.069 | 1 · .909 | .847 · .770 | `64-prologue.js:172` |
 | PV rendus entre phases (`heal`) | tous | tous | tous | `02-core.js:35-37` |

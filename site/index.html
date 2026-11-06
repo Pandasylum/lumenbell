@@ -337,6 +337,20 @@ LB.bossDiff=(name,chap,boss)=>{
   const O=LB.BOSS_OVERRIDE[chap]||{},o=Object.assign({},LB.BOSS_DIFF[name],(O['*']||{})[name],boss?(O[boss]||{})[name]:null);
   return{hp:o.hp,hp3:o.hp3!=null?o.hp3:o.hp,rages:o.rages.slice(),rages3:(o.rages3||o.rages).slice()}};
 LB.rageHp=(b,phase)=>phase===3?b.rages3:b.rages;
+LB.BOSS_RULES={finalHp:1,rageDur:1.6,rageDur2:.8};
+LB.rageState={
+  fresh:()=>({rageN:0,rageHp0:null,rageNext:0,finalDone:false}),
+  isFinal:(S,withFinal)=>withFinal&&S.bossHp<=LB.BOSS_RULES.finalHp,
+  dur:n=>n>1?LB.BOSS_RULES.rageDur2:LB.BOSS_RULES.rageDur,
+  check:(S,thr,withFinal)=>{
+    const n=thr.filter(x=>S.bossHp<=x).length;
+    if(!S.rageNext){
+      if(S.rageHp0!=null){if(S.bossHp>=S.rageHp0&&S.rageN>0)S.rageN--;S.rageHp0=null}
+      if(S.finalDone&&S.bossHp>0)S.finalDone=false}
+    if(n>S.rageN&&!LB.rageState.isFinal(S,withFinal)){S.rageN=n;S.rageHp0=S.bossHp;S.rageNext=n;return n}
+    return 0}
+};
+LB.healFor=(heal,startHp,hp)=>heal===true?startHp:heal?Math.min(startHp,hp+heal):hp;
 LB.WATCHER_T={
   breath:{bob:1.2,bobF:2,fl:1.5,flF:4},            
   walk:{bob:4,f:9.8},                               

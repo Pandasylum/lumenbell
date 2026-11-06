@@ -47,7 +47,7 @@ function rNew(){
     rage:0,u5:false,u55:false,u1:false,healed:false,cycle:1,stacked:0,cut:0,fall:[],fin:null,st:0,ibn:-1,introHx:-20,iclash:false,roared:false};
 }
 function beginP3(noLore){
-  if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=Math.min(RUN.max,Q.php+DIFF.heal);RUN.st[2]={p:Q.dodges,h:Q.taken}}
+  if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=LB.healFor(DIFF.heal,RUN.max,Q.php);RUN.st[2]={p:Q.dodges,h:Q.taken}}
   Q=null;R=rNew();el.ov.classList.remove('clear');setPhaseUI(3);lastP=-1;lastB=-1;
   el.ov.hidden=true;if(!noLore)showLore(3);
   say(_('Phase III. The Bell Tower. The button raises your guard to block.','Phase III. Le Clocher. Le bouton lève ta garde pour bloquer.'));
@@ -126,7 +126,7 @@ function rUlt(lv){
   rLaunch(rPickFrom(R.healed?allPool():BASE),{ult:u,lv});
 }
 function rNext(){
-  if(R.bhp<=1&&!R.u1)return rUlt(1);
+  if(R.bhp<=LB.BOSS_RULES.finalHp&&!R.u1)return rUlt(1);
   if(R.bhp<=DIFF.bd.rages3[0]&&!R.u5)return rUlt(5);
   if(DIFF.bd.rages3[1]&&R.u5&&!R.u55&&R.bhp<=DIFF.bd.rages3[1])return rUlt(55);
   rLaunch(rPick());
@@ -201,7 +201,7 @@ function rDamage(k,c){
     qFlameBurst(tg[0],tg[1],1.5,true);R.shake=reduce?0:20;
     tone(90,.6,'sawtooth',.14,-40);tone(1200,.3,'sine',.07,-600);
     if(R.healed&&R.hornAt==null){R.hornAt=R.time;R.hornX=R.bx;noise(.3,.22,5000,900);tone(900,.25,'square',.06,-600);qBurst(R.bx+105,DECK-340,16,['#ffc15a','#ff7a2b','#ffffff'])}
-    if(R.bhp<=1){
+    if(R.bhp<=LB.BOSS_RULES.finalHp){
       if(!R.healed&&!DIFF.easy){ /* Facile : pas de seconde vie, la vraie fin suit directement (la fausse fin est supprimée, 1er novembre) */
         R.healed=true;R.wdAt=R.time;R.cycle=2;R.u5=false;
         qBurst(R.bx-110,DECK-300,24,['#ffc15a','#ff7a2b','#ffffff']);qBurst(R.bx+110,DECK-300,24,['#ffc15a','#ff7a2b','#ffffff']);noise(.6,.16,3200,500);R.u55=false;R.u1=false;R.rk5=null;R.cn=null;R.pl.s='ready';R.pl.t=0;
