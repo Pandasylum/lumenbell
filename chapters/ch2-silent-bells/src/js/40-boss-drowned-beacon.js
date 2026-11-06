@@ -5,7 +5,7 @@
    bolt    crackling round the lamp for `tell` s, then `fly`; one lamp at a time (left, right, left...), `gap` s between two starts;
    beam    lamp dark `dark` s, thin warning cone `cone` s, sweep `D` s (hold), `after` later;
    chunk   dust `dust` s, then the stone flies `fly` s; salvo of 2-3 stones, `gap` between two impacts;
-   spike   swirl `tell` s, then 3 spikes at seq s from the first one ("tap... tap-tap");
+   spike   (reworked: the swirl was unreadable) a glowing fissure runs along the ground from the tower to the Watcher's feet in `tell` s, the spike bursts out where its head arrives; one fissure per spike, 3 spikes at seq s from the first ("tap... tap-tap");
    night   rage 1: lamps out, each lights `lit` s before it fires, n bolts `gap` apart;
    morse   rage 2 (Hard): long (a short beam, hold) - short - short (a bolt, tap), reps times, `gap` between signals;
    cross   Part 2 beam, two sweeps, `dark` s of black between them;  anchor  sweep (hold), `rel` s to release, the chain rings as the anchor lifts (`lift` s), then the blow (tap);
@@ -280,10 +280,10 @@ function drawBeacon(){
         ctx.restore()}
     }
     if(th.k==='spike'&&gt>=th.t0){
-      if(!th.done)spikeTell(HX+8,clamp((gt-th.t0)/(th.ti-th.t0),0,1),th.seed);
+      if(!th.done)fissure(th,clamp((gt-th.t0)/(th.ti-th.t0),0,1));
       else if(gt-th.okT<.5){const e=(gt-th.okT)/.5;
         if(th.res==='hit')reefSpikes(HX,1,1-e);
-        else if(e<.05){burst(HX+8,GY-10,14,'#e6f4f0',6,.6,.4);burst(HX+8,GY-6,10,'#2a3a3e',5,.6,.5)}}
+        else{reefSpikes(HX,1,Math.max(0,1-e*4));if(!th.bf){th.bf=1;burst(HX+8,GY-30,16,'#ffe9a8',6,.6,.5);burst(HX+8,GY-10,8,'#fff6d6',4,.5,.3)}}}   // blocked: the spike breaks into golden splinters
     }
     if(th.k==='chunk'&&!th.done&&gt<th.tl&&Math.random()<.35){const o=TOWER[th.ri].e;burst(o.x+(Math.random()-.5)*30,o.y+8,1,'#9aa9a6',2,.5,.2)}   // dust rising from the cracked stone
   }
@@ -311,6 +311,16 @@ function counter3(k){
     else burst(to.x,to.y,14,'#fff3c4',5,.5)}}
 /* reef spikes (were ice): black rock thrusting up from the sea floor, a little foam. Tell: the rock splits and foams
    under the Watcher (k 0..1); hit: the spikes (a = opacity) */
+/* the fissure of a reef spike: a glowing crack races along the ground from the tower to the Watcher's feet (its head arrives at the impact); a ring closes on the feet at the end */
+function fissure(th,k){const x1=HX+8,x0=LX-80,hx=lerp(x0,x1,k),R=mulberry(Math.floor(th.seed*1e6));
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  const tail=Math.min(hx-x0,320);ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=5;ctx.beginPath();
+  for(let m=0;m<=16;m++){const x=hx-tail*(m/16),y=GY+5+(R()-.5)*5;m?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
+  ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(255,226,160,.9)';ctx.lineWidth=2;ctx.beginPath();
+  for(let m=0;m<=16;m++){const x=hx-tail*(m/16),y=GY+5+(R()-.5)*5;m?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
+  glow(hx,GY+4,30,'rgba(255,226,160,.9)',.7);
+  if(k>.7){const q=(k-.7)/.3;ctx.strokeStyle=`rgba(255,226,160,${.9*q})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(x1,GY+3,70*(1-q)+14,(70*(1-q)+14)*.25,0,0,Math.PI*2);ctx.stroke()}
+  ctx.restore()}
 function spikeTell(x,k,seed){const R=mulberry(Math.floor(seed*1e6));ctx.lineWidth=2;
   for(let i=0;i<5;i++){const a=R()*Math.PI,ex=x+Math.cos(a)*70*k,ey=GY+6+Math.sin(a)*14*k;ctx.strokeStyle=`rgba(0,0,0,${.5+k*.4})`;ctx.beginPath();ctx.moveTo(x,GY+6);ctx.lineTo(ex,ey);ctx.stroke();
     ell(ex,ey,2+k*2,1+k,`rgba(225,245,240,${.3+k*.5})`)}

@@ -773,7 +773,7 @@ function P3(stage,f,b,final,rage){
   const bolt=(tell,night)=>{const Z=BF.bolt;tell=tell==null?Z.tell:tell;side=S.boltSide=1-(S.boltSide==null?1:S.boltSide);
     T.push({k:'bolt',t0:t,tell:tell*f,ti:t+(tell+Z.fly)*f,real:true,seed:Math.random(),side,night:night?1:0});t+=Z.gap*f;sp='bolt'};
   // reef spikes (tap): swirl, then three spikes "tap... tap-tap"
-  const spike=()=>{const Z=BF.spike,ti0=t+Z.tell*f;let prev=t;Z.seq.forEach((o,i)=>{const ti=ti0+o*f;T.push({k:'spike',t0:i?Math.max(prev,ti-Z.tell*f):t,ti,real:true,seed:Math.random()});prev=ti});t=ti0+Z.seq[Z.seq.length-1]*f+Z.after*f;sp='spike'};
+  const spike=()=>{const Z=BF.spike,ti0=t+Z.tell*f;let prev=t;Z.seq.forEach((o,i)=>{const ti=ti0+o*f;T.push({k:'spike',t0:ti-Z.tell*f,ti,real:true,seed:Math.random()});prev=ti});t=ti0+Z.seq[Z.seq.length-1]*f+Z.after*f;sp='spike'};
   const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*f,side:Math.random()<.5?-1:1});t+=1.2*f;sp='whip'};
   // pieces of the tower (tap): the tentacle coils, the stone cracks and throws dust, salvo of 2-3
   const chunk=()=>{const Z=BF.chunk,n=Z.salvo[0]+Math.floor(Math.random()*(Z.salvo[1]-Z.salvo[0]+1));
