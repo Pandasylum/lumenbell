@@ -1,4 +1,4 @@
-const $=id=>document.getElementById(id);
+const $=LB.$;
 /* save keys and language: common to the series (shared/, LB.store, LB.key, LB.lang). Common keys lb-lang, lb-snd, lb-mus,
    lb-help (old pn-lang, eb-lang, db-opt*: LB.OLD_KEYS); this chapter's keys lb-ch2-* (unlock, records), old db-unl, db-best-*. */
 LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']],audio:{master:.75,sfx:.9,mus:.3}});
@@ -11,7 +11,7 @@ const _=LB._;
 /* TRIAL_OPEN: true = the Trial is open from the start (testing, as in Chapter I); false = opened by the true ending (lb-ch2-end,
    written at the victory, which also shows « ▶ Outro » in the menu). */
 const TRIAL_OPEN=true;
-function endSeen(){return LB.store.get(LB.key('end'),'0')==='1'}
+const endSeen=LB.endSeen; /* true ending seen: shared/js/04-store.js */
 /* the chapter's table for the series frame (menu, start screen, cards, HUD: shared/js/28-ui.js, docs/COMMUN.md § 3.1) */
 const CHAPTER={n:2,id:'ch2',
   title:'Silent Bells',

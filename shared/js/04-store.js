@@ -11,6 +11,8 @@ LB.oldKeys=k=>{const o=(LB.OLD_KEYS[k]||[]).concat(LB.old[k]||[]);
 LB.store={get(k,d){try{let v=localStorage.getItem(k);
   if(v==null)for(const o of LB.oldKeys(k)){v=localStorage.getItem(o);if(v!=null){try{localStorage.setItem(k,v)}catch(e){}break}}
   return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+/* Vraie fin vue (lb-<id>-end) : ouvre l'Épreuve quand le chapitre ne l'ouvre pas d'office (TRIAL_OPEN du chapitre) */
+LB.endSeen=()=>LB.store.get(LB.key('end'),'0')==='1';
 /* À appeler en tête du chapitre, avant toute lecture : id (préfixe lb-<id>-), old ({nouvelle clé:[anciennes]}),
    oldPrefix ([[début de la nouvelle clé, début de l'ancienne]], pour les records). Migre au démarrage toutes les clés
    connues (et chaque ancienne clé à préfixe présente), puis fixe la langue. */

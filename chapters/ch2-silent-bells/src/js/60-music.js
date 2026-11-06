@@ -1,12 +1,12 @@
 /* ---------- music & ambience (procedural, Web Audio) ---------- */
 const MUSIC=(()=>{
-  let ac=null,out,rev,cur=null,layers=[],bedLayers=[],bedId=null,bedTimer=null,timer=null,next=0,step=0,NB=null,ARR=null;
+  let ac=null,out,rev,cur=null,layers=[],bedLayers=[],bedId=null,bedTimer=null,timer=null,next=0,step=0,ARR=null;
   /* le contexte est celui de la série (LB.audio) ; la chaîne de la musique (out, compresseur, réverbération) est refaite s'il a été recréé */
-  function init(){const c=LB.audio.ensure();if(!c)return false;if(ac===c)return true;ac=c;NB=null;
+  function init(){const c=LB.audio.ensure();if(!c)return false;if(ac===c)return true;ac=c;
     out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(LB.audio.dest);
     rev=ac.createConvolver();const n=ac.sampleRate*3.8,b=ac.createBuffer(2,n,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}rev.buffer=b;
     const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out);return true}
-  const nbuf=()=>{if(!NB){NB=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return NB};
+  const nbuf=()=>LB.audio.noiseBuf(2); /* 2 s de bruit blanc, en cache dans LB.audio */
   function env(g,t,a,p,d){a=Math.max(a,.01);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(p,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
   /* far(): sounds played inside it go through a low-pass filter and a quieter bus (distance: the Illusion's / the echo's voice) */
   let dst=null,farV=1;

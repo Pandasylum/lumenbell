@@ -239,3 +239,6 @@
 
 ## 2026-11-05 · engine/build-chapitre
 - Ce que le joueur verra : rien ne change à l’écran ; les fichiers du jeu sont plus légers (environ 12 à 17 % de moins), donc un chargement un peu plus rapide.
+
+## 2026-11-05 · engine/mutualisation-s4
+- Ce que le joueur verra : rien de visible. Détection tactile, bruit de fond audio, calques de fond, qualité adaptative des lueurs et petits outils du noyau sont regroupés dans `shared/`, avec le même comportement dans les deux chapitres.
