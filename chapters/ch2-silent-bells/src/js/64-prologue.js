@@ -396,7 +396,10 @@ function spaceReplies(T,casts,f,gap,stage,K){
    the series stays clean unless the Watcher takes the returning blow (the 'hit' branches of update() set pat.ok=false) */
 function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
   S.pl.fr=1;   // the recovery after this action is halved (plStep)
-  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec*DG.foolRec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);noteImpact(nt.ti);say(_('The reflection comes back.','Le reflet revient.'))}
+  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec*DG.foolRec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);
+  // the returning reflection is a real impact like the others: never closer than VX.gap to one still to come (pushed back, never dropped)
+  {const g=VX.gap[vdk()];for(let i=0;i<200&&S.threats.some(o=>o!==nt&&!o.done&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(o.ti-nt.ti)<g);i++)nt.ti+=.05}
+  noteImpact(nt.ti);say(_('The reflection comes back.','Le reflet revient.'))}
 /* a fragment of an exploding mirror: leaves the mirror, wanders (shrinking wobble) then settles at its own spot above it */
 function fragPos(th,at){
   const m=shardPos(th.si),k=clamp((at-th.t0)/th.fd,0,1),hx=m.x+(th.fi-(th.fn-1)/2)*46,hy=m.y-34+(th.fi%2)*18,e=eout(k),w=60*(1-k)*Math.min(1,k*6);
