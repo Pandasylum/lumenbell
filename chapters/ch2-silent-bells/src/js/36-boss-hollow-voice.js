@@ -6,13 +6,50 @@ function mirrorLight(){if(S.phase!==2)return 0;const G=MIRROR_GLOW;
   if(S.cine&&S.cine.k==='out'){const t=gt-S.cine.t0;return t<CINE_P1.drop?lerp(G.max,G.end,clamp(t/CINE_P1.drop,0,1)):0}
   if(S.mode==='play'||S.mode==='ko'||S.mode==='dead')return G.base+(G.max-G.base)*(1-S.bossHp/S.bossMax);return G.base}
 function voiceAnim(){
-  let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&!th.ill&&!th.pe&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
-  let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&!th.pe&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
+  let cast=0;for(const th of S.threats){if(th.k==='orb'&&gt>=th.t0&&gt<=th.tl+.15&&th.src===0)cast=Math.max(cast,1);if(th.k==='wail'&&!th.ill&&!th.pe&&!th.rp&&gt>=th.t0&&gt<=th.tl+.2)cast=Math.max(cast,1.4)}
+  let echo=0;for(const th of S.threats){if(th.k==='orb'&&th.src>0&&th.src<3&&gt>=th.t0-.3&&gt<=th.ti+.2)echo=1;if(th.k==='shard'&&th.from!=null&&gt<th.t0+.05)echo=1}
   return{cast,echo};
 }
-const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160},{x:470,y:292}];   // the Voice, the two reflections of the rages, the permanent echo (Hard)
+const VPOS=[{x:735,y:248},{x:575,y:180},{x:860,y:160},{x:470,y:292},{x:850,y:225},{x:640,y:215}];   // the Voice, the two reflections of the rages, the permanent echo (Hard), the responding clone (right of the Voice, hand on the other side), the clone of the final assault
 function voicePos(i){const v=VPOS[i];return{x:v.x,y:v.y+Math.sin(rt*1.6+i*2)*8}}
-function voiceHand(i,cast){const p=voicePos(i);return cast?{x:p.x-84,y:p.y-62}:{x:p.x-46,y:p.y+30}}
+/* ---- the hall closes in (refonte of 6 Nov, SP.room / SP.pres): the floating mirrors of the hall count the rages, the echoes leave a pale
+   trace, the reflection of the Voice stretches towards the Watcher. All state in S.room / S.trace / S.presK, reset with the phase (resetPhaseState) ---- */
+const roomState=()=>S.room||(S.room={k:{},n:0,t:0,d:0});
+/* stage of the fight: 0, 1 after rage 1, 2 after rage 2 / in the final assault; only goes up until the reset */
+function pTier(){const R=roomState(),n=S.finalDone||(S.rageN||0)>=2?2:(S.rageN||0)>=1?1:0;return R.t=Math.max(R.t,n)}
+const roomOff=i=>!!(S.room&&S.room.k[i]);
+function roomPick(){const c=SHARDS.map((m,i)=>i).filter(i=>!roomOff(i)&&!(S.shardGone&&S.shardGone[i]>gt));return c.length?c[Math.floor(Math.random()*c.length)]:-1}
+/* each stage closes one mirror of the hall: rage 1 the mirror cracks, then goes out; the next ones go out */
+function roomTick(){
+  if(S.phase!==2)return;const R=roomState(),t=pTier();
+  while(R.n<t){R.n++;const si=roomPick();if(si<0)continue;R.k[si]={t:gt,crack:R.n===1?SP.room.crack:0,fade:SP.room.fade};MUSIC.fx(R.n===1?'crackGlass':'glints')}}
+/* the mirror dance breaks one more mirror (once per fight) */
+function roomBreak(){const R=roomState();if(R.d)return;R.d=1;const si=roomPick();if(si<0)return;R.k[si]={t:gt,crack:0,fade:SP.room.breakFade};
+  const m=shardPos(si);burst(m.x,m.y,18,'#ece4ff',6,.9,.2);MUSIC.fx('crackGlass')}
+/* opacity factor of a mirror of the hall (1 = intact, then flickering out) and the crack lines drawn on it (in its own frame) */
+function roomShard(si){const k=S.room&&S.room.k[si];if(!k)return 1;const e=gt-k.t;if(e<k.crack)return 1;const u=(e-k.crack)/k.fade;return u>=1?0:(1-u)*(.55+.45*Math.sin(rt*40))}
+function roomCrack(si,s){const k=S.room&&S.room.k[si];if(!k||!k.crack)return;
+  const P=[[.05,-.6],[-.1,-.1],[.25,.35],[.1,.7]],B=[[-.1,-.1],[-.4,.12]],u=clamp((gt-k.t)/k.crack,0,1)*P.length;
+  ctx.save();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.3;ctx.beginPath();
+  P.forEach((q,m)=>{const w=clamp(u-m,0,1);if(m===0){ctx.moveTo(q[0]*s,q[1]*s);return}const a=P[m-1];ctx.lineTo(lerp(a[0],q[0],w)*s,lerp(a[1],q[1],w)*s)});
+  if(u>1.5){ctx.moveTo(B[0][0]*s,B[0][1]*s);ctx.lineTo(lerp(B[0][0],B[1][0],clamp(u-1.5,0,1))*s,lerp(B[0][1],B[1][1],clamp(u-1.5,0,1))*s)}
+  ctx.stroke();ctx.restore()}
+/* pale trace left by a rage echo (slots 1 and 2), until the end of the fight */
+const traceA=i=>S.trace&&S.trace[i]?SP.room.trace*(.8+.2*Math.sin(rt*1.3+i)):0;
+function drawTrace(i){const a=traceA(i);if(a>0)drawVoice(i,a,0,0)}
+/* the reflection of the Voice in the water stretches by one notch after each rage (drawing only; called by mirrorFloor, inside the clip of the water) */
+function voiceStretch(){
+  if(S.phase!==2)return;const Z=SP.pres,d=Math.min(.1,Math.max(0,rt-(S.presR==null?rt:S.presR)));S.presR=rt;
+  S.presK=(S.presK||0)+(Z.len[pTier()]-(S.presK||0))*Math.min(1,d*Z.ease);const L=S.presK;if(L<2)return;
+  const x1=voicePos(0).x-10,x2=x1-L,N=24,yT=GY+2;
+  const g=ctx.createLinearGradient(x2,0,x1,0);g.addColorStop(0,'rgba(120,90,170,0)');g.addColorStop(.4,'rgba(70,50,110,.38)');g.addColorStop(1,'rgba(30,18,50,.6)');
+  ctx.save();ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x1,yT);
+  for(let m=1;m<=N;m++){const u=m/N;ctx.lineTo(lerp(x1,x2,u),yT+Math.sin(u*9-rt*2)*1.5)}
+  for(let m=N;m>=0;m--){const u=m/N;ctx.lineTo(lerp(x1,x2,u),yT+lerp(30,2,u*u)*(1+.2*Math.sin(rt*2.2+u*11)))}
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(200,170,255,.16)';ctx.lineWidth=1;ctx.beginPath();
+  for(let m=0;m<=N;m++){const u=m/N,x=lerp(x1,x2,u),y=yT+lerp(30,2,u*u)*(1+.2*Math.sin(rt*2.2+u*11));m?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();ctx.restore()}
+function voiceHand(i,cast){const p=voicePos(i);if(i===4)return{x:p.x+84,y:p.y-62};return cast?{x:p.x-84,y:p.y-62}:{x:p.x-46,y:p.y+30}}
 function drawBoss2(){
   const A=voiceAnim();
   let ko=S.mode==='ko'&&S.phase===2?clamp((gt-S.koT)/2,0,1):0;
@@ -20,12 +57,21 @@ function drawBoss2(){
   if(S.echoA>0){for(const i of[1,2]){
     // rage: a reflection shatters, sending a shard at the Watcher
     const br=S.threats.find(t=>t.k==='shard'&&t.from===i&&gt>=t.t0);
-    if(br){if(!br.bk){br.bk=1;const p=voicePos(i);burst(p.x,p.y-80,26,'#ece4ff',6,.9,.2);burst(p.x,p.y-20,16,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass')}continue}
-    const has=S.threats.some(t=>t.k==='orb'&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,S.echoA*.5,has?1:0,0)}}
+    if(br){if(!br.bk){br.bk=1;(S.trace||(S.trace={}))[i]=gt;const p=voicePos(i);burst(p.x,p.y-80,26,'#ece4ff',6,.9,.2);burst(p.x,p.y-20,16,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass')}
+      drawTrace(i);continue}
+    const has=S.threats.some(t=>t.k==='orb'&&t.src===i&&gt>=t.t0&&gt<=t.tl+.15);drawVoice(i,Math.max(S.echoA*.5,traceA(i)),has?1:0,0)}}
+  else if(S.trace)for(const i of[1,2])drawTrace(i);   // the rage echoes leave a pale trace in the hall until the end of the fight
   // permanent echo (Hard): its own body (slot 3) stays beside the Voice all fight, rages and final assault included,
   // and fires the orb after each spell
   if(S.d.hard){const on=S.mode==='play';S.peA=on?Math.min(1,(S.peA||0)+.04):Math.max(0,(S.peA||0)-.05);
     if(S.peA>0)drawVoice(3,S.peA*.5,S.threats.some(t=>t.pe&&gt>=t.t0&&gt<=t.tl+.15)?1:0,0)}
+  // the responding clone (Normal and Hard): shows for its answer; for an orb it casts with the hand on the other side of the face (drawn flipped)
+  {const rp=S.threats.find(t=>t.rp&&gt>=t.t0-.5&&gt<=(t.k==='wail'?t.tl:t.ti)+.25);if(rp)S.rpFlip=rp.k==='orb'?1:0;
+    S.rpA=rp?Math.min(1,(S.rpA||0)+.07):Math.max(0,(S.rpA||0)-.06);
+    if(S.rpA>0){const p=voicePos(4),cs=S.threats.some(t=>t.rp&&gt>=t.t0&&gt<=t.tl+.15)?1:0;ctx.save();if(S.rpFlip){ctx.translate(2*p.x,0);ctx.scale(-1,1)}drawVoice(4,S.rpA*.5,cs,0);ctx.restore()}}
+  // final assault: the extra clone stays visible and fires without a warning (Normal and Hard)
+  {const on=S.mode==='play'&&S.finalDone&&!!SP.rageEcho[vdk()];S.reA=on?Math.min(1,(S.reA||0)+.04):Math.max(0,(S.reA||0)-.05);
+    if(S.reA>0)drawVoice(5,S.reA*.5,S.threats.some(t=>t.re&&gt>=t.t0&&gt<=t.tl+.15)?1:0,0)}
   // the Illusion of the wail: appears on the left, throws the second wave towards the Watcher, vanishes
   const iw=S.threats.find(t=>t.k==='wail'&&t.ill&&gt>=t.t0&&gt<=t.ti+.7);
   if(iw){const a=Math.min(clamp((gt-iw.t0)/.35,0,1),clamp((iw.ti+.7-gt)/.5,0,1)),I=SP.wail.ill;

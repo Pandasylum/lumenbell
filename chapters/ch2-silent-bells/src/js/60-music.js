@@ -80,6 +80,10 @@ const MUSIC=(()=>{
     draw:t=>{for(let i=0;i<7;i++)osc('triangle',2000+Math.random()*1200,t+i*.07,.002,.04,.12,.4);nz(t,.5,.06,'bandpass',1400,4,.3)},
     heart:t=>{thump(t,52,.35,.35);thump(t+.26,48,.28,.35);osc('sine',1250,t,.3,.02,1.2,.8,1500)},
     glints:t=>tinkle(t,12,1.4,.03),
+    /* crackle of an orb charging at the Voice's face, one note per type (slow: low and wide, normal: mid, fast: high and dry) */
+    orbSlow:t=>{nz(t,.5,.05,'bandpass',900,3,.5,500,.05);osc('sine',330,t,.2,.03,.5,.7,260)},
+    orbNorm:t=>{for(let i=0;i<4;i++)nz(t+i*.05,.04,.06,'bandpass',2200,4,.4);osc('sine',520,t,.1,.03,.35,.6,440)},
+    orbFast:t=>{for(let i=0;i<7;i++)nz(t+i*.025,.02,.05,'highpass',4200+i*150,2,.3);osc('sine',1400,t,.03,.02,.2,.5,1800)},
     swell:t=>{nz(t,.3,.08,'bandpass',400,3,.6,3200,1);osc('sine',300,t,1,.04,.3,.6,900)},
     crackGlass:t=>{for(let i=0;i<6;i++)nz(t+i*.07,.03,.12,'highpass',3500);tinkle(t,4,.4,.03)},
     shatter:t=>{nz(t,.9,.35,'highpass',2600,1,.6);tinkle(t,16,1,.05);thump(t,90,.3,.4)},

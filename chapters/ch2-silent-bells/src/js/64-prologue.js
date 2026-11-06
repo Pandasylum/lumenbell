@@ -158,19 +158,18 @@ const RAIN={normal:[.32,.62],hard:[.55,.9],grace:.13,hurt:.14};
                the next ones `VX.gap` s apart (the minimum between two real impacts), each sending shards (= shard rain .42 / .95). */
 /* Hollow Voice balancing (phase I), per difficulty (Hard = Normal values unless stated). Seconds, NOT scaled by f.
    gap    minimum between two REAL impacts, all spells together (orb, shard, wail); enforced for every pattern in P2;
-   volley number of orbs of a volley [min, max]; rain number of shards of a shard rain;
+   volley: sizes now in SP.volley (refonte of 6 Nov); rain number of shards of a shard rain;
    echoOrbs / echoShards  orbs fired and shards dropped by each echo during the echo rage;
    dance  final assault (mirror dance): number of mirrors, fragments per mirror (Easy 1, Normal and Hard 2 in all);
    pe     permanent echo (Hard only): all fight long, fires one orb `lag` s after the end of each spell (a wail of its own instead of the orb
          after a wail), never within `wail` s of a wail of the Voice; shifted by the gap, never dropped */
 const VX={
   gap:{easy:.6,normal:.75,hard:1.05},
-  volley:{easy:[2,3],normal:[3,5],hard:[3,5]},
   rain:{easy:2,normal:3,hard:3},
   echoOrbs:{easy:1,normal:2,hard:2},
   echoShards:{easy:1,normal:2,hard:2},
   pe:{lag:.7,wail:.25},
-  dance:{mirrors:{easy:1,normal:2,hard:2},frag:1}   // final assault: mirrors the volley leaves by, fragments per exploding mirror
+  dance:{mirrors:{easy:1,normal:2,hard:2},frag:1,n:{easy:3,normal:5,hard:5},ill:{easy:2,normal:2,hard:2}}   // final assault: mirrors the volley leaves by, fragments per exploding mirror, orbs and illusions of its volley (unchanged by the refonte)
 };
 const vdk=()=>S.d.hard?'hard':S.dk==='easy'?'easy':'normal';
 /* internal rhythm of every attack (gaps between strikes, tells, chains): always the Normal's, in real seconds, whatever the difficulty
@@ -209,7 +208,7 @@ const SP={
   storm:{n:5,gap:.34,tl:.5,ti:.95,trapGap:.4,trapTl:.75,trapTa:1.3,trapTb:1.8,after:.7},
   echo:{break1:.2,tl:.42,ti:.95},
   /* wail (I): the tear wave crosses the Watcher (from the right); `lag` s after it, an Illusion appears on the left (`ill`) and
-     throws a second wave the other way (wave starting at x0), then vanishes; the next attack starts `after` s before the second
+     throws a second wave the other way, then vanishes; the next attack starts `after` s before the second
      impact. Both waves are real impacts, spaced by VX.gap like every other. Per wave: `tl` s of cast, then a run of r1 (Voice) /
      r2 (Illusion) s x `run` (the wave is a little faster: x.85). Drawing: at `ti` the leading edge of the wave (`edge` px ahead of
      its centre) touches the Watcher's body (`reach` px from HX, the real hit point), without moving the hitbox or `ti`.
@@ -217,18 +216,53 @@ const SP={
      mirror (I): a mirror of the hall (one of the floating shards) explodes into fragments that fly for `fly` s (wandering, then
      settling) before darting at the Watcher; dance (I, final assault): the volley goes through the mirrors, orbs leave the mirror
      after `split` of their flight, `settle` s after the last orb the mirrors explode */
-  wail:{lag:.1,tl:.8,r1:1.1,r2:.9,run:.85,after:.6,x0:110,edge:22,reach:30,ill:{x:62,y:248}},
+  wail:{lag:.1,tl:.8,r1:1.1,r2:.9,run:.85,after:.6,edge:22,reach:30,ill:{x:62,y:248}},
   /* rain (I): the mirror bursts, its fragments are thrown across the hall for `fly` s (1.5 x .85: a little quicker), changing direction
      `turns` [min, max] times at random spots of `area`, then settle above the mirror and dart one after the other in random order.
      Same for the mirror dance (final assault). draw = drawing scale of the fragments (phone). */
   mirror:{fly:1.275,size:15,draw:1.3,turns:[2,3],area:{x0:50,x1:W-50,y0:50,y1:GY-40}},
-  dance:{split:.45,settle:.6}
+  dance:{split:.45,settle:.6},
+  /* ---- Hollow Voice refonte (6 Nov 2026, docs/decisions/2026-11-06-voix-refonte.md). ALL PROVISIONAL. Seconds, never scaled by a
+     speed of the boss (VOICE_SPEED stays 1); the real impacts keep VX.gap whatever happens here (a gap too short shifts an impact).
+     orb    three flights (tl -> ti) per type: slow / normal (= the old flight) / fast, the charge at the face (`charge`) is the same;
+            `w` = draw weights of a volley's orbs (the type is independent of real / illusory); col / halo / spark = halo of the charge
+            at the face (colour, size, crackling sparks), fx = crackle note (80-sfx-combat.js, 60-music.js);
+     volley size, constant (no stage): n orbs [min, max], ill illusions; never more than `maxRun` illusions in a row, at least one real;
+            cad = pauses (s) between two shots, one row drawn per volley (tight pair then delay, speeding up then pause...), tail after it;
+     tear   drawing only: where tears are born on the face (eyes, mouth), seconds of the run down the face (`run`) and of the fall
+            (`drop`) in the share of the cast, `fall` = x of the fall point from the face centre (the wave leaves it);
+     room   the hall closes in: the shard that cracks (rage 1) / goes out (final assault), `crack` s then `fade` s; the one the dance breaks
+            (`breakFade`); `trace` = opacity of the pale trace the rage echoes leave;
+     pres   the reflection of the Voice in the water stretches towards the Watcher's feet: length (px) per stage (0, rage 1, rage 2 / final), `ease` = speed;
+     reply  answers of the responding clone (see ECHO_REPLY below);
+     rageEcho  final assault: an extra clone fires `n` real orbs without a warning, at `at` s after the start, `tell` s of charge. */
+  orb:{charge:.45,
+    type:{slow:{fly:1.06,col:'rgba(120,150,255,.95)',halo:1.25,spark:3,fx:'orbSlow'},
+      normal:{fly:.85,col:'rgba(176,124,255,.95)',halo:1,spark:0,fx:'orbNorm'},
+      fast:{fly:.64,col:'rgba(255,150,225,.95)',halo:.8,spark:8,fx:'orbFast'}},
+    w:{slow:.3,normal:.4,fast:.3}},
+  volley:{size:{easy:{n:[3,3],ill:1},normal:{n:[4,6],ill:2},hard:{n:[4,6],ill:2}},maxRun:2,tail:.9,
+    cad:[[.22,.95,.3,.8,.5],[.62,.46,.32,1,.3],[.44,.44,.44,.44,.44],[.3,.3,1.05,.3,.9]]},
+  tear:{src:[[-9,6],[9,4],[0,22]],run:.42,drop:.38,fall:{voice:-20,pe:-20,rp:-20,ill:20}},
+  room:{crack:1.2,fade:1,breakFade:.25,trace:.09},
+  pres:{len:[0,180,360],ease:1.6},
+  rageEcho:{easy:null,normal:{n:2},hard:{n:3},at:[1,2.6,4.2],tell:.2},
+  /* ECHO_REPLY: the responding clone (Normal and Hard; none in Easy), per spell and difficulty. rage = rage count from which it answers
+     (Normal 1, Hard 0), delay = s after the end of the spell (the last release; after the last fall for the rain), drawn at random.
+     volley: replays the last real orb (same type), from the other side of the face, never illusory;
+     wail:   `tl` of cast, then a run of `run` s from farther away (wailEcho);
+     rain:   one mirror fragment answers late: wanders `fly` s, `tw` of glow, darts `dart` s.
+     Hard: the permanent echo answers first, the clone after it (at least VX.gap later); never during a wail of the Voice. */
+  reply:{volley:{easy:null,normal:{rage:1,delay:[.7,1]},hard:{rage:0,delay:[.7,1]}},
+    wail:{easy:null,normal:{rage:1,delay:[.7,1]},hard:{rage:0,delay:[.7,1]},tl:.8,run:1.4},
+    rain:{easy:null,normal:{rage:1,delay:[.7,1]},hard:{rage:0,delay:[.7,1]},fly:.6,tw:.42,dart:.53}}
 };
+const ECHO_REPLY=SP.reply;
 /* the mirrors of the hall are the floating shards of the background (SHARDS): n distinct ones, in the right-hand half of the hall */
 function mirrorPick(n,x0,x1){
   x0=x0==null?HX+160:x0;x1=x1==null?880:x1;
-  let c=SHARDS.map((m,i)=>i).filter(i=>SHARDS[i].x>x0&&SHARDS[i].x<x1&&SHARDS[i].y<330&&!(S.shardGone&&S.shardGone[i]>gt));
-  if(c.length<n)c=SHARDS.map((m,i)=>i);
+  let c=SHARDS.map((m,i)=>i).filter(i=>SHARDS[i].x>x0&&SHARDS[i].x<x1&&SHARDS[i].y<330&&!(S.shardGone&&S.shardGone[i]>gt)&&!roomOff(i));
+  if(c.length<n)c=SHARDS.map((m,i)=>i).filter(i=>!roomOff(i));
   return c.sort(()=>Math.random()-.5).slice(0,n)}
 function spawn(){
   const d=S.d,id=S.phase,f2=id===3&&S.form===2,gen=f2?P3b:[P1,P2,P3][id-1];
@@ -247,47 +281,61 @@ function spawn(){
   go(gen(stage,f,gt+.25));
 }
 /* ---- Phase I · the Hollow Voice ---- */
+/* random spots of the hall a fragment is thrown to before it settles (rain, dance, the clone's answer) */
+function scatterWay(){const M=SP.mirror,A=M.area,nW=M.turns[0]+Math.floor(Math.random()*(M.turns[1]-M.turns[0]+1)),w=[];
+    while(w.length<nW){let q;for(let i=0;i<8;i++){q={x:A.x0+Math.random()*(A.x1-A.x0),y:A.y0+Math.random()*(A.y1-A.y0)};const p=w[w.length-1];if(!p||Math.hypot(q.x-p.x,q.y-p.y)>200)break}w.push(q)}return w}
 function P2(stage,f,b,final,rage){
-  const T=[],K=vdk(),gap=VX.gap[K],casts=[];let t=b;
-  const cast=(fn,w)=>(...a)=>{const n=T.length;fn(...a);casts.push({ths:T.slice(n),w})};
-  const orb=(real,src,vsi)=>{T.push({k:'orb',t0:t,tl:t+.45*f,ti:t+1.3*f,real,src:src||0,vsi});t+=.44*f};
-  const volley=cast((n,ill)=>{const [lo,hi]=VX.volley[K];n=clamp(n,lo,hi);ill=Math.min(ill,n-1);const fake=new Set();while(fake.size<ill){const i=1+Math.floor(Math.random()*(n-1));fake.add(i)}for(let i=0;i<n;i++)orb(!fake.has(i));t+=.9*f});
+  const T=[],K=vdk(),gap=VX.gap[K],casts=[],O=SP.orb;let t=b;
+  const cast=(kind,fn)=>(...a)=>{const n=T.length;fn(...a);casts.push({kind,ths:T.slice(n)})};
+  // an orb: charge at the face, then its flight (by type: SP.orb); `ty` only for the orbs of a volley (and the answers that replay them); step = pause before the next shot
+  const orb=(real,src,vsi,ty,step)=>{const tl=t+O.charge*f;T.push({k:'orb',t0:t,tl,ti:tl+O.type[ty||'normal'].fly*f,real,src:src||0,vsi,ty});t+=(step==null?.44:step)*f};
+  const orbTy=()=>{const w=O.w;let r=Math.random()*(w.slow+w.normal+w.fast);return(r-=w.slow)<0?'slow':(r-=w.normal)<0?'normal':'fast'};
+  // which orbs of a volley are illusions: at random, at least one real, never more than `maxRun` in a row (in the order of fire)
+  const fakeSet=(n,ill,maxRun)=>{ill=Math.min(ill,n-1);
+    for(let k=0;k<60;k++){const s=new Set();while(s.size<ill)s.add(Math.floor(Math.random()*n));let run=0,ok=true;for(let i=0;i<n;i++){run=s.has(i)?run+1:0;if(run>maxRun)ok=false}if(ok)return s}
+    return new Set([...Array(ill).keys()].map(i=>i*2).filter(i=>i<n-1))};
+  // volley: constant size (SP.volley), orbs of random types, irregular cadence (one row of pauses drawn per volley)
+  const volley=cast('volley',()=>{const Z=SP.volley,V=Z.size[K],n=V.n[0]+Math.floor(Math.random()*(V.n[1]-V.n[0]+1)),fake=fakeSet(n,V.ill,Z.maxRun),cad=Z.cad[Math.floor(Math.random()*Z.cad.length)];
+    for(let i=0;i<n;i++)orb(!fake.has(i),0,undefined,orbTy(),i<n-1?cad[i]:0);t+=Z.tail*f});
   // the clones' shots come in random order (all sources mixed), each one real or illusory at random, at least one real per echo
   const echo=()=>{const n=VX.echoOrbs[K],sh=[];for(let s=0;s<3;s++)for(let k=0;k<n;k++)sh.push(s);sh.sort(()=>Math.random()-.5);const rl=sh.map(()=>Math.random()<.5),any=Math.floor(Math.random()*sh.length);rl[any]=true;sh.forEach((s,i)=>{orb(rl[i],s);if(i%n===n-1)t+=.1*f});t+=.9*f};
   // rage: the echo, then the two reflections shatter one by one, each dropping its shards at the Watcher (spaced by `gap`)
-  const echoR=cast(()=>{const E=SP.echo,nS=VX.echoShards[K];echo();const last=T[T.length-1].ti;let end=last;
+  const echoR=cast('echo',()=>{const E=SP.echo,nS=VX.echoShards[K];echo();const last=T[T.length-1].ti;let end=last;
     [1,2].forEach((src,j)=>{for(let k=0;k<nS;k++){const s=last+E.break1*f+(j*nS+k)*gap;T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src});end=Math.max(end,s+E.ti*f)}});t=Math.max(t,end+.4*f)});
   // wail: a wave crosses the Watcher, then an Illusion on the left throws a second one the other way (two real impacts)
-  const wail=cast(()=>{const Wl=SP.wail,t1=t+(Wl.tl+Wl.r1*Wl.run)*f,t2=t1+Wl.lag*f,i2=t2+(Wl.tl+Wl.r2*Wl.run)*f;
+  const wail=cast('wail',()=>{const Wl=SP.wail,t1=t+(Wl.tl+Wl.r1*Wl.run)*f,t2=t1+Wl.lag*f,i2=t2+(Wl.tl+Wl.r2*Wl.run)*f;
     T.push({k:'wail',t0:t,tl:t+Wl.tl*f,ti:t1,real:true});
-    T.push({k:'wail',ill:1,t0:t2,tl:t2+Wl.tl*f,ti:i2,real:true});t=i2-Wl.after*f},1);
+    T.push({k:'wail',ill:1,t0:t2,tl:t2+Wl.tl*f,ti:i2,real:true});t=i2-Wl.after*f});
   // a mirror of the hall explodes into n fragments: they fly (SP.mirror.fly), settle, then dart one after the other
-  const scatter=()=>{const M=SP.mirror,A=M.area,nW=M.turns[0]+Math.floor(Math.random()*(M.turns[1]-M.turns[0]+1)),w=[];
-    while(w.length<nW){let q;for(let i=0;i<8;i++){q={x:A.x0+Math.random()*(A.x1-A.x0),y:A.y0+Math.random()*(A.y1-A.y0)};const p=w[w.length-1];if(!p||Math.hypot(q.x-p.x,q.y-p.y)>200)break}w.push(q)}return w};
+  const scatter=scatterWay;
   // arrival order of the fragments at random (slot times in order, handed out to the fragments in a shuffled order)
   const shatter=(si,n,gaps,off,dn)=>{const M=SP.mirror,fd=M.fly*f,ord=[...Array(n).keys()].sort(()=>Math.random()-.5),sl=[];let s=t+fd+(off||0);
     for(let k=0;k<n;k++){if(k)s+=gaps();sl.push(s)}
     for(let k=0;k<n;k++){const a=sl[ord[k]];T.push({k:'shard',fly:1,dn:dn?1:0,si,fi:k,fn:n,fd,way:scatter(),tw:.42*f,t0:t,tl:a+.42*f,ti:a+.95*f})}
     return s};
-  const rain=cast(()=>{const G=RAIN[S.d.m<1?'hard':'normal'];const s=shatter(mirrorPick(1)[0],VX.rain[K],()=>G[0]+Math.random()*(G[1]-G[0]));t=s+1.3*f});
+  const rain=cast('rain',()=>{const G=RAIN[S.d.m<1?'hard':'normal'];const s=shatter(mirrorPick(1)[0],VX.rain[K],()=>G[0]+Math.random()*(G[1]-G[0]));t=s+1.3*f});
   // final assault, mirror dance: a volley goes through the mirrors (orbs leave by 1 mirror in Easy, 2 in Normal and Hard), then
   // each mirror explodes into its fragments; real and illusory orbs as in a volley, gaps by spaceImpacts
-  const dance=cast(()=>{const D=VX.dance,nm=D.mirrors[K],ms=mirrorPick(nm),[lo,hi]=VX.volley[K],n=clamp(5,lo,hi),ill=Math.min(2,n-1),fake=new Set();
+  const dance=cast('dance',()=>{const D=VX.dance,nm=D.mirrors[K],ms=mirrorPick(nm),n=D.n[K],ill=Math.min(D.ill[K],n-1),fake=new Set();
     while(fake.size<ill)fake.add(1+Math.floor(Math.random()*(n-1)));
     const ord=[...Array(n).keys()].sort(()=>Math.random()-.5);
     for(let i=0;i<n;i++)orb(!fake.has(i),0,ms[ord[i]%ms.length]);
     t+=SP.dance.settle*f;let end=t;
-    ms.forEach((si,j)=>{end=Math.max(end,shatter(si,D.frag,()=>gap,j*gap,1))});t=end+1.3*f});
+    ms.forEach((si,j)=>{end=Math.max(end,shatter(si,D.frag,()=>gap,j*gap,1))});t=end+1.3*f;
+    const fx=T.find(x=>x.k==='shard'&&x.fly&&x.fi===0);if(fx)fx.rb=1});   // the first mirror to explode breaks one more mirror of the hall (roomBreak)
+  // final assault: an extra clone, visible all along, fires real orbs without a warning (SP.rageEcho; none in Easy)
+  const rageEcho=()=>{const R=SP.rageEcho,c=R[K];if(!c)return;for(let k=0;k<c.n;k++){const s=b+R.at[k%R.at.length],tl=s+R.tell*f;T.push({k:'orb',t0:s,tl,ti:tl+O.type.normal.fly*f,real:true,src:5,re:1})}};
   if(rage)echoR();
-  else if(final)dance()
+  else if(final){dance();rageEcho()}
   else{
-    const p0=[()=>volley(2,0),()=>volley(3,1),wail,()=>volley(3,0),()=>{wail();volley(2,1)},rain];
-    const p1=[()=>volley(4,1),()=>volley(5,2),()=>{volley(3,0);wail()},()=>{rain();wail()},()=>{volley(3,1);rain()},()=>{wail();volley(4,2)},rain,()=>{rain();volley(3,1)}];
+    const p0=[volley,volley,wail,volley,()=>{wail();volley()},rain];
+    const p1=[volley,volley,()=>{volley();wail()},()=>{rain();wail()},()=>{volley();rain()},()=>{wail();volley()},rain,()=>{rain();volley()}];
     pick(stage?p1:p0)();
     // the echo only comes during the rages, never in this rotation
   }
   // Hard: the permanent echo fires one orb after each spell, rages and final assault included
   if(K==='hard')spacePE(T,casts,f,gap);
+  if(!rage&&!final)spaceReplies(T,casts,f,gap,stage,K);
   spaceImpacts(T,gap);
   // the spell the riposte shows: a wail, a rain of fragments, otherwise a volley (echo and dance included)
   T.spell=T.some(x=>x.k==='wail')?'wail':T.some(x=>x.k==='shard'&&x.fly&&!x.dn)?'rain':'volley';
@@ -313,22 +361,45 @@ function noteImpact(ti){
   if(i>0)G.push(ti-L[i-1]);
   if(i<L.length-1)G.push(L[i+1]-ti)}
 function spacePE(T,casts,f,gap){
-  const reals=()=>T.filter(isRealImpact),P=VX.pe;
+  const reals=()=>T.filter(isRealImpact),P=VX.pe,O2=SP.orb;
   for(const c of casts){
     if(!c.ths.length)continue;   // every spell
     const wl=c.ths.some(x=>x.k==='wail'),Wl=SP.wail,voice=()=>T.filter(x=>x.k==='wail'&&!x.pe);
+    // the orb of the echo and the clone's (which replays the last real orb of a volley) are of different types: normal, unless that is the clone's
+    const lastO=c.ths.filter(x=>x.k==='orb'&&x.real&&x.ty).sort((a,b)=>a.t0-b.t0).pop(),rr=ECHO_REPLY.volley.hard,pty=lastO&&lastO.ty==='normal'?'slow':'normal';
     let t0=Math.max(...c.ths.map(x=>x.tl))+P.lag,th;
     for(let i=0;i<300;i++,t0+=.1){   // too close to a real impact or inside a wail of the Voice: shifted later, never dropped
       // after a wail the echo throws its own wail instead of its orb (same wave, from its hand); otherwise its orb
-      th=wl?{k:'wail',pe:1,t0,tl:t0+Wl.tl*f,ti:t0+(Wl.tl+Wl.r1*Wl.run)*f,real:true}:{k:'orb',t0,tl:t0+.45*f,ti:t0+1.3*f,real:true,src:3,pe:1};
+      th=wl?{k:'wail',pe:1,t0,tl:t0+Wl.tl*f,ti:t0+(Wl.tl+Wl.r1*Wl.run)*f,real:true}:{k:'orb',t0,tl:t0+O2.charge*f,ti:t0+O2.charge*f+O2.type[pty].fly*f,real:true,src:3,pe:1,ty:pty};
       if(!reals().some(r=>Math.abs(r.ti-th.ti)<gap)&&!voice().some(w=>th.tl<w.ti+P.wail&&th.ti>w.tl-P.wail))break}
-    T.push(th)}}
-/* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and
+    T.push(th);c.pe=th}}
+/* the responding clone (ECHO_REPLY): after a spell that receives an answer, in Normal (after rage 1) and Hard (always), the clone answers
+   0.7 to 1.0 s later: volley -> replays the last real orb from the other side of the face; wail -> a farther wail (wailEcho); rain -> a mirror
+   fragment answers late. Real impacts: VX.gap from every other (Hard: from the echo's answer first, then the clone's), never inside a wail of
+   the Voice; too close = shifted later, never dropped. */
+function spaceReplies(T,casts,f,gap,stage,K){
+  const R=ECHO_REPLY,P=VX.pe,O=SP.orb,Wl=SP.wail,reals=()=>T.filter(isRealImpact),voice=()=>T.filter(x=>x.k==='wail'&&!x.pe&&!x.rp);
+  for(const c of casts){
+    const cf=R[c.kind]&&R[c.kind][K];if(!cf||stage<cf.rage||!c.ths.length)continue;
+    const dl=cf.delay[0]+Math.random()*(cf.delay[1]-cf.delay[0]),endTl=Math.max(...c.ths.map(x=>x.tl));let mk;
+    if(c.kind==='volley'){const last=c.ths.filter(x=>x.k==='orb'&&x.real).sort((a,b)=>a.t0-b.t0).pop();if(!last)continue;
+      mk=sh=>{const t0=endTl+dl+sh,tl=t0+O.charge*f;return{k:'orb',t0,tl,ti:tl+O.type[last.ty||'normal'].fly*f,real:true,src:4,rp:1,ty:last.ty}}}
+    else if(c.kind==='wail')mk=sh=>{const t0=endTl+dl+sh;return{k:'wail',rp:1,t0,tl:t0+R.wail.tl*f,ti:t0+(R.wail.tl+R.wail.run)*f,real:true}};
+    else if(c.kind==='rain'){const sh0=c.ths.find(x=>x.k==='shard'&&x.fly);if(!sh0)continue;const Z=R.rain,lastTi=Math.max(...c.ths.filter(x=>x.k==='shard').map(x=>x.ti));
+      mk=sh=>{const ti=lastTi+dl+sh,tl=ti-Z.dart*f,a=tl-Z.tw*f,fd=Z.fly*f;return{k:'shard',fly:1,dn:0,rp:1,bk0:1,si:sh0.si,fi:0,fn:1,fd,way:scatterWay(),tw:Z.tw*f,t0:a-fd,tl,ti}}}
+    else continue;
+    let th;
+    for(let i=0;i<300;i++){th=mk(i*.1);
+      if(!reals().some(r=>Math.abs(r.ti-th.ti)<gap)&&!voice().some(w=>th.t0<w.ti+P.wail&&th.ti>w.t0-P.wail)&&(!c.pe||th.ti>=c.pe.ti+gap))break}
+    T.push(th)}}/* a dodge aimed at a reflection: no extra recovery; the reflection turns round behind the Watcher, becomes solid and
    comes back as a real attack once he can dodge again (action + recovery + DG.backWin). Dodging a reflection is not a fault:
    the series stays clean unless the Watcher takes the returning blow (the 'hit' branches of update() set pat.ok=false) */
 function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
   S.pl.fr=1;   // the recovery after this action is halved (plStep)
-  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec*DG.foolRec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);noteImpact(nt.ti);say(_('The reflection comes back.','Le reflet revient.'))}
+  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec*DG.foolRec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);
+  // the returning reflection is a real impact like the others: never closer than VX.gap to one still to come (pushed back, never dropped)
+  {const g=VX.gap[vdk()];for(let i=0;i<200&&S.threats.some(o=>o!==nt&&!o.done&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(o.ti-nt.ti)<g);i++)nt.ti+=.05}
+  noteImpact(nt.ti);say(_('The reflection comes back.','Le reflet revient.'))}
 /* a fragment of an exploding mirror: leaves the mirror, wanders (shrinking wobble) then settles at its own spot above it */
 function fragPos(th,at){
   const m=shardPos(th.si),k=clamp((at-th.t0)/th.fd,0,1),hx=m.x+(th.fi-(th.fn-1)/2)*46,hy=m.y-34+(th.fi%2)*18,e=eout(k),w=60*(1-k)*Math.min(1,k*6);
@@ -337,6 +408,27 @@ function fragPos(th,at){
     return{x:lerp(Q[i].x,Q[i+1].x,q)+Math.sin(rt*9+th.fi*2.1)*j+(k>=1?Math.sin(rt*1.7+th.fi)*3:0),y:lerp(Q[i].y,Q[i+1].y,q)+Math.cos(rt*8+th.fi*1.3)*j*.8+(k>=1?Math.cos(rt*1.3+th.fi)*3:0)}}
   return{x:lerp(m.x,hx,e)+Math.sin(rt*6+th.fi*2.1)*w+(k>=1?Math.sin(rt*1.7+th.fi)*3:0),y:lerp(m.y,hy,e)+Math.cos(rt*5+th.fi*1.3)*w*.8+(k>=1?Math.cos(rt*1.3+th.fi)*3:0)}}
 function shardPos(si){const s=SHARDS[si];return{x:s.x+Math.sin(rt*.4+s.o)*12,y:s.y+Math.cos(rt*.5+s.o)*8,s:s.s}}
+/* where a wail comes from: the face (fx, fy) and the point where the tears fall into the water (x0, where the wave leaves) */
+function wailSrc(th){const Z=SP.tear.fall;
+  if(th.ill){const I=SP.wail.ill;return{fx:I.x,fy:I.y+Math.sin(rt*1.6)*8-96,x0:I.x+Z.ill,a:.6}}
+  const i=th.rp?4:th.pe?3:0,p=voicePos(i);return{fx:p.x,fy:p.y-96,x0:p.x+Z[th.rp?'rp':th.pe?'pe':'voice'],a:i?.6:1}}
+/* the tears of a wail (drawing only, same times as the cast): they are born at the eyes and the mouth, run down the face and the robe, drip,
+   fall into the water at the fall point (x0); the wave leaves it at `tl` */
+function drawTears(th){
+  const Z=SP.tear,c=wailSrc(th),u=clamp((gt-th.t0)/(th.tl-th.t0),0,1);if(u<=0)return;
+  const run=Z.run,k=clamp((u-run)/Z.drop,0,1),fadeIn=clamp(u/.08,0,1);   // k: the fall, in the share of the cast that follows the run
+  ctx.save();ctx.globalAlpha*=c.a*fadeIn;ctx.lineCap='round';
+  Z.src.forEach(([dx,dy],i)=>{
+    const sx=c.fx+dx,sy=c.fy+dy,ex=c.fx+dx*1.5,ey=c.fy+34,hx=c.x0+(i-1)*5,hy=c.fy+112,s=clamp((u-i*.04)/run,0,1);
+    // path: eye / mouth -> chin -> down the robe to where it drips (hx, hy)
+    const pt=q=>q<.4?{x:lerp(sx,ex,q/.4),y:lerp(sy,ey,q/.4)}:{x:lerp(ex,hx,(q-.4)/.6),y:lerp(ey,hy,(q-.4)/.6)};
+    ctx.strokeStyle='rgba(190,235,255,.8)';ctx.lineWidth=2;ctx.beginPath();const a0=Math.max(0,s-.5);
+    for(let m=0;m<=8;m++){const q=lerp(a0,s,m/8),P=pt(q);m?ctx.lineTo(P.x,P.y):ctx.moveTo(P.x,P.y)}ctx.stroke();
+    if(k<=0){ell(pt(s).x,pt(s).y,2.2,2.8,'rgba(220,245,255,.9)')}
+    else{const dy2=ein(k)*(GY-hy),x=hx+(c.x0-hx)*k,y=hy+dy2;
+      if(k<1){ell(x,y,2.2,3.6,'rgba(220,245,255,.9)')}
+      else{const q=clamp((u-run-Z.drop)/.12,0,1);ctx.strokeStyle=`rgba(200,235,255,${.6*(1-q)})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(c.x0+(i-1)*5,GY+4,4+14*q,1.5+4*q,0,0,Math.PI*2);ctx.stroke()}}});
+  ctx.restore()}
 function drawOrbs(){
   for(const th of S.threats){
     if(gt<th.t0)continue;
@@ -357,7 +449,10 @@ function drawOrbs(){
       if(th.real&&gt>=th.tl){const sh=clamp(1-(GY-y)/400,.25,1);ell(x,GY+3,r*1.6*sh,5*sh,`rgba(0,0,0,${.5*sh})`)}
       // every orb is full; an illusory one (clones' included) has a dotted outline, a real one casts its shadow (above)
       // an illusory orb is a hollow ring (no bright centre) with a paler halo; a real one is solid
-      glow(x,y,r*50/17,'rgba(176,124,255,.95)',th.real?.85:.45);
+      {const OT=SP.orb.type[th.ty||'normal'],ch=gt<th.tl;   // charge at the face: halo and crackling sparks of the type (flight: the usual violet)
+        glow(x,y,r*50/17*(ch?OT.halo:1),ch?OT.col:'rgba(176,124,255,.95)',th.real?.85:.45);
+        if(ch&&OT.spark){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=OT.col;ctx.lineWidth=1.4;ctx.beginPath();
+          for(let k=0;k<OT.spark;k++){const a=gt*(9+k)+k*2.4,l0=r+3,l1=r+5+7*Math.abs(Math.sin(gt*23+k*5));ctx.moveTo(x+Math.cos(a)*l0,y+Math.sin(a)*l0);ctx.lineTo(x+Math.cos(a)*l1,y+Math.sin(a)*l1)}ctx.stroke();ctx.restore()}}
       if(th.real){ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff')}
       else{ctx.save();ctx.strokeStyle='#c9a8ff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ctx.restore()}
       if(dash>0){ctx.save();ctx.globalAlpha*=dash;ctx.setLineDash([6,5]);ctx.lineDashOffset=-gt*12;ctx.strokeStyle='#f4ecff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.stroke();ctx.restore()}
@@ -365,7 +460,7 @@ function drawOrbs(){
     }else if(th.k==='shard'){
       if(th.fly){   // the mirror explodes (once), hidden from the hall until its fragments are gone
         (S.shardGone||(S.shardGone={}))[th.si]=Math.max(S.shardGone[th.si]||0,th.ti+1.2);
-        if(!th.bk0){th.bk0=1;if(!th.fi){const m=shardPos(th.si);burst(m.x,m.y,22,'#ece4ff',6,.9,.2);burst(m.x,m.y,12,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass');S.shake=Math.max(S.shake,7)}}}
+        if(!th.bk0){th.bk0=1;if(!th.fi){const m=shardPos(th.si);burst(m.x,m.y,22,'#ece4ff',6,.9,.2);burst(m.x,m.y,12,'#9a86c8',4,1,.3);MUSIC.fx('crackGlass');S.shake=Math.max(S.shake,7);if(th.rb)roomBreak()}}}
       const o=th.from!=null?{x:voicePos(th.from).x,y:voicePos(th.from).y-90,s:24}:th.fly?{...fragPos(th,Math.min(gt,th.t0+th.fd)),s:SP.mirror.size}:shardPos(th.si),tx=HX+16,ty=HY-10;let x,y,a=1,ang;
       if(gt<th.tl){const k=th.fly?clamp(1-(th.tl-gt)/th.tw,0,1):(gt-th.t0)/(th.tl-th.t0);x=o.x;y=o.y;ang=Math.atan2(ty-y,tx-x);glow(x,y,30*SP.mirror.draw,'rgba(220,200,255,.9)',.8*k)}
       else{let p=(gt-th.tl)/(th.ti-th.tl);if(th.done){if(th.res==='hit'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.3);if(!th.sf){th.sf=1;burst(tx+30,ty-20,10,'#f2ecff',5,.4)}}}
@@ -374,10 +469,13 @@ function drawOrbs(){
       ctx.save();ctx.globalAlpha=a;ctx.translate(x,y);ctx.rotate(ang+Math.PI/2);const s=o.s*.8*SP.mirror.draw;
       const gr=ctx.createLinearGradient(0,-s,0,s);gr.addColorStop(0,'rgba(245,240,255,.95)');gr.addColorStop(1,'rgba(150,120,210,.7)');ctx.fillStyle=gr;
       ctx.beginPath();ctx.moveTo(0,-s*1.2);ctx.lineTo(s*.45,s*.4);ctx.lineTo(0,s*.9);ctx.lineTo(-s*.45,s*.4);ctx.closePath();ctx.fill();ctx.strokeStyle='#ffffff';ctx.lineWidth=1.2;ctx.stroke();ctx.restore();
+    }else if(th.k==='wail'&&gt<th.tl){
+      drawTears(th)   // tears born at the face run down and fall into the water; the wave leaves the fall point (drawing only)
     }else if(th.k==='wail'&&gt>=th.tl){
       let p=(gt-th.tl)/(th.ti-th.tl),a=1;if(th.done){if(th.res==='hit')continue;a=Math.max(0,1-(gt-th.okT)/.4)}
       // the wave runs from its source to the body: at ti (p=1) its leading edge touches the Watcher (reach px from HX, as the returning reflection)
-      const Wl=SP.wail,x0=th.ill?Wl.x0:th.pe?voicePos(3).x-84:voiceHand(0,1).x,xe=th.ill?HX-Wl.reach-Wl.edge:HX+Wl.reach+Wl.edge;
+      const Wl=SP.wail,sc=wailSrc(th),x0=sc.x0,xe=th.ill?HX-Wl.reach-Wl.edge:HX+Wl.reach+Wl.edge;
+      if(gt-th.tl<.5){const q=(gt-th.tl)/.5;ctx.save();ctx.strokeStyle=`rgba(200,160,255,${.6*(1-q)})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x0,GY+4,8+30*q,2+6*q,0,0,Math.PI*2);ctx.stroke();ctx.restore()}   // the ripple of the fall
       const x=lerp(x0,xe,Math.min(p,1.25));ctx.save();ctx.globalAlpha=a;
       if(th.ill){ctx.translate(x,0);ctx.scale(-1,1)}else ctx.translate(x,0);   // the Illusion's wave goes the other way
       for(let i=0;i<4;i++){ctx.strokeStyle=`rgba(200,160,255,${.75-i*.17})`;ctx.lineWidth=5-i;ctx.beginPath();ctx.ellipse(i*16,GY-90,22+i*4,110,0,Math.PI*.55,Math.PI*1.45);ctx.stroke()}

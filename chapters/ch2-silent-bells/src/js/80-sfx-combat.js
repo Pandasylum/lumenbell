@@ -1,11 +1,12 @@
 /* ---------- combat sound effects: wind-ups, releases and impacts ---------- */
 const SFX_START={wave:'rumble',rafter:'fallWhine',plank:'crackRun',dchain:'fallWhine',kwave:'swell',sring:'bellSoft',slam:'draw',sweep:'draw',chain:'chainSlip',stomp:'rumble',rock:'fallWhine',shard:'glints',wail:'voice',back:'swell',beam:'beam',lbeam:'beam',bolt:'charge',spike:'iceCrack',ring:'bellSoft',moon:'chainSlip',trap:'swell',burst:'overload',reform:'clank',implode:'overload'};
+const ORB_FX={slow:'orbSlow',normal:'orbNorm',fast:'orbFast'};   // crackling note of the charge at the face, by orb type (SP.orb)
 const SFX_MID={sring:'whoosh',orb:'throw',toll:'tollLast',ring:'whoosh',trap:'whooshDown',chunk:'clank',shard:'whoosh',sweep:'whoosh',slam:'whoosh'};
 const SFX_HIT={wave:'plant',sring:'clank',slam:'slam',sweep:'plant',chain:'clank',bolt:'thunder',spike:'crackGlass',ring:'clank',hpBack:'clank',hpOut:'plant',plank:'chunk',dchain:'clank'};
 function combatSfx(){
   if(S.mode!=='play'||S.paused)return;
   for(const th of S.threats){
-    if(!th.a0&&gt>=th.t0){th.a0=1;const n=th.k==='wail'?(th.ill||th.pe?'wailEcho':'wailCry'):SFX_START[th.k];if(n&&th.real!==false)MUSIC.fx(n)}   // the Voice's wail, then the same one far and soft (Illusion, echo)
+    if(!th.a0&&gt>=th.t0){th.a0=1;const n=th.k==='wail'?(th.ill||th.pe||th.rp?'wailEcho':'wailCry'):th.k==='orb'&&th.ty?ORB_FX[th.ty]:SFX_START[th.k];if(n&&(th.real!==false||th.k==='orb'))MUSIC.fx(n)}   // the Voice's wail, then the same one far and soft (Illusion, echo)
     const mt=th.k==='toll'?th.tw:(th.k==='slam'||th.k==='sweep')?th.ti-.3:th.tl;
     if(mt!=null&&!th.a1&&gt>=mt){th.a1=1;const n=SFX_MID[th.k];if(n)MUSIC.fx(n)}
     if(!th.hold&&th.ti!=null&&!th.a2&&gt>=th.ti&&th.real!==false){th.a2=1;const n=SFX_HIT[th.k];if(n)MUSIC.fx(n)}
