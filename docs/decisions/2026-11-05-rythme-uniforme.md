@@ -14,6 +14,8 @@ Le 4e coup du balayage (celui qui déclenche la vague) plante l'ancre à la vert
 ## Garde-fou
 `tests/ch2-smoke.js` : contrôle statique, échoue si `d.sp` est lu dans le script, si `f` ne vient plus de `RHY.sp`, ou si `f` multiplie un plancher/écart (`VX.gap`, `SP.floor`, `gap`). Règle ajoutée à `CLAUDE.md` (« Difficulté et chapitres »).
 
+Précisé le 2026-11-06 : vitesse de la Voix = 1 (voir `2026-11-06-voix-vitesse-x1.md`).
+
 ## Décisions à valider
 - Facteur de rage ×1,1 supprimé partout (3 difficultés, 3 boss), y compris Facile et Normal : le Normal en rage devient un peu plus lent qu'avant (×1,1).
 - Facile prend le rythme du Normal (plus de ralentissement ×1/0,85).

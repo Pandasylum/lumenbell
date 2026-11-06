@@ -25,6 +25,11 @@ console.log('syntaxe',errs.length?'KO':'OK');
  if(/\b(?:S\.d|d|D)\.sp\b/.test(html))errs.push('rythme: d.sp lu dans le script (la difficulte ne multiplie pas le rythme interne)');
  if(!/f=1\/\(RHY\.sp\*/.test(html))errs.push('rythme: f n\'est plus calcule depuis RHY.sp');
  for(const m of html.matchAll(/(?:(?<![.\w])gap|VX\.gap\[\w+\]|SP\.floor\[\w+\]|VX\.pe\.\w+|G\[[01]\])\s*\*\s*f\b/g))errs.push('rythme: plancher ou ecart multiplie par f: '+m[0]);
+ {const m=html.match(/\bVOICE_SPEED\s*=\s*([\d.]+)/);
+  if(!m)errs.push('rythme: VOICE_SPEED introuvable');
+  else if(+m[1]!==1){const fs=require('fs'),dd=require('path').join(__dirname,'..','docs','decisions');
+   const ok=fs.readdirSync(dd).some(x=>/\.md$/.test(x)&&fs.readFileSync(require('path').join(dd,x),'utf8').includes('VOICE_SPEED='+m[1]));
+   if(!ok)errs.push('rythme: VOICE_SPEED='+m[1]+' sans entree dans docs/decisions (ecrire "VOICE_SPEED='+m[1]+'")')}}
  console.log('rythme uniforme (statique)',errs.length>n?'KO':'OK')}
 // statique : PV et seuils des boss de LB.BOSS_DIFF (forme de la table, aucune copie locale)
 {const n=errs.length;errs.push(...require('./boss-diff-static')(html,'ch2'));console.log('boss-diff (statique)',errs.length>n?'KO':'OK')}

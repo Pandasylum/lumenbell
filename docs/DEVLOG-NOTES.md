@@ -246,5 +246,7 @@
 ## 2026-11-06 · ci/build-alias-s3b
 - Ce que le joueur verra : rien de visible. Seuls les scripts de build et les workflows changent ; le jeu est identique.
 
+## 2026-11-06 · c2/voix-x1
+- Ce que le joueur verra : la Voix enchaîne ses attaques à son rythme de base, environ 9 % plus lentement qu'avant. Rien d'autre ne change.
 ## 2026-11-06 · shared/boss-diff
 - Ce que le joueur verra : rien de visible. PV et seuils de rage des boss viennent maintenant d une table commune aux deux chapitres ; les valeurs sont identiques.
