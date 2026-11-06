@@ -10,7 +10,7 @@ Ce document évolue à chaque mise à jour du lore. Chaque section ci-dessous a 
 
 Section	Sujet	Statut	Date	PR
 D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	Fait (PR fusionnée)	28 octobre 2026 (mis à jour le 29)	https://github.com/Pandasylum/lumenbell/pull/31
-F	Documents à mettre à jour	En cours (CH2-SPEC et COMMUN faits ; BIBLE, DECISIONS, LORE restent)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
+F	Documents à mettre à jour	En cours (CH2-SPEC, COMMUN et BIBLE faits ; DECISIONS et LORE à confirmer par Kevin)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
 G	Chapitre I · Lanterne du Colosse de braise	Fait (PR fusionnée)	29 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/31
 I	Chapitre II · Pleurs avant la Voix	Fait	29 octobre 2026	
 J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	Fait (PR fusionnée)	30 octobre 2026 (mis à jour le 6 novembre)	(a) et (b) https://github.com/Pandasylum/lumenbell/pull/23 ; (c) https://github.com/Pandasylum/lumenbell/pull/89

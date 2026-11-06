@@ -271,3 +271,6 @@
 
 ## 2026-11-06 · tri-changements
 - Ce que le joueur verra : rien de visible. Statuts J, J(c), O de `CHANGEMENTS.md` passés à Fait (PR #23 et #89) ; F reste en cours.
+
+## 2026-11-06 · bible-f
+- Ce que le joueur verra : rien de visible. `BIBLE.md` et `docs/GLOSSAIRE.md` alignés sur le lore validé (principe directeur, Lumen, noms, Drowned Lighthouse) ; F reste en cours.
