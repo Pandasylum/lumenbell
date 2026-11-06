@@ -196,7 +196,7 @@ const SP={
                after leaving (= old toll 1.0), next attack `after` later; `chain` = the falling chain between two glas (one block);
                `need` = glas to counter before the Finish (total count, not a series);
      finish: `strikes` resonance strikes from `first`, `step` apart, the Elder falls `hit` after the last, `tail` of calm after. */
-  harpoon:{fly:1.1,stick:1,pl1:.75,gap:.35,back:.9,after:.8},
+  harpoon:{fly:1.1,stick:HARPOON_FX.stick,pl1:.75,gap:HARPOON_FX.gap,back:.9,after:.8},   // stick -25 % and gap +.15 s: readability pass of 6 Nov (HARPOON_FX, 32-boss-rust-king.js)
   sweep:{d:{easy:[.85],normal:[.6,.95],hard:[.7,1,.85]},long:.7,ts:.72,after:.5},
   floor:{easy:.6,normal:.75,hard:1.05},   // minimum between two real impacts of different spells (s, NOT x f), like VX.gap of the Voice
   rest:{hard:.6},                          // Hard: pause before a series that follows a combo
@@ -271,7 +271,7 @@ function spawn(){
      next threshold. Thresholds already passed never restart. The final assault restarts until the boss falls (LB.rageState, shared). */
   const hasFinal=id!==3||f2,n=LB.rageState.check(S,rageAt(),hasFinal);
   if(n){S.angerShown=true;S.roarT=gt;S.roarD=LB.rageState.dur(n);S.nextAt=gt+S.roarD;S.shake=10;rageBanner();return}
-  const go=l=>{const q=sched(l);q.spell=l.spell;return q};   // the spell shown by the riposte (set by P2)
+  const go=l=>{const q=sched(l);q.spell=l.spell;q.side=l.side;return q};   // the spell shown by the riposte (set by P2)
   const stage=S.rageN?1:0,f=1/(RHY.sp*(id===2?VOICE_SPEED:1)*(stage?RHY.rage[id]:1));   // inside rhythm = Normal's, in real seconds, same before and after the rage, whatever the difficulty
   if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;go(gen(stage,f,gt+.25,false,r));return}
   if(!S.finalDone&&LB.rageState.isFinal(S,hasFinal)){
@@ -301,7 +301,10 @@ function P2(stage,f,b,final,rage){
   const echo=()=>{const n=VX.echoOrbs[K],sh=[];for(let s=0;s<3;s++)for(let k=0;k<n;k++)sh.push(s);sh.sort(()=>Math.random()-.5);const rl=sh.map(()=>Math.random()<.5),any=Math.floor(Math.random()*sh.length);rl[any]=true;sh.forEach((s,i)=>{orb(rl[i],s);if(i%n===n-1)t+=.1*f});t+=.9*f};
   // rage: the echo, then the two reflections shatter one by one, each dropping its shards at the Watcher (spaced by `gap`)
   const echoR=cast('echo',()=>{const E=SP.echo,nS=VX.echoShards[K];echo();const last=T[T.length-1].ti;let end=last;
-    [1,2].forEach((src,j)=>{for(let k=0;k<nS;k++){const s=last+E.break1*f+(j*nS+k)*gap;T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src});end=Math.max(end,s+E.ti*f)}});t=Math.max(t,end+.4*f)});
+    [1,2].forEach((src,j)=>{for(let k=0;k<nS;k++){const s=last+E.break1*f+(j*nS+k)*gap;T.push({k:'shard',t0:s,tl:s+E.tl*f,ti:s+E.ti*f,from:src});end=Math.max(end,s+E.ti*f)}});
+    // finish: silence, the echoes take place in a circle round the Watcher, then converge in one wave (Hard: a double crown); one dodge dissolves it
+    const Z=VOICE_FX.finish,c0=end+Z.silence*f;T.push({k:'cwave',t0:c0,tl:c0+Z.form*f,ti:c0+(Z.form+Z.conv)*f,real:true,dbl:K==='hard'?1:0});
+    t=Math.max(t,c0+(Z.form+Z.conv+Z.after)*f)});
   // wail: a wave crosses the Watcher, then an Illusion on the left throws a second one the other way (two real impacts)
   const wail=cast('wail',()=>{const Wl=SP.wail,t1=t+(Wl.tl+Wl.r1*Wl.run)*f,t2=t1+Wl.lag*f,i2=t2+(Wl.tl+Wl.r2*Wl.run)*f;
     T.push({k:'wail',t0:t,tl:t+Wl.tl*f,ti:t1,real:true});
@@ -341,18 +344,21 @@ function P2(stage,f,b,final,rage){
   T.spell=T.some(x=>x.k==='wail')?'wail':T.some(x=>x.k==='shard'&&x.fly&&!x.dn)?'rain':'volley';
   return T;
 }
-const isRealImpact=x=>x.k==='shard'||x.k==='wail'||(x.k==='orb'&&x.real);
+const isRealImpact=x=>x.k==='shard'||x.k==='wail'||x.k==='cwave'||x.k==='back'||(x.k==='orb'&&x.real);
+const isImpact=x=>x.k==='shard'||x.k==='wail'||x.k==='cwave'||x.k==='back'||x.k==='orb';
 /* pushes every impact back so that two real ones (and the first one after the previous pattern) are never closer than `gap` s;
    each real impact is noted by noteImpact (S.gapLog = gaps between consecutive real impacts, all sources, read by the ch2-bot run) */
 function spaceImpacts(T,gap){
   T.sort((a,b)=>a.ti-b.ti);
-  let prev=-99,d=0;
-  for(const x of S.threats)if(isRealImpact(x)&&x.ti!=null)prev=Math.max(prev,x.ti);
+  const win=voiceWin();   // illusions and returns: the same rule, with the dodge window (VOICE_FX.margin)
+  let prevR=-99,prevA=-99,d=0;
+  for(const x of S.threats)if(isImpact(x)&&x.ti!=null){prevA=Math.max(prevA,x.ti);if(isRealImpact(x))prevR=Math.max(prevR,x.ti)}
   for(const x of T){
     if(d){x.t0+=d;x.tl+=d;x.ti+=d}
-    if(!isRealImpact(x))continue;
-    if(x.ti-prev<gap){const e=gap-(x.ti-prev);x.t0+=e;x.tl+=e;x.ti+=e;d+=e}
-    prev=x.ti;noteImpact(x.ti)}}
+    if(!isImpact(x))continue;
+    const re=isRealImpact(x),e=Math.max(0,(re?gap-(x.ti-prevR):0),win-(x.ti-prevA));
+    if(e>0){x.t0+=e;x.tl+=e;x.ti+=e;d+=e}
+    prevA=x.ti;if(re){prevR=x.ti;noteImpact(x.ti)}}}
 /* records a real impact time in sorted order and logs the gap to each neighbour (S.gapLog, one value per new adjacent pair) */
 function noteImpact(ti){
   const L=S.impTi||(S.impTi=[]),G=S.gapLog||(S.gapLog=[]);
@@ -396,9 +402,9 @@ function spaceReplies(T,casts,f,gap,stage,K){
    the series stays clean unless the Watcher takes the returning blow (the 'hit' branches of update() set pat.ok=false) */
 function fooled(th){th.done=true;th.res='fooled';th.okT=gt;S.foolT=gt;play('fool');say(_('You dodged a reflection.','Tu as esquivé un reflet.'));
   S.pl.fr=1;   // the recovery after this action is halved (plStep)
-  const c=PT(),nt={k:'back',t0:gt,tl:gt+DG.backTurn,ti:gt+c.act+c.rec*DG.foolRec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);
+  S.dodgeFlash=gt;const c=PT(),nt={k:'back',t0:gt,tl:gt+VOICE_FX.ring.t,ti:gt+c.act+c.rec*DG.foolRec+DG.backWin,real:true,pat:th.pat};th.pat.ths.push(nt);S.threats.push(nt);
   // the returning reflection is a real impact like the others: never closer than VX.gap to one still to come (pushed back, never dropped)
-  {const g=VX.gap[vdk()];for(let i=0;i<200&&S.threats.some(o=>o!==nt&&!o.done&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(o.ti-nt.ti)<g);i++)nt.ti+=.05}
+  {const g=VX.gap[vdk()],w=voiceWin();for(let i=0;i<200&&S.threats.some(o=>o!==nt&&!o.done&&!o.hold&&o.ti!=null&&Math.abs(o.ti-nt.ti)<(o.real===false?w:g));i++)nt.ti+=.05}
   noteImpact(nt.ti);say(_('The reflection comes back.','Le reflet revient.'))}
 /* a fragment of an exploding mirror: leaves the mirror, wanders (shrinking wobble) then settles at its own spot above it */
 function fragPos(th,at){
@@ -432,12 +438,15 @@ function drawTears(th){
 function drawOrbs(){
   for(const th of S.threats){
     if(gt<th.t0)continue;
+    if(th.k==='back'&&gt<th.tl){   // a dodged illusion is gone: a ring tightens on the point where it will land, the orb reappears when the ring ends
+      const k=(gt-th.t0)/(th.tl-th.t0),R=VOICE_FX.ring,rx=HX+30,ry=HY;ctx.save();ctx.strokeStyle=`rgba(244,236,255,${.25+.65*k})`;ctx.lineWidth=2+2*k;
+      ctx.beginPath();ctx.arc(rx,ry,R.r0*(1-k)+9,0,Math.PI*2);ctx.stroke();glow(rx,ry,24+18*k,'rgba(201,168,255,.9)',.3*k);ctx.restore();continue}
     if(th.k==='orb'||th.k==='back'){
       const back=th.k==='back',h=back?{x:HX-110,y:HY-56}:voiceHand(th.src,1),tx=HX+(back?30:14),ty=HY; // a returning reflection lands on the real hit point (HX+30, as HIT elsewhere), not on the Watcher's centre
       let x,y,r=17,a=1,p=0,dash=th.real?0:1;
       if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);if(back){const e=eout(k);x=lerp(tx,h.x,e);y=lerp(ty,h.y,e)-Math.sin(Math.PI*k)*30;dash=1-k}else{x=h.x;y=h.y;r=5+12*k}}
       else{p=(gt-th.tl)/(th.ti-th.tl);
-        if(th.done){if(th.res==='hit'||th.res==='pass'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/.45)}}
+        if(th.done){if(th.res==='hit'||th.res==='pass'){if(gt-th.okT>.05)continue;p=1}else{a=Math.max(0,1-(gt-th.okT)/(th.res==='fooled'?VOICE_FX.ring.fade:.45))}}
         if(th.vsi!=null){   // mirror dance: the orb goes into a mirror of the hall and comes out of it
           const m=shardPos(th.vsi),q=SP.dance.split,pp=Math.min(p,1.15);
           if(pp<q){x=lerp(h.x,m.x,pp/q);y=lerp(h.y,m.y,pp/q)}else{x=lerp(m.x,tx,(pp-q)/(1-q));y=lerp(m.y,ty,(pp-q)/(1-q))}
@@ -469,6 +478,8 @@ function drawOrbs(){
       ctx.save();ctx.globalAlpha=a;ctx.translate(x,y);ctx.rotate(ang+Math.PI/2);const s=o.s*.8*SP.mirror.draw;
       const gr=ctx.createLinearGradient(0,-s,0,s);gr.addColorStop(0,'rgba(245,240,255,.95)');gr.addColorStop(1,'rgba(150,120,210,.7)');ctx.fillStyle=gr;
       ctx.beginPath();ctx.moveTo(0,-s*1.2);ctx.lineTo(s*.45,s*.4);ctx.lineTo(0,s*.9);ctx.lineTo(-s*.45,s*.4);ctx.closePath();ctx.fill();ctx.strokeStyle='#ffffff';ctx.lineWidth=1.2;ctx.stroke();ctx.restore();
+    }else if(th.k==='cwave'){
+      drawEchoFinish(th)
     }else if(th.k==='wail'&&gt<th.tl){
       drawTears(th)   // tears born at the face run down and fall into the water; the wave leaves the fall point (drawing only)
     }else if(th.k==='wail'&&gt>=th.tl){
@@ -482,7 +493,32 @@ function drawOrbs(){
       ctx.restore();
     }
   }
+  if(S.dodgeFlash!=null){const q=(gt-S.dodgeFlash)/VOICE_FX.flash.t;   // flash on the Watcher at every successful dodge
+    if(q>=0&&q<1){ctx.save();ctx.globalCompositeOperation='lighter';glow(HX+10,HY-10,VOICE_FX.flash.r,'rgba(190,255,245,.95)',.75*(1-q));ctx.restore()}}
 }
+/* a small hooded echo (the finish of the Echoes rage), s = scale */
+function echoWisp(x,y,a,s){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.globalAlpha*=a;glow(0,0,34,'rgba(190,150,255,.9)',.45);
+  ctx.fillStyle='rgba(18,12,30,.92)';ctx.beginPath();ctx.moveTo(-11,13);ctx.quadraticCurveTo(-14,-14,0,-26);ctx.quadraticCurveTo(14,-14,11,13);ctx.quadraticCurveTo(0,19,-11,13);ctx.fill();
+  ctx.strokeStyle='rgba(200,160,255,.55)';ctx.lineWidth=1.3;ctx.stroke();ell(0,-6,5,6.5,'#8a80a8');ctx.restore()}
+/* the finish of the Echoes rage (th = cwave): the echoes take place on a circle round the Watcher, converge in a single wave; a dodge dissolves it (flash + wave) */
+function drawEchoFinish(th){
+  const Z=VOICE_FX.finish,cx=HX+10,cy=HY-10;
+  if(th.done){
+    if(th.res!=='ok')return;
+    const q=(gt-th.okT)/Z.dis;if(q>=1)return;
+    if(!th.sf){th.sf=1;burst(cx,cy,16,'#ece4ff',6,.5);MUSIC.fx('glints')}
+    ctx.save();ctx.globalCompositeOperation='lighter';glow(cx,cy,110,'rgba(230,220,255,.95)',.8*(1-q));
+    ctx.strokeStyle=`rgba(236,228,255,${.85*(1-q)})`;ctx.lineWidth=5*(1-q)+1;ctx.beginPath();ctx.ellipse(cx,cy,30+280*eout(q),(30+280*eout(q))*.55,0,0,Math.PI*2);ctx.stroke();ctx.restore();return}
+  const form=clamp((gt-th.t0)/(th.tl-th.t0),0,1),conv=clamp((gt-th.tl)/(th.ti-th.tl),0,1);
+  if(form>=1&&!th.sf0){th.sf0=1;MUSIC.fx('echoArrive')}
+  const crowns=th.dbl?[{r:1,off:0,d:1},{r:Z.rIn,off:.5,d:-1}]:[{r:1,off:0,d:1}];
+  ctx.save();
+  for(const C of crowns){const R=lerp(Z.r0*C.r,22,ein(conv));
+    for(let i=0;i<Z.n;i++){const a=(i+C.off)*Math.PI*2/Z.n+C.d*rt*.5*(1+conv*2),ex=cx+Math.cos(a)*R,ey=cy+Math.sin(a)*R*.55,o=voicePos(1+i%2);
+      const x=lerp(o.x,ex,eout(form)),y=lerp(o.y-60,ey,eout(form));echoWisp(x,y,.35+.55*form,.55+.25*Math.sin(a)*.3)}
+    if(form>=1){ctx.strokeStyle=`rgba(220,200,255,${.2+.5*conv})`;ctx.lineWidth=2+3*conv;ctx.beginPath();ctx.ellipse(cx,cy,R,R*.55,0,0,Math.PI*2);ctx.stroke()}}
+  if(conv>0)glow(cx,cy,40+70*conv,'rgba(220,200,255,.9)',.5*conv);
+  ctx.restore()}
 /* ---- Phase II · the Rust Elder ---- */
 function P1(stage,f,b,final,rage){
   const T=[],K=vdk();let t=b,sp='',gi=0;
@@ -633,6 +669,11 @@ function drawPlank(){
     const l=P.len/2;
     if(gt>=hp.rc&&gt<=hp.p2)ell(HX+24,GY+3,34,4,'rgba(0,0,0,.3)');
     board({x:q.x-c*l,y:q.y-sn*l+dy},{x:q.x+c*l,y:q.y+sn*l+dy},15,al);
+    for(const th of pk){   // a nail at each strike point; it lights up just before its shock (first the upper one, then the lower one)
+      const N=HARPOON_FX.nail,at=th.n===1?P.a:P.b,lit=!th.done&&gt>=th.ti-N.lead;
+      if(th.done&&gt-th.okT>.25)continue;
+      if(lit)glow(at.x,at.y,N.glow,'rgba(255,214,150,.95)',.4+.5*clamp((gt-(th.ti-N.lead))/N.lead,0,1));
+      ell(at.x,at.y,N.r+1.5,N.r+1.5,'#120c08');ell(at.x,at.y,N.r,N.r,lit?'#ffe2a8':'#7a6a58');ell(at.x-1.5,at.y-1.5,N.r*.35,N.r*.35,lit?'#fffbe8':'#b7a58f')}
     for(const th of pk)if(th.done&&gt-th.okT<.12&&!th.bf){th.bf=1;burst(HX+30,th.n===1?HY-60:GY-50,th.res==='ok'?14:8,'#cdb69a',5,.4,.3)}}}
 /* a chain falling from the ceiling on the Watcher (between two glas): one block */
 function drawDChain(){
@@ -718,22 +759,35 @@ const RUST_HAZE=.5,RUST_HALO=430;   // RUST_HALO = radius (px) of the halo of li
 const halo=u=>{u=clamp((u-.25)/.75,0,1);return u*u*(3-2*u)};   // 0 in the core, 1 outside, smooth   // opacity of the veil over everything once the cloud is full (provisional)
 /* ---- Phase III · Form I: the tower's tentacles and torn pieces ---- */
 function P3(stage,f,b,final,rage){
-  const T=[];let t=b;
+  const T=[],BF=BEACON_FX;let t=b,sp='',side=0;
   const R=88;
-  const sweep=dir=>{const ts=t+.95*f,D=1.6*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
-    T.push({k:'beam',t0:t,ts,D,dir,ta:ts+D*s0,tb:ts+D*s1,real:true,hold:true});t=ts+D+.35*f};
-  const bolt=()=>{T.push({k:'bolt',t0:t,ti:t+.95*f,real:true,seed:Math.random()});t+=1.3*f};
-  const spike=()=>{T.push({k:'spike',t0:t,ti:t+.8*f,real:true,seed:Math.random()});t+=1.15*f};
-  const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*f,side:Math.random()<.5?-1:1});t+=1.2*f};
-  const chunk=()=>{T.push({k:'chunk',t0:t,tl:t+.6*f,ti:t+1.2*f,ri:RINGS[Math.floor(Math.random()*6)]});t+=1.55*f};
+  // sweep (hold): lamp dark, thin cone, sweep; B = the timings (BEACON_FX.beam, or the short beam of the Morse rage)
+  const beamAt=(dir,B)=>{const ts=t+(B.dark+B.cone)*f,D=B.D*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
+    T.push({k:'beam',t0:t,dark:B.dark*f,ts,D,dir,ta:ts+D*s0,tb:ts+D*s1,real:true,hold:true});t=ts+D+B.after*f;sp='beam';side=dir<0?1:0};
+  const sweep=dir=>beamAt(dir,BF.beam);
+  // bolt (tap): one lamp at a time, left then right; `tell` s of crackling round it
+  const bolt=(tell,night)=>{const Z=BF.bolt;tell=tell==null?Z.tell:tell;side=S.boltSide=1-(S.boltSide==null?1:S.boltSide);
+    T.push({k:'bolt',t0:t,tell:tell*f,ti:t+(tell+Z.fly)*f,real:true,seed:Math.random(),side,night:night?1:0});t+=Z.gap*f;sp='bolt'};
+  // reef spikes (tap): swirl, then three spikes "tap... tap-tap"
+  const spike=()=>{const Z=BF.spike,ti0=t+Z.tell*f;let prev=t;Z.seq.forEach((o,i)=>{const ti=ti0+o*f;T.push({k:'spike',t0:i?Math.max(prev,ti-Z.tell*f):t,ti,real:true,seed:Math.random()});prev=ti});t=ti0+Z.seq[Z.seq.length-1]*f+Z.after*f;sp='spike'};
+  const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*f,side:Math.random()<.5?-1:1});t+=1.2*f;sp='whip'};
+  // pieces of the tower (tap): the tentacle coils, the stone cracks and throws dust, salvo of 2-3
+  const chunk=()=>{const Z=BF.chunk,n=Z.salvo[0]+Math.floor(Math.random()*(Z.salvo[1]-Z.salvo[0]+1));
+    for(let i=0;i<n;i++){const s=t+i*Z.gap*f;T.push({k:'chunk',t0:s,tl:s+Z.dust*f,ti:s+(Z.dust+Z.fly)*f,ri:RINGS[Math.floor(Math.random()*6)]})}
+    t+=((n-1)*Z.gap+Z.dust+Z.fly+.25)*f;sp='chunk'};
   // the King's wave (hold), crossing the reef like the beam
-  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;return th};
-  // rage, the rising tide: the wave (hold), then reef spikes rise in its wake as it ebbs (taps)
-  const tide=()=>{const w=kwave(),e=w.ts+w.D,P=SP.tide;T.push({k:'spike',t0:e,ti:e+P.spike1*f,real:true,seed:Math.random(),tide:1});T.push({k:'spike',t0:e+P.gap*f,ti:e+P.spike2*f,real:true,seed:Math.random(),tide:1});t=e+P.spike2*f+P.after*f};
+  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;sp='kwave';return th};
+  // rage, the rising tide: the wave (hold), then reef spikes rise in its wake as it ebbs (taps) (kept in the rotation)
+  const tide=()=>{const w=kwave(),e=w.ts+w.D,P=SP.tide;T.push({k:'spike',t0:e,ti:e+P.spike1*f,real:true,seed:Math.random(),tide:1});T.push({k:'spike',t0:e+P.gap*f,ti:e+P.spike2*f,real:true,seed:Math.random(),tide:1});t=e+P.spike2*f+P.after*f;sp='tide'};
+  // rage 1, Night of the Lighthouse: lamps out, each lights `lit` s before it fires, bolts in a chain (taps)
+  const night=()=>{const Z=BF.night;for(let i=0;i<Z.n;i++)bolt(Z.lit,true);t+=.4*f};
+  // rage 2 (Hard), Morse: long (short beam, hold) - short - short (bolt, tap), each signal announced by its own shape
+  const morse=()=>{const M=BF.morse;for(let r=0;r<M.reps;r++)for(const g of M.seq){if(g==='L')beamAt(r%2?1:-1,M.long);else{bolt();t-=(BF.bolt.gap-M.gap)*f}}};
   const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()},whip,chunk,()=>{whip();bolt()},kwave];
   const p1=[()=>{bolt();spike();bolt()},()=>{sweep(-1);sweep(1)},()=>{sweep(-1);t-=.15*f;spike()},()=>{spike();sweep(1);bolt()},()=>{bolt();bolt();sweep(-1)},()=>{whip();whip();chunk()},()=>{sweep(-1);chunk()},tide,()=>{kwave();bolt()}];
-  if(rage){tide();return T}
-  pick(stage?p1:p0)();return T;
+  if(rage){(rage>1?morse:night)()}
+  else pick(stage?p1:p0)();
+  T.spell=sp;T.side=side;return T;
 }
 function beaconHide(){S.hide=null;for(const th of S.threats){if(th.k==='chunk'&&gt>=th.tl&&!(th.done&&gt>th.okT+.8)){(S.hide||(S.hide=new Set())).add(TOWER[th.ri])}}}
 function drawBeaconFx(){

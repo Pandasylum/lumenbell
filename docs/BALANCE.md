@@ -202,6 +202,13 @@ Un reflet esquivé revient en vraie attaque : DG.backTurn .35, DG.backWin .45 (`
 
 **Séquences** (`68-form2-logic.js:23`) — avant rage : ring(3) · moon · trap · ring(2)+trap · cross · burstOut · reform. Après rage : ring(5) · moon+ring(3) · trap+trap · cross+ring(2) · burstOut+moon · ring(3)+cross · reform+ring(2) · storm.
 
+### C2 · Mise à jour du 6 novembre 2026 (lisibilité, `docs/decisions/2026-11-06-ch2-lisibilite-voix-ancien-phare.md`)
+Valeurs changées (secondes, constantes `VOICE_FX`, `HARPOON_FX`, `BEACON_FX`) :
+- Voix : anneau de retour 0,6 s (avant `DG.backTurn` 0,35 s, instant d'impact inchangé) ; écart minimal entre deux impacts dont un non réel = action d'esquive + 0,1 s (Facile 0,77 / Normal 0,43 / Difficile 0,30) ; finish des Échos : 0,4 s de silence, 0,9 s de placement, 0,9 s de convergence (un impact réel de plus) ; Rage Ultime : fin directe.
+- Ancien : `SP.harpoon.stick` 1 → 0,75 ; `SP.harpoon.gap` 0,35 → 0,5.
+- Phare forme I : éclair tell 0,95 → 0,8 + 0,15, écart 1,3 → 1,0 ; faisceau 0,95 + 1,6 → 0,3 + 0,7 + 1,2 ; pierre 0,6 + 0,6 → 0,7 + 0,6, salves 2-3 espacées de 1,05 ; pic 1 seul (tell 0,8) → 3 pics à 0 / 1,05 / 1,45 s ; rages : Nuit (5 éclairs, 0,3 s d'allumage) et Morse (Difficile).
+- Phare forme II : noir de 0,4 s entre les deux faisceaux ; ancre = balayage + coup ; cloche tenue 0,66 s (3 coups) ; éclat 1,2 + 0,6 s ; onde sonore 4-6 ondes (0,5 s, ×0,88) ; rages : pluie de 6 petites cloches, cloche + ondes, Glas (6 coups, ×1,16, puis implosion tenue).
+
 ## Table comparative C1 / C2
 
 | | C1 Ember Bridge | C2 Silent Bells |

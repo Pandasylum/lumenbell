@@ -41,7 +41,7 @@ function success(th,perfect){
   // glas (final assault of phase II): a blocked echo is sent back at the Elder; a glas is countered when all its echoes are blocked (S.glasN: total, not a series)
   if(ph===1&&th.k==='toll'&&th.gid!=null){(S.echoes||(S.echoes=[])).push({t0:gt,x:S.orbX,y:S.orbY});if(S.threats.filter(o=>o.gid===th.gid).every(o=>o.res==='ok'))S.glasN=(S.glasN||0)+1}
   if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('block',perfect);MUSIC.fx('clank');pop(ONO.block,perfect?'#f2fffb':'#bff3ea')}
-  else if(ph===2){S.dodgeOk=gt;play('dodge',perfect)}
+  else if(ph===2){S.dodgeOk=gt;S.dodgeFlash=gt;play('dodge',perfect)}
   else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
 }
 function hurt(th){

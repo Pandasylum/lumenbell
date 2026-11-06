@@ -1,4 +1,16 @@
 /* ---------- boss 2: the Hollow Voice ---------- */
+/* readability pass (6 Nov 2026, docs/decisions/2026-11-06-ch2-lisibilite-voix-ancien-phare.md). Seconds, never a speed multiplier. ALL PROVISIONAL, to tune by eye:
+   ring     a dodged illusion fades at once (fade); a ring tightens `ring` s on the point where the returning orb will land, the orb reappears when it ends
+            (replaces DG.backTurn in fooled(); the impact time of the return is unchanged);
+   flash    glow on the Watcher at every successful dodge (`t` s, `r` px);
+   margin   no two impacts of the Voice (real, illusory, returning) closer than the dodge action + `margin` s (so one press never covers two);
+   finish   end of the Echoes rage: `silence` s after the last shard, the echoes (`n`; Hard: a second, inner crown) take place on a circle of radius `r0` round the
+            Watcher during `form` s, then converge in a single wave in `conv` s; a well-placed dodge dissolves it (flash + wave of `dis` s);
+   direct   Ultimate rage: the last counter kills at once and chains the end animation (no riposte shot before) */
+const VOICE_FX={ring:{t:.6,r0:62,fade:.12},flash:{t:.3,r:110},margin:.1,
+  finish:{silence:.4,n:8,r0:230,rIn:.62,form:.9,conv:.9,dis:.45,after:.5},direct:true};
+/* minimum gap (s) between two impacts of the Voice of which at least one is not real; two real ones keep VX.gap */
+const voiceWin=()=>LB.hero.dur('dodge').act+VOICE_FX.margin;
 /* the turquoise glow deep in the mirror (the keeper's lantern, unseen): faint at first, rising as the Voice weakens,
    brightest just before the mirror shatters. MIRROR_GLOW: base / max during the fight, end = before the shattering */
 const MIRROR_GLOW={base:.06,max:.65,end:.95};
