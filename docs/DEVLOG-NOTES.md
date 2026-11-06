@@ -275,3 +275,8 @@
 ## 2026-11-06 · c2/voix-refonte
 - Ce que le joueur verra : la Voix Creuse reste en place mais son reflet dans l'eau s'étire vers le Veilleur à chaque rage, des miroirs de la salle se fêlent puis s'éteignent, et les échos laissent une trace pâle.
 - Orbes lentes, normales ou rapides (halo et crépitement distincts), volées irrégulières ; les larmes de la plainte coulent du visage jusqu'à l'eau ; en Normal (après la rage 1) et Difficile, un clone répond à chaque sort.
+## 2026-11-06 · bible-f
+- Ce que le joueur verra : rien de visible. `BIBLE.md` et `docs/GLOSSAIRE.md` alignés sur le lore validé (principe directeur, Lumen, noms, Drowned Lighthouse) ; F reste en cours.
+
+## 2026-11-06 · claude/laughing-euler-lspjpk
+- Ce que le joueur verra : rien de visible. Section F de `CHANGEMENTS.md` passée à Fait (PR #117 pour BIBLE et GLOSSAIRE), déplacée sous « Appliqué ».
