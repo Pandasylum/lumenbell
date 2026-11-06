@@ -40,7 +40,7 @@ const SPSTARS=Array.from({length:230},()=>({x:rand(0,W),y:rand(0,H),r:rand(.4,2)
 const STARS=Array.from({length:80},()=>({x:rand(0,W),y:rand(0,250),r:rand(.5,1.6),p:rand(0,6.28)}));
 const FLAKES=Array.from({length:160},()=>({x:rand(0,W),y:rand(0,H),v:rand(60,170),s:rand(1,3),ph:rand(0,6.28)}));
 function rNew(){
-  return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.rbhp,blocks:0,taken:0,
+  return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.bd.hp3,blocks:0,taken:0,
     pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
     sparks:[],floats:[],rings:[],exps:[],fbs:[],melts:[],steam:[],
     shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,bx:BX,
@@ -127,8 +127,8 @@ function rUlt(lv){
 }
 function rNext(){
   if(R.bhp<=1&&!R.u1)return rUlt(1);
-  if(R.bhp<=DIFF.ru&&!R.u5)return rUlt(5);
-  if(DIFF.u2&&R.u5&&!R.u55&&R.bhp<=DIFF.u2)return rUlt(55);
+  if(R.bhp<=DIFF.bd.rages3[0]&&!R.u5)return rUlt(5);
+  if(DIFF.bd.rages3[1]&&R.u5&&!R.u55&&R.bhp<=DIFF.bd.rages3[1])return rUlt(55);
   rLaunch(rPick());
 }
 function rLaunch(kind,opts){
@@ -262,7 +262,7 @@ function rBoss(dt){
       if(t>=.5&&!b.ro){b.ro=true;roar();R.shake=reduce?0:12;R.flash=.5}
       if(t>=.5&&t<2.9&&Math.random()<.35)R.fbs.push({x:R.bx+rand(-90,60),y:DECK-rand(60,320),t:0,big:rand(.9,1.5)});
       if(t>=.9){
-        const n=Math.min(DIFF.rbhp-1,Math.floor((t-.9)/.2)+1);
+        const n=Math.min(DIFF.bd.hp3-1,Math.floor((t-.9)/.2)+1);
         while(R.bhp<1+n){R.bhp++;tone(260+R.bhp*55,.18,'triangle',.05,120)}
       }
       if(t>=3.4){b.s='idle';b.t=0;b.wait=1.1;say(_('The Colossus is back, fiercer than ever.','Le Colosse est de retour, plus féroce encore.'))}

@@ -2,7 +2,7 @@
 function makeEmbers(){return Array.from({length:70},()=>({x:rand(0,W),y:rand(0,H),v:rand(14,48),s:rand(1,2.6),ph:rand(0,6.28)}))}
 function newGame(){
   const emb=G?G.embers:makeEmbers();
-  G={mode:'title',time:0,php:startHP(),bhp:DIFF.bhp,blocks:0,grabs:0,
+  G={mode:'title',time:0,php:startHP(),bhp:DIFF.bd.hp,blocks:0,grabs:0,
      boss:{s:'idle',t:0,wait:1.5},pl:Object.assign(LB.hero.create(),{x:PX}),
      sparks:[],rings:[],floats:[],trail:[],swTrail:[],sw:{p1:false,p2:false,p3:false},atk:{last:'',n:0,plain:0},kick:0,wound:0,p2:false,fy:null,jf:null,fin:null,ringFx:null,embers:emb,
      shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0};

@@ -28,20 +28,19 @@ LB.card.mount($('stage'),$('menu'));LB.pause.mount($('stage'),$('menu'));
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
 /* Difficulty. The Watcher's own settings (hp = HP 6 / 4 / 3, trial 4 at the start and +1 between phases, capped at 4; m = multiplier of his action,
    x2 / x1 / x0.6; rm = of his recovery, x1.2 in Hard) are LB.HERO_DIFF (shared/js/16-hero.js), merged into each entry by
-   LB.diff.apply (the trial entries 'tn' / 'th' take the base difficulty of Normal / Hard); sp = attack speed; boss / boss3 = boss HP of phases I-II / phase III (8 / 10 / 14 and 8 / 10 / 12, as Ember Bridge); heal = HP refilled between phases (true = all, a number = that many, capped at the starting HP); u / u3 = boss HP at which a rage starts, phases I-II / III (one in Easy and
-   Normal, two in Hard: [4] / [5] / [10,5] and [4] / [5] / [8,5], as Ember Bridge). */
+   LB.diff.apply (the trial entries 'tn' / 'th' take the base difficulty of Normal / Hard); bd = boss HP and rage thresholds of phases I-II and III,
+   from LB.BOSS_DIFF (shared/js/18-boss-diff.js: hp, hp3, rages, rages3); heal = HP refilled between phases (true = all, a number = that many, capped at the starting HP). */
 /* La Voix (phase I) attacks 10 % faster in the three difficulties (exception to Chapter I): the one constant, read by spawn() for
-   the Voice only (the attack speed `sp` of each difficulty stays the one of the other bosses). Gaps between real impacts (VX.gap)
-   are absolute seconds and stay respected. */
+   the Voice only. Gaps between real impacts (VX.gap) are absolute seconds and stay respected. */
 const VOICE_SPEED=1.1;
 const DIFFS={
-  easy:{sp:.85,boss:8,boss3:8,u:[4],u3:[4],heal:true,fr:'Facile',en:'Easy'},
-  normal:{sp:1,boss:10,boss3:10,u:[5],u3:[5],heal:true,fr:'Normal',en:'Normal'},
-  hard:{sp:1.18,boss:14,boss3:12,u:[10,5],u3:[8,5],heal:true,hard:true,fr:'Difficile',en:'Hard'},
-  tn:{sp:1,boss:10,boss3:10,u:[5],u3:[5],trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{sp:1.18,boss:14,boss3:12,u:[10,5],u3:[8,5],hard:true,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  easy:{heal:true,fr:'Facile',en:'Easy'},
+  normal:{heal:true,fr:'Normal',en:'Normal'},
+  hard:{heal:true,hard:true,fr:'Difficile',en:'Hard'},
+  tn:{trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
+  th:{hard:true,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
-for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
+for(const k of Object.keys(DIFFS)){const base={tn:'normal',th:'hard'}[k]||k;DIFFS[k]=LB.diff.apply(base,DIFFS[k]);DIFFS[k].bd=LB.bossDiff(base,'ch2')}
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const eio=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2, eout=t=>1-Math.pow(1-t,3), ein=t=>t*t*t;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -53,7 +52,7 @@ let ctx=document.createElement('canvas').getContext('2d');let SC=1;const hasFilt
 /* ---------- state ---------- */
 let gt=0,rt=0;
 let S=fresh('normal');S.mode='menu';
-function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.boss,bossMax:d.boss,
+function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.bd.hp,bossMax:d.bd.hp,
   threats:[],pat:null,nextAt:0,cnt:null,pl:newPl(),held:false,guardT:-9,okT:-9,hurtT:-9,dodgeT:-9,foolT:-9,holding:false,broken:0,
   hits:0,perfects:0,runT:0,full:true,parts:[],pops:[],shake:0,bossFlash:-9,koT:0,deadT:0,deadShown:false,lastK:''}}
 

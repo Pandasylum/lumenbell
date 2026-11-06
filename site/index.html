@@ -327,6 +327,16 @@ LB.drawRecoveryBar=(ctx,x,y,p)=>{
   const k=Math.max(0,Math.min(1,p.t/p.rd));
   ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y+8,62,6);ctx.fillStyle='#6fd3ff';ctx.fillRect(x-30,y+9,60*k,4)};
 LB.DENY_COL='#ff6b6b';
+LB.BOSS_DIFF={
+  easy:{hp:8,rages:[4],rages3:[4]},
+  normal:{hp:10,rages:[5],rages3:[5]},
+  hard:{hp:14,hp3:12,rages:[10,5],rages3:[8,5]}
+};
+LB.BOSS_OVERRIDE={};
+LB.bossDiff=(name,chap,boss)=>{
+  const O=LB.BOSS_OVERRIDE[chap]||{},o=Object.assign({},LB.BOSS_DIFF[name],(O['*']||{})[name],boss?(O[boss]||{})[name]:null);
+  return{hp:o.hp,hp3:o.hp3!=null?o.hp3:o.hp,rages:o.rages.slice(),rages3:(o.rages3||o.rages).slice()}};
+LB.rageHp=(b,phase)=>phase===3?b.rages3:b.rages;
 LB.WATCHER_T={
   breath:{bob:1.2,bobF:2,fl:1.5,flF:4},            
   walk:{bob:4,f:9.8},                               
