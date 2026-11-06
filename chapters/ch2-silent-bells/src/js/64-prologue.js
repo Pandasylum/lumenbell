@@ -654,7 +654,18 @@ function drawRafter(){const r1=S.threats.find(t=>t.k==='rafter'&&t.n===1),r2=S.t
   ctx.strokeStyle='#4a3320';ctx.lineWidth=15;ctx.stroke();ctx.strokeStyle='rgba(200,160,110,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(A.x,A.y-4);ctx.lineTo(B.x,B.y-4);ctx.stroke();
   const dx=B.x-A.x,dy=B.y-A.y,l=Math.hypot(dx,dy)||1;for(const t of[.2,.5,.8])ell(A.x+dx*t,A.y+dy*t,2,2,'#1a120b');
   ctx.fillStyle='#4a3320';ctx.beginPath();ctx.moveTo(B.x-dy/l*7,B.y+dx/l*7);ctx.lineTo(B.x+dx/l*14,B.y+dy/l*14-4);ctx.lineTo(B.x+dx/l*6,B.y+dy/l*6+2);ctx.lineTo(B.x+dx/l*12,B.y+dy/l*12+6);ctx.lineTo(B.x+dy/l*7,B.y-dx/l*7);ctx.fill();
+  // nails stick out of the ceiling plank too (towards the Watcher), lit before the swing (1) then before the fall (2)
+  {const N=HARPOON_FX.nail,sh=r1&&!r1.done?r1:r2&&!r2.done?r2:null,lit=!!sh&&gt>=sh.ti-N.lead;
+    for(const t of N.rafter)drawNail(A.x+dx*t,A.y+dy*t+8,N.rdir.x,N.rdir.y,lit,sh?sh.ti:0,1)}
   ctx.restore()}
+/* a rusty nail sticking out of a board, from its base (bx, by) along the unit direction (dx, dy); it glows just before the shock at `ti` (HARPOON_FX.nail) */
+function drawNail(bx,by,dx,dy,lit,ti,al){const N=HARPOON_FX.nail,tx=bx+dx*N.len,ty=by+dy*N.len;
+  ctx.save();ctx.globalAlpha*=al;ctx.lineCap='round';
+  if(lit)glow(tx,ty,N.glow,'rgba(255,214,150,.95)',.4+.5*clamp((gt-(ti-N.lead))/N.lead,0,1));
+  ctx.strokeStyle='#120c08';ctx.lineWidth=N.r+3;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
+  ctx.strokeStyle=lit?'#ffcf86':'#7a3d1c';ctx.lineWidth=N.r;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
+  ctx.strokeStyle=lit?'#fff3d0':'#a85c2c';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(bx,by-1);ctx.lineTo(tx,ty-1);ctx.stroke();
+  ell(bx,by,N.r+2,N.r+2,'#2b1a10');ctx.restore()}
 /* a board: from A to B, thickness w (same look as the deck beam) */
 function board(A,B,w,al){ctx.save();ctx.globalAlpha*=al;ctx.lineCap='butt';ctx.strokeStyle='#120c08';ctx.lineWidth=w+7;ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();
   ctx.strokeStyle='#4a3320';ctx.lineWidth=w;ctx.stroke();ctx.strokeStyle='rgba(200,160,110,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(A.x,A.y-3);ctx.lineTo(B.x,B.y-3);ctx.stroke();
@@ -669,15 +680,10 @@ function drawPlank(){
     const l=P.len/2;
     if(gt>=hp.rc&&gt<=hp.p2)ell(HX+24,GY+3,34,4,'rgba(0,0,0,.3)');
     board({x:q.x-c*l,y:q.y-sn*l+dy},{x:q.x+c*l,y:q.y+sn*l+dy},15,al);
-    // two rusty nails stick out of the plank, towards the Watcher (they are why it wounds); each lights up just before its shock (first the upper one, then the lower one)
-    for(const th of pk){const N=HARPOON_FX.nail,u=(th.n===1?1:-1)*N.off*P.len,bx=q.x+c*u,by=q.y+sn*u+dy,nx=sn,ny=-c,tx=bx+nx*N.len,ty=by+ny*N.len,lit=!th.done&&gt>=th.ti-N.lead;
+    // two rusty nails stick out of the plank, pointing at the Watcher (they are why it wounds); each lights up just before its shock (first the upper one, then the lower one)
+    for(const th of pk){const N=HARPOON_FX.nail,u=(th.n===1?1:-1)*N.off*P.len;
       if(th.done&&gt-th.okT>.25&&gt>hp.p2)continue;
-      ctx.save();ctx.globalAlpha*=al;ctx.lineCap='round';
-      if(lit)glow(tx,ty,N.glow,'rgba(255,214,150,.95)',.4+.5*clamp((gt-(th.ti-N.lead))/N.lead,0,1));
-      ctx.strokeStyle='#120c08';ctx.lineWidth=N.r+3;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
-      ctx.strokeStyle=lit?'#ffcf86':'#7a3d1c';ctx.lineWidth=N.r;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
-      ctx.strokeStyle=lit?'#fff3d0':'#a85c2c';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(bx+1,by);ctx.lineTo(tx+1,ty);ctx.stroke();
-      ell(bx,by,N.r+2,N.r+2,'#2b1a10');ctx.restore()}
+      drawNail(q.x+c*u,q.y+sn*u+dy,N.dir.x,N.dir.y,!th.done&&gt>=th.ti-N.lead,th.ti,al)}
     for(const th of pk)if(th.done&&gt-th.okT<.12&&!th.bf){th.bf=1;burst(HX+30,th.n===1?HY-60:GY-50,th.res==='ok'?14:8,'#cdb69a',5,.4,.3)}}}
 /* a chain falling from the ceiling on the Watcher (between two glas): one block */
 function drawDChain(){

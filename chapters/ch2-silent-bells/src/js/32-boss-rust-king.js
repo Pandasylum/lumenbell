@@ -1,7 +1,7 @@
 /* harpoon of the Rust Elder, readability pass of 6 Nov 2026 (docs/decisions/2026-11-06-ch2-lisibilite-voix-ancien-phare.md). PROVISIONAL, to tune by eye:
    stick  delay before the recall = old 1 s x .75; gap  between the two plank shocks = old .35 + .15 s (seconds, no multiplier);
-   nail   two rusty nails sticking out of the plank (n = 1 upper, 2 lower): r = thickness and len = length (px), off = place along the plank (share of its length), glow = halo (px), lead = it lights up this many s before its shock */
-const HARPOON_FX={stick:.75,gap:.5,nail:{r:4,len:26,off:.3,glow:34,lead:.35}};
+   nail   two rusty nails sticking out of the plank (n = 1 upper, 2 lower): r = thickness and len = length (px), off = place along the plank (share of its length), dir = direction (towards the Watcher), rafter / rdir = the same on the ceiling plank, glow = halo (px), lead = it lights up this many s before its shock */
+const HARPOON_FX={stick:.75,gap:.5,nail:{r:4,len:26,off:.3,dir:{x:-.97,y:-.24},rafter:[.5,.8],rdir:{x:-.35,y:.94},glow:34,lead:.35}};
 /* ---------- boss 1: the Rust King ---------- */
 function bronze(x0,x1){const g=ctx.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'#0c1714');g.addColorStop(.38,'#3f7466');g.addColorStop(.55,'#2a5148');g.addColorStop(1,'#09120f');return g}
 function jag(x0,x1,y,n,h,R){for(let i=0;i<=n;i++){const t=i/n;ctx.lineTo(lerp(x0,x1,t),y+(i%2?-h*(.4+R()*.6):0))}}

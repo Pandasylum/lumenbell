@@ -1548,7 +1548,7 @@ function heroShape(x,y,pose,o,tint,ghost){
   if(!ghost){S.orbX=L.lx;S.orbY=L.ly}
   if(tint>0){ctx.save();ctx.globalAlpha=tint*.5;ctx.fillStyle='#ff4a3a';ctx.beginPath();ctx.ellipse(x,y-60,32,66,0,0,Math.PI*2);ctx.fill();ctx.restore()}
 }
-const HARPOON_FX={stick:.75,gap:.5,nail:{r:4,len:26,off:.3,glow:34,lead:.35}};
+const HARPOON_FX={stick:.75,gap:.5,nail:{r:4,len:26,off:.3,dir:{x:-.97,y:-.24},rafter:[.5,.8],rdir:{x:-.35,y:.94},glow:34,lead:.35}};
 function bronze(x0,x1){const g=ctx.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'#0c1714');g.addColorStop(.38,'#3f7466');g.addColorStop(.55,'#2a5148');g.addColorStop(1,'#09120f');return g}
 function jag(x0,x1,y,n,h,R){for(let i=0;i<=n;i++){const t=i/n;ctx.lineTo(lerp(x0,x1,t),y+(i%2?-h*(.4+R()*.6):0))}}
 function drawAnchor(hx,hy,c,s,glowA){
@@ -1813,7 +1813,7 @@ const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
   chunk:{dust:.7,fly:.6,gap:1.05,salvo:[2,3]},
-  spike:{tell:.8,seq:[0,1.05,1.45],after:1.0},
+  spike:{tell:.8,seq:[0,1.05,1.45],after:1.0,corals:9},
   night:{n:3,lit:.3,gap:1.0},
   morse:{long:{dark:.2,cone:.4,D:.9,after:.15},seq:['L','c','c'],reps:1,gap:.15},
   cross:{dark:.4},
@@ -2016,7 +2016,7 @@ function drawBeacon(){
     if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D+.1){
       let bx;if(gt<th.ts){bx=th.dir<0?940:-60;const k=(gt-th.t0)/(th.ts-th.t0),lo=lampPoses(LX,LY,1)[th.dir<0?1:0];
         if(th.dark&&gt<th.t0+th.dark)lampDark(lo,1);   // the lamp goes out, then a thin cone warns where the sweep starts (a band with its direction: hold)
-        else thinCone(lo,bx,.35+.5*k);
+        else{ctx.save();ctx.globalCompositeOperation='lighter';glow(lo.x,lo.y,60,'rgba(200,250,255,.9)',.15+.55*k);ctx.restore()}   // the lamp lights up slightly before the sweep, nothing else
         continue}
       const s=(gt-th.ts)/th.D;bx=th.dir<0?940-1000*s:-60+1000*s;
       ctx.save();ctx.globalCompositeOperation='lighter';beamShape(bx,1,th.dir<0?1:-1);ctx.restore();
@@ -2044,7 +2044,6 @@ function drawBeacon(){
   if(S.lampOut&&gt<S.lampOut.until)lampDark(lampPoses(LX,LY,1)[S.lampOut.i],1);   // a countered bolt puts out the lamp that fired it, for 1 s
 }
 function lampDark(o,a){ctx.save();const g=ctx.createRadialGradient(o.x,o.y,2,o.x,o.y,44);g.addColorStop(0,`rgba(4,12,16,${.85*a})`);g.addColorStop(1,'rgba(4,12,16,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,44,0,TAU);ctx.fill();ctx.restore()}
-function thinCone(o,bx,a){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(220,252,255,${a})`;ctx.lineWidth=1.5;ctx.setLineDash([8,6]);ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(bx-26,GY+14);ctx.moveTo(o.x,o.y);ctx.lineTo(bx+26,GY+14);ctx.stroke();ctx.restore()}
 function crackle(o,u){ctx.save();ctx.globalCompositeOperation='lighter';const n=Math.floor(gt*24);glow(o.x,o.y,40+20*u,'rgba(200,250,255,.9)',.25+.45*u);
   for(let i=0;i<5;i++){const a=((n*7+i*72)%360)*Math.PI/180,r0=8,r1=24+((n+i*3)%5)*5;bolt(o.x+Math.cos(a)*r0,o.y+Math.sin(a)*r0,o.x+Math.cos(a)*r1,o.y+Math.sin(a)*r1,(n+i)/50,'rgba(210,252,255,.9)',1.4)}ctx.restore()}
 function counter3(k){
@@ -2058,15 +2057,13 @@ function counter3(k){
     else if(sp==='beam')burst(to.x,to.y,22,'#fff3c4',6,.7,.3);   // the lamp bursts into sparks
     else if(sp==='spike')burst(to.x,to.y,16,'#ffe9a8',6,.6,.5);   // golden splinters
     else burst(to.x,to.y,14,'#fff3c4',5,.5)}}
-function fissure(th,k){const x1=HX+8,x0=LX-80,hx=lerp(x0,x1,k),R=mulberry(Math.floor(th.seed*1e6));
-  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
-  const tail=Math.min(hx-x0,320);ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=5;ctx.beginPath();
-  for(let m=0;m<=16;m++){const x=hx-tail*(m/16),y=GY+5+(R()-.5)*5;m?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
-  ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(255,226,160,.9)';ctx.lineWidth=2;ctx.beginPath();
-  for(let m=0;m<=16;m++){const x=hx-tail*(m/16),y=GY+5+(R()-.5)*5;m?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
-  glow(hx,GY+4,30,'rgba(255,226,160,.9)',.7);
-  if(k>.7){const q=(k-.7)/.3;ctx.strokeStyle=`rgba(255,226,160,${.9*q})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(x1,GY+3,70*(1-q)+14,(70*(1-q)+14)*.25,0,0,Math.PI*2);ctx.stroke()}
-  ctx.restore()}
+function coral(x,h,R,a){ctx.save();ctx.globalAlpha*=a;ctx.lineCap='round';
+  const lean=(R()-.5)*14,br=[[.45,-1],[.62,1],[.8,-.6]];
+  for(const pass of[0,1]){ctx.strokeStyle=pass?'#c8574c':'#2b0e10';ctx.lineWidth=pass?3.2:6.5;ctx.beginPath();ctx.moveTo(x,GY+5);ctx.lineTo(x+lean,GY+5-h);
+    for(const [u,d] of br){const bx=x+lean*u,by=GY+5-h*u;ctx.moveTo(bx,by);ctx.lineTo(bx+d*h*.32,by-h*.3)}ctx.stroke()}
+  ell(x+lean,GY+5-h,2.6,2.6,'#f19a86');for(const [u,d] of br)ell(x+lean*u+d*h*.32,GY+5-h*u-h*.3,2.2,2.2,'#f19a86');ctx.restore()}
+function fissure(th,k){const x1=HX+8,x0=LX-90,N=BEACON_FX.spike.corals,R=mulberry(Math.floor(th.seed*1e6));
+  for(let i=0;i<N;i++){const u=i/N,g=clamp((k-u*.85)/.14,0,1),x=lerp(x0,x1-34,u)+(R()-.5)*12,h=(16+R()*20)*(.7+.5*u),r=mulberry(i*31+Math.floor(th.seed*1e3));if(g>0)coral(x,h*eout(g),r,1)}}
 function spikeTell(x,k,seed){const R=mulberry(Math.floor(seed*1e6));ctx.lineWidth=2;
   for(let i=0;i<5;i++){const a=R()*Math.PI,ex=x+Math.cos(a)*70*k,ey=GY+6+Math.sin(a)*14*k;ctx.strokeStyle=`rgba(0,0,0,${.5+k*.4})`;ctx.beginPath();ctx.moveTo(x,GY+6);ctx.lineTo(ex,ey);ctx.stroke();
     ell(ex,ey,2+k*2,1+k,`rgba(225,245,240,${.3+k*.5})`)}
@@ -3126,7 +3123,16 @@ function drawRafter(){const r1=S.threats.find(t=>t.k==='rafter'&&t.n===1),r2=S.t
   ctx.strokeStyle='#4a3320';ctx.lineWidth=15;ctx.stroke();ctx.strokeStyle='rgba(200,160,110,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(A.x,A.y-4);ctx.lineTo(B.x,B.y-4);ctx.stroke();
   const dx=B.x-A.x,dy=B.y-A.y,l=Math.hypot(dx,dy)||1;for(const t of[.2,.5,.8])ell(A.x+dx*t,A.y+dy*t,2,2,'#1a120b');
   ctx.fillStyle='#4a3320';ctx.beginPath();ctx.moveTo(B.x-dy/l*7,B.y+dx/l*7);ctx.lineTo(B.x+dx/l*14,B.y+dy/l*14-4);ctx.lineTo(B.x+dx/l*6,B.y+dy/l*6+2);ctx.lineTo(B.x+dx/l*12,B.y+dy/l*12+6);ctx.lineTo(B.x+dy/l*7,B.y-dx/l*7);ctx.fill();
+  {const N=HARPOON_FX.nail,sh=r1&&!r1.done?r1:r2&&!r2.done?r2:null,lit=!!sh&&gt>=sh.ti-N.lead;
+    for(const t of N.rafter)drawNail(A.x+dx*t,A.y+dy*t+8,N.rdir.x,N.rdir.y,lit,sh?sh.ti:0,1)}
   ctx.restore()}
+function drawNail(bx,by,dx,dy,lit,ti,al){const N=HARPOON_FX.nail,tx=bx+dx*N.len,ty=by+dy*N.len;
+  ctx.save();ctx.globalAlpha*=al;ctx.lineCap='round';
+  if(lit)glow(tx,ty,N.glow,'rgba(255,214,150,.95)',.4+.5*clamp((gt-(ti-N.lead))/N.lead,0,1));
+  ctx.strokeStyle='#120c08';ctx.lineWidth=N.r+3;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
+  ctx.strokeStyle=lit?'#ffcf86':'#7a3d1c';ctx.lineWidth=N.r;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
+  ctx.strokeStyle=lit?'#fff3d0':'#a85c2c';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(bx,by-1);ctx.lineTo(tx,ty-1);ctx.stroke();
+  ell(bx,by,N.r+2,N.r+2,'#2b1a10');ctx.restore()}
 function board(A,B,w,al){ctx.save();ctx.globalAlpha*=al;ctx.lineCap='butt';ctx.strokeStyle='#120c08';ctx.lineWidth=w+7;ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();
   ctx.strokeStyle='#4a3320';ctx.lineWidth=w;ctx.stroke();ctx.strokeStyle='rgba(200,160,110,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(A.x,A.y-3);ctx.lineTo(B.x,B.y-3);ctx.stroke();
   const dx=B.x-A.x,dy=B.y-A.y;for(const t of[.25,.75])ell(A.x+dx*t,A.y+dy*t,2,2,'#1a120b');ctx.restore()}
@@ -3139,14 +3145,9 @@ function drawPlank(){
     const l=P.len/2;
     if(gt>=hp.rc&&gt<=hp.p2)ell(HX+24,GY+3,34,4,'rgba(0,0,0,.3)');
     board({x:q.x-c*l,y:q.y-sn*l+dy},{x:q.x+c*l,y:q.y+sn*l+dy},15,al);
-    for(const th of pk){const N=HARPOON_FX.nail,u=(th.n===1?1:-1)*N.off*P.len,bx=q.x+c*u,by=q.y+sn*u+dy,nx=sn,ny=-c,tx=bx+nx*N.len,ty=by+ny*N.len,lit=!th.done&&gt>=th.ti-N.lead;
+    for(const th of pk){const N=HARPOON_FX.nail,u=(th.n===1?1:-1)*N.off*P.len;
       if(th.done&&gt-th.okT>.25&&gt>hp.p2)continue;
-      ctx.save();ctx.globalAlpha*=al;ctx.lineCap='round';
-      if(lit)glow(tx,ty,N.glow,'rgba(255,214,150,.95)',.4+.5*clamp((gt-(th.ti-N.lead))/N.lead,0,1));
-      ctx.strokeStyle='#120c08';ctx.lineWidth=N.r+3;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
-      ctx.strokeStyle=lit?'#ffcf86':'#7a3d1c';ctx.lineWidth=N.r;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.stroke();
-      ctx.strokeStyle=lit?'#fff3d0':'#a85c2c';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(bx+1,by);ctx.lineTo(tx+1,ty);ctx.stroke();
-      ell(bx,by,N.r+2,N.r+2,'#2b1a10');ctx.restore()}
+      drawNail(q.x+c*u,q.y+sn*u+dy,N.dir.x,N.dir.y,!th.done&&gt>=th.ti-N.lead,th.ti,al)}
     for(const th of pk)if(th.done&&gt-th.okT<.12&&!th.bf){th.bf=1;burst(HX+30,th.n===1?HY-60:GY-50,th.res==='ok'?14:8,'#cdb69a',5,.4,.3)}}}
 function drawDChain(){
   for(const th of S.threats){if(th.k!=='dchain'||gt<th.t0)continue;

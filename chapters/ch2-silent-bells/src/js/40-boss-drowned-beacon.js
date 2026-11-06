@@ -3,9 +3,9 @@
    stone, ring; tell = a dot or a circle); HOLD = bubble (sweeps, cones, waves, bell; tell = a band with its direction). Seconds, no speed multiplier.
    ALL PROVISIONAL, to tune by eye. Part 1 = form I, Part 2 = form II (the beam is played twice there).
    bolt    crackling round the lamp for `tell` s, then `fly`; one lamp at a time (left, right, left...), `gap` s between two starts;
-   beam    lamp dark `dark` s, thin warning cone `cone` s, sweep `D` s (hold), `after` later;
+   beam    lamp dark `dark` s, then it lights up slightly for `cone` s (no dotted cone), sweep `D` s (hold), `after` later;
    chunk   dust `dust` s, then the stone flies `fly` s; salvo of 2-3 stones, `gap` between two impacts;
-   spike   (reworked: the swirl was unreadable) a glowing fissure runs along the ground from the tower to the Watcher's feet in `tell` s, the spike bursts out where its head arrives; one fissure per spike, 3 spikes at seq s from the first ("tap... tap-tap");
+   spike   (reworked: the swirl was unreadable) corals shoot out of the ground one after the other from the tower to the Watcher's feet (`corals` of them, the front advances in `tell` s), the spike bursts out where the front arrives; one wave per spike, 3 spikes at seq s from the first ("tap... tap-tap");
    night   rage 1: lamps out, each lights `lit` s before it fires, n bolts `gap` apart;
    morse   rage 2 (Hard): long (a short beam, hold) - short - short (a bolt, tap), reps times, `gap` between signals;
    cross   Part 2 beam, two sweeps, `dark` s of black between them;  anchor  sweep (hold), `rel` s to release, the chain rings as the anchor lifts (`lift` s), then the blow (tap);
@@ -17,7 +17,7 @@ const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
   chunk:{dust:.7,fly:.6,gap:1.05,salvo:[2,3]},
-  spike:{tell:.8,seq:[0,1.05,1.45],after:1.0},
+  spike:{tell:.8,seq:[0,1.05,1.45],after:1.0,corals:9},
   night:{n:3,lit:.3,gap:1.0},
   morse:{long:{dark:.2,cone:.4,D:.9,after:.15},seq:['L','c','c'],reps:1,gap:.15},
   cross:{dark:.4},
@@ -264,7 +264,7 @@ function drawBeacon(){
     if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D+.1){
       let bx;if(gt<th.ts){bx=th.dir<0?940:-60;const k=(gt-th.t0)/(th.ts-th.t0),lo=lampPoses(LX,LY,1)[th.dir<0?1:0];
         if(th.dark&&gt<th.t0+th.dark)lampDark(lo,1);   // the lamp goes out, then a thin cone warns where the sweep starts (a band with its direction: hold)
-        else thinCone(lo,bx,.35+.5*k);
+        else{ctx.save();ctx.globalCompositeOperation='lighter';glow(lo.x,lo.y,60,'rgba(200,250,255,.9)',.15+.55*k);ctx.restore()}   // the lamp lights up slightly before the sweep, nothing else
         continue}
       const s=(gt-th.ts)/th.D;bx=th.dir<0?940-1000*s:-60+1000*s;
       ctx.save();ctx.globalCompositeOperation='lighter';beamShape(bx,1,th.dir<0?1:-1);ctx.restore();
@@ -292,9 +292,8 @@ function drawBeacon(){
     if(gt>=a-.2&&gt<=z+.3){const Q=lampPoses(LX,LY,1);for(let i=0;i<2;i++){if(!S.threats.some(th=>th.night&&th.side===i&&gt>=th.t0&&gt<=th.ti+.1))lampDark(Q[i],1)}}}
   if(S.lampOut&&gt<S.lampOut.until)lampDark(lampPoses(LX,LY,1)[S.lampOut.i],1);   // a countered bolt puts out the lamp that fired it, for 1 s
 }
-/* a lamp that is out (dark halo over the bell), the thin warning cone of a sweep, the crackle round a lamp about to fire */
+/* a lamp that is out (dark halo over the bell), the crackle round a lamp about to fire */
 function lampDark(o,a){ctx.save();const g=ctx.createRadialGradient(o.x,o.y,2,o.x,o.y,44);g.addColorStop(0,`rgba(4,12,16,${.85*a})`);g.addColorStop(1,'rgba(4,12,16,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,44,0,TAU);ctx.fill();ctx.restore()}
-function thinCone(o,bx,a){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(220,252,255,${a})`;ctx.lineWidth=1.5;ctx.setLineDash([8,6]);ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(bx-26,GY+14);ctx.moveTo(o.x,o.y);ctx.lineTo(bx+26,GY+14);ctx.stroke();ctx.restore()}
 function crackle(o,u){ctx.save();ctx.globalCompositeOperation='lighter';const n=Math.floor(gt*24);glow(o.x,o.y,40+20*u,'rgba(200,250,255,.9)',.25+.45*u);
   for(let i=0;i<5;i++){const a=((n*7+i*72)%360)*Math.PI/180,r0=8,r1=24+((n+i*3)%5)*5;bolt(o.x+Math.cos(a)*r0,o.y+Math.sin(a)*r0,o.x+Math.cos(a)*r1,o.y+Math.sin(a)*r1,(n+i)/50,'rgba(210,252,255,.9)',1.4)}ctx.restore()}
 /* riposte of phase III, one yellow-white drawing per spell (k = progress 0..1 of S.cnt): tap = a dry streak sent back, hold = a wave released */
@@ -311,16 +310,15 @@ function counter3(k){
     else burst(to.x,to.y,14,'#fff3c4',5,.5)}}
 /* reef spikes (were ice): black rock thrusting up from the sea floor, a little foam. Tell: the rock splits and foams
    under the Watcher (k 0..1); hit: the spikes (a = opacity) */
-/* the fissure of a reef spike: a glowing crack races along the ground from the tower to the Watcher's feet (its head arrives at the impact); a ring closes on the feet at the end */
-function fissure(th,k){const x1=HX+8,x0=LX-80,hx=lerp(x0,x1,k),R=mulberry(Math.floor(th.seed*1e6));
-  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
-  const tail=Math.min(hx-x0,320);ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=5;ctx.beginPath();
-  for(let m=0;m<=16;m++){const x=hx-tail*(m/16),y=GY+5+(R()-.5)*5;m?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
-  ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(255,226,160,.9)';ctx.lineWidth=2;ctx.beginPath();
-  for(let m=0;m<=16;m++){const x=hx-tail*(m/16),y=GY+5+(R()-.5)*5;m?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
-  glow(hx,GY+4,30,'rgba(255,226,160,.9)',.7);
-  if(k>.7){const q=(k-.7)/.3;ctx.strokeStyle=`rgba(255,226,160,${.9*q})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(x1,GY+3,70*(1-q)+14,(70*(1-q)+14)*.25,0,0,Math.PI*2);ctx.stroke()}
-  ctx.restore()}
+/* the corals of a reef spike: they shoot out of the ground one after the other, from the tower towards the Watcher (the front advances in `tell` s); the spike bursts out at his feet
+   when the front arrives. th = the spike, k = progress 0..1 of its tell */
+function coral(x,h,R,a){ctx.save();ctx.globalAlpha*=a;ctx.lineCap='round';
+  const lean=(R()-.5)*14,br=[[.45,-1],[.62,1],[.8,-.6]];
+  for(const pass of[0,1]){ctx.strokeStyle=pass?'#c8574c':'#2b0e10';ctx.lineWidth=pass?3.2:6.5;ctx.beginPath();ctx.moveTo(x,GY+5);ctx.lineTo(x+lean,GY+5-h);
+    for(const [u,d] of br){const bx=x+lean*u,by=GY+5-h*u;ctx.moveTo(bx,by);ctx.lineTo(bx+d*h*.32,by-h*.3)}ctx.stroke()}
+  ell(x+lean,GY+5-h,2.6,2.6,'#f19a86');for(const [u,d] of br)ell(x+lean*u+d*h*.32,GY+5-h*u-h*.3,2.2,2.2,'#f19a86');ctx.restore()}
+function fissure(th,k){const x1=HX+8,x0=LX-90,N=BEACON_FX.spike.corals,R=mulberry(Math.floor(th.seed*1e6));
+  for(let i=0;i<N;i++){const u=i/N,g=clamp((k-u*.85)/.14,0,1),x=lerp(x0,x1-34,u)+(R()-.5)*12,h=(16+R()*20)*(.7+.5*u),r=mulberry(i*31+Math.floor(th.seed*1e3));if(g>0)coral(x,h*eout(g),r,1)}}
 function spikeTell(x,k,seed){const R=mulberry(Math.floor(seed*1e6));ctx.lineWidth=2;
   for(let i=0;i<5;i++){const a=R()*Math.PI,ex=x+Math.cos(a)*70*k,ey=GY+6+Math.sin(a)*14*k;ctx.strokeStyle=`rgba(0,0,0,${.5+k*.4})`;ctx.beginPath();ctx.moveTo(x,GY+6);ctx.lineTo(ex,ey);ctx.stroke();
     ell(ex,ey,2+k*2,1+k,`rgba(225,245,240,${.3+k*.5})`)}
