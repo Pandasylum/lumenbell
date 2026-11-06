@@ -35,13 +35,13 @@ const W=960,H=540,GY=430,HX=230,HY=GY-70;
    are absolute seconds and stay respected. */
 const VOICE_SPEED=1;
 const DIFFS={
-  easy:{sp:.85,boss:8,boss3:8,u:[4],u3:[4],heal:true,fr:'Facile',en:'Easy'},
-  normal:{sp:1,boss:10,boss3:10,u:[5],u3:[5],heal:true,fr:'Normal',en:'Normal'},
-  hard:{sp:1.18,boss:14,boss3:12,u:[10,5],u3:[8,5],heal:true,hard:true,fr:'Difficile',en:'Hard'},
-  tn:{sp:1,boss:10,boss3:10,u:[5],u3:[5],trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{sp:1.18,boss:14,boss3:12,u:[10,5],u3:[8,5],hard:true,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  easy:{heal:true,fr:'Facile',en:'Easy'},
+  normal:{heal:true,fr:'Normal',en:'Normal'},
+  hard:{heal:true,hard:true,fr:'Difficile',en:'Hard'},
+  tn:{trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
+  th:{hard:true,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
-for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
+for(const k of Object.keys(DIFFS)){const base={tn:'normal',th:'hard'}[k]||k;DIFFS[k]=LB.diff.apply(base,DIFFS[k]);DIFFS[k].bd=LB.bossDiff(base,'ch2')}
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const eio=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2, eout=t=>1-Math.pow(1-t,3), ein=t=>t*t*t;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -53,7 +53,7 @@ let ctx=document.createElement('canvas').getContext('2d');let SC=1;const hasFilt
 /* ---------- state ---------- */
 let gt=0,rt=0;
 let S=fresh('normal');S.mode='menu';
-function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.boss,bossMax:d.boss,
+function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.bd.hp,bossMax:d.bd.hp,
   threats:[],pat:null,nextAt:0,cnt:null,pl:newPl(),held:false,guardT:-9,okT:-9,hurtT:-9,dodgeT:-9,foolT:-9,holding:false,broken:0,
   hits:0,perfects:0,runT:0,full:true,parts:[],pops:[],shake:0,bossFlash:-9,koT:0,deadT:0,deadShown:false,lastK:''}}
 

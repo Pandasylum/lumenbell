@@ -248,3 +248,5 @@
 
 ## 2026-11-06 · c2/voix-x1
 - Ce que le joueur verra : la Voix enchaîne ses attaques à son rythme de base, environ 9 % plus lentement qu'avant. Rien d'autre ne change.
+## 2026-11-06 · shared/boss-diff
+- Ce que le joueur verra : rien de visible. PV et seuils de rage des boss viennent maintenant d une table commune aux deux chapitres ; les valeurs sont identiques.

@@ -328,8 +328,8 @@ function hud(){
   const S=R||Q||G;
   if(S!==cntS&&S.mode==='play'){cntS=S;tries[R?3:Q?2:1]++}
   if(S.php!==lastP){LB.hud.player(S.php,DIFF.hp);lastP=S.php}
-  const bmax=S===R?DIFF.rbhp:DIFF.bhp,bk=S===G?1:S===R?3:2;
-  if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;LB.hud.boss(S.bhp,bmax,LB.hud.marks(rageHp(DIFF,bk)));lastB=S.bhp}   /* repères : rages calculées (rageHp) et dernier PV */
+  const bmax=S===R?DIFF.bd.hp3:DIFF.bd.hp,bk=S===G?1:S===R?3:2;
+  if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;LB.hud.boss(S.bhp,bmax,LB.hud.marks(LB.rageHp(DIFF.bd,bk)));lastB=S.bhp}   /* repères : rages calculées (rageHp) et dernier PV */
 }
 function step(dt){
   G.time+=dt;

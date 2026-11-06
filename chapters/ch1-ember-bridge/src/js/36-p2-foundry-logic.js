@@ -18,7 +18,7 @@ const QAH={
 };
 const ROCKP=Array.from({length:9},(_,i)=>{const a=i/9*6.283;return[Math.cos(a)*(.75+((i*37)%5)/10),Math.sin(a)*(.75+((i*53)%5)/10)]});
 function qNew(){
-  return{mode:'intro',t:0,time:0,lt:0,php:startHP(),bhp:DIFF.bhp,dodges:0,taken:0,scroll:0,speed:900,
+  return{mode:'intro',t:0,time:0,lt:0,php:startHP(),bhp:DIFF.bd.hp,dodges:0,taken:0,scroll:0,speed:900,
     pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.6,dur:1,after:''},atk:null,cn:null,chain:null,chainMiss:false,
     enraged:false,rn:0,rage2:false,last:'',n:0,sparks:[],floats:[],rings:[],exps:[],fbs:[],
     streaks:Array.from({length:40},()=>({x:rand(0,W),y:rand(0,H),v:rand(500,1000),l:rand(16,56)})),
@@ -69,10 +69,10 @@ function qTurn(){
     Q.chain=DIFF.q2?['claws','wings','rocks','roar']:['claws','wings','rocks'];Q.chainMiss=false;
     qRage(1.3,'chain');
   }else if(DIFF.q2){
-    const n=DIFF.rages.filter(x=>Q.bhp<=x).length;
+    const n=LB.rageHp(DIFF.bd,2).filter(x=>Q.bhp<=x).length;
     if(n>Q.rn){Q.rn=n;if(n>=2)Q.rage2=true;qRoar(n>=2?_('RAGE!','RAGE !'):_('ENRAGED','ENRAGEMENT'),n)}
     else qLaunch(qPick());
-  }else if(Q.bhp===DIFF.u){
+  }else if(Q.bhp===DIFF.bd.rages[0]){
     qRage(Q.enraged?.8:1.6,'rand');
   }else qLaunch(qPick());
 }

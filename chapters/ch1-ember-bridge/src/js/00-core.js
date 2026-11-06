@@ -3,28 +3,25 @@
 LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},oldPrefix:[['lb-ch1-best-','eb-best-']]});
 const _=LB._;
 const W=960,H=540,DECK=410,PX=250,BX=730;
-/* Difficulté. hp/bhp : PV du Veilleur/Colosse ; m : multiplicateur des fenêtres de blocage et d'esquive ; u : PV du Colosse où se déclenchent les attaques de rage en phases II et III ;
+/* Difficulté. m : multiplicateur des fenêtres de blocage et d'esquive ; bd : PV du Colosse et PV où partent ses rages, de LB.BOSS_DIFF (shared/js/18-boss-diff.js : hp, hp3, rages, rages3) ;
    jets : jets de feu de la Fureur ; fury : PV du Colosse → type de fureur en phase I ; les repères de la jauge du Colosse sont calculés
-   depuis les rages (rageHp, LB.hud.marks) ; l'aide visuelle est disponible partout sauf en Épreuve (LB.help) ;
+   depuis les rages (LB.rageHp, LB.hud.marks) ; l'aide visuelle est disponible partout sauf en Épreuve (LB.help) ;
    easy : aides et allègements, repères en cercle, pas de seconde vie en phase III (la foudre mène droit à la vraie fin) ;
-   hard : attaques en plus (double fouet, épée à 3 coups, souffles enchaînés, rages à séquences) ; fm : fenêtre du souffle ; rm : récupération après blocage ;
-   t : durées de la phase I remplacées ; waitMin/waitMax : pause entre attaques ; chain : [PV, chance] d'un souffle enchaîné ; rbhp/ru : PV du Colosse et PV de la première rage en phase III ; u2 : PV de la rage en deux temps (phase III Difficile) ; q2/rages : phase II Difficile (attaques à 4 griffes, 5 vagues, boulette de feu, cris avec éboulement, balayage de queue). */
+   hard : attaques en plus (double fouet, épée à 3 coups, souffles enchaînés, rages à séquences) ; fm : fenêtre du souffle ;
+   t : durées de la phase I remplacées ; waitMin/waitMax : pause entre attaques ; chain : [PV, chance] d'un souffle enchaîné ; q2 : phase II Difficile (attaques à 4 griffes, 5 vagues, boulette de feu, cris avec éboulement, balayage de queue). */
 const DIFFS={
-  easy:{bhp:8,u:4,jets:2,easy:true,fury:{4:5,1:1}},
-  normal:{bhp:10,u:5,jets:4,easy:false,fury:{5:5,1:1}},
-  hard:{bhp:14,fm:1,u:10,jets:4,easy:false,hard:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},rbhp:12,ru:8,
+  easy:{jets:2,easy:true,fury:{4:5,1:1}},
+  normal:{jets:4,easy:false,fury:{5:5,1:1}},
+  hard:{fm:1,jets:4,easy:false,hard:true,q2:true,fury:{10:5,5:6,1:1},
         t:{windup:.5,strike:.42,sw1w:.75,sw1:.26,swgap:.22,sw2w:.15,sw2:.26,sw3g:.27,sw3w:.34,sw3:.26,fli:.5,stagger:.6,swrec:.65,flrec:.65,fyt:.36,fyg:.05},waitMin:.5,waitMax:.9,chain:[[5,.75],[10,.4]]}
 };
-/* Phase III : PV du Colosse (rbhp) et PV de la première rage (ru) ; par défaut identiques aux autres phases */
-for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u}
+for(const k of ['easy','normal','hard'])DIFFS[k].bd=LB.bossDiff(k,'ch1','colossus');
 DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
 /* PV du Veilleur (hp), multiplicateurs m et rm : LB.HERO_DIFF (shared/js/16-hero.js), fusionnés ici ; l'Épreuve (tn, th) prend 4 PV au départ et +1 PV entre les phases (heal) */
 for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 /* Épreuve du feu ouverte pendant les tests (décision du 28 octobre) ; false rétablit le verrou par la vraie fin (84-loop.js) */
 const TRIAL_OPEN=true;
 const endSeen=LB.endSeen; /* vraie fin vue : shared/js/04-store.js */
-/* PV du Colosse où part chaque rage, par phase (1 à 3) : repères de sa jauge (LB.hud.marks, plus la case du dernier PV) */
-const rageHp=(d,ph)=>ph===3?(d.u2?[d.ru,d.u2]:[d.ru]):(d.rages||[d.u]);
 /* Table du chapitre pour le cadre commun (menu, écran de démarrage, cartes, HUD : shared/js/28-ui.js, docs/COMMUN.md § 3.1) */
 const CHAPTER={n:1,id:'ch1',
   title:'Ember Bridge',

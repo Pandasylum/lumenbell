@@ -366,6 +366,16 @@ LB.drawRecoveryBar=(ctx,x,y,p)=>{
   const k=Math.max(0,Math.min(1,p.t/p.rd));
   ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y+8,62,6);ctx.fillStyle='#6fd3ff';ctx.fillRect(x-30,y+9,60*k,4)};
 LB.DENY_COL='#ff6b6b';
+LB.BOSS_DIFF={
+  easy:{hp:8,rages:[4],rages3:[4]},
+  normal:{hp:10,rages:[5],rages3:[5]},
+  hard:{hp:14,hp3:12,rages:[10,5],rages3:[8,5]}
+};
+LB.BOSS_OVERRIDE={};
+LB.bossDiff=(name,chap,boss)=>{
+  const O=LB.BOSS_OVERRIDE[chap]||{},o=Object.assign({},LB.BOSS_DIFF[name],(O['*']||{})[name],boss?(O[boss]||{})[name]:null);
+  return{hp:o.hp,hp3:o.hp3!=null?o.hp3:o.hp,rages:o.rages.slice(),rages3:(o.rages3||o.rages).slice()}};
+LB.rageHp=(b,phase)=>phase===3?b.rages3:b.rages;
 LB.WATCHER_T={
   breath:{bob:1.2,bobF:2,fl:1.5,flF:4},            
   walk:{bob:4,f:9.8},                               
@@ -1074,13 +1084,13 @@ LB.card.mount($('stage'),$('menu'));LB.pause.mount($('stage'),$('menu'));
 const W=960,H=540,GY=430,HX=230,HY=GY-70;
 const VOICE_SPEED=1;
 const DIFFS={
-  easy:{sp:.85,boss:8,boss3:8,u:[4],u3:[4],heal:true,fr:'Facile',en:'Easy'},
-  normal:{sp:1,boss:10,boss3:10,u:[5],u3:[5],heal:true,fr:'Normal',en:'Normal'},
-  hard:{sp:1.18,boss:14,boss3:12,u:[10,5],u3:[8,5],heal:true,hard:true,fr:'Difficile',en:'Hard'},
-  tn:{sp:1,boss:10,boss3:10,u:[5],u3:[5],trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
-  th:{sp:1.18,boss:14,boss3:12,u:[10,5],u3:[8,5],hard:true,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
+  easy:{heal:true,fr:'Facile',en:'Easy'},
+  normal:{heal:true,fr:'Normal',en:'Normal'},
+  hard:{heal:true,hard:true,fr:'Difficile',en:'Hard'},
+  tn:{trial:true,fr:'Épreuve · Normal',en:'Trial · Normal'},
+  th:{hard:true,trial:true,fr:'Épreuve · Difficile',en:'Trial · Hard'}
 };
-for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
+for(const k of Object.keys(DIFFS)){const base={tn:'normal',th:'hard'}[k]||k;DIFFS[k]=LB.diff.apply(base,DIFFS[k]);DIFFS[k].bd=LB.bossDiff(base,'ch2')}
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const eio=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2, eout=t=>1-Math.pow(1-t,3), ein=t=>t*t*t;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -1090,7 +1100,7 @@ let ctx=document.createElement('canvas').getContext('2d');let SC=1;const hasFilt
 
 let gt=0,rt=0;
 let S=fresh('normal');S.mode='menu';
-function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.boss,bossMax:d.boss,
+function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card',paused:false,hp:d.hp,hpMax:d.hp,bossHp:d.bd.hp,bossMax:d.bd.hp,
   threats:[],pat:null,nextAt:0,cnt:null,pl:newPl(),held:false,guardT:-9,okT:-9,hurtT:-9,dodgeT:-9,foolT:-9,holding:false,broken:0,
   hits:0,perfects:0,runT:0,full:true,parts:[],pops:[],shake:0,bossFlash:-9,koT:0,deadT:0,deadShown:false,lastK:''}}
 
@@ -2621,7 +2631,7 @@ function hud(){
 
 function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
 const RAGE={dur:1.6,dur2:.8,finalHp:1};
-const rageAt=()=>S.phase===3?S.d.u3:S.d.u;   // rage thresholds of the current phase
+const rageAt=()=>LB.rageHp(S.d.bd,S.phase);   // rage thresholds of the current phase
 const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?RAGE.finalHp:null);   // form I of phase III has no final assault
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
@@ -3149,7 +3159,7 @@ function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,pa
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
 function resetPhaseState(){Object.assign(S,{shardGone:null,peA:0,angerShown:false,rageN:0,rageHp0:null,rageNext:0,roarT:-9,roarD:0,finalDone:false,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
-  S.phase=id;S.form=1;S.bossMax=id===3?S.d.boss3:S.d.boss;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
+  S.phase=id;S.form=1;S.bossMax=id===3?S.d.bd.hp3:S.d.bd.hp;S.bossHp=S.bossMax;if(o.first||S.d.heal===true)S.hp=S.hpMax;else if(S.d.heal)S.hp=Math.min(S.hpMax,S.hp+S.d.heal);   // heal true = full refill; a number = that many HP, capped at the starting HP (trial: +1)
  resetPhaseState();
   hud();playCine(id,'in',()=>introCard(id));
 }

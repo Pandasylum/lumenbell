@@ -378,6 +378,16 @@ LB.drawRecoveryBar=(ctx,x,y,p)=>{
   const k=Math.max(0,Math.min(1,p.t/p.rd));
   ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y+8,62,6);ctx.fillStyle='#6fd3ff';ctx.fillRect(x-30,y+9,60*k,4)};
 LB.DENY_COL='#ff6b6b';
+LB.BOSS_DIFF={
+  easy:{hp:8,rages:[4],rages3:[4]},
+  normal:{hp:10,rages:[5],rages3:[5]},
+  hard:{hp:14,hp3:12,rages:[10,5],rages3:[8,5]}
+};
+LB.BOSS_OVERRIDE={};
+LB.bossDiff=(name,chap,boss)=>{
+  const O=LB.BOSS_OVERRIDE[chap]||{},o=Object.assign({},LB.BOSS_DIFF[name],(O['*']||{})[name],boss?(O[boss]||{})[name]:null);
+  return{hp:o.hp,hp3:o.hp3!=null?o.hp3:o.hp,rages:o.rages.slice(),rages3:(o.rages3||o.rages).slice()}};
+LB.rageHp=(b,phase)=>phase===3?b.rages3:b.rages;
 LB.WATCHER_T={
   breath:{bob:1.2,bobF:2,fl:1.5,flF:4},            
   walk:{bob:4,f:9.8},                               
@@ -1070,17 +1080,16 @@ LB.setup({id:'ch1',old:{'lb-ch1-intro':['eb-intro'],'lb-ch1-end':['eb-end']},old
 const _=LB._;
 const W=960,H=540,DECK=410,PX=250,BX=730;
 const DIFFS={
-  easy:{bhp:8,u:4,jets:2,easy:true,fury:{4:5,1:1}},
-  normal:{bhp:10,u:5,jets:4,easy:false,fury:{5:5,1:1}},
-  hard:{bhp:14,fm:1,u:10,jets:4,easy:false,hard:true,q2:true,u2:5,rages:[10,5],fury:{10:5,5:6,1:1},rbhp:12,ru:8,
+  easy:{jets:2,easy:true,fury:{4:5,1:1}},
+  normal:{jets:4,easy:false,fury:{5:5,1:1}},
+  hard:{fm:1,jets:4,easy:false,hard:true,q2:true,fury:{10:5,5:6,1:1},
         t:{windup:.5,strike:.42,sw1w:.75,sw1:.26,swgap:.22,sw2w:.15,sw2:.26,sw3g:.27,sw3w:.34,sw3:.26,fli:.5,stagger:.6,swrec:.65,flrec:.65,fyt:.36,fyg:.05},waitMin:.5,waitMax:.9,chain:[[5,.75],[10,.4]]}
 };
-for(const k of ['easy','normal','hard']){const d=DIFFS[k];d.rbhp=d.rbhp||d.bhp;d.ru=d.ru||d.u}
+for(const k of ['easy','normal','hard'])DIFFS[k].bd=LB.bossDiff(k,'ch1','colossus');
 DIFFS.tn=Object.assign({},DIFFS.normal,{trial:true});DIFFS.th=Object.assign({},DIFFS.hard,{trial:true});
 for(const k of Object.keys(DIFFS))DIFFS[k]=LB.diff.apply({tn:'normal',th:'hard'}[k]||k,DIFFS[k]);
 const TRIAL_OPEN=true;
 const endSeen=LB.endSeen; 
-const rageHp=(d,ph)=>ph===3?(d.u2?[d.ru,d.u2]:[d.ru]):(d.rages||[d.u]);
 const CHAPTER={n:1,id:'ch1',
   title:'Ember Bridge',
   color:'#ff7a2b',color2:'#ffc15a',rgb:'255,122,43',
@@ -1190,7 +1199,7 @@ function roar(){
 function makeEmbers(){return Array.from({length:70},()=>({x:rand(0,W),y:rand(0,H),v:rand(14,48),s:rand(1,2.6),ph:rand(0,6.28)}))}
 function newGame(){
   const emb=G?G.embers:makeEmbers();
-  G={mode:'title',time:0,php:startHP(),bhp:DIFF.bhp,blocks:0,grabs:0,
+  G={mode:'title',time:0,php:startHP(),bhp:DIFF.bd.hp,blocks:0,grabs:0,
      boss:{s:'idle',t:0,wait:1.5},pl:Object.assign(LB.hero.create(),{x:PX}),
      sparks:[],rings:[],floats:[],trail:[],swTrail:[],sw:{p1:false,p2:false,p3:false},atk:{last:'',n:0,plain:0},kick:0,wound:0,p2:false,fy:null,jf:null,fin:null,ringFx:null,embers:emb,
      shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0};
@@ -1653,8 +1662,8 @@ function hud(){
   const S=R||Q||G;
   if(S!==cntS&&S.mode==='play'){cntS=S;tries[R?3:Q?2:1]++}
   if(S.php!==lastP){LB.hud.player(S.php,DIFF.hp);lastP=S.php}
-  const bmax=S===R?DIFF.rbhp:DIFF.bhp,bk=S===G?1:S===R?3:2;
-  if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;LB.hud.boss(S.bhp,bmax,LB.hud.marks(rageHp(DIFF,bk)));lastB=S.bhp}   
+  const bmax=S===R?DIFF.bd.hp3:DIFF.bd.hp,bk=S===G?1:S===R?3:2;
+  if(S.bhp!==lastB||S.mkBox!==bk){S.mkBox=bk;LB.hud.boss(S.bhp,bmax,LB.hud.marks(LB.rageHp(DIFF.bd,bk)));lastB=S.bhp}   
 }
 function step(dt){
   G.time+=dt;
@@ -2409,7 +2418,7 @@ const QAH={
 };
 const ROCKP=Array.from({length:9},(_,i)=>{const a=i/9*6.283;return[Math.cos(a)*(.75+((i*37)%5)/10),Math.sin(a)*(.75+((i*53)%5)/10)]});
 function qNew(){
-  return{mode:'intro',t:0,time:0,lt:0,php:startHP(),bhp:DIFF.bhp,dodges:0,taken:0,scroll:0,speed:900,
+  return{mode:'intro',t:0,time:0,lt:0,php:startHP(),bhp:DIFF.bd.hp,dodges:0,taken:0,scroll:0,speed:900,
     pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.6,dur:1,after:''},atk:null,cn:null,chain:null,chainMiss:false,
     enraged:false,rn:0,rage2:false,last:'',n:0,sparks:[],floats:[],rings:[],exps:[],fbs:[],
     streaks:Array.from({length:40},()=>({x:rand(0,W),y:rand(0,H),v:rand(500,1000),l:rand(16,56)})),
@@ -2459,10 +2468,10 @@ function qTurn(){
     Q.chain=DIFF.q2?['claws','wings','rocks','roar']:['claws','wings','rocks'];Q.chainMiss=false;
     qRage(1.3,'chain');
   }else if(DIFF.q2){
-    const n=DIFF.rages.filter(x=>Q.bhp<=x).length;
+    const n=LB.rageHp(DIFF.bd,2).filter(x=>Q.bhp<=x).length;
     if(n>Q.rn){Q.rn=n;if(n>=2)Q.rage2=true;qRoar(n>=2?_('RAGE!','RAGE !'):_('ENRAGED','ENRAGEMENT'),n)}
     else qLaunch(qPick());
-  }else if(Q.bhp===DIFF.u){
+  }else if(Q.bhp===DIFF.bd.rages[0]){
     qRage(Q.enraged?.8:1.6,'rand');
   }else qLaunch(qPick());
 }
@@ -3211,7 +3220,7 @@ const SPSTARS=Array.from({length:230},()=>({x:rand(0,W),y:rand(0,H),r:rand(.4,2)
 const STARS=Array.from({length:80},()=>({x:rand(0,W),y:rand(0,250),r:rand(.5,1.6),p:rand(0,6.28)}));
 const FLAKES=Array.from({length:160},()=>({x:rand(0,W),y:rand(0,H),v:rand(60,170),s:rand(1,3),ph:rand(0,6.28)}));
 function rNew(){
-  return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.rbhp,blocks:0,taken:0,
+  return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.bd.hp3,blocks:0,taken:0,
     pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
     sparks:[],floats:[],rings:[],exps:[],fbs:[],melts:[],steam:[],
     shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,bx:BX,
@@ -3296,8 +3305,8 @@ function rUlt(lv){
 }
 function rNext(){
   if(R.bhp<=1&&!R.u1)return rUlt(1);
-  if(R.bhp<=DIFF.ru&&!R.u5)return rUlt(5);
-  if(DIFF.u2&&R.u5&&!R.u55&&R.bhp<=DIFF.u2)return rUlt(55);
+  if(R.bhp<=DIFF.bd.rages3[0]&&!R.u5)return rUlt(5);
+  if(DIFF.bd.rages3[1]&&R.u5&&!R.u55&&R.bhp<=DIFF.bd.rages3[1])return rUlt(55);
   rLaunch(rPick());
 }
 function rLaunch(kind,opts){
@@ -3428,7 +3437,7 @@ function rBoss(dt){
       if(t>=.5&&!b.ro){b.ro=true;roar();R.shake=reduce?0:12;R.flash=.5}
       if(t>=.5&&t<2.9&&Math.random()<.35)R.fbs.push({x:R.bx+rand(-90,60),y:DECK-rand(60,320),t:0,big:rand(.9,1.5)});
       if(t>=.9){
-        const n=Math.min(DIFF.rbhp-1,Math.floor((t-.9)/.2)+1);
+        const n=Math.min(DIFF.bd.hp3-1,Math.floor((t-.9)/.2)+1);
         while(R.bhp<1+n){R.bhp++;tone(260+R.bhp*55,.18,'triangle',.05,120)}
       }
       if(t>=3.4){b.s='idle';b.t=0;b.wait=1.1;say(_('The Colossus is back, fiercer than ever.','Le Colosse est de retour, plus féroce encore.'))}
