@@ -8,7 +8,7 @@ Série de combats de boss à un seul bouton en HTML5 canvas (960 × 540) : le Ve
 ## Démarrage rapide
 
 ```bash
-python3 build/build.py          # construit chapters/ch1-ember-bridge/dist/index.html + build/out/ember-bridge-itch.zip
+python3 build/build_chapter.py ch1-ember-bridge # construit chapters/ch1-ember-bridge/dist/index.html + build/out/ember-bridge-itch.zip
 python3 build/build_test.py     # construit build/out/test.html (avec les crochets window.__t)
 cd tests && npm install && npx playwright install chromium
 node smoke.js                   # 3 phases x 3 difficultés, doit afficher "errs []"

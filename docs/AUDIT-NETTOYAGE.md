@@ -23,13 +23,13 @@ Suppressions (`git rm`, matériel de promo itch.io récupéré et sauvegardé ai
 
 Référence restante signalée, non modifiée : `README.md:46` (tableau des dossiers, ligne `store/`) et `docs/decisions/2026-11-05-chapitres-sans-commencer.md:3` (mention de `build/promo.js`). Aucun workflow, test, build, `package.json` ni `apk/` ne référence `store/` ou `promo`.
 
-Vérifié par `git grep` : aucune autre référence que cet audit. Non déplacés, faute de 0 référence prouvée : `build/ch2_swap_args.py` (cité par `archives/DECISIONS-2026-10-27-28.md`), `chapters/ch2-silent-bells/legacy/silent-bells.source.html` (commentaire de `build/build_ch2.py`), `chapters/ch2-silent-bells/shots/` (`ch2/NOTES.md:105`), `docs/AUDIT-2026-10-30.md` (`README.md`, `DEVLOG-NOTES.md`), `store/` et `tests/trial-*` (exclus), `docs/CH2-SPEC.md` (lu par les tests).
+Vérifié par `git grep` : aucune autre référence que cet audit. Non déplacés, faute de 0 référence prouvée : `build/ch2_swap_args.py` (cité par `archives/DECISIONS-2026-10-27-28.md`), `chapters/ch2-silent-bells/legacy/silent-bells.source.html` (commentaire de `build/build_chapter.py`), `chapters/ch2-silent-bells/shots/` (`ch2/NOTES.md:105`), `docs/AUDIT-2026-10-30.md` (`README.md`, `DEVLOG-NOTES.md`), `store/` et `tests/trial-*` (exclus), `docs/CH2-SPEC.md` (lu par les tests).
 
 ---
 
 ## B2 faite
 
-Classe moteur partagé. Builds régénérés (`build.py`, `build_ch2.py`, `build_site.py`). Tests : `smoke` (ch1 puis ch2), `keys`, `audio` : `errs []` partout (`keys.js` n'a pas été intermittent). Pas de bots, de `visual-shots` ni de `trial-*`.
+Classe moteur partagé. Builds régénérés (`build_chapter.py`, `build_site.py`). Tests : `smoke` (ch1 puis ch2), `keys`, `audio` : `errs []` partout (`keys.js` n'a pas été intermittent). Pas de bots, de `visual-shots` ni de `trial-*`.
 
 **Supprimé** (0 référence reprouvée par `git grep -w`, accès par chaîne `LB[…]` compris, tests compris) :
 - `LB.chRgb`, `LB.chHover` (`shared/js/24-cine.js`) ; `startCine`, `drawEclIdle`, `TF_LEN` (Chapitre II) ; `qlimb` (Chapitre I).
@@ -69,7 +69,7 @@ CSS : aucun sélecteur orphelin trouvé par la méthode, hors le cas `.btn.big` 
 | `store/screenshot-3-epee.png` (682 683) | Capture de store | 0 référence | moyen | Idem |
 | `store/screenshot-1-pont.png` (636 287) | Capture de store | 0 référence | moyen | Idem |
 | `store/icon-sources/fg.svg` | Source d'icône | 0 référence au nom ; ses voisins `bg.html`, `fgp.html`, `full.html` sont lus par `store/icon-sources/r.js` | faible | Garder (source d'icône) ou archiver si `fgp.html` l'a remplacé ; à valider |
-| `chapters/ch2-silent-bells/legacy/silent-bells.source.html` (193 288) | Import d'origine figé du Chapitre II | Cité seulement dans un commentaire de `build/build_ch2.py:4` et dans la docstring de `build/ch2_swap_args.py` ; aucun build ni test ne le lit | faible | `git mv` vers `archives/` (lot a). Risque de traçabilité de l'import seulement |
+| `chapters/ch2-silent-bells/legacy/silent-bells.source.html` (193 288) | Import d'origine figé du Chapitre II | Cité seulement dans un commentaire de `build/build_chapter.py` et dans la docstring de `build/ch2_swap_args.py` ; aucun build ni test ne le lit | faible | `git mv` vers `archives/` (lot a). Risque de traçabilité de l'import seulement |
 
 Assets **référencés** (à garder) : `apk/assets/icon-only.png` (473 525), `icon-background.png` (374 247), `icon-foreground.png` (150 083) lus par `.github/workflows/android.yml` et `store/icon-sources/r.js` ; `shared/svg/watcher-menu.svg` lu par `shared/js/20-watcher.js` et les deux `body.html`.
 
@@ -80,9 +80,9 @@ Total ≈ 2 146 814 o de builds, plus deux fichiers de texte générés. Ils doi
 | Chemin | Constat | Preuve | Risque | Action proposée |
 |---|---|---|---|---|
 | `site/ch2/index.html` (479 137) | Copie octet pour octet de `chapters/ch2-silent-bells/dist/index.html` | `cmp` identique | fort | Ne pas toucher à la main ; régénérer par `build_site.py` |
-| `chapters/ch2-silent-bells/dist/index.html` (479 137) | Build généré par `build_ch2.py` | `build_ch2.py` + `tests.yml` | fort | Idem (`build_ch2.py`) |
+| `chapters/ch2-silent-bells/dist/index.html` (479 137) | Build généré par `build_chapter.py` | `build_chapter.py` + `tests.yml` | fort | Idem (`build_chapter.py`) |
 | `site/ch1/index.html` (474 632) | Copie octet pour octet de `chapters/ch1-ember-bridge/dist/index.html` | `cmp` identique | fort | Idem (`build_site.py`) |
-| `chapters/ch1-ember-bridge/dist/index.html` (474 632) | Build généré par `build.py` | CLAUDE.md règle 11 | fort | Idem (`build.py`) |
+| `chapters/ch1-ember-bridge/dist/index.html` (474 632) | Build généré par `build_chapter.py` | CLAUDE.md règle 11 | fort | Idem (`build_chapter.py`) |
 | `site/index.html` (239 276) | Hub généré par `build_site.py` | `tests.yml` | fort | Idem |
 | `docs/TEXTES-CH1.md` (29 146) | Généré par `build/extract_texts.py` | en-tête du script | moyen | Ne pas éditer à la main |
 | `chapters/ch2-silent-bells/TEXTES.md` (8 319) | Généré par `node tests/ch2-texts.js --write` | en-tête du test | moyen | Idem |
@@ -105,7 +105,7 @@ Peu de copie textuelle : seulement 2 lignes de plus de 120 caractères sont comm
 | `chapters/*/src/js/{12-hero-states,36-p2-foundry-logic}.js` | `DG` de même nom dans les deux chapitres, corps différents | idem | moyen | Noter (table de réglages, ne pas fusionner sans équilibrage) |
 | `site/src/js/10-hub.js` (28 799) et `shared/js/28-ui.js` (50 941) | `SETTINGS_T` et panneau de réglages `hset…` du hub répètent `LB.SETTINGS_T` et le panneau commun | `DEMANDES.md` entrée du 2 novembre, « à faire » | moyen | Déjà demandé ; rien à ajouter |
 | `site/src/js/10-hub.js`, `chapters/*/src/js/*-core.js` | Même helper `$` de 1 ligne | comparaison des déclarations | faible | Négligeable |
-| `build/fonts.css` (97 153) | Source unique des polices, déjà partagée par les trois builds | `build.py`, `build_ch2.py`, `build_site.py` | faible | Rien : pas un doublon |
+| `build/fonts.css` (97 153) | Source unique des polices, déjà partagée par les trois builds | `build_chapter.py`, `build_site.py` | faible | Rien : pas un doublon |
 
 Ordre de grandeur : les chapitres pèsent 266 376 o (ch1) et 268 226 o (ch2) de JS source, le hub 28 820 o, `shared/js` 97 170 o.
 
@@ -154,7 +154,7 @@ La décision `docs/decisions/2026-11-05-chapitres-sans-commencer.md` signale ell
 | `chapters/ch2-silent-bells/shots/` (17 JPEG, 2 216 002 o) | Planches avant / après des PR de l'étape C1, « pièces de revue » | `chapters/ch2-silent-bells/NOTES.md:105` ; aucun build ni test ne les lit ; l'audit du 30 octobre en proposait déjà l'archivage. Poids : `c1-1-combats/phase3.jpg` 230 714, `c1-4-retouches/2-lore.jpg` 210 733, `c1-2-sorts/phase3.jpg` 207 805, `c1-2-sorts/phase2.jpg` 196 883, `c1-4-retouches/1-textes-intro-outro.jpg` 185 965, `c1-1-combats/phase2.jpg` 183 838, `c1-3-cinematiques/outro.jpg` 146 668, `c1-1-combats/phase1.jpg` 144 940, `c1-5-retouches-2/1-visuels.jpg` 131 775, `2-riposte.jpg` 111 436, `c1-3-cinematiques/intro.jpg` 109 087, `c1-2-sorts/phase1.jpg` 77 579, `c1-4-retouches/3-gameplay.jpg` 74 845, `c1-5-retouches-2/3-illusions.jpg` 73 116, `4-gros-plans.jpg` 51 578, `c1-4-retouches/3-jauge-rages.jpg` 43 620, `c1-1-combats/menu.jpg` 35 420 | faible | `git mv` vers `archives/ch2-shots/` ; mettre à jour `ch2/NOTES.md:105`. Un changement sous `chapters/ch2-silent-bells/` déclenche le périmètre ch2 de la CI |
 | `docs/AUDIT-2026-10-30.md` (28 337) | Audit ponctuel, propositions déjà appliquées (`archives/` existe) | Cité par `README.md` et `docs/DEVLOG-NOTES.md` seulement | faible | Archiver et corriger le lien du `README.md` |
 | `docs/rapports/2026-11-04-mort-difficile-voix.md` | Rapport d'analyse ponctuel | 0 référence au nom dans le dépôt | faible | Archiver (hors `paths-ignore` : la CI lance `smoke`) |
-| `chapters/ch2-silent-bells/legacy/silent-bells.source.html` (193 288) | Voir § 1.2 | idem | faible | `git mv` vers `archives/` ; adapter le commentaire de `build_ch2.py:4` |
+| `chapters/ch2-silent-bells/legacy/silent-bells.source.html` (193 288) | Voir § 1.2 | idem | faible | `git mv` vers `archives/` ; adapter le commentaire de `build_chapter.py` |
 | `build/ch2_swap_args.py` (81 lignes) | Outil de migration à passe unique (27 octobre), déjà appliqué | Cité par `archives/DECISIONS-2026-10-27-28.md` seulement ; aucun workflow ne l'appelle | faible | `git mv` ; sous `build/`, la CI lance **tous** les périmètres |
 | `CHANGEMENTS.md` (24 517) | Sections au statut Fait : D, G, K, L, N (Fait, PR fusionnée) | tableau lignes 11-24 | moyen | Déplacer le corps de ces sections dans `archives/CHANGEMENTS-faits.md`, garder la ligne du tableau. Des décisions citent « `CHANGEMENTS.md` C / J » : garder des renvois |
 | `CHANGEMENTS.md` (incohérences, pas d'archivage) | Statuts à réconcilier : K, L, N sont Fait dans le tableau mais le corps de leurs sections dit encore « en cours … PR à ouvrir » (lignes 128, 150, 183) ; I « À tenter » alors que `DECISIONS.md` (5 novembre) livre les pleurs de la Voix ; M « À faire » alors que `ch2/phare-refonte` (3 novembre) est livré | lecture des lignes citées | moyen | **À faire par Kevin ou en session dédiée** : je n'invente aucun statut |
@@ -172,11 +172,11 @@ La décision `docs/decisions/2026-11-05-chapitres-sans-commencer.md` signale ell
 | Chemin | Constat | Preuve | Risque | Action proposée |
 |---|---|---|---|---|
 | `docs/LORE.md` | Référence unique du lore | CLAUDE.md règle 1 | fort | Ne jamais modifier sans demande explicite |
-| `chapters/ch1-ember-bridge/dist/index.html`, `chapters/ch2-silent-bells/dist/index.html`, `site/index.html`, `site/ch1/index.html`, `site/ch2/index.html` | Fichiers générés | `build.py`, `build_ch2.py`, `build_site.py`, règles 11 et 18 | fort | Régénérer, ne jamais éditer |
+| `chapters/ch1-ember-bridge/dist/index.html`, `chapters/ch2-silent-bells/dist/index.html`, `site/index.html`, `site/ch1/index.html`, `site/ch2/index.html` | Fichiers générés | `build_chapter.py`, `build_site.py`, règles 11 et 18 | fort | Régénérer, ne jamais éditer |
 | `docs/TEXTES-CH1.md`, `chapters/ch2-silent-bells/TEXTES.md` | Générés (`extract_texts.py`, `ch2-texts.js --write`) | en-têtes ; `TEXTES.md` lu par `tests.yml` | moyen | Idem |
 | `docs/CH2-SPEC.md` | **Lu par les tests** (`tests/ch2-lib.js:37`, `ch2-texts.js`, `ch2-announce.js`) ; l'audit du 30 octobre suggérait de l'archiver | `tests/ch2-lib.js:37` | fort | Ne pas déplacer |
 | `docs/GLOSSAIRE.md`, `docs/COMMUN.md`, `docs/BALANCE.md`, `BIBLE.md`, `DECISIONS.md`, `docs/decisions/*` | Références vivantes ; les chemins `docs/COMMUN.md`, `docs/GLOSSAIRE.md`, `docs/decisions/**` sont dans `paths-ignore` de la CI | `tests.yml` lignes 8-21 | moyen | Ne pas renommer ; les archives de `DECISIONS.md` restent dans `archives/` |
-| `build/build.py`, `build_ch2.py`, `build_site.py`, `build_test.py`, `assemble.py`, `fonts.css` | Chaîne de build, appelée par `tests.yml` et `android.yml` | `tests.yml:90-103`, `android.yml:31-33` | fort | Ne pas toucher |
+| `build/build_chapter.py`, `build_site.py`, `build_test.py`, `assemble.py`, `fonts.css` | Chaîne de build, appelée par `tests.yml` et `android.yml` | `tests.yml:90-103`, `android.yml:31-33` | fort | Ne pas toucher |
 | `.github/workflows/tests.yml`, `android.yml` | Référencent `build/`, `site/` entier, `apk/`, `tests/package-lock.json` | lecture des workflows | fort | Ne pas toucher |
 | `apk/assets/*.png`, `apk/capacitor.config.json`, `apk/package.json` | Lus par `android.yml` | `android.yml` | fort | Ne pas toucher |
 | `tests/launch.js`, `ch2-lib.js`, `ch2-bot.js`, `ch1-bot.js`, `lockscroll.js` | Modules requis par d'autres tests (`require('./…')`) ; `ch1-bot.js` par `input.js`, `ch2-bot.js` par `ch2-input.js`, `ch2-trial.js`, `ch2-retouches3.js`, `ch2-announce.js` | `grep require` | fort | Ne pas déplacer |
@@ -199,12 +199,12 @@ La décision `docs/decisions/2026-11-05-chapitres-sans-commencer.md` signale ell
 - Chapitre I : `qlimb` (`40-p2-foundry-render.js:7`), commentaire `60-ui-menu.js:54`.
 - Chapitre II : `startCine`, `drawEclIdle`, `TF_LEN`.
 - Hub : `fpLang` de `site/src/page/body.html:35`.
-- **Tests** : `smoke` + le test ciblé du chapitre. Chapitre II : `build.py`, `build_ch2.py` puis `build_site.py` et commit des fichiers générés (règle 18), puis `ch2-smoke` et `ch2-texts`. Chapitre I : `build.py` et, par déduction (copie octet pour octet), `build_site.py`, pour que `dist/` et `site/ch1/` restent identiques. Hub : `build_site.py`, `hub.js`, `hub-site.js` (manuel). Jamais par défaut : `visual-shots`, bots, `trial-*`.
+- **Tests** : `smoke` + le test ciblé du chapitre. Chapitre II : `build_chapter.py <id>` puis `build_site.py` et commit des fichiers générés (règle 18), puis `ch2-smoke` et `ch2-texts`. Chapitre I : `build_chapter.py ch1-ember-bridge` et, par déduction (copie octet pour octet), `build_site.py`, pour que `dist/` et `site/ch1/` restent identiques. Hub : `build_site.py`, `hub.js`, `hub-site.js` (manuel). Jamais par défaut : `visual-shots`, bots, `trial-*`.
 
 ### (c) `shared/` (et outillage touchant tous les périmètres)
 
 - `LB.chRgb` et `LB.chHover` (`24-cine.js`), sélecteurs `#gateLangs` et `gateBtn` de `28-ui.js`, bloc `btnbig` (`28-ui.js`, `gate.css`, `assemble.py`), restes de `tests/menu-layout.js` et `tests/ch2-lib.js`.
-- **Tests** : les deux chapitres + `keys` et `audio` ; `build.py`, `build_ch2.py` et `build_site.py` avec commit des sorties (le bloc `btnbig` modifie les trois builds) ; avant un tag `v*` ou un envoi itch.io, lancement manuel de la CI « Tests » (périmètres `shared ch2 hub`) sur `main`. Lire toute la sortie (`errs []` attendu) et relancer uniquement le test en échec.
+- **Tests** : les deux chapitres + `keys` et `audio` ; `build_chapter.py` et `build_site.py` avec commit des sorties (le bloc `btnbig` modifie les trois builds) ; avant un tag `v*` ou un envoi itch.io, lancement manuel de la CI « Tests » (périmètres `shared ch2 hub`) sur `main`. Lire toute la sortie (`errs []` attendu) et relancer uniquement le test en échec.
 
 ---
 

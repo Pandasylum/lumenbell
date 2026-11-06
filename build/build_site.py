@@ -1,5 +1,5 @@
 """Assemble le site complet du jeu (web, itch.io, APK) : le hub et les chapitres, chacun autonome.
-Usage : python3 build/build_site.py   (apres build/build.py et build/build_ch2.py : leurs dist sont recopies tels quels)
+Usage : python3 build/build_site.py   (apres build/build_chapter.py de chaque chapitre : leurs dist sont recopies tels quels)
 Entree : site/src/ (morceaux du hub, ordre : site/src/parts.txt, '@shared' = shared/parts.txt, comme un chapitre),
          build/fonts.css (polices inlinees), chapters/<chapitre>/dist/index.html
 Sortie : site/index.html (hub), site/ch1/index.html, site/ch2/index.html, build/out/lumenbell-site.zip (sans site/src)

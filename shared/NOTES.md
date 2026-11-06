@@ -3,7 +3,7 @@
 - **Créé** le 28 octobre 2026 (session `engine/shared`, première du plan de `docs/COMMUN.md` § 4).
 - **Principe** : pas de modules JS. Les morceaux de `shared/js/`, dans l'ordre de `shared/parts.txt`, sont collés par `build/assemble.py` à la ligne `@shared` du `src/parts.txt` de chaque chapitre, c'est-à-dire **dans l'IIFE du chapitre**, juste après son ouverture (`js/00-open.js`). Un seul nom ajouté à la portée du chapitre : `LB`.
 - Le chapitre appelle `LB.setup({…})` en tête (`js/00-core.js` au Chapitre I, `js/02-core.js` au Chapitre II), **avant toute lecture de clé ou de texte**.
-- Un changement ici change les deux `dist` : reconstruire les deux (`build/build.py`, `build/build_ch2.py`), tests des deux chapitres, comparaison d'images (`tests/visual-shots.js`).
+- Un changement ici change les deux `dist` : reconstruire les deux (`build/build_chapter.py <id>` pour chaque chapitre), tests des deux chapitres, comparaison d'images (`tests/visual-shots.js`).
 
 ## Contenu
 | Fichier | Contenu |

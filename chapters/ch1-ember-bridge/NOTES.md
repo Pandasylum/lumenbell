@@ -1,7 +1,7 @@
 # Chapitre I – Ember Bridge (notes du dossier)
 
-- **État** : v1.0 publié. Source découpée dans `src/` (27 octobre 2026, branche `ch1/split`) ; `legacy/` n'existe plus. `dist/index.html` = référence construite par `python3 build/build.py`, inchangée par le découpage.
-- **Assemblage** : `build/assemble.py` colle les morceaux listés dans `src/parts.txt`, **dans cet ordre, octet pour octet, sans rien ajouter**. Le résultat est l'ancien fragment (sans doctype, une IIFE unique) ; `build.py` et `build_test.py` le transforment comme avant. Pas de modules JS : tous les fichiers JS partagent la portée de l'IIFE ouverte dans `00-core.js` et fermée dans `84-loop.js`.
+- **État** : v1.0 publié. Source découpée dans `src/` (27 octobre 2026, branche `ch1/split`) ; `legacy/` n'existe plus. `dist/index.html` = référence construite par `python3 build/build_chapter.py ch1-ember-bridge`, inchangée par le découpage.
+- **Assemblage** : `build/assemble.py` colle les morceaux listés dans `src/parts.txt`, **dans cet ordre, octet pour octet, sans rien ajouter**. Le résultat est l'ancien fragment (sans doctype, une IIFE unique) ; `build_chapter.py` et `build_test.py` le transforment comme avant. Pas de modules JS : tous les fichiers JS partagent la portée de l'IIFE ouverte dans `00-core.js` et fermée dans `84-loop.js`.
 - **Structure du code** : phases `G` (P1 pont), `Q` (P2 Fonderie, `drawLake`, `lakeY()`), `R` (P3 Clocher, `ringBell`, `FIN`, `finaleScore`) ; cinématiques `SC` (cartons `{d,en,fr}`) et `DRAW=[sStatue,sValley,sTowers,sSea,sDawn,sTitle]` ; panneaux `CARD1`, `LORE`, `showEnd`, `qEnd`, `rEnd` ; i18n `_(en,fr)`.
 - **Textes** : `docs/TEXTES-CH1.md` (régénérable, colonne `fichier:ligne`). Lore : `docs/LORE.md`.
 - **Cartes de transition** (fin de phase I : `showEnd`, cas `G.p2` ; fin de phase II : `qEnd`) : ligne du haut « Transition », titre neutre « Phase I/II terminée », le récit dans le texte seulement (voir `DECISIONS.md`, 28 octobre 2026).
@@ -11,7 +11,7 @@
 ## Carte de `src/`
 | Fichier | Contenu |
 |---|---|
-| `page/head.html` | `<title>`, metas, liens Google Fonts (retirés par `build.py`), `<style>` ouvrant |
+| `page/head.html` | `<title>`, metas, liens Google Fonts (retirés par `build_chapter.py`), `<style>` ouvrant |
 | `page/style.css` | Tout le CSS (entre `<style>` et `</style>`) |
 | `page/body.html` | `</style>`, balisage HTML (en-tête, barres, arène, scène SVG du menu dans `#menu`, commandes), `<script>` ouvrant ; la carte `#ov`, la pause, l'écran de démarrage et le reste du menu sont créés par `LB.card`, `LB.pause`, `LB.menu` (`shared/js/28-ui.js`) ; la boîte de cinématique `#cine` par `LB.cine` |
 | `js/00-open.js` | Ouverture de l'IIFE (suivie, dans `parts.txt`, de `@shared` : le code commun `shared/`, objet `LB`) |
@@ -44,7 +44,7 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 ## Pièges du découpage
 - **L'ordre de `parts.txt` est l'ordre d'exécution.** Une seule IIFE : déplacer un morceau peut casser une `const` utilisée avant sa déclaration (TDZ) même si le build « passe ». Ne pas réordonner sans raison.
 - **Chaque morceau finit par un saut de ligne**, et tout fichier de `src/` doit être listé dans `parts.txt` : `assemble.py` refuse sinon (erreur claire plutôt que JS collé ou fichier ignoré).
-- **Ancrages des scripts de build** : `build.py` cherche `<style>`/`</style>` et les 3 liens Google Fonts (`page/`) ; `build_test.py` cherche `requestAnimationFrame(frame);\n})();` (fin de `84-loop.js`) et `LB.cine.create({key:'intro',` (`76-cine-intro.js`, pour y ajouter `testSeen:true`). Ne pas modifier ces lignes sans adapter les scripts.
+- **Ancrages des scripts de build** : `build_chapter.py` cherche `<style>`/`</style>` et les 3 liens Google Fonts (`page/`) ; `build_test.py` cherche `requestAnimationFrame(frame);\n})();` (fin de `84-loop.js`) et `LB.cine.create({key:'intro',` (`76-cine-intro.js`, pour y ajouter `testSeen:true`). Ne pas modifier ces lignes sans adapter les scripts.
 - Le texte d'ouverture de la phase I n'existe plus qu'une fois : `CARD1` dans `js/60-ui-menu.js` (la carte est créée par `LB.card`).
 - `js/72-boot.js` finit par un commentaire « écran de démarrage » qui décrit en fait le code de `84-loop.js` : laissé tel quel pour rester octet pour octet identique.
 - Les coupes sont faites sur les commentaires de section (`/* ---------- … */`) ; la ligne vide qui précède reste à la fin du morceau précédent.

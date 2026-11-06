@@ -28,8 +28,8 @@ jobs:
       - name: Construire le site (chapitres puis hub)
         working-directory: .
         run: |
-          python3 build/build.py
-          python3 build/build_ch2.py
+          python3 build/build_chapter.py ch1-ember-bridge
+          python3 build/build_chapter.py ch2-silent-bells
           python3 build/build_site.py
       - name: Prepare www (site/ entier, sans site/src)
         run: |

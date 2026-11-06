@@ -1,7 +1,7 @@
 # Site (hub + chapitres) – notes du dossier
 
 - **Contenu** : `index.html` (hub, construit), `ch1/index.html` et `ch2/index.html` (copies exactes des `dist`), `src/` (source du hub, jamais publiée).
-- **Build** : `python3 build/build.py`, `python3 build/build_ch2.py`, puis `python3 build/build_site.py` (assemble `src/parts.txt` avec `shared/` comme un chapitre, polices de `build/fonts.css`, copie les `dist`, zip `build/out/lumenbell-site.zip` sans `src/`). Reproductible : la CI (job `smoke`) vérifie `git diff site/`.
+- **Build** : `python3 build/build_chapter.py <id>` pour chaque chapitre, puis `python3 build/build_site.py` (assemble `src/parts.txt` avec `shared/` comme un chapitre, polices de `build/fonts.css`, copie les `dist`, zip `build/out/lumenbell-site.zip` sans `src/`). Reproductible : la CI (job `smoke`) vérifie `git diff site/`.
 - **Réglages** : `src/js/10-hub.js`, tables `HUB_CH` (un chapitre de plus = une entrée ; `CHAPTERS` dans `build_site.py` pour copier son `dist`), `HUB_T` (mise en page : titre, version, carte ; fond sonore `bed`), `SETTINGS_T` (panneau de la roue : un réglage de plus = une entrée) et `RESET_T` (clés effacées par « Réinitialiser la progression »). Aucune valeur en dur dans `src/page/style.css` (variables posées par le JS).
 - **Fond sonore** : variante « nébuleuse » seule (graves, 50 à 500 Hz ; table `HUB_T.bed`), sans paramètre d'URL ; variantes a et b retirées (décision `docs/decisions/2026-11-02-hub-fond-sonore.md`).
 - **Carte d'entrée** : `placeCard()` + `HUB_T.card` (sous la tour, sinon au-dessus, jamais sur une tour ni le centre). **États des tours** : à jouer = point + `.halo`, terminé = point plein, fermé = cercle éteint (tous modes).
