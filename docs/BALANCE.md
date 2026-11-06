@@ -8,7 +8,7 @@
 
 - **Cellule Facile / Normal / Difficile** : `prép. / fenêtre / durée` en secondes, multiplicateurs appliqués. **prép.** = du début de l'attaque à son premier impact (ou au début de la tenue pour un faisceau) ; **fenêtre** = temps pendant lequel un appui arrête l'attaque (voir ci-dessous) ; **durée** = voir le titre de chaque table.
 - **Fenêtre d'un tap** = `act + grâce` (`LB.hero.stops`, `shared/js/16-hero.js:58`) : appui au plus `act` avant l'impact (le Veilleur est en action), ou dans la grâce de sa récupération. Fenêtre de **tenue** (C2, faisceaux) = tb − ta.
-- **C2 — facteur f** : toutes les durées d'un motif sont multipliées par `f = 1 / (sp × (1 + .1 × stage))`, `stage` = 0 avant la première rage, 1 ensuite (`64-prologue.js:172`). Chaque cellule C2 est donc `avant rage ⟹ après rage` (la fenêtre d'un tap ne change pas ; les rages et le dernier assaut sont toujours en stage 1).
+- **C2 — rythme interne** : aucune accélération par difficulté ni par rage ; le rythme interne des attaques = durées du Normal en secondes réelles (décision du 5 novembre 2026, `docs/decisions/2026-11-05-rythme-uniforme.md`). La fenêtre d'un tap ne change pas.
 - **prov.** = O quand le code lui-même marque la valeur « PROVISOIRE ». **contre** : riposte du Veilleur (C1 phase III seulement).
 - Ordre des phases C2 à l'écran : I Voix Creuse (interne P2), II Ancien de Rouille (interne P1), III Phare (interne P3, formes I et II) — `ORDER=[2,1,3]`, `64-prologue.js:95`.
 

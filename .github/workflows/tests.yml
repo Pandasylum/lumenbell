@@ -11,6 +11,8 @@ on:
       - '*.md'
       - 'chapters/*/NOTES.md'
       - 'shared/NOTES.md'
+      - 'site/NOTES.md'
+      - 'docs/BALANCE.md'
       - 'docs/AUDIT-*.md'
       - 'docs/COMMUN.md'
       - 'docs/DEVLOG-NOTES.md'

@@ -262,3 +262,6 @@
 
 ## 2026-11-06 · docs/recuperation-sharp-darwin
 - Ce que le joueur verra : rien de visible. Documentation : sections D, G, I, K, L, M, N du suivi des changements rangées sous « Appliqué », chemin de `docs/DEVLOG-NOTES.md` corrigé dans `CLAUDE.md`.
+
+## 2026-11-06 · docs/balance-pv
+- Ce que le joueur verra : rien de visible. Règle de rythme et renvoi `LB.BOSS_DIFF` mis à jour dans `docs/BALANCE.md` et les notes du Chapitre II.
