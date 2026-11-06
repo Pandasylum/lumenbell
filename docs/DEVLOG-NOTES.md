@@ -280,3 +280,7 @@
 
 ## 2026-11-06 · claude/laughing-euler-lspjpk
 - Ce que le joueur verra : rien de visible. Section F de `CHANGEMENTS.md` passée à Fait (PR #117 pour BIBLE et GLOSSAIRE), déplacée sous « Appliqué ».
+
+## 2026-11-06 · feat/ch2-lisibilite-voix-ancien-phare
+- Ce que le joueur verra : la Voix efface l'illusion esquivée, resserre un anneau sur l'impact du retour et fait flasher le Veilleur ; sa Rage des Échos finit en couronne d'échos qui converge. Les planches de l'Ancien montrent un clou qui s'allume avant chaque choc.
+- Ce que le joueur verra : au Phare, éclairs qui crépitent autour de la lampe, faisceaux annoncés par un cône fin, pics en « tap… tap-tap », nouvelles rages (Nuit du Phare, Morse, cloches, Glas) et contres jaune-blanc.

@@ -217,3 +217,6 @@ Emplacement exact et forme : à choisir (près des équerres et des chaînes, li
 Ne pas toucher à la silhouette du Colosse (validée) : la lanterne est un élément de décor, pas de son équipement.
 
 Quand une section est faite et fusionnée, la déplacer ici avec sa date et sa PR.
+
+P. Chapitre II · Lisibilité de la Voix, de l'Ancien et du Phare (décision de Kevin du 6 novembre 2026, `docs/decisions/2026-11-06-ch2-lisibilite-voix-ancien-phare.md`)
+Statut : En cours (PR `feat/ch2-lisibilite-voix-ancien-phare` ; à passer à « Fait (PR fusionnée) » à la fusion). Reste à faire : rage finale « Éblouissement » et transition vers la Partie 2, sons tap / tenir, contres propres à chaque sort.

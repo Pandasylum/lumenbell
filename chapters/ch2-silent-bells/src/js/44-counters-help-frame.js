@@ -40,7 +40,7 @@ function drawCounter(){
     const sp=S.cnt.spell;
     if(sp==='rain')counterRain(k);else if(sp==='wail')counterWail(k);
     else if(k>.22&&k<.7){const e=(k-.22)/.48,p=voicePos(0);ctx.strokeStyle=`rgba(255,244,190,${1-e*.8})`;ctx.lineWidth=8*(1-e)+2;ctx.beginPath();ctx.moveTo(S.orbX,S.orbY);ctx.lineTo(lerp(S.orbX,p.x,Math.min(1,e*3)),lerp(S.orbY,p.y-84,Math.min(1,e*3)));ctx.stroke()}}
-  else if(S.cnt.k===3){if(k>.2&&k<.6)bolt(S.orbX,S.orbY,LX,S.form===2?ECY:LY,(k*7|0)/7,'rgba(255,250,238,.95)',4)}
+  else if(S.cnt.k===3)counter3(k);   // 40-boss-drowned-beacon.js
   ctx.restore();
 }
 
