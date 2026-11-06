@@ -268,3 +268,6 @@
 
 ## 2026-11-06 · docs/classe-doc-workflow-align
 - Ce que le joueur verra : rien de visible. Règle 19 de `CLAUDE.md` et notes de la CI alignées sur `tests.yml` (périmètres touchés automatiques sur PR).
+
+## 2026-11-06 · tri-changements
+- Ce que le joueur verra : rien de visible. Statuts J, J(c), O de `CHANGEMENTS.md` passés à Fait (PR #23 et #89) ; F reste en cours.
