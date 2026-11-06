@@ -7,9 +7,9 @@ Session doc seule : aucun test, aucun build. Intouchés : `BIBLE.md`, `docs/LORE
 | Document | Ligne | Constat | Action |
 |---|---|---|---|
 | `chapters/ch2-silent-bells/NOTES.md` | 8 | `src/silent-bells.html` : retiré, mais la phrase le dit déjà | à laisser |
-| `docs/COMMUN.md` | 5 | `chapters/ch2-silent-bells/src/silent-bells.html` n'existe plus (les numéros `ch2:NNN` renvoient à lui) | à valider : ajouter « retirée le 28 octobre » ou renvoyer vers l'archive |
+| `docs/COMMUN.md` | 5 | `chapters/ch2-silent-bells/src/silent-bells.html` n'existe plus (les numéros `ch2:NNN` renvoient à lui) | corrigé (6 nov., renvoi reformulé : page retirée le 28 octobre) |
 | `DECISIONS.md` | 62 | même fichier, entrée datée du 27 octobre (historique) | à laisser |
-| `CHANGEMENTS.md` | 169 | `build/out/phare-v1/comparaison-phase3.png` et `build/out/phare-v2/comparaison-tirs.png` : `build/out/` n'est pas versionné, fichiers introuvables | à valider (entrée M, historique) |
+| `CHANGEMENTS.md` | 169 | `build/out/phare-v1/comparaison-phase3.png` et `build/out/phare-v2/comparaison-tirs.png` : `build/out/` n'est pas versionné, fichiers introuvables | corrigé (mention « non versionné » ajoutée, 6 nov.) |
 | `NOTES.md` | 14, 15, 17, 25 | `build/out/*.zip`, `test.html`, `ch2-test.html` : sorties générées, absentes du dépôt par construction | à laisser |
 | `docs/BALANCE.md` | 46 | `waitMin/Max` : faux positif du script | à laisser |
 | autres | — | aucun lien relatif ni chemin cassé | — |
@@ -29,13 +29,13 @@ Hors `archives/`, `docs/decisions/` et journaux datés (`docs/DEVLOG-NOTES.md`, 
 
 | Document | Ligne | Constat | Action |
 |---|---|---|---|
-| `docs/COMMUN.md` | 82 | « Écran de démarrage » : décrit `#gate` / Commencer du Chapitre I, retiré le 5 novembre | à valider |
-| `docs/COMMUN.md` | 164 | API commune cite `LB.gate.mount()` (retiré) | à valider |
+| `docs/COMMUN.md` | 82 | « Écran de démarrage » : décrit `#gate` / Commencer du Chapitre I, retiré le 5 novembre | corrigé (6 nov.) |
+| `docs/COMMUN.md` | 164 | API commune cite `LB.gate.mount()` (retiré) | corrigé (6 nov.) |
 | `docs/COMMUN.md` | 181, 196 | `LB.gate` dans le plan de session 6 « faite le 1er novembre » (historique) | à laisser |
 | `shared/NOTES.md` | 83 | `LB.gate` : signalé « retiré le 5 novembre » | à laisser |
 | `shared/NOTES.md` | 104 | `LB.gate.focus()` dans une entrée datée du 2 novembre (hub) | à laisser |
 | `shared/NOTES.md` | 79 | « Commencer » = clé de texte commune encore utilisée par le hub | à laisser |
-| `chapters/ch2-silent-bells/NOTES.md` | 185 | « écran de démarrage (Commencer + langues…) » présenté comme « Nouveau pour le joueur » ; périmé depuis le 5 novembre | à valider (ajouter une mention de retrait, sans réécrire) |
+| `chapters/ch2-silent-bells/NOTES.md` | 185 | « écran de démarrage (Commencer + langues…) » présenté comme « Nouveau pour le joueur » ; périmé depuis le 5 novembre | corrigé (6 nov., phrase de retrait) |
 | `chapters/ch2-silent-bells/NOTES.md` | 3, 10 | `…/legacy/silent-bells.source.html` : chemin sous `archives/`, existe | à laisser |
 | `chapters/ch1-ember-bridge/NOTES.md` | 3 | « `legacy/` n'existe plus » | à laisser |
 | `NOTES.md` | 15 | `archives/chapters/ch2-silent-bells/legacy/` : chemin valide | à laisser |
@@ -54,17 +54,17 @@ Hors `archives/`, `docs/decisions/` et journaux datés (`docs/DEVLOG-NOTES.md`, 
 | `CLAUDE.md` | 18-19 | règles 18 et 19 : `build_chapter.py`, `build_site.py`, `ch2-smoke`, `ch2-bot`, `visual-shots`, `trial-*`, `boss-diff-static.js` existent | aucun écart |
 | `CLAUDE.md` | 15 | périmètres `shared ch2 hub` = défaut de `workflow_dispatch` dans `.github/workflows/tests.yml` | aucun écart |
 | `README.md`, `NOTES.md` | — | `build_chapter.py`, `build_site.py`, `build_test.py`, `extract_texts.py`, `node smoke.js`, `npm ci` (scripts `smoke`, `bot`, `fonts` de `tests/package.json`) : tous valides | aucun écart |
-| `NOTES.md` | 26, 28 | décrivent la CI comme « cible » alors que `tests.yml` la met déjà en œuvre | à valider (retirer « cible »?) |
+| `NOTES.md` | 19, 26, 28 | décrivent la CI comme « cible » alors que `tests.yml` la met déjà en œuvre | ligne 26 corrigée (6 nov., `paths-ignore` réel) ; ligne 28 laissée : à valider, elle contredit `tests.yml` (périmètres automatiques sur PR, un seul job, pas de `trial-*` ni `visual-shots` dans le workflow) |
 | `CLAUDE.md` | 18 vs 30 | `d.sp` / `RHY` / `64-prologue.js` cités ; non vérifié dans le code (hors périmètre) | à laisser |
 
 ## 5. Doublons et contradictions (liste seule)
 
 | Documents | Constat | Action |
 |---|---|---|
-| `CLAUDE.md` r.10 · `NOTES.md` 19, 26, 28 · `README.md` 14 | règle des tests/CI écrite dans trois documents, formulations différentes (liste des fichiers de `tests/` incomplète dans `NOTES.md:19`) | à valider |
-| `CLAUDE.md` « Difficulté » · `docs/BALANCE.md` · `shared/NOTES.md` | règles de difficulté et `BOSS_DIFF` exprimées à plusieurs endroits | à valider |
+| `CLAUDE.md` r.10 · `NOTES.md` 19, 26, 28 · `README.md` 14 | règle des tests/CI écrite dans trois documents, formulations différentes (liste des fichiers de `tests/` complétée dans `NOTES.md:19` le 6 nov.) | à valider : copies non identiques à `CLAUDE.md` (règle 19), aucune remplacée par un renvoi |
+| `CLAUDE.md` « Difficulté » · `docs/BALANCE.md` · `shared/NOTES.md` | règles de difficulté et `BOSS_DIFF` exprimées à plusieurs endroits ; contradictions : `docs/BALANCE.md:9` (durées multipliées par `f = 1/(sp×(1+.1×stage))`) et `BIBLE.md:36-39` (PV Colosse 8/10/14) contre `CLAUDE.md` (pas d'accélération par rage, PV via `LB.BOSS_DIFF`) | à valider, rien modifié |
 | `CLAUDE.md` r.2 · `CHANGEMENTS.md` 25 | statuts : « Fait (PR fusionnée) » identiques ; mais le tableau contient aussi « Fait » seul, « Fait à la fusion de la PR », « Fait\t<date>\t<PR> » | à valider |
-| `docs/COMMUN.md` · `shared/NOTES.md` | inventaire du cadre commun (`LB.menu`, `LB.card`, `LB.pause`…) décrit deux fois, `COMMUN.md` plus ancien (cite `LB.gate`) | à valider |
+| `docs/COMMUN.md` · `shared/NOTES.md` | inventaire du cadre commun (`LB.menu`, `LB.card`, `LB.pause`…) décrit deux fois, `COMMUN.md` corrigé pour `LB.gate` (6 nov.) ; détails non identiques, aucun renvoi posé | à valider |
 | `CHANGEMENTS.md` | 4 mentions « À faire » et 5 « En cours » (sections F, J, O, lignes 96, 160) pour des périmètres qui ne sont plus tous actifs | à valider |
 
 ## 6. Taille et croissance
@@ -87,12 +87,11 @@ Hors `archives/`, `docs/decisions/` et journaux datés (`docs/DEVLOG-NOTES.md`, 
 
 **À corriger tout de suite**
 - Ligne manquante de lien dans l'index de `DECISIONS.md` (voix) : corrigé.
+- Passe du 6 novembre : `docs/COMMUN.md` 5, 82, 164 ; `chapters/ch2-silent-bells/NOTES.md` 185 ; `NOTES.md` 19, 26 ; `CHANGEMENTS.md` 169 : corrigés.
 
 **À valider**
-- `docs/COMMUN.md` 5, 82, 164 : renvoi à `silent-bells.html` retiré ; écran de démarrage et `LB.gate` périmés.
-- `chapters/ch2-silent-bells/NOTES.md` 185 : écran de démarrage encore présenté comme nouveauté.
-- `NOTES.md` 26, 28 : mention « cible » à retirer ; liste de tests ligne 19 incomplète.
-- `CHANGEMENTS.md` 169 : captures sous `build/out/`, non versionnées ; statuts non uniformes ; « À faire » / « En cours » résiduels.
+- `NOTES.md` 28 : règle de quota décrite en « cible », en désaccord avec `tests.yml`.
+- `CHANGEMENTS.md` : statuts non uniformes ; « À faire » / « En cours » résiduels (sections F, J, O).
 - Doublons du § 5 (règle des tests/CI, difficulté, cadre commun).
 - Croissance : `docs/DEVLOG-NOTES.md` (254) et `CHANGEMENTS.md` (214).
 

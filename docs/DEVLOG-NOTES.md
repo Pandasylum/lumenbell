@@ -255,3 +255,6 @@
 
 ## 2026-11-06 · docs/audit-docs
 - Ce que le joueur verra : rien de visible. Audit de cohérence des documents (`docs/AUDIT-DOCS.md`) et un lien d'index corrigé dans `DECISIONS.md`.
+
+## 2026-11-06 · docs/audit-docs (corrections factuelles)
+- Ce que le joueur verra : rien de visible. Renvois et état de la CI mis à jour dans `docs/COMMUN.md`, `NOTES.md`, `CHANGEMENTS.md` et les notes du Chapitre II.
