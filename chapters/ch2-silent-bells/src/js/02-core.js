@@ -30,10 +30,10 @@ const W=960,H=540,GY=430,HX=230,HY=GY-70;
    x2 / x1 / x0.6; rm = of his recovery, x1.2 in Hard) are LB.HERO_DIFF (shared/js/16-hero.js), merged into each entry by
    LB.diff.apply (the trial entries 'tn' / 'th' take the base difficulty of Normal / Hard); sp = attack speed; boss / boss3 = boss HP of phases I-II / phase III (8 / 10 / 14 and 8 / 10 / 12, as Ember Bridge); heal = HP refilled between phases (true = all, a number = that many, capped at the starting HP); u / u3 = boss HP at which a rage starts, phases I-II / III (one in Easy and
    Normal, two in Hard: [4] / [5] / [10,5] and [4] / [5] / [8,5], as Ember Bridge). */
-/* La Voix (phase I) attacks 10 % faster in the three difficulties (exception to Chapter I): the one constant, read by spawn() for
+/* La Voix (phase I) boss speed: 1 since 2026-11-06 (was 1.1, docs/decisions/2026-11-06-voix-vitesse-x1.md). Optional per-boss lever, unused (like RHY.rage); read by spawn() for
    the Voice only (the attack speed `sp` of each difficulty stays the one of the other bosses). Gaps between real impacts (VX.gap)
    are absolute seconds and stay respected. */
-const VOICE_SPEED=1.1;
+const VOICE_SPEED=1;
 const DIFFS={
   easy:{sp:.85,boss:8,boss3:8,u:[4],u3:[4],heal:true,fr:'Facile',en:'Easy'},
   normal:{sp:1,boss:10,boss3:10,u:[5],u3:[5],heal:true,fr:'Normal',en:'Normal'},
