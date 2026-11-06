@@ -45,6 +45,3 @@ Variable `PW_CHROMIUM` : chemin d'un Chromium déjà installé (sinon celui de P
 | `apk/` | Projet Capacitor (Android) |
 | `.github/workflows/` | `tests.yml` (tests) et `android.yml` (APK/AAB) |
 
-## Secrets (jamais dans le dépôt)
-
-GitHub → Settings → Secrets and variables → Actions : `KEYSTORE_B64` (keystore en base64, une ligne) et `KEY_PASS`. Alias de clé : `ember`.
