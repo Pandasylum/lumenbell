@@ -215,7 +215,7 @@ Constantes `PHARE_DIFF`, `FATIGUE`, `BEACON_FX` (`40-boss-drowned-beacon.js`). A
 | réglage | Facile | Normal | Difficile |
 |---|---|---|---|
 | Tells (× durée d'avertissement) | ×1,5 | ×1 | ×0,7 |
-| Fenêtre de tap (s après l'appui) | 0,4 | 0,2 | 0,2 |
+| Fenêtre de tap (s après l'appui, habituelle, inchangée) | 0,67 | 0,33 | 0,2 |
 | Tap sur bulle tenue | bloqué | non bloqué | non bloqué |
 | Tolérance de relâchement après faisceau | 0,2 s | 0 | 0 |
 | Éclairs de la Nuit du Phare · allumage avant le tir | 3 · 0,5 s | 4 · 0,3 s | 5 · 0,2 s |

@@ -43,15 +43,15 @@ const COUNTER3={col:'255,246,204',tap:[.2,.45],hold:[.2,.75],
    (so that a tap never shows it), fades in over `dome.fade` s, thin outline, `dome.fill` of opacity inside, gone at once on release. */
 /* DIFFICULTY of the Lighthouse, phase III (decision of 6 Nov 2026, section D; easy / normal / hard, vdk()). No speed multiplier: the rhythm between hits stays Normal's
    in real seconds. tell = x on the warning time of each spell (bolt, beam dark + cone, dust, spike front, anchor and crossing sweeps, bell shadow, shard glow, wave and knell
-   flights...; `night.lit` and the Morse have their own); tapWin = s after the press during which a tap threat is stopped; holdTol = s of grace after a beam has passed
+   flights...; `night.lit` and the Morse have their own); holdTol = s of grace after a beam has passed
    for a late release (see stops); tapInBubble = a tap threat landing while the bubble is held is stopped (Easy only; Normal and Hard: not stopped).
    Elements: night = bolts of the Night of the Lighthouse and the lamp's lighting before the shot; crossDark = black between the two sweeps; salvo = stones; spike = start of each spike
    in the series (s from the first; Hard: a fourth, off the beat); blows = knells of the held bell; sonic = waves (n, shrink 1 = constant pace); glas = knells; sig = Hard signature.
    Fatigue of the hold (FATIGUE below): max = longest hold a spell of the level asks for (holdNeed) + margin; rest = s without guard once the dome bursts. */
 const PHARE_DIFF={
-  easy:{tell:1.5,tapWin:.4,holdTol:.2,tapInBubble:true,night:{n:3,lit:.5},crossDark:.6,salvo:[2,2],spike:[0,1.05],blows:2,sonic:{n:[3,4],shrink:1},glas:5,sig:false,margin:1.5,rest:.6},
-  normal:{tell:1,tapWin:.2,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
-  hard:{tell:.7,tapWin:.2,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
+  easy:{tell:1.5,holdTol:.2,tapInBubble:true,night:{n:3,lit:.5},crossDark:.6,salvo:[2,2],spike:[0,1.05],blows:2,sonic:{n:[3,4],shrink:1},glas:5,sig:false,margin:1.5,rest:.6},
+  normal:{tell:1,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
+  hard:{tell:.7,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
 /* fatigue of the hold: the count starts again when the gesture has been released for more than `reset` s; the dome warns at `warn` of the max (trembles, amber outline) */
 const FATIGUE={reset:.15,warn:.75,amber:'255,190,90'};
 const PD=()=>PHARE_DIFF[vdk()];

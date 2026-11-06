@@ -1193,10 +1193,10 @@ function down(){
 }
 function up(){S.held=false;LB.hero.release(S.pl);$('ward').classList.remove('down')}
 function stops(th){const gr=th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0;
-  if(S.phase===3&&th&&!th.hold){   // a tap threat of the Lighthouse: window per difficulty (PHARE_DIFF.tapWin); a bubble held past it stops it in Easy only (late release: holdTol after a beam's passage)
+  if(S.phase===3&&th&&!th.hold){   // a tap threat of the Lighthouse: the usual window of the gesture (LB.hero, action x m); a bubble held past it stops it in Easy only (late release: holdTol after a beam's passage)
     const Z=PD(),p=S.pl;
-    if(p.s==='act'&&S.held&&p.t>Z.tapWin&&(Z.tapInBubble||gt-S.holdEnd<=Z.holdTol))return true;
-    return LB.hero.stops(p,{win:Z.tapWin,graceAdd:gr})}
+    if(p.s==='act'&&S.held&&p.t>PT().act&&(Z.tapInBubble||gt-S.holdEnd<=Z.holdTol))return true;
+    return LB.hero.stops(p,{graceAdd:gr})}
   return LB.hero.stops(S.pl,{graceAdd:gr})}
 function plStep(dt){
   const p=S.pl,f3=S.phase===3;
@@ -1877,9 +1877,9 @@ const COUNTER3={col:'255,246,204',tap:[.2,.45],hold:[.2,.75],
   win:{bolt:[.2,.55],beam:[.2,.5],chunk:[.2,.7],spike:[.2,.7],anchor:[.2,.8],bell:[.2,.75],shard:[.2,.6],sonic:[.2,.75],dazzle:[.06,.3]},
   lampOut:1};   // s the lamp that fired a countered bolt stays out
 const PHARE_DIFF={
-  easy:{tell:1.5,tapWin:.4,holdTol:.2,tapInBubble:true,night:{n:3,lit:.5},crossDark:.6,salvo:[2,2],spike:[0,1.05],blows:2,sonic:{n:[3,4],shrink:1},glas:5,sig:false,margin:1.5,rest:.6},
-  normal:{tell:1,tapWin:.2,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
-  hard:{tell:.7,tapWin:.2,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
+  easy:{tell:1.5,holdTol:.2,tapInBubble:true,night:{n:3,lit:.5},crossDark:.6,salvo:[2,2],spike:[0,1.05],blows:2,sonic:{n:[3,4],shrink:1},glas:5,sig:false,margin:1.5,rest:.6},
+  normal:{tell:1,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
+  hard:{tell:.7,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
 const FATIGUE={reset:.15,warn:.75,amber:'255,190,90'};
 const PD=()=>PHARE_DIFF[vdk()];
 const bellSpan=Z=>(Z.blows-1)*BEACON_FX.bell.step+BEACON_FX.bell.tail;

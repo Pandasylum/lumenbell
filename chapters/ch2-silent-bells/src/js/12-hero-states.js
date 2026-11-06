@@ -25,10 +25,10 @@ function down(){
 function up(){S.held=false;LB.hero.release(S.pl);$('ward').classList.remove('down')}
 /* is the attack stopped at its impact? (a shard of the rain gets a wider grace in Hard) */
 function stops(th){const gr=th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0;
-  if(S.phase===3&&th&&!th.hold){   // a tap threat of the Lighthouse: window per difficulty (PHARE_DIFF.tapWin); a bubble held past it stops it in Easy only (late release: holdTol after a beam's passage)
+  if(S.phase===3&&th&&!th.hold){   // a tap threat of the Lighthouse: the usual window of the gesture (LB.hero, action x m); a bubble held past it stops it in Easy only (late release: holdTol after a beam's passage)
     const Z=PD(),p=S.pl;
-    if(p.s==='act'&&S.held&&p.t>Z.tapWin&&(Z.tapInBubble||gt-S.holdEnd<=Z.holdTol))return true;
-    return LB.hero.stops(p,{win:Z.tapWin,graceAdd:gr})}
+    if(p.s==='act'&&S.held&&p.t>PT().act&&(Z.tapInBubble||gt-S.holdEnd<=Z.holdTol))return true;
+    return LB.hero.stops(p,{graceAdd:gr})}
   return LB.hero.stops(S.pl,{graceAdd:gr})}
 /* the Watcher's state over time (phase III: the guard is held while the button is down) */
 function plStep(dt){
