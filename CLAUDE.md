@@ -5,7 +5,7 @@ Jeu canvas HTML5, série de combats de boss. Lis d'abord `BIBLE.md`, `NOTES.md` 
 ## Règles non négociables
 1. Le lore officiel est dans `docs/LORE.md` : référence unique, ne le modifie jamais sans demande explicite. Lis aussi `docs/GLOSSAIRE.md` et `CHANGEMENTS.md`.
 2. Si `CHANGEMENTS.md` contient des entrées au statut « À faire » pour ton périmètre, applique-les, puis passe leur statut à « Fait (PR fusionnée) » (statuts de `CHANGEMENTS.md` : À faire, En cours, Fait, Annulé). N'invente aucune modification de texte.
-3. Fin de session : ajoute 1 à 3 lignes « ce que le joueur verra » à `DEVLOG-NOTES.md`.
+3. Fin de session : ajoute 1 à 3 lignes « ce que le joueur verra » à `docs/DEVLOG-NOTES.md`.
 4. Rapport final en 15 lignes maximum : fait / pas fait / décisions à valider. Pas de recopie de code ni de diff.
 5. **Le dépôt est la seule référence.** Pars toujours de la dernière version de la branche, jamais d'une copie ancienne.
 6. **Un périmètre par session.** Ne modifie que le dossier qui t'est attribué. Tout besoin touchant le moteur ou le héros s'écrit dans `DEMANDES.md`.

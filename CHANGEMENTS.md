@@ -32,19 +32,6 @@ Les traductions anglaises ont été validées par Kevin (29 octobre).
 Après modification : régénérer TEXTES.md, lancer tests/ch2-texts.js et les autres tests du chapitre, vérifier visuellement les cartons (durées de lecture : 6 à 7 s pour l'intro, environ 4 s pour l'outro).
 Faire une branche et une PR par ensemble cohérent (textes, lumière, couleur du Veilleur, documents).
 Après chaque section appliquée : mettre à jour le tableau « Suivi », puis ajouter une ligne dans DECISIONS.md si une décision a été prise en cours de route.
-D. Chapitre I · « Drowned Lighthouse » et genou de fin de phase I
-
-Le nom anglais du Phare Noyé est toujours « the Drowned Lighthouse », jamais « Beacon » : beacon désigne déjà le fanal du Clocher au Chapitre I.
-
-Corriger les deux lignes du Chapitre I (numéros de ligne d'après l'extrait TEXTES-CH1.md, à vérifier dans le code) :
-
-src/js/80-cine-outro.js (ligne 12, carton 4 de l'outro) : « Every bell answered. Every one but one. Far out at sea, the Drowned Beacon stayed silent… » → remplacer « Drowned Beacon » par « Drowned Lighthouse ».
-src/js/44-p3-belfry-logic.js (ligne 468, scène de fin) : « Far out at sea, the Drowned Beacon stays silent. End of Chapter I. » → idem.
-
-Chercher aussi toute autre occurrence de « Drowned Beacon » dans le dépôt (texte affiché, lecteur d'écran, TEXTES.md). Ne pas toucher aux « beacon » qui désignent le fanal du Clocher.
-
-Genou à terre : garder l'outro (carton 1 : le Colosse s'incline de lui-même face à la cloche avant d'être figé). Retirer en revanche « à genoux » et « plie un genou » des textes de fin de phase I (lecteur d'écran ; ancienne carte, 08-state.js ligne 84) : le genou est réservé à l'outro. Reprendre la formulation de la carte actuelle de fin de phase I (08-state.js, ligne 87) ; en cas de doute, proposer. Interprétation de la réponse « garder celui de l'outro » : à confirmer en relisant la PR.
-
 F. Documents à mettre à jour
 docs/LORE.md : remplacer par l'export Markdown du document Lumenbell · Lore définitif.
 docs/CH2-SPEC.md :
@@ -82,22 +69,46 @@ Le renommage « Roi Sombre » en « Roi Spectral » dans docs/CH2-SPEC.md (table
 - Le héros devient le Lié principal du centre, à la place du Premier Lié : il reste sept Liés.
 - Héros : Lumen affaibli, blanc teinté de jaune ; clochette : catalyseur de la lumière.
 - Noms anglais : The Priors, The Spectral King.
-G. Chapitre I · Lanterne du Colosse de braise (validé le 29 octobre)
-Ajouter une petite lanterne de Veilleur dans le décor de la Fonderie, à côté des chaînes, visible pendant tout le combat de la phase II.
-Lueur orange (code couleur de la braise), faible, avec une pulsation lente : le Lumen vivant pulse. Elle est allumée : le Colosse n'est pas totalement consumé.
-Elle n'apparaît pas dans l'outro. Ce sont de simples indices : pas de texte, pas de bruitage, pas de zoom.
-Emplacement exact et forme : à choisir (près des équerres et des chaînes, lisible sur la cinématique) et à signaler dans la PR.
-Ne pas toucher à la silhouette du Colosse (validée) : la lanterne est un élément de décor, pas de son équipement.
-I. Chapitre II · Pleurs avant la Voix (Fait)
-Avant l'apparition de la Voix Creuse (phase I), ajouter un pleur étouffé dans le son. Tout le son est synthétisé : pas de fichier audio.
-Sobre et bref, sans texte : il porte la « profonde tristesse » que le texte d'entrée annonce sans la répéter à l'écran.
-À essayer : proposer deux variantes si possible ; Kevin choisit à l'écoute. Si l'essai ne convainc pas, le retirer.
 J. Chapitre II · Validations de Kevin du 30 octobre (voir docs/decisions/2026-10-30-ch2-validations.md)
 Entrées À faire, non appliquées. Elles partent plus tard, dans la session unique du chapitre.
 (a) Bouton de la phase III : « Garde » / « Guard » devient « Bloquer » / « Block » (le geste reste le blocage tenu). Libellé initial et libellés changés en cours de phase dans le code du chapitre ; lecteur d'écran : « Ta garde est brisée » / "Your guard is broken." est conservé volontairement (tranché le 30 octobre, GLOSSAIRE n° 2) : ne pas le changer. Test d'annonce : relire tests/ch2-announce.js (liste BAN, qui contient « garde brisée » / « guard broken » et ne doit pas matcher « Bloquer » / « Block »), puis régénérer TEXTES.md (node tests/ch2-texts.js --write) et relire le diff.
 (b) Règle de série sur les illusions : esquiver une illusion n'est pas une faute de série. La faute n'existe que si le joueur reçoit le coup de retour, donc un dégât. Mettre à jour fooled() et la partie 4 de tests/ch2-input.js (aujourd'hui : l'illusion esquivée casse la série, même si le retour est esquivé). Ne pas toucher à DG.backTurn ni à DG.backWin (valeurs provisoires).
 (c) [En cours, voir section O ; textes reçus le 5 novembre] Carte de défaite du Chapitre II : un simple texte, sur le modèle du Chapitre I. Certaines versions cachent un conseil, par exemple contre la Voix : « Le Veilleur n'a pas su distinguer les illusions… » (exemple d'intention, pas un texte validé). Textes à fournir (projet Lore) : ne rien rédiger ni coder avant de les recevoir.
 Non concernés : valeurs provisoires (SP, DG.backWin, HULL, SHOCK.form), Difficile du Chapitre II, onomatopées CLANG / KRAKOOM / KRAAAK (validées, rien à changer).
+O. Chapitre II · Validations de Kevin du 5 novembre 2026 (voir `docs/decisions/2026-11-05-ch2-validations.md`)
+
+Textes validés par Kevin ; aucun changement de timing, d'équilibrage ni de silhouette.
+- Fin de phase II : EN "After years of waiting, by the light of the moon, only silence answers him." / FR « Après des années d'attente, à la lueur de la lune, seul le silence lui répond. » (remplace « Le navire s'effondre autour de l'Ancien… »).
+- Cartes de défaite (J c) : une par phase, surtitre « Defeat · Phase X » / « Défaite · Phase X », titre et corps affichés ; tableau dans `docs/CH2-SPEC.md`. Le « Defeat » seul et « The Watcher is down. » disparaissent ; le lecteur d'écran « Le Veilleur tombe. Défaite. » reste. En Épreuve, la phrase d'origine « Épreuve : une chute te renvoie à la phase I. » est ajoutée après le corps (gardée par Kevin le 5 novembre). Naissance de la forme II calée à 2,1 s de la cinématique `3:p2` (éclatement de la tour).
+- N° 47 : "Blue heart" / « Cœur bleu » devient "Turquoise heart" / « Cœur turquoise ».
+- Rémanence : une fêlure naît sur la cloche de tête gisant dans les décombres pendant l'évaporation du Lumen ; ni texte ni bruitage.
+- Murmure grave, large et bas à la naissance de la forme II (synthèse existante, aucun texte) ; au même instant, la lanterne du Veilleur pâlit un instant (rendu seulement, cinématique seulement).
+- « Couronne » : le mot n'est plus gravé pendant l'animation de fin de phase III ; il reste au gros plan de l'outro (carton 2). Entrée fournie par Kevin, statut : À faire (appliquée sur la branche ; passe à Fait à la fusion de la PR).
+Statut : en cours, branche `ch2/validations-5nov` (PR à ouvrir).
+
+Vérifications
+Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.
+Chercher « Drowned Beacon ».
+Vérifier qu'aucun mot d'annonce n'a été ajouté (tests/ch2-announce.js).
+Vérifier visuellement : cœur turquoise fixe visible par les jointures (phase II), lanterne orange du Colosse près des chaînes (chapitre I, pendant la phase II), absence de pulsation sur les lueurs de la Sans-Fond, absence de carton à la forme II, durées de lecture des nouveaux cartons.
+À ne pas faire
+Ne pas ajouter d'indice de parasite au chapitre I : la lanterne du Colosse (section G) suffit.
+Ne pas implémenter le choix du chapitre VI, ni les chapitres III à VII.
+Ne pas introduire « Sonneur » comme nom de boss.
+Ne pas changer les timings, valeurs d'équilibrage ou la silhouette du Colosse.
+Appliqué
+
+- **A** · Chapitre II · Textes et titre de la forme II : Fait (PR fusionnée), 30 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Nouveaux textes d'entrée et de fin des trois phases ; plus de carton à la forme II (titre « La Sans-Fond »).
+- **B** · Boss de la phase II : l'Ancien de Rouille : Fait (PR fusionnée), 28 octobre 2026, branche `ch2/lore-changements`. « Roi de Rouille » devient « l'Ancien de Rouille » (EN « The Rust Elder »).
+- **C** · Chapitre II · Lumière du boss et de la Sans-Fond : Fait (PR fusionnée), 28 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Cœur turquoise fixe ; lueurs de la Sans-Fond sans pulsation.
+- **H** · Chapitre II · Rémanence : Fait (PR fusionnée), 30 octobre 2026, branche `ch2/lore-changements`. Évaporation du Lumen à la mort de la Sans-Fond, sans texte ni bruitage.
+- **E** · Veilleur · Couleur de la lanterne et des tirs : Fait (PR fusionnée), 1er novembre 2026, branche `engine/lantern-color`. Lanterne jaune neutre, tirs jaune-blanc dans les deux chapitres.
+
+I. Chapitre II · Pleurs avant la Voix (Fait)
+Avant l'apparition de la Voix Creuse (phase I), ajouter un pleur étouffé dans le son. Tout le son est synthétisé : pas de fichier audio.
+Sobre et bref, sans texte : il porte la « profonde tristesse » que le texte d'entrée annonce sans la répéter à l'écran.
+À essayer : proposer deux variantes si possible ; Kevin choisit à l'écoute. Si l'essai ne convainc pas, le retirer.
+
 K. Chapitre I · Phase II au fond de la Fonderie (plus de chute) (décision de Kevin du 1er novembre 2026, `docs/decisions/2026-11-01-ch1-foundry-floor.md`)
 
 Le combat de la phase II se joue au fond de la Fonderie : le Veilleur suit le Colosse par la brèche et combat sur une plateforme au bord de la lave ; le Colosse vole au-dessus de la lave. Plus de chute, plus de scène de passerelle. Fin de phase II : le grand four engloutit le Colosse, qui s'envole par la cheminée. Toutes les mécaniques restent, esquive comprise. Aucun impact sur le lore.
@@ -182,33 +193,24 @@ Referme le point « Plongée d'esquive » de `docs/decisions/2026-11-01-ch1-foun
 
 Statut : Fait (PR fusionnée), branche `ch1/dodge-side`.
 
-O. Chapitre II · Validations de Kevin du 5 novembre 2026 (voir `docs/decisions/2026-11-05-ch2-validations.md`)
+D. Chapitre I · « Drowned Lighthouse » et genou de fin de phase I
 
-Textes validés par Kevin ; aucun changement de timing, d'équilibrage ni de silhouette.
-- Fin de phase II : EN "After years of waiting, by the light of the moon, only silence answers him." / FR « Après des années d'attente, à la lueur de la lune, seul le silence lui répond. » (remplace « Le navire s'effondre autour de l'Ancien… »).
-- Cartes de défaite (J c) : une par phase, surtitre « Defeat · Phase X » / « Défaite · Phase X », titre et corps affichés ; tableau dans `docs/CH2-SPEC.md`. Le « Defeat » seul et « The Watcher is down. » disparaissent ; le lecteur d'écran « Le Veilleur tombe. Défaite. » reste. En Épreuve, la phrase d'origine « Épreuve : une chute te renvoie à la phase I. » est ajoutée après le corps (gardée par Kevin le 5 novembre). Naissance de la forme II calée à 2,1 s de la cinématique `3:p2` (éclatement de la tour).
-- N° 47 : "Blue heart" / « Cœur bleu » devient "Turquoise heart" / « Cœur turquoise ».
-- Rémanence : une fêlure naît sur la cloche de tête gisant dans les décombres pendant l'évaporation du Lumen ; ni texte ni bruitage.
-- Murmure grave, large et bas à la naissance de la forme II (synthèse existante, aucun texte) ; au même instant, la lanterne du Veilleur pâlit un instant (rendu seulement, cinématique seulement).
-- « Couronne » : le mot n'est plus gravé pendant l'animation de fin de phase III ; il reste au gros plan de l'outro (carton 2). Entrée fournie par Kevin, statut : À faire (appliquée sur la branche ; passe à Fait à la fusion de la PR).
-Statut : en cours, branche `ch2/validations-5nov` (PR à ouvrir).
+Le nom anglais du Phare Noyé est toujours « the Drowned Lighthouse », jamais « Beacon » : beacon désigne déjà le fanal du Clocher au Chapitre I.
 
-Vérifications
-Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.
-Chercher « Drowned Beacon ».
-Vérifier qu'aucun mot d'annonce n'a été ajouté (tests/ch2-announce.js).
-Vérifier visuellement : cœur turquoise fixe visible par les jointures (phase II), lanterne orange du Colosse près des chaînes (chapitre I, pendant la phase II), absence de pulsation sur les lueurs de la Sans-Fond, absence de carton à la forme II, durées de lecture des nouveaux cartons.
-À ne pas faire
-Ne pas ajouter d'indice de parasite au chapitre I : la lanterne du Colosse (section G) suffit.
-Ne pas implémenter le choix du chapitre VI, ni les chapitres III à VII.
-Ne pas introduire « Sonneur » comme nom de boss.
-Ne pas changer les timings, valeurs d'équilibrage ou la silhouette du Colosse.
-Appliqué
+Corriger les deux lignes du Chapitre I (numéros de ligne d'après l'extrait TEXTES-CH1.md, à vérifier dans le code) :
 
-- **A** · Chapitre II · Textes et titre de la forme II : Fait (PR fusionnée), 30 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Nouveaux textes d'entrée et de fin des trois phases ; plus de carton à la forme II (titre « La Sans-Fond »).
-- **B** · Boss de la phase II : l'Ancien de Rouille : Fait (PR fusionnée), 28 octobre 2026, branche `ch2/lore-changements`. « Roi de Rouille » devient « l'Ancien de Rouille » (EN « The Rust Elder »).
-- **C** · Chapitre II · Lumière du boss et de la Sans-Fond : Fait (PR fusionnée), 28 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Cœur turquoise fixe ; lueurs de la Sans-Fond sans pulsation.
-- **H** · Chapitre II · Rémanence : Fait (PR fusionnée), 30 octobre 2026, branche `ch2/lore-changements`. Évaporation du Lumen à la mort de la Sans-Fond, sans texte ni bruitage.
-- **E** · Veilleur · Couleur de la lanterne et des tirs : Fait (PR fusionnée), 1er novembre 2026, branche `engine/lantern-color`. Lanterne jaune neutre, tirs jaune-blanc dans les deux chapitres.
+src/js/80-cine-outro.js (ligne 12, carton 4 de l'outro) : « Every bell answered. Every one but one. Far out at sea, the Drowned Beacon stayed silent… » → remplacer « Drowned Beacon » par « Drowned Lighthouse ».
+src/js/44-p3-belfry-logic.js (ligne 468, scène de fin) : « Far out at sea, the Drowned Beacon stays silent. End of Chapter I. » → idem.
+
+Chercher aussi toute autre occurrence de « Drowned Beacon » dans le dépôt (texte affiché, lecteur d'écran, TEXTES.md). Ne pas toucher aux « beacon » qui désignent le fanal du Clocher.
+
+Genou à terre : garder l'outro (carton 1 : le Colosse s'incline de lui-même face à la cloche avant d'être figé). Retirer en revanche « à genoux » et « plie un genou » des textes de fin de phase I (lecteur d'écran ; ancienne carte, 08-state.js ligne 84) : le genou est réservé à l'outro. Reprendre la formulation de la carte actuelle de fin de phase I (08-state.js, ligne 87) ; en cas de doute, proposer. Interprétation de la réponse « garder celui de l'outro » : à confirmer en relisant la PR.
+
+G. Chapitre I · Lanterne du Colosse de braise (validé le 29 octobre)
+Ajouter une petite lanterne de Veilleur dans le décor de la Fonderie, à côté des chaînes, visible pendant tout le combat de la phase II.
+Lueur orange (code couleur de la braise), faible, avec une pulsation lente : le Lumen vivant pulse. Elle est allumée : le Colosse n'est pas totalement consumé.
+Elle n'apparaît pas dans l'outro. Ce sont de simples indices : pas de texte, pas de bruitage, pas de zoom.
+Emplacement exact et forme : à choisir (près des équerres et des chaînes, lisible sur la cinématique) et à signaler dans la PR.
+Ne pas toucher à la silhouette du Colosse (validée) : la lanterne est un élément de décor, pas de son équipement.
 
 Quand une section est faite et fusionnée, la déplacer ici avec sa date et sa PR.
