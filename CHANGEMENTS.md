@@ -219,4 +219,7 @@ Ne pas toucher à la silhouette du Colosse (validée) : la lanterne est un élé
 Quand une section est faite et fusionnée, la déplacer ici avec sa date et sa PR.
 
 P. Chapitre II · Lisibilité de la Voix, de l'Ancien et du Phare (décision de Kevin du 6 novembre 2026, `docs/decisions/2026-11-06-ch2-lisibilite-voix-ancien-phare.md`)
-Statut : En cours (PR `feat/ch2-lisibilite-voix-ancien-phare` ; à passer à « Fait (PR fusionnée) » à la fusion). Reste à faire : rage finale « Éblouissement » et transition vers la Partie 2, sons tap / tenir, contres propres à chaque sort.
+Statut : Fait (PR fusionnée), https://github.com/Pandasylum/lumenbell/pull/119 (branche `feat/ch2-lisibilite-voix-ancien-phare`). Le reste (Éblouissement et transition, sons tap / tenir, contres propres à chaque sort) : section Q.
+
+Q. Chapitre II · Finitions du Phare (décision de Kevin du 6 novembre 2026, `docs/decisions/2026-11-06-ch2-phare-finitions.md`)
+Statut : En cours (PR `feat/ch2-phare-finitions` ; à passer à « Fait (PR fusionnée) » à la fusion). Regroupe : rage finale Éblouissement et transition vers la Partie 2, sons tap / tenir, contres propres à chaque sort, arc de tap et dôme discret en phase III, difficultés du Phare et fatigue du tenir (section D de la décision).

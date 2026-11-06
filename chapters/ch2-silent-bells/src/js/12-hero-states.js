@@ -24,15 +24,46 @@ function down(){
 }
 function up(){S.held=false;LB.hero.release(S.pl);$('ward').classList.remove('down')}
 /* is the attack stopped at its impact? (a shard of the rain gets a wider grace in Hard) */
-function stops(th){return LB.hero.stops(S.pl,{graceAdd:th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0})}
+function stops(th){const gr=th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0;
+  if(S.phase===3&&th&&!th.hold){   // a tap threat of the Lighthouse: the usual window of the gesture (LB.hero, action x m); a bubble held past it stops it in Easy only (late release: holdTol after a beam's passage)
+    const Z=PD(),p=S.pl;
+    if(p.s==='act'&&S.held&&p.t>PT().act&&(Z.tapInBubble||gt-S.holdEnd<=Z.holdTol))return true;
+    return LB.hero.stops(p,{graceAdd:gr})}
+  return LB.hero.stops(S.pl,{graceAdd:gr})}
 /* the Watcher's state over time (phase III: the guard is held while the button is down) */
 function plStep(dt){
-  const p=S.pl;
+  const p=S.pl,f3=S.phase===3;
+  if(f3)p.stam=1;   // phase III: the shared endurance never trips, the fatigue of the hold is this chapter's (fatStep)
   if(LB.hero.step(p,dt,{gesture:gest(),held:S.held})==='broken'){S.broken=gt+PT().broken;say(_('Your guard is broken.','Ta garde est brisée.'))}
   // dodge aimed at a reflection (fooled): the recovery that follows this action is shortened (DG.foolRec); any other end of the action drops the mark
   if(p.fr){if(p.s==='recover'&&p.rk==='act'){p.rd*=DG.foolRec;p.fr=0}else if(p.s!=='act')p.fr=0}
   S.holding=S.phase===3&&p.s==='act';
+  S.domeT0=S.holding&&S.held?(S.domeT0==null?gt:S.domeT0):null;   // since when the gesture is held (dome of phase III, GUARD_FX.dome)
+  if(f3)fatStep(dt);
 }
+/* fatigue of the hold (phase III, decision of 6 Nov 2026): continuous time of the held gesture, back to 0 once released for more than FATIGUE.reset s; past
+   fatMax(difficulty) the dome bursts and the Watcher is out of breath (no block, no hold) for PHARE_DIFF.rest s, no HP lost. S.pl.stam only feeds the bar (1 = rested). */
+function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk());
+  if(S.holding&&S.held){F.t+=dt;F.rel=0}else{F.rel+=dt;if(F.rel>FATIGUE.reset)F.t=0}
+  if(F.t>max){const rest=PD().rest;F.t=0;F.rel=0;p.s='recover';p.t=0;p.rd=rest;p.rk='broken';S.holding=false;S.domeT0=null;S.broken=gt+rest;S.domeBurst=gt;
+    burst(HX,GY-50,28,'#bff0ff',8,.7);burst(HX,GY-50,12,'#ffffff',5,.5);pop(ONO.crush,'#bff0ff');play('shatter');say(_('Your guard is broken.','Ta garde est brisée.'))}
+  p.stam=clamp(1-F.t/max,0,1)}
+/* the dome warns when the hold has reached FATIGUE.warn of the max */
+const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
+/* opacity 0..1 of the dome of the held guard: nothing for a tap (released before GUARD_FX.dome.delay), then it fades in; none once released */
+function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
+/* where a threat of phase III comes from (to turn the arc of a tap towards it) */
+function threatSrc(th){
+  if(th.k==='bolt')return lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];
+  if(th.k==='chunk')return TOWER[th.ri].e;
+  if(th.k==='ring')return TOWER[RINGS[th.ri%6]].e;
+  if(th.k==='spike')return{x:LX-90,y:GY-6};
+  if(th.k==='whip')return{x:LX+th.side*44,y:GY-210};
+  if(th.k==='anch')return{x:HX+40,y:GY-300};
+  if(th.k==='sbl')return{x:th.x,y:26};
+  if(th.k==='sonic')return{x:LX-60,y:GY-80};
+  if(th.k==='sring')return{x:LX+(th.side?80:-80),y:LY};
+  return{x:LX,y:S.form===2?ECY:LY}}
 
 function success(th,perfect){
   th.done=true;th.res='ok';th.okT=gt;th.perfect=perfect;S.okT=gt;
@@ -42,7 +73,9 @@ function success(th,perfect){
   if(ph===1&&th.k==='toll'&&th.gid!=null){(S.echoes||(S.echoes=[])).push({t0:gt,x:S.orbX,y:S.orbY});if(S.threats.filter(o=>o.gid===th.gid).every(o=>o.res==='ok'))S.glasN=(S.glasN||0)+1}
   if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('block',perfect);MUSIC.fx('clank');pop(ONO.block,perfect?'#f2fffb':'#bff3ea')}
   else if(ph===2){S.dodgeOk=gt;S.dodgeFlash=gt;play('dodge',perfect)}
-  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
+  else{   // phase III, a tap: an arc of light turned towards the threat, sparks where it hits (drawHero); the dry snap; the onomatopoeia is unchanged
+    const G=GUARD_FX.arc,c={x:HX+16,y:GY-80},s=threatSrc(th),a=Math.atan2(s.y-c.y,s.x-c.x);
+    S.arc={t0:gt,a};burst(c.x+Math.cos(a)*G.r,c.y+Math.sin(a)*G.r,G.sparks+(perfect?8:0),perfect?'#ffffff':'#fff3c4',6,.5);play('snap',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
 }
 function hurt(th){
   if(S.mode!=='play')return;

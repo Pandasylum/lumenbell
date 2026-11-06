@@ -209,6 +209,31 @@ Valeurs changées (secondes, constantes `VOICE_FX`, `HARPOON_FX`, `BEACON_FX`) :
 - Phare forme I : éclair tell 0,95 → 0,8 + 0,15, écart 1,3 → 1,0 ; faisceau 0,95 + 1,6 → 0,3 + 0,7 + 1,2 ; pierre 0,6 + 0,6 → 0,7 + 0,6, salves 2-3 espacées de 1,05 ; pic 1 seul (remous) → coraux qui jaillissent de la tour vers le Veilleur (0,8 s), 3 pics à 0 / 1,05 / 1,45 s ; rages : Nuit (3 éclairs, 0,3 s d'allumage) et Morse (Difficile).
 - Phare forme II : noir de 0,4 s entre les deux faisceaux ; ancre = balayage + coup ; cloche tenue 0,66 s (3 coups) ; éclat 1,2 + 0,6 s ; onde sonore 4-6 ondes (0,5 s, ×0,88) ; rages : pluie de 6 petites cloches, cloche + ondes, Glas (6 coups, ×1,16, puis implosion tenue).
 
+### C2 · Phare, phase III : difficultés et fatigue du tenir (6 novembre 2026, `docs/decisions/2026-11-06-ch2-phare-finitions.md` § D)
+Constantes `PHARE_DIFF`, `FATIGUE`, `BEACON_FX` (`40-boss-drowned-beacon.js`). Aucune accélération : l'écart entre coups reste celui de Normal, en secondes réelles.
+
+| réglage | Facile | Normal | Difficile |
+|---|---|---|---|
+| Tells (× durée d'avertissement) | ×1,5 | ×1 | ×0,7 |
+| Fenêtre de tap (s après l'appui, habituelle, inchangée) | 0,67 | 0,33 | 0,2 |
+| Tap sur bulle tenue | bloqué | non bloqué | non bloqué |
+| Tolérance de relâchement après faisceau | 0,2 s | 0 | 0 |
+| Éclairs de la Nuit du Phare · allumage avant le tir | 3 · 0,5 s | 4 · 0,3 s | 5 · 0,2 s |
+| Noir entre les deux faisceaux (Partie 2) | 0,6 s | 0,4 s | 0,25 s |
+| Salve de morceaux de tour | 2 | 2-3 | 3-4 |
+| Pics de récifs (départs, s depuis le premier) | 0 · 1,05 | 0 · 1,05 · 1,45 | 0 · 1,05 · 1,45 · 2,0 |
+| Grosse cloche : coups · tenue exigée | 2 · 0,38 s | 3 · 0,66 s | 4 · 0,94 s |
+| Onde sonore : ondes · délai | 3-4 · constant | 4-5 · ×0,88 | 5-6 · ×0,88 |
+| Glas : coups | 5 | 6 | 7 |
+| Signature (éclair pendant une croix, Partie 2) | non | non | oui |
+| **Tenue exigée la plus longue** (`holdNeed` : faisceaux, Éblouissement, cloche, éclat, Glas…) | 0,60 s | 0,66 s | 0,94 s |
+| Marge | +1,5 s | +0,8 s | +0,3 s |
+| **Tenue maximale continue** (`fatMax`) | **2,10 s** | **1,46 s** | **1,24 s** |
+| Alerte (75 %) | 1,58 s | 1,10 s | 0,93 s |
+| Essoufflement après éclatement du dôme | 0,6 s | 0,9 s | 1,2 s |
+
+Rages (inchangées) : Facile et Normal = Nuit du Phare, Tempête de cloches (1), Glas ; Difficile = en plus Morse et Tempête de cloches (2). Compteur de tenue remis à zéro après 0,15 s de relâchement. L'endurance de `LB.hero` (`drain` 0,36 / s) est neutralisée en phase III.
+
 ## Table comparative C1 / C2
 
 | | C1 Ember Bridge | C2 Silent Bells |

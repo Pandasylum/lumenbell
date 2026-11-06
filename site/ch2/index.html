@@ -1121,6 +1121,7 @@ function fresh(dk){const d=LB.diff.use(DIFFS[dk]);return{dk,d,phase:1,mode:'card
 function say(t){$('live').textContent=t}
 
 const ensureAudio=LB.audio.ensure,tone=LB.audio.tone,noise=LB.audio.noise;
+const GUARD_SND={snap:{vol:.2},hum:{f:[82,123.5,165.5],vol:.055,lp:520,in:.15,out:.1}};
 const sfx={
   block(p){tone(p?1046:880,.5,'sine',.22);tone(p?1568:1318,.35,'sine',.1);tone(2217,.2,'triangle',.05);if(p)tone(2093,.6,'sine',.07)},
   dodge(p){noise(.22,.25,'bandpass',600,2,null,null,2600);if(p)tone(1760,.25,'sine',.06)},
@@ -1133,12 +1134,23 @@ const sfx={
   toll(){[196,392,466,587,784].forEach((f,i)=>tone(f*(1+i*.002),1.6-i*.2,'sine',[.18,.1,.06,.05,.03][i]))},
   charge(){tone(220,.8,'sawtooth',.04,null,null,880)},
   bolt(){noise(.35,.35,'highpass',1800);tone(60,.4,'sine',.25,null,null,30)},
+  snap(p){const Z=GUARD_SND.snap;noise(.05,Z.vol,'highpass',3200,1);tone(1900,.04,'square',Z.vol*.5,null,null,700);tone(300,.07,'triangle',Z.vol*.6,null,null,110);if(p)tone(3100,.05,'sine',Z.vol*.35)},
+  shatter(){noise(.18,.28,'highpass',2500,1);tone(2400,.12,'triangle',.08,null,null,900);tone(160,.2,'sine',.14,null,null,70)},
   shield(){tone(660,.15,'sine',.05);tone(990,.15,'sine',.03)},
   counter(){tone(330,.4,'triangle',.12,null,null,990);noise(.3,.12,'bandpass',2000,3)},
   ko(){tone(110,2,'sine',.3,null,null,40);noise(1.4,.25,'lowpass',900,1,null,null,100)},
   win(){[523,659,784,1046].forEach((f,i)=>tone(f,1.2,'sine',.12,null,LB.audio.ctx?LB.audio.now()+i*.12:0))}
 };
 function play(k,a){if(LB.audio.ctx&&LB.audio.sound)sfx[k](a)}
+let hum=null;
+function humSet(on){
+  const A=LB.audio,c=A.ctx,Z=GUARD_SND.hum;
+  if(hum&&(hum.c!==c||!on||!A.sound)){const h=hum;hum=null;
+    try{const t=h.c.currentTime;h.g.gain.cancelScheduledValues(t);h.g.gain.setValueAtTime(h.g.gain.value,t);h.g.gain.linearRampToValueAtTime(0,t+Z.out);h.os.forEach(o=>o.stop(t+Z.out+.02))}catch(e){}}
+  if(!on||hum||!c||!A.sound||!A.sfx||c.state!=='running')return;
+  try{const t=c.currentTime,g=c.createGain(),lp=c.createBiquadFilter(),os=Z.f.map((f,i)=>{const o=c.createOscillator();o.type=i?'sine':'sawtooth';o.frequency.value=f*(1+i*.002);o.detune.value=i*3;o.connect(lp);o.start(t);return o});
+    lp.type='lowpass';lp.frequency.value=Z.lp;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(Z.vol,t+Z.in);lp.connect(g);g.connect(A.sfx);hum={c,g,os}}catch(e){hum=null}}
+function humStep(){humSet($('menu').hidden&&S.mode==='play'&&!S.paused&&domeAlpha()>0)}
 const MUS=[null,{bpm:84,bass:[73.4,73.4,87.3,65.4],lead:'bell'},{bpm:96,bass:[82.4,87.3,82.4,61.7],lead:'choir'},{bpm:118,bass:[55,55,65.4,49],lead:'arp'}];
 let mStep=0,mNext=0;
 function musTick(){
@@ -1180,13 +1192,39 @@ function down(){
   if(LB.hero.press(S.pl,gest(),gt)){S.guardT=gt;if(S.phase===2)S.dodgeT=gt;if(S.phase===3)play('shield')}
 }
 function up(){S.held=false;LB.hero.release(S.pl);$('ward').classList.remove('down')}
-function stops(th){return LB.hero.stops(S.pl,{graceAdd:th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0})}
+function stops(th){const gr=th&&th.k==='shard'&&S.d.m<1?RAIN.grace:0;
+  if(S.phase===3&&th&&!th.hold){   // a tap threat of the Lighthouse: the usual window of the gesture (LB.hero, action x m); a bubble held past it stops it in Easy only (late release: holdTol after a beam's passage)
+    const Z=PD(),p=S.pl;
+    if(p.s==='act'&&S.held&&p.t>PT().act&&(Z.tapInBubble||gt-S.holdEnd<=Z.holdTol))return true;
+    return LB.hero.stops(p,{graceAdd:gr})}
+  return LB.hero.stops(S.pl,{graceAdd:gr})}
 function plStep(dt){
-  const p=S.pl;
+  const p=S.pl,f3=S.phase===3;
+  if(f3)p.stam=1;   // phase III: the shared endurance never trips, the fatigue of the hold is this chapter's (fatStep)
   if(LB.hero.step(p,dt,{gesture:gest(),held:S.held})==='broken'){S.broken=gt+PT().broken;say(_('Your guard is broken.','Ta garde est brisée.'))}
   if(p.fr){if(p.s==='recover'&&p.rk==='act'){p.rd*=DG.foolRec;p.fr=0}else if(p.s!=='act')p.fr=0}
   S.holding=S.phase===3&&p.s==='act';
+  S.domeT0=S.holding&&S.held?(S.domeT0==null?gt:S.domeT0):null;   // since when the gesture is held (dome of phase III, GUARD_FX.dome)
+  if(f3)fatStep(dt);
 }
+function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk());
+  if(S.holding&&S.held){F.t+=dt;F.rel=0}else{F.rel+=dt;if(F.rel>FATIGUE.reset)F.t=0}
+  if(F.t>max){const rest=PD().rest;F.t=0;F.rel=0;p.s='recover';p.t=0;p.rd=rest;p.rk='broken';S.holding=false;S.domeT0=null;S.broken=gt+rest;S.domeBurst=gt;
+    burst(HX,GY-50,28,'#bff0ff',8,.7);burst(HX,GY-50,12,'#ffffff',5,.5);pop(ONO.crush,'#bff0ff');play('shatter');say(_('Your guard is broken.','Ta garde est brisée.'))}
+  p.stam=clamp(1-F.t/max,0,1)}
+const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
+function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
+function threatSrc(th){
+  if(th.k==='bolt')return lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];
+  if(th.k==='chunk')return TOWER[th.ri].e;
+  if(th.k==='ring')return TOWER[RINGS[th.ri%6]].e;
+  if(th.k==='spike')return{x:LX-90,y:GY-6};
+  if(th.k==='whip')return{x:LX+th.side*44,y:GY-210};
+  if(th.k==='anch')return{x:HX+40,y:GY-300};
+  if(th.k==='sbl')return{x:th.x,y:26};
+  if(th.k==='sonic')return{x:LX-60,y:GY-80};
+  if(th.k==='sring')return{x:LX+(th.side?80:-80),y:LY};
+  return{x:LX,y:S.form===2?ECY:LY}}
 
 function success(th,perfect){
   th.done=true;th.res='ok';th.okT=gt;th.perfect=perfect;S.okT=gt;
@@ -1195,7 +1233,9 @@ function success(th,perfect){
   if(ph===1&&th.k==='toll'&&th.gid!=null){(S.echoes||(S.echoes=[])).push({t0:gt,x:S.orbX,y:S.orbY});if(S.threats.filter(o=>o.gid===th.gid).every(o=>o.res==='ok'))S.glasN=(S.glasN||0)+1}
   if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('block',perfect);MUSIC.fx('clank');pop(ONO.block,perfect?'#f2fffb':'#bff3ea')}
   else if(ph===2){S.dodgeOk=gt;S.dodgeFlash=gt;play('dodge',perfect)}
-  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
+  else{   // phase III, a tap: an arc of light turned towards the threat, sparks where it hits (drawHero); the dry snap; the onomatopoeia is unchanged
+    const G=GUARD_FX.arc,c={x:HX+16,y:GY-80},s=threatSrc(th),a=Math.atan2(s.y-c.y,s.x-c.x);
+    S.arc={t0:gt,a};burst(c.x+Math.cos(a)*G.r,c.y+Math.sin(a)*G.r,G.sparks+(perfect?8:0),perfect?'#ffffff':'#fff3c4',6,.5);play('snap',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
 }
 function hurt(th){
   if(S.mode!=='play')return;
@@ -1239,7 +1279,7 @@ function update(dt){
       if(th.done)continue;
       if(th.hold){
         if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
-        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;if(S.pl.s==='act')LB.hero.stopped(S.pl)}
+        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;S.holdEnd=th.tb;if(S.pl.s==='act')LB.hero.stopped(S.pl)}
         continue;
       }
       if(gt>=th.ti){
@@ -1271,7 +1311,7 @@ function closePat(){
   if(p.ok){
     const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=S.phase===1&&p.spell==='harpoon'?R_CNT.harpoon:R_CNT[S.phase];   // harpoon: slower, so that the ray is seen climbing the chain
    
-    S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase,spell:p.spell,side:p.side};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
+    S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase,spell:p.spell,side:p.side,ri:p.ri};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
     say(S.phase===1?_('Series blocked. The Watcher counters.','Série bloquée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
   }else S.nextAt=gt+R_CNT.nextFail;
 }
@@ -1535,9 +1575,15 @@ function drawHero(){
   ell(x,y+2,30,6,'rgba(0,0,0,.45)');
   heroShape(x,y,pose,o,tint);
   if(ph===1&&p.s==='act'&&play)LB.drawBlock(ctx,x,y,p.t,PT().act);
-  if(ph===3&&S.holding){const flick=S.pl.stam<.25?(Math.sin(gt*40)>0?.5:1):1;ctx.save();ctx.globalAlpha=.9*flick;
-    const g=ctx.createRadialGradient(x,y-40,10,x,y-40,82);g.addColorStop(0,'rgba(127,214,255,0)');g.addColorStop(.8,'rgba(127,214,255,.14)');g.addColorStop(1,'rgba(180,240,255,.4)');
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,92,Math.PI,0);ctx.fill();ctx.strokeStyle='#bff0ff';ctx.lineWidth=2.5;ctx.stroke();ctx.restore()}
+  const da=domeAlpha(),warn=domeWarn();
+  if(da>0){const Z=GUARD_FX.dome,jx=warn?Math.sin(gt*70)*2.2:0,jy=warn?Math.cos(gt*83)*1.4:0;ctx.save();ctx.globalAlpha=da;
+    ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x+jx,y+jy,92,Math.PI,0);ctx.fill();
+    ctx.strokeStyle=warn?`rgba(${FATIGUE.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
+  if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,92+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
+  if(ph===3&&S.arc&&gt-S.arc.t0<GUARD_FX.arc.dur){const G=GUARD_FX.arc,u=(gt-S.arc.t0)/G.dur,cx=x+16,cy=y-80,r=G.r*(.85+.15*eout(u));
+    ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+    ctx.strokeStyle=`rgba(${COUNTER3.col},${.35*(1-u)})`;ctx.lineWidth=G.w*2.2;ctx.beginPath();ctx.arc(cx,cy,r,S.arc.a-G.span,S.arc.a+G.span);ctx.stroke();
+    ctx.strokeStyle=`rgba(${COUNTER3.col},${1-u})`;ctx.lineWidth=G.w*(1-.5*u);ctx.stroke();ctx.restore()}
   if(play&&!S.cine&&LB.help.on())LB.drawRecoveryBar(ctx,x,y,S.pl);
   if(ph===3&&play&&!S.cine){const w=60;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-w/2,y-206,w,6);ctx.fillStyle=gt<S.broken?'#ff8a7a':S.pl.stam<.3?'#ffd27a':'#7fd6ff';ctx.fillRect(x-w/2,y-206,w*S.pl.stam,6)}
 }
@@ -1812,20 +1858,35 @@ function shard(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a*1.5);const g=
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
-  chunk:{dust:.7,fly:.6,gap:1.05,salvo:[2,3]},
-  spike:{tell:.8,seq:[0,1.05,1.45],after:1.0,corals:9},
-  night:{n:3,lit:.3,gap:1.0},
+  chunk:{dust:.7,fly:.6,gap:1.05},   // salvo per difficulty: PHARE_DIFF
+  spike:{tell:.8,after:1.0,corals:9},   // seq (the spikes after the first) per difficulty: PHARE_DIFF
+  night:{gap:1.0},   // n bolts and `lit` per difficulty: PHARE_DIFF
   morse:{long:{dark:.2,cone:.4,D:.9,after:.15},seq:['L','c','c'],reps:1,gap:.15},
-  cross:{dark:.4},
+  cross:{},   // dark between the two sweeps per difficulty: PHARE_DIFF
   anchor:{rel:.4,lift:.8},
-  bell:{tl:.75,ta:1.3,blows:3,step:.28,span:.66,after:.6},
+  bell:{tl:.75,ta:1.3,step:.28,tail:.1,after:.6},   // blows and span (= (blows-1) x step + tail) per difficulty: PHARE_DIFF
   shard:{glow:1.2,blast:.6},
-  sonic:{n:[4,6],first:.8,d0:.5,shrink:.88,fly:.7},
+  sonic:{first:.8,d0:.5,fly:.7},   // n and shrink per difficulty: PHARE_DIFF
   rain:{n:6,pattern:[.55,.55,.3,.8,.55,.45],fall:.7},
-  glas:{n:6,g0:.6,k:1.16,pre:.7,fall:.5},
+  glas:{g0:.6,k:1.16,pre:.7,fall:.5},   // n knells per difficulty: PHARE_DIFF
+  dazzle:{n:3,dark:.3,cone:.5,D:1.1,after:.2},
+  sig:{at:.6},   // Hard, Part 2: a bolt lands `at` s after the end of the first sweep of a crossing (release, tap, hold again)
   direct:true};
 const COUNTER3={col:'255,246,204',tap:[.2,.45],hold:[.2,.75],
-  sp:{bolt:'tap',beam:'tap',chunk:'tap',whip:'tap',spike:'tap',ring:'tap',rain:'tap',anchor:'tap',kwave:'hold',cross:'hold',bell:'hold',shard:'hold',sonic:'hold',glas:'hold',tide:'hold'}};
+  sp:{bolt:'tap',beam:'tap',chunk:'tap',whip:'tap',spike:'tap',ring:'tap',rain:'tap',anchor:'tap',kwave:'hold',cross:'hold',bell:'hold',shard:'hold',sonic:'hold',glas:'hold',tide:'hold',dazzle:'hold'},
+  win:{bolt:[.2,.55],beam:[.2,.5],chunk:[.2,.7],spike:[.2,.7],anchor:[.2,.8],bell:[.2,.75],shard:[.2,.6],sonic:[.2,.75],dazzle:[.06,.3]},
+  lampOut:1};   // s the lamp that fired a countered bolt stays out
+const PHARE_DIFF={
+  easy:{tell:1.5,holdTol:.2,tapInBubble:true,night:{n:3,lit:.5},crossDark:.6,salvo:[2,2],spike:[0,1.05],blows:2,sonic:{n:[3,4],shrink:1},glas:5,sig:false,margin:1.5,rest:.6},
+  normal:{tell:1,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
+  hard:{tell:.7,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
+const FATIGUE={reset:.15,warn:.75,amber:'255,190,90'};
+const PD=()=>PHARE_DIFF[vdk()];
+const bellSpan=Z=>(Z.blows-1)*BEACON_FX.bell.step+BEACON_FX.bell.tail;
+function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
+  return Math.max(w(B.beam.D),w(B.dazzle.D),w(B.morse.long.D),w(SP.kwave.D),1.25*160/1080,1.25*160/1000,1.5*160/1000,bellSpan(Z),B.shard.blast,SP.storm.trapTb-SP.storm.trapTa,.6)}
+const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
+const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
 const LX=760,LY=GY-333;
 function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0))}
   if(S.cnt&&S.cnt.k===3)dim=1;return{charge,dim}}
@@ -2046,17 +2107,57 @@ function drawBeacon(){
 function lampDark(o,a){ctx.save();const g=ctx.createRadialGradient(o.x,o.y,2,o.x,o.y,44);g.addColorStop(0,`rgba(4,12,16,${.85*a})`);g.addColorStop(1,'rgba(4,12,16,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,44,0,TAU);ctx.fill();ctx.restore()}
 function crackle(o,u){ctx.save();ctx.globalCompositeOperation='lighter';const n=Math.floor(gt*24);glow(o.x,o.y,40+20*u,'rgba(200,250,255,.9)',.25+.45*u);
   for(let i=0;i<5;i++){const a=((n*7+i*72)%360)*Math.PI/180,r0=8,r1=24+((n+i*3)%5)*5;bolt(o.x+Math.cos(a)*r0,o.y+Math.sin(a)*r0,o.x+Math.cos(a)*r1,o.y+Math.sin(a)*r1,(n+i)/50,'rgba(210,252,255,.9)',1.4)}ctx.restore()}
+const polyAt=(pts,u)=>{let L=0;const d=[];for(let i=1;i<pts.length;i++){const l=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);d.push(l);L+=l}
+  let r=L*u;for(let i=0;i<d.length;i++){if(r<=d[i]||i===d.length-1){const f=d[i]?Math.min(1,r/d[i]):1;return{i,x:lerp(pts[i].x,pts[i+1].x,f),y:lerp(pts[i].y,pts[i+1].y,f)}}r-=d[i]}};
+function streak(pts,u,wd,a){const h=polyAt(pts,u),C=COUNTER3.col,n=(gt*13|0)/13;
+  for(let j=0;j<=h.i;j++)bolt(pts[j].x,pts[j].y,j<h.i?pts[j+1].x:h.x,j<h.i?pts[j+1].y:h.y,n+j*.37,`rgba(${C},${a})`,wd);
+  return h}
+const headQ=()=>ecPose(S.ecPhi/.55)[EHEAD];
+const C3={
+  bolt(c,u,O,C){const to=lampPoses(LX,LY,1)[c.side||0],h=streak([O,{x:lerp(O.x,to.x,.45),y:GY-26},to],Math.min(1,u*1.25),3.5,1-.4*u);glow(h.x,h.y,34,`rgba(${C},.9)`,.7*(1-u));
+    if(u>=1&&!c.fx3){c.fx3=1;burst(to.x,to.y,14,'#fff3c4',5,.5);S.lampOut={i:c.side||0,until:gt+COUNTER3.lampOut}}},
+  beam(c,u,O,C){const to=lampPoses(LX,LY,1)[c.side||0],e=Math.min(1,u*1.6),x=lerp(O.x,to.x,e),y=lerp(O.y,to.y,e);
+    ctx.strokeStyle=`rgba(${C},${1-.5*u})`;ctx.lineWidth=11*(1-u*.6)+2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(x,y);ctx.stroke();glow(x,y,46,`rgba(${C},.9)`,.8*e);
+    if(u>=1&&!c.fx3){c.fx3=1;burst(to.x,to.y,26,'#fff3c4',7,.8,.3);burst(to.x,to.y,10,'#ffffff',4,.5)}},
+  chunk(c,u,O,C){const r=TOWER[c.ri!=null?c.ri:RINGS[0]].e,fl=clamp(u/.5,0,1),rc=eio(clamp((u-.5)/.5,0,1));
+    if(u<.5){const x=lerp(O.x,r.x,eout(fl)),y=lerp(O.y,r.y,eout(fl))-Math.sin(Math.PI*fl)*40,a=gt*18;ctx.fillStyle=`rgba(${C},.95)`;ctx.beginPath();
+      for(let i=0;i<5;i++){const q=a+i*Math.PI*2/5,rr=i%2?9:13;i?ctx.lineTo(x+Math.cos(q)*rr,y+Math.sin(q)*rr):ctx.moveTo(x+Math.cos(q)*rr,y+Math.sin(q)*rr)}ctx.closePath();ctx.fill();glow(x,y,30,`rgba(${C},.9)`,.6)}
+    else{tentacle(LX,LY+10,lerp(r.x,LX,rc*.7),lerp(r.y,LY+10,rc*.7),5,1,3);glow(r.x,r.y,50*(1-rc),`rgba(${C},.9)`,.7*(1-rc))}
+    if(u>=.5&&!c.fx3){c.fx3=1;burst(r.x,r.y,16,'#fff3c4',6,.6,.4);burst(r.x,r.y,8,'#9aa9a6',4,.6,.4)}},
+  spike(c,u,O,C){const xs=LX-90,run=clamp(u/.55,0,1),x=lerp(HX+30,xs,eout(run));
+    if(u<.55){glow(x,GY-6,40,`rgba(${C},.9)`,.8);ctx.strokeStyle=`rgba(${C},.8)`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(HX+30,GY-4);ctx.lineTo(x,GY-4);ctx.stroke()}
+    else if(u<1){const e=clamp((u-.55)/.25,0,1);ctx.save();ctx.globalCompositeOperation='source-over';reefSpikes(xs,eout(e),1);ctx.restore();glow(xs,GY-30,60,`rgba(${C},.9)`,.5*e)}
+    if(u>=1&&!c.fx3){c.fx3=1;burst(xs,GY-30,22,'#ffe9a8',7,.7,.5);burst(xs,GY-14,10,'#fff6d6',4,.5,.3)}},
+  anchor(c,u,O,C){const a=ANCH.e,b=ANCH.s,ch=.55,m={x:lerp(a.x,b.x,.5),y:lerp(a.y,b.y,.5)};
+    if(u<ch){const e=u/ch;for(let i=0;i<7;i++){const q=(e*1.4+i/7)%1;ell(lerp(a.x,b.x,q)+(Math.random()-.5)*6,lerp(a.y,b.y,q)+(Math.random()-.5)*6,2.2,2.2,`rgba(${C},${.9})`)}
+      bolt(a.x,a.y,lerp(a.x,b.x,e),lerp(a.y,b.y,e),(gt*16|0)/16,`rgba(${C},.8)`,1.6)}
+    else{const e=clamp((u-ch)/(1-ch),0,1),d=26*eout(e);glow(m.x,m.y,50*(1-e),`rgba(${C},.95)`,.9);
+      for(const s of[-1,1]){ctx.strokeStyle=`rgba(${C},${1-e})`;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(m.x+s*d*.5,m.y+s*d*.9+e*e*30,7,4,s*.6,0,Math.PI*2);ctx.stroke()}}
+    if(u>=ch&&!c.fx3){c.fx3=1;burst(m.x,m.y,16,'#fff3c4',6,.6,.2)}},
+  bell(c,u,O,C){const q=headQ(),r=40+150*eout(u);
+    for(let i=0;i<2;i++){const e=clamp(u*1.4-i*.25,0,1);if(e<=0||e>=1)continue;ctx.strokeStyle=`rgba(${C},${.95*(1-e)})`;ctx.lineWidth=7*(1-e)+1;ctx.beginPath();ctx.ellipse(q.x,q.y,40+150*eout(e),(40+150*eout(e))*.55,0,0,Math.PI*2);ctx.stroke()}
+    if(u>.25){ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r||0);ctx.scale(q.sc||1,q.sc||1);ctx.strokeStyle=`rgba(${C},.95)`;ctx.lineWidth=2.4;crackLine(CRACK,clamp((u-.25)/.4,0,1));ctx.restore()}
+    if(u>=.45&&!c.fx3){c.fx3=1;burst(q.x,q.y-10,14,'#fff3c4',5,.6,.3)}},
+  shard(c,u,O,C){const J=bossCore(),e=Math.min(1,u*1.7);
+    for(let i=-3;i<=3;i++){const t={x:J.x+i*26,y:J.y+Math.abs(i)*8-10};bolt(O.x,O.y,lerp(O.x,t.x,e),lerp(O.y,t.y,e),(gt*15|0)/15+i*.21,`rgba(${C},${.85-.4*u})`,2.4-Math.abs(i)*.3)}
+    glow(J.x,J.y,40+70*e,`rgba(${C},.9)`,.7*e*(1-u*.5));
+    if(e>=1&&!c.fx3){c.fx3=1;burst(J.x,J.y,30,'#fff3c4',8,.8,.2);burst(J.x,J.y,12,'#ffffff',5,.5)}},
+  sonic(c,u,O,C){const x=lerp(HX+40,LX-60,eout(u)),y=GY-80;
+    for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(${C},${(.9-i*.22)*(1-u*.5)})`;ctx.lineWidth=4-i;ctx.beginPath();ctx.ellipse(x-i*14,y,16+i*5,70+i*6,0,-Math.PI*.45,Math.PI*.45);ctx.stroke()}
+    if(u>=1&&!c.fx3){c.fx3=1;burst(LX-60,y,18,'#fff3c4',6,.6,.2)}},
+  dazzle(c,u,O,C){const e=Math.min(1,u*1.5),x=lerp(O.x,LX,e),y=lerp(O.y,LY,e);
+    ctx.strokeStyle=`rgba(${C},.95)`;ctx.lineWidth=6+16*u;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(x,y);ctx.stroke();
+    glow(x,y,60+120*u,`rgba(${C},.95)`,.5+.5*u);glow(LX,LY,60+190*u,`rgba(${C},.9)`,u);
+    if(u>=1&&!c.fx3){c.fx3=1;S.shake=Math.max(S.shake,8);burst(LX,LY,40,'#fff6d6',9,1)}}
+};
 function counter3(k){
-  const c=S.cnt,sp=c.spell||'bolt',kind=COUNTER3.sp[sp]||'tap',lo=lampPoses(LX,LY,1),O={x:S.orbX,y:S.orbY},C=COUNTER3.col;
-  const to=sp==='bolt'||sp==='ring'?lo[c.side||0]:sp==='beam'?lo[c.side||0]:sp==='spike'?{x:HX+10,y:GY-8}:sp==='anchor'?{x:LX+60,y:GY-150}:sp==='kwave'||sp==='sonic'?{x:LX-60,y:GY-60}:sp==='bell'||sp==='glas'?{x:HX+12,y:GY-250}:{x:LX,y:S.form===2?ECY:LY};
+  const c=S.cnt,sp=c.spell||'bolt',kind=COUNTER3.sp[sp]||'tap',lo=lampPoses(LX,LY,1),O={x:S.orbX,y:S.orbY},C=COUNTER3.col,W3=COUNTER3.win[sp];
+  if(C3[sp]){const u=clamp((k-W3[0])/(W3[1]-W3[0]),0,1);if(u>0)C3[sp](c,u,O,C);return}
+  const to=sp==='ring'?lo[c.side||0]:sp==='kwave'?{x:LX-60,y:GY-60}:sp==='glas'?{x:HX+12,y:GY-250}:{x:LX,y:S.form===2?ECY:LY};
   const W=COUNTER3[kind],u=clamp((k-W[0])/(W[1]-W[0]),0,1);if(u<=0)return;
   if(k<=W[1]+.15){if(kind==='tap'){ctx.strokeStyle=`rgba(${C},${1-.6*u})`;ctx.lineWidth=7*(1-u)+2;ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(lerp(O.x,to.x,Math.min(1,u*2.2)),lerp(O.y,to.y,Math.min(1,u*2.2)));ctx.stroke()}
   else{const r=40+280*eout(u);ctx.strokeStyle=`rgba(${C},${.9*(1-u)})`;ctx.lineWidth=6*(1-u)+1;ctx.beginPath();ctx.ellipse(O.x,O.y,r,r*.55,0,0,Math.PI*2);ctx.stroke();glow(to.x,to.y,60,`rgba(${C},.9)`,.6*u)}}
-  if(u>=1&&!c.fx3){c.fx3=1;
-    if(sp==='bolt'||sp==='ring'){burst(to.x,to.y,12,'#fff3c4',5,.5);S.lampOut={i:c.side||0,until:gt+1}}   // the lamp that fired goes out for 1 s
-    else if(sp==='beam')burst(to.x,to.y,22,'#fff3c4',6,.7,.3);   // the lamp bursts into sparks
-    else if(sp==='spike')burst(to.x,to.y,16,'#ffe9a8',6,.6,.5);   // golden splinters
-    else burst(to.x,to.y,14,'#fff3c4',5,.5)}}
+  if(u>=1&&!c.fx3){c.fx3=1;burst(to.x,to.y,14,'#fff3c4',5,.5)}}
 function coral(x,h,R,a){ctx.save();ctx.globalAlpha*=a;ctx.lineCap='round';
   const lean=(R()-.5)*14,br=[[.45,-1],[.62,1],[.8,-.6]];
   for(const pass of[0,1]){ctx.strokeStyle=pass?'#c8574c':'#2b0e10';ctx.lineWidth=pass?3.2:6.5;ctx.beginPath();ctx.moveTo(x,GY+5);ctx.lineTo(x+lean,GY+5-h);
@@ -2735,9 +2836,9 @@ function hud(){
   LB.hud.track(gpOf(S.phase),{trial:!!S.d.trial,unl:unlocked()});
 }
 
-function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
+function banner(txt,sub){say(sub?txt+'. '+sub:txt);MUSIC.fx('sting');MUSIC.fx('rumble')}
 const rageAt=()=>LB.rageHp(S.d.bd,S.phase);   // rage thresholds of the current phase
-const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?LB.BOSS_RULES.finalHp:null);   // form I of phase III has no final assault
+const rageMarks=()=>LB.hud.marks(rageAt(),LB.BOSS_RULES.finalHp);   // both forms of phase III end on a final assault (form I: Dazzle, form II: Knell)
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
   else if(S.phase===1){banner(_('Turquoise heart','Cœur turquoise'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
@@ -2795,14 +2896,14 @@ function mirrorPick(n,x0,x1){
   return c.sort(()=>Math.random()-.5).slice(0,n)}
 function spawn(){
   const d=S.d,id=S.phase,f2=id===3&&S.form===2,gen=f2?P3b:[P1,P2,P3][id-1];
-  const hasFinal=id!==3||f2,n=LB.rageState.check(S,rageAt(),hasFinal);
+  const hasFinal=true,n=LB.rageState.check(S,rageAt(),hasFinal);
   if(n){S.angerShown=true;S.roarT=gt;S.roarD=LB.rageState.dur(n);S.nextAt=gt+S.roarD;S.shake=10;rageBanner();return}
-  const go=l=>{const q=sched(l);q.spell=l.spell;q.side=l.side;return q};   // the spell shown by the riposte (set by P2)
+  const go=l=>{const q=sched(l);q.spell=l.spell;q.side=l.side;q.ri=l.ri;return q};   // the spell shown by the riposte (set by P2)
   const stage=S.rageN?1:0,f=1/(RHY.sp*(id===2?VOICE_SPEED:1)*(stage?RHY.rage[id]:1));   // inside rhythm = Normal's, in real seconds, same before and after the rage, whatever the difficulty
   if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;go(gen(stage,f,gt+.25,false,r));return}
   if(!S.finalDone&&LB.rageState.isFinal(S,hasFinal)){
     S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=LB.BOSS_RULES.rageDur2;S.shake=10;
-    banner(_('Final assault','Dernier assaut'),[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
+    banner(_('Final assault','Dernier assaut'),id===3&&!f2?'':[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
     go(gen(1,f,gt+1.6,true));return}
   go(gen(stage,f,gt+.25));
 }
@@ -3219,27 +3320,29 @@ function drawRustHaze(){const R=S.rust;if(!R||gt<R.st)return;
 const RUST_HAZE=.5,RUST_HALO=430;   // RUST_HALO = radius (px) of the halo of light round the Watcher after the rage-1 counter (provisional)
 const halo=u=>{u=clamp((u-.25)/.75,0,1);return u*u*(3-2*u)};   // 0 in the core, 1 outside, smooth   // opacity of the veil over everything once the cloud is full (provisional)
 function P3(stage,f,b,final,rage){
-  const T=[],BF=BEACON_FX;let t=b,sp='',side=0;
+  const T=[],BF=BEACON_FX,Q=PD(),TL=Q.tell;let t=b,sp='',side=0,cri=null;   // TL: x on the warning times (PHARE_DIFF)
   const R=88;
-  const beamAt=(dir,B)=>{const ts=t+(B.dark+B.cone)*f,D=B.D*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
-    T.push({k:'beam',t0:t,dark:B.dark*f,ts,D,dir,ta:ts+D*s0,tb:ts+D*s1,real:true,hold:true});t=ts+D+B.after*f;sp='beam';side=dir<0?1:0};
+  const beamAt=(dir,B)=>{const ts=t+(B.dark+B.cone)*TL*f,D=B.D*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
+    T.push({k:'beam',t0:t,dark:B.dark*TL*f,ts,D,dir,ta:ts+D*s0,tb:ts+D*s1,real:true,hold:true});t=ts+D+B.after*f;sp='beam';side=dir<0?1:0};
   const sweep=dir=>beamAt(dir,BF.beam);
-  const bolt=(tell,night)=>{const Z=BF.bolt;tell=tell==null?Z.tell:tell;side=S.boltSide=1-(S.boltSide==null?1:S.boltSide);
+  const bolt=(tell,night)=>{const Z=BF.bolt;tell=tell==null?Z.tell*TL:tell;side=S.boltSide=1-(S.boltSide==null?1:S.boltSide);
     T.push({k:'bolt',t0:t,tell:tell*f,ti:t+(tell+Z.fly)*f,real:true,seed:Math.random(),side,night:night?1:0});t+=Z.gap*f;sp='bolt'};
-  const spike=()=>{const Z=BF.spike,ti0=t+Z.tell*f;let prev=t;Z.seq.forEach((o,i)=>{const ti=ti0+o*f;T.push({k:'spike',t0:ti-Z.tell*f,ti,real:true,seed:Math.random()});prev=ti});t=ti0+Z.seq[Z.seq.length-1]*f+Z.after*f;sp='spike'};
-  const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*f,side:Math.random()<.5?-1:1});t+=1.2*f;sp='whip'};
-  const chunk=()=>{const Z=BF.chunk,n=Z.salvo[0]+Math.floor(Math.random()*(Z.salvo[1]-Z.salvo[0]+1));
-    for(let i=0;i<n;i++){const s=t+i*Z.gap*f;T.push({k:'chunk',t0:s,tl:s+Z.dust*f,ti:s+(Z.dust+Z.fly)*f,ri:RINGS[Math.floor(Math.random()*6)]})}
-    t+=((n-1)*Z.gap+Z.dust+Z.fly+.25)*f;sp='chunk'};
-  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;sp='kwave';return th};
+  const spike=()=>{const Z=BF.spike,seq=Q.spike,tl=Z.tell*TL*f,ti0=t+tl;seq.forEach(o=>{const ti=ti0+o*f;T.push({k:'spike',t0:ti-tl,ti,real:true,seed:Math.random()})});t=ti0+seq[seq.length-1]*f+Z.after*f;sp='spike'};
+  const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*TL*f,side:Math.random()<.5?-1:1});t+=(.3+.9*TL)*f;sp='whip'};
+  const chunk=()=>{const Z=BF.chunk,n=Q.salvo[0]+Math.floor(Math.random()*(Q.salvo[1]-Q.salvo[0]+1));
+    for(let i=0;i<n;i++){const s=t+i*Z.gap*f;cri=RINGS[Math.floor(Math.random()*6)];T.push({k:'chunk',t0:s,tl:s+Z.dust*TL*f,ti:s+(Z.dust*TL+Z.fly)*f,ri:cri})}
+    t+=((n-1)*Z.gap+Z.dust*TL+Z.fly+.25)*f;sp='chunk'};
+  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*TL*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;sp='kwave';return th};
   const tide=()=>{const w=kwave(),e=w.ts+w.D,P=SP.tide;T.push({k:'spike',t0:e,ti:e+P.spike1*f,real:true,seed:Math.random(),tide:1});T.push({k:'spike',t0:e+P.gap*f,ti:e+P.spike2*f,real:true,seed:Math.random(),tide:1});t=e+P.spike2*f+P.after*f;sp='tide'};
-  const night=()=>{const Z=BF.night;for(let i=0;i<Z.n;i++)bolt(Z.lit,true);t+=.4*f};
+  const night=()=>{const Z=BF.night;for(let i=0;i<Q.night.n;i++)bolt(Q.night.lit,true);t+=.4*f};
   const morse=()=>{const M=BF.morse;for(let r=0;r<M.reps;r++)for(const g of M.seq){if(g==='L')beamAt(r%2?1:-1,M.long);else{bolt();t-=(BF.bolt.gap-M.gap)*f}}};
   const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()},whip,chunk,()=>{whip();bolt()},kwave];
   const p1=[()=>{bolt();spike();bolt()},()=>{sweep(-1);sweep(1)},()=>{sweep(-1);t-=.15*f;spike()},()=>{spike();sweep(1);bolt()},()=>{bolt();bolt();sweep(-1)},()=>{whip();whip();chunk()},()=>{sweep(-1);chunk()},tide,()=>{kwave();bolt()}];
-  if(rage){(rage>1?morse:night)()}
+  const dazzle=()=>{const Z=BF.dazzle;for(let i=0;i<Z.n;i++)beamAt(i%2?1:-1,Z);sp='dazzle'};
+  if(final)dazzle();
+  else if(rage){(rage>1?morse:night)()}
   else pick(stage?p1:p0)();
-  T.spell=sp;T.side=side;return T;
+  T.spell=sp;T.side=side;T.ri=cri;return T;
 }
 function beaconHide(){S.hide=null;for(const th of S.threats){if(th.k==='chunk'&&gt>=th.tl&&!(th.done&&gt>th.okT+.8)){(S.hide||(S.hide=new Set())).add(TOWER[th.ri])}}}
 function drawBeaconFx(){
@@ -3269,25 +3372,28 @@ const RINGS=TOWER.map((p,i)=>p.k==='ring'?i:-1).filter(i=>i>=0);
 const SBELLS=TOWER.map((p,i)=>p.k==='sbell'?i:-1).filter(i=>i>=0);
 const MOV=TOWER.map((p,i)=>(p.k==='ring'||p.k==='seg'||p.k==='sbell')?i:-1).filter(i=>i>=0);
 function P3b(stage,f,b,final,rage){
-  const T=[],BF=BEACON_FX;let t=b,sp='';
-  const ring=n=>{const t0=t;for(let i=0;i<n;i++){const s=t0+i*.34*f;S.ringNext=((S.ringNext||0)+1)%6;T.push({k:'ring',t0:s,tl:s+.5*f,ti:s+.95*f,ri:S.ringNext})}t=t0+(n-1)*.34*f+1.35*f;sp='ring'};
-  const moon=()=>{const A=BF.anchor,ts=t+.9*f,D=1.25*f,e=ts+D;T.push({k:'moon',t0:t,ts,D,ta:ts+D*((1000-(HX+90))/1080),tb:ts+D*((1000-(HX-70))/1080),hold:true});
+  const T=[],BF=BEACON_FX,Q=PD(),TL=Q.tell;let t=b,sp='';   // TL: x on the warning times (PHARE_DIFF)
+  const ring=n=>{const t0=t;for(let i=0;i<n;i++){const s=t0+i*.34*f;S.ringNext=((S.ringNext||0)+1)%6;T.push({k:'ring',t0:s,tl:s+.5*TL*f,ti:s+(.5*TL+.45)*f,ri:S.ringNext})}t=t0+(n-1)*.34*f+1.35*f;sp='ring'};
+  const moon=()=>{const A=BF.anchor,ts=t+.9*TL*f,D=1.25*f,e=ts+D;T.push({k:'moon',t0:t,ts,D,ta:ts+D*((1000-(HX+90))/1080),tb:ts+D*((1000-(HX-70))/1080),hold:true});
     T.push({k:'anch',t0:e,tl:e+A.rel*f,ti:e+(A.rel+A.lift)*f,real:true});t=e+(A.rel+A.lift+.45)*f;sp='anchor'};
-  const cross=()=>{for(let i=0;i<2;i++){const ts=t+.75*f,D=1.25*f;T.push({k:'lbeam',side:i?0:1,t0:t,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});t=ts+D+(i?0:BF.cross.dark*f)}t+=.7*f;sp='cross'};
-  const trap=()=>{const Q=BF.bell,ta=t+Q.ta*f;T.push({k:'trap',t0:t,tl:t+Q.tl*f,ta,tb:ta+Q.span*f,hold:true,blows:Q.blows,step:Q.step*f});t=ta+Q.span*f+Q.after*f;sp='bell'};
-  const burstOut=()=>{const Z=BF.shard;T.push({k:'burst',t0:t,ta:t+Z.glow*f,tb:t+(Z.glow+Z.blast)*f,hold:true});t+=(Z.glow+Z.blast+.5)*f;sp='shard'};
-  const reform=()=>{const tr=t+.9*f,ts=tr+.35*f,D=1.5*f;T.push({k:'reform',t0:t,tr,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});const td=ts+D+.5*f;T.push({k:'disp',t0:ts+D,ti:td,rf:1});t=td+.7*f;sp='cross'};
-  const sonic=()=>{const Z=BF.sonic,n=Z.n[0]+Math.floor(Math.random()*(Z.n[1]-Z.n[0]+1));let s=t+Z.first*f,d=Z.d0;for(let i=0;i<n;i++){T.push({k:'sonic',t0:s-Z.fly*f,ti:s});s+=d*f;d*=Z.shrink}t=s+.3*f;sp='sonic'};
+  const cross=sig=>{for(let i=0;i<2;i++){const ts=t+.75*TL*f,D=1.25*f;T.push({k:'lbeam',side:i?0:1,t0:t,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});
+    if(sig&&!i){const Z=BF.bolt,ti=ts+D+BF.sig.at*f;T.push({k:'bolt',t0:ti-(Z.tell*TL+Z.fly)*f,tell:Z.tell*TL*f,ti,real:true,seed:Math.random(),side:Math.random()<.5?0:1})}
+    t=ts+D+(i?0:Q.crossDark*f)}t+=.7*f;sp='cross'};
+  const trap=()=>{const Z=BF.bell,span=bellSpan(Q),ta=t+Z.ta*TL*f;T.push({k:'trap',t0:t,tl:t+Z.tl*TL*f,ta,tb:ta+span*f,hold:true,blows:Q.blows,step:Z.step*f});t=ta+span*f+Z.after*f;sp='bell'};
+  const burstOut=()=>{const Z=BF.shard,g=Z.glow*TL;T.push({k:'burst',t0:t,ta:t+g*f,tb:t+(g+Z.blast)*f,hold:true});t+=(g+Z.blast+.5)*f;sp='shard'};
+  const reform=()=>{const tr=t+.9*TL*f,ts=tr+.35*f,D=1.5*f;T.push({k:'reform',t0:t,tr,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});const td=ts+D+.5*f;T.push({k:'disp',t0:ts+D,ti:td,rf:1});t=td+.7*f;sp='cross'};
+  const sonic=()=>{const Z=BF.sonic,N=Q.sonic,n=N.n[0]+Math.floor(Math.random()*(N.n[1]-N.n[0]+1));let s=t+Z.first*f,d=Z.d0;for(let i=0;i<n;i++){T.push({k:'sonic',t0:s-Z.fly*TL*f,ti:s});s+=d*f;d*=N.shrink}t=s+.3*f;sp='sonic'};
   const storm=()=>{const Q=SP.storm;for(let i=0;i<Q.n;i++){const s=t+i*Q.gap*f;T.push({k:'sring',side:i%2,t0:s,tl:s+Q.tl*f,ti:s+Q.ti*f})}t+=(Q.n-1)*Q.gap*f+Q.ti*f+Q.trapGap*f;
     T.push({k:'trap',t0:t,tl:t+Q.trapTl*f,ta:t+Q.trapTa*f,tb:t+Q.trapTb*f,hold:true});t+=Q.trapTb*f+Q.after*f;sp='bell'};
-  const rain=()=>{const Z=BF.rain;let s=t+.5*f;for(let i=0;i<Z.n;i++){T.push({k:'sbl',t0:s-Z.fall*f,tl:s-Z.fall*f+.15*f,ti:s,x:HX+20+((i*7)%3-1)*14});s+=Z.pattern[i%Z.pattern.length]*f}t=s+.2*f;sp='rain'};
+  const rain=()=>{const Z=BF.rain;let s=t+.5*f;for(let i=0;i<Z.n;i++){T.push({k:'sbl',t0:s-Z.fall*TL*f,tl:s-Z.fall*TL*f+.15*f,ti:s,x:HX+20+((i*7)%3-1)*14});s+=Z.pattern[i%Z.pattern.length]*f}t=s+.2*f;sp='rain'};
   const bellWaves=()=>{trap();sonic()};
-  const glas=()=>{const Z=BF.glas;let s=t+Z.pre*f,d=Z.g0;for(let i=0;i<Z.n;i++){T.push({k:'sbl',knell:1,t0:s-Z.fall*f,tl:s-Z.fall*f+.1*f,ti:s,x:HX+12});s+=d*f;d*=Z.k}
+  const glas=()=>{const Z=BF.glas;let s=t+Z.pre*f,d=Z.g0;for(let i=0;i<Q.glas;i++){T.push({k:'sbl',knell:1,t0:s-Z.fall*TL*f,tl:s-Z.fall*TL*f+.1*f,ti:s,x:HX+12});s+=d*f;d*=Z.k}
     T.push({k:'implode',t0:s-d/Z.k*f+.2*f,ta:s-d/Z.k*f+1.9*f,tb:s-d/Z.k*f+2.5*f,hold:true});t=s-d/Z.k*f+3*f;sp='glas'};
   if(rage){(rage>1?bellWaves:rain)();T.spell=sp;return T}
   if(final){glas();T.spell=sp;return T}
   const p0=[()=>ring(3),moon,trap,()=>{ring(2);trap()},cross,burstOut,reform];
   const p1=[()=>ring(5),()=>{moon();ring(3)},()=>{trap();trap()},()=>{cross();ring(2)},()=>{burstOut();moon()},()=>{ring(3);cross()},()=>{reform();ring(2)},storm,sonic];
+  if(Q.sig)p1.push(()=>cross(true));   // Hard signature, in the normal rotation (not in the rages)
   pick(stage?p1:p0)();
   T.spell=sp;return T;
 }
@@ -3308,10 +3414,14 @@ function drawEclGame(){
       for(const idx of MOV){const o=P[idx];if(post===0)P[idx]={...o,x:lerp(o.x,J.x,.92*ein(pre))+Math.sin(gt*50+idx)*3*pre,y:lerp(o.y,J.y,.92*ein(pre))};else{const s=Math.sin(Math.PI*post)*(1-post*.3);P[idx]={...o,x:J.x+(o.x-J.x)*(1+2.2*s),y:J.y+(o.y-J.y)*(1+2.2*s)}}}
       J={...J,r:J.r*(1+.4*pre*(1-post))};S.shake=Math.max(S.shake,pre*(1-post)*6);
       if(post>0&&!th.bf){th.bf=1;S.shake=22;S.flashT=gt;burst(J.x,J.y,70,'#e8fdff',11,1.1);MUSIC.fx('explosion')}
+      if(post>0&&post<.45){const e=eout(post/.45),hq=P[EHEAD];ctx.save();ctx.globalCompositeOperation='lighter';   // the last knell, released: a yellow-white wave goes from the Watcher to the bell
+        ctx.strokeStyle=`rgba(${COUNTER3.col},${1-.4*e})`;ctx.lineWidth=7*(1-e*.5);ctx.beginPath();ctx.ellipse(lerp(HX+12,hq.x,e),lerp(GY-90,hq.y,e),30+40*e,70+20*e,0,-Math.PI*.45,Math.PI*.45);ctx.stroke();ctx.restore()}
+      if(post>=.45){const hq=P[EHEAD];ctx.save();ctx.translate(hq.x,hq.y);ctx.rotate(hq.r||0);ctx.scale(hq.sc||1,hq.sc||1);ctx.strokeStyle=`rgba(${COUNTER3.col},.95)`;ctx.lineWidth=2.4;crackLine(CRACK,clamp((post-.45)/.2,0,1));ctx.restore();   // the bell breaks
+        if(!th.gf){th.gf=1;burst(hq.x,hq.y,26,'#fff3c4',8,.8,.3)}}
       if(post>0&&post<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,245,255,${1-post})`;ctx.lineWidth=8*(1-post)+1;ctx.beginPath();ctx.arc(J.x,J.y,post*900,0,Math.PI*2);ctx.stroke();ctx.restore()}}
   }
   const on=1;
-  const hit={x:HX+20,y:GY-80},tells=[],beams=[],fx=[],srings=[],sonics=[],sbls=[];let trapQ=null;
+  const hit={x:HX+20,y:GY-80},tells=[],bolts=[],beams=[],fx=[],srings=[],sonics=[],sbls=[];let trapQ=null;
   for(const th of S.threats){
     if(gt<th.t0)continue;
     if(th.done&&th.res==='ok'&&!th.sfx){th.sfx=1;if(th.k==='ring')MUSIC.fx('bellHit');if(th.k==='trap')MUSIC.fx('bellBig')}
@@ -3344,6 +3454,7 @@ function drawEclGame(){
       if(!th.done){const lk=gt<th.tl+up?eio((gt-th.tl)/up):1,dp=gt<th.tl+up?0:ein((gt-th.tl-up)/.3);ax=lerp(A0.x,HX+40,lk);ay=lerp(A0.y,GY-300,lk)+dp*230}
       else{const q=eio(clamp((gt-th.okT)/.8,0,1)),fy=th.res==='ok'?GY-300:GY-70;ax=lerp(HX+40,A0.x,q);ay=lerp(fy,A0.y,q)}
       A={x:ax,y:ay,a:A0.a,sc:.9,z:3}}
+    else if(th.k==='bolt')bolts.push(th);
     else if(th.k==='sonic')sonics.push(th);
     else if(th.k==='sbl')sbls.push(th);
     else if(th.k==='lbeam')beams.push(th);
@@ -3355,6 +3466,9 @@ function drawEclGame(){
   for(const th of beams){const o=P[SBELLS[th.side]];
     if(gt<th.ts){const k=(gt-th.t0)/(th.ts-th.t0);glow(o.x,o.y,60,'rgba(110,235,255,.9)',.4+.5*k);beamFrom(o.x,o.y,940,.12+.25*k)}
     else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D;beamFrom(o.x,o.y,940-1000*s,1);glow(o.x,o.y,70,'rgba(200,250,255,.9)',.8)}}
+  for(const th of bolts){const o=P[SBELLS[th.side]];
+    if(!th.done){const k=clamp((th.ti-gt)/(th.ti-th.t0),0,1);ctx.strokeStyle=`rgba(180,250,255,${.85-k*.4})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(HX,GY,24+60*k,6+14*k,0,0,Math.PI*2);ctx.stroke();crackle(o,clamp((gt-th.t0)/(th.ti-th.t0),0,1))}
+    else if(gt-th.okT<.22)bolt(o.x,o.y,th.res==='ok'?HX+6:HX,th.res==='ok'?GY-150:GY-40,th.seed,'rgba(220,250,255,.95)',4)}
   for(const t of tells)glow(t[0],t[1],46,'rgba(200,250,255,.95)',.9*t[2]);
   for(const th of srings){const o=P[SBELLS[th.side]];
     if(gt<th.tl){const k=(gt-th.t0)/(th.tl-th.t0);glow(o.x,o.y,56,'rgba(110,235,255,.9)',.3+.6*k);ctx.strokeStyle=`rgba(220,252,255,${k})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(o.x,o.y,30-18*k,0,Math.PI*2);ctx.stroke();continue}
@@ -3367,7 +3481,7 @@ function drawEclGame(){
     else{ctx.strokeStyle=`rgba(255,200,120,${.8*(1-e[3])})`;ctx.lineWidth=3;for(let i=0;i<3;i++){const r=30+((e[3]*90+i*30)%90);ctx.beginPath();ctx.arc(e[1],e[2],r,Math.PI*.15,Math.PI*.85,true);ctx.stroke()}}}
   ctx.restore();
   for(const th of sonics){const u=clamp((gt-th.t0)/(th.ti-th.t0),0,1),x=lerp(LX-60,hit.x,eout(u));
-    if(th.done){const q=(gt-th.okT)/.3;if(q>=1)continue;ctx.save();ctx.globalAlpha=1-q;ctx.strokeStyle='#eafcff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(hit.x,hit.y,20+50*q,0,Math.PI*2);ctx.stroke();ctx.restore();if(!th.bf){th.bf=1;burst(hit.x,hit.y,th.res==='ok'?12:8,'#dff8ff',5,.5)}continue}
+    if(th.done){const q=(gt-th.okT)/.3;if(q>=1)continue;ctx.save();ctx.globalAlpha=1-q;ctx.strokeStyle=th.res==='ok'?`rgb(${COUNTER3.col})`:'#eafcff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(hit.x,hit.y,20+50*q,0,Math.PI*2);ctx.stroke();if(th.res==='ok'){ctx.lineWidth=2;ctx.beginPath();ctx.arc(hit.x,hit.y,10+30*q,0,Math.PI*2);ctx.stroke()}ctx.restore();if(!th.bf){th.bf=1;burst(hit.x,hit.y,th.res==='ok'?12:8,'#dff8ff',5,.5)}continue}
     ctx.save();for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(190,240,255,${.8-i*.2})`;ctx.lineWidth=4-i;ctx.beginPath();ctx.ellipse(x+i*14,hit.y,16+i*5,70+i*6,0,Math.PI*.55,Math.PI*1.45);ctx.stroke()}ctx.restore()}
   for(const th of sbls){const sc=th.knell?1.5:1;
     if(gt<th.tl){const u=(gt-th.t0)/(th.tl-th.t0);ctx.save();ctx.globalCompositeOperation='lighter';glow(th.x,26,30*sc,'rgba(200,250,255,.9)',.6*u);ctx.restore();continue}
@@ -3399,7 +3513,7 @@ function replayEpilogue(cb){if(EPI.playing())return;const keep={gt,t0:S.epT0,par
 function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
   S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if(LB.audio.music)MUSIC.bed(2);
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
-function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=id===3?S.d.bd.hp3:S.d.bd.hp;S.bossHp=S.bossMax;S.hp=o.first?S.hpMax:LB.healFor(S.d.heal,S.hpMax,S.hp);   // heal rule shared: true = full refill, a number = that many HP capped at the starting HP (trial: +1)
  resetPhaseState();
@@ -3591,6 +3705,7 @@ let lastT=performance.now();
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(.05,(now-lastT)/1000);lastT=now;rt+=dt;
+  humStep();   // the hum of the dome follows the dome, also over the menu or a pause (then it is stopped)
   if(!$('menu').hidden)return;
   if(!S.paused&&['play','ko','dead','cine','prologue','epilogue'].includes(S.mode))gt+=dt;
   ctx=ctxMain;SC=SCm;

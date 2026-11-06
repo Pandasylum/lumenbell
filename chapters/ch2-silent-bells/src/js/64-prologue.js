@@ -125,13 +125,13 @@ function hud(){
 
 /* ================= spells, anger and final assaults ================= */
 /* rages and final assaults: nothing written on screen (the sound and the attacks tell it); the screen reader gets the name */
-function banner(txt,sub){say(txt+'. '+sub);MUSIC.fx('sting');MUSIC.fx('rumble')}
+function banner(txt,sub){say(sub?txt+'. '+sub:txt);MUSIC.fx('sting');MUSIC.fx('rumble')}
 /* rages, as in Ember Bridge (shared/js/18-boss-diff.js LB.BOSS_DIFF, 36-p2-foundry-logic.js qTurn / qRage): when the boss's HP has
    reached a threshold of S.d.bd.rages (rages3 in phase III), his next turn is a roar (LB.BOSS_RULES.rageDur, rageDur2 for the next ones: shake, flash, sting),
    then his rage spell (the signature spell of the phase), then the second-half patterns; the final assault comes at
    LB.BOSS_RULES.finalHp. The boss bar marks the thresholds (pips underlined, as in Ember Bridge). */
 const rageAt=()=>LB.rageHp(S.d.bd,S.phase);   // rage thresholds of the current phase
-const rageMarks=()=>LB.hud.marks(rageAt(),S.phase!==3||S.form===2?LB.BOSS_RULES.finalHp:null);   // form I of phase III has no final assault
+const rageMarks=()=>LB.hud.marks(rageAt(),LB.BOSS_RULES.finalHp);   // both forms of phase III end on a final assault (form I: Dazzle, form II: Knell)
 function rageBanner(){
   if(S.phase===2)banner(_('Echoes','Échos'),_('Three voices, one real. Only real orbs cast a shadow; the reflections shatter one by one.','Trois voix, une seule vraie. Seules les vraies orbes ont une ombre ; les reflets se brisent un à un.'));
   else if(S.phase===1){banner(_('Turquoise heart','Cœur turquoise'),_('The Bottomless takes control: every attack calls a toll.','La Sans-Fond prend le contrôle : chaque attaque appelle un glas.'));MUSIC.fx('heart')}
@@ -269,14 +269,14 @@ function spawn(){
   /* as in Ember Bridge (a fury restarts while the Colossus's HP are still at its threshold): a rage whose counter failed
      (HP not lower than when the roar began) starts again at every attack; once the boss is hit, normal attacks resume until the
      next threshold. Thresholds already passed never restart. The final assault restarts until the boss falls (LB.rageState, shared). */
-  const hasFinal=id!==3||f2,n=LB.rageState.check(S,rageAt(),hasFinal);
+  const hasFinal=true,n=LB.rageState.check(S,rageAt(),hasFinal);
   if(n){S.angerShown=true;S.roarT=gt;S.roarD=LB.rageState.dur(n);S.nextAt=gt+S.roarD;S.shake=10;rageBanner();return}
-  const go=l=>{const q=sched(l);q.spell=l.spell;q.side=l.side;return q};   // the spell shown by the riposte (set by P2)
+  const go=l=>{const q=sched(l);q.spell=l.spell;q.side=l.side;q.ri=l.ri;return q};   // the spell shown by the riposte (set by P2)
   const stage=S.rageN?1:0,f=1/(RHY.sp*(id===2?VOICE_SPEED:1)*(stage?RHY.rage[id]:1));   // inside rhythm = Normal's, in real seconds, same before and after the rage, whatever the difficulty
   if(S.rageNext&&!S.finalDone){const r=S.rageNext;S.rageNext=0;go(gen(stage,f,gt+.25,false,r));return}
   if(!S.finalDone&&LB.rageState.isFinal(S,hasFinal)){
     S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=LB.BOSS_RULES.rageDur2;S.shake=10;
-    banner(_('Final assault','Dernier assaut'),[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
+    banner(_('Final assault','Dernier assaut'),id===3&&!f2?'':[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
     go(gen(1,f,gt+1.6,true));return}
   go(gen(stage,f,gt+.25));
 }
@@ -769,35 +769,38 @@ const RUST_HAZE=.5,RUST_HALO=430;   // RUST_HALO = radius (px) of the halo of li
 const halo=u=>{u=clamp((u-.25)/.75,0,1);return u*u*(3-2*u)};   // 0 in the core, 1 outside, smooth   // opacity of the veil over everything once the cloud is full (provisional)
 /* ---- Phase III · Form I: the tower's tentacles and torn pieces ---- */
 function P3(stage,f,b,final,rage){
-  const T=[],BF=BEACON_FX;let t=b,sp='',side=0;
+  const T=[],BF=BEACON_FX,Q=PD(),TL=Q.tell;let t=b,sp='',side=0,cri=null;   // TL: x on the warning times (PHARE_DIFF)
   const R=88;
   // sweep (hold): lamp dark, thin cone, sweep; B = the timings (BEACON_FX.beam, or the short beam of the Morse rage)
-  const beamAt=(dir,B)=>{const ts=t+(B.dark+B.cone)*f,D=B.D*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
-    T.push({k:'beam',t0:t,dark:B.dark*f,ts,D,dir,ta:ts+D*s0,tb:ts+D*s1,real:true,hold:true});t=ts+D+B.after*f;sp='beam';side=dir<0?1:0};
+  const beamAt=(dir,B)=>{const ts=t+(B.dark+B.cone)*TL*f,D=B.D*f;let s0,s1;if(dir<0){s0=(940-HX-R)/1000;s1=(940-HX+R)/1000}else{s0=(HX-R+60)/1000;s1=(HX+R+60)/1000}
+    T.push({k:'beam',t0:t,dark:B.dark*TL*f,ts,D,dir,ta:ts+D*s0,tb:ts+D*s1,real:true,hold:true});t=ts+D+B.after*f;sp='beam';side=dir<0?1:0};
   const sweep=dir=>beamAt(dir,BF.beam);
   // bolt (tap): one lamp at a time, left then right; `tell` s of crackling round it
-  const bolt=(tell,night)=>{const Z=BF.bolt;tell=tell==null?Z.tell:tell;side=S.boltSide=1-(S.boltSide==null?1:S.boltSide);
+  const bolt=(tell,night)=>{const Z=BF.bolt;tell=tell==null?Z.tell*TL:tell;side=S.boltSide=1-(S.boltSide==null?1:S.boltSide);
     T.push({k:'bolt',t0:t,tell:tell*f,ti:t+(tell+Z.fly)*f,real:true,seed:Math.random(),side,night:night?1:0});t+=Z.gap*f;sp='bolt'};
   // reef spikes (tap): swirl, then three spikes "tap... tap-tap"
-  const spike=()=>{const Z=BF.spike,ti0=t+Z.tell*f;let prev=t;Z.seq.forEach((o,i)=>{const ti=ti0+o*f;T.push({k:'spike',t0:ti-Z.tell*f,ti,real:true,seed:Math.random()});prev=ti});t=ti0+Z.seq[Z.seq.length-1]*f+Z.after*f;sp='spike'};
-  const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*f,side:Math.random()<.5?-1:1});t+=1.2*f;sp='whip'};
+  const spike=()=>{const Z=BF.spike,seq=Q.spike,tl=Z.tell*TL*f,ti0=t+tl;seq.forEach(o=>{const ti=ti0+o*f;T.push({k:'spike',t0:ti-tl,ti,real:true,seed:Math.random()})});t=ti0+seq[seq.length-1]*f+Z.after*f;sp='spike'};
+  const whip=()=>{T.push({k:'whip',t0:t,ti:t+.9*TL*f,side:Math.random()<.5?-1:1});t+=(.3+.9*TL)*f;sp='whip'};
   // pieces of the tower (tap): the tentacle coils, the stone cracks and throws dust, salvo of 2-3
-  const chunk=()=>{const Z=BF.chunk,n=Z.salvo[0]+Math.floor(Math.random()*(Z.salvo[1]-Z.salvo[0]+1));
-    for(let i=0;i<n;i++){const s=t+i*Z.gap*f;T.push({k:'chunk',t0:s,tl:s+Z.dust*f,ti:s+(Z.dust+Z.fly)*f,ri:RINGS[Math.floor(Math.random()*6)]})}
-    t+=((n-1)*Z.gap+Z.dust+Z.fly+.25)*f;sp='chunk'};
+  const chunk=()=>{const Z=BF.chunk,n=Q.salvo[0]+Math.floor(Math.random()*(Q.salvo[1]-Q.salvo[0]+1));
+    for(let i=0;i<n;i++){const s=t+i*Z.gap*f;cri=RINGS[Math.floor(Math.random()*6)];T.push({k:'chunk',t0:s,tl:s+Z.dust*TL*f,ti:s+(Z.dust*TL+Z.fly)*f,ri:cri})}
+    t+=((n-1)*Z.gap+Z.dust*TL+Z.fly+.25)*f;sp='chunk'};
   // the King's wave (hold), crossing the reef like the beam
-  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;sp='kwave';return th};
+  const kwave=()=>{const K=SP.kwave,ts=t+K.ts*TL*f,D=K.D*f,th={k:'kwave',t0:t,ts,D,dir:-1,ta:ts+D*(940-HX-R)/1000,tb:ts+D*(940-HX+R)/1000,real:true,hold:true};T.push(th);t=ts+D+K.after*f;sp='kwave';return th};
   // rage, the rising tide: the wave (hold), then reef spikes rise in its wake as it ebbs (taps) (kept in the rotation)
   const tide=()=>{const w=kwave(),e=w.ts+w.D,P=SP.tide;T.push({k:'spike',t0:e,ti:e+P.spike1*f,real:true,seed:Math.random(),tide:1});T.push({k:'spike',t0:e+P.gap*f,ti:e+P.spike2*f,real:true,seed:Math.random(),tide:1});t=e+P.spike2*f+P.after*f;sp='tide'};
   // rage 1, Night of the Lighthouse: lamps out, each lights `lit` s before it fires, bolts in a chain (taps)
-  const night=()=>{const Z=BF.night;for(let i=0;i<Z.n;i++)bolt(Z.lit,true);t+=.4*f};
+  const night=()=>{const Z=BF.night;for(let i=0;i<Q.night.n;i++)bolt(Q.night.lit,true);t+=.4*f};
   // rage 2 (Hard), Morse: long (short beam, hold) - short - short (bolt, tap), each signal announced by its own shape
   const morse=()=>{const M=BF.morse;for(let r=0;r<M.reps;r++)for(const g of M.seq){if(g==='L')beamAt(r%2?1:-1,M.long);else{bolt();t-=(BF.bolt.gap-M.gap)*f}}};
   const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()},whip,chunk,()=>{whip();bolt()},kwave];
   const p1=[()=>{bolt();spike();bolt()},()=>{sweep(-1);sweep(1)},()=>{sweep(-1);t-=.15*f;spike()},()=>{spike();sweep(1);bolt()},()=>{bolt();bolt();sweep(-1)},()=>{whip();whip();chunk()},()=>{sweep(-1);chunk()},tide,()=>{kwave();bolt()}];
-  if(rage){(rage>1?morse:night)()}
+  // final rage of Part 1, Dazzle (code name): n sweeps (hold) that the Watcher absorbs; the counter sends the light back at the central lighthouse (counter3)
+  const dazzle=()=>{const Z=BF.dazzle;for(let i=0;i<Z.n;i++)beamAt(i%2?1:-1,Z);sp='dazzle'};
+  if(final)dazzle();
+  else if(rage){(rage>1?morse:night)()}
   else pick(stage?p1:p0)();
-  T.spell=sp;T.side=side;return T;
+  T.spell=sp;T.side=side;T.ri=cri;return T;
 }
 function beaconHide(){S.hide=null;for(const th of S.threats){if(th.k==='chunk'&&gt>=th.tl&&!(th.done&&gt>th.okT+.8)){(S.hide||(S.hide=new Set())).add(TOWER[th.ri])}}}
 function drawBeaconFx(){
