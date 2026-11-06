@@ -65,7 +65,7 @@ Hors `archives/`, `docs/decisions/` et journaux datés (`docs/DEVLOG-NOTES.md`, 
 | `CLAUDE.md` « Difficulté » · `docs/BALANCE.md` · `shared/NOTES.md` | règles de difficulté et `BOSS_DIFF` exprimées à plusieurs endroits ; contradictions : `docs/BALANCE.md:9` (durées multipliées par `f = 1/(sp×(1+.1×stage))`) et `BIBLE.md:36-39` (PV Colosse 8/10/14) contre `CLAUDE.md` (pas d'accélération par rage, PV via `LB.BOSS_DIFF`) | `BALANCE.md` (ligne 11 en réalité) et `chapters/ch2-silent-bells/NOTES.md:23` corrigés (6 nov.) ; `BIBLE.md:36-39` : ancien écart seulement pour Difficile phase III (12), non modifié (BIBLE intouchable) |
 | `CLAUDE.md` r.2 · `CHANGEMENTS.md` 25 | statuts : « Fait (PR fusionnée) » identiques ; mais le tableau contient aussi « Fait » seul, « Fait à la fusion de la PR », « Fait\t<date>\t<PR> » | à valider |
 | `docs/COMMUN.md` · `shared/NOTES.md` | inventaire du cadre commun (`LB.menu`, `LB.card`, `LB.pause`…) décrit deux fois, `COMMUN.md` corrigé pour `LB.gate` (6 nov.) ; détails non identiques, aucun renvoi posé | à valider |
-| `CHANGEMENTS.md` | 4 mentions « À faire » et 5 « En cours » (sections F, J, O, lignes 96, 160) pour des périmètres qui ne sont plus tous actifs | à valider |
+| `CHANGEMENTS.md` | 4 mentions « À faire » et 5 « En cours » (sections F, J, O, lignes 96, 160) pour des périmètres qui ne sont plus tous actifs | corrigé pour J, J(c), O (Fait, PR #23 et #89, 6 nov.) ; reste à valider : F (BIBLE.md non à jour ; DECISIONS.md lignes 50 et 54 à trancher) |
 
 ## 6. Taille et croissance
 
@@ -92,7 +92,7 @@ Hors `archives/`, `docs/decisions/` et journaux datés (`docs/DEVLOG-NOTES.md`, 
 **À valider**
 - ~~`NOTES.md` 28 : règle de quota en « cible »~~ : corrigé (6 nov.).
 - `docs/AUDIT-OPTIM.md:86` (« CI manuelle `ch2-bot` / `visual-shots` », règle 19) et `docs/AUDIT-NETTOYAGE.md:202` (hub `hub.js`, `hub-site.js` « (manuel) ») : formulations ambiguës, périmètres désormais automatiques sur PR ; non modifiées (audits datés).
-- `CHANGEMENTS.md` : statuts non uniformes ; « À faire » / « En cours » résiduels (sections F, J, O).
+- `CHANGEMENTS.md` : statuts non uniformes ; J, J(c), O passés à Fait (PR fusionnée) le 6 nov. (corrigé) ; section F toujours « En cours » (à valider) ; M : « À faire » renommé « Étapes ».
 - Doublons du § 5 (règle des tests/CI, difficulté, cadre commun).
 - Croissance : `docs/DEVLOG-NOTES.md` (254) et `CHANGEMENTS.md` (214).
 
