@@ -64,7 +64,7 @@ Base : `docs/AUDIT-NETTOYAGE.md` §2 (déjà fait, non répété). Ajouts mesur�
 
 | Chemin | Constat | Gain | Risque | Action proposée |
 |---|---|---|---|---|
-| `build/build.py` ↔ `build_ch2.py` | Deux scripts de 30 et 45 lignes presque jumeaux (`diff` après normalisation `ch1/ch2` : 73 lignes), avec `cut(...)` à occurrence unique qui coupe des morceaux propres à la source Ch. II (meta, polices Google). Un C3 devrait copier l'un des deux | moyen | moyen | Un `build/build_chapter.py <id>` paramétré par `chapters/<id>/chapter.json` (titre, `dist`, zip). Garder les deux scripts actuels comme alias pour ne pas changer les chemins CI |
+| `build.py` ↔ `build_ch2.py` (avant S3) | Deux scripts de 30 et 45 lignes presque jumeaux (`diff` après normalisation `ch1/ch2` : 73 lignes), avec `cut(...)` à occurrence unique qui coupe des morceaux propres à la source Ch. II (meta, polices Google). Un C3 devrait copier l'un des deux | moyen | moyen | Un `build/build_chapter.py <id>` paramétré par `chapters/<id>/chapter.json` (titre, `dist`, zip). (Fait en S3 ; alias retirés en S3b) |
 | `build/assemble.py` (constantes `CH1`, `CH2`) | Les chapitres sont des constantes en dur dans `assemble.py`. Ajouter un C3 = éditer ce fichier | faible | faible | Découvrir les chapitres par `chapters/*/src/parts.txt` |
 | `chapters/*/src/js/00-core.js` / `02-core.js` | Chaque chapitre redéfinit `$`, `_`, `DIFFS`, `endSeen`, `applyLang`, `CHAPTER`, la détection tactile (axe 2). Un C3 les recopierait | moyen | faible | Mutualiser (lot c, axe 2) ; le C3 n'écrit alors que `CHAPTER` et ses tables |
 | Boucle de jeu : `ch1/84-loop.js`, `ch2/96-loop.js` | Deux boucles `requestAnimationFrame` avec le même contrat (`dt` plafonné à 0,05, pause, menu). Pas de boucle commune ; seule `LB.cine` (`shared/24-cine.js`) en a une propre | moyen | moyen | `LB.loop.start({update,draw,paused,menuOpen})` avec plafond `dt` et mesure de cadence ; le Ch. I et le Ch. II l'adopteraient plus tard. À faire pour le C3 seul, sans réécrire I et II |
@@ -78,7 +78,7 @@ Base : `docs/AUDIT-NETTOYAGE.md` §2 (déjà fait, non répété). Ajouts mesur�
 - `96-loop.js` : constante au lieu du tableau `includes` ; `16-update.js:33` : filtre en place ; `lerpC` sans `map/join` ; plafond de particules (valeur dans une table).
 - `musTick` : sortie rapide quand le son est coupé ou la page masquée.
 - Compression des PNG de l'APK.
-- Tests : `smoke` du chapitre touché + test ciblé (règle 10). Si seul du Ch. II : `build.py`, `build_ch2.py`, `build_site.py` puis commit des fichiers générés (règle 18). Aucun test lourd par défaut.
+- Tests : `smoke` du chapitre touché + test ciblé (règle 10). Si seul du Ch. II : `build_chapter.py <id>` puis `build_site.py`, puis commit des fichiers générés (règle 18). Aucun test lourd par défaut.
 
 **(b) Logique d'un chapitre**
 - Ch. II : plafond de dpr tactile, cache des fonds, nuages en sprites, flash de boss sans `ctx.filter`.
@@ -126,7 +126,7 @@ Base : `docs/AUDIT-NETTOYAGE.md` §2 (déjà fait, non répété). Ajouts mesur�
 **Fait** (`build/`, `chapters/*/chapter.json`, builds régénérés ; aucun changement de jeu, `chapters/*/src` et `shared/` non touchés)
 - Commentaires retirés des sorties (`build/strip.py`, appelé par `build_chapter.py` et `build_site.py`) : balayage à états, pas une regex. JS : lignes entières `//` et blocs `/* */` hors chaînes, regex et gabarits ; **les `//` en fin de ligne sont laissés**. CSS : blocs `/* */` hors chaînes. HTML : `<!-- -->` hors script/style. Aucun test ne lit de commentaire dans les builds (greps sur `tests/` : marqueurs et regex portent sur du code).
 - Preuve : suite de jetons de chaque `<script>` comparée avant/après avec l'analyseur TypeScript (hors dépôt) : identique pour Ch. I (127 508 jetons), Ch. II (123 706) et hub (80 + 29 791), 0 erreur d'analyse. Reconstruire donne les mêmes octets (empreinte du site stable).
-- `build/build_chapter.py <id>` paramétré par `chapters/<id>/chapter.json` (`id`, `title`, `dist`, `zip`) ; `build.py` et `build_ch2.py` en sont les alias (mêmes commandes et chemins pour la CI). Les deux zips itch.io ont désormais une date fixe (celui du Ch. I n'en avait pas).
+- `build/build_chapter.py <id>` paramétré par `chapters/<id>/chapter.json` (`id`, `title`, `dist`, `zip`) ; `build.py` et `build_ch2.py` en étaient les alias (supprimés en S3b). Les deux zips itch.io ont désormais une date fixe (celui du Ch. I n'en avait pas).
 - `assemble.py` : `CH1`/`CH2` supprimés ; `chapters()` découvre `chapters/*/src/parts.txt` ; `source()` sans argument = premier chapitre (ordre et sorties inchangés). Un Chapitre III = un dossier avec `src/parts.txt` et `chapter.json`, plus une ligne dans `CHAPTERS` de `build_site.py`.
 
 | Build | Avant (o) | Après (o) | gzip avant → après |
@@ -156,3 +156,10 @@ Base : `docs/AUDIT-NETTOYAGE.md` §2 (déjà fait, non répété). Ajouts mesur�
 - `cine` : garde `min(2, coarse?1.25:dpr)` (donne 1,25 même à dpr 1) ≠ `LB.dpr` ; non mutualisé pour rester identique.
 - Fonds du Ch. II : les calques en bande gardent leur taille de bande grâce à `y0` ; les dégradés mis en cache en S1 (éclats de miroir, cloche, bronze) sont des objets de dégradé, pas des canvas : laissés.
 - `LB.coarse`/`LB.dpr` sont lus au chargement de la page (le cine les lisait au premier montage) : sans effet hors émulation d'appareil changée en cours de page.
+
+## S3b faite · Alias de build supprimés (axe 3, lot c)
+**Fait** (CI / outillage ; aucun changement de jeu, `src/` et `shared/` non touchés, sorties de build inchangées)
+- `build/build.py` et `build/build_ch2.py` supprimés : tous les appels passent par `python3 build/build_chapter.py <id>` (`ch1-ember-bridge`, `ch2-silent-bells`) dans `tests.yml`, `android.yml`, `CLAUDE.md` (règles 11 et 18), `NOTES.md`, `README.md`, `shared/NOTES.md`, `site/NOTES.md` et les `NOTES.md` des chapitres. `build_site.py` inchangé.
+- `tests.yml` : le contrôle « les builds sont à jour » (smoke) boucle sur `chapters/*/chapter.json` (build, `git diff --exit-code` sur `chapters/<id>/dist/`, arbre propre) ; le job `tests` reconstruit aussi en boucle. Un nouveau chapitre est donc contrôlé sans toucher au workflow. Jobs de test par chapitre, `timeout-minutes`, déclencheurs, `paths-ignore` et tests lourds manuels inchangés.
+- `android.yml` : seuls les deux appels de build changent (tag `v*` ou lancement manuel).
+- Les mentions de `build.py` / `build_ch2.py` qui restent dans ce fichier sont historiques (état avant S3).

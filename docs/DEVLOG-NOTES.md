@@ -242,3 +242,6 @@
 
 ## 2026-11-05 · engine/mutualisation-s4
 - Ce que le joueur verra : rien de visible. Détection tactile, bruit de fond audio, calques de fond, qualité adaptative des lueurs et petits outils du noyau sont regroupés dans `shared/`, avec le même comportement dans les deux chapitres.
+
+## 2026-11-06 · ci/build-alias-s3b
+- Ce que le joueur verra : rien de visible. Seuls les scripts de build et les workflows changent ; le jeu est identique.

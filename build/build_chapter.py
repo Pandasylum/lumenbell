@@ -3,7 +3,6 @@ Usage : python3 build/build_chapter.py <id>      ex. ch1-ember-bridge, ch2-silen
 Parametres : chapters/<id>/chapter.json = {id, title, dist, zip} (chemins relatifs a la racine).
 Ecarts avec la source : meta propre a l'hebergeur d'artefacts retiree, polices Google remplacees par build/fonts.css inlinees,
 commentaires JS/CSS/HTML retires de la sortie (build/strip.py ; les sources gardent les leurs).
-build.py (Chapitre I) et build_ch2.py (Chapitre II) restent des alias de ce script : chemins et commandes de la CI inchanges.
 """
 import json, re, sys, zipfile
 from pathlib import Path
