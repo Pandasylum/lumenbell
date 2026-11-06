@@ -55,6 +55,10 @@ function drawEclGame(){
       for(const idx of MOV){const o=P[idx];if(post===0)P[idx]={...o,x:lerp(o.x,J.x,.92*ein(pre))+Math.sin(gt*50+idx)*3*pre,y:lerp(o.y,J.y,.92*ein(pre))};else{const s=Math.sin(Math.PI*post)*(1-post*.3);P[idx]={...o,x:J.x+(o.x-J.x)*(1+2.2*s),y:J.y+(o.y-J.y)*(1+2.2*s)}}}
       J={...J,r:J.r*(1+.4*pre*(1-post))};S.shake=Math.max(S.shake,pre*(1-post)*6);
       if(post>0&&!th.bf){th.bf=1;S.shake=22;S.flashT=gt;burst(J.x,J.y,70,'#e8fdff',11,1.1);MUSIC.fx('explosion')}
+      if(post>0&&post<.45){const e=eout(post/.45),hq=P[EHEAD];ctx.save();ctx.globalCompositeOperation='lighter';   // the last knell, released: a yellow-white wave goes from the Watcher to the bell
+        ctx.strokeStyle=`rgba(${COUNTER3.col},${1-.4*e})`;ctx.lineWidth=7*(1-e*.5);ctx.beginPath();ctx.ellipse(lerp(HX+12,hq.x,e),lerp(GY-90,hq.y,e),30+40*e,70+20*e,0,-Math.PI*.45,Math.PI*.45);ctx.stroke();ctx.restore()}
+      if(post>=.45){const hq=P[EHEAD];ctx.save();ctx.translate(hq.x,hq.y);ctx.rotate(hq.r||0);ctx.scale(hq.sc||1,hq.sc||1);ctx.strokeStyle=`rgba(${COUNTER3.col},.95)`;ctx.lineWidth=2.4;crackLine(CRACK,clamp((post-.45)/.2,0,1));ctx.restore();   // the bell breaks
+        if(!th.gf){th.gf=1;burst(hq.x,hq.y,26,'#fff3c4',8,.8,.3)}}
       if(post>0&&post<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,245,255,${1-post})`;ctx.lineWidth=8*(1-post)+1;ctx.beginPath();ctx.arc(J.x,J.y,post*900,0,Math.PI*2);ctx.stroke();ctx.restore()}}
   }
   const on=1;
@@ -117,7 +121,7 @@ function drawEclGame(){
   ctx.restore();
   // sound waves (tap per wave): concentric crescents coming from the tower; small bells and knells falling on the Watcher (taps)
   for(const th of sonics){const u=clamp((gt-th.t0)/(th.ti-th.t0),0,1),x=lerp(LX-60,hit.x,eout(u));
-    if(th.done){const q=(gt-th.okT)/.3;if(q>=1)continue;ctx.save();ctx.globalAlpha=1-q;ctx.strokeStyle='#eafcff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(hit.x,hit.y,20+50*q,0,Math.PI*2);ctx.stroke();ctx.restore();if(!th.bf){th.bf=1;burst(hit.x,hit.y,th.res==='ok'?12:8,'#dff8ff',5,.5)}continue}
+    if(th.done){const q=(gt-th.okT)/.3;if(q>=1)continue;ctx.save();ctx.globalAlpha=1-q;ctx.strokeStyle=th.res==='ok'?`rgb(${COUNTER3.col})`:'#eafcff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(hit.x,hit.y,20+50*q,0,Math.PI*2);ctx.stroke();if(th.res==='ok'){ctx.lineWidth=2;ctx.beginPath();ctx.arc(hit.x,hit.y,10+30*q,0,Math.PI*2);ctx.stroke()}ctx.restore();if(!th.bf){th.bf=1;burst(hit.x,hit.y,th.res==='ok'?12:8,'#dff8ff',5,.5)}continue}
     ctx.save();for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(190,240,255,${.8-i*.2})`;ctx.lineWidth=4-i;ctx.beginPath();ctx.ellipse(x+i*14,hit.y,16+i*5,70+i*6,0,Math.PI*.55,Math.PI*1.45);ctx.stroke()}ctx.restore()}
   for(const th of sbls){const sc=th.knell?1.5:1;
     if(gt<th.tl){const u=(gt-th.t0)/(th.tl-th.t0);ctx.save();ctx.globalCompositeOperation='lighter';glow(th.x,26,30*sc,'rgba(200,250,255,.9)',.6*u);ctx.restore();continue}

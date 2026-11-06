@@ -21,9 +21,16 @@ function drawHero(){
   heroShape(x,y,pose,o,tint);
   // the shield of the block (phase II), as in Ember Bridge: it lasts as long as the action
   if(ph===1&&p.s==='act'&&play)LB.drawBlock(ctx,x,y,p.t,PT().act);
-  if(ph===3&&S.holding){const flick=S.pl.stam<.25?(Math.sin(gt*40)>0?.5:1):1;ctx.save();ctx.globalAlpha=.9*flick;
-    const g=ctx.createRadialGradient(x,y-40,10,x,y-40,82);g.addColorStop(0,'rgba(127,214,255,0)');g.addColorStop(.8,'rgba(127,214,255,.14)');g.addColorStop(1,'rgba(180,240,255,.4)');
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,92,Math.PI,0);ctx.fill();ctx.strokeStyle='#bff0ff';ctx.lineWidth=2.5;ctx.stroke();ctx.restore()}
+  // phase III, hold: the blue dome, only while the gesture is held (domeAlpha: fade-in, nothing for a tap), thin outline, light fill, the Watcher stays visible
+  const da=domeAlpha();
+  if(da>0){const flick=S.pl.stam<.25?(Math.sin(gt*40)>0?.5:1):1,Z=GUARD_FX.dome;ctx.save();ctx.globalAlpha=da*flick;
+    ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x,y,92,Math.PI,0);ctx.fill();
+    ctx.strokeStyle=`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
+  // phase III, tap: an arc of light (yellow-white of the lantern) in front of the Watcher, turned towards the threat
+  if(ph===3&&S.arc&&gt-S.arc.t0<GUARD_FX.arc.dur){const G=GUARD_FX.arc,u=(gt-S.arc.t0)/G.dur,cx=x+16,cy=y-80,r=G.r*(.85+.15*eout(u));
+    ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+    ctx.strokeStyle=`rgba(${COUNTER3.col},${.35*(1-u)})`;ctx.lineWidth=G.w*2.2;ctx.beginPath();ctx.arc(cx,cy,r,S.arc.a-G.span,S.arc.a+G.span);ctx.stroke();
+    ctx.strokeStyle=`rgba(${COUNTER3.col},${1-u})`;ctx.lineWidth=G.w*(1-.5*u);ctx.stroke();ctx.restore()}
   // recovery bar under the Watcher: a help cue, only with the Help box ticked (the lantern turns red for a refused press)
   if(play&&!S.cine&&LB.help.on())LB.drawRecoveryBar(ctx,x,y,S.pl);
   // stamina bar, above the lantern of the Watcher (y - 206, the height of Ember Bridge's help bar)

@@ -284,3 +284,7 @@
 ## 2026-11-06 · feat/ch2-lisibilite-voix-ancien-phare
 - Ce que le joueur verra : la Voix efface l'illusion esquivée, resserre un anneau sur l'impact du retour et fait flasher le Veilleur ; sa Rage des Échos finit en couronne d'échos qui converge. Les planches de l'Ancien montrent un clou qui s'allume avant chaque choc.
 - Ce que le joueur verra : au Phare, éclairs qui crépitent autour de la lampe, faisceaux annoncés par un cône fin, pics en « tap… tap-tap », nouvelles rages (Nuit du Phare, Morse, cloches, Glas) et contres jaune-blanc.
+
+## 2026-11-06 · feat/ch2-phare-finitions
+- Ce que le joueur verra : au Phare, un tap ouvre un arc de lumière jaune-blanc tourné vers la menace (claquement sec), un maintien ouvre un dôme bleu discret avec un bourdonnement ; chaque sort a son contre propre (lampe qui s'éteint, tentacule qui recule, maillon coupé, cloche fissurée…).
+- Ce que le joueur verra : la dernière rage de la Partie 1 se termine par la lumière renvoyée sur le phare central, qui se brise et lance la Partie 2.

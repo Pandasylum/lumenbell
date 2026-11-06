@@ -12,7 +12,9 @@
    bell    shadow growing `tl` s, then `blows` blows `step` apart (hold, `span` s) each with a ring;  shard  glow in the cracks `glow` s, blast `blast` s (hold);
    sonic   4-6 waves, the first `first` s after the start, the delay shrinking x`shrink`, each flies `fly` s (tap each);
    rain    rage 1 Part 2: n small bells every pattern[i] s (tap);  glas  rage 3: n knells, the gap grows x`k`, then the last one is held (implode) and the end animation follows;
-   direct  the last counter of Part 2 kills at once (no riposte shot before) */
+   direct  the last counter of Part 2 kills at once (no riposte shot before)
+   dazzle  final rage of Part 1 (code name, never shown): n sweeps (hold) that the Watcher absorbs; the last counter sends the light back at the central
+           lighthouse, which breaks (the usual KO, then the transition to Part 2: phaseCleared) */
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
@@ -27,11 +29,18 @@ const BEACON_FX={
   sonic:{n:[4,6],first:.8,d0:.5,shrink:.88,fly:.7},
   rain:{n:6,pattern:[.55,.55,.3,.8,.55,.45],fall:.7},
   glas:{n:6,g0:.6,k:1.16,pre:.7,fall:.5},
+  dazzle:{n:3,dark:.3,cone:.5,D:1.1,after:.2},
   direct:true};
-/* riposte of phase III, visual only (rule unchanged: clean series, riposte, boss -1 HP). Yellow-white of the lantern. tap = a dry streak sent back;
-   hold = a wave released; to = where it goes. */
+/* riposte of phase III, visual only (rule unchanged: clean series, riposte, boss -1 HP). Yellow-white of the lantern. One drawing per spell
+   (C3 below, window win[spell] = [from, to] of the riposte progress k); the spells without one keep the generic streak (tap) or wave (hold). */
 const COUNTER3={col:'255,246,204',tap:[.2,.45],hold:[.2,.75],
-  sp:{bolt:'tap',beam:'tap',chunk:'tap',whip:'tap',spike:'tap',ring:'tap',rain:'tap',anchor:'tap',kwave:'hold',cross:'hold',bell:'hold',shard:'hold',sonic:'hold',glas:'hold',tide:'hold'}};
+  sp:{bolt:'tap',beam:'tap',chunk:'tap',whip:'tap',spike:'tap',ring:'tap',rain:'tap',anchor:'tap',kwave:'hold',cross:'hold',bell:'hold',shard:'hold',sonic:'hold',glas:'hold',tide:'hold',dazzle:'hold'},
+  win:{bolt:[.2,.55],beam:[.2,.5],chunk:[.2,.7],spike:[.2,.7],anchor:[.2,.8],bell:[.2,.75],shard:[.2,.6],sonic:[.2,.75],dazzle:[.06,.3]},
+  lampOut:1};   // s the lamp that fired a countered bolt stays out
+/* guard of phase III, visual only (decision of 6 Nov 2026, to tune by eye). TAP = an arc of light in front of the Watcher, turned towards the
+   threat, `arc.dur` s, sparks at the point of impact, no bubble. HOLD = the blue dome, only while the gesture is held: it appears after `dome.delay` s
+   (so that a tap never shows it), fades in over `dome.fade` s, thin outline, `dome.fill` of opacity inside, gone at once on release. */
+const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
 const LX=760,LY=GY-333;
 function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0))}
   if(S.cnt&&S.cnt.k===3)dim=1;return{charge,dim}}
@@ -296,18 +305,70 @@ function drawBeacon(){
 function lampDark(o,a){ctx.save();const g=ctx.createRadialGradient(o.x,o.y,2,o.x,o.y,44);g.addColorStop(0,`rgba(4,12,16,${.85*a})`);g.addColorStop(1,'rgba(4,12,16,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,44,0,TAU);ctx.fill();ctx.restore()}
 function crackle(o,u){ctx.save();ctx.globalCompositeOperation='lighter';const n=Math.floor(gt*24);glow(o.x,o.y,40+20*u,'rgba(200,250,255,.9)',.25+.45*u);
   for(let i=0;i<5;i++){const a=((n*7+i*72)%360)*Math.PI/180,r0=8,r1=24+((n+i*3)%5)*5;bolt(o.x+Math.cos(a)*r0,o.y+Math.sin(a)*r0,o.x+Math.cos(a)*r1,o.y+Math.sin(a)*r1,(n+i)/50,'rgba(210,252,255,.9)',1.4)}ctx.restore()}
-/* riposte of phase III, one yellow-white drawing per spell (k = progress 0..1 of S.cnt): tap = a dry streak sent back, hold = a wave released */
+/* riposte of phase III, one yellow-white drawing per spell (k = progress 0..1 of S.cnt, u = progress 0..1 of the spell's window COUNTER3.win).
+   The drawing only; the rule (clean series, riposte, boss -1 HP) is in closePat. Drawn with 'lighter' (drawCounter). Spells without a drawing of
+   their own (whip, ring, rain, kwave, cross, tide): the generic streak (tap) or wave (hold). */
+const polyAt=(pts,u)=>{let L=0;const d=[];for(let i=1;i<pts.length;i++){const l=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);d.push(l);L+=l}
+  let r=L*u;for(let i=0;i<d.length;i++){if(r<=d[i]||i===d.length-1){const f=d[i]?Math.min(1,r/d[i]):1;return{i,x:lerp(pts[i].x,pts[i+1].x,f),y:lerp(pts[i].y,pts[i+1].y,f)}}r-=d[i]}};
+/* a jagged streak along the points pts up to the fraction u of its length */
+function streak(pts,u,wd,a){const h=polyAt(pts,u),C=COUNTER3.col,n=(gt*13|0)/13;
+  for(let j=0;j<=h.i;j++)bolt(pts[j].x,pts[j].y,j<h.i?pts[j+1].x:h.x,j<h.i?pts[j+1].y:h.y,n+j*.37,`rgba(${C},${a})`,wd);
+  return h}
+const headQ=()=>ecPose(S.ecPhi/.55)[EHEAD];
+const C3={
+  /* Bolt: ricochet off the ground back to the lamp that fired it, which goes out for COUNTER3.lampOut s */
+  bolt(c,u,O,C){const to=lampPoses(LX,LY,1)[c.side||0],h=streak([O,{x:lerp(O.x,to.x,.45),y:GY-26},to],Math.min(1,u*1.25),3.5,1-.4*u);glow(h.x,h.y,34,`rgba(${C},.9)`,.7*(1-u));
+    if(u>=1&&!c.fx3){c.fx3=1;burst(to.x,to.y,14,'#fff3c4',5,.5);S.lampOut={i:c.side||0,until:gt+COUNTER3.lampOut}}},
+  /* Beam: a ray sent back at the lamp, which bursts into sparks */
+  beam(c,u,O,C){const to=lampPoses(LX,LY,1)[c.side||0],e=Math.min(1,u*1.6),x=lerp(O.x,to.x,e),y=lerp(O.y,to.y,e);
+    ctx.strokeStyle=`rgba(${C},${1-.5*u})`;ctx.lineWidth=11*(1-u*.6)+2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(x,y);ctx.stroke();glow(x,y,46,`rgba(${C},.9)`,.8*e);
+    if(u>=1&&!c.fx3){c.fx3=1;burst(to.x,to.y,26,'#fff3c4',7,.8,.3);burst(to.x,to.y,10,'#ffffff',4,.5)}},
+  /* Tower piece: the stone struck back hits the ring it came from, the tentacle that threw it recoils */
+  chunk(c,u,O,C){const r=TOWER[c.ri!=null?c.ri:RINGS[0]].e,fl=clamp(u/.5,0,1),rc=eio(clamp((u-.5)/.5,0,1));
+    if(u<.5){const x=lerp(O.x,r.x,eout(fl)),y=lerp(O.y,r.y,eout(fl))-Math.sin(Math.PI*fl)*40,a=gt*18;ctx.fillStyle=`rgba(${C},.95)`;ctx.beginPath();
+      for(let i=0;i<5;i++){const q=a+i*Math.PI*2/5,rr=i%2?9:13;i?ctx.lineTo(x+Math.cos(q)*rr,y+Math.sin(q)*rr):ctx.moveTo(x+Math.cos(q)*rr,y+Math.sin(q)*rr)}ctx.closePath();ctx.fill();glow(x,y,30,`rgba(${C},.9)`,.6)}
+    else{tentacle(LX,LY+10,lerp(r.x,LX,rc*.7),lerp(r.y,LY+10,rc*.7),5,1,3);glow(r.x,r.y,50*(1-rc),`rgba(${C},.9)`,.7*(1-rc))}
+    if(u>=.5&&!c.fx3){c.fx3=1;burst(r.x,r.y,16,'#fff3c4',6,.6,.4);burst(r.x,r.y,8,'#9aa9a6',4,.6,.4)}},
+  /* Reef spike: a golden pulse runs along the ground, the spike rises at the tower's foot and breaks into golden splinters */
+  spike(c,u,O,C){const xs=LX-90,run=clamp(u/.55,0,1),x=lerp(HX+30,xs,eout(run));
+    if(u<.55){glow(x,GY-6,40,`rgba(${C},.9)`,.8);ctx.strokeStyle=`rgba(${C},.8)`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(HX+30,GY-4);ctx.lineTo(x,GY-4);ctx.stroke()}
+    else if(u<1){const e=clamp((u-.55)/.25,0,1);ctx.save();ctx.globalCompositeOperation='source-over';reefSpikes(xs,eout(e),1);ctx.restore();glow(xs,GY-30,60,`rgba(${C},.9)`,.5*e)}
+    if(u>=1&&!c.fx3){c.fx3=1;burst(xs,GY-30,22,'#ffe9a8',7,.7,.5);burst(xs,GY-14,10,'#fff6d6',4,.5,.3)}},
+  /* Anchor: sparks run up the chain (hold), then a link is cut (tap) */
+  anchor(c,u,O,C){const a=ANCH.e,b=ANCH.s,ch=.55,m={x:lerp(a.x,b.x,.5),y:lerp(a.y,b.y,.5)};
+    if(u<ch){const e=u/ch;for(let i=0;i<7;i++){const q=(e*1.4+i/7)%1;ell(lerp(a.x,b.x,q)+(Math.random()-.5)*6,lerp(a.y,b.y,q)+(Math.random()-.5)*6,2.2,2.2,`rgba(${C},${.9})`)}
+      bolt(a.x,a.y,lerp(a.x,b.x,e),lerp(a.y,b.y,e),(gt*16|0)/16,`rgba(${C},.8)`,1.6)}
+    else{const e=clamp((u-ch)/(1-ch),0,1),d=26*eout(e);glow(m.x,m.y,50*(1-e),`rgba(${C},.95)`,.9);
+      for(const s of[-1,1]){ctx.strokeStyle=`rgba(${C},${1-e})`;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(m.x+s*d*.5,m.y+s*d*.9+e*e*30,7,4,s*.6,0,Math.PI*2);ctx.stroke()}}
+    if(u>=ch&&!c.fx3){c.fx3=1;burst(m.x,m.y,16,'#fff3c4',6,.6,.2)}},
+  /* Big bell: a golden ring silences it, it is left cracked */
+  bell(c,u,O,C){const q=headQ(),r=40+150*eout(u);
+    for(let i=0;i<2;i++){const e=clamp(u*1.4-i*.25,0,1);if(e<=0||e>=1)continue;ctx.strokeStyle=`rgba(${C},${.95*(1-e)})`;ctx.lineWidth=7*(1-e)+1;ctx.beginPath();ctx.ellipse(q.x,q.y,40+150*eout(e),(40+150*eout(e))*.55,0,0,Math.PI*2);ctx.stroke()}
+    if(u>.25){ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r||0);ctx.scale(q.sc||1,q.sc||1);ctx.strokeStyle=`rgba(${C},.95)`;ctx.lineWidth=2.4;crackLine(CRACK,clamp((u-.25)/.4,0,1));ctx.restore()}
+    if(u>=.45&&!c.fx3){c.fx3=1;burst(q.x,q.y-10,14,'#fff3c4',5,.6,.3)}},
+  /* Tower shard: the absorbed blast is thrown back at the tower in a spray */
+  shard(c,u,O,C){const J=bossCore(),e=Math.min(1,u*1.7);
+    for(let i=-3;i<=3;i++){const t={x:J.x+i*26,y:J.y+Math.abs(i)*8-10};bolt(O.x,O.y,lerp(O.x,t.x,e),lerp(O.y,t.y,e),(gt*15|0)/15+i*.21,`rgba(${C},${.85-.4*u})`,2.4-Math.abs(i)*.3)}
+    glow(J.x,J.y,40+70*e,`rgba(${C},.9)`,.7*e*(1-u*.5));
+    if(e>=1&&!c.fx3){c.fx3=1;burst(J.x,J.y,30,'#fff3c4',8,.8,.2);burst(J.x,J.y,12,'#ffffff',5,.5)}},
+  /* Sound wave: the clean series sends an inverse wave back (each wave was cancelled by a ring when blocked, see drawEclGame) */
+  sonic(c,u,O,C){const x=lerp(HX+40,LX-60,eout(u)),y=GY-80;
+    for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(${C},${(.9-i*.22)*(1-u*.5)})`;ctx.lineWidth=4-i;ctx.beginPath();ctx.ellipse(x-i*14,y,16+i*5,70+i*6,0,-Math.PI*.45,Math.PI*.45);ctx.stroke()}
+    if(u>=1&&!c.fx3){c.fx3=1;burst(LX-60,y,18,'#fff3c4',6,.6,.2)}},
+  /* Dazzle (final rage of Part 1): the absorbed light goes back to the central lighthouse; the KO that follows is the usual one (it breaks) */
+  dazzle(c,u,O,C){const e=Math.min(1,u*1.5),x=lerp(O.x,LX,e),y=lerp(O.y,LY,e);
+    ctx.strokeStyle=`rgba(${C},.95)`;ctx.lineWidth=6+16*u;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(x,y);ctx.stroke();
+    glow(x,y,60+120*u,`rgba(${C},.95)`,.5+.5*u);glow(LX,LY,60+190*u,`rgba(${C},.9)`,u);
+    if(u>=1&&!c.fx3){c.fx3=1;S.shake=Math.max(S.shake,8);burst(LX,LY,40,'#fff6d6',9,1)}}
+};
 function counter3(k){
-  const c=S.cnt,sp=c.spell||'bolt',kind=COUNTER3.sp[sp]||'tap',lo=lampPoses(LX,LY,1),O={x:S.orbX,y:S.orbY},C=COUNTER3.col;
-  const to=sp==='bolt'||sp==='ring'?lo[c.side||0]:sp==='beam'?lo[c.side||0]:sp==='spike'?{x:HX+10,y:GY-8}:sp==='anchor'?{x:LX+60,y:GY-150}:sp==='kwave'||sp==='sonic'?{x:LX-60,y:GY-60}:sp==='bell'||sp==='glas'?{x:HX+12,y:GY-250}:{x:LX,y:S.form===2?ECY:LY};
+  const c=S.cnt,sp=c.spell||'bolt',kind=COUNTER3.sp[sp]||'tap',lo=lampPoses(LX,LY,1),O={x:S.orbX,y:S.orbY},C=COUNTER3.col,W3=COUNTER3.win[sp];
+  if(C3[sp]){const u=clamp((k-W3[0])/(W3[1]-W3[0]),0,1);if(u>0)C3[sp](c,u,O,C);return}
+  const to=sp==='ring'?lo[c.side||0]:sp==='kwave'?{x:LX-60,y:GY-60}:sp==='glas'?{x:HX+12,y:GY-250}:{x:LX,y:S.form===2?ECY:LY};
   const W=COUNTER3[kind],u=clamp((k-W[0])/(W[1]-W[0]),0,1);if(u<=0)return;
   if(k<=W[1]+.15){if(kind==='tap'){ctx.strokeStyle=`rgba(${C},${1-.6*u})`;ctx.lineWidth=7*(1-u)+2;ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(lerp(O.x,to.x,Math.min(1,u*2.2)),lerp(O.y,to.y,Math.min(1,u*2.2)));ctx.stroke()}
   else{const r=40+280*eout(u);ctx.strokeStyle=`rgba(${C},${.9*(1-u)})`;ctx.lineWidth=6*(1-u)+1;ctx.beginPath();ctx.ellipse(O.x,O.y,r,r*.55,0,0,Math.PI*2);ctx.stroke();glow(to.x,to.y,60,`rgba(${C},.9)`,.6*u)}}
-  if(u>=1&&!c.fx3){c.fx3=1;
-    if(sp==='bolt'||sp==='ring'){burst(to.x,to.y,12,'#fff3c4',5,.5);S.lampOut={i:c.side||0,until:gt+1}}   // the lamp that fired goes out for 1 s
-    else if(sp==='beam')burst(to.x,to.y,22,'#fff3c4',6,.7,.3);   // the lamp bursts into sparks
-    else if(sp==='spike')burst(to.x,to.y,16,'#ffe9a8',6,.6,.5);   // golden splinters
-    else burst(to.x,to.y,14,'#fff3c4',5,.5)}}
+  if(u>=1&&!c.fx3){c.fx3=1;burst(to.x,to.y,14,'#fff3c4',5,.5)}}
 /* reef spikes (were ice): black rock thrusting up from the sea floor, a little foam. Tell: the rock splits and foams
    under the Watcher (k 0..1); hit: the spikes (a = opacity) */
 /* the corals of a reef spike: they shoot out of the ground one after the other, from the tower towards the Watcher (the front advances in `tell` s); the spike bursts out at his feet

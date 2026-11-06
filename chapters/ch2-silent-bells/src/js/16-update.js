@@ -49,7 +49,7 @@ function closePat(){
   if(p.ok){
     const allPerf=p.nReal>=2&&p.perf>=p.nReal,c=S.phase===1&&p.spell==='harpoon'?R_CNT.harpoon:R_CNT[S.phase];   // harpoon: slower, so that the ray is seen climbing the chain
    
-    S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase,spell:p.spell,side:p.side};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
+    S.cnt={t:gt,dmg:allPerf?2:1,dur:c.dur,hitAt:c.hitAt,k:S.phase,spell:p.spell,side:p.side,ri:p.ri};S.nextAt=gt+R_CNT.next;play('counter');counterFx();
     say(S.phase===1?_('Series blocked. The Watcher counters.','Série bloquée. Le Veilleur riposte.'):S.phase===2?_('Volley dodged. The Watcher sends the light back.','Volée esquivée. Le Veilleur renvoie la lumière.'):_('Attacks countered. The Watcher sends the lightning back.','Attaques contrées. Le Veilleur renvoie la foudre.'));
   }else S.nextAt=gt+R_CNT.nextFail;
 }

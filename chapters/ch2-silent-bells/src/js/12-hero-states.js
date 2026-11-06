@@ -32,7 +32,22 @@ function plStep(dt){
   // dodge aimed at a reflection (fooled): the recovery that follows this action is shortened (DG.foolRec); any other end of the action drops the mark
   if(p.fr){if(p.s==='recover'&&p.rk==='act'){p.rd*=DG.foolRec;p.fr=0}else if(p.s!=='act')p.fr=0}
   S.holding=S.phase===3&&p.s==='act';
+  S.domeT0=S.holding&&S.held?(S.domeT0==null?gt:S.domeT0):null;   // since when the gesture is held (dome of phase III, GUARD_FX.dome)
 }
+/* opacity 0..1 of the dome of the held guard: nothing for a tap (released before GUARD_FX.dome.delay), then it fades in; none once released */
+function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
+/* where a threat of phase III comes from (to turn the arc of a tap towards it) */
+function threatSrc(th){
+  if(th.k==='bolt')return lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];
+  if(th.k==='chunk')return TOWER[th.ri].e;
+  if(th.k==='ring')return TOWER[RINGS[th.ri%6]].e;
+  if(th.k==='spike')return{x:LX-90,y:GY-6};
+  if(th.k==='whip')return{x:LX+th.side*44,y:GY-210};
+  if(th.k==='anch')return{x:HX+40,y:GY-300};
+  if(th.k==='sbl')return{x:th.x,y:26};
+  if(th.k==='sonic')return{x:LX-60,y:GY-80};
+  if(th.k==='sring')return{x:LX+(th.side?80:-80),y:LY};
+  return{x:LX,y:S.form===2?ECY:LY}}
 
 function success(th,perfect){
   th.done=true;th.res='ok';th.okT=gt;th.perfect=perfect;S.okT=gt;
@@ -42,7 +57,9 @@ function success(th,perfect){
   if(ph===1&&th.k==='toll'&&th.gid!=null){(S.echoes||(S.echoes=[])).push({t0:gt,x:S.orbX,y:S.orbY});if(S.threats.filter(o=>o.gid===th.gid).every(o=>o.res==='ok'))S.glasN=(S.glasN||0)+1}
   if(ph===1){burst(HX+55,GY-80,perfect?26:14,perfect?'#f2fffb':'#8fe8d8',perfect?7:5,.5);play('block',perfect);MUSIC.fx('clank');pop(ONO.block,perfect?'#f2fffb':'#bff3ea')}
   else if(ph===2){S.dodgeOk=gt;S.dodgeFlash=gt;play('dodge',perfect)}
-  else{burst(HX,GY-120,perfect?24:12,perfect?'#e8fdff':'#7fe8ff',6,.5);play('block',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
+  else{   // phase III, a tap: an arc of light turned towards the threat, sparks where it hits (drawHero); the dry snap; the onomatopoeia is unchanged
+    const G=GUARD_FX.arc,c={x:HX+16,y:GY-80},s=threatSrc(th),a=Math.atan2(s.y-c.y,s.x-c.x);
+    S.arc={t0:gt,a};burst(c.x+Math.cos(a)*G.r,c.y+Math.sin(a)*G.r,G.sparks+(perfect?8:0),perfect?'#ffffff':'#fff3c4',6,.5);play('snap',perfect);pop(ONO.block,perfect?'#e8fdff':'#a8f0ff')}
 }
 function hurt(th){
   if(S.mode!=='play')return;

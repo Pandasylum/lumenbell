@@ -3,6 +3,7 @@ let lastT=performance.now();
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(.05,(now-lastT)/1000);lastT=now;rt+=dt;
+  humStep();   // the hum of the dome follows the dome, also over the menu or a pause (then it is stopped)
   if(!$('menu').hidden)return;
   if(!S.paused&&['play','ko','dead','cine','prologue','epilogue'].includes(S.mode))gt+=dt;
   ctx=ctxMain;SC=SCm;
