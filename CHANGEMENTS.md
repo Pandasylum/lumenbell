@@ -10,7 +10,7 @@ Ce document évolue à chaque mise à jour du lore. Chaque section ci-dessous a 
 
 Section	Sujet	Statut	Date	PR
 D	Chapitre I · « Drowned Lighthouse » et genou de fin de phase I	Fait (PR fusionnée)	28 octobre 2026 (mis à jour le 29)	https://github.com/Pandasylum/lumenbell/pull/31
-F	Documents à mettre à jour	En cours (CH2-SPEC, COMMUN et BIBLE faits ; DECISIONS et LORE à confirmer par Kevin)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
+F	Documents à mettre à jour	Fait (PR fusionnée)	30 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/19
 G	Chapitre I · Lanterne du Colosse de braise	Fait (PR fusionnée)	29 octobre 2026	https://github.com/Pandasylum/lumenbell/pull/31
 I	Chapitre II · Pleurs avant la Voix	Fait	29 octobre 2026	
 J	Chapitre II · Validations du 30 octobre (bouton « Bloquer », illusions, carte de défaite)	Fait (PR fusionnée)	30 octobre 2026 (mis à jour le 6 novembre)	(a) et (b) https://github.com/Pandasylum/lumenbell/pull/23 ; (c) https://github.com/Pandasylum/lumenbell/pull/89
@@ -32,6 +32,24 @@ Les traductions anglaises ont été validées par Kevin (29 octobre).
 Après modification : régénérer TEXTES.md, lancer tests/ch2-texts.js et les autres tests du chapitre, vérifier visuellement les cartons (durées de lecture : 6 à 7 s pour l'intro, environ 4 s pour l'outro).
 Faire une branche et une PR par ensemble cohérent (textes, lumière, couleur du Veilleur, documents).
 Après chaque section appliquée : mettre à jour le tableau « Suivi », puis ajouter une ligne dans DECISIONS.md si une décision a été prise en cours de route.
+Vérifications
+Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.
+Chercher « Drowned Beacon ».
+Vérifier qu'aucun mot d'annonce n'a été ajouté (tests/ch2-announce.js).
+Vérifier visuellement : cœur turquoise fixe visible par les jointures (phase II), lanterne orange du Colosse près des chaînes (chapitre I, pendant la phase II), absence de pulsation sur les lueurs de la Sans-Fond, absence de carton à la forme II, durées de lecture des nouveaux cartons.
+À ne pas faire
+Ne pas ajouter d'indice de parasite au chapitre I : la lanterne du Colosse (section G) suffit.
+Ne pas implémenter le choix du chapitre VI, ni les chapitres III à VII.
+Ne pas introduire « Sonneur » comme nom de boss.
+Ne pas changer les timings, valeurs d'équilibrage ou la silhouette du Colosse.
+Appliqué
+
+- **A** · Chapitre II · Textes et titre de la forme II : Fait (PR fusionnée), 30 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Nouveaux textes d'entrée et de fin des trois phases ; plus de carton à la forme II (titre « La Sans-Fond »).
+- **B** · Boss de la phase II : l'Ancien de Rouille : Fait (PR fusionnée), 28 octobre 2026, branche `ch2/lore-changements`. « Roi de Rouille » devient « l'Ancien de Rouille » (EN « The Rust Elder »).
+- **C** · Chapitre II · Lumière du boss et de la Sans-Fond : Fait (PR fusionnée), 28 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Cœur turquoise fixe ; lueurs de la Sans-Fond sans pulsation.
+- **H** · Chapitre II · Rémanence : Fait (PR fusionnée), 30 octobre 2026, branche `ch2/lore-changements`. Évaporation du Lumen à la mort de la Sans-Fond, sans texte ni bruitage.
+- **E** · Veilleur · Couleur de la lanterne et des tirs : Fait (PR fusionnée), 1er novembre 2026, branche `engine/lantern-color`. Lanterne jaune neutre, tirs jaune-blanc dans les deux chapitres.
+
 F. Documents à mettre à jour
 docs/LORE.md : remplacer par l'export Markdown du document Lumenbell · Lore définitif.
 docs/CH2-SPEC.md :
@@ -70,23 +88,7 @@ Le renommage « Roi Sombre » en « Roi Spectral » dans docs/CH2-SPEC.md (table
 - Héros : Lumen affaibli, blanc teinté de jaune ; clochette : catalyseur de la lumière.
 - Noms anglais : The Priors, The Spectral King.
 
-Vérifications
-Chercher dans tout le dépôt les textes affichés qui disent « Roi de Rouille », « Rust King », « le Roi », « the King » à propos du boss de la phase II.
-Chercher « Drowned Beacon ».
-Vérifier qu'aucun mot d'annonce n'a été ajouté (tests/ch2-announce.js).
-Vérifier visuellement : cœur turquoise fixe visible par les jointures (phase II), lanterne orange du Colosse près des chaînes (chapitre I, pendant la phase II), absence de pulsation sur les lueurs de la Sans-Fond, absence de carton à la forme II, durées de lecture des nouveaux cartons.
-À ne pas faire
-Ne pas ajouter d'indice de parasite au chapitre I : la lanterne du Colosse (section G) suffit.
-Ne pas implémenter le choix du chapitre VI, ni les chapitres III à VII.
-Ne pas introduire « Sonneur » comme nom de boss.
-Ne pas changer les timings, valeurs d'équilibrage ou la silhouette du Colosse.
-Appliqué
-
-- **A** · Chapitre II · Textes et titre de la forme II : Fait (PR fusionnée), 30 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Nouveaux textes d'entrée et de fin des trois phases ; plus de carton à la forme II (titre « La Sans-Fond »).
-- **B** · Boss de la phase II : l'Ancien de Rouille : Fait (PR fusionnée), 28 octobre 2026, branche `ch2/lore-changements`. « Roi de Rouille » devient « l'Ancien de Rouille » (EN « The Rust Elder »).
-- **C** · Chapitre II · Lumière du boss et de la Sans-Fond : Fait (PR fusionnée), 28 octobre 2026 (mis à jour le 29), branche `ch2/lore-changements`. Cœur turquoise fixe ; lueurs de la Sans-Fond sans pulsation.
-- **H** · Chapitre II · Rémanence : Fait (PR fusionnée), 30 octobre 2026, branche `ch2/lore-changements`. Évaporation du Lumen à la mort de la Sans-Fond, sans texte ni bruitage.
-- **E** · Veilleur · Couleur de la lanterne et des tirs : Fait (PR fusionnée), 1er novembre 2026, branche `engine/lantern-color`. Lanterne jaune neutre, tirs jaune-blanc dans les deux chapitres.
+Statut : Fait (PR fusionnée), https://github.com/Pandasylum/lumenbell/pull/117 (BIBLE.md et GLOSSAIRE.md). LORE, CH2-SPEC, COMMUN et DECISIONS confirmés à jour par Kevin.
 
 I. Chapitre II · Pleurs avant la Voix (Fait)
 Avant l'apparition de la Voix Creuse (phase I), ajouter un pleur étouffé dans le son. Tout le son est synthétisé : pas de fichier audio.
