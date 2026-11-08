@@ -52,21 +52,20 @@ function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk())
 const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
 /* opacity 0..1 of the dome of the held guard: nothing for a tap (released before GUARD_FX.dome.delay), then it fades in; none once released */
 function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
-/* ring of the action button (decision of 8 Nov 2026, drawn in code, no asset, no text): shown in phase III as soon as the hold is available; fills while the dome
+/* gauge of the action button (decision of 8 Nov 2026, drawn in code, no asset, no text): shown in phase III as soon as the hold is available; fills while the dome
    is held (domeAlpha), pulses while the first beam waits for the hold (S.learn.th, Easy and Normal). Look: WARD_RING (40-boss-drowned-beacon.js). */
-let wardRingEl=null;
+let wardRingEl=null,wardRingBar=null;
 function wardRing(){
   const w=$('ward');if(!w)return;
-  if(!wardRingEl){const R=WARD_RING;   // a frame round the button: a conic gradient seen only through a border-wide mask (no SVG, no asset)
+  if(!wardRingEl){const R=WARD_RING;   // a gauge inside the button: a faint frame (the hold is available) and a bar that loads left to right (no SVG, no asset, no text)
     wardRingEl=document.createElement('div');wardRingEl.setAttribute('aria-hidden','true');
-    const m='linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)';
-    wardRingEl.style.cssText='position:absolute;left:'+-R.gap+'px;top:'+-R.gap+'px;right:'+-R.gap+'px;bottom:'+-R.gap+'px;box-sizing:border-box;padding:'+R.w+'px;border-radius:'+R.rx+'px;pointer-events:none;display:none;-webkit-mask:'+m+';-webkit-mask-composite:xor;mask:'+m+';mask-composite:exclude'}
-  if(wardRingEl.parentNode!==w){if(getComputedStyle(w).position==='static')w.style.position='relative';w.appendChild(wardRingEl)}   // hud() rewrites the button's text: put the ring back
+    wardRingEl.style.cssText='position:absolute;left:0;top:0;right:0;bottom:0;border-radius:inherit;overflow:hidden;pointer-events:none;display:none;box-shadow:inset 0 0 0 '+R.w+'px rgba('+R.col+','+R.base+')';
+    wardRingBar=document.createElement('div');wardRingBar.style.cssText='height:100%;width:0;background:rgba('+R.col+','+R.fill+')';wardRingEl.appendChild(wardRingBar)}
+  if(wardRingEl.parentNode!==w){if(getComputedStyle(w).position==='static')w.style.position='relative';w.appendChild(wardRingEl)}   // hud() rewrites the button's text: put the gauge back
   const on=S.phase===3&&S.mode==='play'&&!S.d.trial;
   if(!on){wardRingEl.style.display='none';return}
   const R=WARD_RING,wait=!!(S.learn&&S.learn.th&&!S.holding),k=wait?1:domeAlpha(),p=wait?R.pulseMin+(1-R.pulseMin)*(.5+.5*Math.sin(rt*2*Math.PI*PULSE_FX.freq/2)):1;
-  wardRingEl.style.display='block';wardRingEl.style.opacity=p.toFixed(3);
-  wardRingEl.style.background='conic-gradient(rgba('+R.col+',.95) '+(k*360).toFixed(1)+'deg,rgba('+R.col+','+R.base+') 0)'}
+  wardRingEl.style.display='block';wardRingEl.style.opacity=p.toFixed(3);wardRingBar.style.width=(k*100).toFixed(1)+'%'}
 /* where a threat of phase III comes from (to turn the arc of a tap towards it) */
 function threatSrc(th){
   if(th.k==='bolt')return lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];

@@ -19,8 +19,8 @@
    the fight stops `lead` s before it reaches the Watcher and moves on only once the dome is fully shown (held); it then glides over the dome without damage.
    Safety: after `timeout` s without a hold it passes without damage and is launched again `retries` time(s), `retryGap` s after it (then no more waiting). Hard: unchanged. */
 const BEACON_LEARN={on:{easy:true,normal:true,hard:false},lead:.1,timeout:7,retries:1,retryGap:1.2};
-/* ring of the action button in phase III (drawn in code by wardRing): `w` px thick, `gap` px outside the button, `rx` corner radius, colour `col` (the blue of the dome), `base` opacity of the unfilled part, `pulseMin` lowest opacity of the pulse while the first beam waits */
-const WARD_RING={w:4,gap:7,rx:6,col:'120,200,255',base:.3,pulseMin:.35};
+/* gauge of the action button in phase III (drawn in code by wardRing, inside the button): `w` px frame of colour `col` at `base` opacity (the hold is available), bar that loads with the dome at `fill` opacity, `pulseMin` lowest opacity of the pulse while the first beam waits */
+const WARD_RING={w:2,col:'120,200,255',base:.45,fill:.38,pulseMin:.35};
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
