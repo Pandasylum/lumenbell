@@ -23,16 +23,14 @@ function drawHero(){
   // the shield of the block (phase II, and the tap of phase III), as in Ember Bridge: it lasts as long as the action
   if(ph===1&&p.s==='act'&&play||tap3)LB.drawBlock(ctx,x,y,p.t,PT().act);
   // phase III, hold: the blue dome, only while the gesture is held (domeAlpha: fade-in; a tap shows the block above, not the dome), thin outline, light fill, the Watcher stays visible
-  const da=domeAlpha(),warn=domeWarn();
-  if(da>0){const Z=GUARD_FX.dome,jx=warn?Math.sin(gt*70)*2.2:0,jy=warn?Math.cos(gt*83)*1.4:0;ctx.save();ctx.globalAlpha=da;
-    ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x+jx,y+jy,92,Math.PI,0);ctx.fill();
-    ctx.strokeStyle=warn?`rgba(${FATIGUE.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
+  const da=domeAlpha();
+  if(da>0)LB.drawDome(ctx,x,y,{a:da,warn:domeWarn(),t:gt});   // drawn in shared/js/20-watcher.js (same dome in the Tutorial tab)
   // the shadow of the dome (GHOST_DOME), dashed: shown while the first beam waits for the hold (BEACON_LEARN), until the Watcher holds
   if(ph===3&&S.learn&&S.learn.th&&!S.holding){const Z=GHOST_DOME;ctx.save();
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(HX,y,Z.r,Math.PI,0);ctx.fill();
     ctx.strokeStyle=`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=GUARD_FX.dome.line;ctx.setLineDash(Z.dash);ctx.stroke();ctx.restore()}
   // the dome bursts when the hold is too long (fatigue): shards of the outline fly off
-  if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,92+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
+  if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,LB.DOME_FX.r+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
   // phase III, tap: an arc of light (yellow-white of the lantern) in front of the Watcher, turned towards the threat
   if(ph===3&&S.arc&&gt-S.arc.t0<GUARD_FX.arc.dur){const G=GUARD_FX.arc,u=(gt-S.arc.t0)/G.dur,cx=x+16,cy=y-80,r=G.r*(.85+.15*eout(u));
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';

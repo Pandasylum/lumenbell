@@ -572,6 +572,14 @@ LB.drawOrb=(c,x,y,r,o)=>{
   else{c.save();c.strokeStyle='#c9a8ff';c.lineWidth=3;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();c.restore()}
   if(o.dash>0){c.save();c.globalAlpha*=o.dash;c.setLineDash([6,5]);c.lineDashOffset=-o.t*12;c.strokeStyle='#f4ecff';c.lineWidth=3;c.beginPath();c.arc(x,y,r+3,0,Math.PI*2);c.stroke();c.restore()}
 };
+LB.DOME_FX={r:92,delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85,amber:'255,190,90'};
+LB.domeAlpha=t=>Math.max(0,Math.min(1,(t-LB.DOME_FX.delay)/LB.DOME_FX.fade));
+LB.drawDome=(c,x,y,o)=>{
+  const Z=LB.DOME_FX,warn=!!o.warn,jx=warn?Math.sin(o.t*70)*2.2:0,jy=warn?Math.cos(o.t*83)*1.4:0;
+  c.save();c.globalAlpha=o.a;
+  c.fillStyle=`rgba(127,214,255,${Z.fill})`;c.beginPath();c.arc(x+jx,y+jy,Z.r,Math.PI,0);c.fill();
+  c.strokeStyle=warn?`rgba(${Z.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;c.lineWidth=Z.line;c.stroke();c.restore();
+};
 LB.WATCHER_SIL={body:'M205 455 L215 392 Q205 380 213 366 Q222 354 234 366 Q242 380 232 392 L242 455Z'};
 LB.drawWatcherSil=(c,ink,o)=>{
   if(!LB.WATCHER_SIL.path)LB.WATCHER_SIL.path=new Path2D(LB.WATCHER_SIL.body);
@@ -1090,7 +1098,7 @@ LB.settings=(()=>{
   return{mount,attach,lang,sync,toggle,visible(){return open},handled(e){return e===last},get el(){return box}};
 })();
 LB.TUTO_T={ids:['block','dodge','hold','still'],ev:'lb-gesture',none:'—',
-  anim:{w:340,h:226,css:272,hx:60,fy:200,xs:350,v:200,orbR:9,oy:70,bodyX:90,glide:.6,fade:.25,loop:2.6,melt:.5,stillR:17,still:{block:.04,dodge:.4,hold:.3,still:.25}}};
+  anim:{w:340,h:226,css:272,hx:110,fy:200,xs:350,v:200,orbR:9,oy:70,bodyX:140,holdLead:.5,glide:.6,fade:.25,loop:2.6,melt:.5,stillR:17,still:{block:.04,dodge:.4,hold:.3,still:.25}}};
 LB.tuto={
   text(id){return{
     block:[LB._('Block','Bloquer'),LB._("One press, at the exact instant: the blow stops dead.","Un seul appui, à l'instant juste : le coup s'arrête net.")],
@@ -1111,17 +1119,18 @@ LB.tuto={
         k=w<0?0:w<H.act?e(w/H.act):Math.max(0,1-e((w-H.act)/H.rec));
       LB.drawWatcher(c,T.hx,T.fy,'dodgeSide',u,{k});
       LB.tuto._orb(c,T.xs-T.v*u,T.fy-T.oy,1)},
-    hold(c,u){const T=LB.TUTO_T.anim,H=LB.HERO_T.hold,ti=LB.tuto._ti(),tp=ti-H.perf,a=u>=tp;
+    hold(c,u){const T=LB.TUTO_T.anim,ti=LB.tuto._tiHold(),tp=ti-T.holdLead,a=u>=tp,R=LB.DOME_FX.r,r=T.orbR;
       LB.drawWatcher(c,T.hx,T.fy,a?'hold':'idle',u);
-      if(a)LB.drawBlock(c,T.hx,T.fy,Math.min(u-tp,H.act),H.act,{plain:true});
+      if(a)LB.drawDome(c,T.hx,T.fy,{a:LB.domeAlpha(u-tp)});
       if(u<ti)LB.tuto._orb(c,T.xs-T.v*u,T.fy-T.oy,1);
-      else{const ph=Math.min(1,(u-ti)/T.glide),th=-Math.PI*.9*ph,r=T.orbR;   
-        if(ph<1)LB.tuto._orb(c,T.hx+82+(34+r)*Math.cos(th),T.fy-76+(92+r)*Math.sin(th),1-Math.max(0,ph-.7)/.3)}}
+      else{const ph=Math.min(1,(u-ti)/T.glide),th0=Math.atan2(-T.oy,Math.sqrt((R+r)*(R+r)-T.oy*T.oy)),th=th0+(-Math.PI*.9-th0)*ph;   
+        if(ph<1)LB.tuto._orb(c,T.hx+(R+r)*Math.cos(th),T.fy+(R+r)*Math.sin(th),1-Math.max(0,ph-.7)/.3)}}
     ,
     still(c,u){const T=LB.TUTO_T.anim,ti=(T.xs-T.bodyX)/T.v,p=Math.max(0,Math.min(1,(u-ti)/T.melt));
       LB.drawWatcher(c,T.hx,T.fy,'idle',u);
       if(p<1){const x=T.xs-T.v*Math.min(u,ti);LB.drawOrb(c,x,T.fy-T.oy,T.stillR*(1-p),{real:false,ch:false,t:u,dash:1-p})}}
   },
+  _tiHold(){const T=LB.TUTO_T.anim,R=LB.DOME_FX.r+T.orbR;return(T.xs-T.hx-Math.sqrt(R*R-T.oy*T.oy))/T.v},   
   _ti(){const T=LB.TUTO_T.anim;return(T.xs-T.hx-82-34-T.orbR)/T.v},   
   _orb(c,x,y,al){const R=LB.TUTO_T.anim.orbR;c.save();c.globalAlpha=Math.max(0,al);const g=c.createRadialGradient(x,y,1,x,y,R*2.4);
     g.addColorStop(0,'rgba(255,244,214,1)');g.addColorStop(.35,'rgba(255,170,90,.9)');g.addColorStop(1,'rgba(255,120,60,0)');
@@ -1134,7 +1143,7 @@ LB.tuto={
     host.appendChild(cvs);const c=cvs.getContext('2d'),a=LB.tuto._a={id,cvs,c,raf:0,t0:0,still:false};c.setTransform(k*d,0,0,k*d,0,0);
     if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){a.still=true;LB.tuto.frame(id,c,LB.tuto._still(id));return}   // image fixe
     LB.tuto._run()},
-  _still(id){const T=LB.TUTO_T.anim,ti=id==='dodge'||id==='still'?(T.xs-T.bodyX)/T.v:LB.tuto._ti();return ti+T.still[id]},
+  _still(id){const T=LB.TUTO_T.anim,ti=id==='dodge'||id==='still'?(T.xs-T.bodyX)/T.v:id==='hold'?LB.tuto._tiHold():LB.tuto._ti();return ti+T.still[id]},
   _run(){const a=LB.tuto._a,T=LB.TUTO_T.anim;if(!a||a.raf||document.hidden)return;
     const f=ts=>{if(LB.tuto._a!==a)return;
       if(!a.cvs.getClientRects().length){LB.tuto.stop();return}   // panneau masqué : on ferme tout
@@ -1308,7 +1317,7 @@ function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk())
     burst(HX,GY-50,28,'#bff0ff',8,.7);burst(HX,GY-50,12,'#ffffff',5,.5);pop(ONO.crush,'#bff0ff');play('shatter');say(_('Your guard is broken.','Ta garde est brisée.'))}
   p.stam=clamp(1-F.t/max,0,1)}
 const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
-function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
+function domeAlpha(){return S.phase===3&&S.holding&&S.domeT0!=null?LB.domeAlpha(gt-S.domeT0):0}
 let wardRingEl=null,wardRingBar=null;
 function wardRing(){
   const w=$('ward');if(!w)return;
@@ -1705,14 +1714,12 @@ function drawHero(){
   ell(x,y+2,30,6,'rgba(0,0,0,.45)');
   heroShape(x,y,pose,o,tint);
   if(ph===1&&p.s==='act'&&play||tap3)LB.drawBlock(ctx,x,y,p.t,PT().act);
-  const da=domeAlpha(),warn=domeWarn();
-  if(da>0){const Z=GUARD_FX.dome,jx=warn?Math.sin(gt*70)*2.2:0,jy=warn?Math.cos(gt*83)*1.4:0;ctx.save();ctx.globalAlpha=da;
-    ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x+jx,y+jy,92,Math.PI,0);ctx.fill();
-    ctx.strokeStyle=warn?`rgba(${FATIGUE.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
+  const da=domeAlpha();
+  if(da>0)LB.drawDome(ctx,x,y,{a:da,warn:domeWarn(),t:gt});   // drawn in shared/js/20-watcher.js (same dome in the Tutorial tab)
   if(ph===3&&S.learn&&S.learn.th&&!S.holding){const Z=GHOST_DOME;ctx.save();
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(HX,y,Z.r,Math.PI,0);ctx.fill();
     ctx.strokeStyle=`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=GUARD_FX.dome.line;ctx.setLineDash(Z.dash);ctx.stroke();ctx.restore()}
-  if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,92+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
+  if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,LB.DOME_FX.r+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
   if(ph===3&&S.arc&&gt-S.arc.t0<GUARD_FX.arc.dur){const G=GUARD_FX.arc,u=(gt-S.arc.t0)/G.dur,cx=x+16,cy=y-80,r=G.r*(.85+.15*eout(u));
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
     ctx.strokeStyle=`rgba(${COUNTER3.col},${.35*(1-u)})`;ctx.lineWidth=G.w*2.2;ctx.beginPath();ctx.arc(cx,cy,r,S.arc.a-G.span,S.arc.a+G.span);ctx.stroke();
@@ -2016,13 +2023,13 @@ const PHARE_DIFF={
   easy:{tell:1.5,holdTol:.2,tapInBubble:true,night:{n:3,lit:.5},crossDark:.6,salvo:[2,2],spike:[0,1.05],blows:2,sonic:{n:[3,4],shrink:1},glas:5,sig:false,margin:1.5,rest:.6},
   normal:{tell:1,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
   hard:{tell:.7,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
-const FATIGUE={reset:.15,warn:.75,amber:'255,190,90'};
+const FATIGUE={reset:.15,warn:.75,amber:LB.DOME_FX.amber};
 const PD=()=>PHARE_DIFF[vdk()];
 const bellSpan=Z=>(Z.blows-1)*BEACON_FX.bell.step+BEACON_FX.bell.tail;
 function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
   return Math.max(w(B.beam.D),w(B.dazzle.D),w(B.morse.long.D),w(SP.kwave.D),1.25*160/1080,1.25*160/1000,1.5*160/1000,bellSpan(Z),B.shard.blast,SP.storm.trapTb-SP.storm.trapTa,.6)}
 const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
-const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
+const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:LB.DOME_FX};
 const GHOST_DOME={r:92,lineA:.8,fill:.07,dash:[10,8]};
 const PULSE_FX={freq:2.4,base:.25,peak:.95};
 const LX=760,LY=GY-333;
