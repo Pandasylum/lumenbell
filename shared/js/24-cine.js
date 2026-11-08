@@ -33,7 +33,7 @@ LB.cine=(()=>{
     box.innerHTML='<div class="cbox"><canvas id="cineC" aria-hidden="true"></canvas></div><p class="ccap" id="cineCap" aria-live="polite"></p><button type="button" class="btn ghost" id="cineSkip">Skip ›</button>';
     document.body.appendChild(box);if(LB.hdr)LB.hdr.watch(box);
     cvs=box.querySelector('canvas');cap=box.querySelector('.ccap');sk=box.querySelector('button');cx=cvs.getContext('2d');
-    K=Math.min(2,LB.coarse?1.25:(window.devicePixelRatio||1));cvs.width=960*K;cvs.height=540*K;
+    K=LB.dpr;cvs.width=960*K;cvs.height=540*K;
     sk.addEventListener('click',()=>{if(cur)cur.skip()});
     window.addEventListener('keydown',e=>{if(!cur)return;e.stopImmediatePropagation();e.preventDefault();if(T.keys.includes(e.key))cur.skip()},true);
     return{cx,K};

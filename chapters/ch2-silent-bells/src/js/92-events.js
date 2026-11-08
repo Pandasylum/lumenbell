@@ -1,7 +1,7 @@
 /* ---------- events ---------- */
 const ward=$('ward'),cvm=$('c'),ctxMain=cvm.getContext('2d');let SCm=1;
-/* pixel ratio cap: 1.25 on touch screens (as Chapter I, 00-core.js), 2 on computers */
-const DPR_MAX=LB.coarse?1.25:2;
+/* pixel ratio cap: LB.DPR_COARSE_MAX on touch screens (shared/js/00-lb.js, as Chapter I), 2 on computers */
+const DPR_MAX=LB.coarse?LB.DPR_COARSE_MAX:2;
 function fitMain(){const r=cvm.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,DPR_MAX);cvm.width=Math.max(1,Math.round(r.width*d));cvm.height=Math.max(1,Math.round(r.height*d));SCm=cvm.width/W}
 new ResizeObserver(fitMain).observe($('stage'));fitMain();
 function skip(){if(S.mode==='prologue'||S.mode==='epilogue')LB.cine.skip();else if(S.mode==='cine'&&S.cine&&cineSeen(S.phase,S.cine.k))endCine()}
