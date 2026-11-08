@@ -68,7 +68,7 @@ function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
 const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
 const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:LB.DOME_FX};
 /* the shadow of the dome: drawn (dashed outline, `fill` of opacity) while the first beam waits for the hold (BEACON_LEARN, Easy and Normal); nothing after it */
-const GHOST_DOME={r:92,lineA:.8,fill:.07,dash:[10,8]};
+const GHOST_DOME={r:LB.DOME_FX.r,lineA:.8,fill:.07,dash:[10,8]};
 /* the pulse of the Watcher's lantern in the entry cinematic of phase III (CINE_P3.guard): the halo swells `freq` times a second between `base` and `peak` */
 const PULSE_FX={freq:2.4,base:.25,peak:.95};
 const LX=760,LY=GY-333;

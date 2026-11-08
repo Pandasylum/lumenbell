@@ -246,11 +246,11 @@ LB.drawOrb=(c,x,y,r,o)=>{
   else{c.save();c.strokeStyle='#c9a8ff';c.lineWidth=3;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();c.restore()}
   if(o.dash>0){c.save();c.globalAlpha*=o.dash;c.setLineDash([6,5]);c.lineDashOffset=-o.t*12;c.strokeStyle='#f4ecff';c.lineWidth=3;c.beginPath();c.arc(x,y,r+3,0,Math.PI*2);c.stroke();c.restore()}
 };
-/* Dôme de la garde tenue (déplacé du Chapitre II, phase III, tracé inchangé ; utilisé aussi par l'onglet Tuto). LB.DOME_FX : rayon r, délai puis
+/* Dôme de la garde tenue (déplacé du Chapitre II, phase III ; rayon 136 depuis le 8 novembre pour envelopper la tête du Veilleur (92 avant : la tête, à ~130 px, dépassait) ; utilisé aussi par l'onglet Tuto). LB.DOME_FX : rayon r, délai puis
    fondu d'apparition (delay, fade, en s depuis le début du maintien), remplissage fill, trait line / lineA, couleur d'alerte de fatigue amber. LB.domeAlpha(t)
    donne l'opacité t secondes après le début du maintien. LB.drawDome(c, x, y, o) : (x, y) = pieds du Veilleur ; o.a  opacité (0..1) ; o.warn  fatigue
    (tremblement et contour ambré, o.t = horloge du chapitre) ; o.r rayon de remplacement, o.jx/jy tremblement fourni. */
-LB.DOME_FX={r:92,delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85,amber:'255,190,90'};
+LB.DOME_FX={r:136,delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85,amber:'255,190,90'};
 LB.domeAlpha=t=>Math.max(0,Math.min(1,(t-LB.DOME_FX.delay)/LB.DOME_FX.fade));
 LB.drawDome=(c,x,y,o)=>{
   const Z=LB.DOME_FX,warn=!!o.warn,jx=warn?Math.sin(o.t*70)*2.2:0,jy=warn?Math.cos(o.t*83)*1.4:0;

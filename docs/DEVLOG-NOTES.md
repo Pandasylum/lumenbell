@@ -328,3 +328,6 @@
 
 ## 2026-11-08 · feat/tuto-animations (dôme « Tenir »)
 - Ce que le joueur verra : dans l'onglet Tutoriel, l'animation « Tenir » montre le dôme bleu de la phase III du Chapitre II (le Veilleur maintient, le dôme se forme, le coup glisse dessus) ; en combat, rien ne change.
+
+## 2026-11-08 · feat/tuto-animations (dôme agrandi)
+- Ce que le joueur verra : en phase III du Chapitre II, le dôme tenu est plus grand et enveloppe désormais la tête du Veilleur (même montée, mêmes durées) ; l'animation « Tenir » du Tutoriel le montre pareil.

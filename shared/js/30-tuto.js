@@ -8,8 +8,8 @@
 LB.TUTO_T={ids:['block','dodge','hold','still'],ev:'lb-gesture',none:'—',
   /* mise en scène des animations (v2) : repère monde w × h, pieds du Veilleur en (hx, fy), taille CSS du canvas ; coup : départ xs, vitesse v (px/s),
      rayon orbR, hauteur oy ; bodyX = x du corps touché par le coup qui passe ; glide = durée de la glisse sur le dôme ; fade = extinction du coup
-     arrêté ; melt = dissipation de l'orbe illusoire, stillR = son rayon ; holdLead = avance de l'appui sur l'impact pour « Tenir » (le dôme est formé à l'impact) ; boucle loop (s) ; still = décalage après l'impact de l'image fixe (prefers-reduced-motion). Les durées de geste viennent de LB.HERO_T. */
-  anim:{w:340,h:226,css:272,hx:110,fy:200,xs:350,v:200,orbR:9,oy:70,bodyX:140,holdLead:.5,glide:.6,fade:.25,loop:2.6,melt:.5,stillR:17,still:{block:.04,dodge:.4,hold:.3,still:.25}}};
+     arrêté ; melt = dissipation de l'orbe illusoire, stillR = son rayon ; holdX, holdXs = pieds du Veilleur et départ du coup pour « Tenir » (le dôme est plus large que les autres gardes) ; holdLead = avance de l'appui sur l'impact pour « Tenir » (le dôme est formé à l'impact) ; boucle loop (s) ; still = décalage après l'impact de l'image fixe (prefers-reduced-motion). Les durées de geste viennent de LB.HERO_T. */
+  anim:{w:340,h:226,css:272,hx:110,fy:200,xs:350,v:200,orbR:9,oy:70,bodyX:140,holdX:150,holdXs:450,holdLead:.5,glide:.6,fade:.25,loop:2.6,melt:.5,stillR:17,still:{block:.04,dodge:.4,hold:.3,still:.25}}};
 LB.tuto={
   /* [titre, texte] d'une entrée dans la langue courante */
   text(id){return{
@@ -37,19 +37,19 @@ LB.tuto={
       LB.drawWatcher(c,T.hx,T.fy,'dodgeSide',u,{k});
       LB.tuto._orb(c,T.xs-T.v*u,T.fy-T.oy,1)},
     /* dôme de la garde tenue (LB.drawDome, partagé avec le Chapitre II) : le Veilleur maintient (pose hold), le dôme monte comme en combat (LB.domeAlpha), le coup glisse dessus */
-    hold(c,u){const T=LB.TUTO_T.anim,ti=LB.tuto._tiHold(),tp=ti-T.holdLead,a=u>=tp,R=LB.DOME_FX.r,r=T.orbR;
-      LB.drawWatcher(c,T.hx,T.fy,a?'hold':'idle',u);
-      if(a)LB.drawDome(c,T.hx,T.fy,{a:LB.domeAlpha(u-tp)});
-      if(u<ti)LB.tuto._orb(c,T.xs-T.v*u,T.fy-T.oy,1);
+    hold(c,u){const T=LB.TUTO_T.anim,ti=LB.tuto._tiHold(),tp=ti-T.holdLead,a=u>=tp,R=LB.DOME_FX.r,r=T.orbR,hx=T.holdX;
+      LB.drawWatcher(c,hx,T.fy,a?'hold':'idle',u);
+      if(a)LB.drawDome(c,hx,T.fy,{a:LB.domeAlpha(u-tp)});
+      if(u<ti)LB.tuto._orb(c,T.holdXs-T.v*u,T.fy-T.oy,1);
       else{const ph=Math.min(1,(u-ti)/T.glide),th0=Math.atan2(-T.oy,Math.sqrt((R+r)*(R+r)-T.oy*T.oy)),th=th0+(-Math.PI*.9-th0)*ph;   /* glisse le long du dôme */
-        if(ph<1)LB.tuto._orb(c,T.hx+(R+r)*Math.cos(th),T.fy+(R+r)*Math.sin(th),1-Math.max(0,ph-.7)/.3)}}
+        if(ph<1)LB.tuto._orb(c,hx+(R+r)*Math.cos(th),T.fy+(R+r)*Math.sin(th),1-Math.max(0,ph-.7)/.3)}}
     ,
     /* orbe illusoire (LB.drawOrb, partagée avec le Chapitre II) : arrive, le Veilleur ne bouge pas (idle), l'orbe se dissipe devant lui */
     still(c,u){const T=LB.TUTO_T.anim,ti=(T.xs-T.bodyX)/T.v,p=Math.max(0,Math.min(1,(u-ti)/T.melt));
       LB.drawWatcher(c,T.hx,T.fy,'idle',u);
       if(p<1){const x=T.xs-T.v*Math.min(u,ti);LB.drawOrb(c,x,T.fy-T.oy,T.stillR*(1-p),{real:false,ch:false,t:u,dash:1-p})}}
   },
-  _tiHold(){const T=LB.TUTO_T.anim,R=LB.DOME_FX.r+T.orbR;return(T.xs-T.hx-Math.sqrt(R*R-T.oy*T.oy))/T.v},   /* instant où le coup touche le dôme */
+  _tiHold(){const T=LB.TUTO_T.anim,R=LB.DOME_FX.r+T.orbR;return(T.holdXs-T.holdX-Math.sqrt(R*R-T.oy*T.oy))/T.v},   /* instant où le coup touche le dôme */
   _ti(){const T=LB.TUTO_T.anim;return(T.xs-T.hx-82-34-T.orbR)/T.v},   /* instant où le coup touche le bord de la garde */
   _orb(c,x,y,al){const R=LB.TUTO_T.anim.orbR;c.save();c.globalAlpha=Math.max(0,al);const g=c.createRadialGradient(x,y,1,x,y,R*2.4);
     g.addColorStop(0,'rgba(255,244,214,1)');g.addColorStop(.35,'rgba(255,170,90,.9)');g.addColorStop(1,'rgba(255,120,60,0)');
