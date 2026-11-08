@@ -1,4 +1,4 @@
-# Onglet « Tuto » du hub (2026-11-08)
+# Onglet « Tutoriel » du hub (2026-11-08)
 
 Décision validée : un onglet « Tuto » dans le hub. **Version 1 : texte seul.** Version 2 (plus tard) : animations rejouées par le moteur.
 
@@ -10,7 +10,12 @@ Décision validée : un onglet « Tuto » dans le hub. **Version 1 : texte seul.
 | Tenir | Hold / Tenir | "Keep pressing: your block holds, a dome wraps around you." / « Maintiens l'appui : ton blocage tient, un dôme t'enveloppe. » | premier maintien réussi (dôme) |
 | Rester en place | Stand still / Rester en place | "Sometimes dodging is a misjudgment: know when to stand still." / « Parfois, l'esquive est une erreur de jugement : sache rester en place. » | première cible à ne pas esquiver (aujourd'hui l'orbe illusoire, Chapitre II phase I) laissée passer sans esquive |
 
-Le titre de l'onglet (info-bulle, nom accessible, titre du panneau) : « Tuto » en FR, « Tutorial » en EN (à valider).
+Le libellé du bouton et le titre du panneau : « Tutoriel » en FR, « Tutorial » en EN (mis à jour le 2026-11-08, ex-« Tuto »).
+
+## Emplacement du bouton
+Pastille centrée juste au-dessus des boutons EN / FR (mobile et ordinateur), même style : icône de livre + libellé « Tutoriel » / « Tutorial ». Cible tactile ≥ 44 px, liseré doré au survol et au focus. Plus d'icône isolée en haut à gauche. Le panneau s'ouvre centré au-dessus de la pastille, largeur bornée à l'écran, croix de fermeture conservée.
+
+Au retry de la P3, aucune attente ; le rappel est dans l'onglet Tutoriel.
 
 ## Mécanique
 - **Bloc unique réutilisable** : `LB.tuto` (`shared/js/30-tuto.js`) porte les données des 4 entrées, le rendu et son style. `LB.tuto.mount(el)` le monte. Monté pour l'instant **uniquement dans le hub** ; aucun montage dans les menus des chapitres.

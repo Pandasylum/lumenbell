@@ -83,7 +83,13 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .gear{position:absolute;z-index:5;top:max(var(--pad),env(safe-area-inset-top,0px));right:max(var(--pad),env(safe-area-inset-right,0px));width:var(--touch);height:var(--touch);display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:none;color:var(--muted);cursor:pointer}
 .gear svg{width:var(--gearS);height:var(--gearS);fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
 .gear:hover,.gear[aria-expanded="true"]{color:var(--fg)}
-.gear.tbtn{right:auto;left:max(var(--pad),env(safe-area-inset-left,0px))}
+.tpill{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:max(44px,var(--touch));padding:6px 16px;font-family:var(--font-display);font-weight:700;font-size:15px;line-height:1;letter-spacing:.12em;white-space:nowrap;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(255,255,255,.22);border-radius:4px;cursor:pointer}
+@media (max-height:520px) and (orientation:landscape){.tpill{position:static;transform:none;margin-right:6px;min-height:var(--touch)}}
+.tpill svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.tpill:hover,.tpill:focus-visible,.tpill[aria-expanded="true"]{border-color:var(--lantern);outline:none}
+.tpill:focus-visible{box-shadow:0 0 0 2px rgba(var(--lanternRgb),.5)}
+#htuto{place-items:end center;padding-bottom:var(--tutoB,16px)}
+#htuto .hsbox{width:min(var(--setW),100%)}
 .gear:focus-visible{outline:2px solid var(--lantern);outline-offset:2px}
 .hset{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:16px;background:rgba(8,6,13,.6);outline:none}
 .hsbox{overscroll-behavior:contain;touch-action:pan-y;position:relative;width:var(--setW);max-height:100%;overflow:auto;display:grid;gap:10px;padding:18px 20px;background:rgba(14,10,20,.96);border:1px solid var(--line);border-top:3px solid var(--lantern);box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 30px rgba(var(--lanternRgb),.12)}
@@ -117,7 +123,6 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
     <h1 class="brand" id="brand"><span>Lumen</span><i>bell</i></h1>
   </header>
   <button class="gear" id="setBtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.4L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.7h4l.4-2.7a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.4z"/><circle cx="12" cy="12" r="3"/></svg></button>
-  <button class="gear tbtn" id="tutoBtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Tutorial" title="Tutorial"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 6.5C10.4 5.3 8 4.8 4.5 5v12.5c3.5-.2 5.9.3 7.5 1.5 1.6-1.2 4-1.7 7.5-1.5V5C16 4.8 13.6 5.3 12 6.5zM12 6.5V19"/></svg></button>
   <div class="figwrap" id="figwrap">
     <div class="fig" id="fig" role="group" aria-label="Chapters">
       <svg class="wire" id="wire" viewBox="0 0 100 100" aria-hidden="true" focusable="false"></svg>
@@ -131,6 +136,7 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
     </div>
   </div>
   <footer class="hfoot">
+    <button class="tpill" id="tutoBtn" type="button" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 6.5C10.4 5.3 8 4.8 4.5 5v12.5c3.5-.2 5.9.3 7.5 1.5 1.6-1.2 4-1.7 7.5-1.5V5C16 4.8 13.6 5.3 12 6.5zM12 6.5V19"/></svg><span id="tutoLbl">Tutorial</span></button>
     <div class="langs" id="langs" role="group" aria-label="Language"></div>
     <p class="ver" id="ver"></p>
   </footer>
@@ -1213,7 +1219,7 @@ function hold(b,S){let t0=0,raf=0,on=false;const p=v=>b.style.setProperty('--p',
   b.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' ')stop()});
   b.addEventListener('contextmenu',e=>e.preventDefault())}
 function tuto(on){if(on===tutoOpen)return;tutoOpen=on;$('htuto').hidden=!on;$('tutoBtn').setAttribute('aria-expanded',String(on));
-  if(on){close(false);settings(false);if(!tutoRender)tutoRender=LB.tuto.mount($('htList'));else tutoRender();try{$('htClose').focus({preventScroll:true})}catch(e){}}else try{$('tutoBtn').focus({preventScroll:true})}catch(e){}}
+  if(on){close(false);settings(false);$('htuto').style.setProperty('--tutoB',Math.max(16,Math.round(innerHeight-$('tutoBtn').getBoundingClientRect().top+10))+'px');if(!tutoRender)tutoRender=LB.tuto.mount($('htList'));else tutoRender();try{$('htClose').focus({preventScroll:true})}catch(e){}}else try{$('tutoBtn').focus({preventScroll:true})}catch(e){}}
 function settings(on){if(on===setOpen)return;setOpen=on;$('hset').hidden=!on;$('setBtn').setAttribute('aria-expanded',String(on));
   if(on){close(false);tuto(false);setSync();try{$('hsClose').focus({preventScroll:true})}catch(e){}}else try{$('setBtn').focus({preventScroll:true})}catch(e){}}
 function reset(){const hit=k=>RESET_T.keys.includes(k)||RESET_T.prefix.some(p=>k.startsWith(p));
@@ -1225,7 +1231,7 @@ function lang(){document.documentElement.lang=LB.lang.cur;
   $('fig').setAttribute('aria-label',LB._('Chapters','Chapitres'));$('langs').setAttribute('aria-label',LB._('Language','Langue'));
   const st=LB._('Settings','Réglages');$('setBtn').setAttribute('aria-label',st);$('setBtn').title=st;$('hsTitle').textContent=st;$('hsClose').setAttribute('aria-label',LB._('Close','Fermer'));
   document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
-  const tt=LB._('Tutorial','Tuto');$('tutoBtn').setAttribute('aria-label',tt);$('tutoBtn').title=tt;$('htTitle').textContent=tt;$('htClose').setAttribute('aria-label',LB._('Close','Fermer'));
+  const tt=LB._('Tutorial','Tutoriel');$('tutoLbl').textContent=tt;$('tutoBtn').setAttribute('aria-label',tt);$('tutoBtn').title=tt;$('htTitle').textContent=tt;$('htClose').setAttribute('aria-label',LB._('Close','Fermer'));
   if(tutoRender)tutoRender();
   setSync();apply(shown);if(card)open(card,true);layout()}
 function layout(){const R=document.documentElement.style,T=HUB_T,w=$('figwrap'),low=innerHeight<=T.lowH&&innerWidth>innerHeight;

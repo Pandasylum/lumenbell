@@ -12,7 +12,7 @@
    Retour d'un chapitre (?back=N, lien « Chapitres » ou fin du chapitre) : sans écran de démarrage, le fond sonore repart.
    Tours fêtées (lb-hub-lit, liste des chapitres) : à l'arrivée, une tour terminée pas encore fêtée s'allume devant le joueur
    avec sa cloche, puis est marquée fêtée ; une tour déjà fêtée apparaît allumée, sans animation.
-   Onglet Tuto (livre en haut à gauche, décision docs/decisions/2026-11-08-onglet-tuto-hub.md) : bloc partagé LB.tuto (shared/js/30-tuto.js).
+   Onglet Tuto (pastille livre + libellé au-dessus des langues, décision docs/decisions/2026-11-08-onglet-tuto-hub.md) : bloc partagé LB.tuto (shared/js/30-tuto.js).
    Réglages (roue en haut à droite) : table SETTINGS_T ; réinitialisation : RESET_T. Fond sonore : HUB_T.bed (variante « nébuleuse », sans paramètre d'URL). Tout réglage est dans HUB_CH, HUB_T, SETTINGS_T et RESET_T ; un chapitre de plus
    = une entrée de plus dans HUB_CH. */
 LB.setup({id:'hub',old:{'lb-ch1-end':['eb-end']}});
@@ -189,7 +189,7 @@ function hold(b,S){let t0=0,raf=0,on=false;const p=v=>b.style.setProperty('--p',
   b.addEventListener('contextmenu',e=>e.preventDefault())}
 /* onglet Tuto : bloc partagé LB.tuto (shared/js/30-tuto.js), monté ici seulement ; ouvert, il referme les réglages et la carte */
 function tuto(on){if(on===tutoOpen)return;tutoOpen=on;$('htuto').hidden=!on;$('tutoBtn').setAttribute('aria-expanded',String(on));
-  if(on){close(false);settings(false);if(!tutoRender)tutoRender=LB.tuto.mount($('htList'));else tutoRender();try{$('htClose').focus({preventScroll:true})}catch(e){}}else try{$('tutoBtn').focus({preventScroll:true})}catch(e){}}
+  if(on){close(false);settings(false);$('htuto').style.setProperty('--tutoB',Math.max(16,Math.round(innerHeight-$('tutoBtn').getBoundingClientRect().top+10))+'px');if(!tutoRender)tutoRender=LB.tuto.mount($('htList'));else tutoRender();try{$('htClose').focus({preventScroll:true})}catch(e){}}else try{$('tutoBtn').focus({preventScroll:true})}catch(e){}}
 function settings(on){if(on===setOpen)return;setOpen=on;$('hset').hidden=!on;$('setBtn').setAttribute('aria-expanded',String(on));
   if(on){close(false);tuto(false);setSync();try{$('hsClose').focus({preventScroll:true})}catch(e){}}else try{$('setBtn').focus({preventScroll:true})}catch(e){}}
 /* efface la progression (RESET_T), garde la langue et les réglages ; le hub se réaffiche à l'état vierge */
@@ -203,7 +203,7 @@ function lang(){document.documentElement.lang=LB.lang.cur;
   $('fig').setAttribute('aria-label',LB._('Chapters','Chapitres'));$('langs').setAttribute('aria-label',LB._('Language','Langue'));
   const st=LB._('Settings','Réglages');$('setBtn').setAttribute('aria-label',st);$('setBtn').title=st;$('hsTitle').textContent=st;$('hsClose').setAttribute('aria-label',LB._('Close','Fermer'));
   document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
-  const tt=LB._('Tutorial','Tuto');$('tutoBtn').setAttribute('aria-label',tt);$('tutoBtn').title=tt;$('htTitle').textContent=tt;$('htClose').setAttribute('aria-label',LB._('Close','Fermer'));
+  const tt=LB._('Tutorial','Tutoriel');$('tutoLbl').textContent=tt;$('tutoBtn').setAttribute('aria-label',tt);$('tutoBtn').title=tt;$('htTitle').textContent=tt;$('htClose').setAttribute('aria-label',LB._('Close','Fermer'));
   if(tutoRender)tutoRender();
   setSync();apply(shown);if(card)open(card,true);layout()}
 /* ---------- mise en page (HUB_T) : figure aussi grande que la place restante (la carte ne la déplace pas) ; titre centré entre le haut

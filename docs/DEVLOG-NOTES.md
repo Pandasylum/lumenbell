@@ -319,3 +319,4 @@
 
 ## 2026-11-08 · feat/hub-onglet-tuto
 - Ce que le joueur verra : un livre en haut à gauche du hub ouvre l'onglet Tuto ; au départ quatre lignes « — », puis chaque geste (bloquer, esquiver, tenir, rester en place) apparaît avec son titre et sa phrase à sa première réussite, et reste.
+- Hub : le bouton Tutoriel (livre + libellé) est maintenant une pastille centrée au-dessus de EN / FR ; son panneau s'ouvre au-dessus.

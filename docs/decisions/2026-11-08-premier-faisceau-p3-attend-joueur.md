@@ -11,3 +11,5 @@
 - Cinématique non touchée. Test : `tests/ch2-input.js` (bloc 5).
 - **Jauge du bouton d'action** (remplace l'anneau, corrigé le 8 novembre) : `wardRing` (`12-hero-states.js`) dessine, à l'intérieur du bouton `#ward`, un cadre fin (le maintien est disponible) et un rectangle qui se charge de gauche à droite pendant le maintien du dôme (`domeAlpha`). Pendant l'attente du premier faisceau (Facile, Normal) la jauge est pleine et pulse (`PULSE_FX.freq`, aucun nouveau timing). Visible en P3 hors Épreuve. En code (ni SVG ni asset ni texte), `shared/` non touché, remise en place si `hud()` réécrit le bouton. Look dans `WARD_RING` (`40-boss-drowned-beacon.js`). Le tap garde son comportement.
 - **Tap en phase III = animation de bloquer** (8 novembre) : un tap (action sans bouton tenu) réutilise la pose « block » et `LB.drawBlock` comme en phase II, avec les durées existantes (`HERO_T`, act 0,333). Aucun nouveau timing ; la tenue (pose « hold », dôme bleu) est inchangée.
+
+Au retry de la P3, aucune attente ; le rappel est dans l'onglet Tutoriel.

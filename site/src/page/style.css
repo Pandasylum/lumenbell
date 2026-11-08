@@ -89,7 +89,13 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .gear{position:absolute;z-index:5;top:max(var(--pad),env(safe-area-inset-top,0px));right:max(var(--pad),env(safe-area-inset-right,0px));width:var(--touch);height:var(--touch);display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:none;color:var(--muted);cursor:pointer}
 .gear svg{width:var(--gearS);height:var(--gearS);fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
 .gear:hover,.gear[aria-expanded="true"]{color:var(--fg)}
-.gear.tbtn{right:auto;left:max(var(--pad),env(safe-area-inset-left,0px))}
+.tpill{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:max(44px,var(--touch));padding:6px 16px;font-family:var(--font-display);font-weight:700;font-size:15px;line-height:1;letter-spacing:.12em;white-space:nowrap;color:var(--fg);background:rgba(10,7,16,.6);border:1px solid rgba(255,255,255,.22);border-radius:4px;cursor:pointer}
+@media (max-height:520px) and (orientation:landscape){.tpill{position:static;transform:none;margin-right:6px;min-height:var(--touch)}}
+.tpill svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.tpill:hover,.tpill:focus-visible,.tpill[aria-expanded="true"]{border-color:var(--lantern);outline:none}
+.tpill:focus-visible{box-shadow:0 0 0 2px rgba(var(--lanternRgb),.5)}
+#htuto{place-items:end center;padding-bottom:var(--tutoB,16px)}
+#htuto .hsbox{width:min(var(--setW),100%)}
 .gear:focus-visible{outline:2px solid var(--lantern);outline-offset:2px}
 .hset{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:16px;background:rgba(8,6,13,.6);outline:none}
 .hsbox{overscroll-behavior:contain;touch-action:pan-y;position:relative;width:var(--setW);max-height:100%;overflow:auto;display:grid;gap:10px;padding:18px 20px;background:rgba(14,10,20,.96);border:1px solid var(--line);border-top:3px solid var(--lantern);box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 30px rgba(var(--lanternRgb),.12)}
