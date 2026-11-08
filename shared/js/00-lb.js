@@ -5,7 +5,7 @@ LB.FONT={display:'"Big Shoulders Display",Impact,sans-serif',body:'"DM Sans",sys
 /* Écran tactile (pointer:coarse) : une seule détection pour toute la série, lue au chargement. */
 LB.coarse=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
 /* Plafond du rapport de pixels sur tactile : constante unique (voir docs/decisions/2026-11-08-plafond-dpr-tactile.md) */
-LB.DPR_COARSE_MAX=1.75;
+LB.DPR_COARSE_MAX=1.5;
 /* Rapport de pixels du canvas principal du Chapitre I et défaut de LB.cacheLayer : plafond LB.DPR_COARSE_MAX sur tactile, 2 sinon */
 LB.dpr=Math.min(LB.coarse?LB.DPR_COARSE_MAX:2,window.devicePixelRatio||1);
 LB.$=id=>document.getElementById(id);
