@@ -1616,7 +1616,7 @@ function drawHero(){
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x+jx,y+jy,92,Math.PI,0);ctx.fill();
     ctx.strokeStyle=warn?`rgba(${FATIGUE.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
   const waiting=ph===3&&S.learn&&S.learn.th&&!S.holding;   // the first beam waits for the hold (BEACON_LEARN): the same shadow, until the Watcher holds
-  if(waiting||ph===3&&S.ghostDome!=null&&gt-S.ghostDome<GHOST_DOME.dur){const Z=GHOST_DOME,u=(gt-S.ghostDome)/Z.dur,a=waiting?1:Math.min(1,(gt-S.ghostDome)/Z.in)*(1-u);ctx.save();ctx.globalAlpha=a;
+  if(waiting||ph===3&&!S.d.hard&&LB.help.on()&&S.ghostDome!=null&&gt-S.ghostDome<GHOST_DOME.dur){const Z=GHOST_DOME,u=(gt-S.ghostDome)/Z.dur,a=waiting?1:Math.min(1,(gt-S.ghostDome)/Z.in)*(1-u);ctx.save();ctx.globalAlpha=a;
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(HX,y,Z.r,Math.PI,0);ctx.fill();
     ctx.strokeStyle=`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=GUARD_FX.dome.line;ctx.setLineDash(Z.dash);ctx.stroke();ctx.restore()}
   if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,92+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
@@ -1930,7 +1930,7 @@ function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
   return Math.max(w(B.beam.D),w(B.dazzle.D),w(B.morse.long.D),w(SP.kwave.D),1.25*160/1080,1.25*160/1000,1.5*160/1000,bellSpan(Z),B.shard.blast,SP.storm.trapTb-SP.storm.trapTa,.6)}
 const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
 const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
-const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:0,normal:0,hard:1}};
+const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:0,normal:0,hard:0}};
 const PULSE_FX={freq:2.4,base:.25,peak:.95};
 const LX=760,LY=GY-333;
 function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0))}
@@ -2129,7 +2129,7 @@ function drawBeacon(){
       if(Math.abs(bx-HX)<90&&S.holding){burst(HX+(Math.random()-.5)*120,GY-60-Math.random()*40,1,'#e8fdff',3,.3)}
     }
     if(th.k==='bolt'&&gt>=th.t0){const o=lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];
-      if(!th.done){const k=clamp((th.ti-gt)/(th.ti-th.t0),0,1);ctx.strokeStyle=`rgba(180,250,255,${.85-k*.4})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(HX,GY,24+60*k,6+14*k,0,0,Math.PI*2);ctx.stroke();
+      if(!th.done){const k=clamp((th.ti-gt)/(th.ti-th.t0),0,1);if(LB.help.on()){ctx.strokeStyle=`rgba(180,250,255,${.85-k*.4})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(HX,GY,24+60*k,6+14*k,0,0,Math.PI*2);ctx.stroke()}   // ring under the feet: a help cue
         crackle(o,clamp((gt-th.t0)/(th.ti-th.t0),0,1));   // electricity crackles round the lamp that will fire (a dot / circle: tap)
         glow(o.x,o.y,60,'rgba(200,250,255,.9)',k<.25?.8:0)}
       else if(gt-th.okT<.22){ctx.save();ctx.globalCompositeOperation='lighter';

@@ -305,3 +305,7 @@
 ## 2026-11-08 · feat/p3-premier-faisceau-attend (anneau)
 - Ce que le joueur verra : une jauge dans le bouton d'action en phase III ; elle se charge pendant le maintien du dôme et pulse pendant l'attente du premier faisceau (Facile, Normal).
 - Ce que le joueur verra (correctif) : l'attente du premier faisceau n'a lieu qu'à l'arrivée en phase III (après l'intro ou via le bouton de Phase), jamais au retry ; la jauge du bouton est bien visible ; le halo en pointillé n'apparaît plus qu'à l'attente du premier faisceau (Difficile : après le premier coup sur une menace à maintenir).
+
+## 2026-11-08 · feat/p3-premier-faisceau-attend (aide visuelle)
+- Ce que le joueur verra : le cercle sous les pieds du Veilleur pendant l'éclair n'apparaît plus qu'avec l'aide visuelle activée ; il n'y en a donc plus en Difficile.
+- Ce que le joueur verra : le halo du dôme reste visible pendant l'attente du premier faisceau (Facile, Normal) ; ensuite il dépend de l'aide visuelle, et en Difficile il n'y a plus aucun halo.

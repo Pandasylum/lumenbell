@@ -69,7 +69,7 @@ const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
 const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
 /* the ghost dome: when a hit lands on a threat that had to be held, the dome the Watcher should have raised is drawn for `dur` s (dashed outline, `fill` of
    opacity), to show what was missing. Per fight (resetPhaseState): `n` times by level (Easy and Normal: never, their shadow is the wait of the first beam; Hard: after the first hit on a threat to hold). */
-const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:0,normal:0,hard:1}};
+const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:0,normal:0,hard:0}};
 /* the pulse of the Watcher's lantern in the entry cinematic of phase III (CINE_P3.guard): the halo swells `freq` times a second between `base` and `peak` */
 const PULSE_FX={freq:2.4,base:.25,peak:.95};
 const LX=760,LY=GY-333;
@@ -311,7 +311,7 @@ function drawBeacon(){
       if(Math.abs(bx-HX)<90&&S.holding){burst(HX+(Math.random()-.5)*120,GY-60-Math.random()*40,1,'#e8fdff',3,.3)}
     }
     if(th.k==='bolt'&&gt>=th.t0){const o=lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];
-      if(!th.done){const k=clamp((th.ti-gt)/(th.ti-th.t0),0,1);ctx.strokeStyle=`rgba(180,250,255,${.85-k*.4})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(HX,GY,24+60*k,6+14*k,0,0,Math.PI*2);ctx.stroke();
+      if(!th.done){const k=clamp((th.ti-gt)/(th.ti-th.t0),0,1);if(LB.help.on()){ctx.strokeStyle=`rgba(180,250,255,${.85-k*.4})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(HX,GY,24+60*k,6+14*k,0,0,Math.PI*2);ctx.stroke()}   // ring under the feet: a help cue
         crackle(o,clamp((gt-th.t0)/(th.ti-th.t0),0,1));   // electricity crackles round the lamp that will fire (a dot / circle: tap)
         glow(o.x,o.y,60,'rgba(200,250,255,.9)',k<.25?.8:0)}
       else if(gt-th.okT<.22){ctx.save();ctx.globalCompositeOperation='lighter';
