@@ -4,7 +4,7 @@ const ward=$('ward'),cvm=$('c'),ctxMain=cvm.getContext('2d');let SCm=1;
 const DPR_MAX=LB.coarse?1.25:2;
 function fitMain(){const r=cvm.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,DPR_MAX);cvm.width=Math.max(1,Math.round(r.width*d));cvm.height=Math.max(1,Math.round(r.height*d));SCm=cvm.width/W}
 new ResizeObserver(fitMain).observe($('stage'));fitMain();
-function skip(){if(S.mode==='prologue'||S.mode==='epilogue')LB.cine.skip();else if(S.mode==='cine')endCine()}
+function skip(){if(S.mode==='prologue'||S.mode==='epilogue')LB.cine.skip();else if(S.mode==='cine'&&S.cine&&cineSeen(S.phase,S.cine.k))endCine()}
 $('skip').addEventListener('click',skip);
 /* inputs of the series (LB.input, shared/js/28-ui.js): Space, up arrow, W, Z, touching the arena or the action button, released
    for all; P / Escape pause; R retry; Enter / Space on a card, the pause and the menu (Normal). This chapter's phase cinematics

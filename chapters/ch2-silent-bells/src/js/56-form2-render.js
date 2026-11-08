@@ -271,6 +271,7 @@ function cineBoss(){
     return}
   /* ===== Drowned Beacon (Phase III) ===== */
   if(ph===3&&k==='in'){
+    cineGuard(t);
     if(t<1.5){drawLamps(LAMP_FLOOR,1);ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();S.heroDY=0}
     else if(t<11.5){S.heroDY=0;S.tfT=S.cine.t0+1.5;drawTransform()}
     else{const s=clamp((t-11.7)/1.4,0,1);drawBoss3({dir:-1,pre:(t-11.7+SPIN.pre)/SPIN.pre,s,post:(t-13.1)/SPIN.back});if(s>0&&s<1){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*s,.8);ctx.restore()}}

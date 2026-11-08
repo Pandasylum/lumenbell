@@ -80,6 +80,7 @@ function success(th,perfect){
 function hurt(th){
   if(S.mode!=='play')return;
   S.hp=Math.max(0,S.hp-1);S.hits++;S.hurtT=gt;S.shake=12;
+  if(S.phase===3&&th&&th.hold&&S.ghostN<GHOST_DOME.n[vdk()]){S.ghostN++;S.ghostDome=gt}   // shows the dome that was missing (GHOST_DOME)
   // stun, cut short so that the next attack can still be stopped (LB.hero.hurt: min(base, max(.14, gap - .2)))
   {let nx=99;for(const o of S.threats)if(o!==th&&!o.done&&o.real!==false){const at=o.hold?o.ta:o.ti;if(at!=null&&at>gt)nx=Math.min(nx,at-gt)}
    LB.hero.hurt(S.pl,nx,{g:gest(),dur:th&&th.k==='shard'?RAIN.hurt:undefined})}

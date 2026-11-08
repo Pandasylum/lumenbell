@@ -25,7 +25,7 @@ const TXT=()=>{const out=[],seen=new Set();
   await add();await add();
   await pg.evaluate(()=>document.querySelector('#mphM [data-diff=trial]').click());await add();await pg.click('#mBackT');
   await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(400);
-  for(let i=0;i<20&&await pg.evaluate(()=>document.getElementById('ov').hidden);i++){await pg.keyboard.press('Enter');await pg.waitForTimeout(250)}   // Chapitre II : cinematique d'entree
+  for(let i=0;i<60&&await pg.evaluate(()=>document.getElementById('ov').hidden);i++){await pg.keyboard.press('Enter');await pg.waitForTimeout(250)}   // Chapitre II : cinematique d'entree
   await add();await pg.click('#go');await pg.waitForTimeout(300);await pg.keyboard.press('p');await pg.waitForTimeout(100);await add();await pg.keyboard.press('p');
   for(const t of all){const x=banned(t);if(x)errs.push(tag+' : texte affiche '+JSON.stringify(t)+' ('+x+')')}
   console.log(tag,all.size,'textes lus');await ctx.close()}

@@ -4,12 +4,14 @@ function setTheme(id){if(LB.audio.music)MUSIC.play(id);else MUSIC.stop()}
 /* cards of the series (LB.card, declarative): kept in lastCard so that « Resume » from the menu shows it again */
 function showCard(o){lastCard=o;LB.card.show(o)}
 function hideCard(){LB.card.hide()}
+/* phase cinematics (in, out, p2): compulsory the first time (no Skip), skippable once seen; flag lb-ch2-cine-<phase><kind>, written when it ends */
+const cineKey=(id,k)=>LB.key('cine-'+id+k),cineSeen=(id,k)=>LB.store.get(cineKey(id,k),'0')==='1';
 function playCine(id,k,cb){
   MUSIC.stop();S.phase=id;resetCine(S);S.parts=[];S.pops=[];S.cine={k,t0:gt};S.cineCb=cb;S.mode='cine';S.paused=false;
   S.tfBurst=S.tfFlash=S.tfAnch=false;S.tfId=(S.tfId||0)+1;S.flashT=-9;S.shake=0;
-  hideCard();hud();if(LB.audio.music)MUSIC.bed(id);$('skip').hidden=false;
+  hideCard();hud();if(LB.audio.music)MUSIC.bed(id);$('skip').hidden=!cineSeen(id,k);
 }
-function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
+function endCine(){if(S.mode!=='cine')return;if(S.cine)LB.store.set(cineKey(S.phase,S.cine.k),'1');const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 /* intro and outro in the series frame (LB.cine, shared/js/24-cine.js): the chapter draws the shot in the module's canvas
    (ctx swapped for the draw), the module draws the frame (cartons, fades, caption, Skip). Game time (gt, particles) runs
    with the game loop as before; only when the loop is stopped (menu open, replay) does it follow the module's time. */
@@ -29,7 +31,7 @@ function replayEpilogue(cb){if(EPI.playing())return;const keep={gt,t0:S.epT0,par
 function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
   S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if(LB.audio.music)MUSIC.bed(2);
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
-function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,ghostN:0,ghostDome:null,pulse:0,domeT0:null,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=id===3?S.d.bd.hp3:S.d.bd.hp;S.bossHp=S.bossMax;S.hp=o.first?S.hpMax:LB.healFor(S.d.heal,S.hpMax,S.hp);   // heal rule shared: true = full refill, a number = that many HP capped at the starting HP (trial: +1)
  resetPhaseState();

@@ -1,0 +1,10 @@
+# Chapitre II · Phare : faire comprendre le tenir (8 novembre 2026)
+
+Constat de Kevin : tenir n'est pas instinctif, rien ne montre qu'un maintien est possible. Peu d'aides visuelles (une seule par niveau), aucun texte.
+
+- **Cinématique d'entrée du Phare** : le Veilleur lève la garde quand le premier faisceau le croise ; la lanterne pulse dès 11,5 s (halo entre `PULSE_FX.base` et `peak`, `PULSE_FX.freq` fois par seconde), le dôme et le bourdonnement tiennent de 11,95 s à 13,2 s (`CINE_P3.guard`, `cineGuard`). Même dôme que le combat.
+- **Dôme fantôme** (`GHOST_DOME`, `40-boss-drowned-beacon.js`) : quand un coup touche une menace à tenir (`th.hold`), le dôme manquant est dessiné 0,9 s en pointillé. Facile : à chaque coup ; Normal : le premier coup de chaque combat (compteur remis à zéro par `resetPhaseState`, donc aussi au début de la Partie 2) ; Difficile : jamais. Aucune fenêtre ni rythme touchés.
+- **Cinématiques de phase obligatoires la première fois** (entrée, sortie, transition de la Partie 2 du Phare) : pas de bouton Passer ni d'Entrée tant qu'elle n'a pas été vue ; drapeau `lb-ch2-cine-<phase interne><in|out|p2>` écrit à la fin. Ensuite Passer / Entrée comme avant. Les clés commencent par `lb-ch`, donc « Réinitialiser la progression » les efface. Le Chapitre I n'a pas de cinématique de phase : rien à y changer. **À valider** : la durée imposée (jusqu'à 13,8 s au Phare).
+- **Carton de titre** (`title`, `TITLE_T`) : la ligne « Phase … · salle » était posée à 46 px au-dessus du nom, ce qui le chevauchait ; elle se place maintenant au-dessus de la hauteur de capitale du nom (`TITLE_T.cap`, `gap`), quelle que soit sa taille.
+- Tests adaptés : `ch2-smoke` et `announce` attendent plus longtemps la carte de phase ; `inputs` vérifie l'Entrée sans effet la première fois puis active ; `cine` accepte la cinématique de phase I comme étape après l'intro.
+- **Piste non retenue** : un indice permanent sur le héros (demande moteur) ; à reprendre si les joueurs ne comprennent toujours pas.

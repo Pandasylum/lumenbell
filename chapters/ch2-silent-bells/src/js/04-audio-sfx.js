@@ -32,7 +32,7 @@ function humSet(on){
   if(!on||hum||!c||!A.sound||!A.sfx||c.state!=='running')return;
   try{const t=c.currentTime,g=c.createGain(),lp=c.createBiquadFilter(),os=Z.f.map((f,i)=>{const o=c.createOscillator();o.type=i?'sine':'sawtooth';o.frequency.value=f*(1+i*.002);o.detune.value=i*3;o.connect(lp);o.start(t);return o});
     lp.type='lowpass';lp.frequency.value=Z.lp;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(Z.vol,t+Z.in);lp.connect(g);g.connect(A.sfx);hum={c,g,os}}catch(e){hum=null}}
-function humStep(){humSet($('menu').hidden&&S.mode==='play'&&!S.paused&&domeAlpha()>0)}
+function humStep(){humSet($('menu').hidden&&(S.mode==='play'||S.mode==='cine')&&!S.paused&&domeAlpha()>0)}
 /* music */
 const MUS=[null,{bpm:84,bass:[73.4,73.4,87.3,65.4],lead:'bell'},{bpm:96,bass:[82.4,87.3,82.4,61.7],lead:'choir'},{bpm:118,bass:[55,55,65.4,49],lead:'arp'}];
 let mStep=0,mNext=0;

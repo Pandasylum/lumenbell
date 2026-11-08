@@ -26,6 +26,10 @@ function drawHero(){
   if(da>0){const Z=GUARD_FX.dome,jx=warn?Math.sin(gt*70)*2.2:0,jy=warn?Math.cos(gt*83)*1.4:0;ctx.save();ctx.globalAlpha=da;
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x+jx,y+jy,92,Math.PI,0);ctx.fill();
     ctx.strokeStyle=warn?`rgba(${FATIGUE.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
+  // the ghost dome: the dome that was missing when a hit landed on a threat to hold (GHOST_DOME), dashed, fading
+  if(ph===3&&S.ghostDome!=null&&gt-S.ghostDome<GHOST_DOME.dur){const Z=GHOST_DOME,u=(gt-S.ghostDome)/Z.dur,a=Math.min(1,(gt-S.ghostDome)/Z.in)*(1-u);ctx.save();ctx.globalAlpha=a;
+    ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(HX,y,Z.r,Math.PI,0);ctx.fill();
+    ctx.strokeStyle=`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=GUARD_FX.dome.line;ctx.setLineDash(Z.dash);ctx.stroke();ctx.restore()}
   // the dome bursts when the hold is too long (fatigue): shards of the outline fly off
   if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,92+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
   // phase III, tap: an arc of light (yellow-white of the lantern) in front of the Watcher, turned towards the threat
@@ -44,6 +48,7 @@ function drawHero(){
 function heroShape(x,y,pose,o,tint,ghost){
   const P=LB.WATCHER_POSES[pose](o.k==null?1:o.k,o,rt),lit=P.lit||(o.staffA!=null&&o.staffA<-1.42-.135);
   const opt=Object.assign({lamp:1-(S.lampDim||0),breath:pose==='idle',lanternCol:LB.watcherLanternCol(S.mode==='play'?S.pl:null,lit)},o);
+  if(S.pulse>0&&!ghost)opt.glow=PULSE_FX.base+(PULSE_FX.peak-PULSE_FX.base)*S.pulse;   // entry of phase III: the lantern pulses with the press
   const L=LB.drawWatcher(ctx,x,y,pose,rt,opt);
   if(!ghost){S.orbX=L.lx;S.orbY=L.ly}
   if(tint>0){ctx.save();ctx.globalAlpha=tint*.5;ctx.fillStyle='#ff4a3a';ctx.beginPath();ctx.ellipse(x,y-60,32,66,0,0,Math.PI*2);ctx.fill();ctx.restore()}

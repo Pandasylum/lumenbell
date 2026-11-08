@@ -64,7 +64,10 @@ async function pause(pg,tag,step){
   // cinematique de phase : Entree passe
   check(await pg.evaluate(()=>window.__t.S.mode)==='cine','ch2: pas de cinematique d\'entree');await pg.keyboard.press('p');await step();
   check(await pg.evaluate(()=>window.__t.S.mode==='cine'&&document.getElementById('pause').hidden),'ch2: P agit pendant la cinematique');
-  await pg.keyboard.press('Enter');await step();check(await pg.evaluate(()=>window.__t.S.mode)==='card','ch2: Entree ne passe pas la cinematique');
+  // premiere fois : obligatoire (Entree sans effet, bouton Passer cache) ; une fois vue (drapeau lb-ch2-cine-2in) : Entree la passe
+  await pg.keyboard.press('Enter');await step();check(await pg.evaluate(()=>window.__t.S.mode==='cine'&&document.getElementById('skip').hidden),'ch2: la cinematique d\'entree doit etre obligatoire la premiere fois');
+  await pg.evaluate(()=>window.__t.LB.store.set(window.__t.LB.key('cine-2in'),'1'));
+  await pg.keyboard.press('Enter');await step();check(await pg.evaluate(()=>window.__t.S.mode)==='card','ch2: Entree ne passe pas la cinematique deja vue');
   await toPlay('ch2 phase I');await pg.evaluate(()=>{const S=window.__t.S;S.hp=S.hpMax=99;S.threats=[];S.nextAt=window.__t.gt+600});await pg.evaluate(SPY);   // plus d'attaque : le test ne doit pas finir en defaite
   await keys(pg,'ch2',step);await pause(pg,'ch2',step);
   await pg.evaluate(()=>{window.__t.S.hpMax=4;window.__t.S.hp=1});await pg.keyboard.press('r');await step();
