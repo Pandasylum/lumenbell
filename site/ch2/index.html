@@ -188,7 +188,7 @@ h1{margin:2px 0 0;font-family:var(--font-display);font-weight:800;font-size:clam
 const LB={};
 LB.FONT={display:'"Big Shoulders Display",Impact,sans-serif',body:'"DM Sans",system-ui,sans-serif'};
 LB.coarse=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
-LB.DPR_COARSE_MAX=1.75;
+LB.DPR_COARSE_MAX=1.5;
 LB.dpr=Math.min(LB.coarse?LB.DPR_COARSE_MAX:2,window.devicePixelRatio||1);
 LB.$=id=>document.getElementById(id);
 LB.cacheLayer=(w,h,draw,o)=>{
