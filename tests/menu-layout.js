@@ -30,8 +30,9 @@ for(const [nm,w,h,touch] of SIZES)for(const lang of ['fr','en'])for(const ch of 
  R.menu=await grab(pg,['intro','outro','langEn','langFr','easy','normal','hard','trial','hub','ver','h2','chap']);
  if(!R.menu.hub)errs.push(ch+' '+tag+' : lien Chapitres absent depuis le hub');
  if(await pg.evaluate(()=>!!document.querySelector('.fsb,.fsm')))errs.push(ch+' '+tag+' : bouton plein ecran encore present');
+ if(ch==='ch2')await pg.evaluate(()=>localStorage.setItem('lb-ch2-cine-2in','1'));   // cinematique d'entree de la phase I deja vue (sinon obligatoire, sans Passer, et sa duree depend de la machine)
  await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(500);
- if(ch==='ch2')for(let i=0;i<40&&await pg.evaluate(()=>document.getElementById('ov').hidden);i++)await pg.waitForTimeout(250);   // cinematique d'entree de phase (obligatoire la premiere fois, sans Passer) : on attend la carte
+ if(ch==='ch2'&&await pg.evaluate(()=>!document.getElementById('skip').hidden)){await pg.keyboard.press('Enter');await pg.waitForTimeout(400)}   // cinematique d'entree de phase : passee, la carte s'affiche
  if(touch&&(nm==='phone'||nm==='l640')&&lang==='fr')await require('./lockscroll')(ctx,pg,ch+' '+tag+' (scene de jeu)',errs);
  await pg.evaluate(()=>document.getElementById('menuBtn').click());await pg.waitForTimeout(300);
  R.resume=await grab(pg,['intro','outro','langEn','langFr','easy','normal','hard','trial','resume','hub','ver','h2','chap']);
