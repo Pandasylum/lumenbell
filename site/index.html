@@ -83,6 +83,7 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
 .gear{position:absolute;z-index:5;top:max(var(--pad),env(safe-area-inset-top,0px));right:max(var(--pad),env(safe-area-inset-right,0px));width:var(--touch);height:var(--touch);display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:none;color:var(--muted);cursor:pointer}
 .gear svg{width:var(--gearS);height:var(--gearS);fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
 .gear:hover,.gear[aria-expanded="true"]{color:var(--fg)}
+.gear.tbtn{right:auto;left:max(var(--pad),env(safe-area-inset-left,0px))}
 .gear:focus-visible{outline:2px solid var(--lantern);outline-offset:2px}
 .hset{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:16px;background:rgba(8,6,13,.6);outline:none}
 .hsbox{overscroll-behavior:contain;touch-action:pan-y;position:relative;width:var(--setW);max-height:100%;overflow:auto;display:grid;gap:10px;padding:18px 20px;background:rgba(14,10,20,.96);border:1px solid var(--line);border-top:3px solid var(--lantern);box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 30px rgba(var(--lanternRgb),.12)}
@@ -116,6 +117,7 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
     <h1 class="brand" id="brand"><span>Lumen</span><i>bell</i></h1>
   </header>
   <button class="gear" id="setBtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.4L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.7h4l.4-2.7a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.4z"/><circle cx="12" cy="12" r="3"/></svg></button>
+  <button class="gear tbtn" id="tutoBtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Tutorial" title="Tutorial"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 6.5C10.4 5.3 8 4.8 4.5 5v12.5c3.5-.2 5.9.3 7.5 1.5 1.6-1.2 4-1.7 7.5-1.5V5C16 4.8 13.6 5.3 12 6.5zM12 6.5V19"/></svg></button>
   <div class="figwrap" id="figwrap">
     <div class="fig" id="fig" role="group" aria-label="Chapters">
       <svg class="wire" id="wire" viewBox="0 0 100 100" aria-hidden="true" focusable="false"></svg>
@@ -139,6 +141,13 @@ body{color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5
       <div class="hsrows" id="hsRows"></div>
     </div>
   </div>
+  <div class="hset" id="htuto" role="dialog" aria-modal="true" aria-labelledby="htTitle" tabindex="-1" hidden>
+    <div class="hsbox">
+      <h2 id="htTitle">Tutorial</h2>
+      <button class="hsx" id="htClose" type="button" aria-label="Close">×</button>
+      <ul id="htList"></ul>
+    </div>
+  </div>
 </main>
 <div class="gate" id="gate"><button class="btn big" id="gateBtn" type="button">Start</button></div>
 <script id="fpLang">(function(){try{var l=localStorage.getItem('lb-lang'),f=l?l==='fr':/^fr/i.test((navigator.languages&&navigator.languages[0])||navigator.language||'');if(f){document.getElementById('gateBtn').textContent='Commencer';}}catch(e){}})()</script>
@@ -157,7 +166,7 @@ LB.cacheLayer=(w,h,draw,o)=>{
   const c=document.createElement('canvas');c.width=rd(w*k);c.height=Math.max(1,rd(h*k)-ty);
   const x=c.getContext('2d');x.setTransform(k,0,0,k,0,-ty);draw(x);return c;
 };
-LB.COMMON=['lang','snd','mus','help'];
+LB.COMMON=['lang','snd','mus','help','tuto'];
 LB.OLD_KEYS={'lb-lang':['pn-lang','eb-lang'],'lb-snd':['db-optSnd'],'lb-mus':['db-optMus'],'lb-help':['db-optHelp']};
 LB.id='';LB.old={};LB.oldPrefix=[];
 LB.key=name=>LB.COMMON.includes(name)?'lb-'+name:'lb-'+LB.id+'-'+name;
@@ -318,7 +327,7 @@ LB.hero={
     return ev},
   stops(p,o){o=typeof o==='number'?{win:o}:(o||{});const c=LB.hero.dur(p.g),win=o.win!=null?o.win:c.act,gr=o.grace!=null?o.grace:c.grace+(o.graceAdd||0);
     return(p.s==='act'&&p.t<=win+.002)||(p.s==='recover'&&p.rk==='act'&&p.t<gr)},
-  stopped(p){p.s='ready';p.t=0},
+  stopped(p,held){p.s='ready';p.t=0;if(LB.tuto)LB.tuto.note(held?'hold':p.g==='dodge'?'dodge':'block')},
   perfect(p,now){return p.s==='act'&&(now!=null?now-p.at:p.t)<=LB.hero.dur(p.g).perf},
   hurt(p,gap,o){o=o||{};const T=LB.HERO_T.hurt,base=o.dur!=null?o.dur:T.base[o.g||p.g||'block'],min=o.min!=null?o.min:T.min,mg=o.margin!=null?o.margin:T.margin;
     p.s='hurt';p.t=0;p.rd=Math.min(base,Math.max(min,(gap==null?99:gap)-mg));p.rk='';return p.rd}
@@ -1040,6 +1049,31 @@ LB.settings=(()=>{
     if(where)where(btn);lang();return btn}
   return{mount,attach,lang,sync,toggle,visible(){return open},handled(e){return e===last},get el(){return box}};
 })();
+LB.TUTO_T={ids:['block','dodge','hold','still'],ev:'lb-gesture',none:'—'};
+LB.tuto={
+  text(id){return{
+    block:[LB._('Block','Bloquer'),LB._("One press, at the exact instant: the blow stops dead.","Un seul appui, à l'instant juste : le coup s'arrête net.")],
+    dodge:[LB._('Dodge','Esquiver'),LB._("One press, at the exact instant: you slip out of its path.","Un seul appui, à l'instant juste : tu glisses hors de sa trajectoire.")],
+    hold:[LB._('Hold','Tenir'),LB._("Keep pressing: your block holds, a dome wraps around you.","Maintiens l'appui : ton blocage tient, un dôme t'enveloppe.")],
+    still:[LB._('Stand still','Rester en place'),LB._("Sometimes dodging is a misjudgment: know when to stand still.","Parfois, l'esquive est une erreur de jugement : sache rester en place.")]
+  }[id]},
+  seen(){try{const a=JSON.parse(LB.store.get(LB.key('tuto'),'[]'));return Array.isArray(a)?a.filter(x=>LB.TUTO_T.ids.includes(x)):[]}catch(e){return[]}},
+  note(id){if(!LB.TUTO_T.ids.includes(id))return;const a=LB.tuto.seen();if(a.includes(id))return;a.push(id);
+    LB.store.set(LB.key('tuto'),JSON.stringify(a));
+    try{window.dispatchEvent(new CustomEvent(LB.TUTO_T.ev,{detail:{id}}))}catch(e){}},
+  render(el){const a=LB.tuto.seen();el.textContent='';
+    for(const id of LB.TUTO_T.ids){const li=document.createElement('li');li.dataset.id=id;
+      if(a.includes(id)){const t=LB.tuto.text(id),h=document.createElement('h3'),p=document.createElement('p');h.textContent=t[0];p.textContent=t[1];li.append(h,p)}
+      else{li.className='lbt-none';li.setAttribute('aria-hidden','true');li.textContent=LB.TUTO_T.none}   // rien ne se déduit à l'avance
+      el.appendChild(li)}},
+  mount(el){
+    if(!document.getElementById('lbTutoCss')){const s=document.createElement('style');s.id='lbTutoCss';
+      s.textContent='.lbtuto{list-style:none;margin:0;padding:0;display:grid;gap:12px}.lbtuto li{display:grid;gap:2px}'
+        +'.lbtuto h3{margin:0;font-family:var(--font-display,inherit);font-weight:700;font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--lantern,#ffd28a)}'
+        +'.lbtuto p{margin:0;font-size:15px;line-height:1.4;color:var(--fg,#eee)}.lbtuto .lbt-none{color:var(--muted,#888);font-size:18px;line-height:1.4}';
+      document.head.appendChild(s)}
+    el.classList.add('lbtuto');const r=()=>LB.tuto.render(el);r();window.addEventListener(LB.TUTO_T.ev,r);return r}
+};
 LB.setup({id:'hub',old:{'lb-ch1-end':['eb-end']}});
 const HUB_CH=[
   {n:1,title:'Ember Bridge',path:'ch1/index.html',bell:392},
@@ -1080,6 +1114,7 @@ const SETTINGS_T=[
 ];
 const RESET_T={
   keys:['lb-hub-lit',     // tours fêtées du hub
+    'lb-tuto',            // entrées de l'onglet Tuto (gestes réussis)
     'eb-end','eb-intro',  // anciennes clés du Chapitre I (lb-ch1-end, lb-ch1-intro), sinon recopiées à la lecture
     'db-unl'],            // ancienne clé du Chapitre II (lb-ch2-unl)
   prefix:['lb-ch',        // tout ce qui est propre à un chapitre : lb-chN-end, lb-chN-intro, lb-chN-unl, lb-chN-best-…
@@ -1156,7 +1191,7 @@ function open(n,quiet){const s=shown[n],c=CH(n);if(!c||s==='closed'||leaving)ret
 function close(focus){if(!card)return;const n=card;card=0;tw[n].classList.remove('sel');$('hcard').hidden=true;if(focus)try{tw[n].focus({preventScroll:true})}catch(e){}}
 function enter(){const c=CH(card);if(!c||c.soon||leaving)return;leaving=true;$('hcGo').disabled=true;bed.stop();
   location.href=c.path+'?from='+LB.HUB.from}
-let setOpen=false;
+let setOpen=false,tutoOpen=false,tutoRender=null;
 function setRows(){const box=$('hsRows');box.innerHTML='';
   for(const S of SETTINGS_T){const row=document.createElement('div');row.className='hsrow';row.dataset.id=S.id;
     if(S.type==='hold'){row.innerHTML='<button type="button" class="hshold" id="hs-'+S.id+'"><i class="gauge"></i><b></b><small></small></button>';hold(row.firstChild,S)}
@@ -1177,8 +1212,10 @@ function hold(b,S){let t0=0,raf=0,on=false;const p=v=>b.style.setProperty('--p',
   b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();if(!e.repeat)go()}});
   b.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' ')stop()});
   b.addEventListener('contextmenu',e=>e.preventDefault())}
+function tuto(on){if(on===tutoOpen)return;tutoOpen=on;$('htuto').hidden=!on;$('tutoBtn').setAttribute('aria-expanded',String(on));
+  if(on){close(false);settings(false);if(!tutoRender)tutoRender=LB.tuto.mount($('htList'));else tutoRender();try{$('htClose').focus({preventScroll:true})}catch(e){}}else try{$('tutoBtn').focus({preventScroll:true})}catch(e){}}
 function settings(on){if(on===setOpen)return;setOpen=on;$('hset').hidden=!on;$('setBtn').setAttribute('aria-expanded',String(on));
-  if(on){close(false);setSync();try{$('hsClose').focus({preventScroll:true})}catch(e){}}else try{$('setBtn').focus({preventScroll:true})}catch(e){}}
+  if(on){close(false);tuto(false);setSync();try{$('hsClose').focus({preventScroll:true})}catch(e){}}else try{$('setBtn').focus({preventScroll:true})}catch(e){}}
 function reset(){const hit=k=>RESET_T.keys.includes(k)||RESET_T.prefix.some(p=>k.startsWith(p));
   try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));ks.filter(hit).forEach(k=>localStorage.removeItem(k))}catch(e){}
   try{sessionStorage.removeItem(LIT)}catch(e){}   // ancienne place des tours vues allumées
@@ -1188,6 +1225,8 @@ function lang(){document.documentElement.lang=LB.lang.cur;
   $('fig').setAttribute('aria-label',LB._('Chapters','Chapitres'));$('langs').setAttribute('aria-label',LB._('Language','Langue'));
   const st=LB._('Settings','Réglages');$('setBtn').setAttribute('aria-label',st);$('setBtn').title=st;$('hsTitle').textContent=st;$('hsClose').setAttribute('aria-label',LB._('Close','Fermer'));
   document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
+  const tt=LB._('Tutorial','Tuto');$('tutoBtn').setAttribute('aria-label',tt);$('tutoBtn').title=tt;$('htTitle').textContent=tt;$('htClose').setAttribute('aria-label',LB._('Close','Fermer'));
+  if(tutoRender)tutoRender();
   setSync();apply(shown);if(card)open(card,true);layout()}
 function layout(){const R=document.documentElement.style,T=HUB_T,w=$('figwrap'),low=innerHeight<=T.lowH&&innerWidth>innerHeight;
   R.setProperty('--titleFs',low?T.title.low:T.title.fs);
@@ -1204,7 +1243,7 @@ function placeCard(){const hc=$('hcard'),T=HUB_T.card;if(!card||hc.hidden)return
     cw=hc.offsetWidth,ch=hc.offsetHeight,
     discs=[...document.querySelectorAll('.tw .dot,#core')].map(e=>{const q=e.getBoundingClientRect();return{x:q.left+q.width/2,y:q.top+q.height/2,r:q.width/2}}),
     rg=document.createRange();rg.selectNodeContents($('brand'));
-    const boxes=[...document.querySelectorAll('#langs button,#ver,#setBtn'),rg].map(e=>e.getBoundingClientRect()),
+    const boxes=[...document.querySelectorAll('#langs button,#ver,#setBtn,#tutoBtn'),rg].map(e=>e.getBoundingClientRect()),
     hitC=(r,c)=>{const dx=Math.max(r.l-c.x,0,c.x-r.r),dy=Math.max(r.t-c.y,0,c.y-r.b);return dx*dx+dy*dy<(c.r+T.clear)*(c.r+T.clear)},
     hitB=(r,o)=>r.l<o.right+T.clear&&r.r>o.left-T.clear&&r.t<o.bottom+T.clear&&r.b>o.top-T.clear,
     lo=m,hi=Math.max(lo,W-m-cw),ideal=Math.min(hi,Math.max(lo,tx-cw/2)),
@@ -1230,6 +1269,9 @@ function motes(){const M=HUB_T.motes,w=$('motes');
 function focusables(){const o=[];for(let n=1;n<=HUB_T.towers;n++)if(shown[n]!=='closed')o.push(n);return o}
 function home(){const o=focusables();return o.find(n=>shown[n]==='play')||o[0]||1}
 function keys(e){if(!$('gate').hidden||leaving)return;const k=e.key;
+  if(tutoOpen){if(k==='Escape'){e.preventDefault();tuto(false)}
+    else if(k==='Tab'){const f=[...$('htuto').querySelectorAll('button')],i=f.indexOf(document.activeElement);e.preventDefault();try{f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus()}catch(x){}}
+    return}
   if(setOpen){if(k==='Escape'){e.preventDefault();settings(false)}
     else if(k==='Tab'){const f=[...$('hset').querySelectorAll('button')],i=f.indexOf(document.activeElement);e.preventDefault();try{f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus()}catch(x){}}
     return}
@@ -1249,6 +1291,9 @@ $('hcard').addEventListener('click',e=>e.stopPropagation());
 $('hub').addEventListener('click',e=>{if(card&&!e.target.closest('.tw,.hcard,.hfoot,.gear,.hset'))close(false)});
 $('setBtn').addEventListener('click',e=>{e.stopPropagation();settings(!setOpen)});
 $('hsClose').addEventListener('click',()=>settings(false));
+$('tutoBtn').addEventListener('click',e=>{e.stopPropagation();tuto(!tutoOpen)});
+$('htClose').addEventListener('click',()=>tuto(false));
+$('htuto').addEventListener('click',e=>{if(e.target===$('htuto'))tuto(false)});
 $('hset').addEventListener('click',e=>{if(e.target===$('hset'))settings(false)});
 $('gateBtn').addEventListener('click',()=>{LB.audio.ensure();$('gate').hidden=true;LB.lift();arrive()});
 document.addEventListener('keydown',keys);

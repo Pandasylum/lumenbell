@@ -196,7 +196,7 @@ LB.cacheLayer=(w,h,draw,o)=>{
   const c=document.createElement('canvas');c.width=rd(w*k);c.height=Math.max(1,rd(h*k)-ty);
   const x=c.getContext('2d');x.setTransform(k,0,0,k,0,-ty);draw(x);return c;
 };
-LB.COMMON=['lang','snd','mus','help'];
+LB.COMMON=['lang','snd','mus','help','tuto'];
 LB.OLD_KEYS={'lb-lang':['pn-lang','eb-lang'],'lb-snd':['db-optSnd'],'lb-mus':['db-optMus'],'lb-help':['db-optHelp']};
 LB.id='';LB.old={};LB.oldPrefix=[];
 LB.key=name=>LB.COMMON.includes(name)?'lb-'+name:'lb-'+LB.id+'-'+name;
@@ -357,7 +357,7 @@ LB.hero={
     return ev},
   stops(p,o){o=typeof o==='number'?{win:o}:(o||{});const c=LB.hero.dur(p.g),win=o.win!=null?o.win:c.act,gr=o.grace!=null?o.grace:c.grace+(o.graceAdd||0);
     return(p.s==='act'&&p.t<=win+.002)||(p.s==='recover'&&p.rk==='act'&&p.t<gr)},
-  stopped(p){p.s='ready';p.t=0},
+  stopped(p,held){p.s='ready';p.t=0;if(LB.tuto)LB.tuto.note(held?'hold':p.g==='dodge'?'dodge':'block')},
   perfect(p,now){return p.s==='act'&&(now!=null?now-p.at:p.t)<=LB.hero.dur(p.g).perf},
   hurt(p,gap,o){o=o||{};const T=LB.HERO_T.hurt,base=o.dur!=null?o.dur:T.base[o.g||p.g||'block'],min=o.min!=null?o.min:T.min,mg=o.margin!=null?o.margin:T.margin;
     p.s='hurt';p.t=0;p.rd=Math.min(base,Math.max(min,(gap==null?99:gap)-mg));p.rk='';return p.rd}
@@ -1079,6 +1079,31 @@ LB.settings=(()=>{
     if(where)where(btn);lang();return btn}
   return{mount,attach,lang,sync,toggle,visible(){return open},handled(e){return e===last},get el(){return box}};
 })();
+LB.TUTO_T={ids:['block','dodge','hold','still'],ev:'lb-gesture',none:'—'};
+LB.tuto={
+  text(id){return{
+    block:[LB._('Block','Bloquer'),LB._("One press, at the exact instant: the blow stops dead.","Un seul appui, à l'instant juste : le coup s'arrête net.")],
+    dodge:[LB._('Dodge','Esquiver'),LB._("One press, at the exact instant: you slip out of its path.","Un seul appui, à l'instant juste : tu glisses hors de sa trajectoire.")],
+    hold:[LB._('Hold','Tenir'),LB._("Keep pressing: your block holds, a dome wraps around you.","Maintiens l'appui : ton blocage tient, un dôme t'enveloppe.")],
+    still:[LB._('Stand still','Rester en place'),LB._("Sometimes dodging is a misjudgment: know when to stand still.","Parfois, l'esquive est une erreur de jugement : sache rester en place.")]
+  }[id]},
+  seen(){try{const a=JSON.parse(LB.store.get(LB.key('tuto'),'[]'));return Array.isArray(a)?a.filter(x=>LB.TUTO_T.ids.includes(x)):[]}catch(e){return[]}},
+  note(id){if(!LB.TUTO_T.ids.includes(id))return;const a=LB.tuto.seen();if(a.includes(id))return;a.push(id);
+    LB.store.set(LB.key('tuto'),JSON.stringify(a));
+    try{window.dispatchEvent(new CustomEvent(LB.TUTO_T.ev,{detail:{id}}))}catch(e){}},
+  render(el){const a=LB.tuto.seen();el.textContent='';
+    for(const id of LB.TUTO_T.ids){const li=document.createElement('li');li.dataset.id=id;
+      if(a.includes(id)){const t=LB.tuto.text(id),h=document.createElement('h3'),p=document.createElement('p');h.textContent=t[0];p.textContent=t[1];li.append(h,p)}
+      else{li.className='lbt-none';li.setAttribute('aria-hidden','true');li.textContent=LB.TUTO_T.none}   // rien ne se déduit à l'avance
+      el.appendChild(li)}},
+  mount(el){
+    if(!document.getElementById('lbTutoCss')){const s=document.createElement('style');s.id='lbTutoCss';
+      s.textContent='.lbtuto{list-style:none;margin:0;padding:0;display:grid;gap:12px}.lbtuto li{display:grid;gap:2px}'
+        +'.lbtuto h3{margin:0;font-family:var(--font-display,inherit);font-weight:700;font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--lantern,#ffd28a)}'
+        +'.lbtuto p{margin:0;font-size:15px;line-height:1.4;color:var(--fg,#eee)}.lbtuto .lbt-none{color:var(--muted,#888);font-size:18px;line-height:1.4}';
+      document.head.appendChild(s)}
+    el.classList.add('lbtuto');const r=()=>LB.tuto.render(el);r();window.addEventListener(LB.TUTO_T.ev,r);return r}
+};
 const $=LB.$;
 LB.setup({id:'ch2',old:{'lb-ch2-unl':['db-unl']},oldPrefix:[['lb-ch2-best-','db-best-']],audio:{master:.75,sfx:.9,mus:.3}});
 const UNLOCK_ALL=true;
@@ -1293,12 +1318,12 @@ function update(dt){
       if(th.done)continue;
       if(th.hold){
         if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){if(!th.safe){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
-        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;S.holdEnd=th.tb;if(S.pl.s==='act')LB.hero.stopped(S.pl)}
+        else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;S.holdEnd=th.tb;if(S.pl.s==='act')LB.hero.stopped(S.pl,true)}
         continue;
       }
       if(gt>=th.ti){
         th.done=true;th.okT=gt;const p=S.pl;
-        if(th.real===false){if(p.s==='act'&&aimedAt(th))fooled(th);else{th.res='pass';burst(HX+20,GY-70,10,'#a49bbd',3,.5);play('fool')}}
+        if(th.real===false){if(p.s==='act'&&aimedAt(th))fooled(th);else{th.res='pass';LB.tuto.note('still');burst(HX+20,GY-70,10,'#a49bbd',3,.5);play('fool')}}
         else if(stops(th)){success(th,LB.hero.perfect(p,gt));LB.hero.stopped(p)}
         else{th.res='hit';th.pat.ok=false;hurt(th);if(S.mode!=='play')break}
       }

@@ -6,46 +6,61 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 
 | Fichier:ligne | Type | Durée | Anglais | Français |
 |---|---|---|---|---|
-| shared/js/24-cine.js:76 | _() |  | Skip › | Passer › |
+| shared/js/24-cine.js:75 | _() |  | Skip › | Passer › |
 | shared/js/28-ui.js:15 | _() |  | The three phases in a row, with no pause and no visual help. | Les trois phases d'affilée, sans pause et sans aide visuelle. |
 | shared/js/28-ui.js:16 | _() |  | You recover 1 life between phases. | Tu récupères 1 PV entre les phases. |
 | shared/js/28-ui.js:17 | _() |  | A single death sends you back to Phase I. | Une seule mort te renvoie à la phase I. |
 | shared/js/28-ui.js:18 | _() |  | One stats table at the end of the run. | Un seul tableau de stats à la fin de la run. |
-| shared/js/28-ui.js:148 | _() |  | Fight paused | Combat en pause |
-| shared/js/28-ui.js:148 | _() |  | Resume | Reprendre |
-| shared/js/28-ui.js:158 | _() |  | Fullscreen | Plein écran |
-| shared/js/28-ui.js:183 | _() |  | Easy | Facile |
-| shared/js/28-ui.js:183 | _() |  | Hard | Difficile |
-| shared/js/28-ui.js:183 | _() |  | Normal | Normal |
-| shared/js/28-ui.js:184 | _() |  | Breathe | Respire |
-| shared/js/28-ui.js:184 | _() |  | Fair and square | À la loyale |
-| shared/js/28-ui.js:184 | _() |  | No mercy | Sans pitié |
-| shared/js/28-ui.js:184 | _() |  | Ultimate challenge | Challenge ultime |
-| shared/js/28-ui.js:231 | _() |  | No record yet | Pas encore de record |
-| shared/js/28-ui.js:235 | _() |  | To unlock | À débloquer |
-| shared/js/28-ui.js:237 | _() |  | Coming soon | À venir |
+| shared/js/28-ui.js:41 | _() |  | Chapters | Chapitres |
+| shared/js/28-ui.js:201 | _() |  | Menu | Menu |
+| shared/js/28-ui.js:242 | _() |  | Fight paused | Combat en pause |
+| shared/js/28-ui.js:242 | _() |  | Leave the fight? | Quitter le combat ? |
+| shared/js/28-ui.js:243 | _() |  | The current fight will be lost. | Le combat en cours sera perdu. |
+| shared/js/28-ui.js:244 | _() |  | Menu | Menu |
 | shared/js/28-ui.js:244 | _() |  | Resume | Reprendre |
-| shared/js/28-ui.js:245 | _() |  | Start | Commencer |
-| shared/js/28-ui.js:248 | _() |  | Difficulties | Difficultés |
-| shared/js/28-ui.js:248 | _() |  | ‹ Back | ‹ Retour |
-| shared/js/28-ui.js:252 | _() |  | Fullscreen | Plein écran |
-| shared/js/28-ui.js:254 | _() |  | Choose difficulty | Choisir la difficulté |
-| shared/js/28-ui.js:255 | _() |  | Language | Langue |
-| shared/js/28-ui.js:318 | _() |  | Not available in the trial | Indisponible dans l'épreuve |
-| shared/js/28-ui.js:336 | _() |  | Enable visual help | Activer l'aide visuelle |
-| src/js/00-core.js:32 | _() |  | The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower. | Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher. |
-| src/js/00-core.js:33 | _() |  | One button: block, dodge. Space, up arrow or tap the screen. P to pause. | Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause. |
-| src/js/00-core.js:35 | _() |  | Trial by Fire | Épreuve du feu |
-| src/js/00-core.js:36 | _() |  | Ember Colossus | Colosse de braise |
-| src/js/00-core.js:36 | _() |  | The Watcher | Le Veilleur |
-| src/js/00-core.js:37 | _() |  |  Visual cues can help you find the right moment to block. |  Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer. |
-| src/js/00-core.js:79 | _() |  | Into the Foundry. | Dans la Fonderie. |
-| src/js/00-core.js:79 | _() |  | Phase II · The Foundry | Phase II · La Fonderie |
-| src/js/00-core.js:79 | _() |  | The forge shaft plunges endlessly down. Chains too large for a man's hand hang from the walls, rusted by centuries. | Le puits des forges s'enfonce sans fin. Aux parois pendent des chaînes trop grandes pour une main d'homme, rouillées de siècles. |
-| src/js/00-core.js:80 | _() |  | After a chase up the forge chimney, the Colossus is caught atop the Watchers' Bell Tower. An echo of the past rings out. | Après une poursuite le long de la cheminée des forges, le Colosse est rattrapé au sommet du Clocher des Veilleurs. Un écho du passé résonne. |
-| src/js/00-core.js:80 | _() |  | Phase III · The Bell Tower | Phase III · Le Clocher |
-| src/js/00-core.js:80 | _() |  | The Watchers' Bell Tower. | Le Clocher des Veilleurs. |
-| src/js/00-core.js:84 | _() |  | Continue | Continuer |
+| shared/js/28-ui.js:245 | _() |  | Leave | Quitter |
+| shared/js/28-ui.js:245 | _() |  | Stay | Rester |
+| shared/js/28-ui.js:269 | _() |  | Easy | Facile |
+| shared/js/28-ui.js:269 | _() |  | Hard | Difficile |
+| shared/js/28-ui.js:269 | _() |  | Normal | Normal |
+| shared/js/28-ui.js:270 | _() |  | Breathe | Respire |
+| shared/js/28-ui.js:270 | _() |  | Fair and square | À la loyale |
+| shared/js/28-ui.js:270 | _() |  | No mercy | Sans pitié |
+| shared/js/28-ui.js:270 | _() |  | Ultimate challenge | Challenge ultime |
+| shared/js/28-ui.js:318 | _() |  | No record yet | Pas encore de record |
+| shared/js/28-ui.js:322 | _() |  | To unlock | À débloquer |
+| shared/js/28-ui.js:329 | _() |  | Resume | Reprendre |
+| shared/js/28-ui.js:332 | _() |  | Difficulties | Difficultés |
+| shared/js/28-ui.js:332 | _() |  | ‹ Back | ‹ Retour |
+| shared/js/28-ui.js:337 | _() |  | Back to the chapters | Retour aux chapitres |
+| shared/js/28-ui.js:337 | _() |  | Chapters | Chapitres |
+| shared/js/28-ui.js:338 | _() |  | Choose difficulty | Choisir la difficulté |
+| shared/js/28-ui.js:339 | _() |  | Language | Langue |
+| shared/js/28-ui.js:405 | _() |  | Not available in the trial | Indisponible dans l'épreuve |
+| shared/js/28-ui.js:429 | _() |  | Enable visual help | Activer l'aide visuelle |
+| shared/js/28-ui.js:472 | _() |  | Settings | Réglages |
+| shared/js/28-ui.js:473 | _() |  | Close | Fermer |
+| shared/js/30-tuto.js:12 | _() |  | Block | Bloquer |
+| shared/js/30-tuto.js:12 | _() |  | One press, at the exact instant: the blow stops dead. | Un seul appui, à l'instant juste : le coup s'arrête net. |
+| shared/js/30-tuto.js:13 | _() |  | Dodge | Esquiver |
+| shared/js/30-tuto.js:13 | _() |  | One press, at the exact instant: you slip out of its path. | Un seul appui, à l'instant juste : tu glisses hors de sa trajectoire. |
+| shared/js/30-tuto.js:14 | _() |  | Hold | Tenir |
+| shared/js/30-tuto.js:14 | _() |  | Keep pressing: your block holds, a dome wraps around you. | Maintiens l'appui : ton blocage tient, un dôme t'enveloppe. |
+| shared/js/30-tuto.js:15 | _() |  | Sometimes dodging is a misjudgment: know when to stand still. | Parfois, l'esquive est une erreur de jugement : sache rester en place. |
+| shared/js/30-tuto.js:15 | _() |  | Stand still | Rester en place |
+| src/js/00-core.js:30 | _() |  | The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower. | Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher. |
+| src/js/00-core.js:31 | _() |  | One button: block, dodge. Space, up arrow or tap the screen. P to pause. | Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause. |
+| src/js/00-core.js:32 | _() |  | Trial by Fire | Épreuve du feu |
+| src/js/00-core.js:33 | _() |  | Ember Colossus | Colosse de braise |
+| src/js/00-core.js:33 | _() |  | The Watcher | Le Veilleur |
+| src/js/00-core.js:34 | _() |  |  Visual cues can help you find the right moment to block. |  Des repères visuels peuvent t'aider à choisir le bon moment pour bloquer. |
+| src/js/00-core.js:64 | _() |  | Into the Foundry. | Dans la Fonderie. |
+| src/js/00-core.js:64 | _() |  | Phase II · The Foundry | Phase II · La Fonderie |
+| src/js/00-core.js:64 | _() |  | The forge shaft plunges endlessly down. Chains too large for a man's hand hang from the walls, rusted by centuries. | Le puits des forges s'enfonce sans fin. Aux parois pendent des chaînes trop grandes pour une main d'homme, rouillées de siècles. |
+| src/js/00-core.js:65 | _() |  | After a chase up the forge chimney, the Colossus is caught atop the Watchers' Bell Tower. An echo of the past rings out. | Après une poursuite le long de la cheminée des forges, le Colosse est rattrapé au sommet du Clocher des Veilleurs. Un écho du passé résonne. |
+| src/js/00-core.js:65 | _() |  | Phase III · The Bell Tower | Phase III · Le Clocher |
+| src/js/00-core.js:65 | _() |  | The Watchers' Bell Tower. | Le Clocher des Veilleurs. |
+| src/js/00-core.js:69 | _() |  | Continue | Continuer |
 | src/js/08-state.js:40 | _() |  | Fight started. | Combat lancé. |
 | src/js/08-state.js:40 | _() |  | The Watcher takes his post on the bridge. The Colossus arrives. | Le Veilleur prend position sur le pont. Le Colosse arrive. |
 | src/js/08-state.js:55 | _() |  | RAAAH! | RAAAH ! |
@@ -232,27 +247,27 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | src/js/44-p3-belfry-logic.js:291 | _() |  | Replay from Phase I | Rejouer depuis la phase I |
 | src/js/44-p3-belfry-logic.js:291 | _() |  | Retry Phase III | Réessayer la phase III |
 | src/js/44-p3-belfry-logic.js:292 | _() |  | Trial by Fire · Complete | Épreuve du feu · Terminée |
-| src/js/44-p3-belfry-logic.js:343 | _() |  | PHASE III | PHASE III |
-| src/js/44-p3-belfry-logic.js:366 | _() |  | WING SHATTERED! | AILE BRISÉE ! |
-| src/js/44-p3-belfry-logic.js:376 | _() |  | The Watcher raises his lantern: the great bell answers. | Le Veilleur lève sa lanterne : la grande cloche répond. |
-| src/js/44-p3-belfry-logic.js:381 | _() |  | DISARMED! | DÉSARMÉ ! |
-| src/js/44-p3-belfry-logic.js:382 | _() |  | The echo tears the mace from the Colossus's hands. | L'écho arrache la masse des mains du Colosse. |
-| src/js/44-p3-belfry-logic.js:400 | _() |  | FINAL BLOW! | COUP ULTIME ! |
-| src/js/44-p3-belfry-logic.js:403 | _() |  | The Colossus crashes down beneath the great bell. | Le Colosse s'écrase sous la grande cloche. |
-| src/js/44-p3-belfry-logic.js:408 | _() |  | The Watcher raises his lantern: the great bell rings and the Colossus turns to stone. | Le Veilleur lève sa lanterne : la grande cloche sonne et le Colosse se change en pierre. |
-| src/js/44-p3-belfry-logic.js:410 | _() |  | The Watcher lights the Bell Tower's beacon. | Le Veilleur allume le fanal du Clocher. |
-| src/js/44-p3-belfry-logic.js:411 | _() |  | One by one, the Spires answer. | Une à une, les Flèches répondent. |
-| src/js/44-p3-belfry-logic.js:415 | _() |  | All but one. | Toutes, sauf une. |
-| src/js/44-p3-belfry-logic.js:416 | _() |  | Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I. | Au large, le Phare Noyé reste muet. Fin du chapitre I. |
+| src/js/44-p3-belfry-logic.js:344 | _() |  | PHASE III | PHASE III |
+| src/js/44-p3-belfry-logic.js:367 | _() |  | WING SHATTERED! | AILE BRISÉE ! |
+| src/js/44-p3-belfry-logic.js:377 | _() |  | The Watcher raises his lantern: the great bell answers. | Le Veilleur lève sa lanterne : la grande cloche répond. |
+| src/js/44-p3-belfry-logic.js:382 | _() |  | DISARMED! | DÉSARMÉ ! |
+| src/js/44-p3-belfry-logic.js:383 | _() |  | The echo tears the mace from the Colossus's hands. | L'écho arrache la masse des mains du Colosse. |
+| src/js/44-p3-belfry-logic.js:401 | _() |  | FINAL BLOW! | COUP ULTIME ! |
+| src/js/44-p3-belfry-logic.js:404 | _() |  | The Colossus crashes down beneath the great bell. | Le Colosse s'écrase sous la grande cloche. |
+| src/js/44-p3-belfry-logic.js:409 | _() |  | The Watcher raises his lantern: the great bell rings and the Colossus turns to stone. | Le Veilleur lève sa lanterne : la grande cloche sonne et le Colosse se change en pierre. |
+| src/js/44-p3-belfry-logic.js:411 | _() |  | The Watcher lights the Bell Tower's beacon. | Le Veilleur allume le fanal du Clocher. |
+| src/js/44-p3-belfry-logic.js:412 | _() |  | One by one, the Spires answer. | Une à une, les Flèches répondent. |
+| src/js/44-p3-belfry-logic.js:416 | _() |  | All but one. | Toutes, sauf une. |
+| src/js/44-p3-belfry-logic.js:417 | _() |  | Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I. | Au large, le Phare Noyé reste muet. Fin du chapitre I. |
 | src/js/60-ui-menu.js:2 | _() |  | Phase I · The Bridge | Phase I · Le pont |
 | src/js/60-ui-menu.js:2 | _() |  | The last watch. | La dernière veille. |
 | src/js/60-ui-menu.js:3 | _() |  | The Colossus has reached the bridge. Behind the Watcher lies nothing but the road to the valleys. A single rule: not one step back. | Le Colosse a atteint le pont. Derrière le Veilleur, il n'y a plus que la route des vallées. Une seule règle : ne pas reculer d'un pas. |
 | src/js/60-ui-menu.js:4 | _() |  | Start | Commencer |
 | src/js/60-ui-menu.js:11 | _() |  | Phase I. | Phase I. |
-| src/js/60-ui-menu.js:36 | _() |  | Retry | Réessayer |
-| src/js/60-ui-menu.js:39 | _() |  | Give up? | Abandonner ? |
-| src/js/60-ui-menu.js:40 | _() |  | Press Retry again to give up the run and start over from Phase I. | Rappuie sur Réessayer pour abandonner la run et repartir de la phase I. |
-| src/js/60-ui-menu.js:51 | _() |  | Phase I. New attempt. | Phase I. Nouvel essai. |
+| src/js/60-ui-menu.js:34 | _() |  | Retry | Réessayer |
+| src/js/60-ui-menu.js:37 | _() |  | Give up? | Abandonner ? |
+| src/js/60-ui-menu.js:38 | _() |  | Press Retry again to give up the run and start over from Phase I. | Rappuie sur Réessayer pour abandonner la run et repartir de la phase I. |
+| src/js/60-ui-menu.js:49 | _() |  | Phase I. New attempt. | Phase I. Nouvel essai. |
 | src/js/76-cine-intro.js:15 | SC | 6 | For a thousand winters, the mountain has burned beneath its stone. | Depuis mille hivers, la montagne brûle sous sa pierre. |
 | src/js/76-cine-intro.js:16 | SC | 7 | In the valleys below, the villages sleep, kept safe by a single stone bridge. Beneath its arch lies a foundry forgotten by all, even by those who keep watch. | Dans les vallées, les villages dorment, à l'abri d'un unique pont de pierre. Sous son arche dort une fonderie oubliée de tous, même de ceux qui veillent. |
 | src/js/76-cine-intro.js:17 | SC | 7 | On the bridge, a lone silhouette: the Watcher, a member of an order sworn to protect the Bound Spires. His lantern lives with him. | Sur le pont, une seule silhouette : le Veilleur, membre d'un ordre qui protège les Flèches liées. Sa lanterne vit avec lui. |
@@ -265,4 +280,3 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | src/js/80-cine-outro.js:11 | SC | 8 | Every bell answered. Every one but one. Far out at sea, the Drowned Lighthouse stayed silent, as if the depths had imposed silence on it. | Toutes les cloches ont répondu. Toutes, sauf une. Au large, le Phare Noyé est resté muet, comme si les profondeurs lui avaient imposé le silence. |
 | src/js/80-cine-outro.js:12 | SC | 6 | At dawn, lantern in hand, the Watcher set out for the coast. | À l'aube, lanterne à la main, le Veilleur s'est mis en route vers la côte. |
 | src/js/80-cine-outro.js:13 | SC | 7 | Chapter II · Silent Bells. To be continued. | Chapitre II · Silent Bells. À suivre. |
-| src/js/80-cine-outro.js:83 | _() |  | LUMENBELL · CHAPTER II | LUMENBELL · CHAPITRE II |

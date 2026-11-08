@@ -57,8 +57,9 @@ LB.hero={
      {win, grace, graceAdd} ; sans o : durée de l'action et grâce du geste */
   stops(p,o){o=typeof o==='number'?{win:o}:(o||{});const c=LB.hero.dur(p.g),win=o.win!=null?o.win:c.act,gr=o.grace!=null?o.grace:c.grace+(o.graceAdd||0);
     return(p.s==='act'&&p.t<=win+.002)||(p.s==='recover'&&p.rk==='act'&&p.t<gr)},
-  /* attaque arrêtée : retour à ready */
-  stopped(p){p.s='ready';p.t=0},
+  /* attaque arrêtée : retour à ready. Seul point de détection des gestes réussis (onglet Tuto, 30-tuto.js) : le geste est celui de la
+     garde (block / dodge) ; held = vrai quand la garde tenue (dôme) vient de réussir, sans changer le geste interne */
+  stopped(p,held){p.s='ready';p.t=0;if(LB.tuto)LB.tuto.note(held?'hold':p.g==='dodge'?'dodge':'block')},
   /* l'arrêt est-il parfait (appui moins de perf avant l'impact) ? à appeler avant stopped ; now = date courante du chapitre */
   perfect(p,now){return p.s==='act'&&(now!=null?now-p.at:p.t)<=LB.hero.dur(p.g).perf},
   /* coup reçu : étourdissement raccourci pour pouvoir arrêter l'attaque suivante (écart = secondes avant elle, 99 sans suivante) ;

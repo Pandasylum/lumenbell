@@ -316,3 +316,6 @@
 ## 2026-11-08 · fix/ch2-tap-p3-et-nettoyage
 - Ce que le joueur verra : en phase III du Chapitre II, un tap fait lever le bouclier de bloquer, comme en phase II ; la tenue garde son dôme bleu.
 - Ce que le joueur verra : aucune ombre de dôme n'apparaît plus après un dégât ; seule reste celle de l'attente du premier faisceau.
+
+## 2026-11-08 · feat/hub-onglet-tuto
+- Ce que le joueur verra : un livre en haut à gauche du hub ouvre l'onglet Tuto ; au départ quatre lignes « — », puis chaque geste (bloquer, esquiver, tenir, rester en place) apparaît avec son titre et sa phrase à sa première réussite, et reste.
