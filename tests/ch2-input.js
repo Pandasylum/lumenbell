@@ -76,4 +76,22 @@ const near=(a,b)=>Math.abs(a-b)<.02;
   if(r.clean!==(want===0))errs.push('illusion '+dk+' '+mode+' : serie '+(r.clean?'propre':'cassee')+', '+(want===0?'propre':'cassee')+' attendue');
   if(mode==='ignore'&&r.back)errs.push('illusion '+dk+' ignoree : un retour a ete lance');
   if(mode!=='ignore'&&!r.back)errs.push('illusion '+dk+' '+mode+' : pas de retour')}
+ // 5. premier faisceau du Phare (BEACON_LEARN) : Facile et Normal, il attend le maintien (dome affiche en entier), puis glisse sans degat ; sans maintien, apres 7 s il passe
+ //    sans degat et se relance une fois (a nouveau 7 s d'attente, puis plus rien) ; Difficile : inchange (pas d'attente, coup recu).
+ for(const dk of ['easy','normal','hard'])for(const mode of ['hold','timeout']){
+  const r=await pg.evaluate(([dk,mode])=>{const T=__t;T.startRun(dk,true);T.jumpPhase(3);for(let i=0;i<60*20&&T.S.mode!=='card';i++)T.step(1/60);T.go();
+   const S=T.S,step=s=>{for(let i=0;i<Math.round(s*60);i++)T.step(1/60)},o={};S.threats=[];S.pat=null;S.nextAt=1e9;S.hp=S.hpMax=99;step(.1);
+   const ts=T.gt+1,D=1.2,th={k:'beam',t0:ts-1,dark:.3,ts,D,dir:-1,ta:ts+D*.622,tb:ts+D*.798,real:true,hold:true};
+   th.pat=S.pat={ths:[th],ok:true,perf:0,nReal:0};S.threats.push(th);
+   step(4.5);o.waits=!!S.learn.th;o.stillWaiting=(step(2.5),!!S.learn.th&&!th.done);o.hitsWait=S.hits;
+   if(mode==='hold'){T.down();step(.6);o.released=!S.learn.th&&S.learn.ok;step(1.2);o.res=th.res;o.hits=S.hits;T.up()}
+   else{step(3.3);o.misses=S.learn.misses;o.safe=th.safe;o.cl=S.threats.filter(t=>t.k==='beam'&&t!==th&&!t.done).length;step(2.4);o.res=th.res;o.again=!!S.learn.th&&S.learn.th!==th;step(6.8);o.misses2=S.learn.misses;step(1.2);o.hits=S.hits;o.end=!S.learn.th}
+   return o},[dk,mode]);
+  const tag='faisceau '+dk+' '+mode+' : ';
+  if(dk==='hard'){if(r.waits)errs.push(tag+'Difficile ne doit pas attendre');continue}
+  if(!r.waits||!r.stillWaiting)errs.push(tag+'le faisceau doit attendre le maintien');
+  if(r.hitsWait)errs.push(tag+'coup recu pendant l\'attente');
+  if(mode==='hold'){if(!r.released)errs.push(tag+'pas repris au maintien');if(r.res!=='ok'||r.hits)errs.push(tag+'doit glisser sans degat ('+r.res+', '+r.hits+' coup)')}
+  else{if(r.misses!==1||!r.safe||r.cl!==1)errs.push(tag+'delai de securite : '+JSON.stringify([r.misses,r.safe,r.cl]));if(r.res==='hit'||r.hits)errs.push(tag+'doit passer sans degat');
+   if(!r.again||r.misses2!==2||!r.end)errs.push(tag+'relance une seule fois : '+JSON.stringify([r.again,r.misses2,r.end]))}}
  errs.push(...perr);console.log('errs',errs);await b.close();process.exitCode=errs.length?1:0})().catch(e=>{console.log('errs',errs.concat('exception: '+e.message));process.exit(1)});

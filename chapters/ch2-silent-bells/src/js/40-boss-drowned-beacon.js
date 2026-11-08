@@ -15,6 +15,10 @@
    direct  the last counter of Part 2 kills at once (no riposte shot before)
    dazzle  final rage of Part 1 (code name, never shown): n sweeps (hold) that the Watcher absorbs; the last counter sends the light back at the central
            lighthouse, which breaks (the usual KO, then the transition to Part 2: phaseCleared) */
+/* learning the hold (decision of 8 Nov 2026, exception to the rule "no timing outside the tables"; nothing else is touched): in the levels of `on`, the FIRST beam of
+   the fight stops `lead` s before it reaches the Watcher and moves on only once the dome is fully shown (held); it then glides over the dome without damage.
+   Safety: after `timeout` s without a hold it passes without damage and is launched again `retries` time(s), `retryGap` s after it (then no more waiting). Hard: unchanged. */
+const BEACON_LEARN={on:{easy:true,normal:true,hard:false},lead:.1,timeout:7,retries:1,retryGap:1.2};
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},

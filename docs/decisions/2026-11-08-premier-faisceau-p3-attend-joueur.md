@@ -1,0 +1,11 @@
+# Phare (P3) : le premier faisceau attend le joueur (8 novembre 2026)
+
+**Décision (validée)** : apprendre le geste « maintenir = dôme » par la pratique. Chapitre II seul (`chapters/ch2-silent-bells/`), Facile et Normal ; Difficile et l'Épreuve inchangés.
+
+- **Comportement** : le premier faisceau du combat (Partie 1) s'arrête `lead` s avant d'atteindre le Veilleur et ne repart que lorsque le dôme est affiché en entier (maintien). Il glisse alors sur le dôme sans dégât (`safe`). Les faisceaux suivants sont inchangés. Le temps de toutes les menaces à venir est suspendu pendant l'attente : aucun autre rythme n'est modifié.
+- **Ombre du dôme** : pendant l'attente, le visuel existant du dôme fantôme (`GHOST_DOME`) est affiché en continu ; il disparaît dès que le joueur maintient et ne revient pas aux faisceaux suivants. Aucun texte, aucun asset.
+- **Exception de timing validée** à la règle « pas de réglage de timing hors tables » : `BEACON_LEARN` (`40-boss-drowned-beacon.js`) tient les valeurs (`lead` 0,1 s, `timeout` 7 s, `retries` 1, `retryGap` 1,2 s). Aucun autre timing touché.
+- **Délai de sécurité** : sans maintien après 7 s, le faisceau passe sans dégât et est relancé une fois (`retryGap` après lui, copie qui attend à son tour 7 s) ; ensuite plus d'attente.
+- **Compteur** : `S.learn`, renouvelé à chaque combat (`resetPhaseState`) : une nouvelle tentative rejoue l'apprentissage.
+- **Dôme fantôme après dégât** : inchangé (`GHOST_DOME.n` : Facile toujours, Normal une fois, Difficile jamais). **À valider** : la consigne parlait de le « conserver » en Difficile après le premier dégât ; il n'y est pas affiché aujourd'hui (décision du 8 novembre : jamais en Difficile).
+- Cinématique non touchée. Test : `tests/ch2-input.js` (bloc 5).
