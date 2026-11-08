@@ -57,14 +57,16 @@ function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.dome
 let wardRingEl=null;
 function wardRing(){
   const w=$('ward');if(!w)return;
-  if(!wardRingEl){wardRingEl=document.createElement('span');wardRingEl.setAttribute('aria-hidden','true');
-    wardRingEl.style.cssText='position:absolute;inset:0;border-radius:50%;pointer-events:none;display:none;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - '+WARD_RING.w+'px),#000 calc(100% - '+WARD_RING.w+'px));mask:radial-gradient(farthest-side,transparent calc(100% - '+WARD_RING.w+'px),#000 calc(100% - '+WARD_RING.w+'px))';
-    if(getComputedStyle(w).position==='static')w.style.position='relative';w.appendChild(wardRingEl)}
+  if(!wardRingEl){const R=WARD_RING;   // a frame round the button: a conic gradient seen only through a border-wide mask (no SVG, no asset)
+    wardRingEl=document.createElement('div');wardRingEl.setAttribute('aria-hidden','true');
+    const m='linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)';
+    wardRingEl.style.cssText='position:absolute;left:'+-R.gap+'px;top:'+-R.gap+'px;right:'+-R.gap+'px;bottom:'+-R.gap+'px;box-sizing:border-box;padding:'+R.w+'px;border-radius:'+R.rx+'px;pointer-events:none;display:none;-webkit-mask:'+m+';-webkit-mask-composite:xor;mask:'+m+';mask-composite:exclude'}
+  if(wardRingEl.parentNode!==w){if(getComputedStyle(w).position==='static')w.style.position='relative';w.appendChild(wardRingEl)}   // hud() rewrites the button's text: put the ring back
   const on=S.phase===3&&S.mode==='play'&&!S.d.trial;
   if(!on){wardRingEl.style.display='none';return}
-  const R=WARD_RING,wait=!!(S.learn&&S.learn.th&&!S.holding),k=wait?0:domeAlpha(),p=wait?R.pulseMin+(1-R.pulseMin)*(.5+.5*Math.sin(rt*2*Math.PI*PULSE_FX.freq/2)):1;
+  const R=WARD_RING,wait=!!(S.learn&&S.learn.th&&!S.holding),k=wait?1:domeAlpha(),p=wait?R.pulseMin+(1-R.pulseMin)*(.5+.5*Math.sin(rt*2*Math.PI*PULSE_FX.freq/2)):1;
   wardRingEl.style.display='block';wardRingEl.style.opacity=p.toFixed(3);
-  wardRingEl.style.background=wait?`rgba(${R.col},.9)`:`conic-gradient(rgba(${R.col},.95) ${(k*360).toFixed(1)}deg,rgba(${R.col},${R.base}) 0)`}
+  wardRingEl.style.background='conic-gradient(rgba('+R.col+',.95) '+(k*360).toFixed(1)+'deg,rgba('+R.col+','+R.base+') 0)'}
 /* where a threat of phase III comes from (to turn the arc of a tap towards it) */
 function threatSrc(th){
   if(th.k==='bolt')return lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];

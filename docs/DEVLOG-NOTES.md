@@ -304,3 +304,4 @@
 
 ## 2026-11-08 · feat/p3-premier-faisceau-attend (anneau)
 - Ce que le joueur verra : un anneau sur le bouton d'action en phase III ; il se remplit pendant le maintien du dôme et pulse pendant l'attente du premier faisceau (Facile, Normal).
+- Ce que le joueur verra (correctif) : l'attente du premier faisceau n'a lieu qu'à l'arrivée en phase III (après l'intro ou via le bouton de Phase), jamais au retry ; l'anneau entoure bien le bouton ; le halo en pointillé n'apparaît plus qu'à l'attente du premier faisceau (Difficile : après le premier coup sur une menace à maintenir).

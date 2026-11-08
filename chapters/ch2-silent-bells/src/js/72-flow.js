@@ -31,10 +31,11 @@ function replayEpilogue(cb){if(EPI.playing())return;const keep={gt,t0:S.epT0,par
 function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
   S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if(LB.audio.music)MUSIC.bed(2);
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
-function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,learn:{ok:false,misses:0,th:null,t:0,first:false},ghostN:0,ghostDome:null,pulse:0,domeT0:null,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+const learnFresh=()=>({ok:false,misses:0,th:null,t:0,first:false});
+function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,ghostN:0,ghostDome:null,pulse:0,domeT0:null,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=id===3?S.d.bd.hp3:S.d.bd.hp;S.bossHp=S.bossMax;S.hp=o.first?S.hpMax:LB.healFor(S.d.heal,S.hpMax,S.hp);   // heal rule shared: true = full refill, a number = that many HP capped at the starting HP (trial: +1)
- resetPhaseState();
+ resetPhaseState();S.learn=learnFresh();   // learning the hold: only when phase III starts after the intro or through the Phase button (never at a retry)
   hud();playCine(id,'in',()=>introCard(id));
 }
 function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:P.boss(),desc:P.desc(),go:_('Start','Commencer'),onGo:beginPlay})}
@@ -78,7 +79,7 @@ function deathCard(){MUSIC.stop();const tr=S.d.trial,DF=DEFEAT[gpOf(S.phase)];
   showCard(o);
 }
 /* retry: from the start of the phase; in phase III that is form I, even after a defeat in form II (as in Ember Bridge) */
-function retryPhase(){S.hp=S.hpMax;S.bossHp=S.bossMax;resetPhaseState();S.form=1;S.mode='card';hud();beginPlay()}
+function retryPhase(){S.hp=S.hpMax;S.bossHp=S.bossMax;resetPhaseState();S.learn=null;S.form=1;S.mode='card';hud();beginPlay()}
 function startRun(dk,noPro){
   S=fresh(dk);S.full=true;S.phase=2;S.form=1;S.cineDone={};
   hideMenu();hud();

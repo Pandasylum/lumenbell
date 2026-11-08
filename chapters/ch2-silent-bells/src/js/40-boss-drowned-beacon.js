@@ -19,8 +19,8 @@
    the fight stops `lead` s before it reaches the Watcher and moves on only once the dome is fully shown (held); it then glides over the dome without damage.
    Safety: after `timeout` s without a hold it passes without damage and is launched again `retries` time(s), `retryGap` s after it (then no more waiting). Hard: unchanged. */
 const BEACON_LEARN={on:{easy:true,normal:true,hard:false},lead:.1,timeout:7,retries:1,retryGap:1.2};
-/* ring of the action button in phase III (drawn in code by wardRing): `w` px thick, colour `col` (the blue of the dome), `base` opacity of the unfilled part, `pulseMin` lowest opacity of the pulse while the first beam waits */
-const WARD_RING={w:5,col:'120,200,255',base:.3,pulseMin:.35};
+/* ring of the action button in phase III (drawn in code by wardRing): `w` px thick, `gap` px outside the button, `rx` corner radius, colour `col` (the blue of the dome), `base` opacity of the unfilled part, `pulseMin` lowest opacity of the pulse while the first beam waits */
+const WARD_RING={w:4,gap:7,rx:6,col:'120,200,255',base:.3,pulseMin:.35};
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
@@ -68,8 +68,8 @@ function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
 const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
 const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
 /* the ghost dome: when a hit lands on a threat that had to be held, the dome the Watcher should have raised is drawn for `dur` s (dashed outline, `fill` of
-   opacity), to show what was missing. Per fight (resetPhaseState): `n` times by level (Easy: always, Normal: the first time only, Hard: never). */
-const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:Infinity,normal:1,hard:0}};
+   opacity), to show what was missing. Per fight (resetPhaseState): `n` times by level (Easy and Normal: never, their shadow is the wait of the first beam; Hard: after the first hit on a threat to hold). */
+const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:0,normal:0,hard:1}};
 /* the pulse of the Watcher's lantern in the entry cinematic of phase III (CINE_P3.guard): the halo swells `freq` times a second between `base` and `peak` */
 const PULSE_FX={freq:2.4,base:.25,peak:.95};
 const LX=760,LY=GY-333;
