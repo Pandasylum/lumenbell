@@ -1215,21 +1215,18 @@ function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk())
   p.stam=clamp(1-F.t/max,0,1)}
 const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
 function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
-let wardRingEl=null,wardRingRect=null;
+let wardRingEl=null,wardRingBar=null;
 function wardRing(){
   const w=$('ward');if(!w)return;
-  if(!wardRingEl){const NS='http://www.w3.org/2000/svg',R=WARD_RING;
-    wardRingEl=document.createElementNS(NS,'svg');wardRingEl.setAttribute('aria-hidden','true');
-    wardRingEl.style.cssText='position:absolute;left:'+-R.gap+'px;top:'+-R.gap+'px;width:calc(100% + '+2*R.gap+'px);height:calc(100% + '+2*R.gap+'px);overflow:visible;pointer-events:none;display:none';
-    const bg=document.createElementNS(NS,'rect');wardRingRect=document.createElementNS(NS,'rect');
-    for(const r of [bg,wardRingRect]){r.setAttribute('x',R.w/2);r.setAttribute('y',R.w/2);r.setAttribute('rx',R.rx);r.setAttribute('fill','none');r.setAttribute('stroke-width',R.w);r.setAttribute('pathLength',100);r.style.width='calc(100% - '+R.w+'px)';r.style.height='calc(100% - '+R.w+'px)'}
-    bg.setAttribute('stroke','rgba('+R.col+','+R.base+')');wardRingRect.setAttribute('stroke','rgba('+R.col+',.95)');wardRingEl.append(bg,wardRingRect)}
-  if(wardRingEl.parentNode!==w){if(getComputedStyle(w).position==='static')w.style.position='relative';w.appendChild(wardRingEl)}   // hud() rewrites the button's text: put the ring back
+  if(!wardRingEl){const R=WARD_RING;   // a gauge inside the button: a faint frame (the hold is available) and a bar that loads left to right (no SVG, no asset, no text)
+    wardRingEl=document.createElement('div');wardRingEl.setAttribute('aria-hidden','true');
+    wardRingEl.style.cssText='position:absolute;left:0;top:0;right:0;bottom:0;border-radius:inherit;overflow:hidden;pointer-events:none;display:none;box-shadow:inset 0 0 0 '+R.w+'px rgba('+R.col+','+R.base+')';
+    wardRingBar=document.createElement('div');wardRingBar.style.cssText='height:100%;width:0;background:rgba('+R.col+','+R.fill+')';wardRingEl.appendChild(wardRingBar)}
+  if(wardRingEl.parentNode!==w){if(getComputedStyle(w).position==='static')w.style.position='relative';w.appendChild(wardRingEl)}   // hud() rewrites the button's text: put the gauge back
   const on=S.phase===3&&S.mode==='play'&&!S.d.trial;
   if(!on){wardRingEl.style.display='none';return}
-  const R=WARD_RING,wait=!!(S.learn&&S.learn.th&&!S.holding),k=wait?0:domeAlpha(),p=wait?R.pulseMin+(1-R.pulseMin)*(.5+.5*Math.sin(rt*2*Math.PI*PULSE_FX.freq/2)):1;
-  wardRingEl.style.display='block';wardRingEl.style.opacity=p.toFixed(3);
-  wardRingRect.setAttribute('stroke-dasharray',wait?'100 0':(k*100).toFixed(1)+' 100')}
+  const R=WARD_RING,wait=!!(S.learn&&S.learn.th&&!S.holding),k=wait?1:domeAlpha(),p=wait?R.pulseMin+(1-R.pulseMin)*(.5+.5*Math.sin(rt*2*Math.PI*PULSE_FX.freq/2)):1;
+  wardRingEl.style.display='block';wardRingEl.style.opacity=p.toFixed(3);wardRingBar.style.width=(k*100).toFixed(1)+'%'}
 function threatSrc(th){
   if(th.k==='bolt')return lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];
   if(th.k==='chunk')return TOWER[th.ri].e;
@@ -1900,7 +1897,7 @@ function sinkGlow(t){
 function shard(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a*1.5);const g=ctx.createLinearGradient(-s,-s,s,s);g.addColorStop(0,'rgba(235,225,255,.75)');g.addColorStop(1,'rgba(90,70,140,.4)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*.5,s*.2);ctx.lineTo(-s*.3,s*.7);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
 
 const BEACON_LEARN={on:{easy:true,normal:true,hard:false},lead:.1,timeout:7,retries:1,retryGap:1.2};
-const WARD_RING={w:4,gap:7,rx:6,col:'120,200,255',base:.3,pulseMin:.35};
+const WARD_RING={w:2,col:'120,200,255',base:.45,fill:.38,pulseMin:.35};
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
