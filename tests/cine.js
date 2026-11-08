@@ -50,7 +50,8 @@ guardBrand();
 guardStatic();
 guardUi();
 async function state(pg,ch){return pg.evaluate(k=>({cine:!document.getElementById('cine').hidden,flag:localStorage.getItem(k),
- card:!document.getElementById('ov').hidden||!document.getElementById('skip')?.hidden&&!!document.getElementById('skip'),menu:!document.getElementById('menu').hidden}),KEY[ch])}
+ card:!document.getElementById('ov').hidden||!document.getElementById('skip')?.hidden&&!!document.getElementById('skip')||k==='lb-ch2-intro'&&document.getElementById('menu').hidden&&document.getElementById('cine').hidden,   // Chapitre II : la cinematique d'entree de la phase I (obligatoire la premiere fois, sans bouton Passer) tient lieu de carte
+ menu:!document.getElementById('menu').hidden}),KEY[ch])}
 async function startNormal(pg,ch){
  await pg.click('#mphM [data-diff=normal]');await pg.waitForTimeout(400)}
 const CARD={};

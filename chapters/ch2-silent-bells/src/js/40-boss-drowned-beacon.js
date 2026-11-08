@@ -61,6 +61,11 @@ function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
   return Math.max(w(B.beam.D),w(B.dazzle.D),w(B.morse.long.D),w(SP.kwave.D),1.25*160/1080,1.25*160/1000,1.5*160/1000,bellSpan(Z),B.shard.blast,SP.storm.trapTb-SP.storm.trapTa,.6)}
 const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
 const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
+/* the ghost dome: when a hit lands on a threat that had to be held, the dome the Watcher should have raised is drawn for `dur` s (dashed outline, `fill` of
+   opacity), to show what was missing. Per fight (resetPhaseState): `n` times by level (Easy: always, Normal: the first time only, Hard: never). */
+const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:Infinity,normal:1,hard:0}};
+/* the pulse of the Watcher's lantern in the entry cinematic of phase III (CINE_P3.guard): the halo swells `freq` times a second between `base` and `peak` */
+const PULSE_FX={freq:2.4,base:.25,peak:.95};
 const LX=760,LY=GY-333;
 function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0))}
   if(S.cnt&&S.cnt.k===3)dim=1;return{charge,dim}}

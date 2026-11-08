@@ -59,7 +59,7 @@ const st=()=>pg.evaluate(()=>({ph:document.body.dataset.ph,eye:document.getEleme
  ward:document.getElementById('ward').textContent,boss:document.getElementById('nmB').textContent,hp:document.getElementById('hpPn').textContent,
  locked:[...document.querySelectorAll('#phases button')].map(x=>x.disabled?1:0).join('')}));
 // passe prologue (cadre commun LB.cine, #cine) et cinematique (Entree) jusqu'a la carte de phase
-const toCard=async lbl=>{for(let i=0;i<40;i++){const s=await st();if(s.card)return s;if(s.skip)await pg.keyboard.press('Enter');await pg.waitForTimeout(250)}errs.push(lbl+': carte de phase jamais affichee');return st()};
+const toCard=async lbl=>{for(let i=0;i<110;i++){const s=await st();if(s.card)return s;if(s.skip)await pg.keyboard.press('Enter');await pg.waitForTimeout(250)}errs.push(lbl+': carte de phase jamais affichee');return st()};
 const play=async(lbl,ph,hp)=>{let s=await toCard(lbl);
  await pg.click('#go');await pg.waitForTimeout(300);
  for(let i=0;i<12;i++){await pg.keyboard.down('Space');await pg.waitForTimeout(120);await pg.keyboard.up('Space');await pg.waitForTimeout(380)}

@@ -1150,7 +1150,7 @@ function humSet(on){
   if(!on||hum||!c||!A.sound||!A.sfx||c.state!=='running')return;
   try{const t=c.currentTime,g=c.createGain(),lp=c.createBiquadFilter(),os=Z.f.map((f,i)=>{const o=c.createOscillator();o.type=i?'sine':'sawtooth';o.frequency.value=f*(1+i*.002);o.detune.value=i*3;o.connect(lp);o.start(t);return o});
     lp.type='lowpass';lp.frequency.value=Z.lp;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(Z.vol,t+Z.in);lp.connect(g);g.connect(A.sfx);hum={c,g,os}}catch(e){hum=null}}
-function humStep(){humSet($('menu').hidden&&S.mode==='play'&&!S.paused&&domeAlpha()>0)}
+function humStep(){humSet($('menu').hidden&&(S.mode==='play'||S.mode==='cine')&&!S.paused&&domeAlpha()>0)}
 const MUS=[null,{bpm:84,bass:[73.4,73.4,87.3,65.4],lead:'bell'},{bpm:96,bass:[82.4,87.3,82.4,61.7],lead:'choir'},{bpm:118,bass:[55,55,65.4,49],lead:'arp'}];
 let mStep=0,mNext=0;
 function musTick(){
@@ -1240,6 +1240,7 @@ function success(th,perfect){
 function hurt(th){
   if(S.mode!=='play')return;
   S.hp=Math.max(0,S.hp-1);S.hits++;S.hurtT=gt;S.shake=12;
+  if(S.phase===3&&th&&th.hold&&S.ghostN<GHOST_DOME.n[vdk()]){S.ghostN++;S.ghostDome=gt}   // shows the dome that was missing (GHOST_DOME)
   {let nx=99;for(const o of S.threats)if(o!==th&&!o.done&&o.real!==false){const at=o.hold?o.ta:o.ti;if(at!=null&&at>gt)nx=Math.min(nx,at-gt)}
    LB.hero.hurt(S.pl,nx,{g:gest(),dur:th&&th.k==='shard'?RAIN.hurt:undefined})}
   if(th&&(th.k==='rafter'||th.k==='plank'))pop(ONO.crush,'#ff8a6b',HX-30,GY-190);
@@ -1579,6 +1580,9 @@ function drawHero(){
   if(da>0){const Z=GUARD_FX.dome,jx=warn?Math.sin(gt*70)*2.2:0,jy=warn?Math.cos(gt*83)*1.4:0;ctx.save();ctx.globalAlpha=da;
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x+jx,y+jy,92,Math.PI,0);ctx.fill();
     ctx.strokeStyle=warn?`rgba(${FATIGUE.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
+  if(ph===3&&S.ghostDome!=null&&gt-S.ghostDome<GHOST_DOME.dur){const Z=GHOST_DOME,u=(gt-S.ghostDome)/Z.dur,a=Math.min(1,(gt-S.ghostDome)/Z.in)*(1-u);ctx.save();ctx.globalAlpha=a;
+    ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(HX,y,Z.r,Math.PI,0);ctx.fill();
+    ctx.strokeStyle=`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=GUARD_FX.dome.line;ctx.setLineDash(Z.dash);ctx.stroke();ctx.restore()}
   if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,92+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
   if(ph===3&&S.arc&&gt-S.arc.t0<GUARD_FX.arc.dur){const G=GUARD_FX.arc,u=(gt-S.arc.t0)/G.dur,cx=x+16,cy=y-80,r=G.r*(.85+.15*eout(u));
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
@@ -1590,6 +1594,7 @@ function drawHero(){
 function heroShape(x,y,pose,o,tint,ghost){
   const P=LB.WATCHER_POSES[pose](o.k==null?1:o.k,o,rt),lit=P.lit||(o.staffA!=null&&o.staffA<-1.42-.135);
   const opt=Object.assign({lamp:1-(S.lampDim||0),breath:pose==='idle',lanternCol:LB.watcherLanternCol(S.mode==='play'?S.pl:null,lit)},o);
+  if(S.pulse>0&&!ghost)opt.glow=PULSE_FX.base+(PULSE_FX.peak-PULSE_FX.base)*S.pulse;   // entry of phase III: the lantern pulses with the press
   const L=LB.drawWatcher(ctx,x,y,pose,rt,opt);
   if(!ghost){S.orbX=L.lx;S.orbY=L.ly}
   if(tint>0){ctx.save();ctx.globalAlpha=tint*.5;ctx.fillStyle='#ff4a3a';ctx.beginPath();ctx.ellipse(x,y-60,32,66,0,0,Math.PI*2);ctx.fill();ctx.restore()}
@@ -1887,6 +1892,8 @@ function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
   return Math.max(w(B.beam.D),w(B.dazzle.D),w(B.morse.long.D),w(SP.kwave.D),1.25*160/1080,1.25*160/1000,1.5*160/1000,bellSpan(Z),B.shard.blast,SP.storm.trapTb-SP.storm.trapTa,.6)}
 const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
 const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
+const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:Infinity,normal:1,hard:0}};
+const PULSE_FX={freq:2.4,base:.25,peak:.95};
 const LX=760,LY=GY-333;
 function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0))}
   if(S.cnt&&S.cnt.k===3)dim=1;return{charge,dim}}
@@ -2310,14 +2317,19 @@ function kingEndStill(){bg1();hullSky(1);hullDebris(9);drawAnchorAt({x:878,y:GY-
 const CINE_LEN={1:{in:7.8,out:7.8},2:{in:4.8,out:7.4},3:{in:13.8,out:12.8,p2:7.4}};
 const CINE_P1={drop:3.1,fall:.65,sink:3.2,depth:70,hatch:5.5,snap:.45,dim:3.8,dimD:1.1};
 const CINE_P2={haul:4.0,lift:4.35,slung:4.75,desc:1.8,descD:380,collapse:1.4,collapseD:2.2,open:2.4,openD:1.4,moon:3.6};
-const CINE_P3={zoom:9.4,zoomD:2.6,zoomZ:2.1,reveal:3.2,revealZ:1.7,revealX:HX,revealY:GY-60};
+const CINE_P3={zoom:9.4,zoomD:2.6,zoomZ:2.1,reveal:3.2,revealZ:1.7,revealX:HX,revealY:GY-60,
+  guard:{pulse:11.5,on:11.95,off:13.2}};
+function cineGuard(t){const G=CINE_P3.guard,on=t>=G.on&&t<G.off;S.holding=on;S.domeT0=on?(S.domeT0==null?gt:S.domeT0):null;
+  S.pulse=t>=G.pulse&&t<G.off?.5-.5*Math.cos(2*Math.PI*PULSE_FX.freq*(t-G.pulse)):0}
 function once(k){if(S.cineDone[k])return false;S.cineDone[k]=1;return true}
-function resetCine(s){s.hatchK=0;s.hatchSnap=0;s.lampDim=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.cineDone={}}
+function resetCine(s){s.hatchK=0;s.hatchSnap=0;s.lampDim=0;s.ripT=0;s.cine=null;s.zapT=0;s.walkLegs=null;s.bodyBob=0;s.impT=0;s.heroPose=null;s.ghost=0;s.noAnchor=false;s.noFace=false;s.heroDX=0;s.heroDY=0;s.tfT=null;s.threats=[];s.pat=null;s.holding=false;s.domeT0=null;s.pulse=0;s.cineDone={}}
 function fadeAll(a,c){if(a<=0)return;ctx.fillStyle=`rgba(${c||'0,0,0'},${clamp(a,0,1)})`;ctx.fillRect(0,0,W,H)}
 const CH_COL=LB.CH_COL;   // table commune (shared/js/24-cine.js)
+const TITLE_T={cap:.78,gap:14};
 function title(t,t0,eye,name,col,ncol){if(t<t0)return;const a=clamp((t-t0)/.5,0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';
-  ctx.font='700 16px '+LB.FONT.body;ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,H*.42-46+(1-a)*8);
-  ctx.font='800 64px '+LB.FONT.display;{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120)ctx.font=`800 ${Math.floor(64*(W-120)/mw)}px ${LB.FONT.display}`}ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,H*.42+3+(1-a)*8);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,H*.42+(1-a)*8);
+  ctx.font='800 64px '+LB.FONT.display;let fs=64;{const mw=ctx.measureText(name.toUpperCase()).width;if(mw>W-120){fs=Math.floor(64*(W-120)/mw);ctx.font=`800 ${fs}px ${LB.FONT.display}`}}
+  const y=H*.42+(1-a)*8;ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillText(name.toUpperCase(),W/2+3,y+3);ctx.fillStyle=ncol||'#f4eee4';ctx.fillText(name.toUpperCase(),W/2,y);
+  ctx.font='700 16px '+LB.FONT.body;ctx.fillStyle=col;ctx.fillText(eye.toUpperCase().split('').join(String.fromCharCode(8202)),W/2,y-fs*TITLE_T.cap-TITLE_T.gap);
   ctx.fillStyle=col;ctx.fillRect(W/2-60*a,H*.42+18,120*a,3);ctx.restore()}
 const FALL=(()=>{const R=mulberry(91);let rank=0;const ids=TOWER.map((p,i)=>i).filter(i=>!FIXED(TOWER[i].k)).sort((a,b)=>TOWER[a].e.y-TOWER[b].e.y);
   const out={};ids.forEach(i=>{const p=TOWER[i],dir=rank%2?1:-1;let x=clamp(p.e.x+dir*(50+rank*20)+(R()-.5)*20,380,945),y=GY-13,r=(R()-.5)*.5;
@@ -2564,6 +2576,7 @@ function cineBoss(){
     S.heroDY=0;S.heroPose=col>0&&col<1?{staffA:-1.9,lean:-.1}:null;
     return}
   if(ph===3&&k==='in'){
+    cineGuard(t);
     if(t<1.5){drawLamps(LAMP_FLOOR,1);ctx.save();ctx.translate(60,0);drawBoss1();ctx.restore();S.heroDY=0}
     else if(t<11.5){S.heroDY=0;S.tfT=S.cine.t0+1.5;drawTransform()}
     else{const s=clamp((t-11.7)/1.4,0,1);drawBoss3({dir:-1,pre:(t-11.7+SPIN.pre)/SPIN.pre,s,post:(t-13.1)/SPIN.back});if(s>0&&s<1){ctx.save();ctx.globalCompositeOperation='lighter';beamShape(940-1000*s,.8);ctx.restore()}}
@@ -3495,12 +3508,13 @@ let lastCard=null;
 function setTheme(id){if(LB.audio.music)MUSIC.play(id);else MUSIC.stop()}
 function showCard(o){lastCard=o;LB.card.show(o)}
 function hideCard(){LB.card.hide()}
+const cineKey=(id,k)=>LB.key('cine-'+id+k),cineSeen=(id,k)=>LB.store.get(cineKey(id,k),'0')==='1';
 function playCine(id,k,cb){
   MUSIC.stop();S.phase=id;resetCine(S);S.parts=[];S.pops=[];S.cine={k,t0:gt};S.cineCb=cb;S.mode='cine';S.paused=false;
   S.tfBurst=S.tfFlash=S.tfAnch=false;S.tfId=(S.tfId||0)+1;S.flashT=-9;S.shake=0;
-  hideCard();hud();if(LB.audio.music)MUSIC.bed(id);$('skip').hidden=false;
+  hideCard();hud();if(LB.audio.music)MUSIC.bed(id);$('skip').hidden=!cineSeen(id,k);
 }
-function endCine(){if(S.mode!=='cine')return;const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
+function endCine(){if(S.mode!=='cine')return;if(S.cine)LB.store.set(cineKey(S.phase,S.cine.k),'1');const cb=S.cineCb;S.cineCb=null;resetCine(S);MUSIC.bedStop();$('skip').hidden=true;S.mode='card';cb&&cb()}
 function cineScene(fn,vig){return(p,t,lt,st,cx)=>{const g=ctx;ctx=cx;try{ctx.save();fn(t);ctx.restore();
   if(vig){const v=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.9);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=v;ctx.fillRect(0,0,W,H)}}finally{ctx=g}}}
 const PRO=LB.cine.create({key:'intro',scenes:()=>CINE_D.intro.map((d,i)=>({d,txt:()=>i<4?PCAP_TXT()[i]:'',draw:cineScene(drawPrologue,true)})),
@@ -3513,7 +3527,7 @@ function replayEpilogue(cb){if(EPI.playing())return;const keep={gt,t0:S.epT0,par
 function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
   S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if(LB.audio.music)MUSIC.bed(2);
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
-function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,ghostN:0,ghostDome:null,pulse:0,domeT0:null,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=id===3?S.d.bd.hp3:S.d.bd.hp;S.bossHp=S.bossMax;S.hp=o.first?S.hpMax:LB.healFor(S.d.heal,S.hpMax,S.hp);   // heal rule shared: true = full refill, a number = that many HP capped at the starting HP (trial: +1)
  resetPhaseState();
@@ -3682,7 +3696,7 @@ const ward=$('ward'),cvm=$('c'),ctxMain=cvm.getContext('2d');let SCm=1;
 const DPR_MAX=LB.coarse?1.25:2;
 function fitMain(){const r=cvm.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,DPR_MAX);cvm.width=Math.max(1,Math.round(r.width*d));cvm.height=Math.max(1,Math.round(r.height*d));SCm=cvm.width/W}
 new ResizeObserver(fitMain).observe($('stage'));fitMain();
-function skip(){if(S.mode==='prologue'||S.mode==='epilogue')LB.cine.skip();else if(S.mode==='cine')endCine()}
+function skip(){if(S.mode==='prologue'||S.mode==='epilogue')LB.cine.skip();else if(S.mode==='cine'&&S.cine&&cineSeen(S.phase,S.cine.k))endCine()}
 $('skip').addEventListener('click',skip);
 function retryKey(){if(S.mode!=='play'&&S.mode!=='dead')return;LB.pause.hide();S.d.trial?startRun(S.dk,true):retryPhase()}
 LB.input.bind({press:down,release:up,pause:()=>{if(S.mode==='play')setPause(!S.paused)},retry:retryKey,

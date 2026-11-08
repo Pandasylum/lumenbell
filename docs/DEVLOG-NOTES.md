@@ -289,3 +289,8 @@
 - Ce que le joueur verra : au Phare, un tap ouvre un arc de lumière jaune-blanc tourné vers la menace (claquement sec), un maintien ouvre un dôme bleu discret avec un bourdonnement ; chaque sort a son contre propre (lampe qui s'éteint, tentacule qui recule, maillon coupé, cloche fissurée…).
 - Ce que le joueur verra : la dernière rage de la Partie 1 se termine par la lumière renvoyée sur le phare central, qui se brise et lance la Partie 2.
 - Ce que le joueur verra : au Phare, Facile laisse plus de temps et moins d'éléments par sort, Difficile en demande plus et plus vite à repérer ; tenir trop longtemps fait trembler le dôme (ambre) puis l'éclate, et le Veilleur reste sans garde un instant.
+
+## 2026-11-08 · claude/wizardly-feynman-vfy6dv
+- Ce que le joueur verra : dans l'entrée du Phare, la lanterne du Veilleur pulse puis un dôme le protège quand le premier faisceau passe, pour montrer qu'on peut tenir.
+- Ce que le joueur verra : touché par une menace à tenir, il voit brièvement le dôme manquant (toujours en Facile, la première fois par combat en Normal, jamais en Difficile).
+- Ce que le joueur verra : les cinématiques de phase ne se passent pas la première fois ; le nom du boss ne chevauche plus la ligne de la salle.
