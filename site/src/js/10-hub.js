@@ -203,7 +203,7 @@ function lang(){document.documentElement.lang=LB.lang.cur;
   $('fig').setAttribute('aria-label',LB._('Chapters','Chapitres'));$('langs').setAttribute('aria-label',LB._('Language','Langue'));
   const st=LB._('Settings','Réglages');$('setBtn').setAttribute('aria-label',st);$('setBtn').title=st;$('hsTitle').textContent=st;$('hsClose').setAttribute('aria-label',LB._('Close','Fermer'));
   document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
-  const tt=LB._('Tutorial','Tutoriel');$('tutoLbl').textContent=tt;$('htTitle').textContent=tt;$('htClose').setAttribute('aria-label',LB._('Close','Fermer'));
+  const tt=LB._('Tutorial','Tutoriel');$('tutoLbl').textContent=tt;$('tutoBtn').setAttribute('aria-label',tt);$('tutoBtn').title=tt;$('htTitle').textContent=tt;$('htClose').setAttribute('aria-label',LB._('Close','Fermer'));
   if(tutoRender)tutoRender();
   setSync();apply(shown);if(card)open(card,true);layout()}
 /* ---------- mise en page (HUB_T) : figure aussi grande que la place restante (la carte ne la déplace pas) ; titre centré entre le haut
