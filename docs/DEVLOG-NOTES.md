@@ -301,3 +301,6 @@
 
 ## 2026-11-08 · fix/mobile-pixelisation
 - Ce que le joueur verra : sur téléphone, l’image du jeu et des cinématiques est plus nette (rapport de pixels plafonné à 1,75 au lieu de 1,25) ; rien ne change sur ordinateur.
+
+## 2026-11-08 · feat/p3-premier-faisceau-attend (anneau)
+- Ce que le joueur verra : un anneau sur le bouton d'action en phase III ; il se remplit pendant le maintien du dôme et pulse pendant l'attente du premier faisceau (Facile, Normal).

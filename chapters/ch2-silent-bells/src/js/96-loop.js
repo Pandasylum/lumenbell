@@ -7,7 +7,7 @@ function loop(now){
   if(!$('menu').hidden)return;
   if(!S.paused&&['play','ko','dead','cine','prologue','epilogue'].includes(S.mode))gt+=dt;
   ctx=ctxMain;SC=SCm;
-  update(dt);gameUpdate(dt);draw();
+  update(dt);gameUpdate(dt);draw();wardRing();
 }
 /* the menu of the series (LB.menu, shared/js/28-ui.js) around this chapter's scene (page/body.html): sea spray, ▶ Intro, ▶ Outro
    (after the true ending), fullscreen, languages, difficulties, Trial by Water; no start screen any more (the chapter starts directly; the

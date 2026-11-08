@@ -9,3 +9,4 @@
 - **Compteur** : `S.learn`, renouvelé à chaque combat (`resetPhaseState`) : une nouvelle tentative rejoue l'apprentissage.
 - **Dôme fantôme après dégât** : inchangé (`GHOST_DOME.n` : Facile toujours, Normal une fois, Difficile jamais). **À valider** : la consigne parlait de le « conserver » en Difficile après le premier dégât ; il n'y est pas affiché aujourd'hui (décision du 8 novembre : jamais en Difficile).
 - Cinématique non touchée. Test : `tests/ch2-input.js` (bloc 5).
+- **Anneau du bouton d'action** : `wardRing` (`12-hero-states.js`), dessiné en code sur `#ward` (aucun asset, aucun texte, `shared/` non touché), look dans `WARD_RING` (`40-boss-drowned-beacon.js`). Visible en P3 dès que le maintien est disponible ; se remplit pendant le maintien du dôme ; pulse (fréquence `PULSE_FX.freq`, aucun nouveau timing) pendant l'attente du premier faisceau. Le tap garde son comportement.

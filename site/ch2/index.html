@@ -1215,6 +1215,17 @@ function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk())
   p.stam=clamp(1-F.t/max,0,1)}
 const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
 function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
+let wardRingEl=null;
+function wardRing(){
+  const w=$('ward');if(!w)return;
+  if(!wardRingEl){wardRingEl=document.createElement('span');wardRingEl.setAttribute('aria-hidden','true');
+    wardRingEl.style.cssText='position:absolute;inset:0;border-radius:50%;pointer-events:none;display:none;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - '+WARD_RING.w+'px),#000 calc(100% - '+WARD_RING.w+'px));mask:radial-gradient(farthest-side,transparent calc(100% - '+WARD_RING.w+'px),#000 calc(100% - '+WARD_RING.w+'px))';
+    if(getComputedStyle(w).position==='static')w.style.position='relative';w.appendChild(wardRingEl)}
+  const on=S.phase===3&&S.mode==='play'&&!S.d.trial;
+  if(!on){wardRingEl.style.display='none';return}
+  const R=WARD_RING,wait=!!(S.learn&&S.learn.th&&!S.holding),k=wait?0:domeAlpha(),p=wait?R.pulseMin+(1-R.pulseMin)*(.5+.5*Math.sin(rt*2*Math.PI*PULSE_FX.freq/2)):1;
+  wardRingEl.style.display='block';wardRingEl.style.opacity=p.toFixed(3);
+  wardRingEl.style.background=wait?`rgba(${R.col},.9)`:`conic-gradient(rgba(${R.col},.95) ${(k*360).toFixed(1)}deg,rgba(${R.col},${R.base}) 0)`}
 function threatSrc(th){
   if(th.k==='bolt')return lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];
   if(th.k==='chunk')return TOWER[th.ri].e;
@@ -1884,6 +1895,7 @@ function sinkGlow(t){
 function shard(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a*1.5);const g=ctx.createLinearGradient(-s,-s,s,s);g.addColorStop(0,'rgba(235,225,255,.75)');g.addColorStop(1,'rgba(90,70,140,.4)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*.5,s*.2);ctx.lineTo(-s*.3,s*.7);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
 
 const BEACON_LEARN={on:{easy:true,normal:true,hard:false},lead:.1,timeout:7,retries:1,retryGap:1.2};
+const WARD_RING={w:5,col:'120,200,255',base:.3,pulseMin:.35};
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
@@ -3747,7 +3759,7 @@ function loop(now){
   if(!$('menu').hidden)return;
   if(!S.paused&&['play','ko','dead','cine','prologue','epilogue'].includes(S.mode))gt+=dt;
   ctx=ctxMain;SC=SCm;
-  update(dt);gameUpdate(dt);draw();
+  update(dt);gameUpdate(dt);draw();wardRing();
 }
 LB.menu.mount(CHAPTER,{
   onDiff:dk=>{ensureAudio();LB.help.use(DIFFS[dk]);startRun(dk)},

@@ -52,6 +52,19 @@ function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk())
 const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
 /* opacity 0..1 of the dome of the held guard: nothing for a tap (released before GUARD_FX.dome.delay), then it fades in; none once released */
 function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
+/* ring of the action button (decision of 8 Nov 2026, drawn in code, no asset, no text): shown in phase III as soon as the hold is available; fills while the dome
+   is held (domeAlpha), pulses while the first beam waits for the hold (S.learn.th, Easy and Normal). Look: WARD_RING (40-boss-drowned-beacon.js). */
+let wardRingEl=null;
+function wardRing(){
+  const w=$('ward');if(!w)return;
+  if(!wardRingEl){wardRingEl=document.createElement('span');wardRingEl.setAttribute('aria-hidden','true');
+    wardRingEl.style.cssText='position:absolute;inset:0;border-radius:50%;pointer-events:none;display:none;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - '+WARD_RING.w+'px),#000 calc(100% - '+WARD_RING.w+'px));mask:radial-gradient(farthest-side,transparent calc(100% - '+WARD_RING.w+'px),#000 calc(100% - '+WARD_RING.w+'px))';
+    if(getComputedStyle(w).position==='static')w.style.position='relative';w.appendChild(wardRingEl)}
+  const on=S.phase===3&&S.mode==='play'&&!S.d.trial;
+  if(!on){wardRingEl.style.display='none';return}
+  const R=WARD_RING,wait=!!(S.learn&&S.learn.th&&!S.holding),k=wait?0:domeAlpha(),p=wait?R.pulseMin+(1-R.pulseMin)*(.5+.5*Math.sin(rt*2*Math.PI*PULSE_FX.freq/2)):1;
+  wardRingEl.style.display='block';wardRingEl.style.opacity=p.toFixed(3);
+  wardRingEl.style.background=wait?`rgba(${R.col},.9)`:`conic-gradient(rgba(${R.col},.95) ${(k*360).toFixed(1)}deg,rgba(${R.col},${R.base}) 0)`}
 /* where a threat of phase III comes from (to turn the arc of a tap towards it) */
 function threatSrc(th){
   if(th.k==='bolt')return lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];
