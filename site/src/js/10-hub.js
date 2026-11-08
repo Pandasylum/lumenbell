@@ -12,6 +12,7 @@
    Retour d'un chapitre (?back=N, lien « Chapitres » ou fin du chapitre) : sans écran de démarrage, le fond sonore repart.
    Tours fêtées (lb-hub-lit, liste des chapitres) : à l'arrivée, une tour terminée pas encore fêtée s'allume devant le joueur
    avec sa cloche, puis est marquée fêtée ; une tour déjà fêtée apparaît allumée, sans animation.
+   Onglet Tuto (livre en haut à gauche, décision docs/decisions/2026-11-08-onglet-tuto-hub.md) : bloc partagé LB.tuto (shared/js/30-tuto.js).
    Réglages (roue en haut à droite) : table SETTINGS_T ; réinitialisation : RESET_T. Fond sonore : HUB_T.bed (variante « nébuleuse », sans paramètre d'URL). Tout réglage est dans HUB_CH, HUB_T, SETTINGS_T et RESET_T ; un chapitre de plus
    = une entrée de plus dans HUB_CH. */
 LB.setup({id:'hub',old:{'lb-ch1-end':['eb-end']}});
@@ -76,6 +77,7 @@ const SETTINGS_T=[
    lb-mus, lb-help) et leurs anciennes clés. keys : clés exactes ; prefix : début de clé. */
 const RESET_T={
   keys:['lb-hub-lit',     // tours fêtées du hub
+    'lb-tuto',            // entrées de l'onglet Tuto (gestes réussis)
     'eb-end','eb-intro',  // anciennes clés du Chapitre I (lb-ch1-end, lb-ch1-intro), sinon recopiées à la lecture
     'db-unl'],            // ancienne clé du Chapitre II (lb-ch2-unl)
   prefix:['lb-ch',        // tout ce qui est propre à un chapitre : lb-chN-end, lb-chN-intro, lb-chN-unl, lb-chN-best-…
@@ -163,7 +165,7 @@ function close(focus){if(!card)return;const n=card;card=0;tw[n].classList.remove
 function enter(){const c=CH(card);if(!c||c.soon||leaving)return;leaving=true;$('hcGo').disabled=true;bed.stop();
   location.href=c.path+'?from='+LB.HUB.from}
 /* ---------- réglages (SETTINGS_T) ---------- */
-let setOpen=false;
+let setOpen=false,tutoOpen=false,tutoRender=null;
 function setRows(){const box=$('hsRows');box.innerHTML='';
   for(const S of SETTINGS_T){const row=document.createElement('div');row.className='hsrow';row.dataset.id=S.id;
     if(S.type==='hold'){row.innerHTML='<button type="button" class="hshold" id="hs-'+S.id+'"><i class="gauge"></i><b></b><small></small></button>';hold(row.firstChild,S)}
@@ -185,8 +187,11 @@ function hold(b,S){let t0=0,raf=0,on=false;const p=v=>b.style.setProperty('--p',
   b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();if(!e.repeat)go()}});
   b.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' ')stop()});
   b.addEventListener('contextmenu',e=>e.preventDefault())}
+/* onglet Tuto : bloc partagé LB.tuto (shared/js/30-tuto.js), monté ici seulement ; ouvert, il referme les réglages et la carte */
+function tuto(on){if(on===tutoOpen)return;tutoOpen=on;$('htuto').hidden=!on;$('tutoBtn').setAttribute('aria-expanded',String(on));
+  if(on){close(false);settings(false);if(!tutoRender)tutoRender=LB.tuto.mount($('htList'));else tutoRender();try{$('htClose').focus({preventScroll:true})}catch(e){}}else try{$('tutoBtn').focus({preventScroll:true})}catch(e){}}
 function settings(on){if(on===setOpen)return;setOpen=on;$('hset').hidden=!on;$('setBtn').setAttribute('aria-expanded',String(on));
-  if(on){close(false);setSync();try{$('hsClose').focus({preventScroll:true})}catch(e){}}else try{$('setBtn').focus({preventScroll:true})}catch(e){}}
+  if(on){close(false);tuto(false);setSync();try{$('hsClose').focus({preventScroll:true})}catch(e){}}else try{$('setBtn').focus({preventScroll:true})}catch(e){}}
 /* efface la progression (RESET_T), garde la langue et les réglages ; le hub se réaffiche à l'état vierge */
 function reset(){const hit=k=>RESET_T.keys.includes(k)||RESET_T.prefix.some(p=>k.startsWith(p));
   try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));ks.filter(hit).forEach(k=>localStorage.removeItem(k))}catch(e){}
@@ -198,6 +203,8 @@ function lang(){document.documentElement.lang=LB.lang.cur;
   $('fig').setAttribute('aria-label',LB._('Chapters','Chapitres'));$('langs').setAttribute('aria-label',LB._('Language','Langue'));
   const st=LB._('Settings','Réglages');$('setBtn').setAttribute('aria-label',st);$('setBtn').title=st;$('hsTitle').textContent=st;$('hsClose').setAttribute('aria-label',LB._('Close','Fermer'));
   document.querySelectorAll('#langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LB.lang.cur)));
+  const tt=LB._('Tutorial','Tuto');$('tutoBtn').setAttribute('aria-label',tt);$('tutoBtn').title=tt;$('htTitle').textContent=tt;$('htClose').setAttribute('aria-label',LB._('Close','Fermer'));
+  if(tutoRender)tutoRender();
   setSync();apply(shown);if(card)open(card,true);layout()}
 /* ---------- mise en page (HUB_T) : figure aussi grande que la place restante (la carte ne la déplace pas) ; titre centré entre le haut
    de la zone sûre et le haut de la tour I, sur le même axe vertical que la figure ---------- */
@@ -219,7 +226,7 @@ function placeCard(){const hc=$('hcard'),T=HUB_T.card;if(!card||hc.hidden)return
     cw=hc.offsetWidth,ch=hc.offsetHeight,
     discs=[...document.querySelectorAll('.tw .dot,#core')].map(e=>{const q=e.getBoundingClientRect();return{x:q.left+q.width/2,y:q.top+q.height/2,r:q.width/2}}),
     rg=document.createRange();rg.selectNodeContents($('brand'));
-    const boxes=[...document.querySelectorAll('#langs button,#ver,#setBtn'),rg].map(e=>e.getBoundingClientRect()),
+    const boxes=[...document.querySelectorAll('#langs button,#ver,#setBtn,#tutoBtn'),rg].map(e=>e.getBoundingClientRect()),
     hitC=(r,c)=>{const dx=Math.max(r.l-c.x,0,c.x-r.r),dy=Math.max(r.t-c.y,0,c.y-r.b);return dx*dx+dy*dy<(c.r+T.clear)*(c.r+T.clear)},
     hitB=(r,o)=>r.l<o.right+T.clear&&r.r>o.left-T.clear&&r.t<o.bottom+T.clear&&r.b>o.top-T.clear,
     lo=m,hi=Math.max(lo,W-m-cw),ideal=Math.min(hi,Math.max(lo,tx-cw/2)),
@@ -246,6 +253,9 @@ function motes(){const M=HUB_T.motes,w=$('motes');
 function focusables(){const o=[];for(let n=1;n<=HUB_T.towers;n++)if(shown[n]!=='closed')o.push(n);return o}
 function home(){const o=focusables();return o.find(n=>shown[n]==='play')||o[0]||1}
 function keys(e){if(!$('gate').hidden||leaving)return;const k=e.key;
+  if(tutoOpen){if(k==='Escape'){e.preventDefault();tuto(false)}
+    else if(k==='Tab'){const f=[...$('htuto').querySelectorAll('button')],i=f.indexOf(document.activeElement);e.preventDefault();try{f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus()}catch(x){}}
+    return}
   if(setOpen){if(k==='Escape'){e.preventDefault();settings(false)}
     else if(k==='Tab'){const f=[...$('hset').querySelectorAll('button')],i=f.indexOf(document.activeElement);e.preventDefault();try{f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus()}catch(x){}}
     return}
@@ -266,6 +276,9 @@ $('hcard').addEventListener('click',e=>e.stopPropagation());
 $('hub').addEventListener('click',e=>{if(card&&!e.target.closest('.tw,.hcard,.hfoot,.gear,.hset'))close(false)});
 $('setBtn').addEventListener('click',e=>{e.stopPropagation();settings(!setOpen)});
 $('hsClose').addEventListener('click',()=>settings(false));
+$('tutoBtn').addEventListener('click',e=>{e.stopPropagation();tuto(!tutoOpen)});
+$('htClose').addEventListener('click',()=>tuto(false));
+$('htuto').addEventListener('click',e=>{if(e.target===$('htuto'))tuto(false)});
 $('hset').addEventListener('click',e=>{if(e.target===$('hset'))settings(false)});
 $('gateBtn').addEventListener('click',()=>{LB.audio.ensure();$('gate').hidden=true;LB.lift();arrive()});
 document.addEventListener('keydown',keys);

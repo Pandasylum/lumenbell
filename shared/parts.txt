@@ -10,3 +10,4 @@ js/18-boss-diff.js
 js/20-watcher.js
 js/24-cine.js
 js/28-ui.js
+js/30-tuto.js

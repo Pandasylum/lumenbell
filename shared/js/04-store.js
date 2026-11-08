@@ -2,7 +2,7 @@
    Clés communes à la série : lb-<nom> pour les noms de COMMON ; propres à un chapitre : lb-<id>-<nom> (LB.key).
    LB.store.get lit la nouvelle clé, sinon les anciennes dans l'ordre (OLD_KEYS communes, puis celles du chapitre, puis
    les préfixes du chapitre) et recopie la première trouvée dans la nouvelle. Les anciennes clés ne sont jamais effacées ni écrites. */
-LB.COMMON=['lang','snd','mus','help'];
+LB.COMMON=['lang','snd','mus','help','tuto'];
 LB.OLD_KEYS={'lb-lang':['pn-lang','eb-lang'],'lb-snd':['db-optSnd'],'lb-mus':['db-optMus'],'lb-help':['db-optHelp']};
 LB.id='';LB.old={};LB.oldPrefix=[];
 LB.key=name=>LB.COMMON.includes(name)?'lb-'+name:'lb-'+LB.id+'-'+name;

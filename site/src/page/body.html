@@ -7,6 +7,7 @@
     <h1 class="brand" id="brand"><span>Lumen</span><i>bell</i></h1>
   </header>
   <button class="gear" id="setBtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.4L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.7h4l.4-2.7a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.4z"/><circle cx="12" cy="12" r="3"/></svg></button>
+  <button class="gear tbtn" id="tutoBtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Tutorial" title="Tutorial"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 6.5C10.4 5.3 8 4.8 4.5 5v12.5c3.5-.2 5.9.3 7.5 1.5 1.6-1.2 4-1.7 7.5-1.5V5C16 4.8 13.6 5.3 12 6.5zM12 6.5V19"/></svg></button>
   <div class="figwrap" id="figwrap">
     <div class="fig" id="fig" role="group" aria-label="Chapters">
       <svg class="wire" id="wire" viewBox="0 0 100 100" aria-hidden="true" focusable="false"></svg>
@@ -28,6 +29,13 @@
       <h2 id="hsTitle">Settings</h2>
       <button class="hsx" id="hsClose" type="button" aria-label="Close">×</button>
       <div class="hsrows" id="hsRows"></div>
+    </div>
+  </div>
+  <div class="hset" id="htuto" role="dialog" aria-modal="true" aria-labelledby="htTitle" tabindex="-1" hidden>
+    <div class="hsbox">
+      <h2 id="htTitle">Tutorial</h2>
+      <button class="hsx" id="htClose" type="button" aria-label="Close">×</button>
+      <ul id="htList"></ul>
     </div>
   </div>
 </main>
