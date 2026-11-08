@@ -9,7 +9,8 @@ function drawHero(){
   const hk=gt-S.hurtT;if(hk<.4){const k=1-hk/.4;ox=-16*k;tint=k;pose='hurt';o={k}}
   if(ph===1&&p.s==='act'&&play){pose='block';o={k:clamp(p.t/LB.WATCHER_T.raise,0,1)}}
   if(ph===2){const g=gt-S.dodgeT;if(g<.38){pose='dodgeSide';o={k:Math.sin(Math.PI*g/.38)}}}
-  if(ph===3&&S.holding){pose='hold';o={}}
+  const tap3=ph===3&&play&&p.s==='act'&&!S.held;   // phase III, tap: the same block as in phase II (pose + shield, HERO_T act); the hold (button down) keeps its pose and its dome
+  if(ph===3&&S.holding){if(tap3){pose='block';o={k:clamp(p.t/LB.WATCHER_T.raise,0,1)}}else{pose='hold';o={}}}
   if(ph===3&&gt<S.broken){pose='hurt';o={k:1}}
   if(S.cnt){pose='cast';o={rot:.06}}   // the counters of the Elder (spells of the Elder: 64-prologue.js, counterKing) and of the other bosses: the sceptre raised
   if(S.heroPose){pose='raise';o={staffA:S.heroPose.staffA,rot:S.heroPose.lean||0,breath:true}}
@@ -19,16 +20,15 @@ function drawHero(){
   if(ph===2&&gt-S.dodgeT<.3){ctx.globalAlpha=.25;heroShape(x+24,y,pose,o,0,true);ctx.globalAlpha=1}
   ell(x,y+2,30,6,'rgba(0,0,0,.45)');
   heroShape(x,y,pose,o,tint);
-  // the shield of the block (phase II), as in Ember Bridge: it lasts as long as the action
-  if(ph===1&&p.s==='act'&&play)LB.drawBlock(ctx,x,y,p.t,PT().act);
-  // phase III, hold: the blue dome, only while the gesture is held (domeAlpha: fade-in, nothing for a tap), thin outline, light fill, the Watcher stays visible
+  // the shield of the block (phase II, and the tap of phase III), as in Ember Bridge: it lasts as long as the action
+  if(ph===1&&p.s==='act'&&play||tap3)LB.drawBlock(ctx,x,y,p.t,PT().act);
+  // phase III, hold: the blue dome, only while the gesture is held (domeAlpha: fade-in; a tap shows the block above, not the dome), thin outline, light fill, the Watcher stays visible
   const da=domeAlpha(),warn=domeWarn();
   if(da>0){const Z=GUARD_FX.dome,jx=warn?Math.sin(gt*70)*2.2:0,jy=warn?Math.cos(gt*83)*1.4:0;ctx.save();ctx.globalAlpha=da;
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x+jx,y+jy,92,Math.PI,0);ctx.fill();
     ctx.strokeStyle=warn?`rgba(${FATIGUE.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
-  // the ghost dome: the dome that was missing when a hit landed on a threat to hold (GHOST_DOME), dashed, fading; after the tutorial only with the visual help on, never in Hard
-  const waiting=ph===3&&S.learn&&S.learn.th&&!S.holding;   // the first beam waits for the hold (BEACON_LEARN): the same shadow, until the Watcher holds
-  if(waiting||ph===3&&!S.d.hard&&LB.help.on()&&S.ghostDome!=null&&gt-S.ghostDome<GHOST_DOME.dur){const Z=GHOST_DOME,u=(gt-S.ghostDome)/Z.dur,a=waiting?1:Math.min(1,(gt-S.ghostDome)/Z.in)*(1-u);ctx.save();ctx.globalAlpha=a;
+  // the shadow of the dome (GHOST_DOME), dashed: shown while the first beam waits for the hold (BEACON_LEARN), until the Watcher holds
+  if(ph===3&&S.learn&&S.learn.th&&!S.holding){const Z=GHOST_DOME;ctx.save();
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(HX,y,Z.r,Math.PI,0);ctx.fill();
     ctx.strokeStyle=`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=GUARD_FX.dome.line;ctx.setLineDash(Z.dash);ctx.stroke();ctx.restore()}
   // the dome bursts when the hold is too long (fatigue): shards of the outline fly off
