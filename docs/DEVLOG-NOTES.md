@@ -325,3 +325,9 @@
 - Ce que le joueur verra : dans l'onglet Tutoriel, chaque geste appris (bloquer, esquiver, tenir) montre un ▶ à droite ; un appui déplie une courte scène en boucle avec le vrai Veilleur, et un second appui la replie.
 - « Rester en place » reste en texte seul ; avec le mouvement réduit, la scène s'affiche en image fixe.
 - Ce que le joueur verra : l'entrée « Rester en place » du Tutoriel s'anime aussi (une orbe illusoire arrive puis se dissipe devant le Veilleur immobile) ; l'orbe est identique à celle du combat du Chapitre II.
+
+## 2026-11-08 · feat/tuto-animations (dôme « Tenir »)
+- Ce que le joueur verra : dans l'onglet Tutoriel, l'animation « Tenir » montre le dôme bleu de la phase III du Chapitre II (le Veilleur maintient, le dôme se forme, le coup glisse dessus) ; en combat, rien ne change.
+
+## 2026-11-08 · feat/tuto-animations (dôme agrandi)
+- Ce que le joueur verra : en phase III du Chapitre II, le dôme tenu est plus grand et enveloppe désormais la tête du Veilleur (même montée, mêmes durées) ; l'animation « Tenir » du Tutoriel le montre pareil.

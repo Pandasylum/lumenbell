@@ -51,7 +51,7 @@ function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk())
 /* the dome warns when the hold has reached FATIGUE.warn of the max */
 const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
 /* opacity 0..1 of the dome of the held guard: no dome for a tap (released before GUARD_FX.dome.delay; the tap draws the block, 28-hero-draw.js), then it fades in; none once released */
-function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
+function domeAlpha(){return S.phase===3&&S.holding&&S.domeT0!=null?LB.domeAlpha(gt-S.domeT0):0}
 /* gauge of the action button (decision of 8 Nov 2026, drawn in code, no asset, no text): shown in phase III as soon as the hold is available; fills while the dome
    is held (domeAlpha), pulses while the first beam waits for the hold (S.learn.th, Easy and Normal). Look: WARD_RING (40-boss-drowned-beacon.js). */
 let wardRingEl=null,wardRingBar=null;

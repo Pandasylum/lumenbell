@@ -59,16 +59,16 @@ const PHARE_DIFF={
   normal:{tell:1,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
   hard:{tell:.7,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
 /* fatigue of the hold: the count starts again when the gesture has been released for more than `reset` s; the dome warns at `warn` of the max (trembles, amber outline) */
-const FATIGUE={reset:.15,warn:.75,amber:'255,190,90'};
+const FATIGUE={reset:.15,warn:.75,amber:LB.DOME_FX.amber};
 const PD=()=>PHARE_DIFF[vdk()];
 const bellSpan=Z=>(Z.blows-1)*BEACON_FX.bell.step+BEACON_FX.bell.tail;
 /* longest hold a spell of the level asks for (s the guard must cover: tb - ta of its hold threats): beams (176 px of reef round the Watcher over the sweep), bell, shard, knell, tower waves */
 function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
   return Math.max(w(B.beam.D),w(B.dazzle.D),w(B.morse.long.D),w(SP.kwave.D),1.25*160/1080,1.25*160/1000,1.5*160/1000,bellSpan(Z),B.shard.blast,SP.storm.trapTb-SP.storm.trapTa,.6)}
 const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
-const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
+const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:LB.DOME_FX};
 /* the shadow of the dome: drawn (dashed outline, `fill` of opacity) while the first beam waits for the hold (BEACON_LEARN, Easy and Normal); nothing after it */
-const GHOST_DOME={r:92,lineA:.8,fill:.07,dash:[10,8]};
+const GHOST_DOME={r:LB.DOME_FX.r,lineA:.8,fill:.07,dash:[10,8]};
 /* the pulse of the Watcher's lantern in the entry cinematic of phase III (CINE_P3.guard): the halo swells `freq` times a second between `base` and `peak` */
 const PULSE_FX={freq:2.4,base:.25,peak:.95};
 const LX=760,LY=GY-333;
