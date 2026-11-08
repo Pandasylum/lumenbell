@@ -8,7 +8,7 @@
 //  4. Chapitre II : plus de code mort du menu (renderMenu, canvas #mc).
 // Captures dans tests/shots/ (lum_<chapitre>_<taille>.png). Sortie attendue : errs []
 const fs=require('fs'),path=require('path');const launch=require('./launch');
-const F={ch1:path.resolve(__dirname,'../chapters/ch1-ember-bridge/dist/index.html'),ch2:path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html')};
+const F={ch1:path.resolve(__dirname,'../site/ch1/index.html'),ch2:path.resolve(__dirname,'../site/ch2/index.html')};
 const COL={ch1:'rgb(255, 122, 43)',ch2:'rgb(79, 224, 204)'},CHAP={ch1:['Chapter I · Ember Bridge','Chapitre I · Ember Bridge'],ch2:['Chapter II · Silent Bells','Chapitre II · Silent Bells']};
 const errs=[],check=(c,m)=>{if(!c)errs.push(m)};
 (async()=>{const b=await launch();fs.mkdirSync(__dirname+'/shots',{recursive:true});

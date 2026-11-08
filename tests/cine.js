@@ -19,7 +19,7 @@
 // Usage : node cine.js (python3 build/build_test.py avant). Sortie attendue : errs []
 const path=require('path');const launch=require('./launch');const {testPage}=require('./ch2-lib');
 const ROOT=path.resolve(__dirname,'..'),errs=[];
-const DIST={ch1:path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html'),ch2:path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html')};
+const DIST={ch1:path.join(ROOT,'site/ch1/index.html'),ch2:path.join(ROOT,'site/ch2/index.html')};
 const KEY={ch1:'lb-ch1-intro',ch2:'lb-ch2-intro'};
 const check=(c,msg)=>{if(!c)errs.push(msg)};
 const fs=require('fs');

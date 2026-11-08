@@ -87,14 +87,6 @@ jobs:
           cache-dependency-path: tests/package-lock.json
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
-      - name: Les builds des chapitres reproduisent exactement leur dist
-        run: |
-          for cfg in chapters/*/chapter.json; do
-            id=$(basename "$(dirname "$cfg")")
-            python3 build/build_chapter.py "$id"
-            git diff --exit-code "chapters/$id/dist/"
-            test -z "$(git status --porcelain "chapters/$id/dist/")"
-          done
       - name: Site (hub + chapitres) - le build reproduit exactement site/
         run: |
           python3 build/build_site.py
@@ -128,8 +120,6 @@ jobs:
         with:
           name: jeu-apercu
           path: |
-            chapters/ch1-ember-bridge/dist/index.html
-            chapters/ch2-silent-bells/dist/index.html
             site/index.html
             site/ch1/index.html
             site/ch2/index.html

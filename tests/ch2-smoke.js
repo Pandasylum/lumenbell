@@ -1,4 +1,4 @@
-// Test de fumee du Chapitre II (Silent Bells) sur chapters/ch2-silent-bells/dist/index.html.
+// Test de fumee du Chapitre II (Silent Bells) sur site/ch2/index.html.
 // Puis, sans aucune cle de sauvegarde (UNLOCK_ALL) : phases II et III lancees directement depuis le menu et la frise,
 // en Facile, Normal et Difficile ; l'Epreuve se lance depuis le menu (frise fermee).
 // Syntaxe du script final, puis Normal et Difficile : prologue, phases I, II, III (deblocage via localStorage db-unl),
@@ -7,7 +7,7 @@
 // hors ligne, toute requete autre que file:/data:/blob: (page, sous-ressource, worker, WebSocket, appel d'API
 // reseau depuis le script) est interceptee et comptee comme erreur. Sortie attendue : errs []
 const fs=require('fs'),path=require('path');const launch=require('./launch');
-const FILE=path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html');
+const FILE=path.resolve(__dirname,'../site/ch2/index.html');
 const errs=[];
 const html=fs.readFileSync(FILE,'utf8');let nScript=0;
 for(const m of html.matchAll(/<script>([\s\S]*?)<\/script>/g)){nScript++;try{new Function(m[1])}catch(e){errs.push('syntaxe: '+e.message)}}

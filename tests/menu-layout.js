@@ -9,7 +9,7 @@
 // Chapitres exclu : meme taille, meme position) sont compares par leur centre, leur haut et leur hauteur, pas par leur largeur.
 // Sortie attendue : errs []
 const path=require('path');const launch=require('./launch');
-const F={ch1:path.resolve(__dirname,'../chapters/ch1-ember-bridge/dist/index.html'),ch2:path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html')};
+const F={ch1:path.resolve(__dirname,'../site/ch1/index.html'),ch2:path.resolve(__dirname,'../site/ch2/index.html')};
 const TOL=1,errs=[];
 // bureau (souris), telephones en portrait (tactile), paysage bas (tactile)
 const SIZES=[['desk',1100,760,false],['p320',320,568,true],['p360',360,640,true],['p375',375,667,true],['phone',390,844,true],['l568',568,320,true],['l640',640,360,true],['land',860,400,true]];

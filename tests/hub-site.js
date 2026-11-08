@@ -53,8 +53,7 @@ async function back(pg){await Promise.all([pg.waitForNavigation({waitUntil:'load
    check(S.p.ac===1,tag+' : hub de retour : '+S.p.ac+' AudioContext (fond sonore)')}
   console.log(tag.padEnd(22),'ok');await ctx.close()}
  // 2. chapitre ouvert seul
- for(const [nm,f] of [['site/ch1',BASE.file+'ch1/index.html'],['site/ch2',BASE.file+'ch2/index.html'],['site/ch1 http',BASE.http+'ch1/index.html'],
-   ['dist ch1','file://'+path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')],['dist ch2','file://'+path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html')]]){
+ for(const [nm,f] of [['site/ch1',BASE.file+'ch1/index.html'],['site/ch2',BASE.file+'ch2/index.html'],['site/ch1 http',BASE.http+'ch1/index.html']]){
   const tag='seul '+nm,{ctx,pg}=await page(b,tag);await pg.goto(f);await pg.waitForTimeout(300);const S=await st(pg);
   check(!S.gate&&!S.back,tag+' : demarrage direct, sans ecran ni Retour '+JSON.stringify(S));
   check(await pg.evaluate(()=>!document.getElementById('mHub')&&!document.querySelector('.mfoot')),tag+' : menu sans lien');
@@ -89,7 +88,7 @@ async function back(pg){await Promise.all([pg.waitForNavigation({waitUntil:'load
   check(t0.join()==='play,closed'&&t1.join()==='done+ring,play'&&S.p.osc>=BEDN+5&&!S.gate,tag+' : la tour I s\'allume avec sa cloche '+t0+' -> '+t1+' ('+S.p.osc+' oscillateurs)');
   await pg.reload();await pg.waitForTimeout(1500);const t2=await tw();S=await st(pg);
   check(t2.join()==='done,play'&&S.p.osc<=BEDN,tag+' : rechargement : pas de rejeu '+t2+' ('+S.p.osc+')');
-  for(const d of ['chapters/ch1-ember-bridge/dist/index.html','chapters/ch2-silent-bells/dist/index.html']){const src=fs.readFileSync(path.join(ROOT,d),'utf8');
+  for(const d of ['site/ch1/index.html','site/ch2/index.html']){const src=fs.readFileSync(path.join(ROOT,d),'utf8');
    check((src.match(/LB\.hubEnd\(/g)||[]).length>=1,tag+' : '+d+' : derniere carte non branchee sur LB.hubEnd')}
   console.log(tag.padEnd(22),t0.join(' '),'->',t1.join(' '),'| recharge',t2.join(' '));await ctx.close()}
  await b.close();

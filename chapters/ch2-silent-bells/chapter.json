@@ -1,6 +1,6 @@
 {
   "id": "ch2-silent-bells",
   "title": "Lumenbell · Silent Bells",
-  "dist": "chapters/ch2-silent-bells/dist/index.html",
+  "dist": "build/out/chapters/ch2-silent-bells/index.html",
   "zip": "build/out/silent-bells-itch.zip"
 }

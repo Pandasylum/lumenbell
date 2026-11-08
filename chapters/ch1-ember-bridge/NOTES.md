@@ -1,6 +1,6 @@
 # Chapitre I – Ember Bridge (notes du dossier)
 
-- **État** : v1.0 publié. Source découpée dans `src/` (27 octobre 2026, branche `ch1/split`) ; `legacy/` n'existe plus. `dist/index.html` = référence construite par `python3 build/build_chapter.py ch1-ember-bridge`, inchangée par le découpage.
+- **État** : v1.0 publié. Source découpée dans `src/` (27 octobre 2026, branche `ch1/split`) ; `legacy/` n'existe plus. `site/ch1/index.html` = référence construite par `python3 build/build_site.py` (plus de `dist/` de chapitre), inchangée par le découpage.
 - **Assemblage** : `build/assemble.py` colle les morceaux listés dans `src/parts.txt`, **dans cet ordre, octet pour octet, sans rien ajouter**. Le résultat est l'ancien fragment (sans doctype, une IIFE unique) ; `build_chapter.py` et `build_test.py` le transforment comme avant. Pas de modules JS : tous les fichiers JS partagent la portée de l'IIFE ouverte dans `00-core.js` et fermée dans `84-loop.js`.
 - **Structure du code** : phases `G` (P1 pont), `Q` (P2 Fonderie, `drawLake`, `lakeY()`), `R` (P3 Clocher, `ringBell`, `FIN`, `finaleScore`) ; cinématiques `SC` (cartons `{d,en,fr}`) et `DRAW=[sStatue,sValley,sTowers,sSea,sDawn,sTitle]` ; panneaux `CARD1`, `LORE`, `showEnd`, `qEnd`, `rEnd` ; i18n `_(en,fr)`.
 - **Textes** : `docs/TEXTES-CH1.md` (régénérable, colonne `fichier:ligne`). Lore : `docs/LORE.md`.

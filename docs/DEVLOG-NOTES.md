@@ -334,3 +334,6 @@
 
 ## 2026-11-08 · chore/version-0-2-0
 - Ce que le joueur verra : le hub et les menus affichent « v0.2.0 » au lieu de « v1.0.0 ».
+
+## 2026-11-08 · chore/build-site-seul
+- Ce que le joueur verra : rien ne change, le jeu est identique (hub et Chapitres I et II). Seul l'outillage de build est simplifié.

@@ -1,6 +1,6 @@
 {
   "id": "ch1-ember-bridge",
   "title": "Lumenbell",
-  "dist": "chapters/ch1-ember-bridge/dist/index.html",
+  "dist": "build/out/chapters/ch1-ember-bridge/index.html",
   "zip": "build/out/ember-bridge-itch.zip"
 }

@@ -9,7 +9,7 @@
 // Sortie attendue : errs []
 const path=require('path');const launch=require('./launch');const {testPage}=require('./ch2-lib');
 const ROOT=path.resolve(__dirname,'..');
-const F={ch1:path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html'),ch2:path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html')};
+const F={ch1:path.join(ROOT,'site/ch1/index.html'),ch2:path.join(ROOT,'site/ch2/index.html')};
 const OFFER={fr:"Activer l'aide visuelle",en:'Enable visual help'};
 const errs=[],check=(c,m)=>{if(!c)errs.push(m)};
 const card=()=>({vis:!document.getElementById('ov').hidden,go2:document.getElementById('go2').hidden?null:document.getElementById('go2').textContent,desc:document.getElementById('ovDesc').textContent,
