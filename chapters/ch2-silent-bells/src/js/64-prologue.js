@@ -799,6 +799,7 @@ function P3(stage,f,b,final,rage){
   const dazzle=()=>{const Z=BF.dazzle;for(let i=0;i<Z.n;i++)beamAt(i%2?1:-1,Z);sp='dazzle'};
   if(final)dazzle();
   else if(rage){(rage>1?morse:night)()}
+  else if(LEARN_FIRST()){S.learn.first=true;sweep(-1)}   // learning the hold (BEACON_LEARN): the first spell of the fight is always the beam, no draw
   else pick(stage?p1:p0)();
   T.spell=sp;T.side=side;T.ri=cri;return T;
 }

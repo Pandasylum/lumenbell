@@ -39,6 +39,7 @@ function update(dt){
    still (the beam stays in front of the Watcher, the shadow of the dome is drawn by drawHero); released by the held dome, or by the safety delay (then launched again
    once). A released beam is `safe`: it crosses without damage. S.learn is renewed with each fight (resetPhaseState). */
 const LEARN_KEYS=['t0','ts','ta','tb','ti'];
+const LEARN_FIRST=()=>{const L=S.learn,Z=BEACON_LEARN;return!!L&&!L.first&&S.phase===3&&S.form===1&&!S.d.trial&&!!Z.on[vdk()]};   // the first pattern of the fight is forced to the beam
 function learnBeam(dt){
   const Z=BEACON_LEARN,L=S.learn;
   if(!L||S.phase!==3||S.form!==1||S.d.trial||!Z.on[vdk()]||L.ok)return;

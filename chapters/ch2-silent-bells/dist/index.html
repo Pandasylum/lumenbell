@@ -1215,6 +1215,18 @@ function fatStep(dt){const p=S.pl,F=S.fat||(S.fat={t:0,rel:0}),max=fatMax(vdk())
   p.stam=clamp(1-F.t/max,0,1)}
 const domeWarn=()=>S.phase===3&&S.fat&&S.fat.t>=FATIGUE.warn*fatMax(vdk());
 function domeAlpha(){const D=GUARD_FX.dome;return S.phase===3&&S.holding&&S.domeT0!=null?clamp((gt-S.domeT0-D.delay)/D.fade,0,1):0}
+let wardRingEl=null,wardRingBar=null;
+function wardRing(){
+  const w=$('ward');if(!w)return;
+  if(!wardRingEl){const R=WARD_RING;   // a gauge inside the button: a faint frame (the hold is available) and a bar that loads left to right (no SVG, no asset, no text)
+    wardRingEl=document.createElement('div');wardRingEl.setAttribute('aria-hidden','true');
+    wardRingEl.style.cssText='position:absolute;left:0;top:0;right:0;bottom:0;border-radius:inherit;overflow:hidden;pointer-events:none;display:none;box-shadow:inset 0 0 0 '+R.w+'px rgba('+R.col+','+R.base+')';
+    wardRingBar=document.createElement('div');wardRingBar.style.cssText='height:100%;width:0;background:rgba('+R.col+','+R.fill+')';wardRingEl.appendChild(wardRingBar)}
+  if(wardRingEl.parentNode!==w){if(getComputedStyle(w).position==='static')w.style.position='relative';w.appendChild(wardRingEl)}   // hud() rewrites the button's text: put the gauge back
+  const on=S.phase===3&&S.mode==='play'&&!S.d.trial;
+  if(!on){wardRingEl.style.display='none';return}
+  const R=WARD_RING,wait=!!(S.learn&&S.learn.th&&!S.holding),k=wait?1:domeAlpha(),p=wait?R.pulseMin+(1-R.pulseMin)*(.5+.5*Math.sin(rt*2*Math.PI*PULSE_FX.freq/2)):1;
+  wardRingEl.style.display='block';wardRingEl.style.opacity=p.toFixed(3);wardRingBar.style.width=(k*100).toFixed(1)+'%'}
 function threatSrc(th){
   if(th.k==='bolt')return lampPoses(LX,LY,1)[th.side!=null?th.side:th.seed<.5?0:1];
   if(th.k==='chunk')return TOWER[th.ri].e;
@@ -1305,6 +1317,7 @@ function update(dt){
   S.shake*=Math.pow(.02,dt);
 }
 const LEARN_KEYS=['t0','ts','ta','tb','ti'];
+const LEARN_FIRST=()=>{const L=S.learn,Z=BEACON_LEARN;return!!L&&!L.first&&S.phase===3&&S.form===1&&!S.d.trial&&!!Z.on[vdk()]};   // the first pattern of the fight is forced to the beam
 function learnBeam(dt){
   const Z=BEACON_LEARN,L=S.learn;
   if(!L||S.phase!==3||S.form!==1||S.d.trial||!Z.on[vdk()]||L.ok)return;
@@ -1884,6 +1897,7 @@ function sinkGlow(t){
 function shard(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a*1.5);const g=ctx.createLinearGradient(-s,-s,s,s);g.addColorStop(0,'rgba(235,225,255,.75)');g.addColorStop(1,'rgba(90,70,140,.4)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*.5,s*.2);ctx.lineTo(-s*.3,s*.7);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
 
 const BEACON_LEARN={on:{easy:true,normal:true,hard:false},lead:.1,timeout:7,retries:1,retryGap:1.2};
+const WARD_RING={w:2,col:'120,200,255',base:.45,fill:.38,pulseMin:.35};
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
@@ -1916,7 +1930,7 @@ function holdNeed(dk){const B=BEACON_FX,Z=PHARE_DIFF[dk],w=D=>D*176/1000;
   return Math.max(w(B.beam.D),w(B.dazzle.D),w(B.morse.long.D),w(SP.kwave.D),1.25*160/1080,1.25*160/1000,1.5*160/1000,bellSpan(Z),B.shard.blast,SP.storm.trapTb-SP.storm.trapTa,.6)}
 const fatMax=dk=>holdNeed(dk)+PHARE_DIFF[dk].margin;
 const GUARD_FX={arc:{dur:.2,r:78,span:.55,w:7,sparks:10},dome:{delay:.12,fade:.15,fill:.12,line:1.6,lineA:.85}};
-const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:Infinity,normal:1,hard:0}};
+const GHOST_DOME={dur:.9,in:.08,r:92,lineA:.8,fill:.07,dash:[10,8],n:{easy:0,normal:0,hard:1}};
 const PULSE_FX={freq:2.4,base:.25,peak:.95};
 const LX=760,LY=GY-333;
 function beaconState(){let charge=0,dim=0;for(const th of S.threats){if(th.k==='beam'&&gt>=th.t0&&gt<=th.ts+th.D)charge=Math.max(charge,gt<th.ts?(gt-th.t0)/(th.ts-th.t0):1);if((th.k==='bolt'||th.k==='spike')&&gt>=th.t0&&gt<=th.ti)charge=Math.max(charge,.5*(gt-th.t0)/(th.ti-th.t0))}
@@ -3378,6 +3392,7 @@ function P3(stage,f,b,final,rage){
   const dazzle=()=>{const Z=BF.dazzle;for(let i=0;i<Z.n;i++)beamAt(i%2?1:-1,Z);sp='dazzle'};
   if(final)dazzle();
   else if(rage){(rage>1?morse:night)()}
+  else if(LEARN_FIRST()){S.learn.first=true;sweep(-1)}   // learning the hold (BEACON_LEARN): the first spell of the fight is always the beam, no draw
   else pick(stage?p1:p0)();
   T.spell=sp;T.side=side;T.ri=cri;return T;
 }
@@ -3551,10 +3566,11 @@ function replayEpilogue(cb){if(EPI.playing())return;const keep={gt,t0:S.epT0,par
 function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
   S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if(LB.audio.music)MUSIC.bed(2);
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
-function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,learn:{ok:false,misses:0,th:null,t:0},ghostN:0,ghostDome:null,pulse:0,domeT0:null,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+const learnFresh=()=>({ok:false,misses:0,th:null,t:0,first:false});
+function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,ghostN:0,ghostDome:null,pulse:0,domeT0:null,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=id===3?S.d.bd.hp3:S.d.bd.hp;S.bossHp=S.bossMax;S.hp=o.first?S.hpMax:LB.healFor(S.d.heal,S.hpMax,S.hp);   // heal rule shared: true = full refill, a number = that many HP capped at the starting HP (trial: +1)
- resetPhaseState();
+ resetPhaseState();S.learn=learnFresh();   // learning the hold: only when phase III starts after the intro or through the Phase button (never at a retry)
   hud();playCine(id,'in',()=>introCard(id));
 }
 function introCard(id){S.mode='card';const P=PH[id];showCard({eye:P.eye(),title:P.boss(),desc:P.desc(),go:_('Start','Commencer'),onGo:beginPlay})}
@@ -3595,7 +3611,7 @@ function deathCard(){MUSIC.stop();const tr=S.d.trial,DF=DEFEAT[gpOf(S.phase)];
   if(!tr&&LB.help.defeat(S.dk==='easy')){o.go2=LB.helpOffer();o.onGo2=()=>{LB.help.enable();retryPhase()}}
   showCard(o);
 }
-function retryPhase(){S.hp=S.hpMax;S.bossHp=S.bossMax;resetPhaseState();S.form=1;S.mode='card';hud();beginPlay()}
+function retryPhase(){S.hp=S.hpMax;S.bossHp=S.bossMax;resetPhaseState();S.learn=null;S.form=1;S.mode='card';hud();beginPlay()}
 function startRun(dk,noPro){
   S=fresh(dk);S.full=true;S.phase=2;S.form=1;S.cineDone={};
   hideMenu();hud();
@@ -3747,7 +3763,7 @@ function loop(now){
   if(!$('menu').hidden)return;
   if(!S.paused&&['play','ko','dead','cine','prologue','epilogue'].includes(S.mode))gt+=dt;
   ctx=ctxMain;SC=SCm;
-  update(dt);gameUpdate(dt);draw();
+  update(dt);gameUpdate(dt);draw();wardRing();
 }
 LB.menu.mount(CHAPTER,{
   onDiff:dk=>{ensureAudio();LB.help.use(DIFFS[dk]);startRun(dk)},
