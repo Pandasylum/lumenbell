@@ -331,3 +331,6 @@
 
 ## 2026-11-08 · feat/tuto-animations (dôme agrandi)
 - Ce que le joueur verra : en phase III du Chapitre II, le dôme tenu est plus grand et enveloppe désormais la tête du Veilleur (même montée, mêmes durées) ; l'animation « Tenir » du Tutoriel le montre pareil.
+
+## 2026-11-08 · chore/version-0-2-0
+- Ce que le joueur verra : le hub et les menus affichent « v0.2.0 » au lieu de « v1.0.0 ».
