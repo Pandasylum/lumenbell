@@ -298,3 +298,6 @@
 ## 2026-11-08 · feat/p3-premier-faisceau-attend
 - Ce que le joueur verra : en Facile et Normal, le premier faisceau du Phare s'arrête devant le Veilleur, l'ombre du dôme apparaît, et il ne repart que quand le joueur maintient ; il glisse alors sur le dôme sans dégât.
 - Ce que le joueur verra : sans maintien après 7 s, le faisceau passe sans dégât et revient une fois. En Difficile, rien ne change.
+
+## 2026-11-08 · fix/mobile-pixelisation
+- Ce que le joueur verra : sur téléphone, l’image du jeu et des cinématiques est plus nette (rapport de pixels plafonné à 1,75 au lieu de 1,25) ; rien ne change sur ordinateur.

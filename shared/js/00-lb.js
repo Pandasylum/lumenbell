@@ -4,8 +4,10 @@ const LB={};
 LB.FONT={display:'"Big Shoulders Display",Impact,sans-serif',body:'"DM Sans",system-ui,sans-serif'};
 /* Écran tactile (pointer:coarse) : une seule détection pour toute la série, lue au chargement. */
 LB.coarse=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
-/* Rapport de pixels du canvas principal du Chapitre I et défaut de LB.cacheLayer : plafond 1,25 sur tactile, 2 sinon */
-LB.dpr=Math.min(LB.coarse?1.25:2,window.devicePixelRatio||1);
+/* Plafond du rapport de pixels sur tactile : constante unique (voir docs/decisions/2026-11-08-plafond-dpr-tactile.md) */
+LB.DPR_COARSE_MAX=1.75;
+/* Rapport de pixels du canvas principal du Chapitre I et défaut de LB.cacheLayer : plafond LB.DPR_COARSE_MAX sur tactile, 2 sinon */
+LB.dpr=Math.min(LB.coarse?LB.DPR_COARSE_MAX:2,window.devicePixelRatio||1);
 LB.$=id=>document.getElementById(id);
 /* Calque hors écran : canvas de w x h unités logiques dessiné une fois par draw(cx), puis posé par drawImage(canvas,0,0,w,h).
    o.k : rapport de pixels (défaut LB.dpr) ; o.y0 : première rangée logique conservée (calque en bande, h = bord bas) ;
