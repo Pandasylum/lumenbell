@@ -8,8 +8,8 @@
 LB.TUTO_T={ids:['block','dodge','hold','still'],ev:'lb-gesture',none:'—',
   /* mise en scène des animations (v2) : repère monde w × h, pieds du Veilleur en (hx, fy), taille CSS du canvas ; coup : départ xs, vitesse v (px/s),
      rayon orbR, hauteur oy ; bodyX = x du corps touché par le coup qui passe ; glide = durée de la glisse sur le dôme ; fade = extinction du coup
-     arrêté ; boucle loop (s) ; still = décalage après l'impact de l'image fixe (prefers-reduced-motion). Les durées de geste viennent de LB.HERO_T. */
-  anim:{w:340,h:226,css:272,hx:60,fy:200,xs:350,v:200,orbR:9,oy:70,bodyX:90,glide:.6,fade:.25,loop:2.6,still:{block:.04,dodge:.4,hold:.3}}};
+     arrêté ; melt = dissipation de l'orbe illusoire, stillR = son rayon ; boucle loop (s) ; still = décalage après l'impact de l'image fixe (prefers-reduced-motion). Les durées de geste viennent de LB.HERO_T. */
+  anim:{w:340,h:226,css:272,hx:60,fy:200,xs:350,v:200,orbR:9,oy:70,bodyX:90,glide:.6,fade:.25,loop:2.6,melt:.5,stillR:17,still:{block:.04,dodge:.4,hold:.3,still:.25}}};
 LB.tuto={
   /* [titre, texte] d'une entrée dans la langue courante */
   text(id){return{
@@ -26,7 +26,7 @@ LB.tuto={
   /* ---------- Version 2 : animations rejouées par le moteur, à la demande (accordéon, une seule ouverte) ----------
      Aucun canvas ni boucle tant qu'aucune entrée n'est dépliée ; un seul canvas (créé à l'ouverture, détruit à la fermeture) et une seule boucle,
      arrêtée à la fermeture, panneau masqué ou onglet caché. Scènes dessinées avec LB.drawWatcher, LB.drawBlock et LB.HERO_T (aucun timing de jeu
-     nouveau). 'still' n'a pas de scène (l'orbe illusoire n'est dessiné que dans le Chapitre II) : texte seul. */
+     nouveau). Les quatre entrées ont une scène ; 'still' utilise LB.drawOrb (shared/js/20-watcher.js, ex-Chapitre II). */
   scene:{
     block(c,u){const T=LB.TUTO_T.anim,H=LB.HERO_T.block,ti=LB.tuto._ti(),tp=ti-H.perf,a=u>=tp&&u<tp+H.act;
       LB.drawWatcher(c,T.hx,T.fy,a?'block':'idle',u,{k:Math.min(1,(u-tp)/LB.WATCHER_T.raise)});
@@ -42,6 +42,11 @@ LB.tuto={
       if(u<ti)LB.tuto._orb(c,T.xs-T.v*u,T.fy-T.oy,1);
       else{const ph=Math.min(1,(u-ti)/T.glide),th=-Math.PI*.9*ph,r=T.orbR;   /* glisse le long de l'ellipse du dôme */
         if(ph<1)LB.tuto._orb(c,T.hx+82+(34+r)*Math.cos(th),T.fy-76+(92+r)*Math.sin(th),1-Math.max(0,ph-.7)/.3)}}
+    ,
+    /* orbe illusoire (LB.drawOrb, partagée avec le Chapitre II) : arrive, le Veilleur ne bouge pas (idle), l'orbe se dissipe devant lui */
+    still(c,u){const T=LB.TUTO_T.anim,ti=(T.xs-T.bodyX)/T.v,p=Math.max(0,Math.min(1,(u-ti)/T.melt));
+      LB.drawWatcher(c,T.hx,T.fy,'idle',u);
+      if(p<1){const x=T.xs-T.v*Math.min(u,ti);LB.drawOrb(c,x,T.fy-T.oy,T.stillR*(1-p),{real:false,ch:false,t:u,dash:1-p})}}
   },
   _ti(){const T=LB.TUTO_T.anim;return(T.xs-T.hx-82-34-T.orbR)/T.v},   /* instant où le coup touche le bord de la garde */
   _orb(c,x,y,al){const R=LB.TUTO_T.anim.orbR;c.save();c.globalAlpha=Math.max(0,al);const g=c.createRadialGradient(x,y,1,x,y,R*2.4);
@@ -55,7 +60,7 @@ LB.tuto={
     host.appendChild(cvs);const c=cvs.getContext('2d'),a=LB.tuto._a={id,cvs,c,raf:0,t0:0,still:false};c.setTransform(k*d,0,0,k*d,0,0);
     if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){a.still=true;LB.tuto.frame(id,c,LB.tuto._still(id));return}   // image fixe
     LB.tuto._run()},
-  _still(id){const T=LB.TUTO_T.anim,ti=id==='dodge'?(T.xs-T.bodyX)/T.v:LB.tuto._ti();return ti+T.still[id]},
+  _still(id){const T=LB.TUTO_T.anim,ti=id==='dodge'||id==='still'?(T.xs-T.bodyX)/T.v:LB.tuto._ti();return ti+T.still[id]},
   _run(){const a=LB.tuto._a,T=LB.TUTO_T.anim;if(!a||a.raf||document.hidden)return;
     const f=ts=>{if(LB.tuto._a!==a)return;
       if(!a.cvs.getClientRects().length){LB.tuto.stop();return}   // panneau masqué : on ferme tout
