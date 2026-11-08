@@ -308,7 +308,11 @@
 
 ## 2026-11-08 · feat/p3-premier-faisceau-attend (aide visuelle)
 - Ce que le joueur verra : le cercle sous les pieds du Veilleur pendant l'éclair n'apparaît plus qu'avec l'aide visuelle activée ; il n'y en a donc plus en Difficile.
-- Ce que le joueur verra : le halo du dôme reste visible pendant l'attente du premier faisceau (Facile, Normal) ; ensuite il dépend de l'aide visuelle, et en Difficile il n'y a plus aucun halo.
+- Ce que le joueur verra : le halo du dôme reste visible pendant l'attente du premier faisceau (Facile, Normal) ; ensuite il n'y en a plus (l'ancienne ombre après un dégât est supprimée), et en Difficile il n'y a jamais de halo.
 
 ## 2026-11-08 · fix/mobile-dpr-1-5 (pixelisation mobile)
 - Ce que le joueur verra : sur téléphone tactile, les images (cinématiques et Chapitre II) sont plus nettes qu'avant, avec une résolution de 1,5 au lieu de 1,25 ; le plafond est à 1,5 pour garder le jeu fluide.
+
+## 2026-11-08 · fix/ch2-tap-p3-et-nettoyage
+- Ce que le joueur verra : en phase III du Chapitre II, un tap fait lever le bouclier de bloquer, comme en phase II ; la tenue garde son dôme bleu.
+- Ce que le joueur verra : aucune ombre de dôme n'apparaît plus après un dégât ; seule reste celle de l'attente du premier faisceau.
