@@ -232,6 +232,20 @@ LB.WATCHER_T={
     return{lx:X+u*cs-v*sn,ly:Y+u*sn+v*cs};
   };
 })();
+/* Orbe du Chapitre II (déplacée du Chapitre II, tracé inchangé) : halo, étincelles de charge, corps, contour pointillé. x, y = centre, r = rayon.
+   o.real  orbe réelle (disque et cœur clair) ou illusoire (anneau creux, halo plus pâle) ;  o.ch  en charge devant le visage (halo o.halo,
+   couleur o.col, étincelles o.spark du type), sinon en vol : violet habituel ;  o.t  horloge du chapitre (s) ;  o.dash  opacité du contour
+   pointillé (0 = aucun). L'alpha global d'origine est conservé : le halo le remet à 1. */
+LB.drawOrb=(c,x,y,r,o)=>{
+  const R=r*50/17*(o.ch?o.halo:1),g=c.createRadialGradient(x,y,0,x,y,R);g.addColorStop(0,o.ch?o.col:'rgba(176,124,255,.95)');g.addColorStop(1,'rgba(0,0,0,0)');
+  c.globalAlpha=o.real?.85:.45;c.fillStyle=g;c.fillRect(x-R,y-R,R*2,R*2);c.globalAlpha=1;
+  if(o.ch&&o.spark){c.save();c.globalCompositeOperation='lighter';c.strokeStyle=o.col;c.lineWidth=1.4;c.beginPath();
+    for(let k=0;k<o.spark;k++){const a=o.t*(9+k)+k*2.4,l0=r+3,l1=r+5+7*Math.abs(Math.sin(o.t*23+k*5));c.moveTo(x+Math.cos(a)*l0,y+Math.sin(a)*l0);c.lineTo(x+Math.cos(a)*l1,y+Math.sin(a)*l1)}c.stroke();c.restore()}
+  const disc=(q,f)=>{c.beginPath();c.ellipse(x,y,Math.abs(q),Math.abs(q),0,0,Math.PI*2);c.fillStyle=f;c.fill()};
+  if(o.real){disc(r,'#c9a8ff');disc(r*.5,'#fbf6ff')}
+  else{c.save();c.strokeStyle='#c9a8ff';c.lineWidth=3;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();c.restore()}
+  if(o.dash>0){c.save();c.globalAlpha*=o.dash;c.setLineDash([6,5]);c.lineDashOffset=-o.t*12;c.strokeStyle='#f4ecff';c.lineWidth=3;c.beginPath();c.arc(x,y,r+3,0,Math.PI*2);c.stroke();c.restore()}
+};
 /* Silhouette du Veilleur des menus et des cinématiques (même tracé dans tous les chapitres) : le corps (chemin SVG, repère
    de l'écran 960 × 540, pieds en y = 455), repris par le fragment shared/svg/watcher-menu.svg des menus. drawWatcherSil la
    dessine sur un canvas : corps (sway = balancement, cisaillement depuis les pieds), bâton, halo (k, r, s = second arrêt), toit,

@@ -320,3 +320,8 @@
 ## 2026-11-08 · feat/hub-onglet-tuto
 - Ce que le joueur verra : un livre en haut à gauche du hub ouvre l'onglet Tuto ; au départ quatre lignes « — », puis chaque geste (bloquer, esquiver, tenir, rester en place) apparaît avec son titre et sa phrase à sa première réussite, et reste.
 - Hub : le bouton Tutoriel (livre + libellé) est maintenant une pastille centrée au-dessus de EN / FR ; son panneau s'ouvre au-dessus.
+
+## 2026-11-08 · feat/tuto-animations
+- Ce que le joueur verra : dans l'onglet Tutoriel, chaque geste appris (bloquer, esquiver, tenir) montre un ▶ à droite ; un appui déplie une courte scène en boucle avec le vrai Veilleur, et un second appui la replie.
+- « Rester en place » reste en texte seul ; avec le mouvement réduit, la scène s'affiche en image fixe.
+- Ce que le joueur verra : l'entrée « Rester en place » du Tutoriel s'anime aussi (une orbe illusoire arrive puis se dissipe devant le Veilleur immobile) ; l'orbe est identique à celle du combat du Chapitre II.

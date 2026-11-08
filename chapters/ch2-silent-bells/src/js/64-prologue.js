@@ -458,13 +458,8 @@ function drawOrbs(){
       if(th.real&&gt>=th.tl){const sh=clamp(1-(GY-y)/400,.25,1);ell(x,GY+3,r*1.6*sh,5*sh,`rgba(0,0,0,${.5*sh})`)}
       // every orb is full; an illusory one (clones' included) has a dotted outline, a real one casts its shadow (above)
       // an illusory orb is a hollow ring (no bright centre) with a paler halo; a real one is solid
-      {const OT=SP.orb.type[th.ty||'normal'],ch=gt<th.tl;   // charge at the face: halo and crackling sparks of the type (flight: the usual violet)
-        glow(x,y,r*50/17*(ch?OT.halo:1),ch?OT.col:'rgba(176,124,255,.95)',th.real?.85:.45);
-        if(ch&&OT.spark){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=OT.col;ctx.lineWidth=1.4;ctx.beginPath();
-          for(let k=0;k<OT.spark;k++){const a=gt*(9+k)+k*2.4,l0=r+3,l1=r+5+7*Math.abs(Math.sin(gt*23+k*5));ctx.moveTo(x+Math.cos(a)*l0,y+Math.sin(a)*l0);ctx.lineTo(x+Math.cos(a)*l1,y+Math.sin(a)*l1)}ctx.stroke();ctx.restore()}}
-      if(th.real){ell(x,y,r,r,'#c9a8ff');ell(x,y,r*.5,r*.5,'#fbf6ff')}
-      else{ctx.save();ctx.strokeStyle='#c9a8ff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ctx.restore()}
-      if(dash>0){ctx.save();ctx.globalAlpha*=dash;ctx.setLineDash([6,5]);ctx.lineDashOffset=-gt*12;ctx.strokeStyle='#f4ecff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.stroke();ctx.restore()}
+      {const OT=SP.orb.type[th.ty||'normal'];   // charge at the face: halo and crackling sparks of the type (flight: the usual violet)
+        LB.drawOrb(ctx,x,y,r,{real:th.real,ch:gt<th.tl,halo:OT.halo,col:OT.col,spark:OT.spark,t:gt,dash:dash})}   // drawn in shared/js/20-watcher.js (same orb in the Tutorial tab)
       ctx.restore();
     }else if(th.k==='shard'){
       if(th.fly){   // the mirror explodes (once), hidden from the hall until its fragments are gone

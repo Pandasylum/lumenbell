@@ -33,3 +33,16 @@ BIBLE.md:16 interdit tout mot d'annonce à l'écran en combat. L'onglet Tuto est
 ## Phasage
 - **V1** (cette décision) : texte seul.
 - **V2** : animations des gestes rejouées par le moteur dans le même bloc ; montage éventuel ailleurs à décider à part.
+
+## 2026-11-08 · feat/tuto-animations (version 2 faite)
+- **Animations rejouées par le moteur**, sans GIF, vidéo ni asset : chaque entrée débloquée (sauf « Rester en place ») porte une icône ▶ à droite ; toute la ligne est un bouton (≥ 44 px, libellé lecteur d'écran « Voir l'animation » / « Watch the animation », aucun mot ajouté à l'écran).
+- **Accordéon** : un clic déplie sous le texte une scène en boucle d'environ 2,6 s ; un second clic ou l'ouverture d'une autre entrée la replie. Une seule ouverte à la fois, aucune par défaut. Entrées non débloquées inchangées (« — »).
+- **Fonctions réutilisées (shared/)** : `LB.drawWatcher` (poses `block`, `dodgeSide`, `hold`, `idle`), `LB.drawBlock` (bouclier ; dôme = option `plain`, comme la phase III du Chapitre I). Durées de geste lues dans `LB.HERO_T` (act, rec, perf) ; la mise en scène (vitesse du coup, boucle) est dans `LB.TUTO_T.anim`, aucun timing de jeu modifié.
+- **Coup entrant** : simple halo ambré dessiné dans le bloc (aucune fonction partagée de projectile n'existe).
+- ~~Sans animation~~ : remplacé ci-dessous, plus aucune entrée sans animation.
+- **Performance** : aucun canvas ni boucle tant qu'une entrée n'est pas dépliée ; un seul canvas (créé à l'ouverture, détruit à la fermeture), une seule boucle `requestAnimationFrame`, arrêtée au repli, panneau masqué (détecté dans la boucle) ou onglet caché ; résolution plafonnée par `LB.dpr` (`LB.DPR_COARSE_MAX` inchangée). `prefers-reduced-motion` : image fixe à l'ouverture, sans boucle.
+
+## 2026-11-08 · feat/tuto-animations (orbe mutualisée, « Rester en place » animée)
+- **Orbe mutualisée** : le tracé de l'orbe (halo, étincelles de charge, anneau creux illusoire ou disque plein réel, contour pointillé) passe du Chapitre II (`drawOrbs`, `64-prologue.js`) à `LB.drawOrb` (`shared/js/20-watcher.js`). Le Chapitre II l'appelle avec les mêmes paramètres, l'ancienne copie locale est supprimée ; seule l'ombre portée de l'orbe réelle reste dans le chapitre. Rendu en combat vérifié identique au pixel (même scène de phase I, avant et après, horloge figée).
+- **« Rester en place » animée** : une orbe illusoire arrive, le Veilleur reste en pose `idle`, l'orbe se dissipe (rayon et contour qui s'effacent) ; mêmes mécaniques que les autres scènes (accordéon, canvas et boucle uniques, image fixe en `prefers-reduced-motion`). Durées de dissipation et rayon dans `LB.TUTO_T.anim` (`melt`, `stillR`) ; aucun timing de jeu modifié.
+- **Plus aucune entrée sans animation** : les quatre entrées débloquées ont leur ▶.
