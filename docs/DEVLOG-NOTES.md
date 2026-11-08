@@ -294,3 +294,7 @@
 - Ce que le joueur verra : dans l'entrée du Phare, la lanterne du Veilleur pulse puis un dôme le protège quand le premier faisceau passe, pour montrer qu'on peut tenir.
 - Ce que le joueur verra : touché par une menace à tenir, il voit brièvement le dôme manquant (toujours en Facile, la première fois par combat en Normal, jamais en Difficile).
 - Ce que le joueur verra : les cinématiques de phase ne se passent pas la première fois ; le nom du boss ne chevauche plus la ligne de la salle.
+
+## 2026-11-08 · feat/p3-premier-faisceau-attend
+- Ce que le joueur verra : en Facile et Normal, le premier faisceau du Phare s'arrête devant le Veilleur, l'ombre du dôme apparaît, et il ne repart que quand le joueur maintient ; il glisse alors sur le dôme sans dégât.
+- Ce que le joueur verra : sans maintien après 7 s, le faisceau passe sans dégât et revient une fois. En Difficile, rien ne change.

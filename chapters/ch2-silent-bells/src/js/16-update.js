@@ -7,11 +7,12 @@ function update(dt){
   if(S.mode==='play'&&!S.paused){
     S.runT+=dt;
     plStep(dt);
+    learnBeam(dt);
     if(!S.pat&&!S.cnt&&gt>=S.nextAt)spawn();
     for(const th of S.threats){
       if(th.done)continue;
       if(th.hold){
-        if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
+        if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){if(!th.safe){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
         else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;S.holdEnd=th.tb;if(S.pl.s==='act')LB.hero.stopped(S.pl)}
         continue;
       }
@@ -33,6 +34,29 @@ function update(dt){
   {const P=S.parts;let n=0;for(let i=0;i<P.length;i++){const p=P[i];if(gt-p.t0<p.life)P[n++]=p}P.length=n}   // in place: no array per frame
   S.pops=S.pops.filter(p=>gt-p.t0<1);
   S.shake*=Math.pow(.02,dt);
+}
+/* the first beam of the fight waits for the hold (BEACON_LEARN, Easy and Normal, first form of phase III): while it waits the time of every threat still to come stands
+   still (the beam stays in front of the Watcher, the shadow of the dome is drawn by drawHero); released by the held dome, or by the safety delay (then launched again
+   once). A released beam is `safe`: it crosses without damage. S.learn is renewed with each fight (resetPhaseState). */
+const LEARN_KEYS=['t0','ts','ta','tb','ti'];
+function learnBeam(dt){
+  const Z=BEACON_LEARN,L=S.learn;
+  if(!L||S.phase!==3||S.form!==1||S.d.trial||!Z.on[vdk()]||L.ok)return;
+  if(!L.th){
+    if(L.misses>Z.retries)return;
+    const th=S.threats.find(o=>o.k==='beam'&&o.hold&&!o.done&&!o.safe&&o.real!==false);
+    if(!th||gt<th.ta-Z.lead)return;
+    L.th=th;L.t=0}
+  const th=L.th;
+  if(th.done){L.th=null;return}
+  L.t+=dt;
+  if(S.holding&&domeAlpha()>=1){th.safe=true;L.th=null;L.ok=true;return}   // the dome is up: the beam moves on and glides over it
+  if(L.t>=Z.timeout){   // safety: it passes without damage, and is launched again once
+    th.safe=true;L.th=null;L.misses++;
+    if(L.misses<=Z.retries){const c=Object.assign({},th),off=th.ts+th.D+Z.retryGap-th.t0;for(const k of LEARN_KEYS)if(c[k]!=null)c[k]+=off;
+      c.done=false;c.safe=false;c.held=false;delete c.res;delete c.okT;th.pat.ths.push(c);S.threats.push(c)}
+    return}
+  for(const o of S.threats)if(!o.done)for(const k of LEARN_KEYS)if(o[k]!=null)o[k]+=dt;   // time stands still
 }
 /* riposte after a clean series, in every phase (rule of Ember Bridge): dur = length of the Watcher's counter, hitAt = moment
    the boss is hit (s, internal phase number: 1 the King, 2 the Voice, 3 the Lighthouse); next = pause before the next series */

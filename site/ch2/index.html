@@ -1275,11 +1275,12 @@ function update(dt){
   if(S.mode==='play'&&!S.paused){
     S.runT+=dt;
     plStep(dt);
+    learnBeam(dt);
     if(!S.pat&&!S.cnt&&gt>=S.nextAt)spawn();
     for(const th of S.threats){
       if(th.done)continue;
       if(th.hold){
-        if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
+        if(gt>=th.ta&&gt<=th.tb){if(S.pl.s!=='act'){if(!th.safe){th.done=true;th.res='hit';th.okT=gt;th.pat.ok=false;hurt(th);if(S.mode!=='play')break}}else if(!th.held){th.held=true;burst(HX,GY-110,10,'#b8fff4',4,.4)}}
         else if(gt>th.tb){th.done=true;th.res='ok';th.okT=gt;S.holdEnd=th.tb;if(S.pl.s==='act')LB.hero.stopped(S.pl)}
         continue;
       }
@@ -1301,6 +1302,26 @@ function update(dt){
   {const P=S.parts;let n=0;for(let i=0;i<P.length;i++){const p=P[i];if(gt-p.t0<p.life)P[n++]=p}P.length=n}   // in place: no array per frame
   S.pops=S.pops.filter(p=>gt-p.t0<1);
   S.shake*=Math.pow(.02,dt);
+}
+const LEARN_KEYS=['t0','ts','ta','tb','ti'];
+function learnBeam(dt){
+  const Z=BEACON_LEARN,L=S.learn;
+  if(!L||S.phase!==3||S.form!==1||S.d.trial||!Z.on[vdk()]||L.ok)return;
+  if(!L.th){
+    if(L.misses>Z.retries)return;
+    const th=S.threats.find(o=>o.k==='beam'&&o.hold&&!o.done&&!o.safe&&o.real!==false);
+    if(!th||gt<th.ta-Z.lead)return;
+    L.th=th;L.t=0}
+  const th=L.th;
+  if(th.done){L.th=null;return}
+  L.t+=dt;
+  if(S.holding&&domeAlpha()>=1){th.safe=true;L.th=null;L.ok=true;return}   // the dome is up: the beam moves on and glides over it
+  if(L.t>=Z.timeout){   // safety: it passes without damage, and is launched again once
+    th.safe=true;L.th=null;L.misses++;
+    if(L.misses<=Z.retries){const c=Object.assign({},th),off=th.ts+th.D+Z.retryGap-th.t0;for(const k of LEARN_KEYS)if(c[k]!=null)c[k]+=off;
+      c.done=false;c.safe=false;c.held=false;delete c.res;delete c.okT;th.pat.ths.push(c);S.threats.push(c)}
+    return}
+  for(const o of S.threats)if(!o.done)for(const k of LEARN_KEYS)if(o[k]!=null)o[k]+=dt;   // time stands still
 }
 const R_CNT={harpoon:{dur:1.6,hitAt:.65},1:{dur:1.05,hitAt:.42},2:{dur:1.05,hitAt:.4},3:{dur:.95,hitAt:.32},next:1.45,nextFail:.95};
 function aimedAt(f){const a=S.pl.at,d=Math.abs(a-f.ti);return!S.threats.some(o=>!o.done&&o!==f&&o.real!==false&&!o.hold&&o.ti!=null&&Math.abs(a-o.ti)<d)}
@@ -1580,7 +1601,8 @@ function drawHero(){
   if(da>0){const Z=GUARD_FX.dome,jx=warn?Math.sin(gt*70)*2.2:0,jy=warn?Math.cos(gt*83)*1.4:0;ctx.save();ctx.globalAlpha=da;
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(x+jx,y+jy,92,Math.PI,0);ctx.fill();
     ctx.strokeStyle=warn?`rgba(${FATIGUE.amber},${Z.lineA})`:`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=Z.line;ctx.stroke();ctx.restore()}
-  if(ph===3&&S.ghostDome!=null&&gt-S.ghostDome<GHOST_DOME.dur){const Z=GHOST_DOME,u=(gt-S.ghostDome)/Z.dur,a=Math.min(1,(gt-S.ghostDome)/Z.in)*(1-u);ctx.save();ctx.globalAlpha=a;
+  const waiting=ph===3&&S.learn&&S.learn.th&&!S.holding;   // the first beam waits for the hold (BEACON_LEARN): the same shadow, until the Watcher holds
+  if(waiting||ph===3&&S.ghostDome!=null&&gt-S.ghostDome<GHOST_DOME.dur){const Z=GHOST_DOME,u=(gt-S.ghostDome)/Z.dur,a=waiting?1:Math.min(1,(gt-S.ghostDome)/Z.in)*(1-u);ctx.save();ctx.globalAlpha=a;
     ctx.fillStyle=`rgba(127,214,255,${Z.fill})`;ctx.beginPath();ctx.arc(HX,y,Z.r,Math.PI,0);ctx.fill();
     ctx.strokeStyle=`rgba(191,240,255,${Z.lineA})`;ctx.lineWidth=GUARD_FX.dome.line;ctx.setLineDash(Z.dash);ctx.stroke();ctx.restore()}
   if(ph===3&&S.domeBurst!=null&&gt-S.domeBurst<.3){const u=(gt-S.domeBurst)/.3;ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='rgba(191,240,255,.9)';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.beginPath();ctx.arc(x,y,92+60*u,Math.PI,0);ctx.stroke();ctx.restore()}
@@ -1860,6 +1882,7 @@ function sinkGlow(t){
   ctx.save();ctx.globalCompositeOperation='lighter';glow(q.x,q.y,60+20*p,'rgba(79,224,204,.9)',.35+.3*p);ell(q.x,q.y-1,2.5,4,`rgba(220,255,248,${.5+.4*p})`);ctx.restore()}
 function shard(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.rotate(a*1.5);const g=ctx.createLinearGradient(-s,-s,s,s);g.addColorStop(0,'rgba(235,225,255,.75)');g.addColorStop(1,'rgba(90,70,140,.4)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*.5,s*.2);ctx.lineTo(-s*.3,s*.7);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
 
+const BEACON_LEARN={on:{easy:true,normal:true,hard:false},lead:.1,timeout:7,retries:1,retryGap:1.2};
 const BEACON_FX={
   bolt:{tell:.8,fly:.15,gap:1.0},
   beam:{dark:.3,cone:.7,D:1.2,after:.35},
@@ -3527,7 +3550,7 @@ function replayEpilogue(cb){if(EPI.playing())return;const keep={gt,t0:S.epT0,par
 function replayPrologue(cb){if(PRO.playing())return;const keep={gt,t0:S.proT0,parts:S.parts,pops:S.pops,done:S.cineDone};
   S.proT0=gt;S.parts=[];S.pops=[];S.cineDone={};MUSIC.stop();if(LB.audio.music)MUSIC.bed(2);
   PRO.replay(()=>{gt=keep.gt;S.proT0=keep.t0;S.parts=keep.parts;S.pops=keep.pops;S.cineDone=keep.done;MUSIC.bedStop();if(!$('menu').hidden)setTheme(4);cb&&cb()})}
-function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,ghostN:0,ghostDome:null,pulse:0,domeT0:null,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
+function resetPhaseState(){Object.assign(S,LB.rageState.fresh(),{shardGone:null,room:null,trace:null,presK:0,presR:null,rpA:0,rpFlip:0,reA:0,peA:0,angerShown:false,roarT:-9,roarD:0,hide:null,walkLegs:null,bodyBob:0,threats:[],pat:null,cnt:null,koShown:false,koBurst:false,deadShown:false,broken:0,ecPhi:0,holding:false,learn:{ok:false,misses:0,th:null,t:0},ghostN:0,ghostDome:null,pulse:0,domeT0:null,pl:newPl(),fat:null,holdEnd:-9,post:null,rust:null,glasN:0,lastCombo:false,echoes:[],still:0,hitstop:0,flashHit:0,recoil:0,rings:[],bossHurtT:null})}
 function enterPhase(id,o){o=o||{};
   S.phase=id;S.form=1;S.bossMax=id===3?S.d.bd.hp3:S.d.bd.hp;S.bossHp=S.bossMax;S.hp=o.first?S.hpMax:LB.healFor(S.d.heal,S.hpMax,S.hp);   // heal rule shared: true = full refill, a number = that many HP capped at the starting HP (trial: +1)
  resetPhaseState();
