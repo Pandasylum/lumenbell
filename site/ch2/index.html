@@ -3534,6 +3534,7 @@ function drawBeaconFx(){
   }
 }
 
+const IMPLODE_FX={pull:.97,glowMin:.35,shake:3,rumble:6,quiet:.18,squeeze:.25,reach:1.15,waveT:.55,flashT:.2,sprayN:50,sprayV:13,shake2:14};
 function drawP(k,x,y,r,heat,sc){ctx.save();ctx.translate(x,y);ctx.rotate(r||0);if(sc)ctx.scale(sc,sc);PDRAW[k](heat==null?.85:heat);ctx.restore()}
 function tent(x0,y0,cx1,cy1,cx2,cy2,x1,y1,w,on){ctx.lineCap='round';ctx.strokeStyle='rgba(4,20,26,.9)';ctx.lineWidth=w+3;ctx.beginPath();ctx.moveTo(x0,y0);ctx.bezierCurveTo(cx1,cy1,cx2,cy2,x1,y1);ctx.stroke();
   ctx.strokeStyle=`rgba(111,232,255,${.55*on+.15})`;ctx.lineWidth=w*.45;ctx.stroke();
@@ -3581,15 +3582,19 @@ function drawEclGame(){
         if(gt>=th.ts&&gt<=th.ts+th.D)reBeam=(gt-th.ts)/th.D;
         if(k>.95&&!th.sf){th.sf=1;MUSIC.fx('clank');MUSIC.fx('ignite')}}}
     if(th.k==='disp'&&th.done&&!th.sf){th.sf=1;S.shake=12;burst(LX,GY-200,40,'#9ff2ff',8,.9);MUSIC.fx('bellCascade')}
-    if(th.k==='implode'){const pre=clamp((gt-th.t0)/(th.ta-th.t0),0,1),post=gt>th.tb?clamp((gt-th.tb)/1.1,0,1):0;
-      for(const idx of MOV){const o=P[idx];if(post===0)P[idx]={...o,x:lerp(o.x,J.x,.92*ein(pre))+Math.sin(gt*50+idx)*3*pre,y:lerp(o.y,J.y,.92*ein(pre))};else{const s=Math.sin(Math.PI*post)*(1-post*.3);P[idx]={...o,x:J.x+(o.x-J.x)*(1+2.2*s),y:J.y+(o.y-J.y)*(1+2.2*s)}}}
-      J={...J,r:J.r*(1+.4*pre*(1-post))};S.shake=Math.max(S.shake,pre*(1-post)*6);
-      if(post>0&&!th.bf){th.bf=1;S.shake=22;S.flashT=gt;burst(J.x,J.y,70,'#e8fdff',11,1.1);MUSIC.fx('explosion')}
+    if(th.k==='implode'){const IF=IMPLODE_FX,c=clamp((gt-th.t0)/(th.tb-th.t0),0,1),pre=ein(c),calm=gt>=th.tb-IF.quiet&&gt<th.tb,post=gt>th.tb?clamp((gt-th.tb)/1.1,0,1):0;   // charge t0 -> tb, then a still instant, then the blast at tb
+      for(const idx of MOV){const o=P[idx];if(post===0)P[idx]={...o,x:lerp(o.x,J.x,IF.pull*pre)+(calm?0:Math.sin(gt*50+idx)*IF.shake*c),y:lerp(o.y,J.y,IF.pull*pre)};else{const s=Math.sin(Math.PI*post)*(1-post*.3);P[idx]={...o,x:J.x+(o.x-J.x)*(1+2.2*s),y:J.y+(o.y-J.y)*(1+2.2*s)}}}
+      J={...J,r:post===0?J.r*(1-IF.squeeze*pre):J.r*(1-IF.squeeze+(IF.squeeze+.4)*Math.min(1,post*4)*(1-post))};S.shake=Math.max(S.shake,calm?0:c*(1-post)*IF.rumble);
+      if(post>0&&!th.bf){th.bf=1;S.shake=22;S.flashT=gt;burst(J.x,J.y,70,'#e8fdff',11,1.1);burst(J.x,J.y,IMPLODE_FX.sprayN,'#ffffff',IMPLODE_FX.sprayV,1.4,.1);MUSIC.fx('explosion')}
       if(post>0&&post<.45){const e=eout(post/.45),hq=P[EHEAD];ctx.save();ctx.globalCompositeOperation='lighter';   // the last knell, released: a yellow-white wave goes from the Watcher to the bell
         ctx.strokeStyle=`rgba(${COUNTER3.col},${1-.4*e})`;ctx.lineWidth=7*(1-e*.5);ctx.beginPath();ctx.ellipse(lerp(HX+12,hq.x,e),lerp(GY-90,hq.y,e),30+40*e,70+20*e,0,-Math.PI*.45,Math.PI*.45);ctx.stroke();ctx.restore()}
       if(post>=.45){const hq=P[EHEAD];ctx.save();ctx.translate(hq.x,hq.y);ctx.rotate(hq.r||0);ctx.scale(hq.sc||1,hq.sc||1);ctx.strokeStyle=`rgba(${COUNTER3.col},.95)`;ctx.lineWidth=2.4;crackLine(CRACK,clamp((post-.45)/.2,0,1));ctx.restore();   // the bell breaks
         if(!th.gf){th.gf=1;burst(hq.x,hq.y,26,'#fff3c4',8,.8,.3)}}
-      if(post>0&&post<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=`rgba(200,245,255,${1-post})`;ctx.lineWidth=8*(1-post)+1;ctx.beginPath();ctx.arc(J.x,J.y,post*900,0,Math.PI*2);ctx.stroke();ctx.restore()}}
+      if(post>0&&post<1){const IF=IMPLODE_FX,dist=Math.hypot(HX+20-J.x,GY-80-J.y),rw=dist*IF.reach*eout(clamp(post/IF.waveT,0,1));ctx.save();ctx.globalCompositeOperation='lighter';
+        if(post<IF.flashT)glow(J.x,J.y,260*(1-post/IF.flashT)+60,'rgba(255,255,255,.95)',1-post/IF.flashT);   // the flash of the blast
+        ctx.strokeStyle=`rgba(200,245,255,${1-post*.7})`;ctx.lineWidth=12*(1-post)+2;ctx.beginPath();ctx.arc(J.x,J.y,rw,0,Math.PI*2);ctx.stroke();ctx.lineWidth=3;ctx.strokeStyle=`rgba(255,255,255,${1-post})`;ctx.beginPath();ctx.arc(J.x,J.y,rw*.92,0,Math.PI*2);ctx.stroke();
+        if(rw>=dist&&!th.hf){th.hf=1;S.shake=Math.max(S.shake,IF.shake2);burst(HX+20,GY-80,30,'#e8fdff',9,.8)}   // the wave reaches the Watcher
+        if(th.hf){const u=clamp((post-IF.waveT/IF.reach)/.4,0,1);glow(HX+20,GY-80,120*(1-u)+40,'rgba(220,250,255,.9)',.8*(1-u))}ctx.restore()}}
   }
   const on=1;
   const hit={x:HX+20,y:GY-80},tells=[],bolts=[],beams=[],fx=[],srings=[],sonics=[],sbls=[];let trapQ=null;
@@ -3616,6 +3621,7 @@ function drawEclGame(){
       if(post>0&&!th.bf){th.bf=1;S.shake=14;burst(J.x,J.y,40,'#bff6ff',9,.9);MUSIC.fx('bellCascade')}
       for(const idx of MOV){const o=P[idx];if(post===0)P[idx]={...o,x:lerp(o.x,J.x,.55*eio(pre))+Math.sin(gt*40+idx)*2*pre,y:lerp(o.y,J.y,.55*eio(pre))};else{const s=Math.sin(Math.PI*post)*(1-post*.3);P[idx]={...o,x:J.x+(o.x-J.x)*(1+1.8*s),y:J.y+(o.y-J.y)*(1+1.8*s)}}}
       if(post>0&&post<1)fx.push(['wave',J.x,J.y,post])}
+    else if(th.k==='implode'){const IF=IMPLODE_FX,c=clamp((gt-th.t0)/(th.tb-th.t0),0,1);if(gt<th.tb){const a=IF.glowMin+(1-IF.glowMin)*c;for(const idx of MOV)tells.push([P[idx].x,P[idx].y,a]);tells.push([J.x,J.y,a],[J.x,J.y,a*c])}}   // the glow rises on the pieces and on the core (floor from the start)
     else if(th.k==='moon'){const st={x:1000,y:GY-60};
       if(gt<th.ts){const k=eio(clamp((gt-th.t0)/(th.ts-th.t0),0,1));A={x:lerp(A0.x,st.x,k),y:lerp(A0.y,st.y,k),a:A0.a+k*2,sc:lerp(A0.sc,.85,k),z:3};tells.push([A.x,A.y,k])}
       else if(gt<=th.ts+th.D){const s=(gt-th.ts)/th.D;A={x:1000-1080*s,y:GY-60-Math.sin(s*Math.PI)*20,a:s*Math.PI*7,sc:.85,z:3};if(!th.wf){th.wf=1;MUSIC.fx('whoosh')}}

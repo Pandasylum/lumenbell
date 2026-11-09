@@ -344,3 +344,6 @@
 ## 2026-11-09 · ch2/musique-p3-paliers
 - Ce que le joueur verra : dès le début de la phase III, la musique est plus grave et plus menaçante (cœur battant, grondement) ; à la naissance de la forme II du Phare (La Sans-Fond) s'ajoutent les tambours de guerre et les cuivres graves ; une fois la rage 1 contrée, elle monte encore avec un balayage grave et deux coups de grosse caisse, comme au Chapitre I, (grosse caisse, roulements, accords serrés, tension qui grimpe, un peu plus rapide et plus forte).
 - Si le joueur retente la forme II, la musique repart du premier palier ; le second revient avec la rage 1.
+
+## 2026-11-09 · ch2/p3-implosion-charge
+- Ce que le joueur verra : au dernier assaut de la forme II, la tour se concentre peu à peu (morceaux qui convergent, lueur qui monte, léger tremblement), puis un court silence, puis l'explosion : flash, onde qui traverse l'écran jusqu'au Veilleur, gerbe.
