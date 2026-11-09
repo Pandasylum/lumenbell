@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Écoute · musique phase III (Chapitre II) · prototype</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font:15px/1.4 system-ui,sans-serif;background:#0d1417;color:#d8e6e4;margin:0;padding:20px;max-width:760px}
+h1{font-size:18px;margin:0 0 4px}p.s{color:#8fa9a6;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;margin-bottom:16px}td{padding:6px 8px;border-bottom:1px solid #22343a}
+td:first-child{width:46%}input[type=range]{width:100%}output{display:inline-block;min-width:54px;text-align:right;font-variant-numeric:tabular-nums;color:#7be0d0}
+button{font:inherit;background:#17323a;color:#e6f4f1;border:1px solid #2f5964;border-radius:6px;padding:9px 14px;margin:0 6px 8px 0;cursor:pointer}
+button:hover{background:#1f4651}button.on{border-color:#7be0d0;background:#1f4651}
+#st{margin-top:10px;color:#7be0d0;min-height:1.4em}
+.note{margin-top:22px;color:#8fa9a6;font-size:13px}
+</style>
+</head>
+<body>
+<h1>Phase III · Chapitre II · écoute des paliers <small>(prototype)</small></h1>
+<p class="s">Outil d'écoute hors jeu. Le moteur ci-dessous est une copie minimale de <code>chapters/ch2-silent-bells/src/js/60-music.js</code> (non modifié) ; les couches des paliers 1 et 2 n'existent que dans cette page.</p>
+
+<table>
+ <tr><td>bpm palier 0 (actuel)</td><td><input id="b0" type="range" min="80" max="160" step="1" value="104"></td><td><output id="b0o"></output></td></tr>
+ <tr><td>bpm palier 1 (forme II)</td><td><input id="b1" type="range" min="80" max="160" step="1" value="116"></td><td><output id="b1o"></output></td></tr>
+ <tr><td>bpm palier 2 (après rage 1)</td><td><input id="b2" type="range" min="80" max="160" step="1" value="126"></td><td><output id="b2o"></output></td></tr>
+ <tr><td>gain du palier 2 (× niveau de base 0,5)</td><td><input id="g2" type="range" min="0.5" max="1.2" step="0.01" value="0.85"></td><td><output id="g2o"></output></td></tr>
+</table>
+
+<button id="p0">Palier 0 (actuel, 104 bpm)</button>
+<button id="p1">Palier 1 (forme II)</button>
+<button id="p2">Palier 2 (après rage 1)</button>
+<button id="seq">Enchaîner 0 → 1 → 2</button>
+<button id="stop">Stop</button>
+<div id="st"></div>
+
+<div class="note">
+Palier 1 : couche de fond (<code>layerOsc</code>), arpège doublé à l'octave, basse plus serrée.<br>
+Palier 2 : en plus bruit rythmique et octave haute, léger baisser du gain général (curseur).<br>
+Les curseurs agissent en direct, pendant l'écoute. Les paliers se changent sans relancer le thème.
+</div>
+
+<script>
+/* ===== copie minimale du moteur de 60-music.js (inchangé) : init, env, osc, nz, lfo, layerNoise, layerOsc ===== */
+let ac=null,out,rev;
+function init(){if(ac)return;ac=new (window.AudioContext||window.webkitAudioContext)();
+  out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(ac.destination);
+  rev=ac.createConvolver();const n=ac.sampleRate*3.8,b=ac.createBuffer(2,n,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}rev.buffer=b;
+  const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out)}
+let _nb=null;const nbuf=()=>{if(!_nb){_nb=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=_nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return _nb};   // LB.audio.noiseBuf(2)
+function env(g,t,a,p,d){a=Math.max(a,.01);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(p,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
+function send(g,wet){if(wet){const w=ac.createGain();w.gain.value=wet;g.connect(w);w.connect(rev)}}
+function osc(type,f,t,a,p,d,wet,f2,det){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+a+d);if(det)o.detune.value=det;env(g,t,a,p,d);o.connect(g);g.connect(out);send(g,wet);o.start(t);o.stop(t+a+d+.1)}
+function nz(t,d,p,type,f,q,wet,f2,a){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+(a||.005)+d);fl.Q.value=q||1;const g=ac.createGain();env(g,t,a||.005,p,d);s.connect(fl);fl.connect(g);g.connect(out);send(g,wet);s.start(t);s.stop(t+(a||.005)+d+.1)}
+function lfo(rate,depth,target){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=rate;lg.gain.value=depth;l.connect(lg);lg.connect(target);l.start();return l}
+let ARR=null;
+function layerNoise(type,f,q,vol,rate,depth,wet){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+2.5);s.connect(fl);fl.connect(g);g.connect(out);send(g,wet);const l=rate?lfo(rate,depth,fl.frequency):null;s.start();ARR.push({g,stop:()=>{try{s.stop();l&&l.stop()}catch(e){}}})}
+function layerOsc(type,f,vol,lp,det,rate,depth,wet){const o=ac.createOscillator();o.type=type;o.frequency.value=f;if(det)o.detune.value=det;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=lp;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+3);const g2=ac.createGain();g2.gain.value=1;o.connect(fl);fl.connect(g);g.connect(g2);g2.connect(out);send(g2,wet);const l=rate?lfo(rate,depth,g2.gain):null;o.start();ARR.push({g,stop:()=>{try{o.stop();l&&l.stop()}catch(e){}}})}
+
+/* ===== thème 3 (Le Phare Noyé), tel que dans 60-music.js : start() et step() du palier 0 ===== */
+function baseStart(){layerNoise('bandpass',480,2,.06,.045,300,.35);layerOsc('sawtooth',55,.016,280);[110,130.8,155.6].forEach((f,i)=>layerOsc('sawtooth',f,.016,620,(i-1)*6,.08+i*.02,.5,.6))}
+const ARP=[440,523.3,659.3,466.2,440,523.3,698.5,466.2];
+function baseStep(s,t){if(s%2===0)osc('sine',55,t,.01,.17,.22,0);
+  osc('sine',ARP[s%8]*(s%32<16?1:1.1225),t,.004,.032,.32,.6);
+  if(s%16===8){nz(t,.12,.09,'highpass',3200);for(let i=0;i<3;i++)nz(t+.03*i,.02,.05,'highpass',5000)}
+  if(s%64===0)nz(t,4,.045,'bandpass',200,3,.6,2200,3)}
+function baseAmb(t){const r=Math.random();
+  if(r<.4){nz(t,.08,.16,'highpass',2200);osc('sine',85,t,.003,.12,.45,.7,38)}
+  else if(r<.7){for(let i=0;i<5;i++)nz(t+Math.random()*.25,.015,.06,'highpass',4500)}
+  else osc('sine',72,t,.6,.07,2,.8,48)}
+
+/* ===== PROTOTYPE : couches des paliers 1 et 2 (n'existent que dans cette page) ===== */
+/* palier 1 : couche de fond (layerOsc, fondu d'entrée de 3 s), arpège doublé à l'octave, basse plus serrée */
+function tierLayers(n){ARR=tierL;
+  if(n>=1){layerOsc('sawtooth',82.4,.018,360,-5,.06,.3,.6);layerOsc('triangle',164.8,.014,520,4,.07,.4,.6)}
+  ARR=null}
+function tierStep(n,s,t){
+  if(n>=1){
+    osc('sine',ARP[s%8]*2*(s%32<16?1:1.1225),t+.0,.004,.018,.28,.6);   // arpège doublé (octave)
+    if(s%2===1)osc('sine',55,t,.01,.09,.2,0);                          // basse plus serrée : le contretemps s'ajoute
+    if(s%8===6)osc('sine',82.4,t,.01,.08,.22,0)}
+  if(n>=2){
+    if(s%2===1)nz(t,.05,.05,'highpass',6000);                          // bruit rythmique (contretemps)
+    if(s%4===0)nz(t,.03,.04,'highpass',4200);
+    osc('sine',ARP[s%8]*4*(s%32<16?1:1.1225),t,.003,.011,.22,.7)}     // octave haute
+}
+
+/* ===== lecteur ===== */
+const $=id=>document.getElementById(id);
+const tierL=[];let bed=[],timer=null,seqT=[],tier=0,next=0,step=0,playing=false,tickT=null;
+const bpmOf=n=>+$('b'+n).value,g2=()=>+$('g2').value;
+function outGain(){if(!ac)return;out.gain.cancelScheduledValues(ac.currentTime);out.gain.setTargetAtTime(.5*(tier>=2?g2():1),ac.currentTime,.3)}
+function fadeLayers(arr){const t=ac.currentTime;arr.splice(0).forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+1);setTimeout(L.stop,1200)})}
+function tick(){const spb=60/bpmOf(tier)/4;
+  if(next<ac.currentTime){const miss=Math.ceil((ac.currentTime-next)/spb);next+=miss*spb;step+=miss}
+  while(next<ac.currentTime+.6){baseStep(step,next);tierStep(tier,step,next);if(Math.random()<.05)baseAmb(next+Math.random()*spb);next+=spb;step++}}
+function setTier(n){tier=n;if(!playing)return;fadeLayers(tierL);tierLayers(n);outGain();mark()}
+function play(n){init();if(ac.state==='suspended')ac.resume();stop(true);
+  playing=true;tier=n;step=0;next=ac.currentTime+.15;
+  ARR=bed;baseStart();ARR=null;tierLayers(n);outGain();
+  timer=setInterval(tick,100);mark()}
+function stop(quiet){seqT.forEach(clearTimeout);seqT=[];clearInterval(tickT);tickT=null;
+  if(!ac){if(!quiet)status('');return}
+  clearInterval(timer);timer=null;playing=false;fadeLayers(bed);fadeLayers(tierL);
+  out.gain.cancelScheduledValues(ac.currentTime);out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);mark();if(!quiet)status('Arrêté.')}
+function status(s){$('st').textContent=s}
+function mark(){['p0','p1','p2'].forEach((id,i)=>$(id).classList.toggle('on',playing&&tier===i));
+  if(playing)status('Palier '+tier+' · '+bpmOf(tier)+' bpm'+(tier>=2?' · gain '+g2().toFixed(2):''))}
+function go(n){if(playing)setTier(n);else play(n);seqT.forEach(clearTimeout);seqT=[]}
+$('p0').onclick=()=>go(0);$('p1').onclick=()=>go(1);$('p2').onclick=()=>go(2);$('stop').onclick=()=>stop();
+$('seq').onclick=()=>{play(0);const D=12000;
+  [1,2].forEach(n=>seqT.push(setTimeout(()=>setTier(n),D*n)));
+  seqT.push(setTimeout(()=>status('Enchaînement terminé (palier 2 en cours).'),D*3));
+  let left=0;clearInterval(tickT);tickT=setInterval(()=>{if(!playing){clearInterval(tickT);return}left++;
+    const sec=left%12,n=Math.min(2,Math.floor(left/12));status('Enchaîné · palier '+n+' · '+bpmOf(n)+' bpm · '+(left<36?(12-sec)+' s avant le suivant':'terminé'));if(left>=36)clearInterval(tickT)},1000)};
+/* curseurs : valeur affichée, effet en direct */
+['b0','b1','b2','g2'].forEach(id=>{const upd=()=>{$(id+'o').textContent=id==='g2'?(+$(id).value).toFixed(2):$(id).value+' bpm';if(playing){if(id==='g2')outGain();mark()}};$(id).oninput=upd;upd()});
+</script>
+</body>
+</html>
