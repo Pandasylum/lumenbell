@@ -2,63 +2,60 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Écoute · musique phase III (Chapitre II) · prototype</title>
+<title>Écoute · musique phase III (Chapitre II) · prototype v2</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 body{font:15px/1.4 system-ui,sans-serif;background:#0d1417;color:#d8e6e4;margin:0;padding:20px;max-width:760px}
 h1{font-size:18px;margin:0 0 4px}p.s{color:#8fa9a6;margin:0 0 16px}
 table{border-collapse:collapse;width:100%;margin-bottom:16px}td{padding:6px 8px;border-bottom:1px solid #22343a}
-td:first-child{width:46%}input[type=range]{width:100%}output{display:inline-block;min-width:54px;text-align:right;font-variant-numeric:tabular-nums;color:#7be0d0}
+td:first-child{width:46%}input[type=range]{width:100%}select{font:inherit;width:100%;background:#17323a;color:#e6f4f1;border:1px solid #2f5964;padding:5px}
+output{display:inline-block;min-width:54px;text-align:right;font-variant-numeric:tabular-nums;color:#7be0d0}
 button{font:inherit;background:#17323a;color:#e6f4f1;border:1px solid #2f5964;border-radius:6px;padding:9px 14px;margin:0 6px 8px 0;cursor:pointer}
 button:hover{background:#1f4651}button.on{border-color:#7be0d0;background:#1f4651}
-#st{margin-top:10px;color:#7be0d0;min-height:1.4em}
-.note{margin-top:22px;color:#8fa9a6;font-size:13px}
+#st{margin-top:10px;color:#7be0d0;min-height:1.4em}.note{margin-top:22px;color:#8fa9a6;font-size:13px}
 </style>
 </head>
 <body>
-<h1>Phase III · Chapitre II · écoute des paliers <small>(prototype)</small></h1>
-<p class="s">Outil d'écoute hors jeu. Le moteur ci-dessous est une copie minimale de <code>chapters/ch2-silent-bells/src/js/60-music.js</code> (non modifié) ; les couches des paliers 1 et 2 n'existent que dans cette page.</p>
-
+<h1>Phase III · Chapitre II · écoute des paliers <small>(prototype v2 · menaçant)</small></h1>
+<p class="s">Outil d'écoute hors jeu. Le moteur est une copie minimale de <code>chapters/ch2-silent-bells/src/js/60-music.js</code> (non modifié) ; la base revue et les paliers n'existent que dans cette page.</p>
 <table>
- <tr><td>bpm palier 0 (actuel)</td><td><input id="b0" type="range" min="80" max="160" step="1" value="104"></td><td><output id="b0o"></output></td></tr>
- <tr><td>bpm palier 1 (forme II)</td><td><input id="b1" type="range" min="80" max="160" step="1" value="116"></td><td><output id="b1o"></output></td></tr>
- <tr><td>bpm palier 2 (après rage 1)</td><td><input id="b2" type="range" min="80" max="160" step="1" value="126"></td><td><output id="b2o"></output></td></tr>
- <tr><td>gain du palier 2 (× niveau de base 0,5)</td><td><input id="g2" type="range" min="0.5" max="1.2" step="0.01" value="0.85"></td><td><output id="g2o"></output></td></tr>
-<tr><td>soutien (drone, basse, bruit, octave haute)</td><td><input id="su" type="range" min="0" max="1" step="0.01" value="0.3"></td><td><output id="suo"></output></td></tr>
- <tr><td>niveau de la mélodie</td><td><input id="me" type="range" min="0" max="2" step="0.01" value="1"></td><td><output id="meo"></output></td></tr>
- <tr><td>variante mélodique</td><td colspan="2"><select id="var">
-  <option value="A">A · contre-chant lent (notes longues)</option>
-  <option value="B">B · arpège montant (boucle sur la grille)</option>
-  <option value="C">C · motif du thème repris (octave / tierce)</option></select></td></tr>
+ <tr><td>bpm palier 0</td><td><input id="b0" type="range" min="80" max="170" step="1" value="104"></td><td><output id="b0o"></output></td></tr>
+ <tr><td>bpm palier 1 (forme II)</td><td><input id="b1" type="range" min="80" max="170" step="1" value="118"></td><td><output id="b1o"></output></td></tr>
+ <tr><td>bpm palier 2 (après rage 1)</td><td><input id="b2" type="range" min="80" max="170" step="1" value="132"></td><td><output id="b2o"></output></td></tr>
+ <tr><td>gain du palier 2 (× 0,5)</td><td><input id="g2" type="range" min="0.6" max="1.5" step="0.01" value="1.1"></td><td><output id="g2o"></output></td></tr>
+ <tr><td>base (palier 0)</td><td colspan="2"><select id="base">
+  <option value="new">Revue : cœur battant, grondement A / Si♭ (seconde mineure), arpège grave</option>
+  <option value="old">Actuelle (thème 3 de 60-music.js)</option></select></td></tr>
+ <tr><td>variante de montée</td><td colspan="2"><select id="var">
+  <option value="A">A · marche de guerre (tambours, cuivres, coups de grosse caisse, accords)</option>
+  <option value="B">B · glas et cordes (cloche, trémolo, accords, grondement)</option>
+  <option value="C">C · montée (tambours, montée continue, roulements, cordes)</option></select></td></tr>
 </table>
-
-<button id="p0">Palier 0 (actuel, 104 bpm)</button>
+<button id="p0">Palier 0 (base)</button>
 <button id="p1">Palier 1 (forme II)</button>
 <button id="p2">Palier 2 (après rage 1)</button>
 <button id="seq">Enchaîner 0 → 1 → 2</button>
 <button id="stop">Stop</button>
 <div id="st"></div>
-
 <div class="note">
-Mélodie : palier 1 = ligne simple, timbre doux ; palier 2 = plus de notes, timbre plus brillant. Toutes les notes sont celles de l'arpège du thème 3 (A, Si♭, Do, Mi puis Fa, transposées d'un ton dans la seconde moitié de la grille de 32 pas), jamais d'autres.<br>
-Soutien discret (curseur) : palier 1 = couche de fond (<code>layerOsc</code>) et basse plus serrée ; palier 2 = en plus bruit rythmique et octave haute, avec le léger baisser du gain général.<br>
-Les curseurs agissent en direct, pendant l'écoute. Les paliers se changent sans relancer le thème.
+Toutes les notes restent dans le thème 3 : A, Si♭, Do, Mi / Fa, transposées d'un ton dans la seconde moitié de la grille de 32 pas.<br>
+Palier 1 : le combat se durcit (tambours, cuivres graves, glas selon la variante). Palier 2 : fin de combat (grosse caisse, roulements, accords serrés, montée de tension, plus fort et plus rapide).<br>
+Les curseurs agissent en direct. Changer de base ou de variante relance le palier en cours.
 </div>
-
 <script>
 /* ===== copie minimale du moteur de 60-music.js (inchangé) : init, env, osc, nz, lfo, layerNoise, layerOsc ===== */
 let ac=null,out,rev;
 function init(){if(ac)return;ac=new (window.AudioContext||window.webkitAudioContext)();
   out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(ac.destination);
   rev=ac.createConvolver();const n=ac.sampleRate*3.8,b=ac.createBuffer(2,n,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}rev.buffer=b;
-  const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out);supBus=ac.createGain();supBus.connect(out);melBus=ac.createGain();melBus.connect(out);supBus.gain.value=+$('su').value;melBus.gain.value=+$('me').value}
+  const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out)}
 let _nb=null;const nbuf=()=>{if(!_nb){_nb=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=_nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return _nb};   // LB.audio.noiseBuf(2)
 function env(g,t,a,p,d){a=Math.max(a,.01);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(p,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
 function send(g,wet){if(wet){const w=ac.createGain();w.gain.value=wet;g.connect(w);w.connect(rev)}}
 function osc(type,f,t,a,p,d,wet,f2,det){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+a+d);if(det)o.detune.value=det;env(g,t,a,p,d);o.connect(g);g.connect(dst||out);send(g,wet);o.start(t);o.stop(t+a+d+.1)}
 function nz(t,d,p,type,f,q,wet,f2,a){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+(a||.005)+d);fl.Q.value=q||1;const g=ac.createGain();env(g,t,a||.005,p,d);s.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet);s.start(t);s.stop(t+(a||.005)+d+.1)}
 function lfo(rate,depth,target){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=rate;lg.gain.value=depth;l.connect(lg);lg.connect(target);l.start();return l}
-let ARR=null,dst=null,supBus,melBus;
+let ARR=null,dst=null;
 function layerNoise(type,f,q,vol,rate,depth,wet){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+2.5);s.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet);const l=rate?lfo(rate,depth,fl.frequency):null;s.start();ARR.push({g,stop:()=>{try{s.stop();l&&l.stop()}catch(e){}}})}
 function layerOsc(type,f,vol,lp,det,rate,depth,wet){const o=ac.createOscillator();o.type=type;o.frequency.value=f;if(det)o.detune.value=det;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=lp;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+3);const g2=ac.createGain();g2.gain.value=1;o.connect(fl);fl.connect(g);g.connect(g2);g2.connect(dst||out);send(g2,wet);const l=rate?lfo(rate,depth,g2.gain):null;o.start();ARR.push({g,stop:()=>{try{o.stop();l&&l.stop()}catch(e){}}})}
 
@@ -74,47 +71,41 @@ function baseAmb(t){const r=Math.random();
   else if(r<.7){for(let i=0;i<5;i++)nz(t+Math.random()*.25,.015,.06,'highpass',4500)}
   else osc('sine',72,t,.6,.07,2,.8,48)}
 
-/* ===== PROTOTYPE : paliers 1 et 2 (n'existent que dans cette page) ===== */
-/* Grille du thème 3 : l'arpège joue A Do Mi Si♭ (pas 0-3 de chaque 8) puis A Do Fa Si♭ (pas 4-7) ; les pas 16-31 sont transposés d'un ton (x1,1225).
-   Une note de mélodie est donc toujours un degré de l'accord du pas : (A, Si♭, Do, Mi ou Fa), x K(s), à l'octave près. */
-const SETB=[[440,466.2,523.3,659.3],[440,466.2,523.3,698.5]];
+/* ===== PROTOTYPE v2 : base revue, couches de palier ===== */
 const K=s=>s%32<16?1:1.1225;
-function pit(s,deg,oct){const b=SETB[(s%8)<4?0:1];return b[deg%4]*Math.pow(2,oct+Math.floor(deg/4))*K(s)}
-const ARPI=[0,2,3,1,0,2,3,1];   // degrés de l'arpège du thème, dans l'ordre des pas
-/* [pas dans le cycle, degré, octave, durée en pas] ; degré 0 A, 1 Si♭, 2 Do, 3 Mi/Fa, 4 = A à l'octave... */
-const MEL={
-  A:{1:{cyc:16,n:[[0,2,0,8],[8,3,0,8]]},
-     2:{cyc:16,n:[[0,3,0,4],[4,2,0,3],[8,3,0,3],[11,4,0,2],[13,3,0,3]]}},
-  B:{1:{cyc:8,n:[[0,0,0,2],[2,2,0,2],[4,3,0,2],[6,4,0,2]]},
-     2:{cyc:8,n:[[0,0,0,1.3],[1,1,0,1.3],[2,2,0,1.3],[3,3,0,1.3],[4,4,0,1.3],[5,5,0,1.3],[6,6,0,1.3],[7,7,0,2]]}}};
-const MVOL={A:.05,B:.032,C:.03};
-/* voix de la mélodie : sinus doux (palier 1) ou triangle brillant avec partiels (palier 2) */
-function mv(f,t,len,vol,bright){const a=Math.min(.12,len*.3);
-  osc(bright?'triangle':'sine',f,t,a,vol,len,.7);
-  osc('sine',f*2.003,t,a,vol*(bright?.5:.22),len*.7,.7);
-  if(bright){osc('sine',f*3,t,a,vol*.3,len*.5,.7);osc('triangle',f,t,a,vol*.5,len,.6,null,7)}}
-function melStep(n,s,t,spb){if(n<1)return;const v=$('var').value,br=n>=2,vol=MVOL[v];dst=melBus;
-  try{
-    if(v==='C'){   // motif du thème repris plus haut : palier 1 = octave sur les temps pairs ; palier 2 = chaque pas, plus la tierce (deux degrés au-dessus, dans l'accord)
-      const i=ARPI[s%8];
-      if(!br){if(s%2===0)mv(pit(s,i,1),t,spb*1.8,vol,true)}
-      else{mv(pit(s,i,1),t,spb*1.4,vol,true);mv(pit(s,i+2,1),t+spb*.02,spb*1.4,vol*.7,true)}}
-    else{const M=MEL[v][n],r=s%M.cyc;
-      for(const q of M.n)if(q[0]===r)mv(pit(s,q[1],q[2]),t,q[3]*spb,vol,br)}
-  }finally{dst=null}}
-/* soutien discret (bus `soutien`) : palier 1 = couche de fond + basse plus serrée ; palier 2 = en plus bruit rythmique + octave haute */
-function tierLayers(n){ARR=tierL;dst=supBus;
-  if(n>=1){layerOsc('sawtooth',82.4,.018,360,-5,.06,.3,.6);layerOsc('triangle',164.8,.014,520,4,.07,.4,.6)}
-  dst=null;ARR=null}
-function tierStep(n,s,t){dst=supBus;
-  if(n>=1){
-    if(s%2===1)osc('sine',55,t,.01,.09,.2,0);
-    if(s%8===6)osc('sine',82.4,t,.01,.08,.22,0)}
-  if(n>=2){
-    if(s%2===1)nz(t,.05,.05,'highpass',6000);
-    if(s%4===0)nz(t,.03,.04,'highpass',4200);
-    osc('sine',ARP[s%8]*4*(s%32<16?1:1.1225),t,.003,.011,.22,.7)}
-  dst=null}
+/* percussions et voix graves (copies simples, pas dans 60-music.js) */
+const kick=(t,p)=>{osc('sine',100,t,.004,p,.35,.15,38);nz(t,.08,p*.3,'lowpass',400)};
+const tom=(t,f,p)=>{osc('sine',f,t,.004,p,.45,.3,f*.55);nz(t,.1,p*.35,'lowpass',700)};
+const snare=(t,p)=>{nz(t,.18,p,'bandpass',1800,.8,.3);osc('triangle',190,t,.002,p*.5,.12,.2)};
+const toll=(t,base,p)=>[[1,1],[2.43,.5],[3.71,.3]].forEach(([m,k])=>osc('sine',base*m,t,.003,p*k,3,.8));
+function saw(f,t,len,vol,lp,wet,lp2){const o=ac.createOscillator(),fl=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';o.frequency.value=f;fl.type='lowpass';fl.Q.value=2;fl.frequency.setValueAtTime(lp,t);fl.frequency.exponentialRampToValueAtTime(lp2||lp*2.2,t+len*.6);env(g,t,.03,vol,len);o.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet==null?.3:wet);o.start(t);o.stop(t+len+.15)}
+/* base revue : cœur battant, grondement A / Si♭ qui bat, arpège du thème une octave plus bas, cloche sourde */
+function newStart(){layerOsc('sawtooth',55,.05,160,-8,.05,.3,.4);layerOsc('sawtooth',58.27,.04,140,6,.04,.3,.4);layerNoise('lowpass',120,.7,.08,.03,30,.3)}
+function newStep(s,t){
+  if(s%16===0)osc('sine',50,t,.004,.5,.5,.2,34);
+  if(s%16===3)osc('sine',46,t,.004,.35,.4,.2,32);
+  if(s%2===0)osc('sine',ARP[s%8]*.5*K(s),t,.01,.03,.9,.8);
+  if(s%64===40)toll(t,182,.05);
+  if(s%64===0)nz(t,4,.045,'bandpass',200,3,.6,2200,3)}
+/* couches par variante et par palier (table) */
+const LAY={
+  A:{1:['drum','brass'],2:['drum','brass','kick4','roll','stab','riser']},
+  B:{1:['bell','str'],2:['bell','str','drum','stab','boom']},
+  C:{1:['drum','riser'],2:['drum','kick4','roll','riser','stab','str']}};
+const lay=(n,v)=>n<1?[]:LAY[v][Math.min(n,2)];
+function tierLayers(n,v){ARR=tierL;
+  if(lay(n,v).includes('str'))for(const f of[220,261.6,329.6,233.1])layerOsc('sawtooth',f,.017,1200,(f%7)-3,8,.6,.5);
+  ARR=null}
+function tierStep(n,s,t,spb,v){const L=lay(n,v);if(!L.length)return;const k=K(s),r=s%8,q=s%16;
+  if(L.includes('drum')){if(r===0||r===6)tom(t,62,.6);if(r===3)tom(t,80,.4);if(r===4)snare(t,.08)}
+  if(L.includes('kick4')&&s%2===0)kick(t,.45);
+  if(L.includes('roll')&&q>=12)tom(t,70+(q-12)*12,.3);
+  if(L.includes('brass')){const O=[[0,110],[2,110],[3,116.5],[4,110],[6,130.8]];for(const o of O)if(o[0]===r)saw(o[1]*k,t,spb*1.6,.05,420)}
+  if(L.includes('stab')&&(q===0||q===10))for(const f of[110,116.5,130.8,164.8])saw(f*k,t,spb*3,.03,700,.4,1800);
+  if(L.includes('bell')){if(s%32===0)toll(t,110*k,.1);if(s%32===16)toll(t,116.5*k,.07)}
+  if(L.includes('boom')&&s%32===0){osc('sine',45,t,.01,.7,1.6,.3,30);nz(t,1.2,.2,'lowpass',200,1,.4,60,.1)}
+  if(L.includes('riser')){if(s%32===16){const d=16*spb;nz(t,d,.07,'bandpass',300,3,.4,5200,d*.5);osc('sine',220*k,t,d*.6,.04,d*.4,.5,880*k)}
+    if(s%32===0&&n>=2){nz(t,1.2,.06,'highpass',3000,1,.5);osc('sine',45,t,.01,.6,1.4,.3,30)}}}
 
 /* ===== lecteur ===== */
 const $=id=>document.getElementById(id);
@@ -122,13 +113,14 @@ const tierL=[];let bed=[],timer=null,seqT=[],tier=0,next=0,step=0,playing=false,
 const bpmOf=n=>+$('b'+n).value,g2=()=>+$('g2').value;
 function outGain(){if(!ac)return;out.gain.cancelScheduledValues(ac.currentTime);out.gain.setTargetAtTime(.5*(tier>=2?g2():1),ac.currentTime,.3)}
 function fadeLayers(arr){const t=ac.currentTime;arr.splice(0).forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+1);setTimeout(L.stop,1200)})}
-function tick(){const spb=60/bpmOf(tier)/4;
+function tick(){const spb=60/bpmOf(tier)/4,nw=$('base').value==='new',v=$('var').value;
   if(next<ac.currentTime){const miss=Math.ceil((ac.currentTime-next)/spb);next+=miss*spb;step+=miss}
-  while(next<ac.currentTime+.6){baseStep(step,next);tierStep(tier,step,next);melStep(tier,step,next,spb);if(Math.random()<.05)baseAmb(next+Math.random()*spb);next+=spb;step++}}
-function setTier(n){tier=n;if(!playing)return;fadeLayers(tierL);tierLayers(n);outGain();mark()}
+  while(next<ac.currentTime+.6){if(nw){newStep(step,next);if(Math.random()<.04)baseAmb(next+Math.random()*spb)}else{baseStep(step,next);if(Math.random()<.05)baseAmb(next+Math.random()*spb)}
+    tierStep(tier,step,next,spb,v);next+=spb;step++}}
+function setTier(n){tier=n;if(!playing)return;fadeLayers(tierL);tierLayers(n,$('var').value);outGain();mark()}
 function play(n){init();if(ac.state==='suspended')ac.resume();stop(true);
   playing=true;tier=n;step=0;next=ac.currentTime+.15;
-  ARR=bed;baseStart();ARR=null;tierLayers(n);outGain();
+  ARR=bed;if($('base').value==='new')newStart();else baseStart();ARR=null;tierLayers(n,$('var').value);outGain();
   timer=setInterval(tick,100);mark()}
 function stop(quiet){seqT.forEach(clearTimeout);seqT=[];clearInterval(tickT);tickT=null;
   if(!ac){if(!quiet)status('');return}
@@ -136,17 +128,15 @@ function stop(quiet){seqT.forEach(clearTimeout);seqT=[];clearInterval(tickT);tic
   out.gain.cancelScheduledValues(ac.currentTime);out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);mark();if(!quiet)status('Arrêté.')}
 function status(s){$('st').textContent=s}
 function mark(){['p0','p1','p2'].forEach((id,i)=>$(id).classList.toggle('on',playing&&tier===i));
-  if(playing)status('Palier '+tier+' · '+bpmOf(tier)+' bpm'+(tier>=2?' · gain '+g2().toFixed(2):'')+(tier>=1?' · variante '+$('var').value:''))}
-function go(n){if(playing)setTier(n);else play(n);seqT.forEach(clearTimeout);seqT=[]}
+  if(playing)status('Palier '+tier+' · '+bpmOf(tier)+' bpm'+(tier>=2?' · gain '+g2().toFixed(2):'')+' · base '+$('base').value+(tier>=1?' · variante '+$('var').value:''))}
+function go(n){seqT.forEach(clearTimeout);seqT=[];if(playing)setTier(n);else play(n)}
 $('p0').onclick=()=>go(0);$('p1').onclick=()=>go(1);$('p2').onclick=()=>go(2);$('stop').onclick=()=>stop();
 $('seq').onclick=()=>{play(0);const D=12000;
   [1,2].forEach(n=>seqT.push(setTimeout(()=>setTier(n),D*n)));
-  seqT.push(setTimeout(()=>status('Enchaînement terminé (palier 2 en cours).'),D*3));
   let left=0;clearInterval(tickT);tickT=setInterval(()=>{if(!playing){clearInterval(tickT);return}left++;
-    const sec=left%12,n=Math.min(2,Math.floor(left/12));status('Enchaîné · palier '+n+' · '+bpmOf(n)+' bpm · '+(left<36?(12-sec)+' s avant le suivant':'terminé'));if(left>=36)clearInterval(tickT)},1000)};
-/* curseurs : valeur affichée, effet en direct */
-['b0','b1','b2','g2','su','me'].forEach(id=>{const dec=id.length===2&&id!=='b0'&&id!=='b1'&&id!=='b2';const upd=()=>{$(id+'o').textContent=dec?(+$(id).value).toFixed(2):$(id).value+' bpm';if(ac){supBus.gain.value=+$('su').value;melBus.gain.value=+$('me').value}if(playing){if(id==='g2')outGain();mark()}};$(id).oninput=upd;upd()});
-$('var').onchange=()=>{if(playing)mark()};
+    const n=Math.min(2,Math.floor(left/12));status('Enchaîné · palier '+n+' · '+bpmOf(n)+' bpm · '+(left<24?(12-left%12)+' s avant le suivant':'palier 2 en cours'));if(left>=36)clearInterval(tickT)},1000)};
+['b0','b1','b2','g2'].forEach(id=>{const upd=()=>{$(id+'o').textContent=id==='g2'?(+$(id).value).toFixed(2):$(id).value+' bpm';if(playing){if(id==='g2')outGain();mark()}};$(id).oninput=upd;upd()});
+$('base').onchange=$('var').onchange=()=>{if(playing){const n=tier;seqT.forEach(clearTimeout);seqT=[];play(n)}};
 </script>
 </body>
 </html>
