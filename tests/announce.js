@@ -8,7 +8,7 @@
 // Sortie attendue : errs []
 const path=require('path'),{spawnSync}=require('child_process');const launch=require('./launch');const {banned}=require('./ch2-lib');
 const ROOT=path.resolve(__dirname,'..');
-const F={ch1:path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html'),ch2:path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html')};
+const F={ch1:path.join(ROOT,'site/ch1/index.html'),ch2:path.join(ROOT,'site/ch2/index.html')};
 const errs=[];
 const TXT=()=>{const out=[],seen=new Set();
  for(const e of document.querySelectorAll('#gate,#menu,#pause,#ov,header,.bars,.controls')){if(e.hidden)continue;

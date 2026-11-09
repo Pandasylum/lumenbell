@@ -1,5 +1,5 @@
 const path=require('path');const launch=require('./launch');
-const errs0=require('./boss-diff-static')(require('fs').readFileSync(path.resolve(__dirname,'../chapters/ch1-ember-bridge/dist/index.html'),'utf8'),'ch1');console.log('boss-diff (statique)',errs0.length?'KO':'OK');
+const errs0=require('./boss-diff-static')(require('fs').readFileSync(path.resolve(__dirname,'../site/ch1/index.html'),'utf8'),'ch1');console.log('boss-diff (statique)',errs0.length?'KO':'OK');
 (async()=>{const b=await launch();
 const pg=await (await b.newContext({viewport:{width:1100,height:760}})).newPage();
 const errs=[...errs0];pg.on('pageerror',e=>errs.push(e.message));

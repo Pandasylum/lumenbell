@@ -8,7 +8,7 @@
 //   est masquee, sans toucher a lb-help) ; un choix fait dans un chapitre est vu par l'autre (meme origine file://).
 // Les cles propres au Chapitre II (lb-ch2-unl, deblocage) restent dans ch2-keys.js. Hors ligne. Sortie attendue : errs []
 const path=require('path');const launch=require('./launch');
-const F={ch1:path.resolve(__dirname,'../chapters/ch1-ember-bridge/dist/index.html'),ch2:path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html')};
+const F={ch1:path.resolve(__dirname,'../site/ch1/index.html'),ch2:path.resolve(__dirname,'../site/ch2/index.html')};
 const errs=[];
 // cas communs : memes cles posees, meme etat attendu dans les deux chapitres
 const COMMON=[

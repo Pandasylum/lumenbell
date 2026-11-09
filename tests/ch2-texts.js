@@ -18,7 +18,7 @@ const C=calls(code);
 for(const c of C)if(c.args.length!==2)errs.push('appel a '+c.args.length+' arguments: '+code.slice(c.at,c.at+60));
 const cell=a=>{const v=lit(a);return v===null?'`'+a.replace(/`/g,"'")+'`':v===''?'*(vide)*':v.replace(/\|/g,'\\|').replace(/\n/g,' ')};
 const md='# Textes du Chapitre II (EN / FR)\n\n'+
- 'Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/dist/index.html` : tous les appels `_(en, fr)`, dans l\'ordre du script. '+
+ 'Genere par `node tests/ch2-texts.js --write` depuis `site/ch2/index.html` : tous les appels `_(en, fr)`, dans l\'ordre du script. '+
  '`tests/ch2-texts.js` echoue si le jeu ne redonne pas exactement ce fichier. Texte en `code` : argument calcule (pas une chaine simple). '+
  'Les onomatopees (identiques dans les deux langues) ne passent pas par `_()`.\n\n'+
  '| # | Anglais | Français |\n|---|---|---|\n'+C.map((c,i)=>'| '+(i+1)+' | '+cell(c.args[0])+' | '+cell(c.args[1])+' |').join('\n')+'\n';

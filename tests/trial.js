@@ -11,7 +11,7 @@
 //     n'ouvre rien ; avec la vraie fin vue (lb-chN-end) : ouverte.
 // Sortie attendue : errs []
 const fs=require('fs'),path=require('path'),os=require('os');const launch=require('./launch');
-const F={ch1:path.resolve(__dirname,'../chapters/ch1-ember-bridge/dist/index.html'),ch2:path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html')};
+const F={ch1:path.resolve(__dirname,'../site/ch1/index.html'),ch2:path.resolve(__dirname,'../site/ch2/index.html')};
 const NAME={ch1:{en:'Trial by Fire',fr:'Épreuve du feu'},ch2:{en:'Trial by Water',fr:"Épreuve de l'eau"}};
 const SUB={en:['Easy','Breathe','Normal','Fair and square','Hard','No mercy','Ultimate challenge'],fr:['Facile','Respire','Normal','À la loyale','Difficile','Sans pitié','Challenge ultime']};
 const RULES={en:['The three phases in a row, with no pause and no visual help.','A single death sends you back to Phase I.','One stats table at the end of the run.'],fr:["Les trois phases d'affilée, sans pause et sans aide visuelle.",'Une seule mort te renvoie à la phase I.','Un seul tableau de stats à la fin de la run.']};

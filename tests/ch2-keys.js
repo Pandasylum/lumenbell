@@ -5,7 +5,7 @@
 // (build/out/ch2-unlock-off.html) pour verifier que le deblocage progressif (lb-ch2-unl) marche encore.
 // Hors ligne. Sortie attendue : errs []
 const fs=require('fs'),path=require('path');const launch=require('./launch');
-const FILE=path.resolve(__dirname,'../chapters/ch2-silent-bells/dist/index.html');
+const FILE=path.resolve(__dirname,'../site/ch2/index.html');
 const OFF=path.resolve(__dirname,'../build/out/ch2-unlock-off.html');
 {const h=fs.readFileSync(FILE,'utf8'),a='const UNLOCK_ALL=true;';if(h.split(a).length!==2)throw new Error('UNLOCK_ALL introuvable');fs.mkdirSync(path.dirname(OFF),{recursive:true});fs.writeFileSync(OFF,h.replace(a,'const UNLOCK_ALL=false;'))}
 const errs=[];

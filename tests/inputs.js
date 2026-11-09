@@ -84,7 +84,7 @@ async function pause(pg,tag,step){
    check(d&&!u,'ch2 phase III: Entree sur le bouton d\'action '+JSON.stringify([d,u]))}
   console.log('ch2',JSON.stringify(await pg.evaluate(()=>window.__n)));await ctx.close()}
  // ecran de demarrage (dist)
- for(const [ch,f] of [['ch1','chapters/ch1-ember-bridge/dist/index.html'],['ch2','chapters/ch2-silent-bells/dist/index.html']]){
+ for(const [ch,f] of [['ch1','site/ch1/index.html'],['ch2','site/ch2/index.html']]){
   const ctx=await b.newContext({viewport:{width:1100,height:760}});const pg=await ctx.newPage();pg.on('pageerror',e=>errs.push(ch+' gate: pageerror: '+e.message));
   await pg.goto('file://'+path.join(ROOT,f));await pg.waitForTimeout(300);
   await pg.evaluate(()=>document.activeElement&&document.activeElement.blur());

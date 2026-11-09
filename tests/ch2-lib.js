@@ -8,7 +8,7 @@
 //                  en mode manuel (LB.cine.manual) : step(dt, dessiner) les fait avancer au meme pas que le jeu.
 const fs=require('fs'),path=require('path');
 const ROOT=path.resolve(__dirname,'..');
-const DIST=process.env.CH2_DIST||path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html');   // CH2_DIST=<fichier> : comparer avec un autre dist (avant / apres)
+const DIST=process.env.CH2_DIST||path.join(ROOT,'site/ch2/index.html');   // CH2_DIST=<fichier> : comparer avec un autre dist (avant / apres)
 function script(h){const m=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)];if(m.length!==1)throw new Error('scripts: '+m.length);return m[0][1]}
 function calls(code){const out=[];const re=/(?<![\w$.])_\(/g;let m;
  const parse=i=>{const args=[];let d=0,st=i;

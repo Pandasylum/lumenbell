@@ -1,6 +1,6 @@
 # Textes du Chapitre II (EN / FR)
 
-Genere par `node tests/ch2-texts.js --write` depuis `chapters/ch2-silent-bells/dist/index.html` : tous les appels `_(en, fr)`, dans l'ordre du script. `tests/ch2-texts.js` echoue si le jeu ne redonne pas exactement ce fichier. Texte en `code` : argument calcule (pas une chaine simple). Les onomatopees (identiques dans les deux langues) ne passent pas par `_()`.
+Genere par `node tests/ch2-texts.js --write` depuis `site/ch2/index.html` : tous les appels `_(en, fr)`, dans l'ordre du script. `tests/ch2-texts.js` echoue si le jeu ne redonne pas exactement ce fichier. Texte en `code` : argument calcule (pas une chaine simple). Les onomatopees (identiques dans les deux langues) ne passent pas par `_()`.
 
 | # | Anglais | Français |
 |---|---|---|

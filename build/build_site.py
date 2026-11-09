@@ -1,7 +1,7 @@
 """Assemble le site complet du jeu (web, itch.io, APK) : le hub et les chapitres, chacun autonome.
-Usage : python3 build/build_site.py   (apres build/build_chapter.py de chaque chapitre : leurs dist sont recopies tels quels)
+Usage : python3 build/build_site.py   (lance build_chapter.py de chaque chapitre, puis recopie leurs sorties intermediaires tel quel)
 Entree : site/src/ (morceaux du hub, ordre : site/src/parts.txt, '@shared' = shared/parts.txt, comme un chapitre),
-         build/fonts.css (polices inlinees), chapters/<chapitre>/dist/index.html
+         build/fonts.css (polices inlinees), build/out/chapters/<chapitre>/index.html (intermediaire, ignore par git)
 Sortie : site/index.html (hub), site/ch1/index.html, site/ch2/index.html, build/out/lumenbell-site.zip (sans site/src)
 Reproductible : meme entree, memes octets (zip a date fixe) ; l'empreinte du site est affichee a la fin.
 Un chapitre de plus : une ligne dans CHAPTERS (et son entree dans HUB_CH, site/src/js/10-hub.js).
@@ -11,13 +11,13 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from strip import strip_page
+from build_chapter import build as build_chapter
 from assemble import ROOT, _listed, _read, _svg, _no_stray, shared_parts, gate_expand
 SITE = ROOT / "site"
 SRC = SITE / "src"
 OUT = ROOT / "build/out"
-# dossier du site -> dist du chapitre
-CHAPTERS = [("ch1", "chapters/ch1-ember-bridge/dist/index.html"),
-            ("ch2", "chapters/ch2-silent-bells/dist/index.html")]
+# dossier du site -> id du chapitre (build_chapter.build le construit en intermediaire)
+CHAPTERS = [("ch1", "ch1-ember-bridge"), ("ch2", "ch2-silent-bells")]
 
 def hub_source():
     out, own = [], set()
@@ -45,8 +45,8 @@ low = s.lower()
 assert "couronne" not in low and "crown" not in low, "nom secret du lore dans le hub"
 s = strip_page(s)  # commentaires JS/CSS/HTML retires de la sortie (les sources gardent les leurs)
 files = {"index.html": s}
-for d, dist in CHAPTERS:
-    files[d + "/index.html"] = (ROOT / dist).read_text(encoding="utf-8")
+for d, cid in CHAPTERS:
+    files[d + "/index.html"] = build_chapter(cid).read_text(encoding="utf-8")
 for rel, text in files.items():
     f = SITE / rel
     f.parent.mkdir(parents=True, exist_ok=True)

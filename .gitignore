@@ -15,3 +15,6 @@ keys/
 password*.txt
 keystore*.txt
 .DS_Store
+
+# anciens dossiers dist/ de chapitres (supprimes : seul site/ est genere)
+chapters/*/dist/

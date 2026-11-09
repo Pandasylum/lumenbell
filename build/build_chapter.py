@@ -1,4 +1,4 @@
-"""Construit le jeu d'un chapitre : morceaux de src/ (ordre : src/parts.txt, via assemble.py) -> dist/index.html (+ zip itch.io).
+"""Construit le jeu d'un chapitre : morceaux de src/ (ordre : src/parts.txt, via assemble.py) -> build/out/chapters/<id>/index.html (intermediaire, hors git ; consomme par build_site.py) + zip itch.io.
 Usage : python3 build/build_chapter.py <id>      ex. ch1-ember-bridge, ch2-silent-bells (dossier de chapters/)
 Parametres : chapters/<id>/chapter.json = {id, title, dist, zip} (chemins relatifs a la racine).
 Ecarts avec la source : meta propre a l'hebergeur d'artefacts retiree, polices Google remplacees par build/fonts.css inlinees,
@@ -54,6 +54,7 @@ def build(cid):
     with zipfile.ZipFile(zpath, "w") as z:
         z.writestr(info, doc)
     print("OK", len(doc.encode("utf-8")), "octets (", full, "avant retrait des commentaires ) ->", dist)
+    return dist
 
 
 if __name__ == "__main__":

@@ -219,17 +219,17 @@ async function cineShots(dir,files){fs.mkdirSync(dir,{recursive:true});const b=a
  if(a[0]==='--compare'){const d=await compare(a[1],a[2]);process.exitCode=d.length?1:0;return}
  const nb=a.includes('--no-breath');const A=a.filter(x=>x!=='--no-breath');
  if(A[0]==='--menu'){if(!A[1])throw new Error('usage : node visual-shots.js --menu <dossier> [ch1.html] [ch2.html]');
-  const files={ch1:path.resolve(A[2]||path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')),ch2:path.resolve(A[3]||path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html'))};
+  const files={ch1:path.resolve(A[2]||path.join(ROOT,'site/ch1/index.html')),ch2:path.resolve(A[3]||path.join(ROOT,'site/ch2/index.html'))};
   const errs=await menus(path.resolve(A[1]),files);console.log('errs',errs);process.exitCode=errs.length?1:0;return}
  if(A[0]==='--hub'){if(!A[1])throw new Error('usage : node visual-shots.js --hub <dossier> [site/index.html]');
   const errs=await hubShots(path.resolve(A[1]),path.resolve(A[2]||path.join(ROOT,'site/index.html')));console.log('errs',errs);process.exitCode=errs.length?1:0;return}
  if(A[0]==='--cine'){if(!A[1])throw new Error('usage : node visual-shots.js --cine <dossier> [ch1.html] [ch2test.html]');
-  const files={ch1:path.resolve(A[2]||path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')),ch2:path.resolve(A[3]||require('./ch2-lib').testPage())};
+  const files={ch1:path.resolve(A[2]||path.join(ROOT,'site/ch1/index.html')),ch2:path.resolve(A[3]||require('./ch2-lib').testPage())};
   const errs=await cineShots(path.resolve(A[1]),files);console.log('errs',errs);process.exitCode=errs.length?1:0;return}
  if(A[0]==='--poses'){if(!A[1])throw new Error('usage : node visual-shots.js --poses <dossier> [ch1test.html] [ch2test.html]');
   const files={ch1:path.resolve(A[2]||path.join(ROOT,'build/out/test.html')),ch2:path.resolve(A[3]||require('./ch2-lib').testPage())};
   const errs=await poses(path.resolve(A[1]),files);console.log('errs',errs);process.exitCode=errs.length?1:0;return}
  if(!A[0])throw new Error('usage : node visual-shots.js <dossier> [ch1.html] [ch2.html] [--no-breath]');
- const files={ch1:path.resolve(A[1]||path.join(ROOT,'chapters/ch1-ember-bridge/dist/index.html')),ch2:path.resolve(A[2]||path.join(ROOT,'chapters/ch2-silent-bells/dist/index.html'))};
+ const files={ch1:path.resolve(A[1]||path.join(ROOT,'site/ch1/index.html')),ch2:path.resolve(A[2]||path.join(ROOT,'site/ch2/index.html'))};
  if(nb){files.ch1=noBreath(files.ch1);files.ch2=noBreath(files.ch2)}
  const errs=await shots(path.resolve(A[0]),files);console.log('errs',errs);process.exitCode=errs.length?1:0})().catch(e=>{console.log('exception',e.message);process.exit(1)});
