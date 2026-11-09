@@ -278,7 +278,6 @@ function spawn(){
     S.finalDone=true;S.angerShown=true;S.roarT=gt;S.roarD=LB.BOSS_RULES.rageDur2;S.shake=10;
     banner(_('Final assault','Dernier assaut'),id===3&&!f2?'':[null,_('Funeral toll','Glas funèbre'),_('Chorus of reflections','Chœur des reflets'),_('Implosion','Implosion')][id]);
     go(gen(1,f,gt+1.6,true));return}
-  if(stage&&id===3&&S.form===2)MUSIC.tier(2);   // rage 1 of form II is over (first normal attack after it): tier 2 of the music
   go(gen(stage,f,gt+.25));
 }
 /* ---- Phase I · the Hollow Voice ---- */

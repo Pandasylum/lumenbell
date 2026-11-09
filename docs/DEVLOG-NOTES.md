@@ -342,5 +342,5 @@
 - Ce que le joueur verra : sur les écrans de petite hauteur (ex. 960×540), « Tutoriel », EN et FR forment une seule rangée centrée sous la figure ; le bouton ne recouvre plus le sixième point, la figure se réduit au besoin.
 
 ## 2026-11-09 · ch2/musique-p3-paliers
-- Ce que le joueur verra : à la naissance de la forme II du Phare (La Sans-Fond), la musique devient plus grave et plus menaçante (cœur battant, grondement, tambours de guerre et cuivres graves) ; une fois la rage 1 passée, elle monte encore (grosse caisse, roulements, accords serrés, tension qui grimpe, un peu plus rapide et plus forte).
+- Ce que le joueur verra : à la naissance de la forme II du Phare (La Sans-Fond), la musique devient plus grave et plus menaçante (cœur battant, grondement, tambours de guerre et cuivres graves) ; une fois la rage 1 contrée, elle monte encore avec un balayage grave et deux coups de grosse caisse, comme au Chapitre I, (grosse caisse, roulements, accords serrés, tension qui grimpe, un peu plus rapide et plus forte).
 - Si le joueur retente la forme II, la musique repart du premier palier ; le second revient avec la rage 1.

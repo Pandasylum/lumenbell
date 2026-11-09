@@ -1,6 +1,6 @@
 /* ---------- music & ambience (procedural, Web Audio) ---------- */
 const MUSIC=(()=>{
-  let ac=null,out,rev,cur=null,layers=[],bedLayers=[],bedId=null,bedTimer=null,timer=null,next=0,step=0,ARR=null,tierN=0;
+  let ac=null,out,rev,cur=null,layers=[],bedLayers=[],bedId=null,bedTimer=null,timer=null,next=0,step=0,ARR=null,tierN=0,tierSrc=null,tierPolled=false;
   /* le contexte est celui de la série (LB.audio) ; la chaîne de la musique (out, compresseur, réverbération) est refaite s'il a été recréé */
   function init(){const c=LB.audio.ensure();if(!c)return false;if(ac===c)return true;ac=c;
     out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(LB.audio.dest);
@@ -30,6 +30,8 @@ const MUSIC=(()=>{
   const p3kick=(t,p)=>{osc('sine',100,t,.004,p,.35,.15,38);nz(t,.08,p*.3,'lowpass',400)};
   const p3tom=(t,f,p)=>{osc('sine',f,t,.004,p,.45,.3,f*.55);nz(t,.1,p*.35,'lowpass',700)};
   const p3snare=(t,p)=>{nz(t,.18,p,'bandpass',1800,.8,.3);osc('triangle',190,t,.002,p*.5,.12,.2)};
+  /* the swell that marks a rise of tier (as the cry of Ember Bridge): a rising saw, two bass drums, a burst of noise */
+  const p3swell=t=>{osc('sawtooth',110,t,.4,.055,1.4,.5,800);p3kick(t+1.3,.6);p3kick(t+1.3,.6);nz(t+1.3,1.2,.2,'lowpass',2500,1,.4,200)};
   const p3toll=(t,base,p)=>[[1,1],[2.43,.5],[3.71,.3]].forEach(([m,k])=>osc('sine',base*m,t,.003,p*k,3,.8));
   function p3saw(f,t,len,vol,lp,wet,lp2){const o=ac.createOscillator(),fl=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';o.frequency.value=f;fl.type='lowpass';fl.Q.value=2;fl.frequency.setValueAtTime(lp,t);fl.frequency.exponentialRampToValueAtTime(lp2||lp*2.2,t+len*.6);env(g,t,.03,vol,len);o.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet==null?.3:wet);o.start(t);o.stop(t+len+.15)}
   /* revised base (tier 1 and 2): replaces the layers and the step of the theme */
@@ -192,8 +194,11 @@ const MUSIC=(()=>{
   function fx(name){if(!LB.audio.sound)return;if(!init())return;const f=FX[name];if(f)f(ac.currentTime+.02)}
   function bed(id){if(!LB.audio.music)return;if(!init())return;if(cur===id)return;bedStop();bedId=id;ARR=bedLayers;THEMES[id].bed();ARR=null;bedTimer=setInterval(()=>{if(Math.random()<.18)THEMES[id].amb(ac.currentTime+.05)},200)}
   function bedStop(){if(!ac)return;clearInterval(bedTimer);bedTimer=null;bedId=null;const t=ac.currentTime;bedLayers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+1);setTimeout(L.stop,1200)});bedLayers=[]}
-  function tick(){const th=THEMES[cur];if(!th)return;const spb=60/(th.bpmT?th.bpmT[tierN]:th.bpm)/4;if(next<ac.currentTime){const miss=Math.ceil((ac.currentTime-next)/spb);next+=miss*spb;step+=miss}while(next<ac.currentTime+.6){th.step(step,next);if(Math.random()<th.ambP)th.amb(next+Math.random()*spb);next+=spb;step++}}
-  function stop(){tierN=0;if(!ac)return;clearInterval(timer);timer=null;cur=null;out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);const t=ac.currentTime;layers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+.8);setTimeout(L.stop,1000)});layers=[]}
+  function tick(){const th=THEMES[cur];if(!th)return;
+    /* tier of phase III read from the game state (tierSrc), as Ember Bridge reads its level: a rise after the first reading is marked by a swell */
+    if(cur===3&&tierSrc){const n=tierSrc()|0;if(n!==tierN){const up=tierPolled&&n>tierN;tier(n);if(up)p3swell(ac.currentTime+.02)}tierPolled=true}
+    const spb=60/(th.bpmT?th.bpmT[tierN]:th.bpm)/4;if(next<ac.currentTime){const miss=Math.ceil((ac.currentTime-next)/spb);next+=miss*spb;step+=miss}while(next<ac.currentTime+.6){th.step(step,next);if(Math.random()<th.ambP)th.amb(next+Math.random()*spb);next+=spb;step++}}
+  function stop(){tierN=0;tierPolled=false;if(!ac)return;clearInterval(timer);timer=null;cur=null;out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);const t=ac.currentTime;layers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+.8);setTimeout(L.stop,1000)});layers=[]}
   /* fadeStop(sec): the theme fades out smoothly, then stops (immediate stop if nothing plays) */
   function fadeStop(sec){if(!ac||cur==null){stop();return}clearInterval(timer);timer=null;const keep=cur,t=ac.currentTime;out.gain.cancelScheduledValues(t);out.gain.setTargetAtTime(.0001,t,sec/4);setTimeout(()=>{if(cur===keep&&timer===null)stop()},sec*1000+100)}
   /* tier(n): only for the theme of phase III (cur 3); 0 = theme, 1 = revised base + drums and brass, 2 = + bass drum, rolls, chords, tension (gain TIERS3.gain2); play and stop put it back to 0 */
@@ -201,5 +206,5 @@ const MUSIC=(()=>{
     if((was>=1)!==(n>=1)){const t0=ac.currentTime;layers.forEach(L=>{L.g.gain.cancelScheduledValues(t0);L.g.gain.setValueAtTime(L.g.gain.value,t0);L.g.gain.linearRampToValueAtTime(0,t0+1);setTimeout(L.stop,1200)});layers=[];THEMES[3].start()}
     const t=ac.currentTime;out.gain.cancelScheduledValues(t);out.gain.setTargetAtTime(.5*(n>=2?TIERS3.gain2:1),t,.3)}
   function play(id){if(!LB.audio.music){stop();bedStop();return}if(!init())return;stop();bedStop();cur=id;step=0;next=ac.currentTime+.15;out.gain.setTargetAtTime(.5*(THEMES[id].vol||1),ac.currentTime,.3);THEMES[id].start();timer=setInterval(tick,100)}
-  return{play,stop,fadeStop,tier,fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
+  return{play,stop,fadeStop,tier,tierSrc(f){tierSrc=f},fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
 })();

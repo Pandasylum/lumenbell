@@ -1,6 +1,9 @@
 /* ---------- flow ---------- */
 let lastCard=null;
-function setTheme(id){if(LB.audio.music){MUSIC.play(id);if(id===3&&S.form===2)MUSIC.tier((S.rageN||0)>=1&&!S.rageNext?2:1)}else MUSIC.stop()}   // form II: tier 1 at its birth (and on retry), back to 2 after a pause once rage 1 is over
+function setTheme(id){if(LB.audio.music)MUSIC.play(id);else MUSIC.stop()}
+/* tier of the music of phase III, read from the state at every music tick, as in Ember Bridge (64-audio-music.js: lvl from R.healed / R.u5 / R.u55):
+   form II = 1; 2 once rage 1 is over (the counter hit the boss: rageN >= 1 and rageHp0 cleared, as R.u5 in Ember Bridge); 0 elsewhere */
+MUSIC.tierSrc(()=>S.mode==='play'&&S.phase===3&&S.form===2?((S.rageN||0)>=1&&S.rageHp0==null?2:1):0);
 /* cards of the series (LB.card, declarative): kept in lastCard so that « Resume » from the menu shows it again */
 function showCard(o){lastCard=o;LB.card.show(o)}
 function hideCard(){LB.card.hide()}
