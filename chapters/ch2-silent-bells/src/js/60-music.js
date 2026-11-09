@@ -22,8 +22,7 @@ const MUSIC=(()=>{
   function layerNoise(type,f,q,vol,rate,depth,wet){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+2.5);s.connect(fl);fl.connect(g);g.connect(out);send(g,wet);const l=rate?lfo(rate,depth,fl.frequency):null;s.start();(ARR||layers).push({g,stop:()=>{try{s.stop();l&&l.stop()}catch(e){}}})}
   function layerOsc(type,f,vol,lp,det,rate,depth,wet){const o=ac.createOscillator();o.type=type;o.frequency.value=f;if(det)o.detune.value=det;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=lp;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+3);const g2=ac.createGain();g2.gain.value=1;o.connect(fl);fl.connect(g);g.connect(g2);g2.connect(out);send(g2,wet);const l=rate?lfo(rate,depth,g2.gain):null;o.start();(ARR||layers).push({g,stop:()=>{try{o.stop();l&&l.stop()}catch(e){}}})}
   const R=a=>a[Math.floor(Math.random()*a.length)];
-  /* Phase III, form II (Le Phare Noyé, « La Sans-Fond »): tier 0 = the theme below; tier 1 (birth of form II) = revised base (beating heart,
-     A / B-flat growl, low arpeggio, dull bell) + war drums and low brass; tier 2 (end of rage 1) = + bass drum, drum rolls, tight chords, rising tension.
+  /* Phase III, form II (Le Phare Noyé, « La Sans-Fond »): the revised base (beating heart, A / B-flat growl, low arpeggio, dull bell) plays from tier 0 (form I); tier 1 (birth of form II) = + war drums and low brass; tier 2 (end of rage 1) = + bass drum, drum rolls, tight chords, rising tension.
      bpm per tier and gain of tier 2: PROVISIONAL (docs/decisions/2026-11-09-ch2-musique-p3-paliers.md); tier set by MUSIC.tier(n), back to 0 by play / stop */
   const TIERS3={bpm:[104,118,122],gain2:1.1,lay:{1:['drum','brass'],2:['drum','brass','kick4','roll','stab','riser']}};
   const ARP3=[440,523.3,659.3,466.2,440,523.3,698.5,466.2],K3=s=>s%32<16?1:1.1225;   // the theme's arpeggio and its whole-tone shift on the second half of the 32-step grid
@@ -34,7 +33,7 @@ const MUSIC=(()=>{
   const p3swell=t=>{osc('sawtooth',110,t,.4,.055,1.4,.5,800);p3kick(t+1.3,.6);p3kick(t+1.3,.6);nz(t+1.3,1.2,.2,'lowpass',2500,1,.4,200)};
   const p3toll=(t,base,p)=>[[1,1],[2.43,.5],[3.71,.3]].forEach(([m,k])=>osc('sine',base*m,t,.003,p*k,3,.8));
   function p3saw(f,t,len,vol,lp,wet,lp2){const o=ac.createOscillator(),fl=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';o.frequency.value=f;fl.type='lowpass';fl.Q.value=2;fl.frequency.setValueAtTime(lp,t);fl.frequency.exponentialRampToValueAtTime(lp2||lp*2.2,t+len*.6);env(g,t,.03,vol,len);o.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet==null?.3:wet);o.start(t);o.stop(t+len+.15)}
-  /* revised base (tier 1 and 2): replaces the layers and the step of the theme */
+  /* revised base of the theme of phase III (all tiers) */
   function base3Start(){layerOsc('sawtooth',55,.05,160,-8,.05,.3,.4);layerOsc('sawtooth',58.27,.04,140,6,.04,.3,.4);layerNoise('lowpass',120,.7,.08,.03,30,.3)}
   function base3Step(s,t){
     if(s%16===0)osc('sine',50,t,.004,.5,.5,.2,34);
@@ -86,11 +85,8 @@ const MUSIC=(()=>{
         else osc('sawtooth',62,t,.5,.025,1.4,.5,48)}},
     /* Le Phare Noyé: a cold pulse, an electric arpeggio, the ice groaning */
     3:{bpm:104,bpmT:TIERS3.bpm,ambP:.05,bed(){layerNoise('bandpass',480,2,.07,.045,300,.35)},
-      start(){if(tierN>=1)return base3Start();layerNoise('bandpass',480,2,.06,.045,300,.35);layerOsc('sawtooth',55,.016,280);[110,130.8,155.6].forEach((f,i)=>layerOsc('sawtooth',f,.016,620,(i-1)*6,.08+i*.02,.5,.6))},
-      step(s,t){if(tierN>=1){base3Step(s,t);tier3Step(s,t);return}if(s%2===0)osc('sine',55,t,.01,.17,.22,0);
-        const arp=[440,523.3,659.3,466.2,440,523.3,698.5,466.2];osc('sine',arp[s%8]*(s%32<16?1:1.1225),t,.004,.032,.32,.6);
-        if(s%16===8){nz(t,.12,.09,'highpass',3200);for(let i=0;i<3;i++)nz(t+.03*i,.02,.05,'highpass',5000)}
-        if(s%64===0)nz(t,4,.045,'bandpass',200,3,.6,2200,3)},
+      start(){base3Start()},
+      step(s,t){base3Step(s,t);tier3Step(s,t)},
       amb(t){const r=Math.random();
         if(r<.4){nz(t,.08,.16,'highpass',2200);osc('sine',85,t,.003,.12,.45,.7,38)}
         else if(r<.7){for(let i=0;i<5;i++)nz(t+Math.random()*.25,.015,.06,'highpass',4500)}
@@ -201,9 +197,8 @@ const MUSIC=(()=>{
   function stop(){tierN=0;tierPolled=false;if(!ac)return;clearInterval(timer);timer=null;cur=null;out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);const t=ac.currentTime;layers.forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+.8);setTimeout(L.stop,1000)});layers=[]}
   /* fadeStop(sec): the theme fades out smoothly, then stops (immediate stop if nothing plays) */
   function fadeStop(sec){if(!ac||cur==null){stop();return}clearInterval(timer);timer=null;const keep=cur,t=ac.currentTime;out.gain.cancelScheduledValues(t);out.gain.setTargetAtTime(.0001,t,sec/4);setTimeout(()=>{if(cur===keep&&timer===null)stop()},sec*1000+100)}
-  /* tier(n): only for the theme of phase III (cur 3); 0 = theme, 1 = revised base + drums and brass, 2 = + bass drum, rolls, chords, tension (gain TIERS3.gain2); play and stop put it back to 0 */
-  function tier(n){n=Math.max(0,Math.min(2,n|0));if(cur!==3||!ac||n===tierN)return;const was=tierN;tierN=n;
-    if((was>=1)!==(n>=1)){const t0=ac.currentTime;layers.forEach(L=>{L.g.gain.cancelScheduledValues(t0);L.g.gain.setValueAtTime(L.g.gain.value,t0);L.g.gain.linearRampToValueAtTime(0,t0+1);setTimeout(L.stop,1200)});layers=[];THEMES[3].start()}
+  /* tier(n): only for the theme of phase III (cur 3); 0 = revised base alone, 1 = + drums and brass, 2 = + bass drum, rolls, chords, tension (gain TIERS3.gain2); play and stop put it back to 0 */
+  function tier(n){n=Math.max(0,Math.min(2,n|0));if(cur!==3||!ac||n===tierN)return;tierN=n;
     const t=ac.currentTime;out.gain.cancelScheduledValues(t);out.gain.setTargetAtTime(.5*(n>=2?TIERS3.gain2:1),t,.3)}
   function play(id){if(!LB.audio.music){stop();bedStop();return}if(!init())return;stop();bedStop();cur=id;step=0;next=ac.currentTime+.15;out.gain.setTargetAtTime(.5*(THEMES[id].vol||1),ac.currentTime,.3);THEMES[id].start();timer=setInterval(tick,100)}
   return{play,stop,fadeStop,tier,tierSrc(f){tierSrc=f},fx,bed,bedStop,setMus(v){if(!v){stop();bedStop()}},get cur(){return cur},get bedId(){return bedId}};
