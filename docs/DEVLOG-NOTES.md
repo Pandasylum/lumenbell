@@ -347,3 +347,4 @@
 
 ## 2026-11-09 · ch2/glas-chaine-visible
 - Ce que le joueur verra : la chaîne qui tombe pendant le glas de l'Ancien de Rouille est plus claire, cernée de sombre avec un fin liseré clair, et son ombre grandit au sol à mesure qu'elle descend.
+- Ce que le joueur verra : quand une chaîne doit tomber au glas, plus de planche suspendue qui apparaît en même temps ; la planche n'apparaît que lorsque c'est son tour.

@@ -635,6 +635,7 @@ function drawWave(x,h,a){if(a<=0||h<=1)return;ctx.save();ctx.globalAlpha*=a;
 /* the deck beam that falls twice after the wave hits the back wall: first it swings down on its hinge, then the hinge breaks */
 const RAFTER={px:HX-150,py:34,L:330,aHit:.95,aHang:.62};
 function drawRafter(){const r1=S.threats.find(t=>t.k==='rafter'&&t.n===1),r2=S.threats.find(t=>t.k==='rafter'&&t.n===2);if(!r1&&!r2)return;
+  if(S.threats.some(t=>t.k==='dchain'&&!t.done&&t.t0<(r1||r2).t0))return;   // a chain falls first: the plank scheduled after it is not shown yet (it hangs in view only once it is the next piece)
   const R=RAFTER,P={x:R.px,y:R.py},end=a=>({x:P.x+Math.cos(a)*R.L,y:P.y+Math.sin(a)*R.L});let A=P,B,al=1,shadow=0;
   const hang=()=>{const a=r1&&r1.res==='hit'&&gt-r1.okT<.3?R.aHit:R.aHang;return a};
   if(r1&&!r1.done){const k=gt<r1.t0?0:ein(clamp((gt-r1.t0)/(r1.ti-r1.t0),0,1));B=end(R.aHit*k);shadow=k;if(gt>=r1.t0&&!r1.cr){r1.cr=1;MUSIC.fx('crackRun')}}
