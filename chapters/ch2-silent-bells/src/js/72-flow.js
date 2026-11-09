@@ -1,6 +1,6 @@
 /* ---------- flow ---------- */
 let lastCard=null;
-function setTheme(id){if(LB.audio.music)MUSIC.play(id);else MUSIC.stop()}
+function setTheme(id){if(LB.audio.music){MUSIC.play(id);if(id===3&&S.form===2)MUSIC.tier((S.rageN||0)>=1&&!S.rageNext?2:1)}else MUSIC.stop()}   // form II: tier 1 at its birth (and on retry), back to 2 after a pause once rage 1 is over
 /* cards of the series (LB.card, declarative): kept in lastCard so that « Resume » from the menu shows it again */
 function showCard(o){lastCard=o;LB.card.show(o)}
 function hideCard(){LB.card.hide()}
