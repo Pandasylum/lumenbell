@@ -635,6 +635,7 @@ function drawWave(x,h,a){if(a<=0||h<=1)return;ctx.save();ctx.globalAlpha*=a;
 /* the deck beam that falls twice after the wave hits the back wall: first it swings down on its hinge, then the hinge breaks */
 const RAFTER={px:HX-150,py:34,L:330,aHit:.95,aHang:.62};
 function drawRafter(){const r1=S.threats.find(t=>t.k==='rafter'&&t.n===1),r2=S.threats.find(t=>t.k==='rafter'&&t.n===2);if(!r1&&!r2)return;
+  if(S.threats.some(t=>t.k==='dchain'&&!t.done&&t.t0<(r1||r2).t0))return;   // a chain falls first: the plank scheduled after it is not shown yet (it hangs in view only once it is the next piece)
   const R=RAFTER,P={x:R.px,y:R.py},end=a=>({x:P.x+Math.cos(a)*R.L,y:P.y+Math.sin(a)*R.L});let A=P,B,al=1,shadow=0;
   const hang=()=>{const a=r1&&r1.res==='hit'&&gt-r1.okT<.3?R.aHit:R.aHang;return a};
   if(r1&&!r1.done){const k=gt<r1.t0?0:ein(clamp((gt-r1.t0)/(r1.ti-r1.t0),0,1));B=end(R.aHit*k);shadow=k;if(gt>=r1.t0&&!r1.cr){r1.cr=1;MUSIC.fx('crackRun')}}
@@ -680,11 +681,20 @@ function drawPlank(){
       if(th.done&&gt-th.okT>.25&&gt>hp.p2)continue;
       drawNail(q.x+c*u,q.y+sn*u+dy,N.dir.x,N.dir.y,!th.done&&gt>=th.ti-N.lead,th.ti,al)}
     for(const th of pk)if(th.done&&gt-th.okT<.12&&!th.bf){th.bf=1;burst(HX+30,th.n===1?HY-60:GY-50,th.res==='ok'?14:8,'#cdb69a',5,.4,.3)}}}
+/* look of the falling chain of the Elder's glas, visual only (provisional values): lighter chain and end link, dark outline, pale rim, shadow on the ground (same grammar as the board) */
+const DCHAIN_FX={chain:'#8a6a48',link:'#4a3320',outline:'rgba(18,12,8,.9)',outW:9,rim:'rgba(200,160,110,.45)',rimW:1.5,rimDx:3,tell:.35,enter:.4,tellY:90,swSpd:14,swAmp:6,glowR:46,glowA:.8,endR:5,outPad:2,shadow:{rx0:14,rx:26,ry0:3,ry:3,a0:.12,a:.33}};
 /* a chain falling from the ceiling on the Watcher (between two glas): one block */
 function drawDChain(){
   for(const th of S.threats){if(th.k!=='dchain'||gt<th.t0)continue;
-    const k=ein(clamp((gt-th.t0)/(th.ti-th.t0),0,1)),x=HX+16,y=lerp(-30,HY-70,k),al=th.done?Math.max(0,1-(gt-th.okT)/.4):1,y1=th.done&&th.res==='ok'?lerp(HY-70,GY-6,eio(clamp((gt-th.okT)/.4,0,1))):y;
-    ctx.save();ctx.globalAlpha*=al;chainLinks(x+6,-40,x,y1,0,'#4a2a18');ell(x,y1,5,7,'#2a1810');ctx.restore();
+    const u=clamp((gt-th.t0)/(th.ti-th.t0),0,1),FT=DCHAIN_FX.tell,k=u<FT?0:ein((u-FT)/(1-FT)),sw=Math.sin(gt*DCHAIN_FX.swSpd)*DCHAIN_FX.swAmp*(1-k),x=HX+16+sw,y=u<FT?lerp(-30,DCHAIN_FX.tellY,eout(clamp(u/(FT*DCHAIN_FX.enter),0,1))):lerp(DCHAIN_FX.tellY,HY-70,k),al=th.done?Math.max(0,1-(gt-th.okT)/.4):1,y1=th.done&&th.res==='ok'?lerp(HY-70,GY-6,eio(clamp((gt-th.okT)/.4,0,1))):y;
+    const F=DCHAIN_FX;
+    if(!th.done&&k>0)ell(x,GY+3,F.shadow.rx0+F.shadow.rx*k,F.shadow.ry0+F.shadow.ry*k,`rgba(0,0,0,${F.shadow.a0+F.shadow.a*k})`);   // shadow on the ground, grows as the chain comes down (like the board)
+    ctx.save();ctx.globalAlpha*=al;ctx.lineCap='round';
+    ctx.strokeStyle=F.outline;ctx.lineWidth=F.outW;ctx.beginPath();ctx.moveTo(x+6,-40);ctx.lineTo(x,y1);ctx.stroke();   // dark outline under the links
+    chainLinks(x+6,-40,x,y1,0,F.chain);
+    if(u<FT&&!th.done){ctx.globalCompositeOperation='lighter';glow(x,y1,F.glowR,'rgba(255,214,150,.95)',F.glowA*clamp(u/(FT*F.enter),0,1));ctx.globalCompositeOperation='source-over'}   // warning: it hangs at the top, swaying, with a glow
+    ctx.strokeStyle=F.rim;ctx.lineWidth=F.rimW;ctx.beginPath();ctx.moveTo(x+6-F.rimDx,-40);ctx.lineTo(x-F.rimDx,y1);ctx.stroke();   // pale thin rim on the lit side
+    ell(x,y1,F.endR+F.outPad,F.endR*1.4+F.outPad,F.outline);ell(x,y1,F.endR,F.endR*1.4,F.link);ctx.restore();
     if(th.done&&!th.bf){th.bf=1;burst(HX+20,HY-60,10,'#b9a48c',4,.4,.3)}}}
 /* the blocked glas sent back at the Elder: an echo from the Watcher's bell to the Elder's head bell */
 function echoWave(x0,y0,x1,y1,u,a,sc){const x=lerp(x0,x1,eout(u)),y=lerp(y0,y1,eout(u)),ang=Math.atan2(y1-y0,x1-x0);
