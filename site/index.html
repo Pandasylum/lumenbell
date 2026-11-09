@@ -1179,6 +1179,7 @@ const HUB_T={
   light:{dur:1.6,delay:.7,gap:.6},           // tour fêtée à l'arrivée : durée du fondu, délai après l'arrivée, écart entre deux tours (s)
   ringDur:1.4,                               // éclat d'une tour qui sonne (s)
   title:{fs:'clamp(30px,8vw,64px)',low:'clamp(24px,7vh,40px)',gap:12},   // titre (paysage bas : low) ; gap : marge mini au-dessus et au-dessous (px)
+  foot:{rowH:620,gap:6,padTop:2},            // petits formats (hauteur ≤ rowH px) : Tutoriel, EN et FR sur une seule rangée centrée (écart gap, marge haute padTop px), dans le flux : la figure se réduit, le groupe ne monte pas
   ver:{right:0},                             // version : retrait du bord droit (px, dans la marge de l'écran), à la hauteur des langues
   card:{fs:'clamp(15px,4.4vw,18px)',tip:8,gap:2,clear:2,edge:10,step:4,tipMin:14},
   halo:{gap:3,w:1.5},                        // « à jouer » : écart et épaisseur du fin cercle autour du point (px), dans tous les modes
@@ -1313,6 +1314,8 @@ function lang(){document.documentElement.lang=LB.lang.cur;
   if(tutoRender)tutoRender();
   setSync();apply(shown);if(card)open(card,true);layout()}
 function layout(){const R=document.documentElement.style,T=HUB_T,w=$('figwrap'),low=innerHeight<=T.lowH&&innerWidth>innerHeight;
+  {const F=T.foot,row=innerHeight<=F.rowH,b=$('tutoBtn').style,f=document.querySelector('.hfoot').style;   // rangée unique : mêmes valeurs que le paysage téléphone
+   b.position=row?'static':'';b.margin=row?'0 '+F.gap+'px 0 0':'';b.left=row?'auto':'';b.bottom=row?'auto':'';b.transform=row?'none':'';f.paddingTop=row?F.padTop+'px':''}
   R.setProperty('--titleFs',low?T.title.low:T.title.fs);
   const sat=parseFloat(getComputedStyle($('hhead')).paddingTop)||0,th=$('brand').offsetHeight,wt=w.getBoundingClientRect().top;
   const top=Math.max(0,sat+th+2*T.title.gap-wt),W=w.clientWidth,H=w.clientHeight-top;

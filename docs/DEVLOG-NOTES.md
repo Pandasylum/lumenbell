@@ -337,3 +337,6 @@
 
 ## 2026-11-08 · chore/build-site-seul
 - Ce que le joueur verra : rien ne change, le jeu est identique (hub et Chapitres I et II). Seul l'outillage de build est simplifié.
+
+## 2026-11-09 · hub/tutorial-row
+- Ce que le joueur verra : sur les écrans de petite hauteur (ex. 960×540), « Tutoriel », EN et FR forment une seule rangée centrée sous la figure ; le bouton ne recouvre plus le sixième point, la figure se réduit au besoin.
