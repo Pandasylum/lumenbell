@@ -39,6 +39,7 @@ const HUB_T={
   light:{dur:1.6,delay:.7,gap:.6},           // tour fêtée à l'arrivée : durée du fondu, délai après l'arrivée, écart entre deux tours (s)
   ringDur:1.4,                               // éclat d'une tour qui sonne (s)
   title:{fs:'clamp(30px,8vw,64px)',low:'clamp(24px,7vh,40px)',gap:12},   // titre (paysage bas : low) ; gap : marge mini au-dessus et au-dessous (px)
+  foot:{rowH:620,gap:6,padTop:2},            // petits formats (hauteur ≤ rowH px) : Tutoriel, EN et FR sur une seule rangée centrée (écart gap, marge haute padTop px), dans le flux : la figure se réduit, le groupe ne monte pas
   ver:{right:0},                             // version : retrait du bord droit (px, dans la marge de l'écran), à la hauteur des langues
   /* carte d'entrée, ancrée sous la tour choisie (placeCard) : fs nom du chapitre ; tip côté de la pointe (px, carré tourné) ; gap écart
      entre le point de la tour et la pointe ; clear écart minimal aux tours, au centre, aux boutons et au titre ; edge marge des bords de
@@ -209,6 +210,8 @@ function lang(){document.documentElement.lang=LB.lang.cur;
 /* ---------- mise en page (HUB_T) : figure aussi grande que la place restante (la carte ne la déplace pas) ; titre centré entre le haut
    de la zone sûre et le haut de la tour I, sur le même axe vertical que la figure ---------- */
 function layout(){const R=document.documentElement.style,T=HUB_T,w=$('figwrap'),low=innerHeight<=T.lowH&&innerWidth>innerHeight;
+  {const F=T.foot,row=innerHeight<=F.rowH,b=$('tutoBtn').style,f=document.querySelector('.hfoot').style;   // rangée unique : mêmes valeurs que le paysage téléphone
+   b.position=row?'static':'';b.margin=row?'0 '+F.gap+'px 0 0':'';b.left=row?'auto':'';b.bottom=row?'auto':'';b.transform=row?'none':'';f.paddingTop=row?F.padTop+'px':''}
   R.setProperty('--titleFs',low?T.title.low:T.title.fs);
   const sat=parseFloat(getComputedStyle($('hhead')).paddingTop)||0,th=$('brand').offsetHeight,wt=w.getBoundingClientRect().top;
   const top=Math.max(0,sat+th+2*T.title.gap-wt),W=w.clientWidth,H=w.clientHeight-top;
