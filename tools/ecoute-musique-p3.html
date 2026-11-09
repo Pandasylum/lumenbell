@@ -24,6 +24,12 @@ button:hover{background:#1f4651}button.on{border-color:#7be0d0;background:#1f465
  <tr><td>bpm palier 1 (forme II)</td><td><input id="b1" type="range" min="80" max="160" step="1" value="116"></td><td><output id="b1o"></output></td></tr>
  <tr><td>bpm palier 2 (après rage 1)</td><td><input id="b2" type="range" min="80" max="160" step="1" value="126"></td><td><output id="b2o"></output></td></tr>
  <tr><td>gain du palier 2 (× niveau de base 0,5)</td><td><input id="g2" type="range" min="0.5" max="1.2" step="0.01" value="0.85"></td><td><output id="g2o"></output></td></tr>
+<tr><td>soutien (drone, basse, bruit, octave haute)</td><td><input id="su" type="range" min="0" max="1" step="0.01" value="0.3"></td><td><output id="suo"></output></td></tr>
+ <tr><td>niveau de la mélodie</td><td><input id="me" type="range" min="0" max="2" step="0.01" value="1"></td><td><output id="meo"></output></td></tr>
+ <tr><td>variante mélodique</td><td colspan="2"><select id="var">
+  <option value="A">A · contre-chant lent (notes longues)</option>
+  <option value="B">B · arpège montant (boucle sur la grille)</option>
+  <option value="C">C · motif du thème repris (octave / tierce)</option></select></td></tr>
 </table>
 
 <button id="p0">Palier 0 (actuel, 104 bpm)</button>
@@ -34,8 +40,8 @@ button:hover{background:#1f4651}button.on{border-color:#7be0d0;background:#1f465
 <div id="st"></div>
 
 <div class="note">
-Palier 1 : couche de fond (<code>layerOsc</code>), arpège doublé à l'octave, basse plus serrée.<br>
-Palier 2 : en plus bruit rythmique et octave haute, léger baisser du gain général (curseur).<br>
+Mélodie : palier 1 = ligne simple, timbre doux ; palier 2 = plus de notes, timbre plus brillant. Toutes les notes sont celles de l'arpège du thème 3 (A, Si♭, Do, Mi puis Fa, transposées d'un ton dans la seconde moitié de la grille de 32 pas), jamais d'autres.<br>
+Soutien discret (curseur) : palier 1 = couche de fond (<code>layerOsc</code>) et basse plus serrée ; palier 2 = en plus bruit rythmique et octave haute, avec le léger baisser du gain général.<br>
 Les curseurs agissent en direct, pendant l'écoute. Les paliers se changent sans relancer le thème.
 </div>
 
@@ -45,16 +51,16 @@ let ac=null,out,rev;
 function init(){if(ac)return;ac=new (window.AudioContext||window.webkitAudioContext)();
   out=ac.createGain();out.gain.value=.5;const comp=ac.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=.003;comp.release.value=.25;const lim=ac.createGain();lim.gain.value=.9;out.connect(comp);comp.connect(lim);lim.connect(ac.destination);
   rev=ac.createConvolver();const n=ac.sampleRate*3.8,b=ac.createBuffer(2,n,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}rev.buffer=b;
-  const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out)}
+  const rg=ac.createGain();rg.gain.value=.55;rev.connect(rg);rg.connect(out);supBus=ac.createGain();supBus.connect(out);melBus=ac.createGain();melBus.connect(out);supBus.gain.value=+$('su').value;melBus.gain.value=+$('me').value}
 let _nb=null;const nbuf=()=>{if(!_nb){_nb=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=_nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return _nb};   // LB.audio.noiseBuf(2)
 function env(g,t,a,p,d){a=Math.max(a,.01);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(p,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
 function send(g,wet){if(wet){const w=ac.createGain();w.gain.value=wet;g.connect(w);w.connect(rev)}}
-function osc(type,f,t,a,p,d,wet,f2,det){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+a+d);if(det)o.detune.value=det;env(g,t,a,p,d);o.connect(g);g.connect(out);send(g,wet);o.start(t);o.stop(t+a+d+.1)}
-function nz(t,d,p,type,f,q,wet,f2,a){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+(a||.005)+d);fl.Q.value=q||1;const g=ac.createGain();env(g,t,a||.005,p,d);s.connect(fl);fl.connect(g);g.connect(out);send(g,wet);s.start(t);s.stop(t+(a||.005)+d+.1)}
+function osc(type,f,t,a,p,d,wet,f2,det){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+a+d);if(det)o.detune.value=det;env(g,t,a,p,d);o.connect(g);g.connect(dst||out);send(g,wet);o.start(t);o.stop(t+a+d+.1)}
+function nz(t,d,p,type,f,q,wet,f2,a){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+(a||.005)+d);fl.Q.value=q||1;const g=ac.createGain();env(g,t,a||.005,p,d);s.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet);s.start(t);s.stop(t+(a||.005)+d+.1)}
 function lfo(rate,depth,target){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=rate;lg.gain.value=depth;l.connect(lg);lg.connect(target);l.start();return l}
-let ARR=null;
-function layerNoise(type,f,q,vol,rate,depth,wet){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+2.5);s.connect(fl);fl.connect(g);g.connect(out);send(g,wet);const l=rate?lfo(rate,depth,fl.frequency):null;s.start();ARR.push({g,stop:()=>{try{s.stop();l&&l.stop()}catch(e){}}})}
-function layerOsc(type,f,vol,lp,det,rate,depth,wet){const o=ac.createOscillator();o.type=type;o.frequency.value=f;if(det)o.detune.value=det;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=lp;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+3);const g2=ac.createGain();g2.gain.value=1;o.connect(fl);fl.connect(g);g.connect(g2);g2.connect(out);send(g2,wet);const l=rate?lfo(rate,depth,g2.gain):null;o.start();ARR.push({g,stop:()=>{try{o.stop();l&&l.stop()}catch(e){}}})}
+let ARR=null,dst=null,supBus,melBus;
+function layerNoise(type,f,q,vol,rate,depth,wet){const s=ac.createBufferSource();s.buffer=nbuf();s.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+2.5);s.connect(fl);fl.connect(g);g.connect(dst||out);send(g,wet);const l=rate?lfo(rate,depth,fl.frequency):null;s.start();ARR.push({g,stop:()=>{try{s.stop();l&&l.stop()}catch(e){}}})}
+function layerOsc(type,f,vol,lp,det,rate,depth,wet){const o=ac.createOscillator();o.type=type;o.frequency.value=f;if(det)o.detune.value=det;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=lp;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol,ac.currentTime+3);const g2=ac.createGain();g2.gain.value=1;o.connect(fl);fl.connect(g);g.connect(g2);g2.connect(dst||out);send(g2,wet);const l=rate?lfo(rate,depth,g2.gain):null;o.start();ARR.push({g,stop:()=>{try{o.stop();l&&l.stop()}catch(e){}}})}
 
 /* ===== thème 3 (Le Phare Noyé), tel que dans 60-music.js : start() et step() du palier 0 ===== */
 function baseStart(){layerNoise('bandpass',480,2,.06,.045,300,.35);layerOsc('sawtooth',55,.016,280);[110,130.8,155.6].forEach((f,i)=>layerOsc('sawtooth',f,.016,620,(i-1)*6,.08+i*.02,.5,.6))}
@@ -68,21 +74,47 @@ function baseAmb(t){const r=Math.random();
   else if(r<.7){for(let i=0;i<5;i++)nz(t+Math.random()*.25,.015,.06,'highpass',4500)}
   else osc('sine',72,t,.6,.07,2,.8,48)}
 
-/* ===== PROTOTYPE : couches des paliers 1 et 2 (n'existent que dans cette page) ===== */
-/* palier 1 : couche de fond (layerOsc, fondu d'entrée de 3 s), arpège doublé à l'octave, basse plus serrée */
-function tierLayers(n){ARR=tierL;
+/* ===== PROTOTYPE : paliers 1 et 2 (n'existent que dans cette page) ===== */
+/* Grille du thème 3 : l'arpège joue A Do Mi Si♭ (pas 0-3 de chaque 8) puis A Do Fa Si♭ (pas 4-7) ; les pas 16-31 sont transposés d'un ton (x1,1225).
+   Une note de mélodie est donc toujours un degré de l'accord du pas : (A, Si♭, Do, Mi ou Fa), x K(s), à l'octave près. */
+const SETB=[[440,466.2,523.3,659.3],[440,466.2,523.3,698.5]];
+const K=s=>s%32<16?1:1.1225;
+function pit(s,deg,oct){const b=SETB[(s%8)<4?0:1];return b[deg%4]*Math.pow(2,oct+Math.floor(deg/4))*K(s)}
+const ARPI=[0,2,3,1,0,2,3,1];   // degrés de l'arpège du thème, dans l'ordre des pas
+/* [pas dans le cycle, degré, octave, durée en pas] ; degré 0 A, 1 Si♭, 2 Do, 3 Mi/Fa, 4 = A à l'octave... */
+const MEL={
+  A:{1:{cyc:16,n:[[0,2,0,8],[8,3,0,8]]},
+     2:{cyc:16,n:[[0,3,0,4],[4,2,0,3],[8,3,0,3],[11,4,0,2],[13,3,0,3]]}},
+  B:{1:{cyc:8,n:[[0,0,0,2],[2,2,0,2],[4,3,0,2],[6,4,0,2]]},
+     2:{cyc:8,n:[[0,0,0,1.3],[1,1,0,1.3],[2,2,0,1.3],[3,3,0,1.3],[4,4,0,1.3],[5,5,0,1.3],[6,6,0,1.3],[7,7,0,2]]}}};
+const MVOL={A:.05,B:.032,C:.03};
+/* voix de la mélodie : sinus doux (palier 1) ou triangle brillant avec partiels (palier 2) */
+function mv(f,t,len,vol,bright){const a=Math.min(.12,len*.3);
+  osc(bright?'triangle':'sine',f,t,a,vol,len,.7);
+  osc('sine',f*2.003,t,a,vol*(bright?.5:.22),len*.7,.7);
+  if(bright){osc('sine',f*3,t,a,vol*.3,len*.5,.7);osc('triangle',f,t,a,vol*.5,len,.6,null,7)}}
+function melStep(n,s,t,spb){if(n<1)return;const v=$('var').value,br=n>=2,vol=MVOL[v];dst=melBus;
+  try{
+    if(v==='C'){   // motif du thème repris plus haut : palier 1 = octave sur les temps pairs ; palier 2 = chaque pas, plus la tierce (deux degrés au-dessus, dans l'accord)
+      const i=ARPI[s%8];
+      if(!br){if(s%2===0)mv(pit(s,i,1),t,spb*1.8,vol,true)}
+      else{mv(pit(s,i,1),t,spb*1.4,vol,true);mv(pit(s,i+2,1),t+spb*.02,spb*1.4,vol*.7,true)}}
+    else{const M=MEL[v][n],r=s%M.cyc;
+      for(const q of M.n)if(q[0]===r)mv(pit(s,q[1],q[2]),t,q[3]*spb,vol,br)}
+  }finally{dst=null}}
+/* soutien discret (bus `soutien`) : palier 1 = couche de fond + basse plus serrée ; palier 2 = en plus bruit rythmique + octave haute */
+function tierLayers(n){ARR=tierL;dst=supBus;
   if(n>=1){layerOsc('sawtooth',82.4,.018,360,-5,.06,.3,.6);layerOsc('triangle',164.8,.014,520,4,.07,.4,.6)}
-  ARR=null}
-function tierStep(n,s,t){
+  dst=null;ARR=null}
+function tierStep(n,s,t){dst=supBus;
   if(n>=1){
-    osc('sine',ARP[s%8]*2*(s%32<16?1:1.1225),t+.0,.004,.018,.28,.6);   // arpège doublé (octave)
-    if(s%2===1)osc('sine',55,t,.01,.09,.2,0);                          // basse plus serrée : le contretemps s'ajoute
+    if(s%2===1)osc('sine',55,t,.01,.09,.2,0);
     if(s%8===6)osc('sine',82.4,t,.01,.08,.22,0)}
   if(n>=2){
-    if(s%2===1)nz(t,.05,.05,'highpass',6000);                          // bruit rythmique (contretemps)
+    if(s%2===1)nz(t,.05,.05,'highpass',6000);
     if(s%4===0)nz(t,.03,.04,'highpass',4200);
-    osc('sine',ARP[s%8]*4*(s%32<16?1:1.1225),t,.003,.011,.22,.7)}     // octave haute
-}
+    osc('sine',ARP[s%8]*4*(s%32<16?1:1.1225),t,.003,.011,.22,.7)}
+  dst=null}
 
 /* ===== lecteur ===== */
 const $=id=>document.getElementById(id);
@@ -92,7 +124,7 @@ function outGain(){if(!ac)return;out.gain.cancelScheduledValues(ac.currentTime);
 function fadeLayers(arr){const t=ac.currentTime;arr.splice(0).forEach(L=>{L.g.gain.cancelScheduledValues(t);L.g.gain.setValueAtTime(L.g.gain.value,t);L.g.gain.linearRampToValueAtTime(0,t+1);setTimeout(L.stop,1200)})}
 function tick(){const spb=60/bpmOf(tier)/4;
   if(next<ac.currentTime){const miss=Math.ceil((ac.currentTime-next)/spb);next+=miss*spb;step+=miss}
-  while(next<ac.currentTime+.6){baseStep(step,next);tierStep(tier,step,next);if(Math.random()<.05)baseAmb(next+Math.random()*spb);next+=spb;step++}}
+  while(next<ac.currentTime+.6){baseStep(step,next);tierStep(tier,step,next);melStep(tier,step,next,spb);if(Math.random()<.05)baseAmb(next+Math.random()*spb);next+=spb;step++}}
 function setTier(n){tier=n;if(!playing)return;fadeLayers(tierL);tierLayers(n);outGain();mark()}
 function play(n){init();if(ac.state==='suspended')ac.resume();stop(true);
   playing=true;tier=n;step=0;next=ac.currentTime+.15;
@@ -104,7 +136,7 @@ function stop(quiet){seqT.forEach(clearTimeout);seqT=[];clearInterval(tickT);tic
   out.gain.cancelScheduledValues(ac.currentTime);out.gain.setTargetAtTime(.5,ac.currentTime+.6,.3);mark();if(!quiet)status('Arrêté.')}
 function status(s){$('st').textContent=s}
 function mark(){['p0','p1','p2'].forEach((id,i)=>$(id).classList.toggle('on',playing&&tier===i));
-  if(playing)status('Palier '+tier+' · '+bpmOf(tier)+' bpm'+(tier>=2?' · gain '+g2().toFixed(2):''))}
+  if(playing)status('Palier '+tier+' · '+bpmOf(tier)+' bpm'+(tier>=2?' · gain '+g2().toFixed(2):'')+(tier>=1?' · variante '+$('var').value:''))}
 function go(n){if(playing)setTier(n);else play(n);seqT.forEach(clearTimeout);seqT=[]}
 $('p0').onclick=()=>go(0);$('p1').onclick=()=>go(1);$('p2').onclick=()=>go(2);$('stop').onclick=()=>stop();
 $('seq').onclick=()=>{play(0);const D=12000;
@@ -113,7 +145,8 @@ $('seq').onclick=()=>{play(0);const D=12000;
   let left=0;clearInterval(tickT);tickT=setInterval(()=>{if(!playing){clearInterval(tickT);return}left++;
     const sec=left%12,n=Math.min(2,Math.floor(left/12));status('Enchaîné · palier '+n+' · '+bpmOf(n)+' bpm · '+(left<36?(12-sec)+' s avant le suivant':'terminé'));if(left>=36)clearInterval(tickT)},1000)};
 /* curseurs : valeur affichée, effet en direct */
-['b0','b1','b2','g2'].forEach(id=>{const upd=()=>{$(id+'o').textContent=id==='g2'?(+$(id).value).toFixed(2):$(id).value+' bpm';if(playing){if(id==='g2')outGain();mark()}};$(id).oninput=upd;upd()});
+['b0','b1','b2','g2','su','me'].forEach(id=>{const dec=id.length===2&&id!=='b0'&&id!=='b1'&&id!=='b2';const upd=()=>{$(id+'o').textContent=dec?(+$(id).value).toFixed(2):$(id).value+' bpm';if(ac){supBus.gain.value=+$('su').value;melBus.gain.value=+$('me').value}if(playing){if(id==='g2')outGain();mark()}};$(id).oninput=upd;upd()});
+$('var').onchange=()=>{if(playing)mark()};
 </script>
 </body>
 </html>
