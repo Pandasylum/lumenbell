@@ -13,6 +13,15 @@ const PORT=8765,ROOT=path.join(__dirname,'..','site');
     console.log(tag,JSON.stringify(s),'rows',JSON.stringify(rows));};
   await pg.reload();await snap('apres-rechargement');
   await pg.goto(url+'?v=2');await snap('apres-navigation-neuve');
+  /* rattrapage (décision du 9 novembre 2026) : chapitre terminé sans lb-tuto → entrées notées et affichées */
+  const catchCase=async(tag,setup,want)=>{
+    await pg.goto(url+'?c='+tag);await pg.evaluate(s=>{localStorage.clear();for(const k in s)localStorage.setItem(k,s[k])},setup);
+    await pg.reload();await pg.evaluate(()=>document.getElementById('tutoBtn').click());await pg.waitForTimeout(300);
+    const r=await pg.evaluate(()=>({tuto:JSON.parse(localStorage.getItem('lb-tuto')||'[]'),rows:[...document.querySelectorAll('#htList li')].filter(l=>!l.classList.contains('lbt-none')).length}));
+    const ok=want.every(i=>r.tuto.includes(i))&&r.tuto.length===want.length&&r.rows===want.length;
+    console.log(tag,ok?'OK':'ECHEC',JSON.stringify(r));if(!ok)errs.push('rattrapage '+tag)};
+  await catchCase('ch1-sans-tuto',{'lb-ch1-end':'1'},['block','dodge']);
+  await catchCase('ch2-sans-tuto',{'lb-ch1-end':'1','lb-ch2-end':'1','lb-ch2-unl':'1'},['block','dodge','hold','still']);
   console.log('errs',JSON.stringify(errs));
   await br.close();srv.kill();
 })();

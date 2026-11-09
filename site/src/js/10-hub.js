@@ -93,6 +93,10 @@ const params=(()=>{try{return new URLSearchParams(location.search)}catch(e){retu
 const backN=+params.get(LB.HUB.back)||0;
 /* ---------- état des tours ---------- */
 function endSeen(n){return LB.store.get('lb-ch'+n+'-end','0')==='1'}
+/* rattrapage de l'onglet Tuto (décision du 9 novembre 2026, docs/decisions/2026-11-09-tuto-rattrapage.md) : un chapitre terminé a forcément
+   réussi ces gestes ; ceux qui manquent sont notés (LB.tuto.note, jamais d'entrée retirée). Avant tout rendu de l'onglet. */
+const TUTO_CATCH={1:['block','dodge'],2:['block','dodge','hold','still']};
+function tutoCatchUp(){for(const n of Object.keys(TUTO_CATCH))if(endSeen(+n))for(const id of TUTO_CATCH[n])LB.tuto.note(id)}
 /* ok(n) : la fin du chapitre n compte (sans : toutes les fins mémorisées) */
 function states(ok){const st={};let prev=true;   // prev : la tour précédente est ouverte et terminée
   for(let n=1;n<=HUB_T.towers;n++){const c=CH(n),open=!!c&&prev;
@@ -190,7 +194,7 @@ function hold(b,S){let t0=0,raf=0,on=false;const p=v=>b.style.setProperty('--p',
   b.addEventListener('contextmenu',e=>e.preventDefault())}
 /* onglet Tuto : bloc partagé LB.tuto (shared/js/30-tuto.js), monté ici seulement ; ouvert, il referme les réglages et la carte */
 function tuto(on){if(on===tutoOpen)return;tutoOpen=on;$('htuto').hidden=!on;$('tutoBtn').setAttribute('aria-expanded',String(on));
-  if(on){close(false);settings(false);$('htuto').style.setProperty('--tutoB',Math.max(16,Math.round(innerHeight-$('tutoBtn').getBoundingClientRect().top+10))+'px');if(!tutoRender)tutoRender=LB.tuto.mount($('htList'));else tutoRender();try{$('htClose').focus({preventScroll:true})}catch(e){}}else try{$('tutoBtn').focus({preventScroll:true})}catch(e){}}
+  if(on){tutoCatchUp();close(false);settings(false);$('htuto').style.setProperty('--tutoB',Math.max(16,Math.round(innerHeight-$('tutoBtn').getBoundingClientRect().top+10))+'px');if(!tutoRender)tutoRender=LB.tuto.mount($('htList'));else tutoRender();try{$('htClose').focus({preventScroll:true})}catch(e){}}else try{$('tutoBtn').focus({preventScroll:true})}catch(e){}}
 function settings(on){if(on===setOpen)return;setOpen=on;$('hset').hidden=!on;$('setBtn').setAttribute('aria-expanded',String(on));
   if(on){close(false);tuto(false);setSync();try{$('hsClose').focus({preventScroll:true})}catch(e){}}else try{$('setBtn').focus({preventScroll:true})}catch(e){}}
 /* efface la progression (RESET_T), garde la langue et les réglages ; le hub se réaffiche à l'état vierge */
@@ -270,6 +274,7 @@ function keys(e){if(!$('gate').hidden||leaving)return;const k=e.key;
 /* ---------- démarrage ---------- */
 function arrive(){bed.start();celebrate();try{tw[home()].focus({preventScroll:true})}catch(e){}}   // après « Commencer »
 function back(){bed.start();celebrate();try{tw[backN&&states()[backN]!=='closed'?backN:home()].focus({preventScroll:true})}catch(e){}}   // retour d'un chapitre, sans écran
+tutoCatchUp();
 vars();motes();build();apply(feastStates());setRows();
 $('langs').innerHTML=LB.LANGS.map(l=>'<button type="button" data-lang="'+l+'" aria-pressed="false">'+l.toUpperCase()+'</button>').join('');
 document.querySelectorAll('#langs button').forEach(b=>b.addEventListener('click',()=>{LB.lang.set(b.dataset.lang);lang();b.blur()}));
