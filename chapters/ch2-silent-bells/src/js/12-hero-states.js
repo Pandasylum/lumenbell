@@ -74,7 +74,7 @@ function threatSrc(th){
   if(th.k==='spike')return{x:LX-90,y:GY-6};
   if(th.k==='whip')return{x:LX+th.side*44,y:GY-210};
   if(th.k==='anch')return{x:HX+40,y:GY-300};
-  if(th.k==='sbl')return{x:th.x,y:26};
+  if(th.k==='sbl')return th.thr?{x:LX,y:ECY}:{x:th.x,y:26};
   if(th.k==='sonic')return{x:LX-60,y:GY-80};
   if(th.k==='sring')return{x:LX+(th.side?80:-80),y:LY};
   return{x:LX,y:S.form===2?ECY:LY}}

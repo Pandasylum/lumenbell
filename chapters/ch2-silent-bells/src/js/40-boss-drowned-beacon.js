@@ -11,7 +11,7 @@
    cross   Part 2 beam, two sweeps, `dark` s of black between them;  anchor  sweep (hold), `rel` s to release, the chain rings as the anchor lifts (`lift` s), then the blow (tap);
    bell    shadow growing `tl` s, then `blows` blows `step` apart (hold, `span` s) each with a ring;  shard  glow in the cracks `glow` s, blast `blast` s (hold);
    sonic   4-6 waves, the first `first` s after the start, the delay shrinking x`shrink`, each flies `fly` s (tap each);
-   rain    rage 1 Part 2: n small bells every pattern[i] s (tap);  glas  rage 3: n knells, the gap grows x`k`, then the last one is held (implode) and the end animation follows;
+   rain    rage 1 Part 2: n small bells thrown from the Phare every pattern[i] s (tap), each returns to him after the impact and is thrown again;  glas  rage 3: n knells, the gap grows x`k`, then the last one is held (implode) and the end animation follows;
    direct  the last counter of Part 2 kills at once (no riposte shot before)
    dazzle  final rage of Part 1 (code name, never shown): n sweeps (hold) that the Watcher absorbs; the last counter sends the light back at the central
            lighthouse, which breaks (the usual KO, then the transition to Part 2: phaseCleared) */
@@ -33,7 +33,7 @@ const BEACON_FX={
   bell:{tl:.75,ta:1.3,step:.28,tail:.1,after:.6},   // blows and span (= (blows-1) x step + tail) per difficulty: PHARE_DIFF
   shard:{glow:1.2,blast:.6},
   sonic:{first:.8,d0:.5,fly:.7},   // n and shrink per difficulty: PHARE_DIFF
-  rain:{n:6,pattern:[.55,.55,.3,.8,.55,.45],fall:.7},
+  rain:{pattern:[.55,.55,.3,.8,.55,.45],fall:.7,back:.55},   // rage 1 Part 2: n small bells per difficulty (PHARE_DIFF.rain); `back` = s of the return flight to the Phare (visual only)
   glas:{g0:.6,k:1.16,pre:.7,fall:.5},   // n knells per difficulty: PHARE_DIFF
   dazzle:{n:3,dark:.3,cone:.5,D:1.1,after:.2},
   sig:{at:.6},   // Hard, Part 2: a bolt lands `at` s after the end of the first sweep of a crossing (release, tap, hold again)
@@ -48,16 +48,23 @@ const COUNTER3={col:'255,246,204',tap:[.2,.45],hold:[.2,.75],
    threat, `arc.dur` s, sparks at the point of impact, no bubble. HOLD = the blue dome, only while the gesture is held: it appears after `dome.delay` s
    (so that a tap never shows it), fades in over `dome.fade` s, thin outline, `dome.fill` of opacity inside, gone at once on release. */
 /* DIFFICULTY of the Lighthouse, phase III (decision of 6 Nov 2026, section D; easy / normal / hard, vdk()). No speed multiplier: the rhythm between hits stays Normal's
-   in real seconds. tell = x on the warning time of each spell (bolt, beam dark + cone, dust, spike front, anchor and crossing sweeps, bell shadow, shard glow, wave and knell
+   in real seconds. rain = small bells of the rage 1 of Part 2 (one less in Normal and Hard); tell = x on the warning time of each spell (bolt, beam dark + cone, dust, spike front, anchor and crossing sweeps, bell shadow, shard glow, wave and knell
    flights...; `night.lit` and the Morse have their own); holdTol = s of grace after a beam has passed
    for a late release (see stops); tapInBubble = a tap threat landing while the bubble is held is stopped (Easy only; Normal and Hard: not stopped).
    Elements: night = bolts of the Night of the Lighthouse and the lamp's lighting before the shot; crossDark = black between the two sweeps; salvo = stones; spike = start of each spike
    in the series (s from the first; Hard: a fourth, off the beat); blows = knells of the held bell; sonic = waves (n, shrink 1 = constant pace); glas = knells; sig = Hard signature.
    Fatigue of the hold (FATIGUE below): max = longest hold a spell of the level asks for (holdNeed) + margin; rest = s without guard once the dome bursts. */
 const PHARE_DIFF={
-  easy:{tell:1.5,holdTol:.2,tapInBubble:true,night:{n:3,lit:.5},crossDark:.6,salvo:[2,2],spike:[0,1.05],blows:2,sonic:{n:[3,4],shrink:1},glas:5,sig:false,margin:1.5,rest:.6},
-  normal:{tell:1,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
-  hard:{tell:.7,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
+  easy:{rain:6,tell:1.5,holdTol:.2,tapInBubble:true,night:{n:3,lit:.5},crossDark:.6,salvo:[2,2],spike:[0,1.05],blows:2,sonic:{n:[3,4],shrink:1},glas:5,sig:false,margin:1.5,rest:.6},
+  normal:{rain:5,tell:1,holdTol:0,tapInBubble:false,night:{n:4,lit:.3},crossDark:.4,salvo:[2,3],spike:[0,1.05,1.45],blows:3,sonic:{n:[4,5],shrink:.88},glas:6,sig:false,margin:.8,rest:.9},
+  hard:{rain:5,tell:.7,holdTol:0,tapInBubble:false,night:{n:5,lit:.2},crossDark:.25,salvo:[3,4],spike:[0,1.05,1.45,2.0],blows:4,sonic:{n:[5,6],shrink:.88},glas:7,sig:true,margin:.3,rest:1.2}};
+/* COMBOS of the Phare (decision of 17 Nov 2026, docs/decisions/2026-11-17-phare-c2-equilibrage.md): size of the series of spells (one counter each) per difficulty, part (1 = form I, 2 = form II)
+   and stage (0 before the first rage, 1 after). Each entry lists the sizes the draw picks from at random, all equiprobable: [1,2] = a single spell or a combo of 2, one time in two;
+   [2,3] = always a combo, 2 or 3 spells, heads or tails. Easy: no combo. No speed multiplier: the rhythm inside a spell and between spells stays Normal's. */
+const PHARE_COMBO={easy:[[[1],[1]],[[1],[1]]],normal:[[[1],[1,2]],[[2],[2,3]]],hard:[[[2],[2]],[[2,3],[3]]]};
+const comboSize=(part,stage)=>pick(PHARE_COMBO[vdk()][part-1][stage]);
+// a series of n different spells of the pool, one after the other (the pool is kept as is)
+const comboOf=(pool,n)=>pool.map(fn=>[Math.random(),fn]).sort((a,b)=>a[0]-b[0]).slice(0,n).map(a=>a[1]);
 /* fatigue of the hold: the count starts again when the gesture has been released for more than `reset` s; the dome warns at `warn` of the max (trembles, amber outline) */
 const FATIGUE={reset:.15,warn:.75,amber:LB.DOME_FX.amber};
 const PD=()=>PHARE_DIFF[vdk()];
