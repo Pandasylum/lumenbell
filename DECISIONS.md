@@ -148,3 +148,5 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 - [2026-11-09 · `ch2/p3-implosion-charge` : Chapitre II, charge lisible puis explosion de l'implosion du dernier assaut de la forme II du Phare (`IMPLODE_FX`, valeurs provisoires, aucun changement de timing)](docs/decisions/2026-11-09-ch2-implosion-charge.md)
 - [2026-11-09 · `ch2/glas-chaine-visible` : Chapitre II, chaîne du décor du Glas de l'Ancien de Rouille plus lisible (contour, liseré, ombre au sol, couleurs éclaircies, `DCHAIN_FX`, valeurs provisoires)](docs/decisions/2026-11-09-ch2-glas-chaine-visible.md)
 - [2026-11-09 · `fix/tuto-perdu-apres-maj` : rattrapage de l'onglet Tuto à l'ouverture du hub (Chapitre I terminé : block, dodge ; Chapitre II terminé : les quatre entrées)](docs/decisions/2026-11-09-tuto-rattrapage.md)
+
+- [2026-11-17 · Phare C2, équilibrage](docs/decisions/2026-11-17-phare-c2-equilibrage.md) : cloches des rages (lancer / retour / relance, une de moins en Normal et Difficile), tableau des combos.

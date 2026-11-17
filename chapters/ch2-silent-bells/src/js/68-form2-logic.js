@@ -31,18 +31,19 @@ function P3b(stage,f,b,final,rage){
   // rage, the bell storm (kept in the rotation): rings fired in turn from the two side lanterns (taps), then the trap bell (hold)
   const storm=()=>{const Q=SP.storm;for(let i=0;i<Q.n;i++){const s=t+i*Q.gap*f;T.push({k:'sring',side:i%2,t0:s,tl:s+Q.tl*f,ti:s+Q.ti*f})}t+=(Q.n-1)*Q.gap*f+Q.ti*f+Q.trapGap*f;
     T.push({k:'trap',t0:t,tl:t+Q.trapTl*f,ta:t+Q.trapTa*f,tb:t+Q.trapTb*f,hold:true});t+=Q.trapTb*f+Q.after*f;sp='bell'};
-  // rage 1, Bell storm: a rhythmic rain of small bells (taps). Hard rage 2: the big bell (hold), then the waves (taps)
-  const rain=()=>{const Z=BF.rain;let s=t+.5*f;for(let i=0;i<Z.n;i++){T.push({k:'sbl',t0:s-Z.fall*TL*f,tl:s-Z.fall*TL*f+.15*f,ti:s,x:HX+20+((i*7)%3-1)*14});s+=Z.pattern[i%Z.pattern.length]*f}t=s+.2*f;sp='rain'};
+  // rage 1, Bell storm: a rhythmic series of small bells (taps) thrown from the Phare, back to him after the impact, thrown again (Q.rain of them). Hard rage 2: the big bell (hold), then the waves (taps)
+  const rain=()=>{const Z=BF.rain;let s=t+.5*f;for(let i=0;i<Q.rain;i++){T.push({k:'sbl',thr:1,t0:s-Z.fall*TL*f,tl:s-Z.fall*TL*f+.15*f,ti:s,x:HX+20+((i*7)%3-1)*14});s+=Z.pattern[i%Z.pattern.length]*f}t=s+.2*f;sp='rain'};
   const bellWaves=()=>{trap();sonic()};
   // rage 3, Knell: n knells at a tempo that slows down (taps), the last one is held in a bubble (the implosion) then released as a wave that breaks the bell
   const glas=()=>{const Z=BF.glas;let s=t+Z.pre*f,d=Z.g0;for(let i=0;i<Q.glas;i++){T.push({k:'sbl',knell:1,t0:s-Z.fall*TL*f,tl:s-Z.fall*TL*f+.1*f,ti:s,x:HX+12});s+=d*f;d*=Z.k}
     T.push({k:'implode',t0:s-d/Z.k*f+.2*f,ta:s-d/Z.k*f+1.9*f,tb:s-d/Z.k*f+2.5*f,hold:true});t=s-d/Z.k*f+3*f;sp='glas'};
   if(rage){(rage>1?bellWaves:rain)();T.spell=sp;return T}
   if(final){glas();T.spell=sp;return T}
-  const p0=[()=>ring(3),moon,trap,()=>{ring(2);trap()},cross,burstOut,reform];
-  const p1=[()=>ring(5),()=>{moon();ring(3)},()=>{trap();trap()},()=>{cross();ring(2)},()=>{burstOut();moon()},()=>{ring(3);cross()},()=>{reform();ring(2)},storm,sonic];
+  // single spells; a combo (PHARE_COMBO) chains n different ones, one counter for the whole series
+  const p0=[()=>ring(3),moon,trap,()=>cross(),burstOut,reform];
+  const p1=[()=>ring(5),moon,trap,()=>cross(),burstOut,reform,storm,sonic];
   if(Q.sig)p1.push(()=>cross(true));   // Hard signature, in the normal rotation (not in the rages)
-  pick(stage?p1:p0)();
+  comboOf(stage?p1:p0,comboSize(2,stage)).forEach(fn=>fn());
   T.spell=sp;return T;
 }
 function beamFrom(ox,oy,bx,a){const g=ctx.createLinearGradient(ox,oy,bx,GY);g.addColorStop(0,`rgba(220,252,255,${.85*a})`);g.addColorStop(1,`rgba(110,230,255,${.28*a})`);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(ox-7,oy);ctx.lineTo(ox+7,oy);ctx.lineTo(bx+70,GY+16);ctx.lineTo(bx-70,GY+16);ctx.closePath();ctx.fill();ell(bx,GY+4,80,11,`rgba(200,250,255,${.25*a})`)}
@@ -140,11 +141,26 @@ function drawEclGame(){
   for(const th of sonics){const u=clamp((gt-th.t0)/(th.ti-th.t0),0,1),x=lerp(LX-60,hit.x,eout(u));
     if(th.done){const q=(gt-th.okT)/.3;if(q>=1)continue;ctx.save();ctx.globalAlpha=1-q;ctx.strokeStyle=th.res==='ok'?`rgb(${COUNTER3.col})`:'#eafcff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(hit.x,hit.y,20+50*q,0,Math.PI*2);ctx.stroke();if(th.res==='ok'){ctx.lineWidth=2;ctx.beginPath();ctx.arc(hit.x,hit.y,10+30*q,0,Math.PI*2);ctx.stroke()}ctx.restore();if(!th.bf){th.bf=1;burst(hit.x,hit.y,th.res==='ok'?12:8,'#dff8ff',5,.5)}continue}
     ctx.save();for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(190,240,255,${.8-i*.2})`;ctx.lineWidth=4-i;ctx.beginPath();ctx.ellipse(x+i*14,hit.y,16+i*5,70+i*6,0,Math.PI*.55,Math.PI*1.45);ctx.stroke()}ctx.restore()}
-  for(const th of sbls){const sc=th.knell?1.5:1;
-    if(gt<th.tl){const u=(gt-th.t0)/(th.tl-th.t0);ctx.save();ctx.globalCompositeOperation='lighter';glow(th.x,26,30*sc,'rgba(200,250,255,.9)',.6*u);ctx.restore();continue}
-    if(th.done){const q=(gt-th.okT)/.35;if(q>=1)continue;ctx.save();ctx.globalAlpha=1-q;ctx.strokeStyle='#eafcff';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(hit.x,hit.y,24+60*q,(24+60*q)*.55,0,0,Math.PI*2);ctx.stroke();ctx.restore();
-      if(!th.bf){th.bf=1;burst(hit.x,hit.y,th.res==='ok'?14:8,'#dff8ff',5,.5);MUSIC.fx(th.knell?'bellBig':'bellHit')}continue}
-    drawP('sbell',th.x,lerp(-30,hit.y-30,ein(clamp((gt-th.tl)/(th.ti-th.tl),0,1))),Math.sin(gt*9+th.ti)*.25,.85,sc)}
+  // small bells: the knells still fall from above; the bells of the rage 1 are THROWN from the Phare (J), blocked or not they fly back to him and are thrown again
+  for(const th of sbls){const sc=th.knell?1.5:1,O=th.thr?J:null,end={x:th.x,y:hit.y-30},RB=BEACON_FX.rain.back;
+    const bell=(x,y,r,s,a,col)=>{ctx.save();ctx.globalCompositeOperation='lighter';glow(x,y,34*s,col,.55*a);ctx.restore();ctx.save();ctx.globalAlpha=a;drawP('sbell',x,y,r,.85,s);ctx.restore()};
+    if(gt<th.tl){const u=(gt-th.t0)/(th.tl-th.t0);
+      if(O)bell(O.x,O.y,Math.sin(gt*9)*.25,.45+.55*u,.4+.6*u,'rgba(200,250,255,.9)');   // the bell is held up at the Phare, a glow grows
+      else{ctx.save();ctx.globalCompositeOperation='lighter';glow(th.x,26,30*sc,'rgba(200,250,255,.9)',.6*u);ctx.restore()}
+      continue}
+    if(th.done){const q=(gt-th.okT)/.35;
+      if(q<1){ctx.save();ctx.globalAlpha=1-q;ctx.strokeStyle='#eafcff';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(hit.x,hit.y,24+60*q,(24+60*q)*.55,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
+      if(!th.bf){th.bf=1;burst(hit.x,hit.y,th.res==='ok'?14:8,'#dff8ff',5,.5);MUSIC.fx(th.knell?'bellBig':'bellHit')}
+      if(O){const r=(gt-th.okT)/RB;   // the return: golden glow and a trail, to tell it from the throw (cyan)
+        if(r<1){const pos=u=>{const k=eio(clamp(u,0,1));return{x:lerp(end.x,O.x,k),y:lerp(end.y,O.y,k)-Math.sin(Math.PI*k)*50}};
+          for(let g=3;g>=1;g--){const p=pos(r-g*.07);bell(p.x,p.y,-g*.3,.8,.18*(4-g)/3,'rgba(255,225,150,.8)')}
+          const p=pos(r);bell(p.x,p.y,-r*7,.9,1,'rgba(255,225,150,.9)')}}
+      continue}
+    const k=ein(clamp((gt-th.tl)/(th.ti-th.tl),0,1));
+    if(O){const pos=u=>({x:lerp(O.x,end.x,u),y:lerp(O.y,end.y,u)-Math.sin(Math.PI*u)*40});   // the throw: a short trail behind the bell
+      for(let g=3;g>=1;g--){const p=pos(Math.max(0,k-g*.07));bell(p.x,p.y,Math.sin(gt*9+g),.8,.18*(4-g)/3,'rgba(200,250,255,.9)')}
+      const p=pos(k);bell(p.x,p.y,Math.sin(gt*9+th.ti)*.25+k*5,1,1,'rgba(200,250,255,.9)')}
+    else drawP('sbell',th.x,lerp(-30,hit.y-30,k),Math.sin(gt*9+th.ti)*.25,.85,sc)}
   if(trapQ){const q=trapQ;S.post=()=>{ctx.save();ctx.globalAlpha=.9;tent(J.x,J.y,(J.x+q.x)/2,J.y-60,(J.x+q.x)/2,q.y-140,q.x,q.y-120,3,.8);ctx.restore();ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);ctx.scale(q.sc,q.sc);PDRAW.head(.85);ctx.restore()}}
 }
 

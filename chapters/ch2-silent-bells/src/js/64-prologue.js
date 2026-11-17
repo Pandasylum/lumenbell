@@ -798,14 +798,15 @@ function P3(stage,f,b,final,rage){
   const night=()=>{const Z=BF.night;for(let i=0;i<Q.night.n;i++)bolt(Q.night.lit,true);t+=.4*f};
   // rage 2 (Hard), Morse: long (short beam, hold) - short - short (bolt, tap), each signal announced by its own shape
   const morse=()=>{const M=BF.morse;for(let r=0;r<M.reps;r++)for(const g of M.seq){if(g==='L')beamAt(r%2?1:-1,M.long);else{bolt();t-=(BF.bolt.gap-M.gap)*f}}};
-  const p0=[bolt,()=>sweep(-1),()=>{spike();bolt()},()=>{sweep(-1);bolt()},()=>{bolt();spike()},whip,chunk,()=>{whip();bolt()},kwave];
-  const p1=[()=>{bolt();spike();bolt()},()=>{sweep(-1);sweep(1)},()=>{sweep(-1);t-=.15*f;spike()},()=>{spike();sweep(1);bolt()},()=>{bolt();bolt();sweep(-1)},()=>{whip();whip();chunk()},()=>{sweep(-1);chunk()},tide,()=>{kwave();bolt()}];
+  // single spells; a combo (PHARE_COMBO) chains n different ones, one counter for the whole series
+  const p0=[()=>bolt(),()=>sweep(-1),spike,whip,chunk,()=>kwave()];
+  const p1=[()=>bolt(),()=>sweep(Math.random()<.5?-1:1),spike,whip,chunk,tide,()=>kwave()];
   // final rage of Part 1, Dazzle (code name): n sweeps (hold) that the Watcher absorbs; the counter sends the light back at the central lighthouse (counter3)
   const dazzle=()=>{const Z=BF.dazzle;for(let i=0;i<Z.n;i++)beamAt(i%2?1:-1,Z);sp='dazzle'};
   if(final)dazzle();
   else if(rage){(rage>1?morse:night)()}
   else if(LEARN_FIRST()){S.learn.first=true;sweep(-1)}   // learning the hold (BEACON_LEARN): the first spell of the fight is always the beam, no draw
-  else pick(stage?p1:p0)();
+  else comboOf(stage?p1:p0,comboSize(1,stage)).forEach(fn=>fn());
   T.spell=sp;T.side=side;T.ri=cri;return T;
 }
 function beaconHide(){S.hide=null;for(const th of S.threats){if(th.k==='chunk'&&gt>=th.tl&&!(th.done&&gt>th.okT+.8)){(S.hide||(S.hide=new Set())).add(TOWER[th.ri])}}}
