@@ -26,14 +26,12 @@ function P3b(stage,f,b,final,rage){
   // the shard of the tower (hold): a glow climbs in the cracks, then the blast
   const burstOut=()=>{const Z=BF.shard,g=Z.glow*TL;T.push({k:'burst',t0:t,ta:t+g*f,tb:t+(g+Z.blast)*f,hold:true});t+=(g+Z.blast+.5)*f;sp='shard'};
   const reform=()=>{const tr=t+.9*TL*f,ts=tr+.35*f,D=1.5*f;T.push({k:'reform',t0:t,tr,ts,D,ta:ts+D*((940-HX-80)/1000),tb:ts+D*((940-HX+80)/1000),hold:true});const td=ts+D+.5*f;T.push({k:'disp',t0:ts+D,ti:td,rf:1});t=td+.7*f;sp='cross'};
-  // sound wave (tap per wave): 4-6 concentric waves, the delay between them shrinking
-  const sonic=()=>{const Z=BF.sonic,N=Q.sonic,n=N.n[0]+Math.floor(Math.random()*(N.n[1]-N.n[0]+1));let s=t+Z.first*f,d=Z.d0;for(let i=0;i<n;i++){T.push({k:'sonic',t0:s-Z.fly*TL*f,ti:s});s+=d*f;d*=N.shrink}t=s+.3*f;sp='sonic'};
   // rage, the bell storm (kept in the rotation): rings fired in turn from the two side lanterns (taps), then the trap bell (hold)
   const storm=()=>{const Q=SP.storm;for(let i=0;i<Q.n;i++){const s=t+i*Q.gap*f;T.push({k:'sring',side:i%2,t0:s,tl:s+Q.tl*f,ti:s+Q.ti*f})}t+=(Q.n-1)*Q.gap*f+Q.ti*f+Q.trapGap*f;
     T.push({k:'trap',t0:t,tl:t+Q.trapTl*f,ta:t+Q.trapTa*f,tb:t+Q.trapTb*f,hold:true});t+=Q.trapTb*f+Q.after*f;sp='bell'};
-  // rage 1, Bell storm: a rhythmic series of small bells (taps) thrown from the Phare, back to him after the impact, thrown again (Q.rain of them). Hard rage 2: the big bell (hold), then the waves (taps)
+  // rage 1, Bell storm: a rhythmic series of small bells (taps) thrown from the Phare, back to him after the impact, thrown again (Q.rain of them). Hard rage 2: the big bell (hold); the sound waves were removed from Part 2 (17 Nov 2026)
   const rain=()=>{const Z=BF.rain;let s=t+.5*f;for(let i=0;i<Q.rain;i++){T.push({k:'sbl',thr:1,t0:s-Z.fall*TL*f,tl:s-Z.fall*TL*f+.15*f,ti:s,x:HX+20+((i*7)%3-1)*14});s+=Z.pattern[i%Z.pattern.length]*f}t=s+.2*f;sp='rain'};
-  const bellWaves=()=>{trap();sonic()};
+  const bellWaves=()=>trap();
   // rage 3, Knell: n knells at a tempo that slows down (taps), the last one is held in a bubble (the implosion) then released as a wave that breaks the bell
   const glas=()=>{const Z=BF.glas;let s=t+Z.pre*f,d=Z.g0;for(let i=0;i<Q.glas;i++){T.push({k:'sbl',knell:1,t0:s-Z.fall*TL*f,tl:s-Z.fall*TL*f+.1*f,ti:s,x:HX+12});s+=d*f;d*=Z.k}
     T.push({k:'implode',t0:s-d/Z.k*f+.2*f,ta:s-d/Z.k*f+1.9*f,tb:s-d/Z.k*f+2.5*f,hold:true});t=s-d/Z.k*f+3*f;sp='glas'};
@@ -41,7 +39,7 @@ function P3b(stage,f,b,final,rage){
   if(final){glas();T.spell=sp;return T}
   // single spells; a combo (PHARE_COMBO) chains n different ones, one counter for the whole series
   const p0=[()=>ring(3),moon,trap,()=>cross(),burstOut,reform];
-  const p1=[()=>ring(5),moon,trap,()=>cross(),burstOut,reform,storm,sonic];
+  const p1=[()=>ring(5),moon,trap,()=>cross(),burstOut,reform,storm];
   if(Q.sig)p1.push(()=>cross(true));   // Hard signature, in the normal rotation (not in the rages)
   comboOf(stage?p1:p0,comboSize(2,stage)).forEach(fn=>fn());
   T.spell=sp;return T;

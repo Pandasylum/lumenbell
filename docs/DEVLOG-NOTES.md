@@ -357,3 +357,5 @@
 
 - Phare Noyé (partie 2, première rage) : les petites cloches partent de la tour, reviennent après l’impact et sont relancées ; une de moins en Normal et Difficile.
 - Phare Noyé : les séries de sorts (combos) suivent un tableau par difficulté, partie et rage.
+
+- Phare Noyé (partie 2) : plus d’ondes sonores après les cloches ; les cloches lancées et rappelées restent.

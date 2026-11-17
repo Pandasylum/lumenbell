@@ -23,3 +23,6 @@ Un combo = une série de sorts différents tirés au hasard dans le pool des sor
 | Facile | 1 et 2 | aucun combo (non précisé : à valider) | aucun combo |
 
 Les anciens duos et trios écrits à la main sont remplacés par ce tirage ; le tableau l'emporte sur les valeurs existantes. « Après rage » = au moins une rage passée.
+
+## Complément du 17 novembre 2026
+- Échos (ondes sonores, `sonic`) des cloches retirés en partie 2 : ni dans la rotation (après rage), ni dans la rage 2 Difficile (la grosse cloche seule). Les cloches ne changent pas. Les ondes ne viennent pas de `shared/` et ne servent pas au Chapitre I.
