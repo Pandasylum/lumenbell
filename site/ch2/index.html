@@ -487,8 +487,8 @@ LB.WATCHER_REST={hand:[46,-66],staff:[[34,0],[60,-140]],sa:-1.39};
     c.fillStyle=P.visor;c.fill(Pd(B9.visor));c.fillRect(14.6,-108,2.5,13);
   }
   function sleeve(c,sh,h,r,P,rim){
-    const k=r/6.5;sh=[sh[0]-3*k,sh[1]-2*k];
-    const dx=h[0]-sh[0],dy=h[1]-sh[1],l=Math.hypot(dx,dy)||1,s2=21*k,b=Math.min(12*k,Math.sqrt(Math.max(0,s2*s2-l*l/4))),
+    const k=r/6.5;sh=[sh[0]-16*k,sh[1]-2*k];
+    const dx=h[0]-sh[0],dy=h[1]-sh[1],l=Math.hypot(dx,dy)||1,s2=23*k,b=Math.min(12*k,Math.sqrt(Math.max(0,s2*s2-l*l/4))),
       mx=(sh[0]+h[0])/2-dy/l*b*2,my=(sh[1]+h[1])/2+dx/l*b*2,w=9*k;
     const path=()=>{c.beginPath();c.moveTo(sh[0],sh[1]);c.quadraticCurveTo(mx,my,h[0],h[1])};
     const q=t=>{const u=1-t;return[u*u*sh[0]+2*u*t*mx+t*t*h[0],u*u*sh[1]+2*u*t*my+t*t*h[1]]};
