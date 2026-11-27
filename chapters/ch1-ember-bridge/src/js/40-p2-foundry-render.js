@@ -177,7 +177,7 @@ function wingAngle(){
   if(a&&a.kind==='wings'){
     const ws=a.hits.filter(h=>h.k==='wave'),last=ws[ws.length-1].at;
     const raise=clamp01(a.t/.5)*(1-clamp01((a.t-(last-.3))/.5));
-    ang-=.4*es(raise);
+    ang-=.4*fdE(raise);
     ws.forEach(h=>{const d=(a.t-(h.at-.55))/.16;ang+=.85*Math.exp(-d*d)})
   }
   if(b.s==='rage')ang-=.3*Math.sin(clamp01(b.t/b.dur)*3.14);
@@ -212,11 +212,13 @@ function drawWing(S,ang,sc,col,wo0,fire,side,dmg){
   ctx.restore();
 }
 /* ===== Le Colosse en vol : le même qu'en phase I (COLOSSE, lot 2) avec ailes, griffes aux deux mains, boule en bandoulière ; la queue garde la longueur de la phase I ===== */
+/* es du jeu n'est pas borné (hors de 0 à 1 il explose) : tout lissage de ce fichier passe par fdE */
+const fdE=u=>es(clamp01(u));
 const FD_S=.85;            /* échelle de pose : le cœur du Colosse reste à (Q.bx-17, Q.by), comme les cibles du jeu */
 const FD_HAM={P:[94,-256],a:-62,g:50,wN:0,wF:0,s:1,r:1}; /* masse dans le dos, boule en bandoulière */
 const QR={q:null,kind:'',tail:false,wd:0,lt:0};
 /* courbe par morceaux, adoucie : K = [[temps, valeur], ...] */
-function fdKv(x,K){if(x<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(x<=K[i][0])return K[i-1][1]+(K[i][1]-K[i-1][1])*es((x-K[i-1][0])/(K[i][0]-K[i-1][0]));return K[K.length-1][1]}
+function fdKv(x,K){if(x<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(x<=K[i][0])return K[i-1][1]+(K[i][1]-K[i-1][1])*fdE((x-K[i-1][0])/(K[i][0]-K[i-1][0]));return K[K.length-1][1]}
 /* mémoire de l'attaque qui précède une riposte (Q.atk est vidé avant Q.cn) */
 function fdRec(){
   if(QR.q!==Q){QR.q=Q;QR.kind='';QR.tail=false;QR.wd=0;QR.lt=Q.time}
@@ -256,36 +258,36 @@ function fdPose(){
   }else if(a&&a.kind==='rocks'){
     /* une main arrache le bloc, le brandit, le lance */
     a.hits.forEach((h,i)=>{if(h.k!=='rock')return;const side=i%2?'B':'A',ts=h.at-1.0,te=h.at-.45,u=a.t;
-      let k=0,f=0;if(u>=ts-.3&&u<te){k=es((u-(ts-.3))/.3);f=1}else if(u>=te&&u<te+.15)k=1-.4*((u-te)/.15);else if(u>=te+.15&&u<te+.55)k=.6*(1-es((u-te-.15)/.4));
+      let k=0,f=0;if(u>=ts-.3&&u<te){k=fdE((u-(ts-.3))/.3);f=1}else if(u>=te&&u<te+.15)k=1-.4*((u-te)/.15);else if(u>=te+.15&&u<te+.55)k=.6*(1-fdE((u-te-.15)/.4));
       const th=u>=te&&u<te+.15?(u-te)/.15:u>=te+.15?1:0;
       if(k>0){hand(side,side==='A'?(-20-110*th)*k:(-50-110*th)*k,(-200+100*th)*k);o.lean+=(.14-.3*th)*k*.6;o.dx-=18*th*k}
       if(f&&u<te)o.held=side});
   }else if(a&&a.kind==='roar'){
-    const cri=es((a.t-.15)/.2)*(1-es((a.t-(a.end-.3))/.3));
+    const cri=fdE((a.t-.15)/.2)*(1-fdE((a.t-(a.end-.3))/.3));
     o.jaw=14;o.lean=.17*cri;o.tete=.3*cri;o.sx=1+.07*cri;o.off=[-92,40];o.nn=[46,-62];o.flap=.8*cri;o.griffe=.9;
   }
   if(b.s==='rage'){
-    const mont=es(b.t/.5),cri=es((b.t-.5)/.18)*(1-es((b.t-(b.dur-.45))/.4));
-    o.plie=.5*mont*(1-es((b.t-.45)/.15));o.lean=-.16*mont*(1-cri)+.17*cri;o.tete=-.2*mont*(1-cri)+.3*cri;o.sx=1+.08*cri;o.jaw=14*cri;
-    o.rage=es(b.t/.7);o.fissure=Math.max(o.fissure,o.rage);o.rageF=es((b.t-.45)/.25)*(1-.45*es((b.t-(b.dur-.4))/.4));
+    const mont=fdE(b.t/.5),cri=fdE((b.t-.5)/.18)*(1-fdE((b.t-(b.dur-.45))/.4));
+    o.plie=.5*mont*(1-fdE((b.t-.45)/.15));o.lean=-.16*mont*(1-cri)+.17*cri;o.tete=-.2*mont*(1-cri)+.3*cri;o.sx=1+.08*cri;o.jaw=14*cri;
+    o.rage=fdE(b.t/.7);o.fissure=Math.max(o.fissure,o.rage);o.rageF=fdE((b.t-.45)/.25)*(1-.45*fdE((b.t-(b.dur-.4))/.4));
     o.off=[-62-30*cri,92-52*cri];o.nn=[34*cri,-56*cri];o.griffe=.55+.6*cri;
-    o.tornade=es((b.t-.5)/.6)*(1-es((b.t-b.dur+.3)/.4));
+    o.tornade=fdE((b.t-.5)/.6)*(1-fdE((b.t-b.dur+.3)/.4));
   }
   if(c){
     /* riposte : le Colosse encaisse (même courbe que la phase I : montée en 80 ms, tenue, retour) */
     const hitT=c.k==='final'?1.55:{stab:.35,head:.55,beam:.85}[c.k],ch=COLFX.choc(c.t,hitT,c.k==='final'?1.2:.8,c.k==='final'?.7:.35),k=c.k==='final'?1.4:1;
     o.dx+=46*ch*k;o.dy+=14*ch*k;o.tete+=.34*ch*k;o.lean+=.2*ch*k;o.flash=c.t>hitT&&c.t<hitT+.07?.45:0;o.fissure=Math.max(o.fissure,COLFX.choc(c.t,hitT,1.1,.5)*(c.k==='final'?1:.7));
     hand('A',8*ch,10*ch);hand('B',30*ch,40*ch);
-    if(c.k==='final'){const ex=es((c.t-1.55)/.5);o.fissure=Math.max(o.fissure,ex);o.eteint=es((c.t-2.6)/.5);o.flap=-.4*es((c.t-2.3)/.6)}
+    if(c.k==='final'){const ex=fdE((c.t-1.55)/.5);o.fissure=Math.max(o.fissure,ex);o.eteint=fdE((c.t-2.6)/.5);o.flap=-.4*fdE((c.t-2.3)/.6)}
   }
-  if(Q.mode==='lake'){o.eteint=Math.max(o.eteint,es(Q.lt/1.2)*.8);o.jaw=0;o.fissure=1;o.rage=.6;o.flap=Math.sin(tt*14)*.5}
+  if(Q.mode==='lake'){o.eteint=Math.max(o.eteint,fdE(Q.lt/1.2)*.8);o.jaw=0;o.fissure=1;o.rage=.6;o.flap=Math.sin(tt*14)*.5}
   return o;
 }
 /* point où le rayon cloue la queue : sous son bout, au ras du lac (cible du rayon, de l'éclat de dégât et du clou) */
 function fdPin(){return QR.tipPx?[QR.tipPx[0],QLAKE-14]:null}
 function qWingDmg(){
   const c=Q.cn,dt=Math.min(.1,Math.max(0,Q.time-QR.lt));QR.lt=Q.time;
-  if(c&&c.k==='head'&&QR.kind==='wings'&&!QR.tail)QR.wd=Math.max(QR.wd,es((c.t-.5)/.5));
+  if(c&&c.k==='head'&&QR.kind==='wings'&&!QR.tail)QR.wd=Math.max(QR.wd,fdE((c.t-.5)/.5));
   else if(!c)QR.wd=Math.max(0,QR.wd-dt*.8);
   return QR.wd;
 }
@@ -297,7 +299,7 @@ function drawBoss2(){
   const wa=wingAngle(),fire=Q.enraged,dmg=qWingDmg(),wo=Q.wo;
   const T2=tailTip(),fol=1-T2.strike,tip=[(T2.tip[0]+P.dx*fol-X0)/s,(T2.tip[1]+P.dy*fol-Y0)/s];
   const R0=[30,-130];let tp=tip;
-  if(Q.cn&&Q.cn.k!=='final'&&QR.tail){const u=es((Q.cn.t-.15)/.2);tp=[tip[0],tip[1]+((QLAKE-14-Y0)/s-tip[1])*u]} /* queue clouée au sol par le rayon */
+  if(Q.cn&&Q.cn.k!=='final'&&QR.tail){const u=fdE((Q.cn.t-.15)/.2);tp=[tip[0],tip[1]+((QLAKE-14-Y0)/s-tip[1])*u]} /* queue clouée au sol par le rayon */
   const qP=[R0,[R0[0]+(tp[0]-R0[0])*.35,R0[1]+(tp[1]-R0[1])*.3+36*(1-T2.strike)],[R0[0]+(tp[0]-R0[0])*.7,R0[1]+(tp[1]-R0[1])*.75+58*(1-T2.strike)],tp];
   QR.tipPx=[X0+tp[0]*s,Y0+tp[1]*s];
   ctx.save();
@@ -332,9 +334,9 @@ function tailTip(){
     const th=a.hits.filter(x=>x.k==='tail'),h=th.find(x=>a.t<x.at+.4)||th[th.length-1]||a.hits[a.hits.length-1];
     if(h.k==='tail'){
       const d=a.t-h.at,up=[x+130,y-170],hit=[QH[0]+30,QH[1]+10];
-      if(d>-.55&&d<=-.14){tip=lerp2(tip,up,es(clamp01((d+.55)/.4)));fire=1}
+      if(d>-.55&&d<=-.14){tip=lerp2(tip,up,fdE(clamp01((d+.55)/.4)));fire=1}
       else if(d>-.14&&d<=0){tip=lerp2(up,hit,ei(clamp01((d+.14)/.14)));fire=1;strike=1}
-      else if(d>0&&d<.4){tip=lerp2(hit,tip,es(d/.4));fire=1-d/.4*.5;strike=1-d/.4}
+      else if(d>0&&d<.4){tip=lerp2(hit,tip,fdE(d/.4));fire=1-d/.4*.5;strike=1-d/.4}
     }
   }
   return{tip,fire,strike};
@@ -360,7 +362,7 @@ function drawHits2(){
       /* tornade de feu qui roule sur le sol jusqu'au bloc, puis le dépasse */
       if(d<-.55||d>.55)continue;
       const u=Math.min(1,(d+.55)/.55),v=Math.max(0,d/.55),x=d<0?(Q.bx-110)+(QH[0]+30-(Q.bx-110))*(u*u*.35+u*.65):(QH[0]+30)-(QH[0]-80)*v,
-        hh=d<0?150*es(u*1.8):150*(1-v*.75),ww=d<0?34*es(u*1.8):34*(1-v*.6);
+        hh=d<0?150*fdE(u*1.8):150*(1-v*.75),ww=d<0?34*fdE(u*1.8):34*(1-v*.6);
       fdTornade(ctx,x,gy+4,hh,ww,tt+h.at,d<0?1:1-v*v);
       if(!reduce)COLFX.eclats(ctx,x+14,gy+4,(Q.time*2.2)%.5,6,['#ff9a35','#ffe08a'],150,60,gy+8,420);
     }else if(h.k==='rock'){
@@ -409,7 +411,7 @@ function heroPose(){
     const t=c.t;
     if(c.k==='stab'){
       /* pas en avant (28 px, 1er novembre : la robe reste sur le bloc), rayon droit sur le torse */
-      const adv=t<.3?eo(t/.3):t<.7?1:1-es(clamp01((t-.7)/.45));x+=28*adv;rot=-.04*adv;
+      const adv=t<.3?eo(t/.3):t<.7?1:1-fdE(clamp01((t-.7)/.45));x+=28*adv;rot=-.04*adv;
     }else if(c.k==='head'){
       /* le Veilleur reste sur son bloc : seul son rayon monte vers la tête (1er novembre) */
       glow=t>=.3&&t<.85?.6:0;
@@ -419,7 +421,7 @@ function heroPose(){
     }else if(c.k==='final'){
       /* coup ultime : le Veilleur reste au sol, un pas en avant sur son bloc ; seul le rayon vise (1er novembre) */
       if(t<1.1){glow=t/1.1}
-      else{const u=es(clamp01((t-1.1)/.45));x+=28*u;glow=t<1.55?1:Math.max(.5,1-(t-1.55)/3)}
+      else{const u=fdE(clamp01((t-1.1)/.45));x+=28*u;glow=t<1.55?1:Math.max(.5,1-(t-1.55)/3)}
     }
     const tgt=qBeamTarget(c);if(tgt)sa=Math.atan2(tgt[1]-(y+WH[1]),tgt[0]-(x+WH[0]));else sa=-.7;
   }else if(qSideK()>0){
@@ -432,7 +434,7 @@ function heroPose(){
     x-=Math.min(p.t,.8)*40;y+=Math.min(DG.drop,p.t*140);rot=-Math.min(1.45,p.t*5);
   }
   /* fin : le Veilleur revient debout sur son bloc et regarde le Colosse plonger, puis s'envoler */
-  if(Q.mode==='lake'){const e=es(clamp01(Q.lt/.6));x+=(Q.hx-x)*e;y+=(Q.hy-y)*e;sa=-1.15;glow=Q.erupt?.8:.35;rot=0}
+  if(Q.mode==='lake'){const e=fdE(clamp01(Q.lt/.6));x+=(Q.hx-x)*e;y+=(Q.hy-y)*e;sa=-1.15;glow=Q.erupt?.8:.35;rot=0}
   return{x,y,rot,sa,glow};
 }
 const WH=[34,-8];
@@ -519,7 +521,7 @@ function drawCnFx(){
   if(c.k==='beam'&&!tail){
     /* le bloc arraché par le Colosse est cueilli au bâton, puis renvoyé à la figure */
     const o0=[tip[0]+30,tip[1]-6];
-    if(c.t>=.3&&c.t<.62)qrock(o0[0],o0[1],18*es((c.t-.3)/.2),tt*8,true);
+    if(c.t>=.3&&c.t<.62)qrock(o0[0],o0[1],18*fdE((c.t-.3)/.2),tt*8,true);
     else if(c.t>=.62&&c.t<.88){const w=(c.t-.62)/.26,p=lerp2(o0,to,w*w);for(let i=4;i>=1;i--){const q=lerp2(o0,to,Math.max(0,w-i*.07)**2);ctx.fillStyle='rgba(255,214,110,'+(.3-i*.05)+')';ctx.beginPath();ctx.arc(q[0],q[1],20-i*3,0,6.283);ctx.fill()}qrock(p[0],p[1],26,tt*11,true)}
     if(c.t>=.75&&c.t<1.35){
       const u=(c.t-.75)/.6,wd=34*(1-u*.6)*(1+.1*Math.sin(tt*60));
@@ -537,13 +539,13 @@ function drawCnFx(){
   }
   if(c.k==='head'&&QR.kind==='wings'&&!tail&&c.t>=.5){
     /* le rayon déchire l'aile proche : entaille, trous brûlés (drawWing, dmg), débris et fumée */
-    const wp=fdWingPt(),u=(c.t-.5)/.65,e=es(u*1.7);
+    const wp=fdWingPt(),u=(c.t-.5)/.65,e=fdE(u*1.7);
     if(u<1){ctx.save();ctx.globalAlpha=1-u*u;const A=[wp[0]-70,wp[1]+62],B=[A[0]+(wp[0]+86-A[0])*e,A[1]+(wp[1]-66-A[1])*e];fdEnt(ctx,A[0],A[1],B[0],B[1],24,'#ff9a35');fdEnt(ctx,A[0],A[1],B[0],B[1],13,'#ffe58a');fdEnt(ctx,A[0],A[1],B[0],B[1],5,'#fffbea');ctx.restore()}
     if(!reduce){COLFX.eclats(ctx,wp[0],wp[1],c.t-.55,22,['#6a3050','#3a1430','#ff9a35','#ffe58a'],270,88,null,260);fdPuff(ctx,wp[0],wp[1],c.t-.6,7,12)}
   }
   if(tail&&c.t>=.35&&c.t<1.6){
     /* la queue est clouée au sol par un trait de lumière, et son feu s'éteint */
-    const q=fdPin()||to,u=(c.t-.35)/.4,pin=es(u),al=c.t<1.2?1:1-(c.t-1.2)/.4;
+    const q=fdPin()||to,u=(c.t-.35)/.4,pin=fdE(u),al=c.t<1.2?1:1-(c.t-1.2)/.4;
     ctx.save();ctx.globalAlpha=al;
     if(c.t<.7)COLFX.etoile(ctx,q[0],q[1],70*(1-u),9,.3,'#ffe9a0',.4);
     COLFX.poly(ctx,[[q[0]-4,q[1]-70*pin],[q[0]+4,q[1]-70*pin],[q[0]+2,q[1]+10],[q[0]-2,q[1]+10]],'#ffe9a0');COLFX.poly(ctx,[[q[0]-1.5,q[1]-70*pin],[q[0]+1.5,q[1]-70*pin],[q[0]+1,q[1]+8],[q[0]-1,q[1]+8]],'#fffbea');
@@ -552,7 +554,7 @@ function drawCnFx(){
   }
   if(c.k==='final'&&c.t>=1.55&&c.t<3.6){
     /* la lumière ressort par les fissures du Colosse */
-    const jet=es((c.t-1.6)/.4)*(1-es((c.t-3.0)/.5)),cx=Q.bx-20,cy=Q.by-4;
+    const jet=fdE((c.t-1.6)/.4)*(1-fdE((c.t-3.0)/.5)),cx=Q.bx-20,cy=Q.by-4;
     if(jet>0){
       [[0,-1],[0,-70],[-30,-30],[22,18],[10,-96],[-52,4],[34,-52]].forEach(([hx,hy],i)=>{const a=i*6.283/7+.5+Math.sin(tt*3+i)*.07,L=(120+(i%3)*60)*jet,x=cx+hx*.8,y=cy+hy*.8;
         ctx.save();ctx.globalAlpha=.75;fdEnt(ctx,x,y,x+Math.cos(a)*L,y+Math.sin(a)*L,11,'#ffe9a0');ctx.globalAlpha=1;fdEnt(ctx,x,y,x+Math.cos(a)*L*.7,y+Math.sin(a)*L*.7,4,'#fffbea');ctx.restore()});
@@ -574,12 +576,12 @@ function renderQ(){
   fdRec();
   qBackground();
   /* rage : voile sombre pendant le cri */
-  if(Q.boss.s==='rage'){const b=Q.boss,v=.45*es(b.t/.5)*(1-es((b.t-(b.dur-.4))/.4));if(v>.01){ctx.fillStyle='rgba(40,4,14,'+v+')';ctx.fillRect(-20,-20,W+40,H+40)}}
+  if(Q.boss.s==='rage'){const b=Q.boss,v=.45*fdE(b.t/.5)*(1-fdE((b.t-(b.dur-.4))/.4));if(v>.01){ctx.fillStyle='rgba(40,4,14,'+v+')';ctx.fillRect(-20,-20,W+40,H+40)}}
   ctx.save();ctx.translate(0,qDive());
   drawBoss2();
-  drawHits2();
   ctx.restore();
   drawLake(true);
+  drawHits2();
   drawHero2();
   drawCnFx();
   drawHints2();
