@@ -429,10 +429,12 @@ function fdPose(){
     o.lean=-.16*(1-e);o.dy+=0;o.wA=-.12+.5*Math.sin(t*(11-3.5*clamp01(t/2.4)))*(1-clamp01((t-2.2)/.6));o.off=[-30,50];o.nn=[40,-30];o.griffe=.9;o.jaw=t>1.3&&t<1.9?14:0;o.tete=-.2*(1-e);o.rageF=.5*(1-e);
   }
   if(Q.mode==='lake'){
-    const lt=Q.lt,sp=Q.splash,d=sp?lt-sp:0,fall=fdE(lt/1.3),e=Math.max(0,d-1.0);
-    o.rot=-1.1*fall*(1-fdE(e/.8));o.wA=-.6*fall*(1-fdE(e/.5));o.flap=Math.sin(tt*14)*.5*fdE(e/.3);
-    o.eteint=.45*fall*(1-fdE(e/.3));o.fissure=1;o.rage=.6+.4*fdE(e/.3);o.rageF=Math.max(.5*fall,fdE(e/.4));o.jaw=e>0&&e<.6?14:0;o.tete=-.3*fdE(e/.4);o.griffe=.9;
-    if(e>0&&e<.5)o.flash=Math.floor(e*16)%2?.4:0;
+    /* fin : il plonge ailes repliées, légèrement penché ; il se pose doucement dans la lave (genoux fléchis) ; puis il se redresse, déploie les ailes et repart */
+    const lt=Q.lt,sp=Q.splash,d=sp?lt-sp:0,fall=fdE(lt/1.4),e=Math.max(0,d-1.0);
+    o.rot=-.45*fall*(1-fdE(e/.7));o.wA=-.5*fall*(1-fdE(e/.5));o.flap=Math.sin(tt*10)*.6*fdE((e-.15)/.3);
+    o.plie=.3*fdE(d/.3)*(1-fdE((d-.6)/.4));o.eteint=.3*fall*(1-fdE(e/.4));
+    o.fissure=1;o.rage=.5+.5*fdE(e/.5);o.rageF=Math.max(.3*fall,.8*fdE(e/.5));o.tete=.1*fall-.3*fdE(e/.6);o.griffe=.55;
+    o.off=[-40,70];o.nn=[10,-10];
   }
   return o;
 }
@@ -457,17 +459,17 @@ function fdBossFx(P,X0,Y0,s,tt){
   }
   if(Q.mode==='lake'){
     const lt=Q.lt,sp=Q.splash,d=sp?lt-sp:0;
-    if(!sp){const f=fdE(clamp01(lt/.6));for(let i=0;i<12;i++)COLFX.flamme(ctx,cx+(i-6)*13+Math.sin(tt*11+i)*5,cy-60-i*44*f,15,70+40*f,(i%2?7:-7),tt*14+i,f*(1-i/14))}
+    if(!sp){const f=fdE(lt/.6);for(let i=0;i<5;i++)COLFX.flamme(ctx,cx+(i-2)*22,cy-60-i*40*f,14,60+30*f,(i%2?6:-6),tt*14+i,f*(1-i/6))}
     else{
-      if(d<1.9){
-        for(let j=0;j<7;j++){const u=(d-j*.05)/.85;if(u>0&&u<1){const x=cx-150+j*50;COLFX.poly(ctx,[[x-22,LV+8],[x+(j-3)*30*(1+u),LV-(200-Math.abs(j-3)*45)*Math.sin(u*Math.PI)],[x+22,LV+8]],j%2?'#ff9a35':'#d4501f')}}
-        if(!reduce)COLFX.eclats(ctx,cx,LV,d,34,['#ffe08a','#ff9a35','#d4501f'],440,90,LV+8,700);
-        fdPuff(ctx,cx-40,LV,d-.2,8,51);fdPuff(ctx,cx+50,LV,d-.3,8,52)}
-      if(d>=1.0){const e=d-1.0,k=fdE(clamp01(e/.4));
-        for(let j=0;j<7;j++){const u=(e-j*.04)/.9;if(u>0&&u<1){const x=cx-170+j*56;COLFX.poly(ctx,[[x-26,LV+8],[x+(j-3)*24*(1+u),LV-(330-Math.abs(j-3)*55)*Math.sin(u*Math.PI)],[x+26,LV+8]],j%2?'#ffe08a':'#ff9a35')}}
-        COLFX.etoile(ctx,cx,cy,(110+50*Math.sin(tt*9))*k,14,tt*3,'rgba(255,214,110,.5)',.4);COLFX.etoile(ctx,cx,cy,60*k,14,-tt*2,'#fffbea',.4);
-        for(let i=0;i<10;i++)fdFlameDown(ctx,cx+(i-5)*20+Math.sin(tt*10+i)*6,Y0+30+i*10,14,(90+i*14)*k*(1-i/12),(i%2?6:-6),tt*13+i,k*(1-i/13));
-        fdPuff(ctx,738,6,e-.6,8,77);fdPuff(ctx,722,6,e-.8,8,78)}
+      /* contact : une seule couronne douce de gouttes de lave */
+      for(let j=0;j<6;j++){const u=(d-j*.04)/.7;if(u>0&&u<1){const x=cx-90+j*36;COLFX.poly(ctx,[[x-10,LV+6],[x+(j-2.5)*14,LV-(70+(j%2)*25)*Math.sin(u*Math.PI)],[x+10,LV+6]],j%2?'#ff9a35':'#d4501f')}}
+      if(d>=1.0){const e=d-1.0,k=fdE(e/.5);
+        /* il ressort : une colonne de feu sous lui, la lave ruisselle de son corps, quelques flammes dans son sillage, un peu de fumée à la cheminée */
+        const pa=1-fdE((e-.5)/.7),pw=60*(1-fdE(e/1.2)*.6);
+        if(pa>0){ctx.save();ctx.globalAlpha=pa;COLFX.poly(ctx,[[cx-pw,LV+6],[cx-pw*.5,cy+60],[cx+pw*.5,cy+60],[cx+pw,LV+6]],'#ff9a35');COLFX.poly(ctx,[[cx-pw*.45,LV+6],[cx-pw*.2,cy+60],[cx+pw*.2,cy+60],[cx+pw*.45,LV+6]],'#ffe08a');ctx.restore()}
+        for(let i=0;i<7;i++){const f=Math.min(1,e/.9),x=cx+(i-3)*24,y=cy+70+f*(110+i*12)*(i%2?1:.8),a=1-fdE((e-.2-i*.05)/.7);if(a>0&&e>i*.04){ctx.save();ctx.globalAlpha=a;COLFX.poly(ctx,[[x-4,y],[x,y-14],[x+4,y],[x,y+8]],'#ff9a35');ctx.restore()}}
+        for(let i=0;i<4;i++)fdFlameDown(ctx,cx+(i-1.5)*24,Y0+20+i*12,12,70*k*(1-i/5),(i%2?5:-5),tt*13+i,k*(1-i/5));
+        fdPuff(ctx,738,6,e-.6,6,77);fdPuff(ctx,722,6,e-.8,6,78)}
     }
   }
 }
@@ -640,7 +642,7 @@ function drawHero2(){
 }
 function drawFx2(){
   const S=R||Q;
-  for(const s of S.sparks){
+  let sn=0;for(const s of S.sparks){if(S===Q&&Q.mode==='lake'&&(sn++%3))continue; /* fin de phase II : une étincelle sur trois */
     ctx.globalAlpha=clamp01(s.life/s.max);ctx.fillStyle=s.col;ctx.fillRect(s.x-s.sz/2,s.y-s.sz/2,s.sz,s.sz);
   }
   ctx.globalAlpha=1;
@@ -748,7 +750,7 @@ function renderQ(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
   ctx.save();
-  if(Q.shake>0&&!reduce)ctx.translate(rand(-1,1)*Q.shake,rand(-1,1)*Q.shake);
+  if(Q.shake>0&&!reduce){const sk=Q.mode==='lake'?.35:1;ctx.translate(rand(-1,1)*Q.shake*sk,rand(-1,1)*Q.shake*sk)} /* fin de phase II : secousse adoucie */
   if(Q.cn&&Q.cn.k==='final'&&!reduce){const k=COLFX.choc(Q.cn.t,1.55,1,.2)*7;ctx.translate(rand(-1,1)*k,rand(-1,1)*k)} /* le coup ultime secoue l'écran en plus */
   fdRec();
   qBackground();
@@ -766,7 +768,7 @@ function renderQ(){
   drawFx2();
   ctx.restore();
   ctx.drawImage(vig,0,0,W,H);
-  if(Q.flash>0){ctx.fillStyle='rgba(255,255,255,'+Q.flash+')';ctx.fillRect(0,0,W,H)}
+  if(Q.flash>0){ctx.fillStyle='rgba(255,255,255,'+Q.flash*(Q.mode==='lake'?.5:1)+')';ctx.fillRect(0,0,W,H)}
   if(Q.hurt>0){ctx.fillStyle='rgba(255,40,30,'+(Q.hurt*.45)+')';ctx.fillRect(0,0,W,H)}
   let fade=0;
   if(Q.mode==='intro')fade=1-clamp01(Q.t/.7);

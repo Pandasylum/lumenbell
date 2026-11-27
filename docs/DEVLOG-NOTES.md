@@ -411,3 +411,4 @@
 - Le contre de la première rage est plus spectaculaire : fissure de lumière dans le pont, trois vagues, colonne de lumière sur le Colosse dont les flammes de rage sont arrachées et s'envolent.
 - En phase II, le Colosse descend en battant des ailes dans une traînée de feu, respire et bouge au repos, tombe en tournoyant dans la lave et jaillit du four ; chaque contre a son effet, et le coup ultime arrache des plaques d'armure.
 - Le Colosse arrive en volant, ailes ouvertes, et reste en vol en combat, jambes pendantes ; le contre des débris fait tomber trois colonnes de lumière sur lui.
+- À la fin de la phase II, le Colosse tombe ailes repliées, se pose doucement dans la lave, puis se redresse, déploie ses ailes et s'envole par la cheminée, sans effets qui s'empilent.
