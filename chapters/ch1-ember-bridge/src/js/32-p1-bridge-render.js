@@ -223,13 +223,15 @@ const COL_P={repos:[0,0,1,0,0,-62,92],arme:[.3,0,.88,10,-24,-62,-62],frappe:[-.4
    wN / wF mains sur le manche, s boule en bandoulière, ff main lointaine depuis l'épaule, r : P et a suivent le buste (rangé dans le dos). */
 const MK=(()=>{const K0={lean:0,drop:0,sx:1,dF:0,dN:0,P:[94,-256],a:-62,g:50,wN:0,wF:0,s:0,ff:[-62,92],r:1};
   const K1={...K0,lean:-.04,s:1,ff:[8,104]},K2={...K1,lean:.06,dN:-10,wN:1,ff:[-30,86]};
-  const K3={lean:.22,drop:0,sx:.92,dF:16,dN:-40,P:[0,-300],a:-15,g:205,wN:1,wF:1,s:1,ff:[-30,86],r:0};
+  /* armement : manche baissé derrière le dos (référence : P [0,-300], a -15) pour que la tête reste entière à l'écran, téléphone compris */
+  const K3={lean:.22,drop:0,sx:.92,dF:16,dN:-40,P:[-5,-285],a:50,g:205,wN:1,wF:1,s:1,ff:[-30,86],r:0};
   const K4={...K3,lean:-.45,drop:22,sx:1.04,dN:-60,P:[-135,-126],a:-201},K5={...K3,lean:-.12,drop:8,sx:.96,dN:-56,P:[-110,-146],a:-192};
   return {K0,K1,K2,K3,K4,K5,Pfin:[-100,-196]}})();
 /* Gestes de l'attaque au marteau, en fractions de la durée de chaque état (durées du jeu inchangées) : sortie dans sw1w, rangement dans swrec / orb */
 const MK_SEQ={sortie:[['K1',.28],['K2',.5],['K3',.86]],gap:[['K5',.4],['K3',1]],range:[['K5',.18],['K3',.42],['K2',.66],['K1',.83],['K0',1]],finSortie:[['K2',.35],['K3',1]]};
-/* points d'impact de la tête du marteau (depuis PX, DECK) : coup bas (1er et 3e), coup haut (2e) ; la pointe touche l'avant du Veilleur */
-const MK_HIT={bas:[90,-70],haut:[90,-165]};
+/* points d'impact de la tête du marteau (depuis PX, DECK) : hauteur du coup bas (1er et 3e) et du coup haut (2e) ;
+   touché : centre de la tête à x, la pointe atteint le Veilleur ; bloqué : la pointe (46 unités de pose) s'arrête sur la barrière (bar) */
+const MK_HIT={x:90,bas:-70,haut:-165,bar:116,pointe:46};
 let colMouthW=[MOUTH[0],MOUTH[1]]; /* gueule du Colosse dans le monde (le souffle en part) */
 function cpMix(A,B,k){return A.map((v,i)=>v+(B[i]-v)*k)}
 function mkMix(p,q,u){const o={};for(const k in p)o[k]=Array.isArray(p[k])?p[k].map((v,i)=>v+(q[k][i]-v)*u):p[k]+(q[k]-p[k])*u;return o}
@@ -241,17 +243,19 @@ function mkSeq(from,seq,u){const io=x=>x*x*(3-2*x);let prev=from,u0=0;
 /* clé du marteau selon l'état du jeu (toP : monde -> pose) */
 function hamKey(toP){
   const b=G.boss,t=b.t,tm=G.time,inQ=x=>x*x*x;
-  const H1=mkHit(toP([PX+MK_HIT.bas[0],DECK+MK_HIT.bas[1]]),MK.K4.P),H2=mkHit(toP([PX+MK_HIT.haut[0],DECK+MK_HIT.haut[1]]),MK.K4.P);
-  const last=DIFF.hard?H1:H2;let k=null;
+  /* coup i : bloqué (parade réussie, ou barrière levée pendant le coup) -> sur la barrière ; sinon -> sur le Veilleur */
+  const par=[G.sw.p1,G.sw.p2,G.sw.p3];
+  const hit=(i,live)=>{const blk=par[i]||(live&&G.pl.s==='act'),x=blk?MK_HIT.bar+MK_HIT.pointe*COL_S:MK_HIT.x;return mkHit(toP([PX+x,DECK+(i===1?MK_HIT.haut:MK_HIT.bas)]),MK.K4.P)};
+  const last=DIFF.hard?hit(2,false):hit(1,false);let k=null;
   switch(b.s){
     case 'sw1w':k=mkSeq(MK.K0,MK_SEQ.sortie,clamp01(t/T.sw1w));k.P=[k.P[0],k.P[1]+Math.sin(tm*50)*1.5*(t/T.sw1w)];break;
-    case 'sw1':k=mkMix(MK.K3,H1,inQ(clamp01(t/T.sw1)));break;
-    case 'swgap':k=mkSeq(H1,MK_SEQ.gap,clamp01(t/T.swgap));if(!G.sw.p1)k.P=[k.P[0]-90/COL_S*Math.sin(Math.PI*clamp01(t/.24)),k.P[1]];break;
+    case 'sw1':k=mkMix(MK.K3,hit(0,true),inQ(clamp01(t/T.sw1)));break;
+    case 'swgap':k=mkSeq(hit(0,false),MK_SEQ.gap,clamp01(t/T.swgap));if(!G.sw.p1)k.P=[k.P[0]-90/COL_S*Math.sin(Math.PI*clamp01(t/.24)),k.P[1]];break;
     case 'sw2w':k={...MK.K3,P:[MK.K3.P[0]+Math.sin(tm*50)*1.5,MK.K3.P[1]]};break;
-    case 'sw2':k=mkMix(MK.K3,H2,inQ(clamp01(t/T.sw2)));break;
-    case 'sw3g':k=mkSeq(H2,MK_SEQ.gap,clamp01(t/T.sw3g));if(!G.sw.p2)k.P=[k.P[0]-60/COL_S*Math.sin(Math.PI*clamp01(t/.24)),k.P[1]];break;
+    case 'sw2':k=mkMix(MK.K3,hit(1,true),inQ(clamp01(t/T.sw2)));break;
+    case 'sw3g':k=mkSeq(hit(1,false),MK_SEQ.gap,clamp01(t/T.sw3g));if(!G.sw.p2)k.P=[k.P[0]-60/COL_S*Math.sin(Math.PI*clamp01(t/.24)),k.P[1]];break;
     case 'sw3w':k={...MK.K3,P:[MK.K3.P[0],MK.K3.P[1]+Math.sin(tm*50)*1.5]};break;
-    case 'sw3':k=mkMix(MK.K3,H1,inQ(clamp01(t/T.sw3)));break;
+    case 'sw3':k=mkMix(MK.K3,hit(2,true),inQ(clamp01(t/T.sw3)));break;
     case 'swrec':k=mkSeq(last,MK_SEQ.range,clamp01(t/T.swrec));
       if(!(DIFF.hard?G.sw.p3:G.sw.p2)){const q=Math.sin(Math.PI*clamp01(t/.24));k.P=[k.P[0]-60/COL_S*q,k.P[1]+60/COL_S*q]}break;
     case 'orb':k=mkSeq(last,MK_SEQ.range,clamp01(t/.6));break;

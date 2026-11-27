@@ -67,7 +67,7 @@ Textes exacts : `docs/TEXTES-CH1.md`.
 | Distance | Volée d'éclats de lumière (cinq comètes) | Grêle de braise, chute de pierres, souffle de flamme, ondes d'ailes |
 | Arme et crochet | Le sceptre planté : laser au sol | Marteau de guerre, combo, crochet |
 
-Les noms affichés « marteau » alors que l'arme est une masse sont à corriger. Le nom affiché d'une attaque doit toujours correspondre à l'arme et au contre réellement utilisés.
+Le Colosse a deux armes : la boule hérissée à la chaîne et le marteau à deux mains ; les noms affichés « marteau » sont corrects. Le nom affiché d'une attaque doit toujours correspondre à l'arme et au contre réellement utilisés.
 
 ## La scène de fin
 1. Le Colosse lève sa masse. 2. La grande cloche répond et le désarme. 3. Un tir de lanterne dans chaque aile. 4. Coup final, effondrement, cloche, fondu, invitation à appuyer sur Espace. Puis l'outro (cartons) : le Colosse est une statue de pierre noire face à la cloche, les Flèches répondent, le Phare Noyé reste muet, le Veilleur part vers la côte. La musique suit la séquence.

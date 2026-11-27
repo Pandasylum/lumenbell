@@ -308,7 +308,7 @@ const COLOSSE=(()=>{
     const hm=o.ham||STOW,r=hm.r||0,Pr=pt(hm.P[0],hm.P[1]),P=mix(hm.P,Pr,r),an=hm.a*D+o.lean*r,dir=[Math.cos(an),Math.sin(an)];
     const head=[P[0]+dir[0]*hm.g,P[1]+dir[1]*hm.g],surF=[P[0]+dir[0]*45,P[1]+dir[1]*45];
     const Hr=[near[0]+42-o.lean*70,near[1]+113+o.lean*20],Hn=mix(Hr,P,hm.wN),H=mix([far[0]+o.off[0],far[1]+o.off[1]],surF,hm.wF);
-    const act=hm.wN>0,dos=hm.wN<.999||(hm.a>-100&&hm.wF<.5);
+    const act=hm.wN>0,dos=hm.wN<.999||(hm.a>-100&&hm.wF<.5)||(hm.a>-60&&head[0]>40); /* tête derrière le dos : marteau derrière le corps */
     const fl=.85+.15*Math.sin(o.t*9),warm=o.warm||1,ph=o.t*.55;
     const sl=pt(-34,-128),s=hm.s||0,tip=o.tip?mix(o.tip,sl,s):sl,behind=s<.5&&tip[0]>-20&&tip[1]<-150;
     const marteau=()=>{c.save();c.translate(head[0],head[1]);c.rotate(an);img(c,SP.ham);c.restore()};
