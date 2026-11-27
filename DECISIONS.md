@@ -150,3 +150,4 @@ Les nouvelles décisions ont chacune leur fichier daté ; une ligne par fichier 
 - [2026-11-09 · `fix/tuto-perdu-apres-maj` : rattrapage de l'onglet Tuto à l'ouverture du hub (Chapitre I terminé : block, dodge ; Chapitre II terminé : les quatre entrées)](docs/decisions/2026-11-09-tuto-rattrapage.md)
 
 - [2026-11-17 · Phare C2, équilibrage](docs/decisions/2026-11-17-phare-c2-equilibrage.md) : cloches des rages (lancer / retour / relance, une de moins en Normal et Difficile), tableau des combos.
+- [2026-11-27 · direction artistique validée pour tout le jeu (refonte avant le Chapitre III) : ambiance, personnages en aplats, Colosse nouvelle silhouette (remplace celle de BIBLE.md), lanterne ; référence `docs/decisions/da/maquette-a9.html`](docs/decisions/2026-11-27-direction-artistique.md)

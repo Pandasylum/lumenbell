@@ -43,7 +43,7 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 **Épreuve du feu** : les trois phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : les 4 PV de départ), PV conservés, une mort ramène à la phase I. Normal et Difficile.
 
 ## Le Colosse de braise
-- **Silhouette** : dessinée une seule fois dans `demonBody`, partagée par les trois phases. **Validée : on ne la change pas.**
+- **Silhouette** : dessinée une seule fois dans `demonBody`, partagée par les trois phases. **Silhouette remplacée par la direction artistique du 2026-11-27 : voir `docs/decisions/2026-11-27-direction-artistique.md`.**
 - **Équipement** : bandoulière de chaîne, épaulettes en enclume, masse à pointes rangée dans le dos, queue, crochet à chaîne à la hanche gauche.
 - **Indice du crochet** : la chaîne du torse se déroule jusqu'à sa main au rythme de l'attaque (phases I et III).
 - **Seconde vie (phase III)** : après la première foudre, ailes rongées et tombées, trous brûlés, fissures de braise ; à la première foudre de la seconde vie, sa corne droite se brise.
