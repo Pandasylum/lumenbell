@@ -126,30 +126,32 @@ function heroPose3(){
     return{x:R.introHx,y:T<1.7?-Math.abs(Math.sin(T*9.8))*4:0,hand:[30,-68-26*up],sa:-.3-1.0*up,rot:0,sy:1,glow:Math.max(.25,up)};
   }
   const p=R.pl,c=R.cn;
-  let hand=[28,-62],sa=-.45,rot=0,sy=1,glow=0;
+  /* repos = garde commune (LB.WATCHER_REST, maquette A9) ; chaque contre part du repos, atteint son geste (valeurs absolues) et y revient */
+  const H0=LB.WATCHER_REST.hand,A0=LB.WATCHER_REST.sa,mh=(a,b,u)=>[a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u],ma=(a,b,u)=>a+(b-a)*u;
+  let hand=H0.slice(),sa=A0,rot=0,sy=1,glow=0;
   const x=heroX3();
   if(c){
     const t=c.t;
     if(c.k==='plant'){
-      const u=es(clamp01(t/.3));hand=[28+10*u,-62+22*u];sa=-.45+.8*u;sy=1-.1*u;glow=t>=.3?clamp01(1-(t-.3)/1.1):0;
-      if(t>1.1){const v=es(clamp01((t-1.1)/.4));hand=[38-10*v,-40-22*v];sa=.35-.8*v;sy=.9+.1*v}
+      const u=es(clamp01(t/.3));hand=mh(H0,[38,-40],u);sa=ma(A0,.35,u);sy=1-.1*u;glow=t>=.3?clamp01(1-(t-.3)/1.1):0;
+      if(t>1.1){const v=es(clamp01((t-1.1)/.4));hand=mh([38,-40],H0,v);sa=ma(.35,A0,v);sy=.9+.1*v}
     }else if(c.k==='bat'){
-      const V='B',u=es(clamp01(t/.22)),v=es(clamp01((t-.6)/.5));
-      if(V==='A'){hand=[26,-62-40*u*(1-v)];sa=-.45-1.1*u*(1-v)}
-      else if(V==='B'){hand=[30,-62-6*u*(1-v)];sa=-.45+.3*u*(1-v)+(t>.2&&t<.6?Math.sin(t*60)*.03:0)}
-      else{hand=[28,-62-26*u*(1-v)+(t>.2&&t<.62?Math.sin(t*55)*2.5:0)];sa=-.45-.5*u*(1-v)}
+      const V='B',u=es(clamp01(t/.22)),v=es(clamp01((t-.6)/.5)),w=u*(1-v);
+      if(V==='A'){hand=mh(H0,[26,-102],w);sa=ma(A0,-1.55,w)}
+      else if(V==='B'){hand=mh(H0,[30,-68],w);sa=ma(A0,-.15,w)+(t>.2&&t<.6?Math.sin(t*60)*.03:0)}
+      else{hand=mh(H0,[28,-88],w);hand[1]+=t>.2&&t<.62?Math.sin(t*55)*2.5:0;sa=ma(A0,-.95,w)}
     }else if(c.k==='bell'){
-      const u=es(clamp01(t/.2)),v=es(clamp01((t-.85)/.5));
-      hand=[28,-62-30*u*(1-v)+(t>.1&&t<.5?Math.sin(t*55)*2.5:0)];sa=-.45-.7*u*(1-v);glow=.9*(1-v)
+      const u=es(clamp01(t/.2)),v=es(clamp01((t-.85)/.5)),w=u*(1-v);
+      hand=mh(H0,[28,-92],w);hand[1]+=t>.1&&t<.5?Math.sin(t*55)*2.5:0;sa=ma(A0,-1.15,w);glow=.9*(1-v)
     }else if(c.k==='bolt'){
-      const u=es(clamp01(t/.25));hand=[28,-62-30*u];sa=-.45-.5*u;glow=1;
-      if(t>1.5){const v=es(clamp01((t-1.5)/.4));hand=[28,-92+30*v];sa=-.95+.5*v;glow=1-v}
+      const u=es(clamp01(t/.25));hand=mh(H0,[28,-92],u);sa=ma(A0,-.95,u);glow=1;
+      if(t>1.5){const v=es(clamp01((t-1.5)/.4));hand=mh([28,-92],H0,v);sa=ma(-.95,A0,v);glow=1-v}
     }else if(c.k==='slide'){
       sy=.82;hand=[34,-34];sa=0;rot=.05;
-      if(t>.65){const v=es(clamp01((t-.65)/.5));sy=.82+.18*v;hand=[34-6*v,-34-28*v];sa=-.45*v;rot=.05*(1-v)}
+      if(t>.65){const v=es(clamp01((t-.65)/.5));sy=.82+.18*v;hand=mh([34,-34],H0,v);sa=ma(0,A0,v);rot=.05*(1-v)}
     }
   }else if(p.s==='act'){
-    const r=clamp01(p.t/.08);hand=[28,-62-32*r];sa=-.45-1.05*r;glow=1;
+    const r=clamp01(p.t/.08);hand=mh(H0,[28,-94],r);sa=ma(A0,-1.5,r);glow=1;
   }else if((p.s==='down'||p.s==='hurt')&&p.lasso){
     const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));
     rot=-1.45*k;hand=[24,-34];sa=.7;

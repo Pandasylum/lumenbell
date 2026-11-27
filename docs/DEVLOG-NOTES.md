@@ -374,3 +374,7 @@
 ## 2026-11-27 · brèche de fin de phase I
 - Au coup de marteau, des fissures de braise partent du point d'impact, puis le tablier se brise en blocs qui basculent et tombent avec leurs dalles et un morceau de parapet.
 - La brèche reste ouverte et calme : bords de pierre éclairés par dessous, colonne de lumière chaude de la Fonderie, braises qui montent et poussière qui retombe.
+
+## 2026-11-27 · nouveau Veilleur (maquette A9)
+- Le Veilleur (et la Veilleure) apparaît de trois quarts, tourné vers le boss : capuche à visière lumineuse, mantelet, cape bleu nuit et tabard crème, avec un liseré chaud du côté de la lanterne.
+- La lanterne a un anneau, un toit de laiton, une cage vitrée où la flamme vacille et une clochette qui pend sous un bras ; le rayon de riposte et le bouclier brillent sans flou coûteux.
