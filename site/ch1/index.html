@@ -509,12 +509,16 @@ LB.WATCHER_REST={hand:[46,-66],staff:[[34,0],[60,-140]],sa:-1.39};
     c.strokeStyle=P.arm;c.lineWidth=w;path();c.stroke();
     c.save();c.translate(w*.2,-w*.2);c.strokeStyle=P.armLit;c.lineWidth=w*.18;path();c.stroke();c.restore();
     const a=q(.76),z=q(.9);c.strokeStyle=P.cuff;c.lineWidth=w*1.1;c.lineCap='butt';c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(z[0],z[1]);c.stroke();c.lineCap='round';
-    return sh;
+    return{S:sh,E:[(sh[0]+h[0])/2-dy/l*b,(sh[1]+h[1])/2+dx/l*b]};
   }
-  function fist(c,h,a){c.save();c.translate(h[0],h[1]);c.rotate(a);
-    c.fillStyle='#d4ac86';c.beginPath();c.ellipse(0,0,4.4,5.2,0,0,6.283);c.fill();
-    c.fillStyle='rgba(255,226,180,.55)';c.beginPath();c.ellipse(1.2,-2.4,2.4,1.6,0,0,6.283);c.fill();
-    c.strokeStyle='rgba(90,48,40,.6)';c.lineWidth=.8;c.beginPath();c.moveTo(-1.6,-3.6);c.lineTo(-1.6,3.6);c.moveTo(1.2,-3.4);c.lineTo(1.2,3.4);c.stroke();
+  function fist(c,h,a,E){const n=[-Math.sin(a),Math.cos(a)],e=E?[h[0]-E[0],h[1]-E[1]]:n,sd=(e[0]*n[0]+e[1]*n[1])>0?-1:1;
+    c.save();c.translate(h[0],h[1]);c.rotate(a);
+    c.fillStyle='#d4ac86';c.beginPath();c.ellipse(0,sd*.6,4.4,5.4,0,0,6.283);c.fill();
+    c.fillStyle='#b88e6c';c.beginPath();c.ellipse(-.4,-sd*3.2,4,1.9,0,0,6.283);c.fill();   
+    c.strokeStyle='rgba(90,48,40,.6)';c.lineWidth=.8;c.beginPath();
+    for(const x of[-1.5,1.3]){c.moveTo(x,-sd*1.4);c.lineTo(x,-sd*4.6)}c.stroke();
+    c.fillStyle='rgba(255,226,180,.55)';c.beginPath();c.ellipse(1.2,sd*2,2.2,1.5,0,0,6.283);c.fill();
+    c.fillStyle='#e2bf98';c.beginPath();c.ellipse(3.4,sd*.9,2.5,1.5,sd*.5,0,6.283);c.fill();   
     c.restore()}
   function pole(c,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,l=Math.hypot(dx,dy)||1,nx=-dy/l*1.1,ny=dx/l*1.1;
     c.lineCap='round';c.strokeStyle='#4a2f2a';c.lineWidth=4.4;c.beginPath();c.moveTo(ax,ay);c.lineTo(bx,by);c.stroke();
@@ -629,13 +633,11 @@ LB.WATCHER_REST={hand:[46,-66],staff:[[34,0],[60,-140]],sa:-1.39};
     const wv=g.white,wa=wv===true?1:+wv||0;if(wa>=1)body(true);else{body(false);if(wa>0){c.save();c.globalAlpha*=wa;body(true);c.restore()}}
     const ar=g.armR||6.5;
     const root=(S,Pl)=>{c.save();c.beginPath();c.arc(S[0],S[1],11*ar/6.5,0,6.283);c.clip();if(g.body){c.translate(0,g.body.dy||0);c.scale(g.body.s||1,g.body.s||1)}mantle(c,Pl);hood(c,Pl);c.restore()};
-    if(wa<1)root(sleeve(c,sh,hand,ar,PAL.n,rim),PAL.n);if(wa>0){c.save();if(wa<1)c.globalAlpha*=wa;root(sleeve(c,sh,hand,ar,PAL.w,0),PAL.w);c.restore()}
     const sa=g.staffAlpha==null?1:g.staffAlpha;if(sa<1){c.save();c.globalAlpha*=Math.max(0,sa)}
-    let L=null;
+    let L=null,fa=0;
     if(g.staff){
       const [sb,st]=g.staff,ang=Math.atan2(st[1]-sb[1],st[0]-sb[0]),ux=Math.cos(ang),uy=Math.sin(ang);
-      pole(c,sb[0],sb[1],st[0]-ux*16,st[1]-uy*16);
-      fist(c,hand,ang);
+      pole(c,sb[0],sb[1],st[0]-ux*16,st[1]-uy*16);fa=ang;
       LB.drawLantern(c,st[0],st[1],glow,col,ang+PI/2,lamp);
       L=st;
     }else{
@@ -646,11 +648,12 @@ LB.WATCHER_REST={hand:[46,-66],staff:[[34,0],[60,-140]],sa:-1.39};
         og.addColorStop(0,'rgba(255,255,255,1)');og.addColorStop(.4,'rgba(255,240,176,.7)');og.addColorStop(1,'rgba(255,217,102,0)');
         c.fillStyle=og;c.beginPath();c.arc(Ln,0,gr*2,0,6.283);c.fill()}
       if(g.beam&&g.beam.al>0){c.save();c.globalCompositeOperation='lighter';LB.lanternBeam(c,[Ln+8,0],[Ln+8+g.beam.len,0],g.beam.w,g.beam.al);c.restore()}
-      c.restore();
-      fist(c,hand,a);
+      c.restore();fa=a;
       L=[hand[0]+Math.cos(a)*Ln,hand[1]+Math.sin(a)*Ln];
     }
     if(sa<1)c.restore();
+    let arm=null;if(wa<1){arm=sleeve(c,sh,hand,ar,PAL.n,rim);root(arm.S,PAL.n)}if(wa>0){c.save();if(wa<1)c.globalAlpha*=wa;arm=sleeve(c,sh,hand,ar,PAL.w,0);root(arm.S,PAL.w);c.restore()}
+    if(sa<1){c.save();c.globalAlpha*=Math.max(0,sa)}fist(c,hand,fa,arm&&arm.E);if(sa<1)c.restore();
     if(o.inFrame)o.inFrame(c,g);
     c.restore();
     const ly0=L[1]+bob,r=(g.rot||0)+(g.rot2||0),cs=Math.cos(r),sn=Math.sin(r),u=L[0]*sx,v=ly0*sy;
