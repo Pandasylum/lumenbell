@@ -18,6 +18,7 @@ function drawAura3(o,t){
 function drawBoss3(){
   const ob=bossPose3(),t=R.time,fin=R.mode==='finale';
   const o=col3Pose(ob);
+  if(R.mode==='intro')col3Warm(ctx);
   const bx=o.ported?R.bx:ob.x,dy=o.ported?0:(Math.abs(ob.dy)<=2.001?0:ob.dy);
   COL3.f={x0:bx+C3X+o.dx,y0:DECK+dy,bx,flip:!!ob.flip};
   const wd=R.healed&&!fin?(R.wdAt==null?1:clamp01((R.time-R.wdAt)/.8)):(R.healed?1:0);

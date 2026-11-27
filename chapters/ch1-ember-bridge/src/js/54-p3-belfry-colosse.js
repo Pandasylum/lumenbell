@@ -135,6 +135,12 @@ function col3Fb(ob){
   }else if(ob.nostow){o.P=[0,3000];o.r=0}   /* la masse a été jetée : plus rien dans le dos */
   return o;
 }
+/* préchauffage (entrée de la phase III) : une image quasi invisible de chaque pose du marteau, pour que le premier coup ne paie ni l'envoi des calques au processeur graphique ni la compilation du dessin */
+function col3Warm(c){
+  if(COL3.warm)return;COL3.warm=1;
+  [K3_GARDE,K3_ARME,K3_FRAPPE,K3_FRAPPE2,K3_DOS].forEach(o=>{c.save();c.globalAlpha=.02;c.translate(8,H-8);c.scale(.12,.12);
+    COLOSSE.draw(c,{lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:0,tete:0,jaw:0,t:0,warm:1,eyes:.25,legs:{f:[0,0,0],n:[0,0,0]},tip:[o.tx,o.ty],heat:0,sag:20,ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r}});c.restore()});
+}
 /* mouvements de vie : respiration, poids qui passe d'une épaule à l'autre, mains qui flottent, tête qui cherche, yeux qui palpitent */
 function col3Life(o,t){
   if(reduce)return;
