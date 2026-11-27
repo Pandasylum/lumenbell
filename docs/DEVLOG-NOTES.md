@@ -378,3 +378,7 @@
 ## 2026-11-27 · Colosse A9 au pont
 - Au pont, le Colosse a son nouveau corps : de trois quarts, tourné vers le Veilleur, épaules en enclume, boule hérissée au bout de sa chaîne.
 - Il arme la masse en se cambrant, se couche sur le coup, puis se redresse en arrachant sa chaîne ; ses jambes restent plantées et ses bras ne s'étirent jamais.
+
+## 2026-11-27 · Colosse : boule et marteau
+- Pour l'attaque au marteau, le Colosse passe sa boule en bandoulière, empoigne le marteau par-dessus l'épaule et frappe à deux mains jusqu'au Veilleur.
+- Entre les coups du combo, il arrache le marteau du sol et le relève sans le lâcher, puis le range dans son dos, tête au-dessus de l'épaule.

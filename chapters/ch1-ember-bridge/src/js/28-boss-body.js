@@ -117,7 +117,7 @@ function demonBody(o){
    liseré ; à chaque image on ne fait que les poser. Le buste se penche et pivote autour de la taille (PY), les jambes restent
    plantées ; les bras gardent des longueurs fixes (L1, L2) et plient toujours du même côté. demonBody (phases II et III) n'y touche pas. */
 const COLOSSE=(()=>{
-  const TAU=6.283185307179586,P=d=>new Path2D(d);
+  const TAU=6.283185307179586,P=d=>new Path2D(d),P2=P;
   let K=1; /* pixels par unité de maquette pendant la mise en cache */
   const CH='#2a1230',CH_F='#1d0c25',CL='rgba(178,82,92,.30)',CL2='rgba(205,108,102,.22)',OM='rgba(7,0,18,.46)',FER='#35223f',FER_C='rgba(176,128,150,.45)';
   function lg(c,x0,y0,x1,y1,st){const g=c.createLinearGradient(x0,y0,x1,y1);st.forEach(s=>g.addColorStop(...s));return g}
@@ -263,6 +263,16 @@ const COLOSSE=(()=>{
       pc(x,'M-7 -18C6 -24 24 -21 28 -10L29 11C24 22 6 24 -7 18Q-2 0 -7 -18Z','#3c1b42',[['M-7 -18C6 -24 24 -21 28 -10L18 -9L-5 -9Z',CL],['M-5 10L29 10C24 22 6 24 -7 18Z',OM]],8);
       tr(x,'M17 -20Q22 -12 17 -7Q23 0 17 6Q22 13 16 21','rgba(10,2,16,.8)',2)},RIM,[0,3]);
     SP.ball=bake([-50,-50,100,100],boule,RIM,S3);
+    /* marteau à deux mains (colosse-marteau.js) : repère de la tête, manche vers l'arrière */
+    const HL=238;
+    SP.ham=bake([-HL-14,-54,HL+14+50,108],c=>{
+      pc(c,'M'+(-HL)+' -8H-6V8H'+(-HL)+'Z','#2a1a26',[['M'+(-HL)+' -8H-6V-3H'+(-HL)+'Z','rgba(255,180,140,.35)']],4);
+      [-HL+4,-HL+58,-HL+100,-70].forEach(x=>pc(c,'M'+x+' -10h13v20h-13Z',FER,[['M'+x+' -10h13v6h-13Z',FER_C]],3));
+      pc(c,'M'+(-HL-10)+' 0L'+(-HL+4)+' -13V13Z',FER,[],3);
+      pc(c,'M-26 -44L-18 -50H20L28 -44V44L20 50H-18L-26 44Z','#3a2038',[['M-26 -44L-18 -50H-6V50H-18L-26 44Z',CL],['M12 -50H20L28 -44V44L20 50H12Z',OM],['M-26 -44L-18 -50H20L28 -44Z',FER_C]],10);
+      [-36,28].forEach(y=>pc(c,'M-29 '+y+'H31v9H-29Z',FER,[['M-29 '+y+'H31v3H-29Z',FER_C]],4));
+      pc(c,'M28 -20L46 0L28 20Z','#2c1534',[['M28 -20L46 0H28Z','rgba(214,140,140,.5)']],3);
+      feu(c,'M-8 -26L4 -10L-5 4L8 24M4 -10L17 -16M-5 4L-17 12',3.2,1)},'rgba(255,160,90,.9)',[2,2]);
     SP.glow=bake([-64,-64,128,128],x=>{const g=x.createRadialGradient(0,0,0,0,0,64);g.addColorStop(0,'rgba(255,150,60,1)');g.addColorStop(.35,'rgba(255,110,40,.4)');g.addColorStop(1,'rgba(255,90,30,0)');x.fillStyle=g;x.fillRect(-64,-64,128,128)});
   }
   const img=(c,s)=>c.drawImage(s.e,s.box[0],s.box[1],s.box[2],s.box[3]);
@@ -283,33 +293,47 @@ const COLOSSE=(()=>{
       [[1,'#c8421c'],[.64,'#f57c28'],[.3,'#ffd27a']].forEach(([s,col])=>{c.fillStyle=col;c.beginPath();c.moveTo(x-wd*s,y);c.bezierCurveTo(x-wd*1.1*s,y-h*.4*s,x+l*.2-wd*.3,y-h*.55*s,x+(l+q)*s,y-h*e*s);c.bezierCurveTo(x+l*.45*s+wd*.3,y-h*.55*s,x+wd*1.15*s,y-h*.35*s,x+wd*s,y);c.fill()})})}
   function halo(c,x,y,r,a){if(a<=0)return;c.save();c.globalCompositeOperation='screen';c.globalAlpha=Math.min(1,a);c.drawImage(SP.glow.e,x-r,y-r,2*r,2*r);c.restore()}
 
-  /* o : lean, drop, sx, dF, dN (buste) ; off (main lointaine depuis l'épaule) ; nearT, nearW (main proche demandée et son poids) ;
-     tip, sag (bout de la chaîne et mou, en unités de pose) ; t, warm, jaw, hurt, wound ; back(applyM), front(rig) : rappels */
+  /* o : lean, drop, sx, dF, dN (buste) ; off (main lointaine depuis l'épaule) ; tip, sag (bout de la chaîne de la boule et mou, unités de pose) ;
+     ham : marteau à deux mains { P main proche, a angle du manche (degrés), g tête -> main proche, wN / wF mains sur le manche,
+     s boule en bandoulière, r : P et a dans le repère du buste } (absent : rangé dans le dos) ; t, warm, jaw, hurt, wound ; back(applyM), front(rig) */
+  const STOW={P:[94,-256],a:-62,g:50,wN:0,wF:0,s:0,r:1},D=Math.PI/180;
   function draw(c,o){
     if(!SP)build();
     const co=Math.cos(o.lean),si=Math.sin(o.lean),A=[o.sx*co,o.sx*si,-si,co,si*PY,PY+o.drop-co*PY];
     const pt=(x,y)=>[A[0]*x+A[2]*y+A[4],A[1]*x+A[3]*y+A[5]];
     const applyM=(dx=0)=>{c.transform(A[0],A[1],A[2],A[3],A[4],A[5]);if(dx)c.translate(dx,0)};
+    const mix=(p,q,u)=>[p[0]+(q[0]-p[0])*u,p[1]+(q[1]-p[1])*u];
     const far=pt(-70+o.dF,-215),near=pt(70+o.dN,-215),hd=(o.dF+o.dN)/2;
-    const H=[far[0]+o.off[0],far[1]+o.off[1]];
-    const Hr=[near[0]+42-o.lean*70,near[1]+113+o.lean*20],w=o.nearW||0,Hn=w>0&&o.nearT?[Hr[0]+(o.nearT[0]-Hr[0])*w,Hr[1]+(o.nearT[1]-Hr[1])*w]:Hr;
+    /* marteau : main proche sur le manche, main lointaine plus près de la tête */
+    const hm=o.ham||STOW,r=hm.r||0,Pr=pt(hm.P[0],hm.P[1]),P=mix(hm.P,Pr,r),an=hm.a*D+o.lean*r,dir=[Math.cos(an),Math.sin(an)];
+    const head=[P[0]+dir[0]*hm.g,P[1]+dir[1]*hm.g],surF=[P[0]+dir[0]*45,P[1]+dir[1]*45];
+    const Hr=[near[0]+42-o.lean*70,near[1]+113+o.lean*20],Hn=mix(Hr,P,hm.wN),H=mix([far[0]+o.off[0],far[1]+o.off[1]],surF,hm.wF);
+    const act=hm.wN>0,dos=hm.wN<.999||(hm.a>-100&&hm.wF<.5);
     const fl=.85+.15*Math.sin(o.t*9),warm=o.warm||1,ph=o.t*.55;
-    const tip=o.tip,behind=tip&&tip[0]>-20&&tip[1]<-150;
-    const flail=W=>{if(!tip)return;const sg=o.sag*1.3;
-      chaine(c,[W,[(W[0]*2+tip[0])/3,(W[1]*2+tip[1])/3+sg],[(W[0]+tip[0]*2)/3,(W[1]+tip[1]*2)/3+sg],tip],Math.max(6,Math.round(Math.hypot(tip[0]-W[0],tip[1]-W[1])/15)),9,'#6c4e68','#f0b49a');
-      if(o.heat>.5)halo(c,tip[0],tip[1],56,.5*o.heat);
-      c.save();c.translate(tip[0],tip[1]);c.rotate(tip[0]*.012);img(c,SP.ball);c.restore()};
+    const sl=pt(-34,-128),s=hm.s||0,tip=o.tip?mix(o.tip,sl,s):sl,behind=s<.5&&tip[0]>-20&&tip[1]<-150;
+    const marteau=()=>{c.save();c.translate(head[0],head[1]);c.rotate(an);img(c,SP.ham);c.restore()};
+    /* boule : au poing au bout de sa chaîne, ou rangée en bandoulière pendant l'attaque au marteau */
+    const boule_=W=>{
+      if(s>=.999){c.save();c.translate(sl[0],sl[1]);c.rotate(o.lean);c.scale(.85,.85);img(c,SP.ball);c.restore();return}
+      const sg=(o.sag*(1-s)+4*s)*1.3;
+      chaine(c,[W,[(W[0]*2+tip[0])/3,(W[1]*2+tip[1])/3+sg],[(W[0]+tip[0]*2)/3,(W[1]+tip[1]*2)/3+sg],tip],Math.max(4,Math.round(Math.hypot(tip[0]-W[0],tip[1]-W[1])/15)),9,'#6c4e68','#f0b49a');
+      if(o.heat>.5&&s<.1)halo(c,tip[0],tip[1],56,.5*o.heat);
+      c.save();c.translate(tip[0],tip[1]);c.rotate(tip[0]*.012*(1-s)+o.lean*s);const k=1-.15*s;c.scale(k,k);img(c,SP.ball);c.restore()};
     const Wf=ik(far,H,-1)[1];
     c.save();
     if(o.back){c.save();o.back(applyM);c.restore()}
-    if(behind)flail(Wf);
+    if(dos)marteau();
+    if(behind)boule_(Wf);
     img(c,SP.legs);
     if(o.wound>0){c.save();c.strokeStyle='rgba(255,220,140,'+Math.min(1,o.wound)+')';c.lineWidth=3.5;c.lineCap='round';c.beginPath();c.moveTo(-63,-61);c.lineTo(-40,-61);c.moveTo(-63,-61);c.lineTo(-53,-77);c.moveTo(-63,-61);c.lineTo(-53,-45);c.stroke();c.restore()}
     c.save();applyM();halo(c,-24,-205,90,.3*warm*fl);img(c,SP.torso);c.restore();
-    const na=bras(c,near,Hn,0);
+    let na=act?null:bras(c,near,Hn,0);
     c.save();applyM(hd);img(c,SP.corneL);c.restore();
     c.save();applyM(o.dN);img(c,SP.paulR);c.restore();
+    if(act)na=bras(c,near,Hn,0);
+    if(!dos)marteau();
     const fa=bras(c,far,H,1);
+    if(act)seg(c,SP.fist,na.W,na.an);
     c.save();applyM(o.dF);img(c,SP.paulL);c.restore();
     /* tête : couronne derrière, gueule qui s'ouvre (jaw), yeux blancs quand il est touché */
     c.save();applyM(hd);c.scale(.8,.8);
@@ -317,13 +341,15 @@ const COLOSSE=(()=>{
     c.scale(1.25,1.25);img(c,SP.head);c.scale(.8,.8);
     const j=o.jaw||0;
     if(j>0){c.fillStyle='rgba(255,160,60,.95)';c.beginPath();c.moveTo(-95,-254);c.lineTo(-29,-258);c.lineTo(-31,-246+j);c.lineTo(-90,-240+j);c.closePath();c.fill()}
-    if(o.hurt){c.fillStyle='#ffffff';c.fill(P('M-94 -302L-75 -289L-79 -286.5L-91 -294Z'));c.fill(P('M-65 -287L-34 -309L-39 -296L-55 -285.5Z'))}
+    if(o.hurt){c.fillStyle='#ffffff';c.fill(P2('M-94 -302L-75 -289L-79 -286.5L-91 -294Z'));c.fill(P2('M-65 -287L-34 -309L-39 -296L-55 -285.5Z'))}
     c.translate(0,j);c.scale(1.25,1.25);img(c,SP.jaw);
     c.restore();
     c.save();applyM();img(c,SP.sangle);c.restore();
-    if(!behind)flail(fa.W);
-    const mouth=pt(-49.6+hd,-200+(o.jaw||0)*.4);
-    const rig={far,near,fa,na,mouth,applyM,fist:()=>seg(c,SP.fist,na.W,na.an)};
+    /* les deux poings serrés sur le manche passent devant */
+    if(!dos&&hm.wF>.9){seg(c,SP.fist,fa.W,fa.an);seg(c,SP.fist,na.W,na.an)}
+    if(!behind)boule_(fa.W);
+    const mouth=pt(-49.6+hd,-200+j*.4);
+    const rig={far,near,fa,na,mouth,head,P,dir,applyM};
     if(o.front)o.front(rig);
     c.restore();
     return rig}

@@ -44,8 +44,8 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 
 ## Le Colosse de braise
 - **Silhouette** : dessinée une seule fois dans `demonBody`, partagée par les trois phases. **Silhouette remplacée par la direction artistique du 2026-11-27 : voir `docs/decisions/2026-11-27-direction-artistique.md`.**
-- **Équipement** : bandoulière de chaîne, épaulettes en enclume, masse à pointes rangée dans le dos, queue, crochet à chaîne à la hanche gauche.
-- **Indice du crochet** : la chaîne du torse se déroule jusqu'à sa main au rythme de l'attaque (phases I et III).
+- **Équipement** : bandoulière de chaîne, épaulettes en enclume, boule hérissée à la chaîne (au poing au repos, passée en bandoulière pendant l'attaque au marteau), marteau à deux mains rangé dans le dos (tête visible au-dessus de l'épaule), queue, crochet à chaîne à la hanche gauche.
+- **Indice du crochet** : en phase I, la chaîne du torse ne se déroule plus (la bandoulière reste en place, la boule est au poing) ; en phase III, elle se déroule encore jusqu'à sa main au rythme de l'attaque.
 - **Seconde vie (phase III)** : après la première foudre, ailes rongées et tombées, trous brûlés, fissures de braise ; à la première foudre de la seconde vie, sa corne droite se brise.
 - **Rages** : Râle d'agonie, Fureur, Embrasement ; en Difficile : Fureur de braise, Danse des chaînes, Embrasement final.
 

@@ -87,7 +87,7 @@ Vocabulaire déjà décidé dans le dépôt, sans terme inventé. État au 30 oc
 | Pont de pierre | stone bridge | `G` | Décor de la phase I du Chapitre I | `BIBLE.md:9,52` |
 | La salle des reflets / La cale / Les récifs | The Mirror Hall / The Hold / The Reefs | `ORDER=[2,1,3]` | Titres des trois phases du Chapitre II | `docs/CH2-SPEC.md:43,45,47,59` ; `chapters/ch2-silent-bells/src/js/64-prologue.js:112,119,124,130` |
 | Rémanence | Afterglow | — | Évaporation du Lumen à la fin de la phase III du Chapitre II, sans texte ni bruitage ; une fêlure naît alors sur la cloche de tête gisant dans les décombres | lore (`docs/LORE.md:57`) ; `CHANGEMENTS.md:131-133` |
-| Masse | mace | `demonBody` | L'arme du Colosse est une masse, pas un marteau | `BIBLE.md:45,68` |
+| Masse | mace (flail), two-handed hammer | `demonBody`, `COLOSSE` | Deux armes du Colosse : la boule hérissée à la chaîne (au poing au repos) et le marteau à deux mains (rangé dans le dos, tête visible) | `BIBLE.md:47` ; `docs/decisions/2026-11-27-colosse-armes.md` |
 | Rage | rage | `rages`, `LB.rage(name)` (proposé) | Aucun nom à l'écran ; nom au lecteur d'écran. Chapitre I : Râle d'agonie, Fureur, Embrasement ; Difficile : Fureur de braise, Danse des chaînes, Embrasement final | `BIBLE.md:48` ; `archives/COMMUN-inventaire.md#s1-4` |
 
 | Rages du Chapitre II | — (noms EN non définis dans les sources lues) | `storm()` (Tempête de cloches) | Échos (phase I), Nuage de rouille et Double vague (phase II), Marée montante (forme I), Tempête de cloches (forme II) | `docs/CH2-SPEC.md:104-118` ; `chapters/ch2-silent-bells/NOTES.md:89` |
