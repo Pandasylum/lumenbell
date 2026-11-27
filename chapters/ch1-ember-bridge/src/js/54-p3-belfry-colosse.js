@@ -207,12 +207,24 @@ function col3Fb(ob){
   }else if(ob.nostow){o.P=[0,3000];o.r=0}   /* la masse a été jetée : plus rien dans le dos */
   return o;
 }
-/* préchauffage (entrée de la phase III) : une image quasi invisible de chaque pose du marteau, pour que le premier coup ne paie ni l'envoi des calques au processeur graphique ni la compilation du dessin */
+/* préchauffage (entrée de la phase III) : chaque pose du marteau, de la boule, du pivot (miroir, vue de dos) et les effets des coups sont dessinés une fois,
+   quasi invisibles, À LA TAILLE ET À LA PLACE DU JEU (une pose par image pendant l'entrée, derrière le Colosse qui se pose) : le premier coup ne paie plus ni l'envoi
+   des calques au processeur graphique ni la compilation du dessin à cette échelle (un dessin réduit ne suffit pas : le marteau figeait le jeu au premier combo). */
+const COL3_WARM=[
+  ...[K3_GARDE,K3_ARME,K3_FRAPPE,K3_FRAPPE2,K3_DOS].map(o=>({o})),
+  {o:{...K3_DOS,s:0,tx:46,ty:-300}},                       /* boule au bout de sa chaîne */
+  {o:K3_DOS,m:-1},{o:{...K3_DOS,dos:1,qD:[[0,30],[0,10],[0,-110]]},m:.8},{o:{...K3_DOS,dos:-1,qD:[[0,30],[0,10],[0,-110]]},m:.8},   /* pivot du coup de queue */
+  {fx:1}];
 function col3Warm(c){
-  if(COL3.warm)return;COL3.warm=1;
-  [K3_GARDE,K3_ARME,K3_FRAPPE,K3_FRAPPE2,K3_DOS].forEach(o=>{c.save();c.globalAlpha=.02;c.translate(8,H-8);c.scale(.12,.12);
-    COLOSSE.draw(c,{lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:0,tete:0,jaw:0,t:0,warm:1,eyes:.25,legs:{f:[0,0,0],n:[0,0,0]},tip:[o.tx,o.ty],heat:0,sag:20,ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r}});c.restore()});
-  c.save();c.globalAlpha=.02;c.translate(8,H-8);c.scale(-.12,.12);COLOSSE.draw(c,{...K3_DOS,dos:1,qD:[[0,30],[0,10],[0,-110]],plie:0,tete:0,jaw:0,t:0,warm:1,legs:{f:[0,0,0],n:[0,0,0]},ham:{P:K3_DOS.P,a:K3_DOS.a,g:K3_DOS.g,wN:0,wF:0,s:1,r:1}});c.restore();
+  const i=COL3.warm|0;if(i>=COL3_WARM.length)return;COL3.warm=i+1;
+  const w=COL3_WARM[i];c.save();c.globalAlpha=.01;
+  if(w.fx){const x=R.bx-200,tm=R.time;   /* effets : jet, vague, éclats, traînée de la queue */
+    COLFX.jet(c,[x,DECK-220],[PX+110,DECK-80],58,tm,1);k3vague(c,x,PX+122,.6,-1,tm);k3contact(c,[PX+118,DECK-62],.05,96,63);k3fente(c,x,PX+122,1,1);
+    k3sillage(c,[[x,DECK-200],[x-60,DECK-120],[x-120,DECK-70],[x-180,DECK-50]],1);k3aspire(c,[x+120,DECK-200],.8,tm)}
+  else{const o=w.o;c.translate(R.bx+C3X,DECK);c.scale(C3*(w.m||1),C3);
+    COLOSSE.draw(c,{dos:o.dos||0,qD:o.qD,lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:0,tete:0,jaw:0,t:0,warm:1,eyes:.25,legs:{f:[0,0,0],n:[0,0,0]},
+      tip:[o.tx,o.ty],heat:0,sag:20,ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r}})}
+  c.restore();
 }
 /* mouvements de vie : respiration, poids qui passe d'une épaule à l'autre, mains qui flottent, tête qui cherche, yeux qui palpitent */
 function col3Life(o,t){
