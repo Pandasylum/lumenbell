@@ -391,7 +391,7 @@ const COLOSSE=(()=>{
     const Wf=ik(far,H,-1)[1];
     c.save();
     /* queue : toujours visible, tout au fond, la racine suit le bassin */
-    queue(c,queueAccrochee(queueSol(o),pt));
+    queue(c,queueAccrochee(o.qP||queueSol(o),pt)); /* o.qP : queue pilotée par la phase II (même courbe, même forme) */
     if(dos)marteau();
     if(behind)boule_(Wf);
     /* jambes : o.legs = {f:[x, lever, angle], n:[...]} en unités de pose (pas lourds) ; la lointaine derrière */

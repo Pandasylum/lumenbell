@@ -396,3 +396,5 @@
 - Quand le Colosse encaisse un coup (boule rebondie, orbe, estoc, bague, dernier coup), l'image se fige un instant, un éclair à moitié transparent le traverse, des éclats jaillissent et il recule, ses fissures s'ouvrent.
 - En rage, il rugit entouré de flammes découpées, sa peau se fend pièce par pièce ; quand la bague éteint ses flammes, il ploie sur ses jambes. Sa queue traîne derrière lui, toujours accrochée à son bassin.
 - Le Veilleur lève sa lumière pour l'orbe, fonce pour l'estoc, frappe le sol de sa bague et ouvre son halo pour le dernier coup.
+- Au fond de la Fonderie, le Colosse vole devant un haut fourneau, un creuset qui verse sa coulée dans la lave et une chaîne rompue ; la petite lanterne orange du mur pulse tout le combat.
+- Griffes, tornades de feu des ailes, débris et boule de feu ont le même dessin que le Colosse de la phase I ; après une esquive parfaite, l'éclat, l'aile déchirée, le bloc renvoyé ou la queue clouée répondent au coup.
