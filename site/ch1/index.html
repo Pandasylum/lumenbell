@@ -3623,13 +3623,6 @@ function qflame(x,y,w,h,ph,col){
   ctx.quadraticCurveTo(x+Math.sin(t*8+ph)*w*.6-w*.2,y-h*.55,x+Math.sin(t*6+ph)*w*.5,y-h);
   ctx.quadraticCurveTo(x+Math.sin(t*7+ph)*w*.4+w*.2,y-h*.5,x+w,y);ctx.closePath();ctx.fill();
 }
-function qScrollY(base,period){return (base%period+period)%period-60}
-function qGear(x,y,r,a,col){
-  ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.fillStyle=col;
-  for(let i=0;i<10;i++){ctx.rotate(.628);ctx.fillRect(-r*.14,-r-8,r*.28,14)}
-  ctx.beginPath();ctx.arc(0,0,r,0,6.283);ctx.arc(0,0,r*.45,0,6.283,true);ctx.fill();
-  ctx.restore();
-}
 const FD={S:1.25,ZW:.78,back:null,reb:null,front:null};
 const FD_BORD='rgba(255,160,110,.55)';
 function fdP(c,pts,col){c.fillStyle=col;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.fill()}
@@ -3761,9 +3754,6 @@ function wingAngle(){
   if(Q.mode==='lake'&&Q.erupt)ang+=Math.sin(Q.time*14)*.4-.2;
   return ang;
 }
-const WING_OK=[[0,0],[200,-215],[250,-130],[345,-120],[285,-30],[330,60],[230,60],[250,140],[110,95]];
-const WING_HURT=[[0,0],[170,-175],[235,-120],[300,-95],[262,-25],[290,40],[225,50],[200,112],[105,92]];
-const WING_HOLES=[[[190,-120],[215,-100],[205,-70],[180,-85]],[[270,-20],[295,-5],[285,25],[258,10]],[[150,40],[175,50],[165,75],[140,62]]];
 const FD_WK=1.5,FD_WS={};
 function fdWingSprite(loin){
   const k=loin?1:0;if(FD_WS[k])return FD_WS[k];
@@ -3789,10 +3779,10 @@ function drawWing(S,ang,sc,col,wo0,fire,side){
 const fdE=u=>es(clamp01(u));
 const FD_S=.85;            
 const FD_HAM={P:[94,-256],a:-62,g:50,wN:0,wF:0,s:1,r:1}; 
-const QR={q:null,kind:'',wd:0,lt:0,cr:0,rend:0,rg:0,cnO:null,geo:null,front:null,coeur:null};
+const QR={q:null,kind:'',cr:0,rg:0,cnO:null,geo:null,front:null,coeur:null};
 function fdKv(x,K){if(x<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(x<=K[i][0])return K[i-1][1]+(K[i][1]-K[i-1][1])*fdE((x-K[i-1][0])/(K[i][0]-K[i-1][0]));return K[K.length-1][1]}
 function fdRec(){
-  if(QR.q!==Q){QR.q=Q;QR.kind='';QR.wd=0;QR.lt=Q.time;QR.cr=0;QR.rg=0;QR.cnO=null;QR.geo=null;QR.rel={}}
+  if(QR.q!==Q){QR.q=Q;QR.kind='';QR.cr=0;QR.rg=0;QR.cnO=null;QR.geo=null;QR.rel={}}
   const a=Q.atk;if(a)QR.kind=a.kind; 
   const c=Q.cn;
   if(c&&QR.cnO!==c)QR.cnO=c;

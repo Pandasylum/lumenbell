@@ -10,14 +10,6 @@ function qflame(x,y,w,h,ph,col){
   ctx.quadraticCurveTo(x+Math.sin(t*8+ph)*w*.6-w*.2,y-h*.55,x+Math.sin(t*6+ph)*w*.5,y-h);
   ctx.quadraticCurveTo(x+Math.sin(t*7+ph)*w*.4+w*.2,y-h*.5,x+w,y);ctx.closePath();ctx.fill();
 }
-/* Phase II : le fond de la Fonderie, sous le pont (1er novembre : plus de chute, le décor ne défile plus). */
-function qScrollY(base,period){return (base%period+period)%period-60}
-function qGear(x,y,r,a,col){
-  ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.fillStyle=col;
-  for(let i=0;i<10;i++){ctx.rotate(.628);ctx.fillRect(-r*.14,-r-8,r*.28,14)}
-  ctx.beginPath();ctx.arc(0,0,r,0,6.283);ctx.arc(0,0,r*.45,0,6.283,true);ctx.fill();
-  ctx.restore();
-}
 /* ===== Phase II : la Fonderie au fond de la montagne (maquette fonderie-reference.js, 27/11) =====
    Décor fixe dessiné UNE fois dans trois calques en cache (fond, rebord, avant-plan) ; à chaque image : seulement les mouvements (roue, creuset et coulée,
    brumes, lave, braises, chaîne qui se balance, lanterne qui pulse). Aucun canvas créé par image, aucun filter, aucun shadowBlur par image.
@@ -175,10 +167,6 @@ function wingAngle(){
   if(Q.mode==='lake'&&Q.erupt)ang+=Math.sin(Q.time*14)*.4-.2;
   return ang;
 }
-/* dmg (0 à 1) : aile abîmée après la foudre, bouts rongés, trous brûlés, une membrure brisée. */
-const WING_OK=[[0,0],[200,-215],[250,-130],[345,-120],[285,-30],[330,60],[230,60],[250,140],[110,95]];
-const WING_HURT=[[0,0],[170,-175],[235,-120],[300,-95],[262,-25],[290,40],[225,50],[200,112],[105,92]];
-const WING_HOLES=[[[190,-120],[215,-100],[205,-70],[180,-85]],[[270,-20],[295,-5],[285,25],[258,10]],[[150,40],[175,50],[165,75],[140,62]]];
 /* ailes dans le style de la maquette (aile() de fonderie-reference) : deux sprites dessinés une fois (ombre portée, plans de lumière, nervures, fissures de braise), partagés par les phases I et II ;
    dessin par image : un drawImage et, en rage, des flammes aux pointes. */
 const FD_WK=1.5,FD_WS={};
@@ -208,12 +196,12 @@ function drawWing(S,ang,sc,col,wo0,fire,side){
 const fdE=u=>es(clamp01(u));
 const FD_S=.85;            /* échelle de pose : le cœur du Colosse reste à (Q.bx-17, Q.by), comme les cibles du jeu */
 const FD_HAM={P:[94,-256],a:-62,g:50,wN:0,wF:0,s:1,r:1}; /* masse dans le dos, boule en bandoulière */
-const QR={q:null,kind:'',wd:0,lt:0,cr:0,rend:0,rg:0,cnO:null,geo:null,front:null,coeur:null};
+const QR={q:null,kind:'',cr:0,rg:0,cnO:null,geo:null,front:null,coeur:null};
 /* courbe par morceaux, adoucie : K = [[temps, valeur], ...] */
 function fdKv(x,K){if(x<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(x<=K[i][0])return K[i-1][1]+(K[i][1]-K[i-1][1])*fdE((x-K[i-1][0])/(K[i][0]-K[i-1][0]));return K[K.length-1][1]}
 /* mémoire de l'attaque qui précède une riposte (Q.atk est vidé avant Q.cn) */
 function fdRec(){
-  if(QR.q!==Q){QR.q=Q;QR.kind='';QR.wd=0;QR.lt=Q.time;QR.cr=0;QR.rg=0;QR.cnO=null;QR.geo=null;QR.rel={}}
+  if(QR.q!==Q){QR.q=Q;QR.kind='';QR.cr=0;QR.rg=0;QR.cnO=null;QR.geo=null;QR.rel={}}
   const a=Q.atk;if(a)QR.kind=a.kind; /* la riposte dépend de l'attaque initiale (a.kind), jamais de la queue qui la termine */
   /* riposte qui termine une rage : le numéro de la rage vient de la logique (Q.cn.rg) ; le dernier assaut garde la riposte ordinaire */
   const c=Q.cn;
