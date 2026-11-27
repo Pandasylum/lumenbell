@@ -1,5 +1,4 @@
 /* ---------- rendu phase III ---------- */
-function finTh(t){return t<FIN.collapse?0:1.4*ei(clamp01((t-FIN.collapse)/1.1))}
 function flameRow(foot,d,pre,post,sc){
   /* onde de choc : une succession d'explosions qui part du pied du Colosse et grossit jusqu'à atteindre le héros */
   if(d<=-pre||d>=post)return;
@@ -27,10 +26,15 @@ function drawBolt(x,y0,y1,al,big){
   }
   ctx.restore();
 }
-/* final : s'écroule (6,9 s), se relève à moitié quand la cloche va sonner, puis s'agenouille et baisse la tête ; le feu s'éteint ensuite */
-function finKneel(t){
-  const k=es(clamp01(finTh(t)/1.4)),rise=es(clamp01((t-(FIN.bell-.6))/.6)),bow=es(clamp01((t-FIN.bell)/.9));
-  return {k,rise,bow,df:k*(1.1*(1-rise)+.85*rise+.15*bow),out:es(clamp01((t-(FIN.bell-.2))/1.8))};
+/* final : le Colosse tombe en avant d'un bloc, reste étalé, tente de se relever (un premier essai échoue), finit à genoux ; le feu s'éteint pendant l'effort.
+   th : angle du corps entier autour de ses pieds (négatif = vers l'avant), lift : le corps étalé repose sur le sol, k : genoux fléchis, r : bras tendus devant lui */
+function finFall(t){
+  const T=t-FIN.collapse;
+  if(T<0)return {on:false,th:0,lift:0,k:0,r:0,bow:0,out:0};
+  const K=[[0,0],[.55,-1.45],[.95,-1.35],[1.3,-.85],[1.55,-1.15],[2.3,-.1],[2.6,0]];let th=0;
+  for(let i=1;i<K.length;i++)if(T<=K[i][0]){const u=(T-K[i-1][0])/(K[i][0]-K[i-1][0]);th=K[i-1][1]+(K[i][1]-K[i-1][1])*(i===1?ei(u):es(u));break}
+  if(T>K[K.length-1][0])th=0;
+  return {on:true,th,lift:-64*Math.sin(Math.min(Math.abs(th),1.5708)),k:es(clamp01((T-1.9)/.7)),r:es(clamp01(T/.25))*(1-es(clamp01((T-1.6)/.5))),bow:es(clamp01((T-2.3)/.8)),out:es(clamp01((T-1.5)/1.8))};
 }
 function heroFin(){
   const f=R.fin,t=f.t,bx=R.bx,L=[-112,-165];
@@ -47,11 +51,10 @@ function heroFin(){
     if(t>=FIN.charge&&t<FIN.strike){hand=[26,-100];sa=-1.45;y=L[1]-24*es(clamp01((t-FIN.charge)/.6))}
     else if(t>=FIN.strike){hand=[38,-56];sa=.12;x+=14*es(clamp01((t-FIN.strike)/.1))}
     if(t>=FIN.collapse){
-      /* le Colosse s'écroule sur un genou (il ne bascule plus) : le Veilleur reste sur son épaule, qui descend avec lui */
-      const k=es(clamp01(finTh(t)/1.4));
-      const A=[L[0]+(45-L[0])*k,L[1]+(-200-L[1])*k];
-      x=bx+A[0];y=A[1]+KNEEL3*finKneel(t).df;
-      hand=[30,-60];sa=.12+.9*k;glow=.4;
+      /* le Veilleur reste accroché à son dos : il suit la chute, l'effort et l'agenouillement du Colosse */
+      const f=finFall(t),k0=es(clamp01((t-FIN.collapse)/.4)),A=[L[0]+(45-L[0])*k0,L[1]+(-215-L[1])*k0+KNEEL3*f.k],c=Math.cos(f.th),sn=Math.sin(f.th);
+      x=bx+A[0]*c-A[1]*sn;y=A[0]*sn+A[1]*c+f.lift;rot=f.th;
+      hand=[30,-60];sa=.12+.9*k0;glow=.4;
     }
     if(t>=FIN.bell-.6){
       /* debout sur le Colosse terrassé, il lève sa lanterne vers la cloche */
@@ -65,7 +68,7 @@ function finBoss(o){
   const t=R.fin.t,th=0,c=1,sn=0;
   o.warm=t<FIN.collapse?(t>=FIN.strike?2:1.5):Math.max(.03,(t<FIN.bell?Math.max(.25,1.7-(t-FIN.collapse)*.35):Math.max(.25,1.7-(FIN.bell-FIN.collapse)*.35)*(1-clamp01((t-FIN.bell)/1.2))));
   o.jaw=(t>=FIN.strike&&t<FIN.collapse)?16:(t<.6?12:0);
-  o.lean=0;o.dy=0;o.kd=finKneel(t);o.kneel=o.kd.k;
+  const fl=finFall(t);o.kd=fl;o.lean=fl.th;o.dy=fl.lift;o.kneel=fl.k;
   if(t>=FIN.strike&&t<FIN.collapse)o.x+=rand(-3,3);
   o.hands=[[-128,-66],[128,-66]].map(p=>[o.x+p[0]*c-p[1]*sn,DECK+p[0]*sn+p[1]*c]);
   if(t<FIN.collapse){const sw=Math.sin(t*3)*4;o.hands[0][1]+=sw;o.hands[1][1]-=sw}

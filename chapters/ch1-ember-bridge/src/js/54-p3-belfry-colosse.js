@@ -122,12 +122,11 @@ function col3Fb(ob){
   const loc=h=>{const dx=h[0]-ob.x,dy=h[1]-DECK;return fin?[dx*c-dy*sn,dx*sn+dy*c]:[dx,dy]};
   const h0=loc(ob.hands[0]),h1=loc(ob.hands[1]);
   const o={...K3_DOS,off:[-62+(h0[0]+128)/C3,92+(h0[1]+66)/C3],nn:[(h1[0]-128)/C3,(h1[1]+66)/C3],lean:fin?0:ob.lean,jaw:ob.jaw,wa:ob.wa,ws:ob.ws,yeux:ob.jaw>8?.6:.25,warm:ob.warm};
-  if(ob.kneel>0){
-    /* final : écroulé, il se relève à moitié (la tête vers la cloche), puis s'agenouille en baissant la tête ; le feu s'éteint, seules les fissures gardent la braise */
-    const f=ob.kd,k=f.k;
-    Object.assign(o,{kneel:k,kdk:KNEEL3/C3,drop:KNEEL3/C3*f.df,out:f.out,
-      lean:-.22*k*(1-f.rise)-.02*k*f.rise*(1-f.bow)-.17*f.bow,tete:.3*k*(1-f.rise)-.1*k*f.rise*(1-f.bow)+.8*f.bow,
-      yeux:.25*(1-f.out),jaw:0,off:[-62+30*k,92+2*k],nn:[-50*k,-4*k]});
+  if(ob.kd&&ob.kd.on){
+    /* final : le corps entier tombe en avant (rotation autour des pieds, voir drawBoss3), bras tendus devant pour se rattraper, puis il se redresse sur les genoux, la tête basse ; le feu s'éteint */
+    const f=ob.kd,k=f.k,r=f.r,L2=(a,b,u)=>a+(b-a)*u;
+    Object.assign(o,{kneel:k,kdk:KNEEL3/C3,drop:KNEEL3/C3*k,out:f.out,lean:-.17*f.bow,tete:-.15*r*(1-k)+.85*f.bow,yeux:.25*(1-f.out),jaw:6*r*(1-k),
+      off:[L2(L2(-62,-75,r),-32,k),L2(L2(92,-70,r),94,k)],nn:[L2(L2(0,-95,r),-50,k),L2(L2(0,-60,r),-4,k)],ws:1+.5*r,wa:.25*r});
   }
   if(ob.sword&&ob.sword.l>1){
     /* la masse brandie au final : les deux poings sur le manche */

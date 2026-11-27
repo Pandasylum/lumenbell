@@ -2327,7 +2327,7 @@ const COLOSSE=(()=>{
     const kn=o.kneel||0;
     [[SP.legF,LG.f,HF,aF,SP.legFC],[SP.legN,LG.n,HN,aN,SP.legNC]].forEach(([sp,q,hip,an,ov])=>{
       if(kn>.001){ 
-        const near=sp===SP.legN,b=sp.box,dk=o.kdk,ky=near?-56:-60,kx=near?46:-66,p1=near?0:1.15*kn,p2=near?-1.5*kn:0,co=Math.cos(p1),si=Math.sin(p1),
+        const near=sp===SP.legN,b=sp.box,dk=o.kdk*kn,ky=near?-56:-60,kx=near?46:-66,p1=near?0:1.15*kn,p2=near?-1.5*kn:0,co=Math.cos(p1),si=Math.sin(p1),
           hn=[hip[0],hip[1]+dk],vx=kx-hip[0],vy=ky-hip[1],kk=[hn[0]+vx*co-vy*si,hn[1]+vx*si+vy*co-(near?22*kn:0)];
         c.save();c.translate(hn[0],hn[1]);c.rotate(p1);c.translate(-hip[0],-hip[1]);c.beginPath();c.rect(b[0],b[1],b[2],ky-b[1]);c.clip();img(c,sp);c.restore();
         c.save();c.translate(kk[0],kk[1]);c.rotate(p2);c.translate(-kx,-ky);c.beginPath();c.rect(b[0],ky,b[2],b[1]+b[3]-ky);c.clip();img(c,sp);c.restore();
@@ -4586,7 +4586,6 @@ function rFinale(dt){
     R.outro=true;OUTRO.play(()=>{if(!R)return;R.outro=false;if(R.mode==='space'&&!R.cardShown){R.cardShown=true;rEnd()}})}
 }
 
-function finTh(t){return t<FIN.collapse?0:1.4*ei(clamp01((t-FIN.collapse)/1.1))}
 function flameRow(foot,d,pre,post,sc){
   if(d<=-pre||d>=post)return;
   const N=7,life=.5+post*.3,gx=GUARD[0];
@@ -4613,9 +4612,13 @@ function drawBolt(x,y0,y1,al,big){
   }
   ctx.restore();
 }
-function finKneel(t){
-  const k=es(clamp01(finTh(t)/1.4)),rise=es(clamp01((t-(FIN.bell-.6))/.6)),bow=es(clamp01((t-FIN.bell)/.9));
-  return {k,rise,bow,df:k*(1.1*(1-rise)+.85*rise+.15*bow),out:es(clamp01((t-(FIN.bell-.2))/1.8))};
+function finFall(t){
+  const T=t-FIN.collapse;
+  if(T<0)return {on:false,th:0,lift:0,k:0,r:0,bow:0,out:0};
+  const K=[[0,0],[.55,-1.45],[.95,-1.35],[1.3,-.85],[1.55,-1.15],[2.3,-.1],[2.6,0]];let th=0;
+  for(let i=1;i<K.length;i++)if(T<=K[i][0]){const u=(T-K[i-1][0])/(K[i][0]-K[i-1][0]);th=K[i-1][1]+(K[i][1]-K[i-1][1])*(i===1?ei(u):es(u));break}
+  if(T>K[K.length-1][0])th=0;
+  return {on:true,th,lift:-64*Math.sin(Math.min(Math.abs(th),1.5708)),k:es(clamp01((T-1.9)/.7)),r:es(clamp01(T/.25))*(1-es(clamp01((T-1.6)/.5))),bow:es(clamp01((T-2.3)/.8)),out:es(clamp01((T-1.5)/1.8))};
 }
 function heroFin(){
   const f=R.fin,t=f.t,bx=R.bx,L=[-112,-165];
@@ -4631,10 +4634,9 @@ function heroFin(){
     if(t>=FIN.charge&&t<FIN.strike){hand=[26,-100];sa=-1.45;y=L[1]-24*es(clamp01((t-FIN.charge)/.6))}
     else if(t>=FIN.strike){hand=[38,-56];sa=.12;x+=14*es(clamp01((t-FIN.strike)/.1))}
     if(t>=FIN.collapse){
-      const k=es(clamp01(finTh(t)/1.4));
-      const A=[L[0]+(45-L[0])*k,L[1]+(-200-L[1])*k];
-      x=bx+A[0];y=A[1]+KNEEL3*finKneel(t).df;
-      hand=[30,-60];sa=.12+.9*k;glow=.4;
+      const f=finFall(t),k0=es(clamp01((t-FIN.collapse)/.4)),A=[L[0]+(45-L[0])*k0,L[1]+(-215-L[1])*k0+KNEEL3*f.k],c=Math.cos(f.th),sn=Math.sin(f.th);
+      x=bx+A[0]*c-A[1]*sn;y=A[0]*sn+A[1]*c+f.lift;rot=f.th;
+      hand=[30,-60];sa=.12+.9*k0;glow=.4;
     }
     if(t>=FIN.bell-.6){
       const u=es(clamp01((t-(FIN.bell-.6))/.5));
@@ -4647,7 +4649,7 @@ function finBoss(o){
   const t=R.fin.t,th=0,c=1,sn=0;
   o.warm=t<FIN.collapse?(t>=FIN.strike?2:1.5):Math.max(.03,(t<FIN.bell?Math.max(.25,1.7-(t-FIN.collapse)*.35):Math.max(.25,1.7-(FIN.bell-FIN.collapse)*.35)*(1-clamp01((t-FIN.bell)/1.2))));
   o.jaw=(t>=FIN.strike&&t<FIN.collapse)?16:(t<.6?12:0);
-  o.lean=0;o.dy=0;o.kd=finKneel(t);o.kneel=o.kd.k;
+  const fl=finFall(t);o.kd=fl;o.lean=fl.th;o.dy=fl.lift;o.kneel=fl.k;
   if(t>=FIN.strike&&t<FIN.collapse)o.x+=rand(-3,3);
   o.hands=[[-128,-66],[128,-66]].map(p=>[o.x+p[0]*c-p[1]*sn,DECK+p[0]*sn+p[1]*c]);
   if(t<FIN.collapse){const sw=Math.sin(t*3)*4;o.hands[0][1]+=sw;o.hands[1][1]-=sw}
@@ -5154,11 +5156,10 @@ function col3Fb(ob){
   const loc=h=>{const dx=h[0]-ob.x,dy=h[1]-DECK;return fin?[dx*c-dy*sn,dx*sn+dy*c]:[dx,dy]};
   const h0=loc(ob.hands[0]),h1=loc(ob.hands[1]);
   const o={...K3_DOS,off:[-62+(h0[0]+128)/C3,92+(h0[1]+66)/C3],nn:[(h1[0]-128)/C3,(h1[1]+66)/C3],lean:fin?0:ob.lean,jaw:ob.jaw,wa:ob.wa,ws:ob.ws,yeux:ob.jaw>8?.6:.25,warm:ob.warm};
-  if(ob.kneel>0){
-    const f=ob.kd,k=f.k;
-    Object.assign(o,{kneel:k,kdk:KNEEL3/C3,drop:KNEEL3/C3*f.df,out:f.out,
-      lean:-.22*k*(1-f.rise)-.02*k*f.rise*(1-f.bow)-.17*f.bow,tete:.3*k*(1-f.rise)-.1*k*f.rise*(1-f.bow)+.8*f.bow,
-      yeux:.25*(1-f.out),jaw:0,off:[-62+30*k,92+2*k],nn:[-50*k,-4*k]});
+  if(ob.kd&&ob.kd.on){
+    const f=ob.kd,k=f.k,r=f.r,L2=(a,b,u)=>a+(b-a)*u;
+    Object.assign(o,{kneel:k,kdk:KNEEL3/C3,drop:KNEEL3/C3*k,out:f.out,lean:-.17*f.bow,tete:-.15*r*(1-k)+.85*f.bow,yeux:.25*(1-f.out),jaw:6*r*(1-k),
+      off:[L2(L2(-62,-75,r),-32,k),L2(L2(92,-70,r),94,k)],nn:[L2(L2(0,-95,r),-50,k),L2(L2(0,-60,r),-4,k)],ws:1+.5*r,wa:.25*r});
   }
   if(ob.sword&&ob.sword.l>1){
     const X0=ob.x+C3X,s=ob.sword;
@@ -5651,6 +5652,7 @@ function renderR(){
      main.setTransform(1,0,0,1,0,0);main.filter='grayscale(1) brightness(.62)';main.drawImage(OFF,0,0);main.filter='none';main.restore();
      if(pk<1){ctx.save();ctx.strokeStyle='rgba(255,240,190,'+(.85*(1-pk))+')';ctx.lineWidth=4*(1-pk)+1;ctx.beginPath();ctx.arc(cp[0],cp[1],rr,0,6.283);ctx.stroke();ctx.restore()}
    }}
+  if(R.mode==='finale'){const T=R.fin.t-FIN.collapse-.55;if(T>0&&T<.9){k3pas(ctx,R.bx-290,T,2,91);k3pas(ctx,R.bx-130,T,1.4,92)}}   
   drawFallWings();drawFinFx();
   if(R.mode==='finale'&&R.fin.t<.4)drawBolt(R.bx-20,-10,DECK-260,1-R.fin.t/.4,true);
   drawHits3();
