@@ -359,3 +359,6 @@
 - Phare Noyé : les séries de sorts (combos) suivent un tableau par difficulté, partie et rage.
 
 - Phare Noyé (partie 2) : plus d’ondes sonores après les cloches ; les cloches lancées et rappelées restent.
+
+- 2026-11-27 (direction artistique, documentation seule) : rien ne change dans le jeu pour l’instant.
+- À venir : refonte visuelle de tout le jeu avant le Chapitre III, Colosse en trois quarts vu d’en bas, lanterne à cage vitrée.
