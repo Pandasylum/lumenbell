@@ -7,7 +7,7 @@
 const C3=1.1;        /* unités de pose -> monde (comme la phase I) */
 const C3X=-20;       /* le repère du Colosse est à R.bx-20 : son cœur reste là où visent les contres */
 const K3TAU=6.283185307179586;
-const STONE3=14;     /* final : de combien le Colosse s'affaisse (px) quand la pierre le gagne */
+const KNEEL3=55;     /* final : de combien le buste descend quand le Colosse met un genou à terre (px) */
 const k3cl=u=>u<0?0:u>1?1:u,k3ez=u=>{u=k3cl(u);return u*u*(3-2*u)},k3l=(a,b,u)=>a+(b-a)*u;
 const k3poly=COLFX.poly,k3star=COLFX.etoile,k3shards=COLFX.eclats,k3flame=COLFX.flamme;
 const k3rnd=s=>()=>(s=(s*16807)%2147483647)/2147483647;
@@ -122,9 +122,9 @@ function col3Fb(ob){
   const loc=h=>{const dx=h[0]-ob.x,dy=h[1]-DECK;return fin?[dx*c-dy*sn,dx*sn+dy*c]:[dx,dy]};
   const h0=loc(ob.hands[0]),h1=loc(ob.hands[1]);
   const o={...K3_DOS,off:[-62+(h0[0]+128)/C3,92+(h0[1]+66)/C3],nn:[(h1[0]-128)/C3,(h1[1]+66)/C3],lean:fin?0:ob.lean,jaw:ob.jaw,wa:ob.wa,ws:ob.ws,yeux:ob.jaw>8?.6:.25,warm:ob.warm};
-  if(ob.stone>0){
-    /* final : figé face à la cloche, debout, la tête basse et les bras ballants, le feu éteint ; la pierre le gagne des pieds à la tête (renderR) */
-    const k=ob.stone;Object.assign(o,{drop:STONE3/C3*k,plie:.1*k,tete:.5*k,lean:.05*k,yeux:.25*(1-k),jaw:0,off:[-62+32*k,92+6*k],nn:[-34*k,-14*k]});
+  if(ob.kneel>0){
+    /* final : genou à terre, buste penché, la tête s'incline plus bas quand la cloche lui répond, le feu éteint */
+    const k=ob.kneel,bw=ob.bow||0;Object.assign(o,{kneel:k,drop:KNEEL3/C3*k,tete:(.4+.4*bw)*k,lean:-.1*k-.07*bw,yeux:.25*(1-k),jaw:0,off:[-62+30*k,92+2*k],nn:[-50*k,-4*k]});
   }
   if(ob.sword&&ob.sword.l>1){
     /* la masse brandie au final : les deux poings sur le manche */
