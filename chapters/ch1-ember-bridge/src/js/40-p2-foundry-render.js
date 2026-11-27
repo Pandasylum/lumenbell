@@ -280,6 +280,8 @@ function fdPose(){
   if(Q.mode==='lake'){o.eteint=Math.max(o.eteint,es(Q.lt/1.2)*.8);o.jaw=0;o.fissure=1;o.rage=.6;o.flap=Math.sin(tt*14)*.5}
   return o;
 }
+/* point où le rayon cloue la queue : sous son bout, au ras du lac (cible du rayon, de l'éclat de dégât et du clou) */
+function fdPin(){return QR.tipPx?[QR.tipPx[0],QLAKE-14]:null}
 function qWingDmg(){
   const c=Q.cn,dt=Math.min(.1,Math.max(0,Q.time-QR.lt));QR.lt=Q.time;
   if(c&&c.k==='head'&&QR.kind==='wings'&&!QR.tail)QR.wd=Math.max(QR.wd,es((c.t-.5)/.5));
@@ -294,7 +296,7 @@ function drawBoss2(){
   const wa=wingAngle(),fire=Q.enraged,dmg=qWingDmg(),wo=Q.wo;
   const T2=tailTip(),tip=[(T2.tip[0]-X0)/s,(T2.tip[1]-Y0)/s];
   const R0=[30,-130];let tp=tip;
-  if(Q.cn&&Q.cn.k!=='final'&&QR.tail){const u=es((Q.cn.t-.35)/.3);tp=[tip[0],tip[1]+((QLAKE-14-Y0)/s-tip[1])*u]} /* queue clouée au sol par le rayon */
+  if(Q.cn&&Q.cn.k!=='final'&&QR.tail){const u=es((Q.cn.t-.15)/.2);tp=[tip[0],tip[1]+((QLAKE-14-Y0)/s-tip[1])*u]} /* queue clouée au sol par le rayon */
   const qP=[R0,[R0[0]+(tp[0]-R0[0])*.35,R0[1]+(tp[1]-R0[1])*.3+36*(1-T2.strike)],[R0[0]+(tp[0]-R0[0])*.7,R0[1]+(tp[1]-R0[1])*.75+58*(1-T2.strike)],tp];
   QR.tipPx=[X0+tp[0]*s,Y0+tp[1]*s];
   ctx.save();
@@ -540,7 +542,7 @@ function drawCnFx(){
   }
   if(tail&&c.t>=.35&&c.t<1.6){
     /* la queue est clouée au sol par un trait de lumière, et son feu s'éteint */
-    const q=QR.tipPx||to,u=(c.t-.35)/.4,pin=es(u),al=c.t<1.2?1:1-(c.t-1.2)/.4;
+    const q=fdPin()||to,u=(c.t-.35)/.4,pin=es(u),al=c.t<1.2?1:1-(c.t-1.2)/.4;
     ctx.save();ctx.globalAlpha=al;
     if(c.t<.7)COLFX.etoile(ctx,q[0],q[1],70*(1-u),9,.3,'#ffe9a0',.4);
     COLFX.poly(ctx,[[q[0]-4,q[1]-70*pin],[q[0]+4,q[1]-70*pin],[q[0]+2,q[1]+10],[q[0]-2,q[1]+10]],'#ffe9a0');COLFX.poly(ctx,[[q[0]-1.5,q[1]-70*pin],[q[0]+1.5,q[1]-70*pin],[q[0]+1,q[1]+8],[q[0]-1,q[1]+8]],'#fffbea');
@@ -558,7 +560,7 @@ function drawCnFx(){
   }
 }
 function qBeamTarget(c){
-  if(c.k!=='final'&&QR.tail&&QR.tipPx)return QR.tipPx;
+  if(c.k!=='final'&&QR.tail&&QR.tipPx)return fdPin();
   if(c.k==='head'&&QR.kind==='wings')return fdWingPt();
   return c.k==='head'?[Q.bx,Q.by-92]:c.k==='beam'?[Q.bx-30,Q.by-4]:c.k==='final'?[Q.bx-20,Q.by-4]:[Q.bx-30,Q.by-4];
 }

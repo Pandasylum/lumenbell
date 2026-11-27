@@ -11,7 +11,9 @@ Source : maquette `fonderie-reference.js` (colosseF, FS, DEC, ambiance, recul, d
 - **Fin de phase et défaite** : même déroulé (plongée, jaillissement, envol par la cheminée) ; la lave passe devant le Colosse.
 - **Performance** : aucun canvas créé par image, aucun `filter`, aucun `shadowBlur` par image (retirés des coups, de `qrock`). Mouvement réduit : horloge figée, éclats coupés.
 
+## Après revue
+- Après une attaque finie par la queue, le rayon, l'éclat de dégât et le clou visent le même point, au bout de la queue clouée au ras du lac (`fdPin`). Seul le point d'affichage de l'éclat change dans `qDamage` ; dégâts et timings inchangés.
+
 ## À valider
-- Le jeu n'a pas de riposte après le cri (`qAtkEnd`, `roar` → `qIdle`) : la riposte « rayon dans la gueule » est donc non visible ; besoin moteur noté dans `DEMANDES.md`.
-- Après une attaque finie par la queue, le rayon vise le bout de la queue, mais l'éclat de dégât du jeu (`qDamage`) reste sur la poitrine.
+- Le jeu n'a pas de riposte après le cri (`qAtkEnd`, `roar` → `qIdle`) : la riposte « rayon dans la gueule » n'est donc pas visible ; aucune demande moteur n'est ouverte.
 - Pas de revue visuelle locale (consigne : CI seule).
