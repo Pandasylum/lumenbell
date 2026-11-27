@@ -413,3 +413,5 @@
 - Le Colosse arrive en volant, ailes ouvertes, et reste en vol en combat, jambes pendantes ; le contre des débris fait tomber trois colonnes de lumière sur lui.
 - À la fin de la phase II, le Colosse tombe ailes repliées, se pose doucement dans la lave, puis se redresse, déploie ses ailes et s'envole par la cheminée, sans effets qui s'empilent.
 - Quand le Colosse tombe, ses ailes restent ouvertes et frémissent dans l'air ; elles ne se replient qu'au contact de la lave, sans traînée de feu.
+- En phase III, le Colosse brandit son marteau à deux mains (il le range dans le dos sinon), décroche et lance la boule enchaînée, sort ses griffes, charge en vraie course jusqu'au piétinement et au geyser, souffle et lance trois tornades de feu ; il respire et bouge au repos.
+- À la fin du combat, le Colosse s'agenouille, la tête basse, puis se fige en pierre sous le Veilleur.

@@ -22,13 +22,14 @@
 | `js/16-p1-bridge-logic.js` | Phase I : logique du combat, rages, `bossStep`, `hud`, `step` |
 | `js/20-p1-bridge-decor.js` | Phase I : calques statiques du pont (`buildStatic`) |
 | `js/24-hero-draw.js` | Raccourci `lanternBeam` ; le Veilleur (corps, sceptre-lanterne, poses, bouclier) est dans `shared/js/20-watcher.js` (`LB.drawWatcher`) |
-| `js/28-boss-body.js` | Colosse : chaîne, enclumes, masse rangée, **`demonBody`** (silhouette validée, partagée), **`COLOSSE`** (phase I : calques cuits, queue, fissures par pièce, `plie` / `tete` / teintes), **`COLFX`** (effets réutilisables, non branchés en phases II et III) |
+| `js/28-boss-body.js` | Colosse : **`COLOSSE`** (phase I : calques cuits, queue, fissures par pièce, `plie` / `tete` / teintes), **`COLFX`** (effets réutilisables, non branchés en phases II et III) |
 | `js/32-p1-bridge-render.js` | Phase I : poses, attaques, effets, aides, `render` ; ripostes (`RP`, `COL_H`, `COL_R`, `MV_S` : réactions de dégâts, rage, gestes de lumière du Veilleur ; voir `docs/decisions/2026-11-27-ripostes-p1.md`) |
 | `js/36-p2-foundry-logic.js` | Phase II : `Q`, `DG`, repères du fond (`QFLOOR`, `QLAKE`, `QEDGE`), attaques, `lakeY` (horloge de la fin), `qDive`, `qEnd`, `qStep` |
 | `js/40-p2-foundry-render.js` | Phase II : décor de la Fonderie en trois calques en cache (`fdBuild`, `qBackground`, `drawLake`), creuset du palan et ripostes de fin de rage (`fdCr1`, `fdCr2`, `fdRipFx`), ailes en sprites (`drawWing`, aussi phase I), Colosse du lot 2 (`drawBoss2`, `fdPose`), attaques (`drawHits2`), contres (`drawCnFx`), `renderQ` |
 | `js/44-p3-belfry-logic.js` | Phase III : `R`, `R_T`, `RATK`, `ULT`, `FIN`, `rEnd`, `rStep`, `rFinale` |
 | `js/48-p3-belfry-poses.js` | Phase III : finale (`heroFin`, `finBoss`, ailes tombées), poses du Veilleur et du Colosse, masse |
 | `js/52-p3-belfry-decor.js` | Phase III : tours, cloche (`ringBell`), fanal, beffroi, fond et sol |
+| `js/54-p3-belfry-colosse.js` | Phase III : Colosse du Clocher (`COLOSSE`), poses calées sur les impacts (`col3Pose`, `col3Hammer`, `col3Whip`, `col3Charge`…), effets de la maquette (`col3Fx`, tornades, geyser, fente), final à genoux |
 | `js/56-p3-belfry-render.js` | Phase III : aura, fissures, Colosse, contres (cloche, éclats, rayon), fin vers la mer, `renderR` |
 | `js/60-ui-menu.js` | `CARD1`, `goPhase`, options, pause (`setPause`), réessayer, menu commun (`LB.menu.mount`, braises), `showMenu`, difficultés (`applyDiff`, `LB.help.use`), entrées communes (`LB.input.bind`) |
 | `js/64-audio-music.js` | Musique synthétisée : combat, menu, finale, outro, `MUS`, `musTick` |
