@@ -409,3 +409,4 @@
 - Le contre de la première rage lance une lame de lumière en croissant qui court sur le pont jusqu'au Colosse, au lieu d'un cercle plat sous les pieds du Veilleur.
 - Les rayons de la lanterne, partout dans le Chapitre I, sont maintenant des coins de lumière dorés comme en phase I ; les impacts des phases II et III éclatent en étoiles et en flammes découpées, sans cercles ni halos bleus.
 - Le contre de la première rage est plus spectaculaire : fissure de lumière dans le pont, trois vagues, colonne de lumière sur le Colosse dont les flammes de rage sont arrachées et s'envolent.
+- En phase II, le Colosse descend en battant des ailes dans une traînée de feu, respire et bouge au repos, tombe en tournoyant dans la lave et jaillit du four ; chaque contre a son effet, et le coup ultime arrache des plaques d'armure.
