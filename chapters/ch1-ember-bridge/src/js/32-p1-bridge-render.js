@@ -214,6 +214,125 @@ function hookStep(o,target,t){
   o.hv=Math.abs(target-cur)<=sp?target:cur+Math.sign(target-cur)*sp;
   return o.hv;
 }
+/* Colosse A9 : les 4 poses de la boule à la chaîne validées (repos, armement, frappe, arrachement).
+   Colonnes : penché (rad), descente, pivot (largeur du buste), décalage épaule lointaine / proche, main lointaine depuis l'épaule (x, y).
+   Le buste passe d'une pose à l'autre au rythme des états du jeu (mêmes durées, mêmes impacts). */
+const COL_S=1.1; /* unités de pose (maquette x0.8) -> monde ; à 1.1 la pointe du marteau atteint le Veilleur sans étirer les bras */
+const COL_P={repos:[0,0,1,0,0,-62,92],arme:[.3,0,.88,10,-24,-62,-62],frappe:[-.4,16,1.06,-16,20,-88,66],arrache:[.07,6,.95,8,-8,-84,16]};
+/* Marteau à deux mains : images clés validées (colosse-marteau.js). P main proche, a angle du manche (degrés), g tête -> main proche,
+   wN / wF mains sur le manche, s boule en bandoulière, ff main lointaine depuis l'épaule, r : P et a suivent le buste (rangé dans le dos). */
+const MK=(()=>{const K0={lean:0,drop:0,sx:1,dF:0,dN:0,P:[94,-256],a:-62,g:50,wN:0,wF:0,s:0,ff:[-62,92],r:1};
+  const K1={...K0,lean:-.04,s:1,ff:[8,104]},K2={...K1,lean:.06,dN:-10,wN:1,ff:[-30,86]};
+  /* armement : manche baissé derrière le dos (référence : P [0,-300], a -15) pour que la tête reste entière à l'écran, téléphone compris */
+  const K3={lean:.22,drop:0,sx:.92,dF:16,dN:-40,P:[-5,-285],a:50,g:205,wN:1,wF:1,s:1,ff:[-30,86],r:0};
+  const K4={...K3,lean:-.45,drop:22,sx:1.04,dN:-60,P:[-135,-126],a:-201},K5={...K3,lean:-.12,drop:8,sx:.96,dN:-56,P:[-110,-146],a:-192};
+  return {K0,K1,K2,K3,K4,K5,Pfin:[-100,-196]}})();
+/* Gestes de l'attaque au marteau, en fractions de la durée de chaque état (durées du jeu inchangées) : sortie dans sw1w, rangement dans swrec / orb */
+const MK_SEQ={sortie:[['K1',.28],['K2',.5],['K3',.86]],gap:[['K5',.4],['K3',1]],range:[['K5',.18],['K3',.42],['K2',.66],['K1',.83],['K0',1]],finSortie:[['K2',.35],['K3',1]]};
+/* points d'impact de la tête du marteau (depuis PX, DECK) : hauteur du coup bas (1er et 3e) et du coup haut (2e) ;
+   touché : centre de la tête à x, la pointe atteint le Veilleur ; bloqué : la pointe (46 unités de pose) s'arrête sur la barrière (bar) */
+const MK_HIT={x:90,bas:-70,haut:-165,bar:116,pointe:46};
+let colMouthW=[MOUTH[0],MOUTH[1]]; /* gueule du Colosse dans le monde (le souffle en part) */
+function cpMix(A,B,k){return A.map((v,i)=>v+(B[i]-v)*k)}
+function mkMix(p,q,u){const o={};for(const k in p)o[k]=Array.isArray(p[k])?p[k].map((v,i)=>v+(q[k][i]-v)*u):p[k]+(q[k]-p[k])*u;return o}
+/* image d'impact : la tête du marteau sur le point visé (la main reste à portée, le manche s'oriente) */
+function mkHit(Tp,P){const dx=Tp[0]-P[0],dy=Tp[1]-P[1];let a=Math.atan2(dy,dx)/Math.PI*180;if(a>-90)a-=360;return {...MK.K4,P:P.slice(),a,g:Math.min(232,Math.hypot(dx,dy))}}
+function mkSeq(from,seq,u){const io=x=>x*x*(3-2*x);let prev=from,u0=0;
+  for(const [k,u1] of seq){const K=typeof k==='string'?MK[k]:k;if(u<=u1)return mkMix(prev,K,io(clamp01((u-u0)/(u1-u0))));prev=K;u0=u1}
+  return prev}
+/* clé du marteau selon l'état du jeu (toP : monde -> pose) */
+function hamKey(toP){
+  const b=G.boss,t=b.t,tm=G.time,inQ=x=>x*x*x;
+  /* coup i : bloqué (parade réussie, ou barrière levée pendant le coup) -> sur la barrière ; sinon -> sur le Veilleur */
+  const par=[G.sw.p1,G.sw.p2,G.sw.p3];
+  const hit=(i,live)=>{const blk=par[i]||(live&&G.pl.s==='act'),x=blk?MK_HIT.bar+MK_HIT.pointe*COL_S:MK_HIT.x;return mkHit(toP([PX+x,DECK+(i===1?MK_HIT.haut:MK_HIT.bas)]),MK.K4.P)};
+  const last=DIFF.hard?hit(2,false):hit(1,false);let k=null;
+  switch(b.s){
+    case 'sw1w':k=mkSeq(MK.K0,MK_SEQ.sortie,clamp01(t/T.sw1w));k.P=[k.P[0],k.P[1]+Math.sin(tm*50)*1.5*(t/T.sw1w)];break;
+    case 'sw1':k=mkMix(MK.K3,hit(0,true),inQ(clamp01(t/T.sw1)));break;
+    case 'swgap':k=mkSeq(hit(0,false),MK_SEQ.gap,clamp01(t/T.swgap));if(!G.sw.p1)k.P=[k.P[0]-90/COL_S*Math.sin(Math.PI*clamp01(t/.24)),k.P[1]];break;
+    case 'sw2w':k={...MK.K3,P:[MK.K3.P[0]+Math.sin(tm*50)*1.5,MK.K3.P[1]]};break;
+    case 'sw2':k=mkMix(MK.K3,hit(1,true),inQ(clamp01(t/T.sw2)));break;
+    case 'sw3g':k=mkSeq(hit(1,false),MK_SEQ.gap,clamp01(t/T.sw3g));if(!G.sw.p2)k.P=[k.P[0]-60/COL_S*Math.sin(Math.PI*clamp01(t/.24)),k.P[1]];break;
+    case 'sw3w':k={...MK.K3,P:[MK.K3.P[0],MK.K3.P[1]+Math.sin(tm*50)*1.5]};break;
+    case 'sw3':k=mkMix(MK.K3,hit(2,true),inQ(clamp01(t/T.sw3)));break;
+    case 'swrec':k=mkSeq(last,MK_SEQ.range,clamp01(t/T.swrec));
+      if(!(DIFF.hard?G.sw.p3:G.sw.p2)){const q=Math.sin(Math.PI*clamp01(t/.24));k.P=[k.P[0]-60/COL_S*q,k.P[1]+60/COL_S*q]}break;
+    case 'orb':k=mkSeq(last,MK_SEQ.range,clamp01(t/.6));break;
+    case 'fin':{if(t<1.5)break;
+      const HF=mkHit(toP([HOLE_X,DECK-232+SW_LEN]),MK.Pfin);
+      k=t<1.85?mkSeq(MK.K0,MK_SEQ.finSortie,clamp01((t-1.5)/.35)):t<2.0?mkMix(MK.K3,HF,inQ(clamp01((t-1.85)/.15))):HF;break;}
+  }
+  if(k&&G.kick&&(b.s==='swgap'||b.s==='sw3g'||b.s==='swrec'||b.s==='orb'))k.P=[k.P[0]+G.kick*30/COL_S,k.P[1]];
+  return k;
+}
+function colBody(toP){
+  const b=G.boss,t=b.t,P=COL_P,R=P.repos,A=P.arme,F=P.frappe,X=P.arrache;let p;
+  switch(b.s){
+    case 'windup':p=cpMix(R,A,eo(clamp01(t/.35)));p[5]+=Math.sin(G.time*55)*1.6*(t/T.windup);break;
+    case 'strike':p=cpMix(A,F,es(clamp01(t/(b.sk||T.strike)*1.35)));break;
+    case 'rewind':p=cpMix(F,A,eo(clamp01(t/.18)));break;
+    case 'rebound':p=cpMix(F,X,es(clamp01(t/T.rebound)));break;
+    case 'stagger':p=cpMix(X,R,eo(clamp01(t/.5)));break;
+    case 'lift':p=cpMix(F,X,eo(clamp01(t/.55)));break;
+    case 'hold':p=X.slice();p[5]+=Math.sin(G.time*34)*1.5;break;
+    case 'slam':p=cpMix(X,F,ei(clamp01(t/.16)));break;
+    case 'release':p=cpMix(F,R,eo(clamp01(t/.6)));break;
+    case 'dead':p=cpMix(R,F,.55);break;
+    default:p=R.slice();p[6]+=Math.sin(G.time*3)*3;
+  }
+  /* marteau : le buste suit les images clés */
+  const ham=hamKey(toP);
+  if(ham)p=[ham.lean,ham.drop,ham.sx,ham.dF,ham.dN,ham.ff[0],ham.ff[1]];
+  /* souffle : il se cambre pour inspirer, se jette en avant pour cracher ; rugissement : buste rejeté en arrière ; touché : il recule */
+  if(b.s==='fl_in')p[0]+=.12*es(clamp01(t/Math.min(T.fli,b.fli||T.fli)));
+  else if(b.s==='fl_out')p[0]+=.12-.28*eo(clamp01(t/.2));
+  else if(b.s==='fl_stab')p[0]-=.16;
+  else if(b.s==='fl_rec')p[0]-=.16*(1-eo(clamp01(t/.4)));
+  else if(b.s==='fy_roar'){p[0]+=.16;p[1]-=4}
+  else if(b.s==='hurt')p[0]+=.1*clamp01((b.hurtT-t)/.4);
+  if(b.s==='fin'&&t<1.5)p[0]+=.22*finRecoil(t)/55;
+  if(b.s!=='dead')p[1]+=Math.sin(G.time*2.2)*1.6;
+  return {p,ham};
+}
+/* Présence du Colosse au pont (visuel seul, logique inchangée) : décalage sur le pont (ox, il laisse de l'air au bord droit du cadre),
+   pas lourds entre deux attaques (foulée, durée d'un pas, levée du pied ; instants depuis le début du repos : pied lointain puis proche en avant,
+   proche puis lointain en arrière), secousse et poussière à chaque pied posé ; penché menaçant au repos ; lissages (s). */
+const COL_V={ox:-40,foulee:26,pas:.42,lever:13,av:[.3,.75],ar:[2.6,3.0],secousse:2.5,menace:[-.07,3,.015],lisse:.25,regard:[-.22,.16,.6]};
+const CW={G:null,fF:0,fN:0,mv:null,m0:0,lt:null,lix:null,menace:0,eyes:0,look:0,dust:[],pose:0};
+/* pieds posés au sol (repère du pont, entrée G.ix comprise) : un pied à la fois se lève et rattrape sa place, le corps est porté par les pieds */
+function colWalk(){
+  const b=G.boss,V=COL_V,tm=G.time,ix=G.ix||0;
+  /* nouvelle partie (nouvel état, ou horloge revenue en arrière) : pieds remis sous le corps */
+  if(CW.G!==G||(CW.lt!=null&&tm<CW.lt-.2)){Object.assign(CW,{G,fF:ix,fN:ix,mv:null,lt:null,lix:ix,menace:0,eyes:0,look:0,dust:[],pose:-1})}
+  const dt=CW.lt==null?0:Math.max(0,Math.min(.05,tm-CW.lt));CW.lt=tm;
+  const vix=dt>0?(ix-CW.lix)/dt:0;CW.lix=ix;
+  const idle=b.s==='idle'&&G.mode==='play',S=V.foulee,t=b.t,lead=Math.max(-40,Math.min(40,vix*.18));
+  const tg={f:ix+lead+(idle&&t>V.av[0]&&t<V.ar[1]?-S:0),n:ix+lead+(idle&&t>V.av[1]&&t<V.ar[0]?-S:0)};
+  const lift={f:0,n:0},K={f:'fF',n:'fN'};
+  if(!CW.mv){const df=Math.abs(tg.f-CW.fF),dn=Math.abs(tg.n-CW.fN);if(Math.max(df,dn)>.5){CW.mv=df>=dn?'f':'n';CW.m0=CW[K[CW.mv]]}}
+  if(CW.mv){const k=CW.mv,key=K[k],d=tg[k]-CW[key],sp=Math.max(S/V.pas,Math.abs(vix)*2.2)*dt;
+    if(Math.abs(d)<=sp){CW[key]=tg[k];CW.mv=null;CW.pose=tm;
+      CW.dust.push({x:BX+V.ox+CW[key]+(k==='f'?-44:46),t:tm});if(!reduce)G.shake=Math.max(G.shake||0,V.secousse)}
+    else{CW[key]+=Math.sign(d)*sp;const a=Math.abs(CW[key]-CW.m0),r=Math.abs(tg[k]-CW[key]);lift[k]=V.lever*Math.sin(Math.PI*clamp01(a/(a+r||1)))}}
+  CW.dust=CW.dust.filter(q=>tm-q.t<.6);
+  /* menace au repos, yeux qui s'embrasent avant l'attaque */
+  const ease=x=>1-Math.exp(-dt/V.lisse*x);
+  CW.menace+=((idle?1:0)-CW.menace)*ease(1);
+  const tell=['windup','sw1w','sw2w','sw3w','fl_in','fy_roar','fy_t','rk_t'].includes(b.s);
+  CW.eyes+=((tell?1:0)-CW.eyes)*ease(1.6);
+  /* corps porté par les pieds (il suit l'entrée avec un léger retard) */
+  const wx=Math.max(-1.3*S,Math.min(1.3*S,(CW.fF+CW.fN)/2-ix));
+  const dip=CW.pose>0?3.5*Math.max(0,1-(tm-CW.pose)/.25):0,walking=CW.mv?1:0;
+  return {lift,wx,dip,walking,leg:k=>CW[K[k]]-ix-wx};
+}
+function drawDust(){
+  const ix=G.ix||0;
+  for(const q of CW.dust){const u=(G.time-q.t)/.6,a=(1-u)*.5,x=q.x-ix;
+    ctx.fillStyle='rgba(150,110,130,'+a+')';
+    for(let i=-2;i<=2;i++){ctx.beginPath();ctx.ellipse(x+i*(10+u*16),DECK-2-Math.abs(i)*u*5,7+u*12,3+u*4,0,0,6.283);ctx.fill()}
+    ctx.fillStyle='rgba(255,170,80,'+(1-u)+')';for(let i=0;i<5;i++)ctx.fillRect(x-18+i*9,DECK-4-u*(18+i%3*9),2,2)}
+}
 function drawBoss(){
   const b=G.boss,pz=pose(),t=G.time;
   let dx=0,dy=0;
@@ -223,26 +342,45 @@ function drawBoss(){
     if(T>=2.25){const u=clamp01((T-2.25)/.45);dx=finRecoil(T)+(HOLE_X-BX-finRecoil(T))*es(u);dy=-90*Math.sin(Math.PI*Math.min(u,1)*.75);if(T>=2.55){const fq=T-2.55;dy+=fq*fq*700+fq*80}}}
   if(b.s==='dead')dy=Math.min(56,b.t*150);
   const warm=(b.s==='windup'||b.s==='strike'||b.s.startsWith('sw')||b.s.startsWith('fl_'))?1.25:(b.fury?1.7:1);
-  const dead=b.s==='dead';
-  const hkT=(b.s==='windup'||b.s==='strike'||b.s==='rebound'||b.s==='rewind'||b.s==='lift'||b.s==='hold'||b.s==='slam'||b.s==='release')?1:0,hk1=hookStep(b,hkT,t);
-
-  ctx.save();ctx.translate(BX+dx,DECK+dy);
-  /* bras du marteau dessiné dans le repère du monde, voir drawSwordArm */
+  /* état de la chaîne conservé (hookStep) : la masse reste au poing, la bandoulière reste sur le torse */
+  const hkT=(b.s==='windup'||b.s==='strike'||b.s==='rebound'||b.s==='rewind'||b.s==='lift'||b.s==='hold'||b.s==='slam'||b.s==='release')?1:0;hookStep(b,hkT,t);
   const jaw=(G.mode==='intro'&&G.it>3.0&&G.it<3.9)?14:b.s==='fl_in'?14*clamp01(b.t/Math.min(T.fli,b.fli||T.fli)):(b.s==='fl_out'||b.s==='fy_roar')?14:0;
-  ctx.save();ctx.scale(.92,.92);
-  {const wf=Math.sin(t*1.8)*.03;
-   for(const sd of [-1,1]){drawWing([sd*64,-222],-.85+wf,.8,'#220a11',.34,!!b.fury,sd);drawWing([sd*50,-232],-1.15+wf,1,'#35101a',.34,!!b.fury,sd)}}
-  demonBody({t,warm,jaw,hurt:G.recoil>.3,dead,wound:G.wound,stow:1-clamp01(swordPose().len/40),hk:hk1});
+  const wk=colWalk(),wx=wk.wx;
+  const X0=BX+COL_V.ox+wx+dx,Y0=DECK+dy,s=COL_S,toP=q=>[(q[0]-X0)/s,(q[1]-Y0)/s],toW=q=>[X0+q[0]*s,Y0+q[1]*s];
+  const cb=colBody(toP),p=cb.p,tip=[pz.tip[0]+dx,pz.tip[1]+dy],MN=COL_V.menace,m=CW.menace;
+  p[0]+=MN[0]*m;p[1]+=MN[1]*m+Math.sin(t*2.2)*1.4*m-(wk.lift.f+wk.lift.n)*.3/s+wk.dip/s;p[0]-=.035*wk.walking*Math.sign(-(G.ix||0)||1);p[2]+=MN[2]*m*Math.sin(t*2.2);
+  /* regard : la tête se tourne vers le Veilleur (il le suit quand il est soulevé) */
+  {const R=COL_V.regard,hx=X0-40*s,hy=Y0-236*s,vx=G.pl.x,vy=DECK-liftAmt()-90,d=Math.hypot(vx-hx,vy-hy)||1;
+   const tg=Math.max(R[0],Math.min(R[1],-Math.asin((vy-hy)/d)*R[2]))*(b.s==='dead'?0:1);CW.look+=(tg-CW.look)*.12}
+  const lg=k=>Math.max(-45,Math.min(45,wk.leg(k)/s));
+  const legs={f:[lg('f'),wk.lift.f/s,-wk.lift.f*.004],n:[lg('n'),wk.lift.n/s,-wk.lift.n*.004]};
+  const trail=b.s==='sw1'||b.s==='sw2';if(!trail)G.swTrail.length=0;
+  ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);
+  const rig=COLOSSE.draw(ctx,{lean:p[0],drop:p[1],sx:p[2],dF:p[3],dN:p[4],off:[p[5],p[6]],ham:cb.ham,legs,look:CW.look,eyes:CW.eyes,breath:t,smoke:.8+.6*CW.menace,
+    tip:toP(tip),sag:pz.sag/s,heat:pz.heat,t,warm,jaw,hurt:G.recoil>.3,wound:G.wound,
+    back:applyM=>{
+      /* ailes dans le dos : la lointaine (à gauche) plus petite ; elles suivent le buste */
+      ctx.save();applyM();ctx.scale(.92/s,.92/s);
+      const wf=Math.sin(t*1.8)*.03;
+      for(const sd of [-1,1]){const k=sd<0?.82:1,x=sd<0?-57:63;drawWing([x,-250],-.85+wf,.8*k,'#220a11',.34,!!b.fury,sd);drawWing([x-sd*13,-260],-1.15+wf,k,'#35101a',.34,!!b.fury,sd)}
+      ctx.restore();
+      /* traînée du marteau (main proche -> tête), dans le repère du monde */
+      ctx.save();ctx.scale(1/s,1/s);ctx.translate(-X0,-Y0);
+      for(let i=1;i<G.swTrail.length;i++){
+        const A=G.swTrail[i-1],B=G.swTrail[i];
+        ctx.fillStyle='rgba(255,170,70,'+(i/G.swTrail.length*.4)+')';
+        ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(A[2],A[3]);ctx.lineTo(B[2],B[3]);ctx.lineTo(B[0],B[1]);ctx.closePath();ctx.fill();
+      }
+      ctx.restore();
+    },
+    front:rig=>{if(trail){const a=toW(rig.P),h=toW(rig.head);G.swTrail.push([a[0],a[1],h[0],h[1]]);if(G.swTrail.length>7)G.swTrail.shift()}}});
   ctx.restore();
-  ctx.restore();
-  if(b.s==='fl_in'||b.s==='fl_out')faceFire(BX+dx-18,DECK+dy-238,b.s==='fl_in'?es(clamp01(b.t/Math.min(T.fli,b.fli||T.fli))):1-es(clamp01(b.t/.5)),b.s==='fl_in'?b.t:1);
-
-  if(b.fury){ctx.save();ctx.translate(BX+dx,DECK+dy);drawAura(b.fury);ctx.restore()}
-  /* bras et mains suivent le corps (secousses, chute de fin de phase) */
-  const S=[BX-92+dx,DECK-200+dy],h=[pz.hand[0]+dx,pz.hand[1]+dy],tip=[pz.tip[0]+dx,pz.tip[1]+dy];
-  drawArm(S,h,78,-1);
-  ctx.fillStyle='#2b2233';ctx.strokeStyle='#4a3a55';ctx.lineWidth=3;
-  ctx.beginPath();ctx.arc(h[0],h[1],17,0,6.283);ctx.fill();ctx.stroke();
+  drawDust();
+  const mw=toW(rig.mouth);colMouthW=[mw[0]+(G.ix||0),mw[1]];
+  if(b.s==='fl_in'||b.s==='fl_out')faceFire(mw[0]-4,mw[1]-2,b.s==='fl_in'?es(clamp01(b.t/Math.min(T.fli,b.fli||T.fli))):1-es(clamp01(b.t/.5)),b.s==='fl_in'?b.t:1);
+  if(b.fury){ctx.save();ctx.translate(X0,Y0);drawAura(b.fury);ctx.restore()}
+  /* chaleur au poing lointain pendant l'attaque de la masse */
+  const h=toW(rig.fa.W);
   if(pz.heat>.5){
     const rg=ctx.createRadialGradient(h[0],h[1],2,h[0],h[1],34);
     rg.addColorStop(0,'rgba(255,190,90,'+(.55*pz.heat)+')');rg.addColorStop(1,'rgba(255,120,40,0)');
@@ -255,8 +393,6 @@ function drawBoss(){
     ctx.fillStyle='rgba(255,170,70,'+(i/G.trail.length*.45)+')';
     ctx.beginPath();ctx.arc(q[0],q[1],3+i*.9,0,6.283);ctx.fill();
   });
-  if(hk1>.02)drawWhip(h,lerp2(h,tip,es(hk1)),pz.sag*es(hk1),pz.heat);
-  drawSwordArm(dx,dy);
 }
 
 function drawPlayer(){
@@ -372,7 +508,8 @@ function drawFx(){
   ctx.globalAlpha=1;
 }
 
-function flameShape(front,al,wide){
+function flameShape(front,al,wide,M0){
+  const MOUTH=M0||colMouthW;
   const dx=front[0]-MOUTH[0],dy=front[1]-MOUTH[1],len=Math.hypot(dx,dy)||1;
   const ux=dx/len,uy=dy/len,nx=-uy,ny=ux;
   ctx.save();ctx.globalAlpha=al;ctx.lineCap='round';
@@ -392,7 +529,7 @@ function flameShape(front,al,wide){
 function drawFlame(){
   const b=G.boss;
   let front=null,al=1,wide=1;
-  if(b.s==='fl_out'){const q=clamp01(b.t/T.flo);front=lerp2(MOUTH,BAR,es(q));wide=.4+.6*q}
+  if(b.s==='fl_out'){const q=clamp01(b.t/T.flo);front=lerp2(colMouthW,BAR,es(q));wide=.4+.6*q}
   else if(b.s==='fl_stab'&&b.t<.25){front=BAR;al=1-b.t/.25}
   else if(b.s==='fl_rec'&&b.t<.45){front=lerp2(BAR,CHEST,eo(clamp01(b.t/.15)));al=1-clamp01((b.t-.15)/.3)}
   if(front)flameShape(front,al,wide);
@@ -640,7 +777,7 @@ function render(){
   drawEmbers(0,70,1);
   ctx.drawImage(bgBridge,0,0,W,H);
   BRD.archGlow(G.time);
-  drawHole();ctx.save();ctx.translate(G.ix||0,0);drawBoss();ctx.restore();drawCracks();drawPlayer();drawFlame();drawJets();drawRock();if(G.boss.dbf&&G.boss.s==='fl_in')drawChainTell(BX-18,DECK-238,G.boss.t);if(G.boss.dbl&&(G.boss.s==='windup'||G.boss.s==='strike'))drawDblTell(G.boss.t);drawRing();drawBarrier();drawOrb();drawHints();drawFx();
+  drawHole();ctx.save();ctx.translate(G.ix||0,0);drawBoss();ctx.restore();drawCracks();drawPlayer();drawFlame();drawJets();drawRock();if(G.boss.dbf&&G.boss.s==='fl_in')drawChainTell(colMouthW[0]-4,colMouthW[1]-2,G.boss.t);if(G.boss.dbl&&(G.boss.s==='windup'||G.boss.s==='strike'))drawDblTell(G.boss.t);drawRing();drawBarrier();drawOrb();drawHints();drawFx();
   drawEmbers(0,18,.9);
   ctx.restore();
   ctx.drawImage(vig,0,0,W,H);

@@ -378,3 +378,12 @@
 ## 2026-11-27 · nouveau Veilleur (maquette A9)
 - Le Veilleur (et la Veilleure) apparaît de trois quarts, tourné vers le boss : capuche à visière lumineuse, mantelet, cape bleu nuit et tabard crème, avec un liseré chaud du côté de la lanterne.
 - La lanterne a un anneau, un toit de laiton, une cage vitrée où la flamme vacille et une clochette qui pend sous un bras ; le rayon de riposte et le bouclier brillent sans flou coûteux.
+
+## 2026-11-27 · Colosse A9 au pont
+- Au pont, le Colosse a son nouveau corps : de trois quarts, tourné vers le Veilleur, épaules en enclume, boule hérissée au bout de sa chaîne.
+- Il arme la masse en se cambrant, se couche sur le coup, puis se redresse en arrachant sa chaîne ; ses jambes restent plantées et ses bras ne s'étirent jamais.
+
+## 2026-11-27 · Colosse : boule et marteau
+- Pour l'attaque au marteau, le Colosse passe sa boule en bandoulière, empoigne le marteau par-dessus l'épaule et frappe à deux mains jusqu'au Veilleur.
+- Entre les coups du combo, il arrache le marteau du sol et le relève sans le lâcher, puis le range dans son dos, tête au-dessus de l'épaule.
+- Entre deux attaques, le Colosse avance de deux pas lourds qui font trembler le pont puis regagne sa place ; il suit le Veilleur du regard, ses yeux s'embrasent avant de frapper, de la fumée sort de ses naseaux.

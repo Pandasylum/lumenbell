@@ -44,8 +44,8 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 
 ## Le Colosse de braise
 - **Silhouette** : dessinée une seule fois dans `demonBody`, partagée par les trois phases. **Silhouette remplacée par la direction artistique du 2026-11-27 : voir `docs/decisions/2026-11-27-direction-artistique.md`.**
-- **Équipement** : bandoulière de chaîne, épaulettes en enclume, masse à pointes rangée dans le dos, queue, crochet à chaîne à la hanche gauche.
-- **Indice du crochet** : la chaîne du torse se déroule jusqu'à sa main au rythme de l'attaque (phases I et III).
+- **Équipement** : bandoulière de chaîne, épaulettes en enclume, boule hérissée à la chaîne (au poing au repos, passée en bandoulière pendant l'attaque au marteau), marteau à deux mains rangé dans le dos (tête visible au-dessus de l'épaule), queue, crochet à chaîne à la hanche gauche.
+- **Indice du crochet** : en phase I, la chaîne du torse ne se déroule plus (la bandoulière reste en place, la boule est au poing) ; en phase III, elle se déroule encore jusqu'à sa main au rythme de l'attaque.
 - **Seconde vie (phase III)** : après la première foudre, ailes rongées et tombées, trous brûlés, fissures de braise ; à la première foudre de la seconde vie, sa corne droite se brise.
 - **Rages** : Râle d'agonie, Fureur, Embrasement ; en Difficile : Fureur de braise, Danse des chaînes, Embrasement final.
 
@@ -67,7 +67,7 @@ Textes exacts : `docs/TEXTES-CH1.md`.
 | Distance | Volée d'éclats de lumière (cinq comètes) | Grêle de braise, chute de pierres, souffle de flamme, ondes d'ailes |
 | Arme et crochet | Le sceptre planté : laser au sol | Marteau de guerre, combo, crochet |
 
-Les noms affichés « marteau » alors que l'arme est une masse sont à corriger. Le nom affiché d'une attaque doit toujours correspondre à l'arme et au contre réellement utilisés.
+Le Colosse a deux armes : la boule hérissée à la chaîne et le marteau à deux mains ; les noms affichés « marteau » sont corrects. Le nom affiché d'une attaque doit toujours correspondre à l'arme et au contre réellement utilisés.
 
 ## La scène de fin
 1. Le Colosse lève sa masse. 2. La grande cloche répond et le désarme. 3. Un tir de lanterne dans chaque aile. 4. Coup final, effondrement, cloche, fondu, invitation à appuyer sur Espace. Puis l'outro (cartons) : le Colosse est une statue de pierre noire face à la cloche, les Flèches répondent, le Phare Noyé reste muet, le Veilleur part vers la côte. La musique suit la séquence.
