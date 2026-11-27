@@ -419,7 +419,7 @@ function rugir(){
   RP.sombre=R.sombre*mont;
   return o;
 }
-/* effets d'impact (flat, sans flou) : étoile et éclats à l'impact, ondes du cri ; X0, Y0, s = repère du Colosse */
+/* effets d'impact (flat, sans flou) : étoile et éclats à l'impact, gerbe de flammes du cri ; X0, Y0, s = repère du Colosse */
 function drawRpEvents(rig,toW,X0,Y0,s){
   const k=RP.clk,ix=G.ix||0,sc=s/1.25;
   RP.ev=RP.ev.filter(e=>k-e.t0<1.3);
@@ -435,9 +435,14 @@ function drawRpEvents(rig,toW,X0,Y0,s){
       const x=e.p[0],y=e.p[1];
       if(u<R.st[1]){const v=u/R.st[1];COLFX.etoile(ctx,x,y,R.st[0]*sc*(.5+v*.5)*(1-v*.6),10,.2,'#ffd66a',.4);COLFX.etoile(ctx,x,y,R.st[0]*.55*sc*(1-v),10,.5,'#fffbea')}
       if(!reduce)COLFX.eclats(ctx,x,y,u,R.ec[0],R.ec[1],R.ec[2],R.ec[3],DECK+4);
-    }else if(e.k==='rugi'&&!reduce){
-      ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);COLFX.ondes(ctx,u);ctx.restore();
-      COLFX.eclats(ctx,X0,Y0-4,u,34,['#ff9a35','#6a3a50','#d4501f'],380*sc,21,DECK+4);
+    }else if(e.k==='rugi'){
+      /* enragement : une gerbe de flammes jaillit autour de lui, sur le sol et le long du corps. Plus d'anneau qui s'étend (COLFX.ondes) : il ressemblait à une attaque à parer. */
+      const env=es(clamp01(u/.22))*(1-es(clamp01((u-.75)/.45))),tm=reduce?0:u;
+      if(env>.01){ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);
+        [[-250,0,26,150,-14],[-205,0,30,190,-18],[-150,0,26,150,-10],[-96,0,22,110,-6],[96,0,22,110,6],[150,0,26,160,10],[205,0,30,200,18],[250,0,26,150,14],[-170,-170,20,110,-16],[170,-170,20,120,16],[-130,-290,18,90,-12],[140,-300,18,90,12]]
+          .forEach(([x,y,w,h,l],i)=>COLFX.flamme(ctx,x,y,w,h*env*(.85+.15*Math.sin(tm*18+i*1.7)),l,tm*14+i*1.9));
+        ctx.restore()}
+      if(!reduce)COLFX.eclats(ctx,X0,Y0-4,u,34,['#ff9a35','#6a3a50','#d4501f'],380*sc,21,DECK+4);
     }
   }
 }

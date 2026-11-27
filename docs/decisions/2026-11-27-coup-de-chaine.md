@@ -17,3 +17,7 @@ Demande : la boule à pointes ne l'agrippe plus, elle frappe le Veilleur directe
 - Phrase éventuelle à l'écran ou en narration pour le coup de boule (rien n'est affiché pour l'instant).
 - Le Veilleur « tombe » après un coup de boule non bloqué (même chute qu'après l'ancien écrasement) ; une simple projection serait une décision de gameplay.
 - Pas de revue visuelle locale (CI seule).
+
+## Enragement de la phase I
+- Le cri d'enragement ne lance plus d'anneau de braise qui s'étend au sol (`COLFX.ondes`) : il ressemblait à une attaque à parer. À la place, une gerbe de flammes jaillit autour du Colosse (au sol, le long des flancs et au-dessus des épaules), monte en 0,22 s, tient, puis retombe en 0,45 s. `COLFX.ondes` n'est plus appelée (phase I) ; elle reste dans `COLFX`. Mouvement réduit : flammes figées, sans braises.
+

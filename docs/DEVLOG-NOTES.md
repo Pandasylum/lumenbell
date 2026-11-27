@@ -405,3 +405,4 @@
 - Contre des ailes : une lame de lumière en croissant fend les flammes ; contre des débris : des éclats de pierre dorés filent dans le rayon. Les ailes du Colosse ont le dessin de la maquette.
 - Le coup de chaîne n'agrippe plus : la boule à pointes balayée au bout de la chaîne frappe directement le Veilleur, puis rebondit et revient au poing du Colosse (phases I et III).
 - Quand le Colosse encaisse un coup, son buste et sa tête vacillent trois fois avant de se stabiliser.
+- Quand le Colosse s'enrage, des flammes jaillissent tout autour de lui au lieu d'un cercle qui s'étend : plus rien ne ressemble à une attaque à parer.
