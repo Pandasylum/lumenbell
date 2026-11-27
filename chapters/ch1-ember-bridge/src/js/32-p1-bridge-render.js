@@ -42,19 +42,12 @@ function pose(){
       hand=lerp2(FWD_HAND,IDLE_HAND,k);
       tip=lerp2(HEAD,[hand[0]-24,hand[1]+110],eo(clamp01(t/.45)));
       sag=50;break;}
-    case 'lift':{
-      hand=lerp2(FWD_HAND,[BX-150,206],eo(clamp01(t/.55)));
-      const cur=[CHEST[0],CHEST[1]-liftAmt()];
-      tip=lerp2(BAR,cur,clamp01(t/.12));sag=14;heat=1;break;}
-    case 'hold':
-      hand=[BX-150,206+Math.sin(G.time*34)*2];tip=[CHEST[0],CHEST[1]-LIFT_MAX];sag=10;heat=1;break;
-    case 'slam':
-      hand=lerp2([BX-150,206],[BX-140,300],ei(clamp01(t/.16)));
-      tip=[CHEST[0],CHEST[1]-liftAmt()];sag=10;heat=1;break;
     case 'release':{
-      const k=eo(clamp01(t/.6));
-      hand=lerp2([BX-140,300],IDLE_HAND,k);
-      tip=lerp2([CHEST[0],CHEST[1]+10],[hand[0]-34,hand[1]+104],k);sag=50;break;}
+      /* la boule a frappé : elle finit sa course sur le Veilleur, chaîne tendue (0,08 s), puis rebondit et revient au poing en s'enroulant */
+      const hit=clamp01(t/.08),k=eo(clamp01((t-.12)/.48)),ch=[CHEST[0],CHEST[1]+10];
+      hand=lerp2(FWD_HAND,IDLE_HAND,k);
+      tip=lerp2(lerp2(BAR,ch,hit),[hand[0]-34,hand[1]+104],k);tip[1]-=70*Math.sin(Math.PI*clamp01((t-.1)/.4))*(1-k);
+      sag=t<.12?-70:50*k-30*(1-k);heat=1-.6*k;break;}
     case 'dead':
       hand=[BX-120,342];tip=[hand[0]-70,DECK-6];sag=24;break;
     default:
@@ -274,10 +267,7 @@ function colBody(toP){
     case 'rewind':p=cpMix(F,A,eo(clamp01(t/.18)));break;
     case 'rebound':p=cpMix(F,X,es(clamp01(t/T.rebound)));break;
     case 'stagger':p=cpMix(X,R,eo(clamp01(t/.5)));break;
-    case 'lift':p=cpMix(F,X,eo(clamp01(t/.55)));break;
-    case 'hold':p=X.slice();p[5]+=Math.sin(G.time*34)*1.5;break;
-    case 'slam':p=cpMix(X,F,ei(clamp01(t/.16)));break;
-    case 'release':p=cpMix(F,R,eo(clamp01(t/.6)));break;
+    case 'release':p=cpMix(cpMix(F,X,eo(clamp01(t/.28))),R,eo(clamp01((t-.28)/.32)));break; /* il se couche sur le coup, se redresse en tirant la chaîne, puis revient au repos */
     case 'dead':p=cpMix(R,F,.55);break;
     default:p=R.slice();p[6]+=Math.sin(G.time*3)*3;
   }
@@ -340,11 +330,11 @@ function drawDust(){
    lean penché, dx recul, tete tête, plie jambes, dN épaule proche, ff main lointaine, nn main proche, eteint ; fis fissure (fd, fh : sa courbe, keep : reste ensuite),
    fl éclair (0,07 s), ec éclats [nombre, couleurs, vitesse, graine], st étoile d'impact [rayon, durée], pt point d'impact */
 const COL_H={
-  tete:{pt:'gueule',d:.7,hold:.15,lean:.17,dx:18,tete:.2,ff:[14,-2],nn:[12,-22],fis:.3,fd:.8,fh:.25,fl:.45,ec:[16,['#ffe9a0','#ff9a35','#6a3a50'],260,5],st:[70,.2]},
-  orb:{pt:'coeur',d:.8,hold:.25,lean:.3,dx:34,tete:.28,dN:14,ff:[34,-4],nn:[26,-46],fis:1,fd:1,fh:.4,fl:.45,ec:[26,['#ffe58a','#6a3a50','#ff9a35','#2c1534'],300,9],st:[110,.22]},
-  jambe:{pt:'jambe',d:.8,hold:.2,lean:.2,dx:30,tete:.55,ff:[20,-14],nn:[20,-30],fis:.5,fd:.8,fh:.2,fl:.4,ec:[20,['#ff9a35','#6a3a50','#ffe58a'],270,13],st:[80,.2]},
+  tete:{wob:.05,pt:'gueule',d:.7,hold:.15,lean:.17,dx:18,tete:.2,ff:[14,-2],nn:[12,-22],fis:.3,fd:.8,fh:.25,fl:.45,ec:[16,['#ffe9a0','#ff9a35','#6a3a50'],260,5],st:[70,.2]},
+  orb:{wob:.09,pt:'coeur',d:.8,hold:.25,lean:.3,dx:34,tete:.28,dN:14,ff:[34,-4],nn:[26,-46],fis:1,fd:1,fh:.4,fl:.45,ec:[26,['#ffe58a','#6a3a50','#ff9a35','#2c1534'],300,9],st:[110,.22]},
+  jambe:{wob:.07,pt:'jambe',d:.8,hold:.2,lean:.2,dx:30,tete:.55,ff:[20,-14],nn:[20,-30],fis:.5,fd:.8,fh:.2,fl:.4,ec:[20,['#ff9a35','#6a3a50','#ffe58a'],270,13],st:[80,.2]},
   bague:{pt:'coeur',d:.7,hold:.9,lean:-.3,tete:-.22,plie:1,ff:[16,4],nn:[-10,6],eteint:1,fl:.45,ec:[24,['#ffe58a','#6a3a50','#2c1534'],260,31],st:[80,.2]},
-  fin:{pt:'coeur',d:.7,hold:.35,lean:.34,tete:.36,plie:.35,fis:1,fd:1.2,fh:.6,keep:.35,fl:.6,ec:[40,['#ffe58a','#6a3a50','#ff9a35','#2c1534','#fffbea'],380,41],st:[120,.4]}
+  fin:{wob:.12,pt:'coeur',d:.7,hold:.35,lean:.34,tete:.36,plie:.35,fis:1,fd:1.2,fh:.6,keep:.35,fl:.6,ec:[40,['#ffe58a','#6a3a50','#ff9a35','#2c1534','#fffbea'],380,41],st:[120,.4]}
 };
 /* Rage : cri (roulement : il se ramasse, puis se redresse en rugissant, tout dans les 1,0 s de fy_roar), flammes (montée, puis tenue à « reste »),
    fissures (montée / descente en s), extinction des flammes à la fin de la rage, voile sombre pendant le cri */
@@ -412,6 +402,9 @@ function colReact(){
   if(R.nn)o.nn=[R.nn[0]*c,R.nn[1]*c];
   o.fissure=Math.max((R.fis||0)*C(u,0,R.fd||1,R.fh||.4),R.keep||0);
   o.flash=u<.07?R.fl:0;
+  /* il est vivant : après l'impact, le buste, la tête et le recul oscillent trois fois en s'amortissant (amplitude propre à chaque coup, R.wob) */
+  const wb=R.wob||0,os=u>.05?Math.exp(-3.4*(u-.05))*Math.sin((u-.05)*17):0;
+  o.lean+=wb*os*1.6;o.tete+=wb*os*2.2;o.dx+=wb*os*60;
   return o;
 }
 /* le cri : il se ramasse, se redresse en rugissant, puis revient (tout dans fy_roar) */

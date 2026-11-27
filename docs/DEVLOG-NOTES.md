@@ -403,3 +403,5 @@
 - À la fin de la deuxième rage (Difficile), le creuset vide pendouille, le cogne, puis tombe sur sa tête et sombre avec lui : il ne reste que le chariot et des bouts de chaîne.
 - Les fins de rage durent maintenant environ cinq secondes : le creuset avance, cogne, un câble saute, la lave tombe sur le Colosse, puis le creuset revient vide.
 - Contre des ailes : une lame de lumière en croissant fend les flammes ; contre des débris : des éclats de pierre dorés filent dans le rayon. Les ailes du Colosse ont le dessin de la maquette.
+- Le coup de chaîne n'agrippe plus : la boule à pointes balayée au bout de la chaîne frappe directement le Veilleur, puis rebondit et revient au poing du Colosse (phases I et III).
+- Quand le Colosse encaisse un coup, son buste et sa tête vacillent trois fois avant de se stabiliser.

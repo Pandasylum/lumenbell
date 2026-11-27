@@ -113,7 +113,7 @@ function heroX3(){
     if(t<.65)return tx;
     return tx+(PX-tx)*es(clamp01((t-.65)/.5));
   }
-  if((p.s==='down'||p.s==='hurt')&&p.lasso){const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));return PX+46*k}
+  if((p.s==='down'||p.s==='hurt')&&p.lasso){const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));return PX-30*k}
   if(p.s==='down'||p.s==='hurt')return PX-24*(1-clamp01(p.t/.5));
   return PX;
 }
@@ -154,7 +154,7 @@ function heroPose3(){
     const r=clamp01(p.t/.08);hand=mh(H0,[28,-94],r);sa=ma(A0,-1.5,r);glow=1;
   }else if((p.s==='down'||p.s==='hurt')&&p.lasso){
     const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));
-    rot=-1.45*k;hand=[24,-34];sa=.7;
+    rot=.5*k;hand=[10,-60];sa=.3; /* frappé par la boule : repoussé, plus tiré par un lasso */
   }else if(p.s==='down'||p.s==='hurt'){rot=.12;sy=.82;sa=.6}
   return{x,hand,sa,rot,sy,glow};
 }
