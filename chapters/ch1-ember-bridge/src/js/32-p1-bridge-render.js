@@ -214,6 +214,46 @@ function hookStep(o,target,t){
   o.hv=Math.abs(target-cur)<=sp?target:cur+Math.sign(target-cur)*sp;
   return o.hv;
 }
+/* Colosse A9 : les 4 poses de la masse validées (repos, armement, frappe, arrachement).
+   Colonnes : penché (rad), descente, pivot (largeur du buste), décalage épaule lointaine / proche, main lointaine depuis l'épaule (x, y).
+   Le buste passe d'une pose à l'autre au rythme des états du jeu (mêmes durées, mêmes impacts) ; mArr / mCoup : buste pour la masse du bras proche. */
+const COL_S=1.05; /* unités de pose (maquette x0.8) -> monde */
+const COL_P={repos:[0,0,1,0,0,-62,92],arme:[.3,0,.88,10,-24,-62,-62],frappe:[-.4,16,1.06,-16,20,-88,66],arrache:[.07,6,.95,8,-8,-84,16],
+  mArr:[.2,0,.9,6,-20],mCoup:[-.45,16,1.06,-12,22]};
+let colMouthW=[MOUTH[0],MOUTH[1]]; /* gueule du Colosse dans le monde (le souffle en part) */
+function cpMix(A,B,k){return A.map((v,i)=>v+(B[i]-v)*k)}
+function colBody(){
+  const b=G.boss,t=b.t,P=COL_P,R=P.repos,A=P.arme,F=P.frappe,X=P.arrache;let p;
+  switch(b.s){
+    case 'windup':p=cpMix(R,A,eo(clamp01(t/.35)));p[5]+=Math.sin(G.time*55)*1.6*(t/T.windup);break;
+    case 'strike':p=cpMix(A,F,es(clamp01(t/(b.sk||T.strike)*1.35)));break;
+    case 'rewind':p=cpMix(F,A,eo(clamp01(t/.18)));break;
+    case 'rebound':p=cpMix(F,X,es(clamp01(t/T.rebound)));break;
+    case 'stagger':p=cpMix(X,R,eo(clamp01(t/.5)));break;
+    case 'lift':p=cpMix(F,X,eo(clamp01(t/.55)));break;
+    case 'hold':p=X.slice();p[5]+=Math.sin(G.time*34)*1.5;break;
+    case 'slam':p=cpMix(X,F,ei(clamp01(t/.16)));break;
+    case 'release':p=cpMix(F,R,eo(clamp01(t/.6)));break;
+    case 'dead':p=cpMix(R,F,.55);break;
+    default:p=R.slice();p[6]+=Math.sin(G.time*3)*3;
+  }
+  /* souffle : il se cambre pour inspirer, se jette en avant pour cracher ; rugissement : buste rejeté en arrière ; touché : il recule */
+  if(b.s==='fl_in')p[0]+=.12*es(clamp01(t/Math.min(T.fli,b.fli||T.fli)));
+  else if(b.s==='fl_out')p[0]+=.12-.28*eo(clamp01(t/.2));
+  else if(b.s==='fl_stab')p[0]-=.16;
+  else if(b.s==='fl_rec')p[0]-=.16*(1-eo(clamp01(t/.4)));
+  else if(b.s==='fy_roar'){p[0]+=.16;p[1]-=4}
+  else if(b.s==='hurt')p[0]+=.1*clamp01((b.hurtT-t)/.4);
+  if(b.s==='fin')p[0]+=.22*finRecoil(t)/55;
+  /* masse au bras proche : le buste suit la main, de l'élan en arrière au bout du coup */
+  const sp=swordPose();let w=0;
+  if(b.s.startsWith('sw'))w=b.s==='sw1w'?eo(clamp01(t/.4)):b.s==='swrec'?1-eo(clamp01(t/T.swrec)):1;
+  else if(b.s==='orb')w=1-eo(clamp01(t/.6));
+  else if(b.s==='fin'&&t>=1.5)w=1;
+  if(w>0){const u=clamp01((110-(sp.hand[0]-BX))/244),M=cpMix(P.mArr,P.mCoup,u);for(let i=0;i<5;i++)p[i]+=(M[i]-p[i])*w}
+  if(b.s!=='dead')p[1]+=Math.sin(G.time*2.2)*1.6;
+  return {p,sp,w};
+}
 function drawBoss(){
   const b=G.boss,pz=pose(),t=G.time;
   let dx=0,dy=0;
@@ -223,26 +263,50 @@ function drawBoss(){
     if(T>=2.25){const u=clamp01((T-2.25)/.45);dx=finRecoil(T)+(HOLE_X-BX-finRecoil(T))*es(u);dy=-90*Math.sin(Math.PI*Math.min(u,1)*.75);if(T>=2.55){const fq=T-2.55;dy+=fq*fq*700+fq*80}}}
   if(b.s==='dead')dy=Math.min(56,b.t*150);
   const warm=(b.s==='windup'||b.s==='strike'||b.s.startsWith('sw')||b.s.startsWith('fl_'))?1.25:(b.fury?1.7:1);
-  const dead=b.s==='dead';
-  const hkT=(b.s==='windup'||b.s==='strike'||b.s==='rebound'||b.s==='rewind'||b.s==='lift'||b.s==='hold'||b.s==='slam'||b.s==='release')?1:0,hk1=hookStep(b,hkT,t);
-
-  ctx.save();ctx.translate(BX+dx,DECK+dy);
-  /* bras du marteau dessiné dans le repère du monde, voir drawSwordArm */
+  /* état de la chaîne conservé (hookStep) : la masse reste au poing, la bandoulière reste sur le torse */
+  const hkT=(b.s==='windup'||b.s==='strike'||b.s==='rebound'||b.s==='rewind'||b.s==='lift'||b.s==='hold'||b.s==='slam'||b.s==='release')?1:0;hookStep(b,hkT,t);
   const jaw=(G.mode==='intro'&&G.it>3.0&&G.it<3.9)?14:b.s==='fl_in'?14*clamp01(b.t/Math.min(T.fli,b.fli||T.fli)):(b.s==='fl_out'||b.s==='fy_roar')?14:0;
-  ctx.save();ctx.scale(.92,.92);
-  {const wf=Math.sin(t*1.8)*.03;
-   for(const sd of [-1,1]){drawWing([sd*64,-222],-.85+wf,.8,'#220a11',.34,!!b.fury,sd);drawWing([sd*50,-232],-1.15+wf,1,'#35101a',.34,!!b.fury,sd)}}
-  demonBody({t,warm,jaw,hurt:G.recoil>.3,dead,wound:G.wound,stow:1-clamp01(swordPose().len/40),hk:hk1});
+  const X0=BX+dx,Y0=DECK+dy,s=COL_S,toP=q=>[(q[0]-X0)/s,(q[1]-Y0)/s],toW=q=>[X0+q[0]*s,Y0+q[1]*s];
+  const cb=colBody(),p=cb.p,sp=cb.sp,tip=[pz.tip[0]+dx,pz.tip[1]+dy];
+  if(!(b.s==='sw1'||b.s==='sw2'))G.swTrail.length=0;
+  ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);
+  const rig=COLOSSE.draw(ctx,{lean:p[0],drop:p[1],sx:p[2],dF:p[3],dN:p[4],off:[p[5],p[6]],
+    nearT:cb.w>0?toP([sp.hand[0]+dx,sp.hand[1]+dy]):null,nearW:cb.w,
+    tip:toP(tip),sag:pz.sag/s,heat:pz.heat,t,warm,jaw,hurt:G.recoil>.3,wound:G.wound,
+    back:applyM=>{
+      /* ailes dans le dos : la lointaine (à gauche) plus petite ; elles suivent le buste */
+      ctx.save();applyM();ctx.scale(.92/s,.92/s);
+      const wf=Math.sin(t*1.8)*.03;
+      for(const sd of [-1,1]){const k=sd<0?.82:1,x=sd<0?-57:63;drawWing([x,-250],-.85+wf,.8*k,'#220a11',.34,!!b.fury,sd);drawWing([x-sd*13,-260],-1.15+wf,k,'#35101a',.34,!!b.fury,sd)}
+      ctx.restore();
+      /* la masse du bras proche, accrochée dans le dos quand il ne s'en sert pas */
+      const st=1-clamp01(sp.len/40);
+      if(st>.02){ctx.save();applyM();ctx.globalAlpha=st;ctx.translate(20,-100);ctx.rotate(-1.107);ctx.scale(.92/s,.92/s);drawHammer(245,.25,t,9);ctx.restore()}
+    },
+    front:rig=>{
+      if(sp.len<=0)return;
+      /* la tête de la masse vise le même point qu'avant ; la main reste au bout du bras (jamais étiré), le manche glisse dans le poing */
+      const hw=[sp.hand[0]+dx,sp.hand[1]+dy],Ht=[hw[0]+Math.cos(sp.a)*sp.len,hw[1]+Math.sin(sp.a)*sp.len],Wd=toW(rig.na.W);
+      const k=clamp01(sp.len/SW_LEN),dd=Math.hypot(Ht[0]-Wd[0],Ht[1]-Wd[1]);
+      let da=Math.atan2(Ht[1]-Wd[1],Ht[0]-Wd[0])-sp.a;da=Math.atan2(Math.sin(da),Math.cos(da));
+      const a=sp.a+da*k,sl=Math.min(0,dd-sp.len)*k,O=[Wd[0]+Math.cos(a)*sl,Wd[1]+Math.sin(a)*sl];
+      ctx.save();ctx.scale(1/s,1/s);ctx.translate(-X0,-Y0);
+      if(b.s==='sw1'||b.s==='sw2'){G.swTrail.push([O[0],O[1],O[0]+Math.cos(a)*sp.len,O[1]+Math.sin(a)*sp.len]);if(G.swTrail.length>7)G.swTrail.shift()}
+      for(let i=1;i<G.swTrail.length;i++){
+        const A=G.swTrail[i-1],B=G.swTrail[i];
+        ctx.fillStyle='rgba(255,170,70,'+(i/G.swTrail.length*.4)+')';
+        ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(A[2],A[3]);ctx.lineTo(B[2],B[3]);ctx.lineTo(B[0],B[1]);ctx.closePath();ctx.fill();
+      }
+      ctx.translate(O[0],O[1]);ctx.rotate(a);drawHammer(sp.len,sp.heat,t,9);
+      ctx.restore();
+      rig.fist();
+    }});
   ctx.restore();
-  ctx.restore();
-  if(b.s==='fl_in'||b.s==='fl_out')faceFire(BX+dx-18,DECK+dy-238,b.s==='fl_in'?es(clamp01(b.t/Math.min(T.fli,b.fli||T.fli))):1-es(clamp01(b.t/.5)),b.s==='fl_in'?b.t:1);
-
-  if(b.fury){ctx.save();ctx.translate(BX+dx,DECK+dy);drawAura(b.fury);ctx.restore()}
-  /* bras et mains suivent le corps (secousses, chute de fin de phase) */
-  const S=[BX-92+dx,DECK-200+dy],h=[pz.hand[0]+dx,pz.hand[1]+dy],tip=[pz.tip[0]+dx,pz.tip[1]+dy];
-  drawArm(S,h,78,-1);
-  ctx.fillStyle='#2b2233';ctx.strokeStyle='#4a3a55';ctx.lineWidth=3;
-  ctx.beginPath();ctx.arc(h[0],h[1],17,0,6.283);ctx.fill();ctx.stroke();
+  const mw=toW(rig.mouth);colMouthW=[mw[0]+(G.ix||0),mw[1]];
+  if(b.s==='fl_in'||b.s==='fl_out')faceFire(mw[0]-4,mw[1]-2,b.s==='fl_in'?es(clamp01(b.t/Math.min(T.fli,b.fli||T.fli))):1-es(clamp01(b.t/.5)),b.s==='fl_in'?b.t:1);
+  if(b.fury){ctx.save();ctx.translate(X0,Y0);drawAura(b.fury);ctx.restore()}
+  /* chaleur au poing lointain pendant l'attaque de la masse */
+  const h=toW(rig.fa.W);
   if(pz.heat>.5){
     const rg=ctx.createRadialGradient(h[0],h[1],2,h[0],h[1],34);
     rg.addColorStop(0,'rgba(255,190,90,'+(.55*pz.heat)+')');rg.addColorStop(1,'rgba(255,120,40,0)');
@@ -255,8 +319,6 @@ function drawBoss(){
     ctx.fillStyle='rgba(255,170,70,'+(i/G.trail.length*.45)+')';
     ctx.beginPath();ctx.arc(q[0],q[1],3+i*.9,0,6.283);ctx.fill();
   });
-  if(hk1>.02)drawWhip(h,lerp2(h,tip,es(hk1)),pz.sag*es(hk1),pz.heat);
-  drawSwordArm(dx,dy);
 }
 
 function drawPlayer(){
@@ -371,7 +433,8 @@ function drawFx(){
   ctx.globalAlpha=1;
 }
 
-function flameShape(front,al,wide){
+function flameShape(front,al,wide,M0){
+  const MOUTH=M0||colMouthW;
   const dx=front[0]-MOUTH[0],dy=front[1]-MOUTH[1],len=Math.hypot(dx,dy)||1;
   const ux=dx/len,uy=dy/len,nx=-uy,ny=ux;
   ctx.save();ctx.globalAlpha=al;ctx.lineCap='round';
@@ -391,7 +454,7 @@ function flameShape(front,al,wide){
 function drawFlame(){
   const b=G.boss;
   let front=null,al=1,wide=1;
-  if(b.s==='fl_out'){const q=clamp01(b.t/T.flo);front=lerp2(MOUTH,BAR,es(q));wide=.4+.6*q}
+  if(b.s==='fl_out'){const q=clamp01(b.t/T.flo);front=lerp2(colMouthW,BAR,es(q));wide=.4+.6*q}
   else if(b.s==='fl_stab'&&b.t<.25){front=BAR;al=1-b.t/.25}
   else if(b.s==='fl_rec'&&b.t<.45){front=lerp2(BAR,CHEST,eo(clamp01(b.t/.15)));al=1-clamp01((b.t-.15)/.3)}
   if(front)flameShape(front,al,wide);
@@ -639,7 +702,7 @@ function render(){
   drawEmbers(0,70,1);
   ctx.drawImage(bgBridge,0,0,W,H);
   BRD.archGlow(G.time);
-  drawHole();ctx.save();ctx.translate(G.ix||0,0);drawBoss();ctx.restore();drawCracks();drawPlayer();drawFlame();drawJets();drawRock();if(G.boss.dbf&&G.boss.s==='fl_in')drawChainTell(BX-18,DECK-238,G.boss.t);if(G.boss.dbl&&(G.boss.s==='windup'||G.boss.s==='strike'))drawDblTell(G.boss.t);drawRing();drawBarrier();drawOrb();drawHints();drawFx();
+  drawHole();ctx.save();ctx.translate(G.ix||0,0);drawBoss();ctx.restore();drawCracks();drawPlayer();drawFlame();drawJets();drawRock();if(G.boss.dbf&&G.boss.s==='fl_in')drawChainTell(colMouthW[0]-4,colMouthW[1]-2,G.boss.t);if(G.boss.dbl&&(G.boss.s==='windup'||G.boss.s==='strike'))drawDblTell(G.boss.t);drawRing();drawBarrier();drawOrb();drawHints();drawFx();
   drawEmbers(0,18,.9);
   ctx.restore();
   ctx.drawImage(vig,0,0,W,H);
