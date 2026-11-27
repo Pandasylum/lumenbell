@@ -478,18 +478,103 @@ function drawRing(){
 }
 const HOLE_X=BX-170; /* le trou s'ouvre devant le Colosse, là où frappe le marteau */
 function finRecoil(t){return t<1.1?0:t<1.35?55*eo((t-1.1)/.25):55-25*es(clamp01((t-1.35)/.6))}
+/* Brèche de fin de phase I : fissures, blocs de tablier qui basculent, bords de maçonnerie éclairés par dessous, colonne de lumière de la Fonderie.
+   Formes fixes (tirées une fois), aucune ombre portée ni filtre ; les durées restent celles de b.t (impact à 2.0, ouverture en .22 s). */
+const BREACH=(()=>{
+  const HW=125,ROW=16,NR=Math.ceil((H-DECK)/ROW);
+  const rn=s=>()=>(s=(s*16807)%2147483647)/2147483647;
+  const r=rn(41);
+  const JL=Array.from({length:NR+1},()=>r()*2-1),JR=Array.from({length:NR+1},()=>r()*2-1);
+  const BW=Array.from({length:NR},(_,i)=>[12+r()*10,12+r()*10]);
+  /* fissures : parties du point de frappe, 4 segments irréguliers chacune */
+  const CR=[-2.9,-2.5,-2.1,-1.7,-1.4,-.5,-.1,.25,.65,1.05,1.6].map((an,i)=>{const L=(i%2?110:190)*(.7+r()*.5),pts=[[0,0]];let x=0,y=0;for(let k=1;k<=4;k++){const a2=an+(r()-.5)*.7,l=L/4*(.7+r()*.6);x+=Math.cos(a2)*l;y+=Math.sin(a2)*l*.45;pts.push([x,y])}return pts});
+  /* blocs : x relatif à la demi-largeur, largeur, épaisseur, vitesse, rotation, retard, dérive, parapet */
+  const BLK=[[-.78,44,30,40,1.2,.02,-26,0],[-.42,52,34,-60,-1.6,.08,-12,1],[-.1,48,30,20,.9,0,8,0],[.2,56,34,-30,-1.1,.06,14,1],[.52,46,30,50,1.5,.03,22,0],[.8,42,34,10,-.8,.1,30,0]];
+  const N_EMB=26,N_DUST=18;
+  const EMB=Array.from({length:N_EMB},()=>({xo:r()*2-1,ph:r(),sp:.18+r()*.22,w:r()*6.28}));
+  const DUS=Array.from({length:N_DUST},()=>({xo:r()*2-1,v:.6+r()*.8,s:1.5+r()*1.8}));
+  let sprCol,sprGl;
+  function sprites(){
+    if(sprCol)return;
+    sprCol=LB.cacheLayer(96,256,c=>{c.fillStyle=(g=>{g.addColorStop(0,'rgba(255,150,60,0)');g.addColorStop(.55,'rgba(255,160,70,.5)');g.addColorStop(1,'rgba(255,200,120,.95)');return g})(c.createLinearGradient(0,0,0,256));c.fillRect(0,0,96,256);
+      c.globalCompositeOperation='destination-in';const h=c.createLinearGradient(0,0,96,0);h.addColorStop(0,'rgba(0,0,0,0)');h.addColorStop(.5,'rgba(0,0,0,1)');h.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=h;c.fillRect(0,0,96,256)},{k:1});
+    sprGl=LB.cacheLayer(128,128,c=>{const g=c.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,200,110,1)');g.addColorStop(.35,'rgba(255,130,50,.45)');g.addColorStop(1,'rgba(255,90,30,0)');c.fillStyle=g;c.fillRect(0,0,128,128)},{k:1});
+  }
+  const edgeX=(i,side,hw)=>HOLE_X+side*hw*(1+(side<0?JL[i]:JR[i])*.07);
+  function draw(q){
+    sprites();
+    const k=es(clamp01(q/.22)),hw=HW*k,x0=HOLE_X-hw,x1=HOLE_X+hw,tt=G.time;
+    /* 1. fissures sur le tablier, du point de frappe vers l'extérieur */
+    const cg=es(clamp01(q/.18));
+    ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+    CR.forEach(pts=>{
+      for(let pass=0;pass<2;pass++){
+        ctx.strokeStyle=pass?'rgba(255,170,90,.75)':'#1c1026';ctx.lineWidth=pass?1.2:3;
+        ctx.beginPath();ctx.moveTo(HOLE_X,DECK+3+pass*.8);
+        const n=Math.max(1,Math.ceil(4*cg));for(let i=1;i<=n;i++){const f=i===n?cg*4-(n-1):1,p0=pts[i-1],p1=pts[i];ctx.lineTo(HOLE_X+p0[0]+(p1[0]-p0[0])*Math.min(1,f),DECK+3+pass*.8+p0[1]+(p1[1]-p0[1])*Math.min(1,f))}
+        ctx.stroke();
+      }
+    });
+    ctx.restore();
+    /* éclair de braise au point de frappe */
+    if(q<.3){const u=q/.3,rr=40+260*es(u);ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=1-u;ctx.drawImage(sprGl,HOLE_X-rr,DECK-rr,rr*2,rr*2);ctx.restore()}
+    if(hw<2)return;
+    /* 2. rien de l'ancien pont au-dessus du vide : le fond lointain recouvre le parapet */
+    const sk=bgFar.width/W;
+    ctx.drawImage(bgFar,x0*sk,(DECK-52)*sk,(x1-x0)*sk,52*sk,x0,DECK-52,x1-x0,52);
+    /* 3. vide : aplat sombre qui devient braise en bas, bords irréguliers par courses de maçonnerie */
+    ctx.save();
+    const g=ctx.createLinearGradient(0,DECK,0,H);g.addColorStop(0,'#160b14');g.addColorStop(.55,'#3a1418');g.addColorStop(1,'#7a2c12');
+    ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(edgeX(0,-1,hw),DECK-1);ctx.lineTo(edgeX(0,1,hw),DECK-1);
+    for(let i=0;i<NR;i++){const y=Math.min(H,DECK+(i+1)*ROW),a=edgeX(i,1,hw);ctx.lineTo(a,Math.min(H,DECK+i*ROW));ctx.lineTo(a,y)}
+    ctx.lineTo(x1+8,H+2);ctx.lineTo(x0-8,H+2);
+    for(let i=NR-1;i>=0;i--){const y=Math.min(H,DECK+(i+1)*ROW),a=edgeX(i,-1,hw);ctx.lineTo(a,y);ctx.lineTo(a,Math.min(H,DECK+i*ROW))}
+    ctx.closePath();ctx.fill();ctx.clip();
+    /* 4. colonne de lumière de la Fonderie (additive, sprite, respiration douce) */
+    const pul=.9+.1*Math.sin(tt*2.1),ch=H-DECK+210;
+    ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=.5*pul*k;ctx.drawImage(sprCol,HOLE_X-hw*1.05,H-ch,hw*2.1,ch);
+    ctx.globalAlpha=.55*pul*k;ctx.drawImage(sprGl,HOLE_X-hw*1.6,H-hw*1.2,hw*3.2,hw*2.4);ctx.restore();
+    /* 5. blocs du tablier qui basculent et tombent (dalle éclairée, maçonnerie, liseré chaud dessous, éclat de parapet) */
+    BLK.forEach((b,i)=>{
+      if(reduce&&i%2===0)return;
+      const qq=Math.max(0,q-b[5]);if(qq<=0&&k<.3)return;
+      const cx=HOLE_X+b[0]*hw+b[6]*qq,cy=DECK+b[2]/2+b[3]*qq+720*qq*qq;if(cy>H+70)return;
+      ctx.save();ctx.translate(cx,cy);ctx.rotate(Math.min(qq,1.1)*b[4]);
+      const w=b[1],th=b[2];
+      ctx.fillStyle='#4d3248';ctx.fillRect(-w/2,-th/2,w,th);
+      ctx.fillStyle='#654055';ctx.fillRect(-w/2,-th/2,w,12);
+      ctx.fillStyle='rgba(255,190,150,.32)';ctx.fillRect(-w/2+3,-th/2+1,w-8,1.5);
+      ctx.fillStyle='#392640';ctx.fillRect(-w/2,-th/2+12,w*.45,th-12-6);ctx.fillRect(w*.1,-th/2+18,w*.4,th-18);
+      ctx.fillStyle='rgba(255,130,60,.6)';ctx.fillRect(-w/2,th/2-2,w,2);
+      if(b[7]){ctx.fillStyle='#2e1f36';ctx.beginPath();ctx.moveTo(-w*.2,-th/2);ctx.lineTo(-w*.16,-th/2-15);ctx.quadraticCurveTo(0,-th/2-22,w*.12,-th/2-13);ctx.lineTo(w*.2,-th/2-12);ctx.lineTo(w*.24,-th/2);ctx.closePath();ctx.fill();
+        ctx.fillStyle='rgba(255,170,100,.3)';ctx.fillRect(w*.12,-th/2-12,w*.12,1.5)}
+      ctx.restore();
+    });
+    /* 6. poussière qui retombe dans le trou, braises qui montent */
+    const nd=reduce?7:N_DUST,ne=reduce?10:N_EMB;
+    if(q<2.4){const fa=Math.min(1,q*5)*Math.max(0,1-q/2.4);ctx.fillStyle='rgba(190,140,150,'+(.55*fa)+')';
+      for(let i=0;i<nd;i++){const d=DUS[i];ctx.fillRect(HOLE_X+d.xo*hw*.9,DECK-60+q*90*d.v,d.s,d.s)}}
+    for(let i=0;i<ne;i++){const e=EMB[i],u=(tt*e.sp+e.ph)%1,a=(1-u)*.85*k;ctx.fillStyle=(i%3?'rgba(255,176,90,':'rgba(255,220,150,')+a+')';
+      ctx.fillRect(HOLE_X+e.xo*hw*.85+Math.sin(tt*1.4+e.w)*10,H+8-u*(H-DECK+170),2,2)}
+    ctx.restore();
+    /* 7. bords : épaisseur de la maçonnerie en courses décalées, dalle claire en haut, éclairée par dessous */
+    for(let side=-1;side<=1;side+=2){
+      for(let i=0;i<NR;i++){
+        const y=DECK+i*ROW,h=Math.min(ROW,H-y);if(h<=0)break;
+        const ex=edgeX(i,side,hw),bw=BW[i][side<0?0:1],x=side<0?ex:ex-bw;
+        ctx.fillStyle=i===0?'#654055':i%2?'#3d2a45':'#4a3250';ctx.fillRect(x,y,bw,h);
+        if(i===0){ctx.fillStyle='rgba(255,190,150,.32)';ctx.fillRect(x,y,bw,1.5)}
+        ctx.fillStyle='rgba(255,120,50,'+(.1+.4*i/NR)+')';ctx.fillRect(x,y,bw,h);
+        ctx.fillStyle='rgba(255,150,70,'+(.45+.3*i/NR)+')';ctx.fillRect(x,y+h-1.5,bw,1.5);
+        ctx.fillRect(side<0?ex:ex-1.5,y,1.5,h);
+      }
+    }
+  }
+  return{draw};
+})();
 function drawHole(){
   const b=G.boss;if(b.s!=='fin'||b.t<2.0)return;
-  const k=es(clamp01((b.t-2.0)/.22)),hw=125*k,x0=HOLE_X-hw;
-  ctx.save();
-  const g=ctx.createLinearGradient(0,DECK-6,0,H);
-  g.addColorStop(0,'#14090c');g.addColorStop(1,'#7a2a10');
-  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x0,DECK-6);
-  for(let i=1;i<=8;i++)ctx.lineTo(x0+i*hw/4,DECK-6+(i%2?10:-2));
-  ctx.lineTo(HOLE_X+hw,H);ctx.lineTo(x0,H);ctx.closePath();ctx.fill();
-  const lg=ctx.createRadialGradient(HOLE_X,H,10,HOLE_X,H,220*k);lg.addColorStop(0,'rgba(255,140,50,.55)');lg.addColorStop(1,'rgba(255,90,30,0)');
-  ctx.fillStyle=lg;ctx.fillRect(x0,DECK-6,hw*2,H-DECK+6);
-  ctx.restore();
+  BREACH.draw(b.t-2.0);
 }
 function drawCracks(){
   /* coup final de la phase I : le rayon de la lanterne file jusqu'au torse du Colosse et y explose */
@@ -550,12 +635,10 @@ function render(){
   ctx.save();
   if(G.shake>0&&!reduce)ctx.translate(rand(-1,1)*G.shake,rand(-1,1)*G.shake);
   ctx.drawImage(bgFar,0,0,W,H);
-  const pulse=.85+.15*Math.sin(G.time*2.1)+.05*Math.sin(G.time*7.3);
-  const lg=ctx.createRadialGradient(W/2,H+60,20,W/2,H+60,560);
-  lg.addColorStop(0,'rgba(255,110,30,'+(.55*pulse)+')');lg.addColorStop(.5,'rgba(200,50,20,'+(.22*pulse)+')');lg.addColorStop(1,'rgba(120,20,10,0)');
-  ctx.fillStyle=lg;ctx.fillRect(0,0,W,H);
+  BRD.mist(reduce?0:(G.time*.012)%1);
   drawEmbers(0,70,1);
   ctx.drawImage(bgBridge,0,0,W,H);
+  BRD.archGlow(G.time);
   drawHole();ctx.save();ctx.translate(G.ix||0,0);drawBoss();ctx.restore();drawCracks();drawPlayer();drawFlame();drawJets();drawRock();if(G.boss.dbf&&G.boss.s==='fl_in')drawChainTell(BX-18,DECK-238,G.boss.t);if(G.boss.dbl&&(G.boss.s==='windup'||G.boss.s==='strike'))drawDblTell(G.boss.t);drawRing();drawBarrier();drawOrb();drawHints();drawFx();
   drawEmbers(0,18,.9);
   ctx.restore();

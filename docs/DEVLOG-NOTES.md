@@ -366,3 +366,11 @@
 ## 2026-11-27 · charte graphique (docs)
 - Rien de nouveau à l'écran pour l'instant : la charte fixe la palette et le rendu à suivre pour les prochains décors et personnages.
 - Le joueur ne voit aucun changement dans les chapitres actuels ; la direction artistique sera visible à partir du lot 1 (pont en essai).
+
+## 2026-11-27 · décor du pont (phase I)
+- Le pont se joue désormais sous un ciel du soir, une grande lune sombre derrière le Colosse, des crêtes et des tours au loin, avec une brume qui glisse lentement.
+- Les arches du pont laissent voir une lueur chaude qui palpite ; les dalles ont une arête éclairée et le parapet est ébréché.
+
+## 2026-11-27 · brèche de fin de phase I
+- Au coup de marteau, des fissures de braise partent du point d'impact, puis le tablier se brise en blocs qui basculent et tombent avec leurs dalles et un morceau de parapet.
+- La brèche reste ouverte et calme : bords de pierre éclairés par dessous, colonne de lumière chaude de la Fonderie, braises qui montent et poussière qui retombe.
