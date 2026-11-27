@@ -242,11 +242,12 @@ function fdPose(){
   const hand=(side,x,y)=>{if(side==='A'){o.off[0]+=x;o.off[1]+=y}else{o.nn[0]+=x;o.nn[1]+=y}};
   if(a&&a.kind==='claws'){
     /* il fond sur le bloc, une main après l'autre : repli, coup, retour */
-    let dive=0,side='A',best=0;
-    a.hits.forEach((h,i)=>{if(!h.k.startsWith('claw'))return;const d=a.t-h.at,v=fdKv(d,[[-.9,0],[-.5,-.4],[-.2,-.5],[0,1],[.35,.25],[.75,0]]);if(Math.abs(v)>=best){best=Math.abs(v);dive=v;side=i%2?'B':'A'}});
-    const p=Math.max(0,-dive),s=Math.max(0,dive);
-    o.dx=-230*s+30*p;o.dy=10*s;o.lean=-.34*s+.26*p;o.tete=.2*s;o.griffe=.55+.75*Math.max(s,p);
-    if(side==='A')hand('A',-60*s+80*p,-60*s-200*p);else hand('B',-130*s+16*p,-70*s-150*p);
+    /* chaque coup agit sur sa main ; le corps suit la plus forte des élans en cours (max continu : jamais de saut quand deux coups se recouvrent) */
+    let S=0,Pl=0;
+    a.hits.forEach((h,i)=>{if(!h.k.startsWith('claw'))return;const d=a.t-h.at,v=fdKv(d,[[-.9,0],[-.55,-.4],[-.3,-.5],[0,1],[.35,.25],[.75,0]]),p=Math.max(0,-v),s=Math.max(0,v);
+      S=Math.max(S,s);Pl=Math.max(Pl,p);
+      if(i%2===0)hand('A',-60*s+80*p,-60*s-200*p);else hand('B',-130*s+16*p,-70*s-150*p)});
+    o.dx=-230*S+30*Pl;o.dy=10*S;o.lean=-.34*S+.26*Pl;o.tete=.2*S;o.griffe=.55+.75*Math.max(S,Pl);
   }else if(a&&a.kind==='wings'){
     /* il se ramasse, lève les ailes, les rabat : le corps suit chaque coup */
     const ws=a.hits.filter(h=>h.k==='wave');let sl=0;ws.forEach(h=>{const d=(a.t-(h.at-.55))/.16;sl=Math.max(sl,Math.exp(-d*d))});
@@ -294,7 +295,7 @@ function drawBoss2(){
   const t=Q.time,tt=reduce?0:t,b=Q.boss,P=fdPose(),s=FD_S;
   const X0=Q.bx+17+P.dx,Y0=Q.by+185*s+P.dy;
   const wa=wingAngle(),fire=Q.enraged,dmg=qWingDmg(),wo=Q.wo;
-  const T2=tailTip(),tip=[(T2.tip[0]-X0)/s,(T2.tip[1]-Y0)/s];
+  const T2=tailTip(),fol=1-T2.strike,tip=[(T2.tip[0]+P.dx*fol-X0)/s,(T2.tip[1]+P.dy*fol-Y0)/s];
   const R0=[30,-130];let tp=tip;
   if(Q.cn&&Q.cn.k!=='final'&&QR.tail){const u=es((Q.cn.t-.15)/.2);tp=[tip[0],tip[1]+((QLAKE-14-Y0)/s-tip[1])*u]} /* queue clouée au sol par le rayon */
   const qP=[R0,[R0[0]+(tp[0]-R0[0])*.35,R0[1]+(tp[1]-R0[1])*.3+36*(1-T2.strike)],[R0[0]+(tp[0]-R0[0])*.7,R0[1]+(tp[1]-R0[1])*.75+58*(1-T2.strike)],tp];
