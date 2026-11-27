@@ -35,11 +35,14 @@ LB.WATCHER_T={
   flame:{f1:31,f2:57,a1:.12,a2:.06,fs:19,sway:1.2},   /* flamme : vacillement (rad/s, amplitudes) et balancement de la pointe (px) ; fixe en mouvement réduit */
   bell:{f:12.6,a:.16}                               /* clochette : balancement (rad/s, rad) ; immobile en mouvement réduit */
 };
+/* garde de combat (maquette A9), la même dans toutes les phases sauf indication contraire : main, bâton planté (talon, lanterne)
+   et angle du sceptre tenu en main (sa) qui place la lanterne au même endroit. Les chapitres qui chorégraphient eux-mêmes partent d'ici. */
+LB.WATCHER_REST={hand:[46,-66],staff:[[34,0],[60,-140]],sa:-1.39};
 (function(){
   const W=LB.WATCHER_T,PI=Math.PI,cl=v=>v<0?0:v>1?1:v;
   const es=t=>t*t*(3-2*t);   /* lissage du Chapitre I */
   /* géométries du Chapitre I (repère du Veilleur) ; k = avancement de la pose, o = options */
-  const staffIdle=()=>({staff:[[34,0],[60,-140]],hand:[46,-66]});
+  const RS=LB.WATCHER_REST,staffIdle=()=>({staff:[RS.staff[0].slice(),RS.staff[1].slice()],hand:RS.hand.slice()});
   const staffUp=r=>({staff:[[34,-58*r],[60-2*r,-140-26*r]],hand:[46-8*r,-66-8*r]});
   LB.WATCHER_POSES={
     /* debout, lanterne au bout du bâton planté (phase I du Chapitre I) ; respire */
@@ -54,9 +57,9 @@ LB.WATCHER_T={
     /* garde tenue (phase III du Chapitre II) : sceptre levé, lanterne allumée */
     hold:k=>({hand:[36,-92],sa:-1.5,L:76,glow:1,lit:1}),
     /* sceptre levé (garde de la phase III du Chapitre I, appel de la cloche, cinématiques) ; k = levée */
-    raise:k=>({hand:[46-14*k,-66-28*k],sa:-1.39-.11*k,L:76,glow:k>0?1:.3,lit:k>0?1:0}),
+    raise:k=>({hand:[RS.hand[0]-14*k,RS.hand[1]-28*k],sa:RS.sa-.11*k,L:76,glow:k>0?1:.3,lit:k>0?1:0}),
     /* coup reçu : plié, sceptre baissé ; k = intensité */
-    hurt:k=>({hand:[46-6*k,-66+4*k],sa:-1.39+2*k,L:76,rot:.12*k,sy:1-.18*k,glow:.3}),
+    hurt:k=>({hand:[RS.hand[0]-6*k,RS.hand[1]+4*k],sa:RS.sa+2*k,L:76,rot:.12*k,sy:1-.18*k,glow:.3}),
     /* à terre (défaite, prise relâchée) */
     down:k=>Object.assign(staffIdle(),{rot2:.12,sy:.82,glow:.25}),
     /* appel de la lumière (orbe, cloche) : comme la garde, lanterne allumée */
@@ -149,9 +152,9 @@ LB.WATCHER_T={
   }
   /* bras proche (de l'épaule à la main, coude plié selon la distance), liseré compris ; r = rayon de l'épaule */
   function sleeve(c,sh,h,r,P,rim){
-    /* l'épaule d'ancrage (sh) est au bord du mantelet ; le bras sort dessous, un peu en arrière (S), et le coude se plie
+    /* l'épaule d'ancrage (sh) est au bord du mantelet ; le bras sort dessous, sur le flanc (S), pas sur le torse, et le coude se plie
        comme un bras de deux segments de 21 px (à l'échelle de r) : coude sous la ligne épaule-main quand la main est devant */
-    const k=r/6.5;sh=[sh[0]-10*k,sh[1]-4*k];
+    const k=r/6.5;sh=[sh[0]-3*k,sh[1]-2*k];
     const dx=h[0]-sh[0],dy=h[1]-sh[1],l=Math.hypot(dx,dy)||1,s2=21*k,b=Math.min(12*k,Math.sqrt(Math.max(0,s2*s2-l*l/4))),
       mx=(sh[0]+h[0])/2-dy/l*b*2,my=(sh[1]+h[1])/2+dx/l*b*2,w=9*k;
     const path=()=>{c.beginPath();c.moveTo(sh[0],sh[1]);c.quadraticCurveTo(mx,my,h[0],h[1])};
@@ -281,7 +284,7 @@ LB.WATCHER_T={
     if(o.flat)return flat(c,X,Y,g.scale||1,g.lamp==null?1:g.lamp);
     if(o.ink)return back(c,X,Y,o.ink,g.lamp==null?1:g.lamp);
     /* sceptre tenu par son angle (Chapitre II) : la main suit, le bâton passe dans la main */
-    if(g.staffA!=null&&!o.staff&&o.sa==null){const A=g.staffA,up=cl((-1.42-A)/.45),dx=Math.cos(A),dy=Math.sin(A),h=[45+dx*4,-66-8*up];
+    if(g.staffA!=null&&!o.staff&&o.sa==null){const A=g.staffA,up=cl((-1.42-A)/.45),dx=Math.cos(A),dy=Math.sin(A),h=[RS.hand[0]-1+dx*4,RS.hand[1]-8*up];
       g.hand=o.hand||h;g.staff=[[g.hand[0]-dx*60,g.hand[1]-dy*60],[g.hand[0]+dx*80,g.hand[1]+dy*80]];g.sa=undefined;
       if(o.glow==null)g.glow=up>.3?1:.25;if(o.lit==null)g.lit=up>.3?1:0}
     const br=W.breath,breathe=o.breath!=null?o.breath:pose==='idle',bob=breathe?Math.sin((t||0)*br.bobF)*br.bob*.5:0;

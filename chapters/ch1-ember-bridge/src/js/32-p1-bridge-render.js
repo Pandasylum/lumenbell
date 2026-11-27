@@ -268,7 +268,8 @@ function drawPlayer(){
   /* le Veilleur commun (LB.drawWatcher) ; la phase donne sa géométrie : bâton planté, garde, estoc */
   const dashing=p.s==='dash'||p.s==='stab'||p.s==='back',low=p.s==='down'||p.s==='hurt';
   const thrust=p.s==='stab'?(p.t<.1?es(p.t/.1):p.t<.22?1:1-clamp01((p.t-.22)/.08)):0;
-  const hand=dashing?[28+24*thrust,-60]:[26,-62-6*r],sb=dashing?[hand[0]-34,hand[1]+6]:[26,-2-58*r],st=dashing?[hand[0]+34,hand[1]-6]:[30+18*r,-140-26*r];
+  /* garde commune (LB.WATCHER_REST) : géométrie des poses partagées « counter » (estoc) et « block » (garde levée, r = levée) */
+  const Q=dashing?LB.WATCHER_POSES.counter(thrust):LB.WATCHER_POSES.block(r),hand=Q.hand,sb=Q.staff[0],st=Q.staff[1];
   const pose=up?(p.s==='act'?'block':'cast'):dashing?'counter':low?(p.s==='down'?'down':'hurt'):'idle';
   const b=G.boss,ring=(b.s==='lift'&&b.t>=.12)||b.s==='hold'||b.s==='slam';
   LB.drawWatcher(ctx,p.x,DECK-lift-(G.ib||0),pose,G.time,{
