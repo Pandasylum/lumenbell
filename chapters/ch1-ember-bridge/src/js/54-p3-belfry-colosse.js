@@ -38,12 +38,16 @@ function col3Hammer(a){
   return {...k3keys(q,ks)};
 }
 function col3Stab(a){
-  /* seconde vie, Difficile : coup de bélier du marteau (à l'horizontale), combo, puis marteau planté et explosion */
-  const q=a.pt,PULL={...K3B,lean:.28,sx:.92,drop:4,dF:14,dN:-34,P:[64,-150],a:180,g:205},
-    THR={...K3B,dx:44,lean:-.42,drop:14,sx:1.04,dF:16,dN:-56,P:[-128,-140],a:180,g:205},
+  /* seconde vie, Difficile : coup de bélier du marteau (à l'horizontale), combo, puis marteau planté et explosion.
+     Un seul mouvement : il tire le marteau par-dessus l'épaule, pousse, rebondit sur la garde, lève le marteau au-dessus de sa tête et l'arme derrière lui
+     (plus de poussée tenue ni de retour lent tête en bas, qui faisaient un coup bloqué puis une remise à zéro). Angles choisis pour que le marteau passe par le haut. */
+  const q=a.pt,PULL={...K3B,lean:.28,sx:.92,drop:4,dF:14,dN:-34,P:[64,-150],a:-180,g:205},
+    THR={...K3B,dx:44,lean:-.42,drop:14,sx:1.04,dF:16,dN:-56,P:[-128,-140],a:-180,g:205},
+    RECUL={...K3B,dx:26,lean:-.22,drop:10,sx:1.02,dF:16,dN:-50,P:[-100,-152],a:-172,g:205},
+    LEVE={...K3B,dx:8,lean:.12,sx:.95,dF:16,dN:-46,P:[-10,-210],a:-45,g:205},
     PLANT={...K3B,dx:20,lean:-.32,drop:18,sx:1.02,dF:14,dN:-44,P:[-62,-160],a:-220,g:205};
-  const ks=[[0,K3_DOS],[.5,PULL,'o'],[.62,PULL],[.85,THR,'i'],[1.1,THR],[1.7,K3_ARME]];
-  [1.95,2.45,2.95].forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,'l'],[T,F,'i'],[T+.12,F])});
+  const ks=[[0,K3_DOS],[.5,PULL,'o'],[.62,PULL],[.85,THR,'i'],[.97,RECUL,'o'],[1.35,LEVE]];
+  [1.95,2.45,2.95].forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,i?'l':'o'],[T,F,'i'],[T+.12,F])});
   ks.push([3.35,K3_ARME],[3.9,PLANT],[4.2,PLANT],[4.7,K3_ARME]);
   const o={...k3keys(q,ks)};
   o.heat=k3bump(q,3.35,3.95,.2);   /* la tête du marteau se charge avant l'explosion */
