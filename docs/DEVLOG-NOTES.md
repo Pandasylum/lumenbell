@@ -401,3 +401,5 @@
 - Quand une attaque finit par un coup de queue, la riposte reste celle de l'attaque de départ ; le rayon et l'éclat arrivent au même endroit.
 - Après la première rage, le creuset du palan avance et cogne le Colosse, le rayon coupe un câble et la lave se verse sur lui ; le creuset revient vide, pendu à un seul câble.
 - À la fin de la deuxième rage (Difficile), le creuset vide pendouille, le cogne, puis tombe sur sa tête et sombre avec lui : il ne reste que le chariot et des bouts de chaîne.
+- Les fins de rage durent maintenant environ cinq secondes : le creuset avance, cogne, un câble saute, la lave tombe sur le Colosse, puis le creuset revient vide.
+- Contre des ailes : une lame de lumière en croissant fend les flammes ; contre des débris : des éclats de pierre dorés filent dans le rayon. Les ailes du Colosse ont le dessin de la maquette.

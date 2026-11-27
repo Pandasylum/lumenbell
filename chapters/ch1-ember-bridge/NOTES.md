@@ -25,7 +25,7 @@
 | `js/28-boss-body.js` | Colosse : chaîne, enclumes, masse rangée, **`demonBody`** (silhouette validée, partagée), **`COLOSSE`** (phase I : calques cuits, queue, fissures par pièce, `plie` / `tete` / teintes), **`COLFX`** (effets réutilisables, non branchés en phases II et III) |
 | `js/32-p1-bridge-render.js` | Phase I : poses, attaques, effets, aides, `render` ; ripostes (`RP`, `COL_H`, `COL_R`, `MV_S` : réactions de dégâts, rage, gestes de lumière du Veilleur ; voir `docs/decisions/2026-11-27-ripostes-p1.md`) |
 | `js/36-p2-foundry-logic.js` | Phase II : `Q`, `DG`, repères du fond (`QFLOOR`, `QLAKE`, `QEDGE`), attaques, `lakeY` (horloge de la fin), `qDive`, `qEnd`, `qStep` |
-| `js/40-p2-foundry-render.js` | Phase II : fond de la Fonderie (`qBackground`, hotte `qHood`), ailes, Colosse, Veilleur, lave, rebord, bloc, chaînes et lanterne (`drawLake`, `qLantern`), `renderQ` |
+| `js/40-p2-foundry-render.js` | Phase II : décor de la Fonderie en trois calques en cache (`fdBuild`, `qBackground`, `drawLake`), creuset du palan et ripostes de fin de rage (`fdCr1`, `fdCr2`, `fdRipFx`), ailes en sprites (`drawWing`, aussi phase I), Colosse du lot 2 (`drawBoss2`, `fdPose`), attaques (`drawHits2`), contres (`drawCnFx`), `renderQ` |
 | `js/44-p3-belfry-logic.js` | Phase III : `R`, `R_T`, `RATK`, `ULT`, `FIN`, `rEnd`, `rStep`, `rFinale` |
 | `js/48-p3-belfry-poses.js` | Phase III : finale (`heroFin`, `finBoss`, ailes tombées), poses du Veilleur et du Colosse, masse |
 | `js/52-p3-belfry-decor.js` | Phase III : tours, cloche (`ringBell`), fanal, beffroi, fond et sol |
@@ -92,3 +92,9 @@ Les textes `_()` restent là où ils sont utilisés (le découpage n'a rien dép
 
 - 2026-11-02 (`menu/crown` A, `shared/` seulement) : ouvert depuis le hub (`site/chN/index.html?from=hub`), le chapitre n'a pas d'écran de démarrage et son menu montre « Retour » vers le hub ; ouvert seul, écran de démarrage et plus de lien en bas du menu (« chapitre suivant » retiré). `CHAPTER.next` retiré (2 novembre, `hub/cleanup`). `dist` reconstruit (seuls les morceaux communs changent).
 - 2026-11-02 (`menu/crown-fixes`, session moteur) : bouton plein écran retiré de l'en-tête et du menu ; mouvement réduit lu par `LB.motion` (réglage du hub, sinon le système) ; lien du menu « Chapitres » ; ouvert depuis le hub, la carte de la vraie fin (hors Épreuve) porte « Chapitres » et ramène au hub (`LB.hubEnd`). Voir `docs/decisions/2026-11-02-hub-fixes.md`.
+
+## Phase II, direction artistique (PR #151, 27 novembre)
+- Décor : monde de la maquette 1230 x 692 posé sur l'écran (`FD.ZW`) ; rebord sur `QFLOOR`, lave sur `QLAKE`, bord sur `QEDGE`, bloc sur `QH`. Calques en cache créés une fois ; par image : tracés seulement (pas de `filter`, de `shadowBlur`, ni de canvas créé).
+- Colosse : `COLOSSE.draw` (masse dans le dos, boule en bandoulière, griffes aux deux mains, queue pilotée par `o.qP`). Tout lissage de ce fichier passe par `fdE` (`es` du jeu n'est pas borné).
+- La riposte dépend de l'attaque initiale (`QR.kind`) : griffes = éclat à bout portant, ailes = croissant de lumière, débris = éclats de pierre emportés par le rayon. Jamais de riposte propre à la queue.
+- Fin de rage : `Q.cn.rg` (logique, `qCounter`) vaut 1 ou 2 pour la riposte qui termine la 1re ou la 2e rage, 0 sinon (le dernier assaut garde la sienne). `DG.rip` donne l'éclat de dégât et la fin de ces deux ripostes (temps réel, 5,5 s) ; `QR.cr` garde l'état du creuset (0 plein, 1 vide à un seul câble, 2 absent) jusqu'à la fin de la phase.
