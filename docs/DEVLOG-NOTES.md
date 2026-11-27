@@ -406,3 +406,4 @@
 - Le coup de chaîne n'agrippe plus : la boule à pointes balayée au bout de la chaîne frappe directement le Veilleur, puis rebondit et revient au poing du Colosse (phases I et III).
 - Quand le Colosse encaisse un coup, son buste et sa tête vacillent trois fois avant de se stabiliser.
 - Quand le Colosse s'enrage, des flammes jaillissent tout autour de lui au lieu d'un cercle qui s'étend : plus rien ne ressemble à une attaque à parer.
+- Le contre de la première rage lance une lame de lumière en croissant qui court sur le pont jusqu'au Colosse, au lieu d'un cercle plat sous les pieds du Veilleur.

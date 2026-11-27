@@ -21,3 +21,6 @@ Demande : la boule à pointes ne l'agrippe plus, elle frappe le Veilleur directe
 ## Enragement de la phase I
 - Le cri d'enragement ne lance plus d'anneau de braise qui s'étend au sol (`COLFX.ondes`) : il ressemblait à une attaque à parer. À la place, une gerbe de flammes jaillit autour du Colosse (au sol, le long des flancs et au-dessus des épaules), monte en 0,22 s, tient, puis retombe en 0,45 s. `COLFX.ondes` n'est plus appelée (phase I) ; elle reste dans `COLFX`. Mouvement réduit : flammes figées, sans braises.
 
+## Contre de la 1re rage, phase I (`drawRing`)
+- Les anneaux de lumière à plat sous les pieds (ellipses au ras du pont) sont remplacés : la bague frappe le sol, une lame de lumière en croissant, debout et ouverte vers le Colosse, court sur le pont en grandissant (0,55 s, comme l'onde d'avant), laisse des filets de lumière qui jaillissent du sol, puis éclate sur lui (étoile et éclats de pierre). Instants et effets de jeu inchangés ; le Veilleur ne dessine plus son onde (déjà désactivée côté `fx`), `shared/` n'est pas touché.
+
