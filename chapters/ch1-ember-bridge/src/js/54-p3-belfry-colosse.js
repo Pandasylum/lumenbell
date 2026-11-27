@@ -12,7 +12,9 @@ const k3cl=u=>u<0?0:u>1?1:u,k3ez=u=>{u=k3cl(u);return u*u*(3-2*u)},k3l=(a,b,u)=>
 const k3poly=COLFX.poly,k3star=COLFX.etoile,k3shards=COLFX.eclats,k3flame=COLFX.flamme;
 const k3rnd=s=>()=>(s=(s*16807)%2147483647)/2147483647;
 const k3mix=(p,q,u)=>{const o={};for(const k in p){const a=p[k],b=k in q?q[k]:a;o[k]=Array.isArray(a)?a.map((v,i)=>v+(b[i]-v)*u):typeof a==='number'?a+(b-a)*u:b}return o};
-const k3keys=(t,K)=>{if(t<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(t<=K[i][0])return k3mix(K[i-1][1],K[i][1],k3ez((t-K[i-1][0])/(K[i][0]-K[i-1][0])));return K[K.length-1][1]};
+/* images clés : [temps, pose, accélération?] ; 'i' = le segment qui finit à cette clé accélère (coup, élan), 'o' = il ralentit sans s'arrêter (arrivée) ; sinon doux aux deux bouts */
+const k3ease={i:u=>Math.pow(u,1.35),o:u=>1-Math.pow(1-u,1.5),l:u=>u};
+const k3keys=(t,K)=>{if(t<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(t<=K[i][0]){const u=k3cl((t-K[i-1][0])/(K[i][0]-K[i-1][0]));return k3mix(K[i-1][1],K[i][1],K[i][2]?k3ease[K[i][2]](u):k3ez(u))}return K[K.length-1][1]};
 const k3val=(t,K)=>k3keys(t,K.map(([a,v])=>[a,{v}])).v;
 const k3bump=(t,a,b,m=.12)=>k3ez((t-a)/m)*(1-k3ez((t-b)/m));
 /* poses (unités de pose) : lean/drop/sx/dF/dN = buste, off/nn = mains lointaine et proche, P/a/g/wN/wF/s/r = marteau et boule (voir COLOSSE.draw),
@@ -29,8 +31,8 @@ const col3W=p=>{const f=COL3.f;return f.flip?[2*f.bx-(f.x0+p[0]*C3),f.y0+p[1]*C3
 function col3Hammer(a){
   /* garde, armé, frappe, combo : 2 coups (combo) ou 3 coups ; les coups Difficile sont recalés sur les images de base (swq) */
   const two=a.kind==='sword2'&&!a.hard3,H=two?[.75,1.4]:[.75,1.4,2.05],q=a.hard3?swq(a):a.pt;
-  const ks=[[0,K3_DOS],[.24,K3_GARDE]];
-  H.forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.2,K3_ARME],[T,F],[T+.14,F])});
+  const ks=[[0,K3_DOS],[.22,K3_GARDE,'i']];
+  H.forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,'l'],[T,F,'i'],[T+.14,F])});
   ks.push([H[H.length-1]+.5,K3_ARME]);
   return {...k3keys(q,ks)};
 }
@@ -39,8 +41,8 @@ function col3Stab(a){
   const q=a.pt,PULL={...K3B,lean:.28,sx:.92,drop:4,dF:14,dN:-34,P:[64,-150],a:180,g:205},
     THR={...K3B,dx:44,lean:-.42,drop:14,sx:1.04,dF:16,dN:-56,P:[-128,-140],a:180,g:205},
     PLANT={...K3B,dx:20,lean:-.32,drop:18,sx:1.02,dF:14,dN:-44,P:[-62,-160],a:-220,g:205};
-  const ks=[[0,K3_DOS],[.2,K3_GARDE],[.5,PULL],[.62,PULL],[.85,THR],[1.1,THR],[1.7,K3_ARME]];
-  [1.95,2.45,2.95].forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.2,K3_ARME],[T,F],[T+.12,F])});
+  const ks=[[0,K3_DOS],[.2,K3_GARDE,'i'],[.5,PULL,'l'],[.62,PULL],[.85,THR,'i'],[1.1,THR],[1.7,K3_ARME]];
+  [1.95,2.45,2.95].forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,'l'],[T,F,'i'],[T+.12,F])});
   ks.push([3.35,K3_ARME],[3.9,PLANT],[4.2,PLANT],[4.7,K3_ARME]);
   const o={...k3keys(q,ks)};
   o.heat=k3bump(q,3.35,3.95,.2);   /* la tête du marteau se charge avant l'explosion */
