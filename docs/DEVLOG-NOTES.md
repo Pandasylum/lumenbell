@@ -391,3 +391,8 @@
 ## 2026-11-27 · Veilleur vivant
 - Le Veilleur porte une grande cape qui flotte au vent ; au repos il respire, tourne la tête, sa lanterne se balance et sa visière brille par instants.
 - Quand il bloque, il plante son appui et porte la lanterne en avant ; quand il esquive, il se ramasse, bondit et retombe en se tassant, puis revient doucement en garde.
+
+## 2026-11-27 · Ripostes de la phase I
+- Quand le Colosse encaisse un coup (boule rebondie, orbe, estoc, bague, dernier coup), l'image se fige un instant, un éclair à moitié transparent le traverse, des éclats jaillissent et il recule, ses fissures s'ouvrent.
+- En rage, il rugit entouré de flammes découpées, sa peau se fend pièce par pièce ; quand la bague éteint ses flammes, il ploie sur ses jambes. Sa queue traîne derrière lui, toujours accrochée à son bassin.
+- Le Veilleur lève sa lumière pour l'orbe, fonce pour l'estoc, frappe le sol de sa bague et ouvre son halo pour le dernier coup.

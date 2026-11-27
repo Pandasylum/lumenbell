@@ -115,7 +115,10 @@ function demonBody(o){
    Coordonnées de pose : maquette x0.8, origine entre les pieds. Chaque pièce rigide (jambes, torse, épaules, tête, mâchoire,
    bandoulière, segments de bras, poing, boule) est peinte une seule fois dans un calque en cache, avec ses ombres, flous et son
    liseré ; à chaque image on ne fait que les poser. Le buste se penche et pivote autour de la taille (PY), les jambes restent
-   plantées ; les bras gardent des longueurs fixes (L1, L2) et plient toujours du même côté. demonBody (phases II et III) n'y touche pas. */
+   plantées ; les bras gardent des longueurs fixes (L1, L2) et plient toujours du même côté. demonBody (phases II et III) n'y touche pas.
+   Ripostes (référence ripostes-reference.js, 27/11) : queue toujours visible dont la racine suit le bassin (queueAccrochee) ; fissures peintes
+   DANS chaque pièce (calques cuits : torse, jambes, épaules, tête, bras), jamais par-dessus l'ensemble, donc la chaîne et la tête passent devant
+   celles du torse ; jambes qui ploient (plie), tête inclinée (tete), teintes sur la silhouette (flash, eteint). */
 const COLOSSE=(()=>{
   const TAU=6.283185307179586,P=d=>new Path2D(d),P2=P;
   let K=1; /* pixels par unité de maquette pendant la mise en cache */
@@ -237,6 +240,26 @@ const COLOSSE=(()=>{
    pc(c,'M0 -25C15 -25 25 -14 25 0C25 14 14 25 0 25C-15 25 -25 15 -25 0C-25 -15 -15 -25 0 -25Z','#3a1b38',[['M-22 -11L-6 -24L2 -6L-13 7Z',CL],['M8 -24L25 -4L18 17L6 4Z',OM]],10);feu(c,'M-10 -16L1 -3L-5 8L4 21M1 -3L15 -9',3,1);c.restore()}
 
   const L1=68,L2=66,PY=-124;
+  /* ---- queue : courbe effilée, pointe en lame (la lame est cuite : SP.tip). Au sol, derrière les jambes, la pointe relevée ;
+     la racine suit le bassin (même transformation que le torse) : jamais détachée. COLQ.sx resserre la queue pour que la lame reste dans le cadre. ---- */
+  const COLQ={sx:.82};
+  const queueSol=o=>[[30,-130],[150-(o.lean||0)*40,-56],[120,18],[232+(o.rage||0)*6,-26-(o.rage||0)*34]].map((q,i)=>i?[30+(q[0]-30)*COLQ.sx,q[1]]:q);
+  const queueAccrochee=(P,pt)=>{const r=pt(8,-142),s=pt(P[0][0],P[0][1]),dx=s[0]-P[0][0],dy=s[1]-P[0][1];return [r,[P[1][0]+dx,P[1][1]+dy],P[2],P[3]]};
+  function plg(c,pts,col){c.fillStyle=col;c.beginPath();pts.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.fill()}
+  function queue(c,P){const f=u=>{const v=1-u;return [0,1].map(k=>v*v*v*P[0][k]+3*v*v*u*P[1][k]+3*v*u*u*P[2][k]+u*u*u*P[3][k])};
+    const N=14,h=[],b=[],m=[];
+    for(let i=0;i<=N;i++){const u=i/N,p=f(u),q=f(Math.min(1,u+.01)),p0=f(Math.max(0,u-.01)),a=Math.atan2(q[1]-p0[1],q[0]-p0[0]),w=24*(1-u)+6;m.push(p);h.push([p[0]-Math.sin(a)*w,p[1]+Math.cos(a)*w]);b.push([p[0]+Math.sin(a)*w,p[1]-Math.cos(a)*w])}
+    plg(c,[...h,...b.slice().reverse()],CH);plg(c,[...b,...m.slice().reverse()],CL2);
+    c.lineCap='round';
+    for(let i=2;i<N;i+=2){c.strokeStyle='#14081c';c.lineWidth=3;c.beginPath();c.moveTo(h[i][0],h[i][1]);c.lineTo(b[i][0],b[i][1]);c.stroke();
+      const a=b[i],n=b[i+1];plg(c,[a,[(a[0]+n[0])/2+(b[i][0]-h[i][0])*.7,(a[1]+n[1])/2+(b[i][1]-h[i][1])*.7],n],'#3a1b38')}
+    c.strokeStyle='rgba(255,138,72,.55)';c.lineWidth=1.2;c.beginPath();b.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.stroke();
+    const e=f(1),e0=f(.95);c.save();c.translate(e[0],e[1]);c.rotate(Math.atan2(e[1]-e0[1],e[0]-e0[0]));img(c,SP.tip);c.restore()}
+  /* fissure peinte dans une pièce : tracé de braise (feu) coupé par la silhouette cuite de la pièce (destination-in), donc jamais en dehors */
+  function bakeCrack(base,fn,sh){const R=SP.R,b=base.box,e=mk(base.e.width,base.e.height),x=e.getContext('2d');x.setTransform(R,0,0,R,-b[0]*R,-b[1]*R);if(sh)x.scale(sh,sh);fn(x);
+    x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='destination-in';x.drawImage(base.e,0,0);return {e,box:b}}
+  /* veines sur un bras, dans le repère du segment (0,0)->(len,0) : zigzag qui suit l'axe */
+  const veineD=(len,u)=>'M'+len*u[0]+' '+u[1]+'L'+len*u[2]+' '+u[3]+'L'+len*u[4]+' '+u[5]+'L'+len*u[6]+' '+u[7];
   /* bras à deux segments de longueur fixe : la main demandée est ramenée à la portée, le coude plie toujours du même côté */
   function ik(S,H,side){const dx=H[0]-S[0],dy=H[1]-S[1];let d=Math.hypot(dx,dy);const a=Math.atan2(dy,dx);d=Math.min(L1+L2-1,Math.max(Math.abs(L1-L2)+8,d));const b=Math.acos((L1*L1+d*d-L2*L2)/(2*L1*d));const e=a+side*b;const E=[S[0]+L1*Math.cos(e),S[1]+L1*Math.sin(e)];const W=[S[0]+d*Math.cos(a),S[1]+d*Math.sin(a)];return [E,W]}
 
@@ -276,13 +299,28 @@ const COLOSSE=(()=>{
       [-36,28].forEach(y=>pc(c,'M-29 '+y+'H31v9H-29Z',FER,[['M-29 '+y+'H31v3H-29Z',FER_C]],4));
       pc(c,'M28 -20L46 0L28 20Z','#2c1534',[['M28 -20L46 0H28Z','rgba(214,140,140,.5)']],3);
       feu(c,'M-8 -26L4 -10L-5 4L8 24M4 -10L17 -16M-5 4L-17 12',3.2,1)},'rgba(255,160,90,.9)',[2,2]);
+    /* fissures cuites dans chaque pièce (largeur moyenne ; l'intensité règle l'opacité au dessin) */
+    const FW=4.6,Mf=(d,w)=>x=>feu(x,d,w||FW,1),Mm=d=>x=>feu(x,d,FW,1);
+    const T1='M-30 -308L-37 -283L-22 -267L-34 -246L-23 -225L-30 -200L-21 -174M-37 -283L-66 -258M-22 -267L24 -265M-34 -246L-60 -222M-23 -225L10 -212L26 -190';
+    SP.torsoC=bakeCrack(SP.torso,Mm(T1),.8);
+    SP.torsoR=bakeCrack(SP.torso,Mm('M104 -300L112 -262L100 -240L128 -204L150 -182L146 -150M-96 -296L-120 -250L-114 -232L-140 -206M-30 -174L-6 -150L30 -142'),.8);
+    SP.headC=bakeCrack(SP.head,Mf('M-52 -330L-60 -314L-50 -304L-57 -293M-100 -284L-90 -272L-97 -260',3.4),.8);
+    SP.paulRC=bakeCrack(SP.paulR,Mm('M104 -300L112 -262L100 -240'),.8);
+    SP.paulLC=bakeCrack(SP.paulL,Mm('M-96 -296L-120 -250L-114 -232'),.8);
+    SP.legNC=bakeCrack(SP.legN,Mf('M34 -124L52 -100L44 -72L70 -50L72 -24',6),.8);
+    SP.legFC=bakeCrack(SP.legF,Mf('M-62 -122L-80 -90L-66 -62L-84 -30',6),.8);
+    SP.upC=[0,1].map(f=>bakeCrack(SP.up[f],x=>feu(x,veineD(L1,[.2,-4,.45,7,.62,-3,.9,5]),FW*.8,1)));
+    SP.foreC=[0,1].map(f=>bakeCrack(SP.fore[f],x=>feu(x,veineD(L2,[.12,-5,.4,6,.58,-4,.8,3]),FW*.8,1)));
+    /* pointe de la queue : lame, repère de la queue (x vers l'avant) */
+    SP.tip=bake([-8,-26,64,52],x=>{pc(x,'M-6 -10L14 -24L52 0L14 24L-6 10L6 0Z','#3a1b38',[['M-6 -10L14 -24L52 0H6Z',CL]],5);feu(x,'M6 0L34 0M18 -10L24 0',2.4,1)},RIM,S3);
     SP.glow=bake([-64,-64,128,128],x=>{const g=x.createRadialGradient(0,0,0,0,0,64);g.addColorStop(0,'rgba(255,150,60,1)');g.addColorStop(.35,'rgba(255,110,40,.4)');g.addColorStop(1,'rgba(255,90,30,0)');x.fillStyle=g;x.fillRect(-64,-64,128,128)});
   }
   const img=(c,s)=>c.drawImage(s.e,s.box[0],s.box[1],s.box[2],s.box[3]);
   function seg(c,s,A,an){c.save();c.translate(A[0],A[1]);c.rotate(an);img(c,s);c.restore()}
   /* bras : épaule, coude, poignet (aucun étirement) */
-  function bras(c,S,H,far){const [E,W]=ik(S,H,-1),a1=Math.atan2(E[1]-S[1],E[0]-S[0]),a2=Math.atan2(W[1]-E[1],W[0]-E[0]);
+  function bras(c,S,H,far,vn){const [E,W]=ik(S,H,-1),a1=Math.atan2(E[1]-S[1],E[0]-S[0]),a2=Math.atan2(W[1]-E[1],W[0]-E[0]);
     seg(c,SP.up[far],S,a1);seg(c,SP.fore[far],E,a2);
+    if(vn>.01){c.save();c.globalAlpha=Math.min(1,vn);seg(c,SP.upC[far],S,a1);seg(c,SP.foreC[far],E,a2);c.restore()} /* veines de rage, dans chaque segment */
     /* coude : plaque de fer, pointe à l'extérieur du pli */
     const ux=2*E[0]-(S[0]+W[0]),uy=2*E[1]-(S[1]+W[1]),m=Math.hypot(ux,uy)||1,n=[ux/m,uy/m];
     c.fillStyle=FER;c.beginPath();c.arc(E[0],E[1],15,0,TAU);c.fill();c.beginPath();c.moveTo(E[0]-n[1]*12,E[1]+n[0]*12);c.lineTo(E[0]+n[0]*30,E[1]+n[1]*30);c.lineTo(E[0]+n[1]*12,E[1]-n[0]*12);c.fill();
@@ -296,25 +334,51 @@ const COLOSSE=(()=>{
       [[1,'#c8421c'],[.64,'#f57c28'],[.3,'#ffd27a']].forEach(([s,col])=>{c.fillStyle=col;c.beginPath();c.moveTo(x-wd*s,y);c.bezierCurveTo(x-wd*1.1*s,y-h*.4*s,x+l*.2-wd*.3,y-h*.55*s,x+(l+q)*s,y-h*e*s);c.bezierCurveTo(x+l*.45*s+wd*.3,y-h*.55*s,x+wd*1.15*s,y-h*.35*s,x+wd*s,y);c.fill()})})}
   function halo(c,x,y,r,a){if(a<=0)return;c.save();c.globalCompositeOperation='screen';c.globalAlpha=Math.min(1,a);c.drawImage(SP.glow.e,x-r,y-r,2*r,2*r);c.restore()}
 
-  /* o : lean, drop, sx, dF, dN (buste) ; off (main lointaine depuis l'épaule) ; tip, sag (bout de la chaîne de la boule et mou, unités de pose) ;
+  /* o : lean, drop, sx, dF, dN (buste) ; off (main lointaine depuis l'épaule) ; nn (décalage de la main proche) ; tip, sag (bout de la chaîne de la boule et mou, unités de pose) ;
+     plie (jambes fléchies, 0 à 1) ; tete (inclinaison de la tête, rad) ; fissure, rage (0 à 1 : fissures peintes dans chaque pièce) ; flash (0 à 1, éclair sur la silhouette),
+     eteint (0 à 1, la silhouette s'assombrit) ;
      ham : marteau à deux mains { P main proche, a angle du manche (degrés), g tête -> main proche, wN / wF mains sur le manche,
      s boule en bandoulière, r : P et a dans le repère du buste } (absent : rangé dans le dos) ; t, warm, jaw, hurt, wound ; back(applyM), front(rig) */
   const STOW={P:[94,-256],a:-62,g:50,wN:0,wF:0,s:0,r:1},D=Math.PI/180;
+  /* repère du buste : penché et pivoté autour de la taille (PY), descendu par drop et par les jambes qui ploient */
+  function frame(o){const dr=o.drop+(o.plie||0)*26,co=Math.cos(o.lean),si=Math.sin(o.lean),A=[o.sx*co,o.sx*si,-si,co,si*PY,PY+dr-co*PY];
+    return {A,pt:(x,y)=>[A[0]*x+A[2]*y+A[4],A[1]*x+A[3]*y+A[5]]}}
+  let LAY=null; /* calque de teinte, créé à la première teinte puis réutilisé (flash, eteint) */
   function draw(c,o){
     if(!SP)build();
-    const co=Math.cos(o.lean),si=Math.sin(o.lean),A=[o.sx*co,o.sx*si,-si,co,si*PY,PY+o.drop-co*PY];
-    const pt=(x,y)=>[A[0]*x+A[2]*y+A[4],A[1]*x+A[3]*y+A[5]];
+    const g=frame(o),A=g.A;
+    /* ailes et traînée : derrière, sur le contexte du jeu (jamais teintées) */
+    if(o.back){c.save();o.back((dx=0)=>{c.transform(A[0],A[1],A[2],A[3],A[4],A[5]);if(dx)c.translate(dx,0)});c.restore()}
+    const fl=o.flash||0,et=o.eteint||0;
+    if(!(fl>.01||et>.01))return core(c,o,g);
+    /* teinte : le Colosse est dessiné dans un calque, la teinte ne couvre que sa silhouette (source-atop) */
+    const cv=c.canvas,T=c.getTransform();
+    if(!LAY)LAY=document.createElement('canvas');
+    if(LAY.width!==cv.width||LAY.height!==cv.height){LAY.width=cv.width;LAY.height=cv.height}
+    const x=LAY.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,LAY.width,LAY.height);x.setTransform(T.a,T.b,T.c,T.d,T.e,T.f);
+    const rig=core(x,o,g);
+    x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='source-atop';
+    if(et>.01){x.fillStyle='rgba(30,22,48,'+.5*Math.min(1,et)+')';x.fillRect(0,0,LAY.width,LAY.height)}
+    if(fl>.01){x.fillStyle='rgba(255,246,214,'+Math.min(1,fl)+')';x.fillRect(0,0,LAY.width,LAY.height)}
+    x.globalCompositeOperation='source-over';
+    c.save();c.setTransform(1,0,0,1,0,0);c.drawImage(LAY,0,0);c.restore();
+    return rig}
+  function core(c,o,g){
+    const A=g.A,pt=g.pt;
     const applyM=(dx=0)=>{c.transform(A[0],A[1],A[2],A[3],A[4],A[5]);if(dx)c.translate(dx,0)};
     const mix=(p,q,u)=>[p[0]+(q[0]-p[0])*u,p[1]+(q[1]-p[1])*u];
     const far=pt(-70+o.dF,-215),near=pt(70+o.dN,-215),hd=(o.dF+o.dN)/2;
     /* marteau : main proche sur le manche, main lointaine plus près de la tête */
     const hm=o.ham||STOW,r=hm.r||0,Pr=pt(hm.P[0],hm.P[1]),P=mix(hm.P,Pr,r),an=hm.a*D+o.lean*r,dir=[Math.cos(an),Math.sin(an)];
     const head=[P[0]+dir[0]*hm.g,P[1]+dir[1]*hm.g],surF=[P[0]+dir[0]*45,P[1]+dir[1]*45];
-    const Hr=[near[0]+42-o.lean*70,near[1]+113+o.lean*20],Hn=mix(Hr,P,hm.wN),H=mix([far[0]+o.off[0],far[1]+o.off[1]],surF,hm.wF);
+    const nn=o.nn||[0,0],Hr=[near[0]+42-o.lean*70+nn[0],near[1]+113+o.lean*20+nn[1]],Hn=mix(Hr,P,hm.wN),H=mix([far[0]+o.off[0],far[1]+o.off[1]],surF,hm.wF);
     const act=hm.wN>0,dos=hm.wN<.999||(hm.a>-100&&hm.wF<.5)||(hm.a>-60&&head[0]>40); /* tête derrière le dos : marteau derrière le corps */
     const fl=.85+.15*Math.sin(o.t*9),warm=o.warm||1,ph=o.t*.55;
-    const lk=o.look||0,PV=[-36,-206],headM=()=>{applyM(hd);c.translate(PV[0],PV[1]);c.rotate(lk);c.translate(-PV[0],-PV[1])};
+    const lk=(o.look||0)+(o.tete||0),PV=[-36,-206],headM=()=>{applyM(hd);c.translate(PV[0],PV[1]);c.rotate(lk);c.translate(-PV[0],-PV[1])};
     const hpt=(x,y)=>{const cx=x-PV[0],cy=y-PV[1],cl=Math.cos(lk),sn=Math.sin(lk);return pt(PV[0]+cx*cl-cy*sn+hd,PV[1]+cx*sn+cy*cl)};
+    /* fissures : dans chaque pièce, opacité = intensité (fissure ou rage) ; épaules et bras à partir de .35 de rage, jambes à partir de .7 */
+    const rg=o.rage||0,ca=Math.min(1,Math.max(o.fissure||0,rg)*1.5),ra=Math.min(1,Math.max(0,(rg-.35)*3)),rl=Math.min(1,Math.max(0,(rg-.7)*4)),
+      cr=(sp,a)=>{if(a>.01){c.save();c.globalAlpha=Math.min(1,a);img(c,sp);c.restore()}};
     const sl=pt(-34,-128),s=hm.s||0,tip=o.tip?mix(o.tip,sl,s):sl,behind=s<.5&&tip[0]>-20&&tip[1]<-150;
     const marteau=()=>{c.save();c.translate(head[0],head[1]);c.rotate(an);img(c,SP.ham);c.restore()};
     /* boule : au poing au bout de sa chaîne, ou rangée en bandoulière pendant l'attaque au marteau */
@@ -326,7 +390,8 @@ const COLOSSE=(()=>{
       c.save();c.translate(tip[0],tip[1]);c.rotate(tip[0]*.012*(1-s)+o.lean*s);const k=1-.15*s;c.scale(k,k);img(c,SP.ball);c.restore()};
     const Wf=ik(far,H,-1)[1];
     c.save();
-    if(o.back){c.save();o.back(applyM);c.restore()}
+    /* queue : toujours visible, tout au fond, la racine suit le bassin */
+    queue(c,queueAccrochee(queueSol(o),pt));
     if(dos)marteau();
     if(behind)boule_(Wf);
     /* jambes : o.legs = {f:[x, lever, angle], n:[...]} en unités de pose (pas lourds) ; la lointaine derrière */
@@ -335,21 +400,23 @@ const COLOSSE=(()=>{
     const LL=120,HF=[-40,-118],HN=[34,-118];
     let aF=Math.asin(Math.max(-.38,Math.min(.38,-LG.f[0]/LL))),aN=Math.asin(Math.max(-.38,Math.min(.38,-LG.n[0]/LL)));
     const gap=(HN[0]-LL*Math.sin(aN))-(HF[0]-LL*Math.sin(aF));if(gap<34){const k=(34-gap)/(2*LL);aF+=k;aN-=k}
-    [[SP.legF,LG.f,HF,aF],[SP.legN,LG.n,HN,aN]].forEach(([sp,q,hip,an])=>{c.save();c.translate(hip[0],hip[1]-q[1]*.55);c.rotate(an+q[2]);c.translate(-hip[0],-hip[1]);img(c,sp);c.restore()});
+    c.save();if(o.plie)c.scale(1,1-.2*o.plie); /* il ploie sur ses jambes : elles se raccourcissent, les pieds restent au sol */
+    [[SP.legF,LG.f,HF,aF,SP.legFC],[SP.legN,LG.n,HN,aN,SP.legNC]].forEach(([sp,q,hip,an,ov])=>{c.save();c.translate(hip[0],hip[1]-q[1]*.55);c.rotate(an+q[2]);c.translate(-hip[0],-hip[1]);img(c,sp);cr(ov,rl);c.restore()});
+    c.restore();
     if(o.wound>0){c.save();c.strokeStyle='rgba(255,220,140,'+Math.min(1,o.wound)+')';c.lineWidth=3.5;c.lineCap='round';c.beginPath();c.moveTo(-63,-61);c.lineTo(-40,-61);c.moveTo(-63,-61);c.lineTo(-53,-77);c.moveTo(-63,-61);c.lineTo(-53,-45);c.stroke();c.restore()}
-    c.save();applyM();halo(c,-24,-205,90,.3*warm*fl);img(c,SP.torso);c.restore();
-    let na=act?null:bras(c,near,Hn,0);
+    c.save();applyM();halo(c,-24,-205,90,.3*warm*fl);img(c,SP.torso);cr(SP.torsoC,ca);cr(SP.torsoR,ra);c.restore();
+    let na=act?null:bras(c,near,Hn,0,ra);
     c.save();headM();img(c,SP.corneL);c.restore();
-    c.save();applyM(o.dN);img(c,SP.paulR);c.restore();
-    if(act)na=bras(c,near,Hn,0);
+    c.save();applyM(o.dN);img(c,SP.paulR);cr(SP.paulRC,Math.min(ra,ca));c.restore();
+    if(act)na=bras(c,near,Hn,0,ra);
     if(!dos)marteau();
-    const fa=bras(c,far,H,1);
+    const fa=bras(c,far,H,1,ra);
     if(act)seg(c,SP.fist,na.W,na.an);
-    c.save();applyM(o.dF);img(c,SP.paulL);c.restore();
+    c.save();applyM(o.dF);img(c,SP.paulL);cr(SP.paulLC,Math.min(ra,ca));c.restore();
     /* tête : couronne derrière, gueule qui s'ouvre (jaw), yeux blancs quand il est touché */
     c.save();headM();c.scale(.8,.8);
     halo(c,-40,-350,70,.45*warm*fl);couronne(c,ph,warm);
-    c.scale(1.25,1.25);img(c,SP.head);c.scale(.8,.8);
+    c.scale(1.25,1.25);img(c,SP.head);cr(SP.headC,ca);c.scale(.8,.8);
     const j=o.jaw||0;
     if(j>0){c.fillStyle='rgba(255,160,60,.95)';c.beginPath();c.moveTo(-95,-254);c.lineTo(-29,-258);c.lineTo(-31,-246+j);c.lineTo(-90,-240+j);c.closePath();c.fill()}
     const ey=o.eyes||0;if(ey>.02&&!o.hurt){halo(c,-64,-296,26+30*ey,.7*ey);halo(c,-86,-296,18+22*ey,.6*ey);c.save();c.globalAlpha=Math.min(1,ey);c.fillStyle='#fff7d4';c.fill(P2('M-94 -302L-75 -289L-79 -286.5L-91 -294Z'));c.fill(P2('M-65 -287L-34 -309L-39 -296L-55 -285.5Z'));c.restore()}
@@ -368,9 +435,42 @@ const COLOSSE=(()=>{
         if(i%4===0){c.fillStyle='rgba(255,'+(140+i*8)+',60,'+(.8*(1-age)*env)+')';c.fillRect(x+r*.4,y-r*.3,1.6,1.6)}}
       c.restore()}
     const mouth=hpt(-49.6,-200+j*.4);
-    const rig={far,near,fa,na,mouth,head,P,dir,applyM};
+    const rig={far,near,fa,na,mouth,head,P,dir,applyM,pt,coeur:pt(-20,-185),gueule:pt(-58,-207)};
     if(o.front)o.front(rig);
     c.restore();
     return rig}
   return {draw,ik,L1,L2};
+})();
+
+/* ===== Effets du Colosse réutilisables (référence ripostes-reference.js, 27/11) : dégâts, éclats, flammes de rage =====
+   Écrits pour les phases II et III, NON branchés dans ce lot (seule la phase I les appelle). Aplats nets : aucun flou, aucune ombre portée,
+   aucun canvas créé ; chaque fonction reçoit le contexte et des coordonnées dans le repère courant. Mouvement réduit : l'appelant ne lance pas
+   les éclats et passe t = 0 aux flammes (elles ne vacillent plus). Les flammes de rage se dessinent dans le repère des pieds du Colosse, en
+   unités de pose (REF : les tracés de la référence sont en pixels de maquette, 1,25 par unité de pose). */
+const COLFX=(()=>{
+  const TAU=6.283185307179586,cl=v=>v<0?0:v>1?1:v,sm=u=>{u=cl(u);return u*u*(3-2*u)},REF=.8;
+  const rnd=s=>()=>(s=(s*16807)%2147483647)/2147483647;
+  /* réaction de dégâts : monte en 80 ms, tient (hold), revient en d ; t = secondes depuis l'impact t0 */
+  function choc(t,t0,d,hold){const u=t-t0,h=hold==null?.2:hold;if(u<0)return 0;if(u<.08)return u/.08;if(u<.08+h)return 1;return Math.pow(1-cl((u-.08-h)/d),2)}
+  function poly(c,pts,col){c.fillStyle=col;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.fill()}
+  /* étoile à n branches (éclair d'impact) */
+  function etoile(c,x,y,r,n,rot,col,k){if(!(r>0))return;k=k==null?.42:k;const p=[];for(let i=0;i<n*2;i++){const a=rot+i*Math.PI/n,d=i%2?r*k:r*(i%4?1:.72);p.push([x+Math.cos(a)*d,y+Math.sin(a)*d])}poly(c,p,col)}
+  /* éclats projetés : t = secondes depuis l'impact (0,8 s de vie), v = vitesse, sol = hauteur du sol, g = gravité ; col = une couleur ou une liste */
+  function eclats(c,x,y,t,n,col,v,seed,sol,g){if(t<0||t>.8)return;g=g==null?500:g;const r=rnd(seed);
+    for(let i=0;i<n;i++){const a=-Math.PI*.5+(r()-.5)*4,s=v*(.4+r()),px=x+Math.cos(a)*s*t,py=Math.min(sol==null?1e9:sol,y+Math.sin(a)*s*t+g*t*t),d=(3+r()*7)*(1-t/.8),q=r()*6+t*9;
+      c.fillStyle=Array.isArray(col)?col[i%col.length]:col;c.beginPath();c.moveTo(px+Math.cos(q)*d,py+Math.sin(q)*d);c.lineTo(px+Math.cos(q+2.2)*d,py+Math.sin(q+2.2)*d);c.lineTo(px+Math.cos(q+4)*d*.7,py+Math.sin(q+4)*d*.7);c.closePath();c.fill()}}
+  /* flamme découpée, trois tons et un cœur clair, sans flou : (x, y) pied, w largeur, h hauteur, l inclinaison, ph phase du vacillement */
+  function flamme(c,x,y,w,h,l,ph,a){if(h<2)return;c.save();c.globalAlpha=a==null?1:a;
+    [[1,'#8e2418'],[.7,'#d4501f'],[.38,'#ff9a35'],[.16,'#ffe08a']].forEach(([s,col],j)=>{const q=Math.sin(ph+j)*w*.5,hh=h*(s*.75+.25),ww=w*s;
+      c.fillStyle=col;c.beginPath();c.moveTo(x-ww,y);c.lineTo(x-ww*.85+q*.2,y-hh*.38);c.lineTo(x-ww*.25,y-hh*.34);c.lineTo(x+l*s+q,y-hh);c.lineTo(x+ww*.3+l*.4*s,y-hh*.55);c.lineTo(x+ww*.95,y-hh*.62);c.lineTo(x+ww*.7,y-hh*.3);c.lineTo(x+ww,y);c.closePath();c.fill()});
+    c.restore()}
+  /* flammes de rage : derrière le Colosse (x, y du haut du torse, w, h, inclinaison), puis petites flammes devant, au ras du sol */
+  const DERRIERE=[[-92,-300,24,96,-34],[-54,-330,30,150,-40],[0,-338,34,178,-14],[52,-334,30,146,22],[96,-318,24,112,40],[130,-276,20,84,44],[-120,-250,18,70,-40]];
+  const SOL=[-170,-128,-92,88,124,170];
+  /* f : intensité des flammes (0 à 1) ; t : horloge du vacillement (0 : figées) ; c : repère des pieds, unités de pose */
+  function rageDerriere(c,t,f){if(!(f>.01))return;c.save();c.scale(REF,REF);DERRIERE.forEach(([x,y,w,h,l],i)=>flamme(c,x,y+40,w,h*f,l,t*13+i*1.7));c.restore()}
+  function rageSol(c,t,f){if(!(f>.01))return;c.save();c.scale(REF,REF);SOL.forEach((x,i)=>flamme(c,x,2,11+(i%3)*3,(34+(i%3)*18)*f*(.8+.2*Math.sin(t*15+i)),x<0?-9:9,t*16+i));c.restore()}
+  /* ondes de braise au sol à l'éclat du cri : u = secondes depuis le cri (deux anneaux décalés de .18 s, .8 s chacun) */
+  function ondes(c,u){c.save();c.scale(REF,REF);for(let i=0;i<2;i++){const v=(u-i*.18)/.8;if(v>0&&v<1){const r=80+v*430;c.strokeStyle='rgba(255,150,60,'+(1-v)+')';c.lineWidth=12*(1-v)+2;c.beginPath();c.ellipse(0,3,r,r*.09,0,0,TAU);c.stroke()}}c.restore()}
+  return {choc,poly,etoile,eclats,flamme,rageDerriere,rageSol,ondes};
 })();
