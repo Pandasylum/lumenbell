@@ -117,6 +117,8 @@ LB.WATCHER_T={
   const capeD=f=>'M6 -100C-14 -98 -25 -84 -31 -64C-37 -44 '+(-43+f)+' -24 '+(-48+f*1.6)+' '+(-5+f*.6)+'Q'+(-40+f*.6)+' '+(-1-f*.5)+' -31 -2Q-25 '+(-3+f*.5)+' -19 -1L8 -6C13 -34 18 -68 15 -95Z',
     capeLit=f=>'M-4 -92C-18 -70 -32 -40 '+(-46+f*1.6)+' '+(-6+f*.6)+'L'+(-39+f)+' -4C-29 -34 -16 -62 -1 -84Z',
     capeSh='M2 -70C-6 -46 -16 -22 -24 -2L-12 -3C-6 -24 0 -46 5 -62Z';
+  /* mantelet (aussi redessiné sur la naissance du bras, qui sort dessous) */
+  function mantle(c,P){pc(c,B9.mant,P.mant,[B9.mantLit,P.lit,B9.mantSh,P.sh]);tr(c,B9.hem,P.hem,1)}
   /* pièce : aplat, puis ses plans nets dans sa forme */
   function pc(c,d,fill,planes){const p=Pd(d);c.fillStyle=fill;c.fill(p);if(planes){c.save();c.clip(p);for(let i=0;i<planes.length;i+=2){c.fillStyle=planes[i+1];c.fill(Pd(planes[i]))}c.restore()}}
   function tr(c,d,col,w){c.strokeStyle=col;c.lineWidth=w;c.lineCap='round';c.lineJoin='round';c.stroke(Pd(d))}
@@ -135,13 +137,16 @@ LB.WATCHER_T={
     pc(c,B9.boot,P.boot,[B9.bootLit,P.lit]);
     pc(c,B9.tab,tg,[B9.tabSh,P.tsh]);tr(c,B9.fold,P.fold,.9);tr(c,B9.emb,P.emb,1.6);
     pc(c,B9.belt,P.belt,[B9.beltHi,P.beltHi]);pc(c,B9.buckle,P.buckle);pc(c,B9.pouch,P.pouch);
-    pc(c,B9.mant,P.mant,[B9.mantLit,P.lit,B9.mantSh,P.sh]);tr(c,B9.hem,P.hem,1);
+    mantle(c,P);
+    hood(c,P);
+  };
+  /* capuche-heaume et visière (lueur douce en dégradé fixe, plus faible que la lanterne) */
+  function hood(c,P){
     pc(c,B9.hood,P.hood,[B9.hoodLit,P.lit,B9.hoodSh,P.hoodSh]);tr(c,B9.trim,P.trim,3);
-    /* visière : lueur douce (dégradé fixe), plus faible que la lanterne */
-    c.fillStyle=grad(c,Wh?'vw':'vn',()=>{const g=c.createRadialGradient(16,-107,1,16,-107,11);g.addColorStop(0,'rgba('+P.vg+',.42)');g.addColorStop(1,'rgba('+P.vg+',0)');return g});
+    c.fillStyle=grad(c,P===PAL.w?'vw':'vn',()=>{const g=c.createRadialGradient(16,-107,1,16,-107,11);g.addColorStop(0,'rgba('+P.vg+',.42)');g.addColorStop(1,'rgba('+P.vg+',0)');return g});
     c.fillRect(5,-118,22,22);
     c.fillStyle=P.visor;c.fill(Pd(B9.visor));c.fillRect(14.6,-108,2.5,13);
-  };
+  }
   /* bras proche (de l'épaule à la main, coude plié selon la distance), liseré compris ; r = rayon de l'épaule */
   function sleeve(c,sh,h,r,P,rim){
     /* l'épaule d'ancrage (sh) est au bord du mantelet ; le bras sort dessous, un peu en arrière (S), et le coude se plie
@@ -152,14 +157,11 @@ LB.WATCHER_T={
     const path=()=>{c.beginPath();c.moveTo(sh[0],sh[1]);c.quadraticCurveTo(mx,my,h[0],h[1])};
     const q=t=>{const u=1-t;return[u*u*sh[0]+2*u*t*mx+t*t*h[0],u*u*sh[1]+2*u*t*my+t*t*h[1]]};
     c.lineCap='round';c.lineJoin='round';
-    if(rim>0){c.save();c.translate(RIM[0],RIM[1]);c.strokeStyle='rgba('+P.rim+','+Math.min(1,rim)+')';c.lineWidth=w;path();c.stroke();
-      c.fillStyle=c.strokeStyle;c.beginPath();c.arc(sh[0],sh[1],r,0,6.283);c.fill();c.restore()}
+    if(rim>0){c.save();c.translate(RIM[0],RIM[1]);c.strokeStyle='rgba('+P.rim+','+Math.min(1,rim)+')';c.lineWidth=w;path();c.stroke();c.restore()}
     c.strokeStyle=P.arm;c.lineWidth=w;path();c.stroke();
     c.save();c.translate(w*.2,-w*.2);c.strokeStyle=P.armLit;c.lineWidth=w*.18;path();c.stroke();c.restore();
     const a=q(.76),z=q(.9);c.strokeStyle=P.cuff;c.lineWidth=w*1.1;c.lineCap='butt';c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(z[0],z[1]);c.stroke();c.lineCap='round';
-    /* épaule : sous le mantelet */
-    c.fillStyle=P.mant;c.beginPath();c.arc(sh[0],sh[1],r,0,6.283);c.fill();
-    c.strokeStyle=P.lit;c.lineWidth=1.4;c.beginPath();c.arc(sh[0],sh[1],r-1,-2.6,-.4);c.stroke();
+    return sh;
   }
   /* main fermée sur le sceptre ; a = direction du sceptre */
   function fist(c,h,a){c.save();c.translate(h[0],h[1]);c.rotate(a);
@@ -301,7 +303,9 @@ LB.WATCHER_T={
     const wv=g.white,wa=wv===true?1:+wv||0;if(wa>=1)body(true);else{body(false);if(wa>0){c.save();c.globalAlpha*=wa;body(true);c.restore()}}
     /* bras proche (même voile) */
     const ar=g.armR||6.5;
-    if(wa<1)sleeve(c,sh,hand,ar,PAL.n,rim);if(wa>0){c.save();if(wa<1)c.globalAlpha*=wa;sleeve(c,sh,hand,ar,PAL.w,0);c.restore()}
+    /* le bras sort de sous le mantelet : le mantelet est repeint sur la naissance du bras (disque autour de l'épaule), dans le repère du corps */
+    const root=(S,Pl)=>{c.save();c.beginPath();c.arc(S[0],S[1],11*ar/6.5,0,6.283);c.clip();if(g.body){c.translate(0,g.body.dy||0);c.scale(g.body.s||1,g.body.s||1)}mantle(c,Pl);hood(c,Pl);c.restore()};
+    if(wa<1)root(sleeve(c,sh,hand,ar,PAL.n,rim),PAL.n);if(wa>0){c.save();if(wa<1)c.globalAlpha*=wa;root(sleeve(c,sh,hand,ar,PAL.w,0),PAL.w);c.restore()}
     const sa=g.staffAlpha==null?1:g.staffAlpha;if(sa<1){c.save();c.globalAlpha*=Math.max(0,sa)}
     let L=null;
     if(g.staff){
