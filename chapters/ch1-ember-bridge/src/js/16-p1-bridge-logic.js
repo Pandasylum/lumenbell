@@ -30,10 +30,7 @@ function resolveStrike(){
     tone(880,.28,'square',.05,-260);tone(1400,.2,'sine',.04);
     say(_('Block successful.','Blocage réussi.'));
   }else{
-    b.s='lift';b.t=0;p.s='grabbed';p.t=0;
-    float(_('HOOKED!','ACCROCHÉ !'),PX,DECK-190,'#ff8a6b');
-    tone(150,.2,'sawtooth',.06,-80);
-    say(_('Caught by the hook.','Accroché par le crochet.'));
+    ballHit(); /* la boule à pointes frappe le Veilleur directement : plus d'agrippement (lift / hold / slam supprimés) */
   }
 }
 function headHit(){
@@ -44,10 +41,10 @@ function headHit(){
   if(G.bhp<=0){b.s='dead';b.t=0;G.mode='won';G.endIn=1.4;say(_('Phase I cleared.','Phase I terminée.'))}
   else{b.s='stagger';b.t=0;b.stagT=0}
 }
-function slamHit(){
+function ballHit(){
   const b=G.boss,p=G.pl;
   G.php=Math.max(0,G.php-DMG_GRAB);G.grabs++;G.shake=reduce?0:15;G.hurt=.35;G.hitstop=.1;thud(1.3);
-  dust(PX,DECK);tone(80,.35,'sine',.14,-40);burst(PX+10,DECK-60,24,['#ffc15a','#ff7a2b','#ffffff']);float(_('BOOM!','BOUM !'),PX,DECK-190,'#ff8a6b');
+  dust(PX,DECK);tone(80,.35,'sine',.14,-40);burst(PX+10,DECK-60,24,['#ffc15a','#ff7a2b','#ffffff']);
   p.s='down';p.t=0;p.downT=.9;b.s='release';b.t=0;
   if(G.php<=0){G.mode='lost';G.endIn=1.1;say(_('You are down. Defeat.','Tu es à terre. Défaite.'))}
 }
@@ -269,9 +266,6 @@ function bossStep(dt){
     case 'strike':if(b.t>=(b.sk||T.strike))resolveStrike();break;
     case 'rebound':if(b.t>=T.rebound)headHit();break;
     case 'stagger':if(b.t>=(b.stagT||T.stagger))toIdle();break;
-    case 'lift':if(b.t>=.55){b.s='hold';b.t=0}break;
-    case 'hold':if(b.t>=.22){b.s='slam';b.t=0}break;
-    case 'slam':if(b.t>=.16)slamHit();break;
     case 'release':if(b.t>=.6)toIdle();break;
     case 'sw1w':if(b.t>=T.sw1w){b.s='sw1';b.t=0;tone(300,.12,'sawtooth',.06,-180)}break;
     case 'sw1':if(b.t>=T.sw1)resolveSword(1);break;
@@ -357,7 +351,7 @@ function step(dt){
     p.fired=true;G.ringFx={t:0};G.shake=reduce?0:9;G.flash=.3;dust(PX,DECK);
     tone(120,.4,'sine',.12,-60);tone(800,.5,'sine',.05,400);
   }
-  if(G.ringFx){G.ringFx.t+=dt;if(G.ringFx.t>.8)G.ringFx=null}
+  if(G.ringFx){G.ringFx.t+=dt;if(G.ringFx.t>1.3)G.ringFx=null} /* durée d'affichage seulement : le contre spectaculaire dure 1,3 s */
   if(G.jf){G.jf.t-=dt;if(G.jf.t<=0)G.jf=null}
   if(G.mode==='intro')introStep(dt);
   bossStep(dt);

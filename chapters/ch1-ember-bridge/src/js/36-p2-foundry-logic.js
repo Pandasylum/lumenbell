@@ -3,7 +3,9 @@ let Q=null;
 const QH=[250,300],QB=[705,285];
 /* Phase II : drop = hauteur du bloc au-dessus du rebord (px : rebord QFLOOR, chute de la défaite) ; fall = étourdissement d'un débris (s) ; wide = marge d'esquive en plus en Difficile contre chute et rocher (s). Durées de l'action, de la récupération et de la grâce : LB.HERO_T.dodge.
    side = pas de côté de l'esquive (dessin seulement, pose dodgeSide comme au Chapitre II) : dur = durée de la pose (s), dx = recul (px, vers la gauche ; limité par le bloc : la robe reste sur sa face du haut), rot = inclinaison (rad, autour des pieds), ghost = durée de l'image rémanente (s), gx = son écart (px, vers sa place de départ), ga = son opacité. */
-const DG={drop:110,fall:.14,wide:.13,side:{dur:.38,dx:-18,rot:-.18,ghost:.3,gx:19,ga:.25}};
+const DG={drop:110,fall:.14,wide:.13,side:{dur:.38,dx:-18,rot:-.18,ghost:.3,gx:19,ga:.25},
+  /* riposte qui termine la 1re / 2e rage : le creuset du palan se joue en temps réel, à voir et à comprendre (hit : éclat de dégât, la lave tombe sur le Colosse ; end : fin de la riposte) */
+  rip:{1:{hit:1.75,end:5.55},2:{hit:1.8,end:5.65}}};
 /* Phase II au fond de la Fonderie (1er novembre) : le Veilleur se tient sur un bloc du pont tombé sur le rebord, DG.drop au-dessus ; son esquive est un pas de côté sur le bloc (DG.side, 1er novembre), il n'en descend qu'à la défaite. QFLOOR = rebord, QLAKE = surface de la lave, QEDGE = bord du rebord côté lave (px). */
 const QFLOOR=QH[1]+44+DG.drop,QLAKE=QFLOOR+16,QEDGE=350;
 const QA={
@@ -20,7 +22,7 @@ const ROCKP=Array.from({length:9},(_,i)=>{const a=i/9*6.283;return[Math.cos(a)*(
 function qNew(){
   return{mode:'intro',t:0,time:0,lt:0,php:startHP(),bhp:DIFF.bd.hp,dodges:0,taken:0,scroll:0,speed:900,
     pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.6,dur:1,after:''},atk:null,cn:null,chain:null,chainMiss:false,
-    enraged:false,rn:0,rage2:false,last:'',n:0,sparks:[],floats:[],rings:[],exps:[],fbs:[],
+    enraged:false,rn:0,rend:0,rage2:false,last:'',n:0,sparks:[],floats:[],rings:[],exps:[],fbs:[],
     streaks:Array.from({length:40},()=>({x:rand(0,W),y:rand(0,H),v:rand(500,1000),l:rand(16,56)})),
     debris:Array.from({length:7},()=>({x:rand(60,W-60),y:rand(0,H),v:rand(180,420),r:rand(8,24),a:rand(0,6),w:rand(-3,3)})),
     shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,wo:0,bx:QB[0],by:QB[1],hx:QH[0],hy:QH[1],dropY:0,splash:0,sideT:-9,ended:false,wing:false,fn:0};
@@ -155,7 +157,9 @@ function qAtkEnd(){
 }
 function qCounter(k){
   const b=Q.boss,p=Q.pl;
-  Q.cn={k,t:0,hit:false};b.s='cn';b.t=0;p.s='counter';p.t=0;
+  /* rg : numéro de la rage que cette riposte termine (0 = riposte ordinaire) ; le dernier assaut (qFinal) garde la sienne */
+  const nR=DIFF.q2?Q.rn:(Q.enraged?1:0),rg=(Q.bhp>LB.BOSS_RULES.finalHp&&nR>Q.rend)?Q.rend+1:0;
+  Q.cn={k,t:0,hit:false,rg};b.s='cn';b.t=0;p.s='counter';p.t=0;
   tone(300,.4,'triangle',.05,300);
   say(_('Perfect dodge. Riposte!','Esquive parfaite. Riposte !'));
 }
@@ -166,7 +170,7 @@ function qFinal(){
 }
 function qDamage(k){
   Q.bhp=Math.max(0,Q.bhp-1);Q.recoil=1;Q.shake=reduce?0:13;Q.hitstop=.11;Q.flash=.4;thud(1.2);
-  const tg=k==='head'?[Q.bx,Q.by-92]:[Q.bx-30,Q.by-4];
+  const tg=qBeamTarget({k,dmg:true}); /* l'éclat de dégât s'affiche là où le rayon arrive (dessin seulement : même point qu'avant, sauf l'aile déchirée) */
   qBurst(tg[0],tg[1],30,['#ffffff','#fff0b0','#ffc15a']);qRing(tg[0],tg[1]);
   tone(170,.25,'square',.08,-110);tone(900,.2,'sine',.05);
   qFlameBurst(tg[0],tg[1],k==='beam'?1.3:1);
@@ -176,13 +180,13 @@ function qDamage(k){
 function qCnStep(dt){
   const c=Q.cn,b=Q.boss,p=Q.pl;c.t+=dt;
   if(c.k==='final'){qFinalStep(c);return}
-  const sp={stab:{hit:.35,end:1.15},head:{hit:.55,end:1.45},beam:{hit:.85,end:1.65}}[c.k];
+  const sp=c.rg?DG.rip[c.rg]:{stab:{hit:.35,end:1.15},head:{hit:.55,end:1.45},beam:{hit:.85,end:1.65}}[c.k];
   if(c.k==='beam'&&c.t<.75&&Math.random()<.6){
     const a=rand(0,6.283),r=rand(40,80),tip=qSwordTip();
     Q.sparks.push({x:tip[0]+Math.cos(a)*r,y:tip[1]+Math.sin(a)*r,vx:-Math.cos(a)*r*4,vy:-Math.sin(a)*r*4,g:0,life:.25,max:.25,col:'#fff0b0',sz:2.5});
   }
   if(!c.hit&&c.t>=sp.hit){c.hit=true;qDamage(c.k)}
-  if(c.t>=sp.end){Q.cn=null;p.s='ready';p.t=0;b.s='hurt';b.t=0}
+  if(c.t>=sp.end){if(c.rg)Q.rend=c.rg;Q.cn=null;p.s='ready';p.t=0;b.s='hurt';b.t=0}
 }
 function qFinalStep(c){
   const chest=[Q.bx-20,Q.by-4];

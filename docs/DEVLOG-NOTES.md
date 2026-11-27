@@ -396,3 +396,20 @@
 - Quand le Colosse encaisse un coup (boule rebondie, orbe, estoc, bague, dernier coup), l'image se fige un instant, un éclair à moitié transparent le traverse, des éclats jaillissent et il recule, ses fissures s'ouvrent.
 - En rage, il rugit entouré de flammes découpées, sa peau se fend pièce par pièce ; quand la bague éteint ses flammes, il ploie sur ses jambes. Sa queue traîne derrière lui, toujours accrochée à son bassin.
 - Le Veilleur lève sa lumière pour l'orbe, fonce pour l'estoc, frappe le sol de sa bague et ouvre son halo pour le dernier coup.
+- Au fond de la Fonderie, le Colosse vole devant un haut fourneau, un creuset qui verse sa coulée dans la lave et une chaîne rompue ; la petite lanterne orange du mur pulse tout le combat.
+- Griffes, tornades de feu des ailes, débris et boule de feu ont le même dessin que le Colosse de la phase I ; après une esquive parfaite, l'éclat, l'aile déchirée ou le bloc renvoyé répondent au coup.
+- Quand une attaque finit par un coup de queue, la riposte reste celle de l'attaque de départ ; le rayon et l'éclat arrivent au même endroit.
+- Après la première rage, le creuset du palan avance et cogne le Colosse, le rayon coupe un câble et la lave se verse sur lui ; le creuset revient vide, pendu à un seul câble.
+- À la fin de la deuxième rage (Difficile), le creuset vide pendouille, le cogne, puis tombe sur sa tête et sombre avec lui : il ne reste que le chariot et des bouts de chaîne.
+- Les fins de rage durent maintenant environ cinq secondes : le creuset avance, cogne, un câble saute, la lave tombe sur le Colosse, puis le creuset revient vide.
+- Contre des ailes : une lame de lumière en croissant fend les flammes ; contre des débris : des éclats de pierre dorés filent dans le rayon. Les ailes du Colosse ont le dessin de la maquette.
+- Le coup de chaîne n'agrippe plus : la boule à pointes balayée au bout de la chaîne frappe directement le Veilleur, puis rebondit et revient au poing du Colosse (phases I et III).
+- Quand le Colosse encaisse un coup, son buste et sa tête vacillent trois fois avant de se stabiliser.
+- Quand le Colosse s'enrage, des flammes jaillissent tout autour de lui au lieu d'un cercle qui s'étend : plus rien ne ressemble à une attaque à parer.
+- Le contre de la première rage lance une lame de lumière en croissant qui court sur le pont jusqu'au Colosse, au lieu d'un cercle plat sous les pieds du Veilleur.
+- Les rayons de la lanterne, partout dans le Chapitre I, sont maintenant des coins de lumière dorés comme en phase I ; les impacts des phases II et III éclatent en étoiles et en flammes découpées, sans cercles ni halos bleus.
+- Le contre de la première rage est plus spectaculaire : fissure de lumière dans le pont, trois vagues, colonne de lumière sur le Colosse dont les flammes de rage sont arrachées et s'envolent.
+- En phase II, le Colosse descend en battant des ailes dans une traînée de feu, respire et bouge au repos, tombe en tournoyant dans la lave et jaillit du four ; chaque contre a son effet, et le coup ultime arrache des plaques d'armure.
+- Le Colosse arrive en volant, ailes ouvertes, et reste en vol en combat, jambes pendantes ; le contre des débris fait tomber trois colonnes de lumière sur lui.
+- À la fin de la phase II, le Colosse tombe ailes repliées, se pose doucement dans la lave, puis se redresse, déploie ses ailes et s'envole par la cheminée, sans effets qui s'empilent.
+- Quand le Colosse tombe, ses ailes restent ouvertes et frémissent dans l'air ; elles ne se replient qu'au contact de la lave, sans traînée de feu.

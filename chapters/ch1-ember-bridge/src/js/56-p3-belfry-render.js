@@ -102,20 +102,33 @@ function faceFire(cx,cy,k,q){
   }
   ctx.restore();
 }
+/* boule à pointes (chaîne tendue de la main à la boule) : même dessin que la boule du Colosse */
+function drawSpikeBall(x,y,r,rot){
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot);
+  for(let i=0;i<9;i++){ctx.save();ctx.rotate(i*6.283/9+.2);COLFX.poly(ctx,[[r*.7,-r*.4],[r*(i%3?1.5:1.8),0],[r*.7,r*.4]],'#2c1534');ctx.restore()}
+  ctx.fillStyle='#3a1b38';ctx.beginPath();ctx.arc(0,0,r,0,6.283);ctx.fill();
+  ctx.fillStyle='rgba(176,128,150,.35)';ctx.beginPath();ctx.arc(-r*.3,-r*.3,r*.45,0,6.283);ctx.fill();
+  ctx.strokeStyle='#e9561b';ctx.lineWidth=2.6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-r*.4,-r*.65);ctx.lineTo(r*.05,-r*.1);ctx.lineTo(-r*.2,r*.3);ctx.lineTo(r*.15,r*.8);ctx.stroke();
+  ctx.strokeStyle='#ffc27a';ctx.lineWidth=1;ctx.stroke();ctx.restore();
+}
+/* Le crochet en phase III : la boule se balance au-dessus de lui, puis frappe le Veilleur directement (plus de lasso) ; elle rebondit et revient au poing. */
 function drawWhipGlow(hs){
   const a=R.atk;if(!a||a.kind!=='whip'||a.pt<0||(a.cf!=null&&a.pt>=a.cf))return;
-  const wq=DIFF.hard?aq(a,'whip',.75):a.pt;
-  const k=es(clamp01(wq/.55))*(1-es(clamp01((wq-.8)/.4)));
-  if(k<=0)return;
-  const h=hs[0];
-  ctx.save();
-  const g=ctx.createRadialGradient(h[0],h[1],2,h[0],h[1],46);
-  g.addColorStop(0,'rgba(255,240,190,'+(.85*k)+')');g.addColorStop(.45,'rgba(255,150,50,'+(.55*k)+')');g.addColorStop(1,'rgba(255,100,30,0)');
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(h[0],h[1],46,0,6.283);ctx.fill();
-  ctx.shadowColor='#ffc15a';ctx.shadowBlur=22*k;ctx.fillStyle='rgba(255,176,74,'+(.9*k)+')';
-  ctx.beginPath();ctx.arc(h[0],h[1],15,0,6.283);ctx.fill();
-  ctx.fillStyle='rgba(255,243,207,'+k+')';ctx.beginPath();ctx.arc(h[0],h[1],8,0,6.283);ctx.fill();
-  ctx.restore();
+  const wq=DIFF.hard?aq(a,'whip',.75):a.pt,h=hs[0],tm=reduce?0:R.time;
+  if(wq<0||wq>1.4)return;
+  const sw=es(clamp01(wq/.55)),fl=ei(clamp01((wq-.55)/.2)),back=es(clamp01((wq-.8)/.55)),tgt=[PX+6,DECK-72],rest=[h[0]-34,h[1]+104];
+  let bp;
+  if(wq<.55){const an=wq*10;bp=[h[0]-30+Math.cos(an)*48*sw,h[1]-26+Math.sin(an)*40*sw]}
+  else if(wq<.8){const s0=[h[0]-30+48,h[1]-26];bp=lerp2(s0,tgt,fl);bp[1]-=50*Math.sin(Math.PI*fl)*(1-fl)}
+  else{bp=lerp2(tgt,rest,back);bp[1]-=60*Math.sin(Math.PI*back)}
+  /* chaîne : maillons alternés de la main à la boule, un peu de mou quand elle n'est pas tendue */
+  const n=9,sag=wq>=.55&&wq<.8?0:14;
+  for(let i=1;i<=n;i++){const u=i/(n+1),x=h[0]+(bp[0]-h[0])*u,y=h[1]+(bp[1]-h[1])*u+Math.sin(u*Math.PI)*sag;
+    ctx.strokeStyle='#14091a';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(x,y,i%2?7:3,i%2?3:6,Math.atan2(bp[1]-h[1],bp[0]-h[0]),0,6.283);ctx.stroke();
+    ctx.strokeStyle='#7a5a72';ctx.lineWidth=2.4;ctx.stroke()}
+  drawSpikeBall(bp[0],bp[1],20,tm*8+wq*6);
+  if(wq>=.75&&wq<1.0){const u=(wq-.75)/.25;COLFX.etoile(ctx,tgt[0],tgt[1],90*(1-u*.8),10,.2,'#ffd66a',.4);COLFX.etoile(ctx,tgt[0],tgt[1],44*(1-u),10,.5,'#fffbea');
+    if(!reduce)COLFX.eclats(ctx,tgt[0],tgt[1],wq-.75,18,['#ffe58a','#6a3a50','#ff9a35'],300,5,DECK+4,520)}
 }
 function drawClaws(hs){
   const a=R.atk;if(!a||a.kind!=='claws')return;
