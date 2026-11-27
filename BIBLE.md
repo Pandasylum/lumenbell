@@ -74,7 +74,8 @@ Le Colosse a deux armes : la boule hérissée à la chaîne et le marteau à deu
 
 ## Direction artistique et son
 - **Tout est dessiné par le code** (canvas) : pas d'image de décor ni de sprite.
-- **Tout le son est synthétisé**, y compris la berceuse du chapitre III (chant formantique, vocalises sans paroles intelligibles, paroles écrites à l’écran). Seule exception : la voix du Roi Spectral (chapitre VI), un enregistrement court embarqué en base64, toujours sous-titré, modulé en jeu par LB.audio (hauteur, filtre, réverbération). Format lisible partout, iOS compris (mp3 ou m4a), fichier source suivi dans le dépôt. L’audio se met en pause en arrière-plan.
+- **Le son vient de la synthèse ou de fichiers courts rendus avec Earshot et embarqués** (mp3 ou m4a, lisibles sur iOS, scripts et sources suivis dans le dépôt, licence de chaque source vérifiée avant publication), y compris la berceuse du chapitre III (chant formantique, vocalises sans paroles intelligibles, paroles écrites à l’écran). Seule exception : la voix du Roi Spectral (chapitre VI), un enregistrement court embarqué en base64, toujours sous-titré, modulé en jeu par LB.audio (hauteur, filtre, réverbération). Format lisible partout, iOS compris (mp3 ou m4a), fichier source suivi dans le dépôt. L’audio se met en pause en arrière-plan.
+- **Aucune onomatopée à l’écran**, cris compris : chaque coup se comprend par le son et la réaction de dégâts. Retrait dans le code après intégration du son et des réactions (Chapitres I et II), voir `docs/decisions/2026-11-27-son-et-onomatopees.md`.
 - Palette et rendu : voir `docs/decisions/2026-11-27-charte-graphique.md`. La lanterne reste la lumière la plus vive, et la seule lumière chaude propre au joueur.
 - Polices Big Shoulders Display et DM Sans (licence libre), intégrées : aucun appel à Google Fonts en version publiée.
 
