@@ -166,7 +166,7 @@ function qFinal(){
 }
 function qDamage(k){
   Q.bhp=Math.max(0,Q.bhp-1);Q.recoil=1;Q.shake=reduce?0:13;Q.hitstop=.11;Q.flash=.4;thud(1.2);
-  const tg=(k!=='final'&&QR.tail&&fdPin())||(k==='head'?[Q.bx,Q.by-92]:[Q.bx-30,Q.by-4]); /* après une attaque finie par la queue, l'éclat s'affiche au bout de la queue, comme le rayon (dessin seulement) */
+  const tg=qBeamTarget({k}); /* l'éclat de dégât s'affiche là où le rayon arrive (dessin seulement : même point qu'avant, sauf l'aile déchirée) */
   qBurst(tg[0],tg[1],30,['#ffffff','#fff0b0','#ffc15a']);qRing(tg[0],tg[1]);
   tone(170,.25,'square',.08,-110);tone(900,.2,'sine',.05);
   qFlameBurst(tg[0],tg[1],k==='beam'?1.3:1);

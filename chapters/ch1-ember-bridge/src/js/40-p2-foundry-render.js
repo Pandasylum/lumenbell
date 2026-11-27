@@ -216,13 +216,13 @@ function drawWing(S,ang,sc,col,wo0,fire,side,dmg){
 const fdE=u=>es(clamp01(u));
 const FD_S=.85;            /* échelle de pose : le cœur du Colosse reste à (Q.bx-17, Q.by), comme les cibles du jeu */
 const FD_HAM={P:[94,-256],a:-62,g:50,wN:0,wF:0,s:1,r:1}; /* masse dans le dos, boule en bandoulière */
-const QR={q:null,kind:'',tail:false,wd:0,lt:0};
+const QR={q:null,kind:'',wd:0,lt:0};
 /* courbe par morceaux, adoucie : K = [[temps, valeur], ...] */
 function fdKv(x,K){if(x<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(x<=K[i][0])return K[i-1][1]+(K[i][1]-K[i-1][1])*fdE((x-K[i-1][0])/(K[i][0]-K[i-1][0]));return K[K.length-1][1]}
 /* mémoire de l'attaque qui précède une riposte (Q.atk est vidé avant Q.cn) */
 function fdRec(){
-  if(QR.q!==Q){QR.q=Q;QR.kind='';QR.tail=false;QR.wd=0;QR.lt=Q.time}
-  const a=Q.atk;if(a){QR.kind=a.kind;QR.tail=a.hits.some(h=>h.k==='tail')}
+  if(QR.q!==Q){QR.q=Q;QR.kind='';QR.wd=0;QR.lt=Q.time}
+  const a=Q.atk;if(a)QR.kind=a.kind; /* la riposte dépend de l'attaque initiale (a.kind), jamais de la queue qui la termine */
 }
 /* griffes d'une main : trois lames, sur l'avant-bras */
 function fdGriffes(c,E,Wr,k){if(k<=.02)return;const a=Math.atan2(Wr[1]-E[1],Wr[0]-E[0]);c.save();c.translate(Wr[0],Wr[1]);c.rotate(a);
@@ -283,11 +283,9 @@ function fdPose(){
   if(Q.mode==='lake'){o.eteint=Math.max(o.eteint,fdE(Q.lt/1.2)*.8);o.jaw=0;o.fissure=1;o.rage=.6;o.flap=Math.sin(tt*14)*.5}
   return o;
 }
-/* point où le rayon cloue la queue : sous son bout, au ras du lac (cible du rayon, de l'éclat de dégât et du clou) */
-function fdPin(){return QR.tipPx?[QR.tipPx[0],QLAKE-14]:null}
 function qWingDmg(){
   const c=Q.cn,dt=Math.min(.1,Math.max(0,Q.time-QR.lt));QR.lt=Q.time;
-  if(c&&c.k==='head'&&QR.kind==='wings'&&!QR.tail)QR.wd=Math.max(QR.wd,fdE((c.t-.5)/.5));
+  if(c&&c.k==='head'&&QR.kind==='wings')QR.wd=Math.max(QR.wd,fdE((c.t-.5)/.5));
   else if(!c)QR.wd=Math.max(0,QR.wd-dt*.8);
   return QR.wd;
 }
@@ -299,10 +297,8 @@ function drawBoss2(){
   const wa=wingAngle(),fire=Q.enraged,dmg=qWingDmg(),wo=Q.wo;
   const T2=tailTip(),fol=1-T2.strike,tip=[(T2.tip[0]+P.dx*fol-X0)/s,(T2.tip[1]+P.dy*fol-Y0)/s];
   const R0=[30,-130];let tp=tip;
-  if(Q.cn&&Q.cn.k!=='final'&&QR.tail){const u=fdE((Q.cn.t-.15)/.2);tp=[tip[0],tip[1]+((QLAKE-14-Y0)/s-tip[1])*u]} /* queue clouée au sol par le rayon */
   const qP=[R0,[R0[0]+(tp[0]-R0[0])*.35,R0[1]+(tp[1]-R0[1])*.3+36*(1-T2.strike)],[R0[0]+(tp[0]-R0[0])*.7,R0[1]+(tp[1]-R0[1])*.75+58*(1-T2.strike)],tp];
-  QR.tipPx=[X0+tp[0]*s,Y0+tp[1]*s];
-  ctx.save();
+    ctx.save();
   if(P.rageF>.01){ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);COLFX.rageDerriere(ctx,tt,P.rageF);ctx.restore()}
   ctx.translate(X0,Y0);ctx.scale(s,s);
   COLOSSE.draw(ctx,{lean:P.lean,drop:P.drop,sx:P.sx,dF:P.dF,dN:P.dN,off:P.off,nn:P.nn,ham:FD_HAM,qP,look:-.05,eyes:Q.enraged?.5:.15,breath:tt,smoke:1,
@@ -324,7 +320,7 @@ function drawBoss2(){
   if(P.tornade>.02&&!reduce){const g=P.tornade;fdTornade(ctx,Q.bx-250,Q.by+10,170*g,38*g,t);fdTornade(ctx,Q.bx+226,Q.by-6,160*g,36*g,t+2.1)}
   else if(P.tornade>.02){const g=P.tornade;fdTornade(ctx,Q.bx-250,Q.by+10,170*g,38*g,0);fdTornade(ctx,Q.bx+226,Q.by-6,160*g,36*g,0)}
   /* feu et lueur au bout de la queue */
-  if(T2.fire>0&&!(Q.cn&&QR.tail&&Q.cn.t>.7)){const q=QR.tipPx,f=T2.fire;fdGlow(ctx,q[0],q[1],52*f,'255,200,100',.55);COLFX.flamme(ctx,q[0],q[1]+10,12,(46+10*Math.sin(tt*10))*f,-6,tt*14)}
+  if(T2.fire>0){const q=[X0+tp[0]*s,Y0+tp[1]*s],f=T2.fire;fdGlow(ctx,q[0],q[1],52*f,'255,200,100',.55);COLFX.flamme(ctx,q[0],q[1]+10,12,(46+10*Math.sin(tt*10))*f,-6,tt*14)}
 }
 
 function tailTip(){
@@ -516,9 +512,9 @@ function drawHints2(){
    attaque finie par la queue = queue clouée et éteinte ; coup ultime = la lumière sort par les fissures */
 function drawCnFx(){
   const c=Q.cn;if(!c)return;
-  const tt=reduce?0:Q.time,tip=qSwordTip(),to=qBeamTarget(c),tail=c.k!=='final'&&QR.tail;
+  const tt=reduce?0:Q.time,tip=qSwordTip(),to=qBeamTarget(c);
   {const al=qBeamAl(c);if(al>0){const w=c.k==='final'?26*(1+.08*Math.sin(tt*50)):16;lanternBeam(tip,to,w,al)}}
-  if(c.k==='beam'&&!tail){
+  if(c.k==='beam'){
     /* le bloc arraché par le Colosse est cueilli au bâton, puis renvoyé à la figure */
     const o0=[tip[0]+30,tip[1]-6];
     if(c.t>=.3&&c.t<.62)qrock(o0[0],o0[1],18*fdE((c.t-.3)/.2),tt*8,true);
@@ -531,26 +527,17 @@ function drawCnFx(){
       ctx.strokeStyle='#ffffff';ctx.lineWidth=wd*.6;ctx.stroke();ctx.restore();
     }
   }
-  if(c.k==='stab'&&!tail&&c.t>=.3&&c.t<.8){
+  if(c.k==='stab'&&c.t>=.3&&c.t<.8){
     /* éclat à bout portant : l'estoc touche la poitrine, la griffe saute */
     const u=(c.t-.35)/.45;
     if(c.t<.62){COLFX.etoile(ctx,to[0],to[1],90*(1-Math.max(0,u)*.6),10,.2,'#ffd66a',.4);COLFX.etoile(ctx,to[0],to[1],48*(1-Math.max(0,u)),10,.5,'#fffbea')}
     if(!reduce&&u>0)COLFX.eclats(ctx,to[0],to[1],u*.8,22,['#ffe58a','#6a3a50','#ff9a35','#2c1534'],300,9,null,500);
   }
-  if(c.k==='head'&&QR.kind==='wings'&&!tail&&c.t>=.5){
+  if(c.k==='head'&&QR.kind==='wings'&&c.t>=.5){
     /* le rayon déchire l'aile proche : entaille, trous brûlés (drawWing, dmg), débris et fumée */
     const wp=fdWingPt(),u=(c.t-.5)/.65,e=fdE(u*1.7);
     if(u<1){ctx.save();ctx.globalAlpha=1-u*u;const A=[wp[0]-70,wp[1]+62],B=[A[0]+(wp[0]+86-A[0])*e,A[1]+(wp[1]-66-A[1])*e];fdEnt(ctx,A[0],A[1],B[0],B[1],24,'#ff9a35');fdEnt(ctx,A[0],A[1],B[0],B[1],13,'#ffe58a');fdEnt(ctx,A[0],A[1],B[0],B[1],5,'#fffbea');ctx.restore()}
     if(!reduce){COLFX.eclats(ctx,wp[0],wp[1],c.t-.55,22,['#6a3050','#3a1430','#ff9a35','#ffe58a'],270,88,null,260);fdPuff(ctx,wp[0],wp[1],c.t-.6,7,12)}
-  }
-  if(tail&&c.t>=.35&&c.t<1.6){
-    /* la queue est clouée au sol par un trait de lumière, et son feu s'éteint */
-    const q=fdPin()||to,u=(c.t-.35)/.4,pin=fdE(u),al=c.t<1.2?1:1-(c.t-1.2)/.4;
-    ctx.save();ctx.globalAlpha=al;
-    if(c.t<.7)COLFX.etoile(ctx,q[0],q[1],70*(1-u),9,.3,'#ffe9a0',.4);
-    COLFX.poly(ctx,[[q[0]-4,q[1]-70*pin],[q[0]+4,q[1]-70*pin],[q[0]+2,q[1]+10],[q[0]-2,q[1]+10]],'#ffe9a0');COLFX.poly(ctx,[[q[0]-1.5,q[1]-70*pin],[q[0]+1.5,q[1]-70*pin],[q[0]+1,q[1]+8],[q[0]-1,q[1]+8]],'#fffbea');
-    ctx.restore();
-    if(!reduce){COLFX.eclats(ctx,q[0],q[1],c.t-.4,16,['#ff9a35','#ffe08a','#8a4c4a'],220,81,q[1]+6,480);fdPuff(ctx,q[0],q[1]-4,c.t-.75,8,29)}
   }
   if(c.k==='final'&&c.t>=1.55&&c.t<3.6){
     /* la lumière ressort par les fissures du Colosse */
@@ -563,7 +550,6 @@ function drawCnFx(){
   }
 }
 function qBeamTarget(c){
-  if(c.k!=='final'&&QR.tail&&QR.tipPx)return fdPin();
   if(c.k==='head'&&QR.kind==='wings')return fdWingPt();
   return c.k==='head'?[Q.bx,Q.by-92]:c.k==='beam'?[Q.bx-30,Q.by-4]:c.k==='final'?[Q.bx-20,Q.by-4]:[Q.bx-30,Q.by-4];
 }
