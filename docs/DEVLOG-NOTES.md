@@ -362,3 +362,7 @@
 
 - 2026-11-27 (direction artistique, documentation seule) : rien ne change dans le jeu pour l’instant.
 - À venir : refonte visuelle de tout le jeu avant le Chapitre III, Colosse en trois quarts vu d’en bas, lanterne à cage vitrée.
+
+## 2026-11-27 · charte graphique (docs)
+- Rien de nouveau à l'écran pour l'instant : la charte fixe la palette et le rendu à suivre pour les prochains décors et personnages.
+- Le joueur ne voit aucun changement dans les chapitres actuels ; la direction artistique sera visible à partir du lot 1 (pont en essai).

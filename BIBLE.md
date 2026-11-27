@@ -75,7 +75,7 @@ Les noms affichés « marteau » alors que l'arme est une masse sont à corriger
 ## Direction artistique et son
 - **Tout est dessiné par le code** (canvas) : pas d'image de décor ni de sprite.
 - **Tout le son est synthétisé**, y compris la berceuse du chapitre III (chant formantique, vocalises sans paroles intelligibles, paroles écrites à l’écran). Seule exception : la voix du Roi Spectral (chapitre VI), un enregistrement court embarqué en base64, toujours sous-titré, modulé en jeu par LB.audio (hauteur, filtre, réverbération). Format lisible partout, iOS compris (mp3 ou m4a), fichier source suivi dans le dépôt. L’audio se met en pause en arrière-plan.
-- Palette : braise chaude contre pierre sombre ; la lanterne est la seule couleur claire.
+- Palette et rendu : voir `docs/decisions/2026-11-27-charte-graphique.md`. La lanterne reste la lumière la plus vive, et la seule lumière chaude propre au joueur.
 - Polices Big Shoulders Display et DM Sans (licence libre), intégrées : aucun appel à Google Fonts en version publiée.
 
 ## Réglages sensibles (ne pas toucher sans validation)
