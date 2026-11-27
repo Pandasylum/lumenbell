@@ -407,3 +407,4 @@
 - Quand le Colosse encaisse un coup, son buste et sa tête vacillent trois fois avant de se stabiliser.
 - Quand le Colosse s'enrage, des flammes jaillissent tout autour de lui au lieu d'un cercle qui s'étend : plus rien ne ressemble à une attaque à parer.
 - Le contre de la première rage lance une lame de lumière en croissant qui court sur le pont jusqu'au Colosse, au lieu d'un cercle plat sous les pieds du Veilleur.
+- Les rayons de la lanterne, partout dans le Chapitre I, sont maintenant des coins de lumière dorés comme en phase I ; les impacts des phases II et III éclatent en étoiles et en flammes découpées, sans cercles ni halos bleus.

@@ -71,3 +71,10 @@ Plans fixes dessinés une seule fois ; le mouvement réduit coupe les particules
 ## Reste ouvert
 - Brèche et Phare englouti de la cale : à voir dans le projet Lore.
 - Fluidité sur téléphone : non mesurée (lot 1).
+
+## Effets, impacts et rayons (ajout du 2026-11-27, Chapitre I)
+- **Lumière du Veilleur** : toujours des aplats nets, d'or `#ffe9a0` et de crème `#fffbea` (halo `rgba(255,214,110,.55)`), jamais de dégradé ni de flou. Rayon = coin de lumière qui s'élargit vers sa cible ; coup de lumière = étoile à branches ; vague = croissant. Chapitre I, phases I à III : un seul dessin (`lanternBeam`, `24-hero-draw.js`) ; `LB.lanternBeam` (dégradé) reste réservé au Chapitre II.
+- **Feu** : flammes découpées à quatre tons (`COLFX.flamme`), jamais de dégradé radial.
+- **Impacts** : étoile d'impact, éclats en triangles, fumée en aplats ; plus d'anneau qui s'étend (il ressemble à une attaque à parer). Phases II et III partagent `drawFx2`.
+- **Bleu** : réservé au bouclier, à l'esquive et à la barre de récupération (signaux de jeu), jamais à un impact.
+- Lot concerné : « Colosse et ses animations d'attaque » (lot 3).

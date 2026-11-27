@@ -18,3 +18,7 @@ Source : maquette `fonderie-reference.js` (colosseF, FS, DEC, ambiance, recul, d
 ## À valider
 - Le jeu n'a pas de riposte après le cri (`qAtkEnd`, `roar` → `qIdle`) : la riposte « rayon dans la gueule » n'est donc pas visible ; aucune demande moteur n'est ouverte.
 - Pas de revue visuelle locale (consigne : CI seule).
+
+## Effets d'impact (après revue)
+Les effets d'impact de la phase II (`drawFx2`, aussi utilisé par la phase III) passent à la charte : étoiles d'or et de crème au lieu des anneaux et des explosions en dégradé bleu, flammes découpées (`COLFX.flamme`) au lieu des gerbes en dégradé, et le rayon de la lanterne (`lanternBeam`, chapitre) devient un coin de lumière en aplats, comme la lumière de la phase I. Voir la charte, section « Effets, impacts et rayons ».
+**Non audité** : les effets propres à la phase III (griffes, cloche, souffle) gardent leurs ombres portées d'origine ; à voir avec la fiche de la phase III. Les étincelles bleues de l'esquive et du bouclier restent bleues (signal de jeu).
