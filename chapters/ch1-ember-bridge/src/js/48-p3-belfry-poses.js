@@ -42,10 +42,10 @@ function heroFin(){
     if(t>=FIN.charge&&t<FIN.strike){hand=[26,-100];sa=-1.45;y=L[1]-24*es(clamp01((t-FIN.charge)/.6))}
     else if(t>=FIN.strike){hand=[38,-56];sa=.12;x+=14*es(clamp01((t-FIN.strike)/.1))}
     if(t>=FIN.collapse){
-      /* le Colosse s'agenouille (il ne bascule plus) : le Veilleur reste sur son épaule, qui descend avec lui */
+      /* le Colosse reste debout et s'affaisse un peu (il ne bascule plus) : le Veilleur reste sur son épaule */
       const k=es(clamp01(finTh(t)/1.4));
       const A=[L[0]+(45-L[0])*k,L[1]+(-200-L[1])*k];
-      x=bx+A[0];y=A[1]+KNEEL3*k;
+      x=bx+A[0];y=A[1]+STONE3*k;
       hand=[30,-60];sa=.12+.9*k;glow=.4;
     }
     if(t>=FIN.bell-.6){
@@ -60,7 +60,7 @@ function finBoss(o){
   const t=R.fin.t,th=0,c=1,sn=0;
   o.warm=t<FIN.collapse?(t>=FIN.strike?2:1.5):Math.max(.03,(t<FIN.bell?Math.max(.25,1.7-(t-FIN.collapse)*.35):Math.max(.25,1.7-(FIN.bell-FIN.collapse)*.35)*(1-clamp01((t-FIN.bell)/1.2))));
   o.jaw=(t>=FIN.strike&&t<FIN.collapse)?16:(t<.6?12:0);
-  o.lean=0;o.dy=0;o.kneel=es(clamp01(finTh(t)/1.4));
+  o.lean=0;o.dy=0;o.stone=es(clamp01(finTh(t)/1.4));
   if(t>=FIN.strike&&t<FIN.collapse)o.x+=rand(-3,3);
   o.hands=[[-128,-66],[128,-66]].map(p=>[o.x+p[0]*c-p[1]*sn,DECK+p[0]*sn+p[1]*c]);
   if(t<FIN.collapse){const sw=Math.sin(t*3)*4;o.hands[0][1]+=sw;o.hands[1][1]-=sw}

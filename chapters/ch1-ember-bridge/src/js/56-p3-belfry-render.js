@@ -26,7 +26,7 @@ function drawBoss3(){
   if(R.healed&&!fin&&R.boss.s!=='dead'){ctx.save();ctx.translate(bx,DECK+dy);ctx.scale(.92,.92);drawAura3(ob,t);ctx.restore()}
   if(R.atk&&R.atk.dbl&&R.atk.t<R.atk.hits[R.atk.hits.length-1].at+.05){ctx.save();ctx.translate(bx,DECK+dy);ctx.rotate(fin?ob.lean:0);ctx.scale(.92,.92);ctx.fillStyle='rgba(255,176,74,'+(.85+.15*Math.sin(t*30))+')';ctx.shadowColor='#ff7a2b';ctx.shadowBlur=14;ctx.font='900 54px '+DISPLAY;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!'.repeat(R.atk.tn||2),-170,-300);ctx.restore()}
   ctx.save();ctx.translate(bx,DECK+dy);if(fin&&ob.lean)ctx.rotate(ob.lean);ctx.translate(C3X+o.dx,0);ctx.scale(C3,C3);
-  const rig=COLOSSE.draw(ctx,{lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:o.plie,kneel:o.kneel,tete:o.tete,jaw:o.jaw,fissure:wd,
+  const rig=COLOSSE.draw(ctx,{lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:o.plie,tete:o.tete,jaw:o.jaw,fissure:wd,
     t:reduce?0:t,warm:ob.warm,eyes:o.yeux,breath:reduce?null:t,smoke:1,hurt:R.recoil>.3,legs:{f:[o.fx,o.fl,o.fa],n:[o.nx,o.nl,o.na]},tip:[o.tx,o.ty],heat:o.heat,sag:20,
     ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r},
     back:applyM=>{
@@ -359,13 +359,20 @@ function renderR(){
   r3Background();
   r3Ground();
   drawBellWaves();
-  {const k=R.mode==='finale'?clamp01((R.fin.t-FIN.bell)/1.4):0;
-   if(k>0){
+  {/* final : la pierre noire gagne le Colosse des pieds à la tête (du dernier souffle de la chute à la cloche), une braise court sur la ligne qui monte */
+   const pk=R.mode==='finale'?clamp01((R.fin.t-(FIN.collapse+.3))/(FIN.bell+1.4-FIN.collapse-.3)):0,ly=DECK+10-es(pk)*440;
+   if(pk<=0)drawBoss3();
+   else{
+     if(pk<1){ctx.save();ctx.beginPath();ctx.rect(-40,-40,W+80,ly+40);ctx.clip();drawBoss3();ctx.restore()}
      if(OFF.width!==cv.width||OFF.height!==cv.height){OFF.width=cv.width;OFF.height=cv.height}
      const main=ctx;OFFX.setTransform(1,0,0,1,0,0);OFFX.clearRect(0,0,OFF.width,OFF.height);OFFX.setTransform(main.getTransform());
      ctx=OFFX;try{drawBoss3()}finally{ctx=main}
-     main.save();main.setTransform(1,0,0,1,0,0);main.filter='grayscale('+k+') brightness('+(1-.4*k)+')';main.drawImage(OFF,0,0);main.filter='none';main.restore();
-   }else drawBoss3()}
+     main.save();if(pk<1){main.beginPath();main.rect(-40,ly,W+80,H);main.clip()}
+     main.setTransform(1,0,0,1,0,0);main.filter='grayscale(1) brightness(.62)';main.drawImage(OFF,0,0);main.filter='none';main.restore();
+     if(pk<1){const bx=R.bx-20;ctx.save();ctx.lineCap='round';ctx.strokeStyle='rgba(255,150,60,'+(.85*(1-pk))+')';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(bx-150,ly);ctx.lineTo(bx+150,ly);ctx.stroke();
+       if(!reduce)for(let i=0;i<10;i++){const u=(R.time*1.3+i*.37)%1;ctx.fillStyle='rgba(120,112,140,'+(.7*(1-u))+')';ctx.fillRect(bx-140+i*31+Math.sin(R.time*2+i)*6,ly+u*70,3,3)}
+       ctx.restore()}
+   }}
   drawFallWings();drawFinFx();
   if(R.mode==='finale'&&R.fin.t<.4)drawBolt(R.bx-20,-10,DECK-260,1-R.fin.t/.4,true);
   drawHits3();

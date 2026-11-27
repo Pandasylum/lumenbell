@@ -288,14 +288,7 @@ const COLOSSE=(()=>{
     let aF=Math.asin(Math.max(-.38,Math.min(.38,-LG.f[0]/LL))),aN=Math.asin(Math.max(-.38,Math.min(.38,-LG.n[0]/LL)));
     const gap=(HN[0]-LL*Math.sin(aN))-(HF[0]-LL*Math.sin(aF));if(gap<34){const k=(34-gap)/(2*LL);aF+=k;aN-=k}
     c.save();if(o.plie)c.scale(1,1-.2*o.plie); /* il ploie sur ses jambes : elles se raccourcissent, les pieds restent au sol */
-    const kn=o.kneel||0;
-    [[SP.legF,LG.f,HF,aF,SP.legFC],[SP.legN,LG.n,HN,aN,SP.legNC]].forEach(([sp,q,hip,an,ov])=>{
-      if(kn>.001){ /* à genoux (final) : le même sprite de jambe, articulé au genou — cuisse descendue avec le bassin, genou au sol, tibia et pied couchés derrière */
-        const near=sp===SP.legN,b=sp.box,dk=o.drop,ky=near?-56:-60,kx=near?46:-66;
-        c.save();c.beginPath();c.rect(b[0],b[1],b[2],ky-b[1]);c.clip();c.translate(0,dk*kn);img(c,sp);c.restore();
-        c.save();c.translate(kx,ky+(dk-(near?22:28))*kn);c.rotate(-1.5*kn);c.translate(-kx,-ky);c.beginPath();c.rect(b[0],ky,b[2],b[1]+b[3]-ky);c.clip();img(c,sp);c.restore();
-        return}
-      c.save();c.translate(hip[0],hip[1]-q[1]*.55);c.rotate(an+q[2]);c.translate(-hip[0],-hip[1]);img(c,sp);cr(ov,rl);c.restore()});
+    [[SP.legF,LG.f,HF,aF,SP.legFC],[SP.legN,LG.n,HN,aN,SP.legNC]].forEach(([sp,q,hip,an,ov])=>{c.save();c.translate(hip[0],hip[1]-q[1]*.55);c.rotate(an+q[2]);c.translate(-hip[0],-hip[1]);img(c,sp);cr(ov,rl);c.restore()});
     c.restore();
     if(o.wound>0){c.save();c.strokeStyle='rgba(255,220,140,'+Math.min(1,o.wound)+')';c.lineWidth=3.5;c.lineCap='round';c.beginPath();c.moveTo(-63,-61);c.lineTo(-40,-61);c.moveTo(-63,-61);c.lineTo(-53,-77);c.moveTo(-63,-61);c.lineTo(-53,-45);c.stroke();c.restore()}
     c.save();applyM();halo(c,-24,-205,90,.3*warm*fl);img(c,SP.torso);cr(SP.torsoC,ca);cr(SP.torsoR,ra);c.restore();
