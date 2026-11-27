@@ -431,7 +431,7 @@ function fdPose(){
   if(Q.mode==='lake'){
     /* fin : il plonge ailes repliées, légèrement penché ; il se pose doucement dans la lave (genoux fléchis) ; puis il se redresse, déploie les ailes et repart */
     const lt=Q.lt,sp=Q.splash,d=sp?lt-sp:0,fall=fdE(lt/1.4),e=Math.max(0,d-1.0);
-    o.rot=-.45*fall*(1-fdE(e/.7));o.wA=-.5*fall*(1-fdE(e/.5));o.flap=Math.sin(tt*10)*.6*fdE((e-.15)/.3);
+    o.rot=-.45*fall*(1-fdE(d/.5)); /* il se redresse au contact : il s'enfonce debout, pas de travers */o.wA=-.5*fall*(1-fdE(e/.5));o.flap=Math.sin(tt*10)*.6*fdE((e-.15)/.3);
     o.plie=.3*fdE(d/.3)*(1-fdE((d-.6)/.4));o.eteint=.3*fall*(1-fdE(e/.4));
     o.fissure=1;o.rage=.5+.5*fdE(e/.5);o.rageF=Math.max(.3*fall,.8*fdE(e/.5));o.tete=.1*fall-.3*fdE(e/.6);o.griffe=.55;
     o.off=[-40,70];o.nn=[10,-10];
@@ -768,7 +768,7 @@ function renderQ(){
   drawFx2();
   ctx.restore();
   ctx.drawImage(vig,0,0,W,H);
-  if(Q.flash>0){ctx.fillStyle='rgba(255,255,255,'+Q.flash*(Q.mode==='lake'?.5:1)+')';ctx.fillRect(0,0,W,H)}
+  if(Q.flash>0){ctx.fillStyle='rgba(255,255,255,'+Q.flash*(Q.mode==='lake'?.22:1)+')';ctx.fillRect(0,0,W,H)}
   if(Q.hurt>0){ctx.fillStyle='rgba(255,40,30,'+(Q.hurt*.45)+')';ctx.fillRect(0,0,W,H)}
   let fade=0;
   if(Q.mode==='intro')fade=1-clamp01(Q.t/.7);
