@@ -550,12 +550,10 @@ function render(){
   ctx.save();
   if(G.shake>0&&!reduce)ctx.translate(rand(-1,1)*G.shake,rand(-1,1)*G.shake);
   ctx.drawImage(bgFar,0,0,W,H);
-  const pulse=.85+.15*Math.sin(G.time*2.1)+.05*Math.sin(G.time*7.3);
-  const lg=ctx.createRadialGradient(W/2,H+60,20,W/2,H+60,560);
-  lg.addColorStop(0,'rgba(255,110,30,'+(.55*pulse)+')');lg.addColorStop(.5,'rgba(200,50,20,'+(.22*pulse)+')');lg.addColorStop(1,'rgba(120,20,10,0)');
-  ctx.fillStyle=lg;ctx.fillRect(0,0,W,H);
+  BRD.mist(reduce?0:(G.time*.012)%1);
   drawEmbers(0,70,1);
   ctx.drawImage(bgBridge,0,0,W,H);
+  BRD.archGlow(G.time);
   drawHole();ctx.save();ctx.translate(G.ix||0,0);drawBoss();ctx.restore();drawCracks();drawPlayer();drawFlame();drawJets();drawRock();if(G.boss.dbf&&G.boss.s==='fl_in')drawChainTell(BX-18,DECK-238,G.boss.t);if(G.boss.dbl&&(G.boss.s==='windup'||G.boss.s==='strike'))drawDblTell(G.boss.t);drawRing();drawBarrier();drawOrb();drawHints();drawFx();
   drawEmbers(0,18,.9);
   ctx.restore();
