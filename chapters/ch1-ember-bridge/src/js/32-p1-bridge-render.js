@@ -299,31 +299,37 @@ function colBody(toP){
    pas lourds entre deux attaques (foulée, durée d'un pas, levée du pied ; instants depuis le début du repos : pied lointain puis proche en avant,
    proche puis lointain en arrière), secousse et poussière à chaque pied posé ; penché menaçant au repos ; lissages (s). */
 const COL_V={ox:-40,foulee:26,pas:.42,lever:13,av:[.3,.75],ar:[2.6,3.0],secousse:2.5,menace:[-.07,3,.015],lisse:.25,regard:[-.22,.16,.6]};
-const CW={fF:0,fN:0,mv:null,lt:null,menace:0,eyes:0,look:0,dust:[]};
+const CW={G:null,fF:0,fN:0,mv:null,m0:0,lt:null,lix:null,menace:0,eyes:0,look:0,dust:[]};
+/* pieds posés au sol (repère du pont, entrée G.ix comprise) : un pied à la fois se lève et rattrape sa place, le corps est porté par les pieds */
 function colWalk(){
-  const b=G.boss,V=COL_V,tm=G.time,dt=CW.lt==null?0:Math.max(0,Math.min(.05,tm-CW.lt));CW.lt=tm;
-  const idle=b.s==='idle',S=V.foulee,t=b.t;
-  const tg={f:idle&&t>V.av[0]&&t<V.ar[1]?-S:0,n:idle&&t>V.av[1]&&t<V.ar[0]?-S:0};
-  const lift={f:0,n:0};
-  /* un seul pied à la fois : il se lève, avance, se pose lourdement */
-  if(!CW.mv)for(const k of ['f','n'])if(Math.abs(tg[k]-CW['f'+k.toUpperCase()])>.5){CW.mv=k;break}
-  if(CW.mv){const k=CW.mv,key='f'+k.toUpperCase(),d=tg[k]-CW[key],sp=S/V.pas*dt;
+  const b=G.boss,V=COL_V,tm=G.time,ix=G.ix||0;
+  if(CW.G!==G){Object.assign(CW,{G,fF:ix,fN:ix,mv:null,lt:null,lix:ix,menace:0,eyes:0,look:0,dust:[]})}
+  const dt=CW.lt==null?0:Math.max(0,Math.min(.05,tm-CW.lt));CW.lt=tm;
+  const vix=dt>0?(ix-CW.lix)/dt:0;CW.lix=ix;
+  const idle=b.s==='idle'&&G.mode==='play',S=V.foulee,t=b.t,lead=Math.max(-40,Math.min(40,vix*.18));
+  const tg={f:ix+lead+(idle&&t>V.av[0]&&t<V.ar[1]?-S:0),n:ix+lead+(idle&&t>V.av[1]&&t<V.ar[0]?-S:0)};
+  const lift={f:0,n:0},K={f:'fF',n:'fN'};
+  if(!CW.mv){const df=Math.abs(tg.f-CW.fF),dn=Math.abs(tg.n-CW.fN);if(Math.max(df,dn)>.5){CW.mv=df>=dn?'f':'n';CW.m0=CW[K[CW.mv]]}}
+  if(CW.mv){const k=CW.mv,key=K[k],d=tg[k]-CW[key],sp=Math.max(S/V.pas,Math.abs(vix)*2.2)*dt;
     if(Math.abs(d)<=sp){CW[key]=tg[k];CW.mv=null;
       CW.dust.push({x:BX+V.ox+CW[key]+(k==='f'?-44:46),t:tm});if(!reduce)G.shake=Math.max(G.shake||0,V.secousse)}
-    else{CW[key]+=Math.sign(d)*sp;const u=1-Math.abs(tg[k]-CW[key])/S;lift[k]=V.lever*Math.sin(Math.PI*clamp01(u))}}
+    else{CW[key]+=Math.sign(d)*sp;const a=Math.abs(CW[key]-CW.m0),r=Math.abs(tg[k]-CW[key]);lift[k]=V.lever*Math.sin(Math.PI*clamp01(a/(a+r||1)))}}
   CW.dust=CW.dust.filter(q=>tm-q.t<.6);
   /* menace au repos, yeux qui s'embrasent avant l'attaque */
   const ease=x=>1-Math.exp(-dt/V.lisse*x);
   CW.menace+=((idle?1:0)-CW.menace)*ease(1);
   const tell=['windup','sw1w','sw2w','sw3w','fl_in','fy_roar','fy_t','rk_t'].includes(b.s);
   CW.eyes+=((tell?1:0)-CW.eyes)*ease(1.6);
-  return {lift};
+  /* corps porté par les pieds (il suit l'entrée avec un léger retard) */
+  const wx=Math.max(-1.3*S,Math.min(1.3*S,(CW.fF+CW.fN)/2-ix));
+  return {lift,wx,leg:k=>CW[K[k]]-ix-wx};
 }
 function drawDust(){
-  for(const q of CW.dust){const u=(G.time-q.t)/.6,a=(1-u)*.5;
+  const ix=G.ix||0;
+  for(const q of CW.dust){const u=(G.time-q.t)/.6,a=(1-u)*.5,x=q.x-ix;
     ctx.fillStyle='rgba(150,110,130,'+a+')';
-    for(let i=-2;i<=2;i++){ctx.beginPath();ctx.ellipse(q.x+i*(10+u*16),DECK-2-Math.abs(i)*u*5,7+u*12,3+u*4,0,0,6.283);ctx.fill()}
-    ctx.fillStyle='rgba(255,170,80,'+(1-u)+')';for(let i=0;i<5;i++)ctx.fillRect(q.x-18+i*9,DECK-4-u*(18+i%3*9),2,2)}
+    for(let i=-2;i<=2;i++){ctx.beginPath();ctx.ellipse(x+i*(10+u*16),DECK-2-Math.abs(i)*u*5,7+u*12,3+u*4,0,0,6.283);ctx.fill()}
+    ctx.fillStyle='rgba(255,170,80,'+(1-u)+')';for(let i=0;i<5;i++)ctx.fillRect(x-18+i*9,DECK-4-u*(18+i%3*9),2,2)}
 }
 function drawBoss(){
   const b=G.boss,pz=pose(),t=G.time;
@@ -337,14 +343,15 @@ function drawBoss(){
   /* état de la chaîne conservé (hookStep) : la masse reste au poing, la bandoulière reste sur le torse */
   const hkT=(b.s==='windup'||b.s==='strike'||b.s==='rebound'||b.s==='rewind'||b.s==='lift'||b.s==='hold'||b.s==='slam'||b.s==='release')?1:0;hookStep(b,hkT,t);
   const jaw=(G.mode==='intro'&&G.it>3.0&&G.it<3.9)?14:b.s==='fl_in'?14*clamp01(b.t/Math.min(T.fli,b.fli||T.fli)):(b.s==='fl_out'||b.s==='fy_roar')?14:0;
-  const wk=colWalk(),wx=(CW.fF+CW.fN)/2;
+  const wk=colWalk(),wx=wk.wx;
   const X0=BX+COL_V.ox+wx+dx,Y0=DECK+dy,s=COL_S,toP=q=>[(q[0]-X0)/s,(q[1]-Y0)/s],toW=q=>[X0+q[0]*s,Y0+q[1]*s];
   const cb=colBody(toP),p=cb.p,tip=[pz.tip[0]+dx,pz.tip[1]+dy],MN=COL_V.menace,m=CW.menace;
   p[0]+=MN[0]*m;p[1]+=MN[1]*m+Math.sin(t*2.2)*1.4*m-(wk.lift.f+wk.lift.n)*.3/s;p[2]+=MN[2]*m*Math.sin(t*2.2);
   /* regard : la tête se tourne vers le Veilleur (il le suit quand il est soulevé) */
   {const R=COL_V.regard,hx=X0-40*s,hy=Y0-236*s,vx=G.pl.x,vy=DECK-liftAmt()-90,d=Math.hypot(vx-hx,vy-hy)||1;
    const tg=Math.max(R[0],Math.min(R[1],-Math.asin((vy-hy)/d)*R[2]))*(b.s==='dead'?0:1);CW.look+=(tg-CW.look)*.12}
-  const legs={f:[(CW.fF-wx)/s,wk.lift.f/s,-wk.lift.f*.006],n:[(CW.fN-wx)/s,wk.lift.n/s,-wk.lift.n*.006]};
+  const lg=k=>Math.max(-40,Math.min(40,wk.leg(k)/s));
+  const legs={f:[lg('f'),wk.lift.f/s,-wk.lift.f*.006],n:[lg('n'),wk.lift.n/s,-wk.lift.n*.006]};
   const trail=b.s==='sw1'||b.s==='sw2';if(!trail)G.swTrail.length=0;
   ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);
   const rig=COLOSSE.draw(ctx,{lean:p[0],drop:p[1],sx:p[2],dF:p[3],dN:p[4],off:[p[5],p[6]],ham:cb.ham,legs,look:CW.look,eyes:CW.eyes,breath:t,smoke:.8+.6*CW.menace,
@@ -395,7 +402,8 @@ function drawPlayer(){
   /* le Veilleur commun (LB.drawWatcher) ; la phase donne sa géométrie : bâton planté, garde, estoc */
   const dashing=p.s==='dash'||p.s==='stab'||p.s==='back',low=p.s==='down'||p.s==='hurt';
   const thrust=p.s==='stab'?(p.t<.1?es(p.t/.1):p.t<.22?1:1-clamp01((p.t-.22)/.08)):0;
-  const hand=dashing?[28+24*thrust,-60]:[26,-62-6*r],sb=dashing?[hand[0]-34,hand[1]+6]:[26,-2-58*r],st=dashing?[hand[0]+34,hand[1]-6]:[30+18*r,-140-26*r];
+  /* garde commune (LB.WATCHER_REST) : géométrie des poses partagées « counter » (estoc) et « block » (garde levée, r = levée) */
+  const Q=dashing?LB.WATCHER_POSES.counter(thrust):LB.WATCHER_POSES.block(r),hand=Q.hand,sb=Q.staff[0],st=Q.staff[1];
   const pose=up?(p.s==='act'?'block':'cast'):dashing?'counter':low?(p.s==='down'?'down':'hurt'):'idle';
   const b=G.boss,ring=(b.s==='lift'&&b.t>=.12)||b.s==='hold'||b.s==='slam';
   LB.drawWatcher(ctx,p.x,DECK-lift-(G.ib||0),pose,G.time,{
