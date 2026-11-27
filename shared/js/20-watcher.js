@@ -44,7 +44,7 @@ LB.WATCHER_T={
   bell:{f:12.6,a:.16},                              /* clochette : balancement (rad/s, rad) ; immobile en mouvement réduit */
   /* animation (référence validée du 27 novembre, docs/decisions/2026-11-27-veilleur-animations.md) : elle se cale sur les poses et
      l'horloge que le chapitre donne déjà, sans toucher aux états, fenêtres ni durées de LB.hero */
-  idle:{loop:4.4},                                  /* repos vivant : boucle du regard et de l'éclat de visière (s) */
+  idle:{loop:9},                                    /* repos vivant : boucle du regard et de l'éclat de visière (s) */
   wind:{f:5.2,ph:1.9},                              /* vent dans la cape : fréquence (rad/s), déphasage des deux pans */
   arm:{len:23,pivot:[12,-76]},                      /* bras : deux segments fixes (px, à l'échelle de armR), pivot du geste près de l'épaule */
   anim:{rise:.1,crouch:.08,into:.06,fall:.3,land:.26,dust:.8,guard:{block:1,hold:.5}},
