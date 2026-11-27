@@ -131,7 +131,7 @@ const COLOSSE=(()=>{
     c.strokeStyle='#14091a';c.lineWidth=s*.72;c.beginPath();c.ellipse(0,0,s,plat?s*.66:s*.15,0,0,TAU);c.stroke();c.strokeStyle=col;c.lineWidth=s*.4;c.stroke();c.strokeStyle=hi;c.lineWidth=s*.13;c.beginPath();c.ellipse(0,-.6,s,plat?s*.66:s*.15,0,Math.PI*1.05,Math.PI*1.75);c.stroke();c.restore();q=r}}
 
   /* ---- pièces de la référence (coordonnées de maquette, origine entre les pieds) ---- */
-  function jambes(c){const hot=1;
+  function jambeL(c){const hot=1;
    /* ---- jambe lointaine : plus haute sur le sol, plus sombre ---- */
    pc(c,'M-46 -148C-68 -132 -86 -110 -91 -94C-96 -78 -84 -66 -70 -69C-54 -75 -40 -96 -18 -118L-10 -142Z',CH_F,[['M-46 -146C-66 -130 -84 -110 -88 -94L-72 -92C-64 -108 -46 -126 -30 -138Z',CL2]]);
    pc(c,'M-90 -84C-92 -68 -84 -48 -81 -30L-49 -30C-47 -48 -51 -68 -62 -83C-72 -96 -88 -97 -90 -84Z',CH_F,[['M-90 -82C-90 -66 -83 -48 -80 -30L-70 -30C-72 -50 -78 -66 -78 -88Z',CL2]]);
@@ -140,6 +140,8 @@ const COLOSSE=(()=>{
    pc(c,'M-84 -42Q-66 -50 -48 -42L-48 -32Q-66 -40 -83 -32Z',FER,[['M-84 -42Q-66 -50 -48 -42L-48 -39Q-66 -47 -84 -39Z',FER_C]],5);
    pc(c,'M-86 -96Q-102 -102 -114 -96Q-100 -88 -90 -74Z',FER,[['M-86 -96Q-102 -102 -114 -96L-90 -90Z',FER_C]],4);
    feu(c,'M-62 -122L-72 -100L-66 -88M-74 -70L-68 -52L-72 -36',2.6,hot);
+   }
+  function jambeP(c){const hot=1;
    /* ---- jambe proche : devant, plus grande ---- */
    pc(c,'M8 -148C13 -118 26 -96 39 -70C46 -56 67 -54 75 -67C84 -80 78 -104 62 -128L50 -152Z',CH,[['M8 -148C13 -118 26 -96 39 -70L54 -68C46 -92 34 -118 30 -146Z',CL],['M52 -150L80 -90L74 -62L58 -80L62 -110Z',OM]]);
    pc(c,'M41 -73C47 -56 62 -45 66 -26L105 -24C103 -46 93 -67 77 -79C63 -92 39 -88 41 -73Z',CH,[['M42 -72C48 -56 62 -44 66 -26L80 -26C76 -46 62 -58 58 -80Z',CL],['M84 -76L108 -22L92 -22L80 -50Z',OM]]);
@@ -248,7 +250,8 @@ const COLOSSE=(()=>{
   function build(){
     const R=Math.min(3.2,1.1*Math.max(1,typeof dpr==='number'?dpr:1));SP={R};K=.8*R;
     const RIM='rgba(255,138,72,.9)',S3=[3,1],Mq=f=>x=>{x.scale(.8,.8);f(x)};
-    SP.legs=bake([-108,-134,218,148],Mq(jambes),RIM,S3);
+    SP.legF=bake([-108,-134,112,140],Mq(jambeL),RIM,S3);
+    SP.legN=bake([-4,-134,112,148],Mq(jambeP),RIM,S3);
     SP.torso=bake([-96,-272,200,200],Mq(torse),RIM,S3);
     SP.sangle=bake([-72,-252,154,180],Mq(sangle),RIM,S3);
     SP.paulL=bake([-146,-262,112,72],Mq(paulL),'rgba(255,160,110,.8)',S3);
@@ -310,6 +313,8 @@ const COLOSSE=(()=>{
     const Hr=[near[0]+42-o.lean*70,near[1]+113+o.lean*20],Hn=mix(Hr,P,hm.wN),H=mix([far[0]+o.off[0],far[1]+o.off[1]],surF,hm.wF);
     const act=hm.wN>0,dos=hm.wN<.999||(hm.a>-100&&hm.wF<.5)||(hm.a>-60&&head[0]>40); /* tête derrière le dos : marteau derrière le corps */
     const fl=.85+.15*Math.sin(o.t*9),warm=o.warm||1,ph=o.t*.55;
+    const lk=o.look||0,PV=[-36,-206],headM=()=>{applyM(hd);c.translate(PV[0],PV[1]);c.rotate(lk);c.translate(-PV[0],-PV[1])};
+    const hpt=(x,y)=>{const cx=x-PV[0],cy=y-PV[1],cl=Math.cos(lk),sn=Math.sin(lk);return pt(PV[0]+cx*cl-cy*sn+hd,PV[1]+cx*sn+cy*cl)};
     const sl=pt(-34,-128),s=hm.s||0,tip=o.tip?mix(o.tip,sl,s):sl,behind=s<.5&&tip[0]>-20&&tip[1]<-150;
     const marteau=()=>{c.save();c.translate(head[0],head[1]);c.rotate(an);img(c,SP.ham);c.restore()};
     /* boule : au poing au bout de sa chaîne, ou rangée en bandoulière pendant l'attaque au marteau */
@@ -324,11 +329,13 @@ const COLOSSE=(()=>{
     if(o.back){c.save();o.back(applyM);c.restore()}
     if(dos)marteau();
     if(behind)boule_(Wf);
-    img(c,SP.legs);
+    /* jambes : o.legs = {f:[x, lever, angle], n:[...]} en unités de pose (pas lourds) ; la lointaine derrière */
+    const LG=o.legs||{f:[0,0,0],n:[0,0,0]};
+    [[SP.legF,LG.f,[-40,-118]],[SP.legN,LG.n,[34,-118]]].forEach(([sp,q,hip])=>{c.save();c.translate(q[0],-q[1]);c.translate(hip[0],hip[1]);c.rotate(q[2]);c.translate(-hip[0],-hip[1]);img(c,sp);c.restore()});
     if(o.wound>0){c.save();c.strokeStyle='rgba(255,220,140,'+Math.min(1,o.wound)+')';c.lineWidth=3.5;c.lineCap='round';c.beginPath();c.moveTo(-63,-61);c.lineTo(-40,-61);c.moveTo(-63,-61);c.lineTo(-53,-77);c.moveTo(-63,-61);c.lineTo(-53,-45);c.stroke();c.restore()}
     c.save();applyM();halo(c,-24,-205,90,.3*warm*fl);img(c,SP.torso);c.restore();
     let na=act?null:bras(c,near,Hn,0);
-    c.save();applyM(hd);img(c,SP.corneL);c.restore();
+    c.save();headM();img(c,SP.corneL);c.restore();
     c.save();applyM(o.dN);img(c,SP.paulR);c.restore();
     if(act)na=bras(c,near,Hn,0);
     if(!dos)marteau();
@@ -336,11 +343,12 @@ const COLOSSE=(()=>{
     if(act)seg(c,SP.fist,na.W,na.an);
     c.save();applyM(o.dF);img(c,SP.paulL);c.restore();
     /* tête : couronne derrière, gueule qui s'ouvre (jaw), yeux blancs quand il est touché */
-    c.save();applyM(hd);c.scale(.8,.8);
+    c.save();headM();c.scale(.8,.8);
     halo(c,-40,-350,70,.45*warm*fl);couronne(c,ph,warm);
     c.scale(1.25,1.25);img(c,SP.head);c.scale(.8,.8);
     const j=o.jaw||0;
     if(j>0){c.fillStyle='rgba(255,160,60,.95)';c.beginPath();c.moveTo(-95,-254);c.lineTo(-29,-258);c.lineTo(-31,-246+j);c.lineTo(-90,-240+j);c.closePath();c.fill()}
+    const ey=o.eyes||0;if(ey>.02&&!o.hurt){halo(c,-64,-296,26+30*ey,.7*ey);halo(c,-86,-296,18+22*ey,.6*ey);c.save();c.globalAlpha=Math.min(1,ey);c.fillStyle='#fff7d4';c.fill(P2('M-94 -302L-75 -289L-79 -286.5L-91 -294Z'));c.fill(P2('M-65 -287L-34 -309L-39 -296L-55 -285.5Z'));c.restore()}
     if(o.hurt){c.fillStyle='#ffffff';c.fill(P2('M-94 -302L-75 -289L-79 -286.5L-91 -294Z'));c.fill(P2('M-65 -287L-34 -309L-39 -296L-55 -285.5Z'))}
     c.translate(0,j);c.scale(1.25,1.25);img(c,SP.jaw);
     c.restore();
@@ -348,7 +356,14 @@ const COLOSSE=(()=>{
     /* les deux poings serrés sur le manche passent devant */
     if(!dos&&hm.wF>.9){seg(c,SP.fist,fa.W,fa.an);seg(c,SP.fist,na.W,na.an)}
     if(!behind)boule_(fa.W);
-    const mouth=pt(-49.6+hd,-200+j*.4);
+    /* souffle : fumée et braises qui sortent des naseaux et de la gueule au rythme de la respiration (o.breath = phase) */
+    if(o.breath!=null){const N=[hpt(-64,-222),hpt(-52,-222),hpt(-50,-200)];c.save();
+      for(let i=0;i<12;i++){const age=((o.t*.55)+i/12)%1,te=o.t-age/.55,env=Math.max(0,-Math.sin(te*2.2));if(env<.05)continue;
+        const n=N[i%3],x=n[0]-age*(16+i%4*5)+Math.sin(te*3+i)*3,y=n[1]-age*(34+i%3*8),r=2.5+age*11;
+        c.fillStyle='rgba(72,52,80,'+(.42*(1-age)*env*(o.smoke||1))+')';c.beginPath();c.arc(x,y,r,0,TAU);c.fill();
+        if(i%4===0){c.fillStyle='rgba(255,'+(140+i*8)+',60,'+(.8*(1-age)*env)+')';c.fillRect(x+r*.4,y-r*.3,1.6,1.6)}}
+      c.restore()}
+    const mouth=hpt(-49.6,-200+j*.4);
     const rig={far,near,fa,na,mouth,head,P,dir,applyM};
     if(o.front)o.front(rig);
     c.restore();

@@ -382,3 +382,4 @@
 ## 2026-11-27 · Colosse : boule et marteau
 - Pour l'attaque au marteau, le Colosse passe sa boule en bandoulière, empoigne le marteau par-dessus l'épaule et frappe à deux mains jusqu'au Veilleur.
 - Entre les coups du combo, il arrache le marteau du sol et le relève sans le lâcher, puis le range dans son dos, tête au-dessus de l'épaule.
+- Entre deux attaques, le Colosse avance de deux pas lourds qui font trembler le pont puis regagne sa place ; il suit le Veilleur du regard, ses yeux s'embrasent avant de frapper, de la fumée sort de ses naseaux.

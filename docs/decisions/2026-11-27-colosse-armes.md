@@ -20,3 +20,8 @@ Remplace les points « à valider » de [2026-11-27-colosse-torse.md](2026-11-27
 **À valider** : vitesse des gestes raccourcis.
 
 Phases II et III inchangées (`demonBody`), rien dans `shared/`.
+
+**Présence au pont (visuel seul, logique inchangée)** — table `COL_V`
+- Position : dessiné 40 px plus à gauche (il collait au bord droit du cadre, sous le bandeau et contre la bordure) ; points d'impact inchangés dans le monde.
+- Pas lourds : pendant le repos entre deux attaques, deux pas en avant (pied lointain puis proche, foulée 26 px) puis retour à sa place ; un pied à la fois, il se lève et se pose avec secousse de l'écran et poussière. Si l'attaque arrive avant, il regagne sa place pendant l'armement.
+- Faire peur : tête qui suit le Veilleur (y compris soulevé), yeux qui s'embrasent avant chaque attaque, fumée et braises aux naseaux au rythme de la respiration, buste penché et souffle plus ample au repos.

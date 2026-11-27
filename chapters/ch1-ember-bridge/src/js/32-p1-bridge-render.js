@@ -295,6 +295,36 @@ function colBody(toP){
   if(b.s!=='dead')p[1]+=Math.sin(G.time*2.2)*1.6;
   return {p,ham};
 }
+/* Présence du Colosse au pont (visuel seul, logique inchangée) : décalage sur le pont (ox, il laisse de l'air au bord droit du cadre),
+   pas lourds entre deux attaques (foulée, durée d'un pas, levée du pied ; instants depuis le début du repos : pied lointain puis proche en avant,
+   proche puis lointain en arrière), secousse et poussière à chaque pied posé ; penché menaçant au repos ; lissages (s). */
+const COL_V={ox:-40,foulee:26,pas:.42,lever:13,av:[.3,.75],ar:[2.6,3.0],secousse:2.5,menace:[-.07,3,.015],lisse:.25,regard:[-.22,.16,.6]};
+const CW={fF:0,fN:0,mv:null,lt:null,menace:0,eyes:0,look:0,dust:[]};
+function colWalk(){
+  const b=G.boss,V=COL_V,tm=G.time,dt=CW.lt==null?0:Math.max(0,Math.min(.05,tm-CW.lt));CW.lt=tm;
+  const idle=b.s==='idle',S=V.foulee,t=b.t;
+  const tg={f:idle&&t>V.av[0]&&t<V.ar[1]?-S:0,n:idle&&t>V.av[1]&&t<V.ar[0]?-S:0};
+  const lift={f:0,n:0};
+  /* un seul pied à la fois : il se lève, avance, se pose lourdement */
+  if(!CW.mv)for(const k of ['f','n'])if(Math.abs(tg[k]-CW['f'+k.toUpperCase()])>.5){CW.mv=k;break}
+  if(CW.mv){const k=CW.mv,key='f'+k.toUpperCase(),d=tg[k]-CW[key],sp=S/V.pas*dt;
+    if(Math.abs(d)<=sp){CW[key]=tg[k];CW.mv=null;
+      CW.dust.push({x:BX+V.ox+CW[key]+(k==='f'?-44:46),t:tm});if(!reduce)G.shake=Math.max(G.shake||0,V.secousse)}
+    else{CW[key]+=Math.sign(d)*sp;const u=1-Math.abs(tg[k]-CW[key])/S;lift[k]=V.lever*Math.sin(Math.PI*clamp01(u))}}
+  CW.dust=CW.dust.filter(q=>tm-q.t<.6);
+  /* menace au repos, yeux qui s'embrasent avant l'attaque */
+  const ease=x=>1-Math.exp(-dt/V.lisse*x);
+  CW.menace+=((idle?1:0)-CW.menace)*ease(1);
+  const tell=['windup','sw1w','sw2w','sw3w','fl_in','fy_roar','fy_t','rk_t'].includes(b.s);
+  CW.eyes+=((tell?1:0)-CW.eyes)*ease(1.6);
+  return {lift};
+}
+function drawDust(){
+  for(const q of CW.dust){const u=(G.time-q.t)/.6,a=(1-u)*.5;
+    ctx.fillStyle='rgba(150,110,130,'+a+')';
+    for(let i=-2;i<=2;i++){ctx.beginPath();ctx.ellipse(q.x+i*(10+u*16),DECK-2-Math.abs(i)*u*5,7+u*12,3+u*4,0,0,6.283);ctx.fill()}
+    ctx.fillStyle='rgba(255,170,80,'+(1-u)+')';for(let i=0;i<5;i++)ctx.fillRect(q.x-18+i*9,DECK-4-u*(18+i%3*9),2,2)}
+}
 function drawBoss(){
   const b=G.boss,pz=pose(),t=G.time;
   let dx=0,dy=0;
@@ -307,11 +337,17 @@ function drawBoss(){
   /* état de la chaîne conservé (hookStep) : la masse reste au poing, la bandoulière reste sur le torse */
   const hkT=(b.s==='windup'||b.s==='strike'||b.s==='rebound'||b.s==='rewind'||b.s==='lift'||b.s==='hold'||b.s==='slam'||b.s==='release')?1:0;hookStep(b,hkT,t);
   const jaw=(G.mode==='intro'&&G.it>3.0&&G.it<3.9)?14:b.s==='fl_in'?14*clamp01(b.t/Math.min(T.fli,b.fli||T.fli)):(b.s==='fl_out'||b.s==='fy_roar')?14:0;
-  const X0=BX+dx,Y0=DECK+dy,s=COL_S,toP=q=>[(q[0]-X0)/s,(q[1]-Y0)/s],toW=q=>[X0+q[0]*s,Y0+q[1]*s];
-  const cb=colBody(toP),p=cb.p,tip=[pz.tip[0]+dx,pz.tip[1]+dy];
+  const wk=colWalk(),wx=(CW.fF+CW.fN)/2;
+  const X0=BX+COL_V.ox+wx+dx,Y0=DECK+dy,s=COL_S,toP=q=>[(q[0]-X0)/s,(q[1]-Y0)/s],toW=q=>[X0+q[0]*s,Y0+q[1]*s];
+  const cb=colBody(toP),p=cb.p,tip=[pz.tip[0]+dx,pz.tip[1]+dy],MN=COL_V.menace,m=CW.menace;
+  p[0]+=MN[0]*m;p[1]+=MN[1]*m+Math.sin(t*2.2)*1.4*m-(wk.lift.f+wk.lift.n)*.3/s;p[2]+=MN[2]*m*Math.sin(t*2.2);
+  /* regard : la tête se tourne vers le Veilleur (il le suit quand il est soulevé) */
+  {const R=COL_V.regard,hx=X0-40*s,hy=Y0-236*s,vx=G.pl.x,vy=DECK-liftAmt()-90,d=Math.hypot(vx-hx,vy-hy)||1;
+   const tg=Math.max(R[0],Math.min(R[1],-Math.asin((vy-hy)/d)*R[2]))*(b.s==='dead'?0:1);CW.look+=(tg-CW.look)*.12}
+  const legs={f:[(CW.fF-wx)/s,wk.lift.f/s,-wk.lift.f*.006],n:[(CW.fN-wx)/s,wk.lift.n/s,-wk.lift.n*.006]};
   const trail=b.s==='sw1'||b.s==='sw2';if(!trail)G.swTrail.length=0;
   ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);
-  const rig=COLOSSE.draw(ctx,{lean:p[0],drop:p[1],sx:p[2],dF:p[3],dN:p[4],off:[p[5],p[6]],ham:cb.ham,
+  const rig=COLOSSE.draw(ctx,{lean:p[0],drop:p[1],sx:p[2],dF:p[3],dN:p[4],off:[p[5],p[6]],ham:cb.ham,legs,look:CW.look,eyes:CW.eyes,breath:t,smoke:.8+.6*CW.menace,
     tip:toP(tip),sag:pz.sag/s,heat:pz.heat,t,warm,jaw,hurt:G.recoil>.3,wound:G.wound,
     back:applyM=>{
       /* ailes dans le dos : la lointaine (à gauche) plus petite ; elles suivent le buste */
@@ -330,6 +366,7 @@ function drawBoss(){
     },
     front:rig=>{if(trail){const a=toW(rig.P),h=toW(rig.head);G.swTrail.push([a[0],a[1],h[0],h[1]]);if(G.swTrail.length>7)G.swTrail.shift()}}});
   ctx.restore();
+  drawDust();
   const mw=toW(rig.mouth);colMouthW=[mw[0]+(G.ix||0),mw[1]];
   if(b.s==='fl_in'||b.s==='fl_out')faceFire(mw[0]-4,mw[1]-2,b.s==='fl_in'?es(clamp01(b.t/Math.min(T.fli,b.fli||T.fli))):1-es(clamp01(b.t/.5)),b.s==='fl_in'?b.t:1);
   if(b.fury){ctx.save();ctx.translate(X0,Y0);drawAura(b.fury);ctx.restore()}
