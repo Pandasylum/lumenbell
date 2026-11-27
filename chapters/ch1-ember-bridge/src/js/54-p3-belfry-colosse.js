@@ -31,8 +31,9 @@ const col3W=p=>{const f=COL3.f,m=C3*(f.m||1);return f.flip?[2*f.bx-(f.x0+p[0]*m)
 function col3Hammer(a){
   /* garde, armé, frappe, combo : 2 coups (combo) ou 3 coups ; les coups Difficile sont recalés sur les images de base (swq) */
   const two=a.kind==='sword2'&&!a.hard3,H=two?[.75,1.4]:[.75,1.4,2.05],q=a.hard3?swq(a):a.pt;
-  const ks=[[0,K3_DOS],[.22,K3_GARDE,'i']];
-  H.forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,'l'],[T,F,'i'],[T+.14,F])});
+  /* il dégaine du dos directement vers la pose armée (plus de passage par la garde, marteau tête en bas, qui ressemblait à un coup avant le combo) */
+  const ks=[[0,K3_DOS]];
+  H.forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,i?'l':'o'],[T,F,'i'],[T+.14,F])});
   ks.push([H[H.length-1]+.5,K3_ARME]);
   return {...k3keys(q,ks)};
 }
@@ -41,7 +42,7 @@ function col3Stab(a){
   const q=a.pt,PULL={...K3B,lean:.28,sx:.92,drop:4,dF:14,dN:-34,P:[64,-150],a:180,g:205},
     THR={...K3B,dx:44,lean:-.42,drop:14,sx:1.04,dF:16,dN:-56,P:[-128,-140],a:180,g:205},
     PLANT={...K3B,dx:20,lean:-.32,drop:18,sx:1.02,dF:14,dN:-44,P:[-62,-160],a:-220,g:205};
-  const ks=[[0,K3_DOS],[.2,K3_GARDE,'i'],[.5,PULL,'l'],[.62,PULL],[.85,THR,'i'],[1.1,THR],[1.7,K3_ARME]];
+  const ks=[[0,K3_DOS],[.5,PULL,'o'],[.62,PULL],[.85,THR,'i'],[1.1,THR],[1.7,K3_ARME]];
   [1.95,2.45,2.95].forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,'l'],[T,F,'i'],[T+.12,F])});
   ks.push([3.35,K3_ARME],[3.9,PLANT],[4.2,PLANT],[4.7,K3_ARME]);
   const o={...k3keys(q,ks)};
@@ -211,7 +212,7 @@ function col3Fb(ob){
    quasi invisibles, À LA TAILLE ET À LA PLACE DU JEU (une pose par image pendant l'entrée, derrière le Colosse qui se pose) : le premier coup ne paie plus ni l'envoi
    des calques au processeur graphique ni la compilation du dessin à cette échelle (un dessin réduit ne suffit pas : le marteau figeait le jeu au premier combo). */
 const COL3_WARM=[
-  ...[K3_GARDE,K3_ARME,K3_FRAPPE,K3_FRAPPE2,K3_DOS].map(o=>({o})),
+  ...[K3_ARME,K3_FRAPPE,K3_FRAPPE2,K3_DOS].map(o=>({o})),
   {o:{...K3_DOS,s:0,tx:46,ty:-300}},                       /* boule au bout de sa chaîne */
   {o:K3_DOS,m:-1},{o:{...K3_DOS,dos:1,qD:[[0,30],[0,10],[0,-110]]},m:.8},{o:{...K3_DOS,dos:-1,qD:[[0,30],[0,10],[0,-110]]},m:.8},   /* pivot du coup de queue */
   {fx:1}];
