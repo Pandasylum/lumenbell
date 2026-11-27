@@ -414,4 +414,4 @@
 - À la fin de la phase II, le Colosse tombe ailes repliées, se pose doucement dans la lave, puis se redresse, déploie ses ailes et s'envole par la cheminée, sans effets qui s'empilent.
 - Quand le Colosse tombe, ses ailes restent ouvertes et frémissent dans l'air ; elles ne se replient qu'au contact de la lave, sans traînée de feu.
 - En phase III, le Colosse brandit son marteau à deux mains (il le range dans le dos sinon), décroche et lance la boule enchaînée, sort ses griffes, charge en vraie course jusqu'au piétinement et au geyser, souffle et lance trois tornades de feu ; il respire et bouge au repos.
-- À la fin du combat, le Colosse s'écroule sur un genou et s'incline quand la cloche lui répond ; la lumière du fanal le touche et la pierre noire le gagne de l'épaule jusqu'aux pieds.
+- À la fin du combat, le Colosse s'écroule, se relève à moitié puis s'agenouille la tête basse quand la cloche lui répond, son feu s'éteint ; le rayon du fanal le touche en pleine poitrine et la pierre noire se répand depuis ce point.

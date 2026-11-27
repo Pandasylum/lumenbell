@@ -21,12 +21,12 @@ function drawBoss3(){
   const bx=o.ported?R.bx:ob.x,dy=o.ported?0:(Math.abs(ob.dy)<=2.001?0:ob.dy);
   COL3.f={x0:bx+C3X+o.dx,y0:DECK+dy,bx,flip:!!ob.flip};
   const wd=R.healed&&!fin?(R.wdAt==null?1:clamp01((R.time-R.wdAt)/.8)):(R.healed?1:0);
-  const fire=ob.warm>1.1||R.rage>0,hot=ob.ws>1.05,wf=reduce?0:Math.sin(t*1.8)*.03;
+  const fire=(ob.warm>1.1||R.rage>0)&&!(o.out>.5),hot=ob.ws>1.05,wf=reduce?0:Math.sin(t*1.8)*.03;
   if(ob.flip){ctx.save();ctx.translate(bx,0);ctx.scale(-1,1);ctx.translate(-bx,0)}
   if(R.healed&&!fin&&R.boss.s!=='dead'){ctx.save();ctx.translate(bx,DECK+dy);ctx.scale(.92,.92);drawAura3(ob,t);ctx.restore()}
   if(R.atk&&R.atk.dbl&&R.atk.t<R.atk.hits[R.atk.hits.length-1].at+.05){ctx.save();ctx.translate(bx,DECK+dy);ctx.rotate(fin?ob.lean:0);ctx.scale(.92,.92);ctx.fillStyle='rgba(255,176,74,'+(.85+.15*Math.sin(t*30))+')';ctx.shadowColor='#ff7a2b';ctx.shadowBlur=14;ctx.font='900 54px '+DISPLAY;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!'.repeat(R.atk.tn||2),-170,-300);ctx.restore()}
   ctx.save();ctx.translate(bx,DECK+dy);if(fin&&ob.lean)ctx.rotate(ob.lean);ctx.translate(C3X+o.dx,0);ctx.scale(C3,C3);
-  const rig=COLOSSE.draw(ctx,{lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:o.plie,kneel:o.kneel,tete:o.tete,jaw:o.jaw,fissure:wd,
+  const rig=COLOSSE.draw(ctx,{lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:o.plie,kneel:o.kneel,kdk:o.kdk,out:o.out,tete:o.tete,jaw:o.jaw,fissure:fin?1:wd,
     t:reduce?0:t,warm:ob.warm,eyes:o.yeux,breath:reduce?null:t,smoke:1,hurt:R.recoil>.3,legs:{f:[o.fx,o.fl,o.fa],n:[o.nx,o.nl,o.na]},tip:[o.tx,o.ty],heat:o.heat,sag:20,
     ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r},
     back:applyM=>{
@@ -359,25 +359,24 @@ function renderR(){
   r3Background();
   r3Ground();
   drawBellWaves();
-  {/* final : la lumière du fanal touche le Colosse agenouillé et la pierre noire le gagne de l'épaule vers les pieds ; la ligne de lumière descend, les braises s'éteignent */
-   const pk=R.mode==='finale'?clamp01((R.fin.t-(FIN.hero-.3))/2.1):0,ly=DECK-430+es(pk)*445;
+  {/* final : la lumière du fanal touche le Colosse agenouillé, en pleine poitrine ; la pierre noire se répand en cercle depuis ce point (anneau de lumière sur son bord) */
+   const pk=R.mode==='finale'?clamp01((R.fin.t-(FIN.hero+.1))/1.9):0,cp=COL3.k?COL3.k.coeur:[R.bx-42,DECK-200],rr=es(pk)*620;
    if(pk<=0)drawBoss3();
    else{
-     if(pk<1){ctx.save();ctx.beginPath();ctx.rect(-40,ly,W+80,H);ctx.clip();drawBoss3();ctx.restore()}
+     if(pk<1){ctx.save();ctx.beginPath();ctx.rect(-40,-40,W+80,H+80);ctx.arc(cp[0],cp[1],rr,0,6.283);ctx.clip('evenodd');drawBoss3();ctx.restore()}
      if(OFF.width!==cv.width||OFF.height!==cv.height){OFF.width=cv.width;OFF.height=cv.height}
      const main=ctx;OFFX.setTransform(1,0,0,1,0,0);OFFX.clearRect(0,0,OFF.width,OFF.height);OFFX.setTransform(main.getTransform());
      ctx=OFFX;try{drawBoss3()}finally{ctx=main}
-     main.save();if(pk<1){main.beginPath();main.rect(-40,-40,W+80,ly+40);main.clip()}
+     main.save();if(pk<1){main.beginPath();main.arc(cp[0],cp[1],rr,0,6.283);main.clip()}
      main.setTransform(1,0,0,1,0,0);main.filter='grayscale(1) brightness(.62)';main.drawImage(OFF,0,0);main.filter='none';main.restore();
-     if(pk<1){const bx=R.bx-20;ctx.save();ctx.lineCap='round';ctx.strokeStyle='rgba(255,236,170,'+(.8*(1-pk))+')';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(bx-170,ly);ctx.lineTo(bx+170,ly);ctx.stroke();
-       if(!reduce)for(let i=0;i<10;i++){const u=(R.time*1.3+i*.37)%1;ctx.fillStyle='rgba(120,112,140,'+(.7*(1-u))+')';ctx.fillRect(bx-150+i*33+Math.sin(R.time*2+i)*6,ly+u*60,3,3)}
-       ctx.restore()}
+     if(pk<1){ctx.save();ctx.strokeStyle='rgba(255,240,190,'+(.85*(1-pk))+')';ctx.lineWidth=4*(1-pk)+1;ctx.beginPath();ctx.arc(cp[0],cp[1],rr,0,6.283);ctx.stroke();ctx.restore()}
    }}
   drawFallWings();drawFinFx();
   if(R.mode==='finale'&&R.fin.t<.4)drawBolt(R.bx-20,-10,DECK-260,1-R.fin.t/.4,true);
   drawHits3();
   drawHero3();
   if(R.mode==='finale'){const ft=R.fin.t,a0=FIN.hero-1.0;if(ft>=a0&&ft<FIN.hero-.3){const h=heroPose3(),L=[h.x+h.hand[0]+Math.cos(h.sa)*76,DECK+(h.y||0)+h.hand[1]+Math.sin(h.sa)*76],u=es(clamp01((ft-a0)/.4)),al=ft<FIN.hero-.5?1:clamp01((FIN.hero-.3-ft)/.2);lanternBeam(L,lerp2(L,[150,DECK-76],u),12,al)}}
+  if(R.mode==='finale'&&COL3.k){const ft=R.fin.t,t0=FIN.hero-.3;if(ft>=t0&&ft<FIN.hero+.5){const u=es(clamp01((ft-t0)/.4)),al=ft<FIN.hero+.1?1:clamp01((FIN.hero+.5-ft)/.4),F=[150,DECK-76];ctx.save();ctx.globalCompositeOperation='lighter';lanternBeam(F,lerp2(F,COL3.k.coeur,u),14,al);ctx.restore()}}
   drawCn3();
   for(const s of R.steam){ctx.fillStyle='rgba(235,245,255,'+(.35*clamp01(s.life/s.max))+')';ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,6.283);ctx.fill()}
   drawHints3();

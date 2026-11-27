@@ -27,6 +27,11 @@ function drawBolt(x,y0,y1,al,big){
   }
   ctx.restore();
 }
+/* final : s'écroule (6,9 s), se relève à moitié quand la cloche va sonner, puis s'agenouille et baisse la tête ; le feu s'éteint ensuite */
+function finKneel(t){
+  const k=es(clamp01(finTh(t)/1.4)),rise=es(clamp01((t-(FIN.bell-.6))/.6)),bow=es(clamp01((t-FIN.bell)/.9));
+  return {k,rise,bow,df:k*(1.1*(1-rise)+.85*rise+.15*bow),out:es(clamp01((t-(FIN.bell-.2))/1.8))};
+}
 function heroFin(){
   const f=R.fin,t=f.t,bx=R.bx,L=[-112,-165];
   let x=PX,y=0,rot=0,glow=1,hand=[28,-94],sa=-1.5;
@@ -45,7 +50,7 @@ function heroFin(){
       /* le Colosse s'écroule sur un genou (il ne bascule plus) : le Veilleur reste sur son épaule, qui descend avec lui */
       const k=es(clamp01(finTh(t)/1.4));
       const A=[L[0]+(45-L[0])*k,L[1]+(-200-L[1])*k];
-      x=bx+A[0];y=A[1]+KNEEL3*k;
+      x=bx+A[0];y=A[1]+KNEEL3*finKneel(t).df;
       hand=[30,-60];sa=.12+.9*k;glow=.4;
     }
     if(t>=FIN.bell-.6){
@@ -60,7 +65,7 @@ function finBoss(o){
   const t=R.fin.t,th=0,c=1,sn=0;
   o.warm=t<FIN.collapse?(t>=FIN.strike?2:1.5):Math.max(.03,(t<FIN.bell?Math.max(.25,1.7-(t-FIN.collapse)*.35):Math.max(.25,1.7-(FIN.bell-FIN.collapse)*.35)*(1-clamp01((t-FIN.bell)/1.2))));
   o.jaw=(t>=FIN.strike&&t<FIN.collapse)?16:(t<.6?12:0);
-  o.lean=0;o.dy=0;o.kneel=es(clamp01(finTh(t)/1.4));o.bow=es(clamp01((t-FIN.bell)/.8));
+  o.lean=0;o.dy=0;o.kd=finKneel(t);o.kneel=o.kd.k;
   if(t>=FIN.strike&&t<FIN.collapse)o.x+=rand(-3,3);
   o.hands=[[-128,-66],[128,-66]].map(p=>[o.x+p[0]*c-p[1]*sn,DECK+p[0]*sn+p[1]*c]);
   if(t<FIN.collapse){const sw=Math.sin(t*3)*4;o.hands[0][1]+=sw;o.hands[1][1]-=sw}
