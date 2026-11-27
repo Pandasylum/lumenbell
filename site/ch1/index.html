@@ -5252,6 +5252,17 @@ function k3geyser(c,x,u,t){if(u<0||u>1)return;const monte=k3ez(u/.14),tombe=k3ez
     k3poly(c,[[bx-19,by+34],[bx-9+q*.4,by-hh*.5],[bx+k*26+q,by-hh],[bx+8+q*.3,by-hh*.42],[bx+19,by+34]],col)});
   for(let i=0;i<7;i++){const k=(i-3)/3;k3flame(c,x+k*W*1.6,y+3,13,(58-Math.abs(k)*28)*monte*(1-tombe)*(1+.25*Math.sin(t*19+i)),k*26,t*15+i)}
   const r=k3rnd(88);for(let i=0;i<22;i++){const v=(r()+t*2.2)%1,px=x+(r()-.5)*W*3.4,py=y-v*(H+60);k3poly(c,[[px,py-7],[px+4,py],[px,py+4],[px-4,py]],i%2?'#ffe08a':'#ff9a35')}}
+function k3boue(c,x,u,t){if(u<=0)return;u=k3cl(u);const y=DECK+6,rx=16+44*u,ry=3.5+8*u,r=k3rnd(17);
+  c.save();c.fillStyle='rgba(34,8,14,'+(.55+.3*u)+')';c.beginPath();c.ellipse(x,y,rx*1.18,ry*1.25,0,0,K3TAU);c.fill();
+  c.fillStyle='#8e2418';c.beginPath();c.ellipse(x,y,rx,ry,0,0,K3TAU);c.fill();
+  c.fillStyle='#d4501f';c.beginPath();c.ellipse(x,y,rx*.78,ry*.76,0,0,K3TAU);c.fill();
+  c.fillStyle=u>.7?'#fff0c0':'#ff9a35';c.beginPath();c.ellipse(x,y,rx*.46,ry*.44,0,0,K3TAU);c.fill();
+  c.strokeStyle='#ffb84a';c.lineWidth=2;c.lineCap='round';
+  for(let i=-2;i<=2;i++){c.beginPath();c.moveTo(x+i*rx*.34,y+ry*.5);c.lineTo(x+i*rx*.62,y+ry+3+Math.abs(i)*2);c.stroke()}
+  for(let i=0;i<9;i++){const ph=(t*2.6+i*.37+r())%1,bx=x+(r()-.5)*rx*1.5,by=y-ph*(8+16*u),br=1.5+(2+3*u)*Math.sin(ph*Math.PI);
+    c.fillStyle=i%2?'#ffe08a':'#ffb84a';c.beginPath();c.arc(bx,by,br,0,K3TAU);c.fill()}
+  for(let i=0;i<5;i++){const k=(i-2)/2;k3flame(c,x+k*rx*.7,y,4+3*u,(8+22*u)*(.75+.25*Math.sin(t*14+i*1.9)),k*6,t*12+i)}
+  c.restore()}
 function k3fente(c,x0,x1,u,al){if(u<=0||al<=0)return;const r=k3rnd(31),N=12,p=[];for(let i=0;i<=N;i++)p.push([k3l(x0,x1,i/N),DECK+6+(i&&i<N?(r()-.5)*15:0)]);
   const n=Math.max(1,Math.ceil(k3cl(u)*N));c.save();c.globalAlpha=al;c.lineJoin='miter';
   [[11,'#12040e'],[6,'#e9561b'],[2.2,'#ffe08a']].forEach(([w,col])=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();p.slice(0,n+1).forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.stroke()});
@@ -5280,6 +5291,7 @@ function col3Fx(){
     else if(h.k==='ram'){const mir=!!a.h&&ri++>0;k3contact(c,[PX+(mir?12:122),DECK-84],d,110,23)}
     else if(h.k==='geyser'){
       const g=d+.1,x=PX+14;
+      if(d<0)k3boue(c,x,(d+.7)/.6,tm);
       k3geyser(c,x,g/.62,tm);
       if(g>0){if(!reduce){k3shards(c,x,DECK-6,g,24,['#8d90bc','#37375f','#ff9a35','#ffe08a'],380,24,DECK+6);k3shards(c,x,DECK-6,g-.25,18,['#8d90bc','#ff9a35','#ffe08a'],330,25,DECK+6)}k3fumee(c,x,DECK-150,(d-.1)/.7,8,26)}
     }
