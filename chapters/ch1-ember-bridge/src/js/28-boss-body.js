@@ -331,7 +331,11 @@ const COLOSSE=(()=>{
     if(behind)boule_(Wf);
     /* jambes : o.legs = {f:[x, lever, angle], n:[...]} en unités de pose (pas lourds) ; la lointaine derrière */
     const LG=o.legs||{f:[0,0,0],n:[0,0,0]};
-    [[SP.legF,LG.f,[-40,-118]],[SP.legN,LG.n,[34,-118]]].forEach(([sp,q,hip])=>{c.save();c.translate(q[0],-q[1]);c.translate(hip[0],hip[1]);c.rotate(q[2]);c.translate(-hip[0],-hip[1]);img(c,sp);c.restore()});
+    /* chaque jambe pivote autour de sa hanche (elle reste attachée au bassin) ; le pied lointain reste à gauche du proche (jamais croisées) */
+    const LL=120,HF=[-40,-118],HN=[34,-118];
+    let aF=Math.asin(Math.max(-.38,Math.min(.38,-LG.f[0]/LL))),aN=Math.asin(Math.max(-.38,Math.min(.38,-LG.n[0]/LL)));
+    const gap=(HN[0]-LL*Math.sin(aN))-(HF[0]-LL*Math.sin(aF));if(gap<34){const k=(34-gap)/(2*LL);aF+=k;aN-=k}
+    [[SP.legF,LG.f,HF,aF],[SP.legN,LG.n,HN,aN]].forEach(([sp,q,hip,an])=>{c.save();c.translate(hip[0],hip[1]-q[1]*.55);c.rotate(an+q[2]);c.translate(-hip[0],-hip[1]);img(c,sp);c.restore()});
     if(o.wound>0){c.save();c.strokeStyle='rgba(255,220,140,'+Math.min(1,o.wound)+')';c.lineWidth=3.5;c.lineCap='round';c.beginPath();c.moveTo(-63,-61);c.lineTo(-40,-61);c.moveTo(-63,-61);c.lineTo(-53,-77);c.moveTo(-63,-61);c.lineTo(-53,-45);c.stroke();c.restore()}
     c.save();applyM();halo(c,-24,-205,90,.3*warm*fl);img(c,SP.torso);c.restore();
     let na=act?null:bras(c,near,Hn,0);

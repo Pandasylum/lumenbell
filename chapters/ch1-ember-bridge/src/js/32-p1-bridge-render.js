@@ -299,11 +299,12 @@ function colBody(toP){
    pas lourds entre deux attaques (foulée, durée d'un pas, levée du pied ; instants depuis le début du repos : pied lointain puis proche en avant,
    proche puis lointain en arrière), secousse et poussière à chaque pied posé ; penché menaçant au repos ; lissages (s). */
 const COL_V={ox:-40,foulee:26,pas:.42,lever:13,av:[.3,.75],ar:[2.6,3.0],secousse:2.5,menace:[-.07,3,.015],lisse:.25,regard:[-.22,.16,.6]};
-const CW={G:null,fF:0,fN:0,mv:null,m0:0,lt:null,lix:null,menace:0,eyes:0,look:0,dust:[]};
+const CW={G:null,fF:0,fN:0,mv:null,m0:0,lt:null,lix:null,menace:0,eyes:0,look:0,dust:[],pose:0};
 /* pieds posés au sol (repère du pont, entrée G.ix comprise) : un pied à la fois se lève et rattrape sa place, le corps est porté par les pieds */
 function colWalk(){
   const b=G.boss,V=COL_V,tm=G.time,ix=G.ix||0;
-  if(CW.G!==G){Object.assign(CW,{G,fF:ix,fN:ix,mv:null,lt:null,lix:ix,menace:0,eyes:0,look:0,dust:[]})}
+  /* nouvelle partie (nouvel état, ou horloge revenue en arrière) : pieds remis sous le corps */
+  if(CW.G!==G||(CW.lt!=null&&tm<CW.lt-.2)){Object.assign(CW,{G,fF:ix,fN:ix,mv:null,lt:null,lix:ix,menace:0,eyes:0,look:0,dust:[],pose:-1})}
   const dt=CW.lt==null?0:Math.max(0,Math.min(.05,tm-CW.lt));CW.lt=tm;
   const vix=dt>0?(ix-CW.lix)/dt:0;CW.lix=ix;
   const idle=b.s==='idle'&&G.mode==='play',S=V.foulee,t=b.t,lead=Math.max(-40,Math.min(40,vix*.18));
@@ -311,7 +312,7 @@ function colWalk(){
   const lift={f:0,n:0},K={f:'fF',n:'fN'};
   if(!CW.mv){const df=Math.abs(tg.f-CW.fF),dn=Math.abs(tg.n-CW.fN);if(Math.max(df,dn)>.5){CW.mv=df>=dn?'f':'n';CW.m0=CW[K[CW.mv]]}}
   if(CW.mv){const k=CW.mv,key=K[k],d=tg[k]-CW[key],sp=Math.max(S/V.pas,Math.abs(vix)*2.2)*dt;
-    if(Math.abs(d)<=sp){CW[key]=tg[k];CW.mv=null;
+    if(Math.abs(d)<=sp){CW[key]=tg[k];CW.mv=null;CW.pose=tm;
       CW.dust.push({x:BX+V.ox+CW[key]+(k==='f'?-44:46),t:tm});if(!reduce)G.shake=Math.max(G.shake||0,V.secousse)}
     else{CW[key]+=Math.sign(d)*sp;const a=Math.abs(CW[key]-CW.m0),r=Math.abs(tg[k]-CW[key]);lift[k]=V.lever*Math.sin(Math.PI*clamp01(a/(a+r||1)))}}
   CW.dust=CW.dust.filter(q=>tm-q.t<.6);
@@ -322,7 +323,8 @@ function colWalk(){
   CW.eyes+=((tell?1:0)-CW.eyes)*ease(1.6);
   /* corps porté par les pieds (il suit l'entrée avec un léger retard) */
   const wx=Math.max(-1.3*S,Math.min(1.3*S,(CW.fF+CW.fN)/2-ix));
-  return {lift,wx,leg:k=>CW[K[k]]-ix-wx};
+  const dip=CW.pose>0?3.5*Math.max(0,1-(tm-CW.pose)/.25):0,walking=CW.mv?1:0;
+  return {lift,wx,dip,walking,leg:k=>CW[K[k]]-ix-wx};
 }
 function drawDust(){
   const ix=G.ix||0;
@@ -346,12 +348,12 @@ function drawBoss(){
   const wk=colWalk(),wx=wk.wx;
   const X0=BX+COL_V.ox+wx+dx,Y0=DECK+dy,s=COL_S,toP=q=>[(q[0]-X0)/s,(q[1]-Y0)/s],toW=q=>[X0+q[0]*s,Y0+q[1]*s];
   const cb=colBody(toP),p=cb.p,tip=[pz.tip[0]+dx,pz.tip[1]+dy],MN=COL_V.menace,m=CW.menace;
-  p[0]+=MN[0]*m;p[1]+=MN[1]*m+Math.sin(t*2.2)*1.4*m-(wk.lift.f+wk.lift.n)*.3/s;p[2]+=MN[2]*m*Math.sin(t*2.2);
+  p[0]+=MN[0]*m;p[1]+=MN[1]*m+Math.sin(t*2.2)*1.4*m-(wk.lift.f+wk.lift.n)*.3/s+wk.dip/s;p[0]-=.035*wk.walking*Math.sign(-(G.ix||0)||1);p[2]+=MN[2]*m*Math.sin(t*2.2);
   /* regard : la tête se tourne vers le Veilleur (il le suit quand il est soulevé) */
   {const R=COL_V.regard,hx=X0-40*s,hy=Y0-236*s,vx=G.pl.x,vy=DECK-liftAmt()-90,d=Math.hypot(vx-hx,vy-hy)||1;
    const tg=Math.max(R[0],Math.min(R[1],-Math.asin((vy-hy)/d)*R[2]))*(b.s==='dead'?0:1);CW.look+=(tg-CW.look)*.12}
-  const lg=k=>Math.max(-40,Math.min(40,wk.leg(k)/s));
-  const legs={f:[lg('f'),wk.lift.f/s,-wk.lift.f*.006],n:[lg('n'),wk.lift.n/s,-wk.lift.n*.006]};
+  const lg=k=>Math.max(-45,Math.min(45,wk.leg(k)/s));
+  const legs={f:[lg('f'),wk.lift.f/s,-wk.lift.f*.004],n:[lg('n'),wk.lift.n/s,-wk.lift.n*.004]};
   const trail=b.s==='sw1'||b.s==='sw2';if(!trail)G.swTrail.length=0;
   ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);
   const rig=COLOSSE.draw(ctx,{lean:p[0],drop:p[1],sx:p[2],dF:p[3],dN:p[4],off:[p[5],p[6]],ham:cb.ham,legs,look:CW.look,eyes:CW.eyes,breath:t,smoke:.8+.6*CW.menace,
