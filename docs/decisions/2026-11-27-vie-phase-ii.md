@@ -7,7 +7,7 @@ Timings, dégâts, positions et logique inchangés (`40-p2-foundry-render.js` ; 
 - **Il vole en combat** : ailes qui battent doucement, corps qui oscille, jambes pendantes qui balancent (`fdLegs`).
 - **Colosse vivant** : respiration, tête qui tourne, mains et griffes qui bougent, ailes qui battent doucement, flammes qui vacillent.
 - **Entrée** : il descend en battant des ailes avec une traînée de feu ; chaque battement soulève des braises (les lames de vent ont été retirées) ; ailes ouvertes dès le début ; éclair à l'arrivée de ses ailes ; le Veilleur atterrit sur son bloc dans la poussière.
-- **Chute** : il plonge ailes repliées, légèrement penché, avec quelques flammes dans son sillage.
+- **Chute** : il plonge légèrement penché, ailes restées ouvertes qui se lèvent et frémissent dans l'air ; elles ne se replient qu'au contact de la lave. Pas de traînée de flammes.
 - **Pose** : il se pose doucement dans la lave, genoux fléchis, une seule couronne douce de gouttes.
 - **Sortie** : il se redresse, déploie les ailes ; une colonne de feu sous lui, la lave ruisselle de son corps, quelques flammes dans son sillage, un peu de fumée à la cheminée, puis il s'envole.
 - Mouvement réduit : pas d'éclats ; horloge figée.
