@@ -22,8 +22,8 @@
 | `js/16-p1-bridge-logic.js` | Phase I : logique du combat, rages, `bossStep`, `hud`, `step` |
 | `js/20-p1-bridge-decor.js` | Phase I : calques statiques du pont (`buildStatic`) |
 | `js/24-hero-draw.js` | Raccourci `lanternBeam` ; le Veilleur (corps, sceptre-lanterne, poses, bouclier) est dans `shared/js/20-watcher.js` (`LB.drawWatcher`) |
-| `js/28-boss-body.js` | Colosse : chaîne, enclumes, masse rangée, **`demonBody`** (silhouette validée, partagée) |
-| `js/32-p1-bridge-render.js` | Phase I : poses, attaques, effets, aides, `render` |
+| `js/28-boss-body.js` | Colosse : chaîne, enclumes, masse rangée, **`demonBody`** (silhouette validée, partagée), **`COLOSSE`** (phase I : calques cuits, queue, fissures par pièce, `plie` / `tete` / teintes), **`COLFX`** (effets réutilisables, non branchés en phases II et III) |
+| `js/32-p1-bridge-render.js` | Phase I : poses, attaques, effets, aides, `render` ; ripostes (`RP`, `COL_H`, `COL_R`, `MV_S` : réactions de dégâts, rage, gestes de lumière du Veilleur ; voir `docs/decisions/2026-11-27-ripostes-p1.md`) |
 | `js/36-p2-foundry-logic.js` | Phase II : `Q`, `DG`, repères du fond (`QFLOOR`, `QLAKE`, `QEDGE`), attaques, `lakeY` (horloge de la fin), `qDive`, `qEnd`, `qStep` |
 | `js/40-p2-foundry-render.js` | Phase II : fond de la Fonderie (`qBackground`, hotte `qHood`), ailes, Colosse, Veilleur, lave, rebord, bloc, chaînes et lanterne (`drawLake`, `qLantern`), `renderQ` |
 | `js/44-p3-belfry-logic.js` | Phase III : `R`, `R_T`, `RATK`, `ULT`, `FIN`, `rEnd`, `rStep`, `rFinale` |
