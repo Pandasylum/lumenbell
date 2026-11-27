@@ -399,3 +399,5 @@
 - Au fond de la Fonderie, le Colosse vole devant un haut fourneau, un creuset qui verse sa coulée dans la lave et une chaîne rompue ; la petite lanterne orange du mur pulse tout le combat.
 - Griffes, tornades de feu des ailes, débris et boule de feu ont le même dessin que le Colosse de la phase I ; après une esquive parfaite, l'éclat, l'aile déchirée ou le bloc renvoyé répondent au coup.
 - Quand une attaque finit par un coup de queue, la riposte reste celle de l'attaque de départ ; le rayon et l'éclat arrivent au même endroit.
+- Après la première rage, le creuset du palan avance et cogne le Colosse, le rayon coupe un câble et la lave se verse sur lui ; le creuset revient vide, pendu à un seul câble.
+- À la fin de la deuxième rage (Difficile), le creuset vide pendouille, le cogne, puis tombe sur sa tête et sombre avec lui : il ne reste que le chariot et des bouts de chaîne.
