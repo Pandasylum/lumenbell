@@ -351,7 +351,7 @@ function step(dt){
     p.fired=true;G.ringFx={t:0};G.shake=reduce?0:9;G.flash=.3;dust(PX,DECK);
     tone(120,.4,'sine',.12,-60);tone(800,.5,'sine',.05,400);
   }
-  if(G.ringFx){G.ringFx.t+=dt;if(G.ringFx.t>.8)G.ringFx=null}
+  if(G.ringFx){G.ringFx.t+=dt;if(G.ringFx.t>1.3)G.ringFx=null} /* durée d'affichage seulement : le contre spectaculaire dure 1,3 s */
   if(G.jf){G.jf.t-=dt;if(G.jf.t<=0)G.jf=null}
   if(G.mode==='intro')introStep(dt);
   bossStep(dt);

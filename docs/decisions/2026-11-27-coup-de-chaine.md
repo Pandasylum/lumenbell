@@ -24,3 +24,6 @@ Demande : la boule à pointes ne l'agrippe plus, elle frappe le Veilleur directe
 ## Contre de la 1re rage, phase I (`drawRing`)
 - Les anneaux de lumière à plat sous les pieds (ellipses au ras du pont) sont remplacés : la bague frappe le sol, une lame de lumière en croissant, debout et ouverte vers le Colosse, court sur le pont en grandissant (0,55 s, comme l'onde d'avant), laisse des filets de lumière qui jaillissent du sol, puis éclate sur lui (étoile et éclats de pierre). Instants et effets de jeu inchangés ; le Veilleur ne dessine plus son onde (déjà désactivée côté `fx`), `shared/` n'est pas touché.
 
+## Contre de la 1re rage, version spectaculaire (`drawRing`)
+- Le croissant seul manquait de souffle. Le contre se joue en trois temps sur 1,3 s : (1) la bague frappe le sol (étoile, lames de lumière en éventail, fissure lumineuse qui court dans le tablier, trois croissants décalés) ; (2) à l'arrivée sur le Colosse, au même instant que l'ancien impact (`ringHit`, 0,55 s) : flash, colonne de lumière, lames dans toutes les directions ; (3) ses flammes de rage sont arrachées et montent en s'éteignant, éclats de pierre. Seule la durée d'affichage de `G.ringFx` passe de 0,8 s à 1,3 s (`16-p1-bridge-logic.js`) ; l'instant des dégâts ne change pas.
+
