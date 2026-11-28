@@ -93,49 +93,135 @@ function drawHero3(){
   if(p.s==='act')LB.drawBlock(ctx,PX,DECK,p.t,HD('block').act,{plain:true});
   if(hf)ctx.restore();
 }
-function drawBombs(a){
-  const off=a.off||0,q=a.t-off;let i=0;
-  for(const h of a.hits){
-    if(h.k!=='bomb')continue;
-    const k=i++,L=bombL(k),P=bombPos(k),d=a.t-h.at;
-    if(d>=0){
-      if(d<.45){
-        const f=1-d/.45;
-        ctx.save();ctx.shadowColor='#ff7a2b';ctx.shadowBlur=24;
-        const rr=30+110*(1-f),g=ctx.createRadialGradient(P[0],P[1],4,P[0],P[1],rr);
-        g.addColorStop(0,'rgba(255,240,190,'+(.7*f)+')');g.addColorStop(1,'rgba(255,100,30,0)');
-        ctx.fillStyle=g;ctx.beginPath();ctx.arc(P[0],P[1],rr,0,6.283);ctx.fill();
-        for(let j=0;j<5;j++)qflame(P[0]+(j-2)*13,DECK+4,15,(160-Math.abs(j-2)*28)*f,j,j%2?'rgba(255,196,90,.95)':'rgba(255,100,40,.95)');
-        ctx.restore();
-      }
-      continue;
-    }
-    if(q<L-.55)continue;
-    let y=P[1];
-    if(q<L){const u=(q-(L-.55))/.55;y=-60+(P[1]+60)*ei(u)}
-    drawIce3(P[0],y,true);
-    if(d>-.7){ /* clignotement d'annonce : plus tôt, plus fort, de plus en plus rapide */
-      const u=1+d/.7,pl=.5+.5*Math.sin(R.time*(30+30*u)),rr=40+60*u;
-      const g=ctx.createRadialGradient(P[0],y,2,P[0],y,rr);
-      g.addColorStop(0,'rgba(255,245,210,'+Math.min(1,.35+.65*u*pl)+')');g.addColorStop(1,'rgba(255,120,40,0)');
-      ctx.fillStyle=g;ctx.beginPath();ctx.arc(P[0],y,rr,0,6.283);ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,'+(.6*u*pl)+')';ctx.beginPath();ctx.arc(P[0],y,26,0,6.283);ctx.fill();
-    }
-  }
+/* ===== grêle de braise, bombes, chute de pierres et boule de feu, cri (maquette validée clocher-pluie.js, 28/11) =====
+   Instants du jeu : coups ice, bomb, rock, fire et fall seulement (h.at - a.off en temps de pose a.pt ; bombes : bombPos et bombL). Aplats nets, ni filtre ni ombre portée,
+   aucun calque en combat. Mouvement réduit : flammes, nuée et poussière figées, ni éclats ni gravats, ni secousse. L'état propre au dessin (trou, blocs en main)
+   vit sur l'attaque (a.c3) et repart donc à chaque attaque. Le dôme de la garde reste celui du jeu (LB.drawBlock, garde tenue) ; ici, l'éclat sur le dôme d'un coup paré. */
+const K3P_PIERRE=['#8d90bc','#5d6092','#37375f','#2b2a4c'],K3P_FEU=['#ffe08a','#ff9a35','#d4501f','#8e2418'];
+const k3dome=x=>{const dx=x-PX,r=LB.DOME_FX.r;return [x,DECK+4-Math.sqrt(Math.max(0,r*r-dx*dx))]};   /* point du dôme de la garde au-dessus de x */
+const k3eclats=(...v)=>{if(!reduce)k3shards(...v)};
+/* bloc de dallage arraché */
+function k3bloc(c,x,y,r,rot,seed){const q=k3rnd(seed),p=[];for(let i=0;i<7;i++){const a=i*K3TAU/7,d=r*(.82+q()*.34);p.push([Math.cos(a)*d,Math.sin(a)*d*.86])}
+  c.save();c.translate(x,y);c.rotate(rot);k3poly(c,p.map(v=>[v[0]*1.09,v[1]*1.09]),'#120d24');k3poly(c,p,'#4a4974');k3poly(c,[p[3],p[4],p[5],p[6],[0,-r*.12]],'#8d90bc');k3poly(c,[p[0],p[1],p[2],[0,r*.1]],'#2b2a4c');
+  k3poly(c,[p[4],p[5],[p[5][0]*.72,p[5][1]*.72],[p[4][0]*.74,p[4][1]*.74]],'#cfd8f2');
+  c.strokeStyle='#e9561b';c.lineWidth=2.4;c.beginPath();c.moveTo(-r*.5,r*.1);c.lineTo(-r*.1,-r*.05);c.lineTo(r*.12,r*.34);c.lineTo(r*.5,r*.26);c.stroke();c.restore()}
+/* éclat de braise : roche noire, pointe en avant, traînée découpée */
+function k3braise(c,x,y,r,ang,t,seed){
+  c.save();c.translate(x,y);c.rotate(ang);const s=Math.sin(t*34+seed);
+  [[1,'#8e2418',1],[.72,'#d4501f',.82],[.46,'#ff9a35',.62],[.22,'#ffe08a',.42]].forEach(([w,col,l])=>k3poly(c,[[r*.4,0],[-r*.1,-r*w],[-r*(1.2+2.6*l),-r*w*.5+s*3],[-r*(1+1.4*l),-r*w*.1],[-r*(1.6+3.4*l),r*w*.28-s*3],[-r*(.8+l),r*w*.55],[-r*.1,r*w]],col));
+  k3poly(c,[[r*1.5,0],[r*.2,-r*.62],[-r*.5,-r*.3],[-r*.35,r*.42],[r*.3,r*.56]],'#1a0820');k3poly(c,[[r*1.5,0],[r*.2,-r*.62],[r*.1,-r*.08]],'#a47c8a');
+  c.strokeStyle='#ffc27a';c.lineWidth=2;c.beginPath();c.moveTo(r*.9,r*.1);c.lineTo(r*.15,r*.05);c.lineTo(-r*.2,r*.28);c.stroke();c.restore()}
+function k3impact(c,p,u,r,seed,cols){if(u<0)return;if(u<.2){k3star(c,p[0],p[1],r*(1-u*3),8,.3,'#ffe9a0',.4);k3star(c,p[0],p[1],r*.5*(1-u*4),8,.7,'#fffbea',.4)}k3eclats(c,p[0],p[1],u,16,cols,250,seed,DECK+5)}
+/* gravats qui rebondissent sur les dalles */
+function k3gravats(c,x,u,seed,n){if(reduce||u<0||u>2.2)return;const q=k3rnd(seed);c.save();c.globalAlpha=u<1.5?1:1-(u-1.5)/.7;
+  for(let i=0;i<n;i++){const dir=i%2?1:-1,vx=dir*(60+q()*200),vy=-(80+q()*230),y0=DECK-110+q()*40,r=6+q()*9,tm=Math.min(u,(-vy+Math.sqrt(vy*vy+2*900*(DECK+2-y0)))/900),rot=q()*6+tm*8*dir;
+    k3bloc(c,x+vx*tm,Math.min(DECK+2-r*.3,y0+vy*tm+450*tm*tm),r,rot,seed+i*7)}c.restore()}
+function k3poussiere(c,x,y,u,seed,n,al){if(u<0||u>.9)return;const q=k3rnd(seed);for(let i=0;i<n;i++){const k=(i/(n-1)-.5)*2,px=x+k*(24+u*120)+q()*14,py=y-q()*14-u*36,r=(9+q()*13)*(1+u*1.2),p=[];for(let j=0;j<7;j++){const a=j*.9+i;p.push([px+Math.cos(a)*r*(j%2?.8:1.2),py+Math.sin(a)*r*.6])}k3poly(c,p,'rgba(150,140,186,'+(al||.75)*(1-u/.9)+')')}}
+function k3colonne(c,x,u,t){if(u<0||u>.55)return;const f=u<.08?u/.08:1-(u-.08)/.47;
+  for(let j=-2;j<=2;j++)k3flame(c,x+j*17,DECK+5,17-Math.abs(j)*2,(155-Math.abs(j)*40)*f,j*13,t*19+j*2)}
+/* le coup paré frappe le dôme de la garde : un éclat bleu court sur son bord */
+function k3domeTouche(c,p,d,h){if(h.ok!==true||d<=0||d>=.5)return;const an=Math.atan2(p[1]-DECK-4,p[0]-PX);
+  c.strokeStyle='rgba(190,232,255,'+(1-d*2)+')';c.lineWidth=7*(1-d*2)+1;c.beginPath();c.arc(PX,DECK+4,LB.DOME_FX.r,an-.3-d,an+.3+d);c.stroke()}
+/* ---- 1. grêle de braise : il appelle le feu au ciel, qui retombe en pluie oblique sur la garde ---- */
+function k3nuee(c,t,k){if(k<=.02)return;const q=k3rnd(41),cx=PX+150;c.save();c.globalAlpha=k;
+  /* nuée de cendre : lourds rouleaux sombres, le dessous éclairé par la braise */
+  const rouleau=(x,y,r,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,r,r*.52,0,0,K3TAU);c.fill()};
+  const N=[];for(let i=0;i<13;i++){const u=i/12;N.push([cx-210+u*420+Math.sin(t*1.8+i*2.1)*8,30+q()*24+Math.sin(u*Math.PI)*10+Math.sin(t*2.6+i)*3,38+q()*26+Math.sin(u*Math.PI)*18])}
+  N.forEach(([x,y,r])=>rouleau(x,y+9,r*.96,'#d4501f'));N.forEach(([x,y,r])=>rouleau(x,y+4,r*.97,'#6a2438'));N.forEach(([x,y,r])=>rouleau(x,y-3,r,'#2c1534'));N.forEach(([x,y,r],i)=>{if(i%2)rouleau(x-6,y-16,r*.66,'#46234a')});
+  for(let i=0;i<9;i++){const [x,y,r]=N[(i*5+2)%13];if(Math.sin(t*9+i*2.7)>.1)k3flame(c,x,y+r*.52+6,5,-14-(i%3)*5,3,t*13+i)}
+  for(let i=0;i<14;i++){const x=cx+(q()-.5)*330,y=76+q()*30+((t*70+i*23)%34);k3poly(c,[[x,y-7],[x+3,y],[x,y+4],[x-3,y]],i%2?'#ffe08a':'#ff9a35')}c.restore()}
+function k3grele(c,a,H,q,off,tm){const fin=H[H.length-1].at-off,M=COL3.mouth;
+  const jk=k3bump(q,.3,.62,.12);if(jk>.02&&M)COLFX.jet(c,M,[k3l(M[0],PX+250,jk),k3l(M[1],66,jk)],62,tm,1);
+  k3nuee(c,tm,k3ez((q-.45)/.3)*(1-k3ez((q-fin-.1)/.4)));
+  const X=[34,-30,86,6,56],from=[250,-250];
+  H.forEach((h,i)=>{const d=a.t-h.at,p=k3dome(PX+X[i%5]),O=[p[0]+from[0]*.92,p[1]+from[1]*.92];
+    /* petits éclats qui l'accompagnent, plantés dans la dalle autour de la garde */
+    for(let j=0;j<2;j++){const e=(d+.46-j*.07)/.5,gx=PX+(j?196:-168)+i*13*(j?1:-1);if(e>0&&e<1)k3braise(c,k3l(gx+230,gx,e*e*.4+e*.6),k3l(30,DECK-4,e*e*.4+e*.6),7,2.34,tm,i*3+j);else if(e>=1&&e<2.4){k3flame(c,gx,DECK+4,8,30*(1-(e-1)/1.4),-5,tm*17+i);k3eclats(c,gx,DECK,(e-1)*.5,6,K3P_FEU,150,60+i*3+j,DECK+5)}}
+    if(d>=-.55&&d<0){const u=(d+.55)/.55,v=u*u*.5+u*.5;k3braise(c,k3l(O[0],p[0],v),k3l(O[1],p[1],v),17,Math.atan2(p[1]-O[1],p[0]-O[0]),tm,i)}
+    k3impact(c,p,d,50,11+i,['#ffe08a','#ff9a35','#2c1534','#fff6d8']);
+    k3domeTouche(c,p,d,h);
+  });
+}
+/* ---- 2. bombes de braise (Difficile) : cœurs de braise crachés en cloche, posés, ils clignotent puis éclatent ---- */
+function k3coeur(c,x,y,rot,chaud,t,seed){c.save();c.translate(x,y);c.rotate(rot);
+  const p=[[-23,-4],[-14,-22],[8,-25],[24,-9],[20,15],[-2,24],[-21,15]];
+  k3poly(c,p.map(v=>[v[0]*1.12,v[1]*1.12]),'#12040e');k3poly(c,p,'#2c1534');k3poly(c,[p[0],p[1],p[2],[-2,-6]],'#6a3a50');k3poly(c,[p[3],p[4],p[5],[2,6]],'#1a0820');
+  const w=2.6+5*chaud;[[w+3,'#d4501f'],[w,'#ff9a35'],[w*.4,'#fff6d8']].forEach(([lw,col])=>{c.strokeStyle=col;c.lineWidth=lw;c.lineJoin='miter';c.beginPath();c.moveTo(-18,-8);c.lineTo(-5,-1);c.lineTo(-9,12);c.moveTo(-5,-1);c.lineTo(7,-8);c.lineTo(8,-21);c.moveTo(7,-8);c.lineTo(18,8);c.moveTo(-5,-1);c.lineTo(5,18);c.stroke()});
+  c.restore();k3flame(c,x-6,y-20,7,16+26*chaud+5*Math.sin(t*14+seed),-6,t*15+seed)}
+function k3bombes(c,a,H,q,tm){const M=COL3.mouth||[R.bx-84,DECK-228];
+  H.forEach((h,i)=>{const B=bombPos(i),Lt=bombL(i),d=a.t-h.at,u=(q-(Lt-.55))/.55,y=DECK-20;
+    if(d>=0){k3impact(c,[B[0],y],d,95,31+i,['#ffe08a','#ff9a35','#d4501f','#2c1534']);k3colonne(c,B[0],d,tm);k3poussiere(c,B[0],DECK,d,70+i,6,.6);return}
+    if(u<0)return;
+    if(u<1){const x=k3l(M[0],B[0],u),yy=k3l(M[1],y,u)-170*Math.sin(Math.PI*u);
+      for(let j=5;j>0;j--){const v=u-j*.05;if(v>0)k3star(c,k3l(M[0],B[0],v),k3l(M[1],y,v)-170*Math.sin(Math.PI*v),16-j*2,5,j+tm*9,'rgba(255,140,50,'+(.8-j*.13)+')',.5)}
+      k3coeur(c,x,yy,u*9,.4,tm,i);return}
+    /* posée : elle clignote de plus en plus vite (instants de l'ancien clignotement) ; mouvement réduit : lueur fixe */
+    const w=d>-.7?1+d/.7:0,pl=reduce?.75:.5+.5*Math.sin(R.time*(30+30*w));
+    c.fillStyle='rgba(233,86,27,'+(.2+.35*w)+')';c.beginPath();c.ellipse(B[0],DECK+3,24+16*w,5+3*w,0,0,K3TAU);c.fill();
+    if(w>0){k3star(c,B[0],y,28+30*w*(.55+.45*pl),10,tm*2,'rgba(255,154,53,'+(.35+.5*w*pl)+')',.55);if(pl>.6)k3star(c,B[0],y,22+22*w,10,-tm*2,'rgba(255,246,216,'+(.5*w+.2)+')',.55)}
+    k3coeur(c,B[0],y+(reduce?0:Math.sin(tm*50+i)*2*w),reduce?0:Math.sin(tm*44)*.08*w,w*pl,tm,i)});
+}
+/* ---- 3. chute de pierres : il arrache un bloc du dallage, le hisse à deux mains et le lance haut ; le bloc retombe. Difficile : boule de feu crachée ---- */
+function k3trou(c,x,u){if(u<0)return;const a=u<2?1:1-k3cl((u-2)/.6);if(a<=0)return;c.save();c.globalAlpha=a;
+  k3poly(c,[[x-46,DECK+2],[x-24,DECK-4],[x+6,DECK+1],[x+30,DECK-3],[x+48,DECK+5],[x+22,DECK+13],[x-10,DECK+9],[x-34,DECK+12]],'#12040e');
+  c.strokeStyle='#e9561b';c.lineWidth=3;c.beginPath();c.moveTo(x-34,DECK+6);c.lineTo(x-8,DECK+4);c.lineTo(x+14,DECK+8);c.lineTo(x+36,DECK+5);c.moveTo(x-46,DECK+2);c.lineTo(x-74,DECK+9);c.moveTo(x+48,DECK+5);c.lineTo(x+70,DECK-1);c.stroke();
+  for(let i=0;i<5;i++)k3poly(c,[[x-62+i*31,DECK+3],[x-52+i*31,DECK-8-(i%3)*5],[x-42+i*31,DECK+3]],i%2?'#5d6092':'#37375f');c.restore()}
+function k3pierres(c,a,H,tm){const k=COL3.k,M=COL3.mouth||[R.bx-84,DECK-228],S=a.c3;
+  if(S.trou==null)S.trou=R.bx-190;const x0=S.trou;
+  let n=0;
+  H.forEach(h=>{const d=a.t-h.at;
+    if(h.k==='fire'){
+      if(d>-.72&&d<-.45)k3star(c,M[0],M[1],46*k3cl((d+.72)/.27),10,tm*7,'#ff9a35',.5);
+      if(d>=-.45&&d<0){const u=k3ez((d+.45)/.45),p=k3dome(PX+80),x=k3l(M[0],p[0],u),y=k3l(M[1],p[1],u),an=Math.atan2(p[1]-M[1],p[0]-M[0]);
+        k3braise(c,x,y,26,an,tm,9);k3star(c,x,y,40,11,tm*13,'#ff9a35',.6);k3star(c,x,y,24,9,-tm*11,'#ffe08a',.6);k3star(c,x,y,11,8,tm*9,'#fffbea',.6)}
+      if(d>=0){const p=k3dome(PX+80);k3impact(c,p,d,96,55,['#ffe08a','#ff9a35','#d4501f','#6a3a50']);k3colonne(c,PX+150,d*1.1,tm);k3colonne(c,PX-132,d*1.3,tm);k3domeTouche(c,p,d,h)}
+      return}
+    if(h.k!=='rock')return;const i=n++,s=d+.95;if(s<0)return;
+    k3trou(c,x0+i*26,s-.18);
+    k3poussiere(c,x0+i*26,DECK,s-.18,20+i,8);k3eclats(c,x0+i*26,DECK-4,s-.18,14,K3P_PIERRE,260,80+i,DECK+5);
+    const main=k?[(k.loin[0]+k.proche[0])/2-8,(k.loin[1]+k.proche[1])/2-18]:[R.bx-100,DECK-260];
+    const B=k3dome(PX+(i?58:22));
+    if(d>=-.78&&d<-.4){const v=k3ez((d+.78)/.14);k3bloc(c,k3l(x0+i*26,main[0],v),k3l(DECK-8,main[1],v),34,reduce?0:Math.sin(tm*30)*.04,3+i);S['m'+i]=main;
+      if(!reduce)for(let j=0;j<4;j++)k3poly(c,[[main[0]-24+j*15,main[1]+26+((tm*260+j*19)%44)],[main[0]-19+j*15,main[1]+34+((tm*260+j*19)%44)],[main[0]-26+j*15,main[1]+36+((tm*260+j*19)%44)]],'#5d6092')}   /* terre qui s'en égrène */
+    if(d>=-.4&&d<0){const u=(d+.4)/.4,p0=S['m'+i]||main,arc=-150-60*i,at=w=>[k3l(p0[0],B[0],w),k3l(p0[1],B[1],w)+arc*Math.sin(Math.PI*w)*(1-.25*w)];
+      for(let j=4;j>0;j--){const w=u-j*.07;if(w>0){const p=at(w);k3poly(c,[[p[0]-9+j,p[1]],[p[0],p[1]-9+j],[p[0]+9-j,p[1]],[p[0],p[1]+9-j]],'rgba(150,140,186,'+(.75-j*.14)+')')}}
+      const p=at(u);k3bloc(c,p[0],p[1],34,u*7,3+i)}
+    if(d>=0){k3impact(c,B,d,78,41+i,['#cfd8f2','#8d90bc','#37375f','#ff9a35']);k3gravats(c,B[0],d,90+i*11,7);k3poussiere(c,B[0],B[1]+20,d,33+i,7,.7);k3domeTouche(c,B,d,h)}
+  });
+}
+/* ---- 4. cri : la voix ébranle le Clocher, la maçonnerie tombe droit sur le Veilleur ---- */
+function k3cri(c,a,H,q,off,tm){const fin=H[H.length-1].at-off,M=COL3.mouth||[R.bx-84,DECK-228];
+  const k=k3bump(q,.32,fin,.14);
+  if(k>.02){const dir=Math.atan2(-.18,-1);c.save();c.lineCap='round';
+    for(let i=0;i<5;i++){const v=((q-.32)*1.7+i/5)%1,r=26+v*340;c.strokeStyle='rgba(255,'+(150+i*14)+',80,'+((1-v)*.8*k)+')';c.lineWidth=10*(1-v)+2;c.beginPath();c.arc(M[0],M[1],r,dir-.62,dir+.62);c.stroke();
+      c.lineWidth=5*(1-v)+1;c.beginPath();c.arc(M[0],M[1],r*.8,-1.9,-1.25);c.stroke()}c.restore();
+    /* poussière et gravats qui ruissellent de la voûte */
+    const r=k3rnd(12);for(let i=0;i<46;i++){const x=r()*W,s=3+r()*5,y=((tm*(240+r()*260)+r()*500)%(DECK+30))-30;k3poly(c,[[x,y-s*2.4],[x+s*.6,y],[x,y+s],[x-s*.6,y]],i%3?'rgba(150,140,186,'+.6*k+')':'rgba(207,216,242,'+.8*k+')')}}
+  /* le dallage se fend sous lui */
+  const fk=k3ez((q-.36)/.3),fa=1-k3ez((q-fin-.8)/.8);if(fk>0&&fa>0)k3fente(c,R.bx-150,PX+150,fk*.9,fa);
+  if(q>.36&&q<1)k3poussiere(c,R.bx-90,DECK,q-.36,5,10);
+  const many=H.length>1;
+  H.forEach((h,i)=>{const d=a.t-h.at,x=PX+(many?[6,38,-26,52,-4][i%5]:14),top=k3dome(x),r=many?30:44;
+    if(d>=-.9&&d<0){const w=k3cl((d+.9)/.9);c.fillStyle='rgba(8,4,22,'+(.25+.35*w)+')';c.beginPath();c.ellipse(x,DECK+3,14+r*w,4+3*w,0,0,K3TAU);c.fill();
+      if(d<-.6){const v=(d+.9)/.3;for(let j=0;j<6;j++){const px=x-30+j*12,py=v*70+(j*23)%40;k3poly(c,[[px,py],[px+3,py+10],[px-3,py+10]],'#cfd8f2')}}}
+    if(d>=-.6&&d<0){const u=(d+.6)/.6,y=k3l(-70,top[1],u*u);
+      for(let j=-1;j<=1;j++)k3poly(c,[[x+j*r*.6-3,y-r*.4],[x+j*r*.6+3,y-r*.4],[x+j*r*.6,y-r*.4-(50+70*u)*(j?.6:1)]],'rgba(207,216,242,.55)');
+      k3bloc(c,x,y,r,.3+u*(i%2?2.4:-2),60+i);if(!many){k3bloc(c,x-r*1.1,y-r*.7,r*.4,u*5,71);k3bloc(c,x+r*1.05,y-r*1.1,r*.34,-u*6,72)}}
+    if(d>=0){k3impact(c,top,d,r*2,61+i,['#cfd8f2','#8d90bc','#37375f','#2b2a4c']);k3gravats(c,x,d,130+i*13,many?5:9);k3poussiere(c,x,top[1]+24,d,43+i,8,.7);k3domeTouche(c,top,d,h)}
+  });
 }
 function drawHits3a(){
-  const a=R.atk;if(!a)return;
-  if(a.h&&a.kind==='avalanche'){drawBombs(a);return}
-  if(a.kind==='avalanche'){
-    let ii=0;
-    a.hits.forEach(h=>{
-      if(h.k!=='ice')return;
-      const i=ii++,d=a.t-h.at;
-      if(d<-.55||d>0)return;
-      const u=(d+.55)/.55,x=PX+104+(i%3)*14,y=-60+(GUARD[1]+10+60)*ei(u);
-      drawIce3(x,y,true);
-    });
-  }
+  const a=R.atk;if(!col3PluieA(a)||R.mode!=='play')return;
+  const H=col3PluieH(a);if(!H.length)return;
+  const c=ctx,off=a.off||0,q=a.pt,tm=reduce?0:R.time;if(!a.c3)a.c3={};
+  /* secousses de la maquette : à chaque impact, et pendant le cri (rendu seulement ; nulles en mouvement réduit) */
+  if(!reduce){H.forEach(h=>{if(!h.c3s&&a.t>=h.at){h.c3s=1;R.shake=Math.max(R.shake,h.k==='bomb'||h.k==='fall'?11:8)}});
+    if(a.kind==='roar'&&q>.34&&a.t<H[H.length-1].at)R.shake=Math.max(R.shake,4)}
+  c.save();
+  if(a.kind==='avalanche'){if(a.h)k3bombes(c,a,H,q,tm);else k3grele(c,a,H,q,off,tm)}
+  else if(a.kind==='rocks')k3pierres(c,a,H,tm);
+  else k3cri(c,a,H,q,off,tm);
+  c.restore();
 }
 /* débris arraché (corne, bec d'enclume) : il part de p (point du corps au moment du coup), tombe, roule et s'efface ; u = secondes depuis la cassure */
 function col3Debris(c,id,u,p,dessin,cols){
@@ -246,7 +332,7 @@ function drawMarteauOnde(d){
 }
 function drawHitsX(){
   const a=R.atk;if(!a)return;
-  let ri=0,fi=0;
+  let fi=0;
   for(const h of a.hits){
     const d=a.t-h.at;
     if(h.k==='blast'){
@@ -254,31 +340,6 @@ function drawHitsX(){
       if(h.flap){if(d>-.22&&!h.sw){h.sw=true;tone(200,.2,'sawtooth',.06,-160)}drawQueueFx(a,h,d,fi++)}   /* coup de queue : sa vraie queue (pose), ici la traînée et l'impact */
       else if(gsh)drawMarteauOnde(d);   /* Difficile : la frappe du marteau reste, l'explosion devient une onde de flammes */
       else drawOnde(a,h,d);
-    }else if(h.k==='fire'&&d>-.7&&d<.1){
-      const M=COL3.mouth||[R.bx-84,DECK-228],tg=[GUARD[0]+10,GUARD[1]],u=clamp01((d+.45)/.45);
-      ctx.save();ctx.shadowColor='#ff7a2b';ctx.shadowBlur=22;
-      if(d<-.45){const k=(d+.7)/.25;const g=ctx.createRadialGradient(M[0],M[1],2,M[0],M[1],40*k);g.addColorStop(0,'rgba(255,235,170,.9)');g.addColorStop(1,'rgba(255,100,30,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(M[0],M[1],40*k,0,6.283);ctx.fill()}
-      else{
-        const p=lerp2(M,tg,es(u));
-        for(let i=5;i>=1;i--){const pp=lerp2(M,tg,es(Math.max(0,u-i*.06)));ctx.fillStyle='rgba(255,140,50,'+(.5-i*.08)+')';ctx.beginPath();ctx.arc(pp[0],pp[1],22-i*2.5,0,6.283);ctx.fill()}
-        const g=ctx.createRadialGradient(p[0],p[1],2,p[0],p[1],28);g.addColorStop(0,'#fff6d0');g.addColorStop(.45,'#ffb04a');g.addColorStop(1,'rgba(255,90,30,0)');
-        ctx.fillStyle=g;ctx.beginPath();ctx.arc(p[0],p[1],28,0,6.283);ctx.fill();
-      }
-      ctx.restore();
-    }else if(h.k==='fall'&&d>-.9&&d<.15){
-      const gx=heroFlip()?PX-116:GUARD[0],y0=-50,y1=GUARD[1]-18;
-      ctx.save();
-      if(d<0){const w=clamp01((d+.9)/.5);ctx.fillStyle='rgba(255,120,50,'+(.15+.25*w)+')';ctx.beginPath();ctx.ellipse(gx,DECK+3,14+16*w,4,0,0,6.283);ctx.fill()}
-      if(d>-.6&&d<.08){const u=clamp01((d+.6)/.6),y=y0+(y1-y0)*u*u;qrock(gx,y,26,R.time*6,true)}
-      ctx.restore();
-    }else if(h.k==='rock'){
-      const idx=(ri%2===0)?1:0;ri++;
-      if(d>=-.95&&d<-.45){const u=es(clamp01((d+.95)/.35));qrock(R.bx+(idx?40:-40),DECK-375,10+16*u,R.time*3,true)}
-      else if(d>=-.45&&d<.05){
-        const u=clamp01((d+.45)/.45),p0=[R.bx-190,DECK-250],p1=[GUARD[0]+20,GUARD[1]],q=lerp2(p0,p1,u);q[1]-=70*Math.sin(Math.PI*u);
-        {const T=[];for(let i=1;i<=5;i++){const uu=Math.max(0,u-i*.06),t2=lerp2(p0,p1,uu);t2[1]-=70*Math.sin(Math.PI*uu);T.push(t2)}qrockTrail(T,22)}
-        qrock(q[0],q[1],26,R.time*10,true);
-      }
     }
   }
 }

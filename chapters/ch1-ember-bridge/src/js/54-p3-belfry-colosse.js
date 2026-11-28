@@ -250,6 +250,35 @@ function col3Life(o,t){
   o.off=[o.off[0]+2*s(t*1.3),o.off[1]+3*s(t*1.7+1)];o.nn=[o.nn[0]+2*s(t*1.1+2),o.nn[1]+3*s(t*1.5)];
   o.tete+=.06*s(t*.8)+.03*s(t*2.3);o.jaw+=Math.max(0,s(t*2.2))*2.5;o.yeux+=.06*s(t*3.1);o.wa+=.05*s(t*1.3);
 }
+/* ===== grêle de braise, bombes, chute de pierres et boule de feu, cri (maquette validée clocher-pluie.js, 28/11) =====
+   Poses calées sur les coups du jeu en temps de pose (a.pt, h.at - a.off ; rythme des bombes : bombL en a.pt). Seuls les coups ice, bomb, rock, fire et fall comptent :
+   le cri et les coups de queue d'une rage gardent leur propre pose, et la fin de l'attaque ne les compte pas. */
+const K3_PLUIE=['ice','bomb','rock','fire','fall'];
+const col3PluieA=a=>!!a&&(a.kind==='avalanche'||a.kind==='rocks'||a.kind==='roar');
+const col3PluieH=a=>a.hits.filter(h=>K3_PLUIE.includes(h.k));
+const k3keysL=(t,K)=>{if(t<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(t<=K[i][0])return k3mix(K[i-1][1],K[i][1],k3ez((t-K[i-1][0])/(K[i][0]-K[i-1][0])));return K[K.length-1][1]};
+const K3_APPEL={...K3_DOS,lean:.24,tete:.46,jaw:16,off:[-96,34],nn:[52,-70],sx:1.07,yeux:1,ws:1.34,wa:-.35},   /* il appelle le feu au ciel */
+  K3_INSPIRE={...K3_DOS,lean:-.2,drop:18,tete:-.18,jaw:3,off:[-40,60],nn:[-20,10],ws:.92},
+  K3_PLONGE={...K3_DOS,lean:-.46,drop:30,plie:.7,tete:-.22,off:[-118,150],nn:[-196,62],jaw:6,yeux:.6},   /* il arrache un bloc du dallage */
+  K3_HAUT={...K3_DOS,lean:.24,tete:.14,off:[8,-118],nn:[-56,-222],jaw:12,yeux:.8,ws:1.2},                   /* le bloc hissé à deux mains */
+  K3_JETTE={...K3_DOS,lean:-.36,drop:14,tete:-.1,off:[-150,6],nn:[-218,-92],jaw:9,yeux:.8},
+  K3_CRACHE={...K3_DOS,lean:-.26,tete:-.16,jaw:15,off:[-84,60],nn:[20,-10],yeux:1},
+  K3_ARC={...K3_DOS,lean:-.34,drop:26,plie:.55,tete:-.3,jaw:5,off:[-70,96],nn:[-34,26],yeux:.9,ws:.9},       /* il se ramasse avant le cri */
+  K3_CRIP={...K3_DOS,lean:-.2,drop:10,tete:.06,jaw:17,off:[-116,10],nn:[66,-40],sx:1.08,yeux:1,ws:1.42,wa:-.5};
+function col3Pluie(a){
+  const q=a.pt,off=a.off||0,H=col3PluieH(a),D=K3_DOS;if(!H.length)return null;
+  const fin=H[H.length-1].at-off;let o;
+  if(a.kind==='avalanche'&&!a.h)o=k3keysL(q,[[0,D],[.14,K3_INSPIRE],[.36,K3_APPEL],[fin-.15,K3_APPEL],[fin+.45,D]]);
+  else if(a.kind==='avalanche'){const K=[[0,D]];H.forEach((h,i)=>{const t0=bombL(i)-.55;K.push([t0-.17,K3_INSPIRE],[t0+.04,K3_CRACHE],[t0+.14,K3_CRACHE])});
+    K.push([bombL(H.length-1)-.55+.7,D]);K.sort((x,y)=>x[0]-y[0]);o=k3keysL(q,K)}
+  else if(a.kind==='rocks'){const K=[[0,D]];H.forEach(h=>{const at=h.at-off;
+      if(h.k==='rock')K.push([at-.82,K3_PLONGE],[at-.72,K3_PLONGE],[at-.52,K3_HAUT],[at-.45,K3_HAUT],[at-.3,K3_JETTE],[at-.14,K3_JETTE]);
+      else K.push([at-.72,K3_INSPIRE],[at-.45,K3_CRACHE],[at-.05,K3_CRACHE])});
+    K.push([fin+.45,D]);K.sort((x,y)=>x[0]-y[0]);o=k3keysL(q,K)}
+  else{o=k3keysL(q,[[0,D],[.12,K3_ARC],[.24,K3_ARC],[.38,K3_CRIP],[fin-.1,K3_CRIP],[fin+.45,D]]);
+    const cri=k3bump(q,.32,fin,.14);if(!reduce&&cri>0){o.dx=(o.dx||0)+Math.sin(R.time*61)*3.5*cri;o.tete+=Math.sin(R.time*37)*.05*cri}}   /* la voix le secoue */
+  return o;
+}
 function col3Atk(a){
   const q=a.pt,K=(a.cf!=null&&q>=a.cf)?'breath':a.kind;
   if(q<0)return null;
@@ -260,6 +289,7 @@ function col3Atk(a){
   if(K==='breath')return col3Breath(a);
   if(a.kind==='claws')return col3Claws(a);
   if(a.kind==='waves')return col3Waves(a);
+  if(col3PluieA(a))return col3Pluie(a);
   return null;
 }
 /* pose finale du Colosse pour cette image : { o: paramètres COLOSSE, ported: pose de la maquette } */
@@ -280,7 +310,7 @@ function col3Pose(ob){
   else if(cp){o=cp;COL3.last=cp;COL3.lastT=t;po=cp}
   else if(!a&&COL3.last&&R.mode==='play'&&t>=COL3.lastT&&t-COL3.lastT<.5)o=k3mix(COL3.last,fb,k3ez((t-COL3.lastT)/.45));   /* fin d'attaque : retour doux à la garde */
   else o=fb;
-  if(po&&!(a&&a.hits.some(h=>h.k==='wave'))){o.wa=ob.wa;o.ws=ob.ws}
+  if(po&&!(a&&(a.hits.some(h=>h.k==='wave')||(col3PluieA(a)&&a.pt>=0)))){o.wa=ob.wa;o.ws=ob.ws}   /* grêle, pierres et cri : les ailes de la maquette */
   const on=a&&!fin?col3Onde(a):null;
   if(on){const pw=po?k3ez((on.m-2.25)/.35):0;o=rk>.02?k3mix(on,col3Cri(fb,a),rk*.35):on;if(pw>0)o=k3mix(o,po,pw);COL3.last=o;COL3.lastT=t;po=o}   /* l'attaque qui suit reprend la main en douceur */   /* onde de flammes : il aspire le feu, abat ses poings */
   const qz=a&&!fin?col3Queue(a,o,ob):null;

@@ -423,3 +423,6 @@
 - Sa rage se brise sous la cloche et la foudre : la première foudre fait céder l'enclume de son épaule ; ses ailes brûlent et retombent quand il reprend vie, et la foudre de la seconde vie lui brise la grande corne.
 - Le sommet du Clocher change de visage : lune rose au-dessus d'une mer de nuages, tours de l'ordre perchées sur leurs éperons, brumes qui dérivent, beffroi de pierre enneigé et sa grande cloche dorée.
 - Les dalles fuient vers le vide entre les créneaux ; le fanal attend, éteint, sur son socle au premier plan, jusqu'à ce que le Veilleur l'allume à la fin.
+- Au Clocher, le Colosse appelle une nuée de cendre qui crache une pluie de braise ; en Difficile, il crache des cœurs de braise qui clignotent puis éclatent en colonnes de feu.
+- Il arrache des blocs du dallage et les lance à deux mains ; son cri fait trembler le Clocher et la maçonnerie tombe droit sur le Veilleur.
+- Au loin, les tours de l'ordre ont la silhouette des flèches du pont, sous une lune plus sombre.
