@@ -9,7 +9,7 @@ const C3=1.1;        /* unités de pose -> monde (comme la phase I) */
 const C3X=-20;       /* le repère du Colosse est à R.bx-20 : son cœur reste là où visent les contres */
 const K3TAU=6.283185307179586;
 const KNEEL3=76;     /* final : de combien le buste descend quand le Colosse met un genou à terre (px) */
-const k3cl=u=>u<0?0:u>1?1:u,k3ez=u=>{u=k3cl(u);return u*u*(3-2*u)},k3l=(a,b,u)=>a+(b-a)*u;
+const k3cl=clamp01,k3ez=u=>es(clamp01(u)),k3l=(a,b,u)=>a+(b-a)*u;
 const k3poly=COLFX.poly,k3star=COLFX.etoile,k3shards=COLFX.eclats,k3flame=COLFX.flamme;
 const k3rnd=s=>()=>(s=(s*16807)%2147483647)/2147483647;
 const k3mix=(p,q,u)=>{const o={};for(const k in p){const a=p[k],b=k in q?q[k]:a;o[k]=Array.isArray(a)?a.map((v,i)=>v+(b[i]-v)*u):typeof a==='number'?a+(b-a)*u:b}return o};
@@ -374,7 +374,6 @@ function col3Contre(fb){
   if(S.k!=='bell')o=k3mix(o,fb,k3ez((u-(end-.3))/.3));   /* retour à la garde */
   return o}
 /* ---- effets portés de la maquette (aplats nets : ni flou ni ombre portée ; mouvement réduit : plus d'éclats ni de vacillement) ---- */
-function k3glow(c,x,y,r,rgb,al){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba('+rgb+','+al+')');g.addColorStop(.35,'rgba('+rgb+','+al*.4+')');g.addColorStop(1,'rgba('+rgb+',0)');c.save();c.globalCompositeOperation='screen';c.fillStyle=g;c.fillRect(x-r,y-r,2*r,2*r);c.restore()}
 function k3contact(c,p,u,r,seed,cols){if(u<0)return;cols=cols||['#ffe9a0','#dcae5c','#fff6d8'];
   if(u<.2){k3star(c,p[0],p[1],r*(1-u*3),8,.3,'#ffe9a0',.4);k3star(c,p[0],p[1],r*.5*(1-u*4),8,.7,'#fffbea',.4)}
   if(!reduce)k3shards(c,p[0],p[1],u,18,cols,250,seed,DECK+5)}
@@ -407,7 +406,7 @@ function k3tornade(c,x,y,h,w,t,a){if(h<6)return;w*=1.5;h*=1.12;c.save();c.global
   c.restore()}
 /* geyser : colonne de feu qui crève les dalles (u : 0 à 1 sur toute sa vie) */
 function k3geyser(c,x,u,t){if(u<0||u>1)return;const monte=k3ez(u/.14),tombe=k3ez((u-.72)/.28),H=330*monte*(1-tombe*.85),W=62*(1-tombe*.6);if(H<4)return;const y=DECK+4;
-  k3glow(c,x,y-90,230,'255,130,50',.55*(1-tombe));
+  colGlow(c,x,y-90,230,'255,130,50',.55*(1-tombe));
   [[1,'#8e2418',1],[.76,'#d4501f',.94],[.52,'#ff9a35',.86],[.28,'#ffe08a',.74],[.1,'#fff6d8',.55]].forEach(([w,col,hk],j)=>{const g=[],d=[],N=11;
     for(let i=0;i<=N;i++){const v=i/N,wd=W*w*(1.35-.75*v+.5*v*v)*(i%2?1.16:.82),q=Math.sin(t*23-i*1.7+j)*9*v;g.push([x-wd+q,y-v*H*hk]);d.push([x+wd+q,y-v*H*hk-9])}
     k3poly(c,[...g,[x+Math.sin(t*17+j)*14,y-H*hk-40*w*monte],...d.reverse()],col)});
@@ -460,7 +459,7 @@ function k3acouphene(c,p,k,tm){if(k<=.02)return;c.save();c.globalAlpha=k;c.lineC
 function k3eclair(c,a,b,seed,n,amp,w){const r=k3rnd(seed),p=[a];for(let i=1;i<n;i++)p.push([k3l(a[0],b[0],i/n)+(r()-.5)*amp,k3l(a[1],b[1],i/n)+(r()-.5)*amp*.3]);p.push(b);c.lineJoin='miter';c.lineCap='butt';
   [[w*3.2,'rgba(140,160,255,.38)'],[w*1.7,'#b9c6ff'],[w,'#ffffff']].forEach(([lw,col])=>{c.strokeStyle=col;c.lineWidth=lw;c.beginPath();p.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.stroke()});return p}
 function k3foudre(c,u,p){if(u<0||u>.75)return;const s=reduce?61:61+((u*22)|0),a=u<.42?1:1-(u-.42)/.33;c.save();c.globalAlpha=a;
-  k3glow(c,p[0],p[1],300,'170,190,255',.7*a);
+  colGlow(c,p[0],p[1],300,'170,190,255',.7*a);
   const tr=k3eclair(c,[p[0]+46,-30],p,s,9,84,17*(u<.3?1:.6));
   [2,3,5,6].forEach((i,j)=>{const d=tr[i],sens=j%2?1:-1;k3eclair(c,d,[d[0]+sens*(90+j*28),d[1]+70+j*14],s+7+j,5,34,3.6)});
   k3eclair(c,[p[0]-120,-30],[p[0]-26,p[1]+30],s+31,8,70,5);
@@ -478,7 +477,7 @@ function k3arcs(c,pts,al,tm){if(al<=.02)return;c.save();c.globalAlpha=al;const r
 /* l'orage : la nuit tombe, des nuées roulent au-dessus du Colosse (k : 0 à 1) */
 function k3orage(c,tm,k){if(k<=.01)return;c.save();c.fillStyle='rgba(6,6,30,'+.6*k+')';c.fillRect(-40,-40,W+80,H+80);const x0=R.bx-170;
   for(let i=0;i<9;i++){const r=k3rnd(140+i),x=x0+Math.cos(tm*1.8+i*.7)*(90+i*22),y=-6+i%3*22+Math.sin(tm*2.4+i)*6,w=110+r()*90;k3poly(c,[[x-w,y],[x-w*.6,y-26],[x-w*.1,y-18],[x+w*.3,y-34],[x+w*.8,y-12],[x+w,y+4],[x+w*.4,y+24],[x-w*.3,y+14],[x-w*.7,y+22]],'rgba('+(i%2?'28,24,60':'48,40,86')+','+.85*k+')')}
-  if(!reduce&&Math.sin(tm*31)>.7)k3glow(c,x0+40,20,170,'170,190,255',.4*k);c.restore()}
+  if(!reduce&&Math.sin(tm*31)>.7)colGlow(c,x0+40,20,170,'170,190,255',.4*k);c.restore()}
 /* la grande corne brisée qui tombe et roule au sol (x, y : son point ; rot : rotation) */
 let K3CORNE=null;   /* tracés de la corne tombée, créés une fois */
 function k3corne(c,x,y,rot){if(!K3CORNE)K3CORNE=[new Path2D('M-30 6C-8 8 12 2 24 -10C34 -22 38 -34 36 -48C52 -30 52 -6 34 10C18 24 -8 24 -26 20L-20 14Z'),new Path2D('M36 -48C52 -30 52 -6 34 10C46 -8 46 -28 36 -48Z'),new Path2D('M-29 7L-22 12L-27 15L-25 20')];
@@ -533,5 +532,5 @@ function col3Fx(){
       c.restore();if(!reduce)k3shards(c,ox+120*dir,DECK-90,(R.time*2.6)%.5,10,['#ff9a35','#ffe08a'],200,60,DECK+6)}
   }
   /* seconde vie, Difficile : le marteau chargé avant l'explosion */
-  if(a.h&&a.kind==='greatsword'&&a.pt>=3.35&&a.pt<4){const hd=k.head,u=k3cl((a.pt-3.35)/.55);k3glow(c,hd[0],hd[1],60+40*u,'255,170,70',.35+.4*u)}
+  if(a.h&&a.kind==='greatsword'&&a.pt>=3.35&&a.pt<4){const hd=k.head,u=k3cl((a.pt-3.35)/.55);colGlow(c,hd[0],hd[1],60+40*u,'255,170,70',.35+.4*u)}
 }

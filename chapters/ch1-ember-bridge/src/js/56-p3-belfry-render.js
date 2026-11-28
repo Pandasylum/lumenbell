@@ -144,8 +144,8 @@ function col3Debris(c,id,u,p,dessin,cols){
   c.save();c.globalAlpha=1-k3cl((u-CN3.sol)/.5);dessin(x,s<1?y:y-12,s<1?(reduce?1.45*s:u*9):1.45);c.restore();
   if(!reduce){k3shards(c,x,sol,u-CN3.chute,12,['#9a9cc8',cols[0],'#ff9a35'],170,13,DECK+6);k3shards(c,p0[0],p0[1],u,20,cols,300,12,DECK+5)}
   k3fumee(c,p0[0],p0[1],u%1.8,6,44)}
-/* centre de la lanterne du Veilleur (départ du rayon et des comètes) */
-function lant3(){const h=heroPose3(),x=heroX3();return [x+h.hand[0]+Math.cos(h.sa)*76,DECK+(h.hand[1]+Math.sin(h.sa)*76)*h.sy]}
+/* centre de la lanterne du Veilleur (départ du rayon, des comètes et des tirs du final), au bout du bâton complet (baton3) ; h = heroPose3() */
+function lant3(h){h=h||heroPose3();return [h.x+h.hand[0]+Math.cos(h.sa)*BATON3.haut,DECK+(h.y||0)+(h.hand[1]+Math.sin(h.sa)*BATON3.haut)*(h.sy||1)]}
 /* contres (maquette colosse-clocher.js, scènes 1 à 9) : armes = garde bleue puis rayon du sceptre ; distance = cinq comètes ;
    cloche = ondes de la grande cloche et KO auditif ; rage = cloche puis foudre (tête et cœur, ou la grande corne à la première foudre de la seconde vie) */
 function col3CnFx(){
@@ -207,7 +207,7 @@ function drawQueueFx(a,h,d,i){
 /* vague de flammes découpées : de x0 (poings) à x1 (garde) ; u avancée (0 à 1), fin = secondes depuis l'arrivée */
 function k3vague(c,x0,x1,u,fin,tm){if(u<0)return;
   const x=k3l(x0,x1,k3cl(u)),al=fin<0?1:1-k3cl(fin/.3),sg=x1<x0?-1:1;
-  if(al>0){c.save();c.globalAlpha=al;k3glow(c,x,DECK-50,170,'255,130,50',.5*al);
+  if(al>0){c.save();c.globalAlpha=al;colGlow(c,x,DECK-50,170,'255,130,50',.5*al);
     for(let i=7;i>=0;i--){const px=x-sg*(i*30+(fin>0?fin*40*i:0));if((x0-px)*sg>60)continue;const h=(214-i*24)*(fin<0?.55+.45*k3cl(u*2.4):1-k3cl(fin/.3))*(1+.13*Math.sin(tm*23+i*2));k3flame(c,px,DECK+8+(i%2)*3,40-i*2.4,h,(-34+i*3)*-sg,tm*14+i*1.7)}
     c.restore()}
   const r=k3rnd(52),span=Math.max(.2,ONDE.vg-ONDE.imp);for(let i=0;i<15;i++){const px=k3l(x0,x1,(i+.5)/15),v=(u*span-(i+.5)/15*span)/.55;if(v<=0||v>=1)continue;
@@ -216,7 +216,7 @@ function k3vague(c,x0,x1,u,fin,tm){if(u<0)return;
   if(fin>0&&fin<.55){const v=fin/.55;[[-92,150],[-66,190],[-40,140],[-112,110],[-20,100]].forEach(([deg,L],i)=>{const an=(sg<0?deg:-180-deg)*Math.PI/180,bx=x1-4*sg,by=DECK-40;
     c.save();c.globalAlpha=1-v*v;k3flame(c,bx+Math.cos(an)*L*v*.8,by+Math.sin(an)*L*v*.8,18*(1-v*.5),70*(1-v*.6),(deg+90)*.7*-sg,tm*17+i);c.restore()})}}
 /* il aspire le feu : traits de braise qui convergent vers son cœur */
-function k3aspire(c,p,m,tm){const k=k3bump(m,.25,1.15,.2);if(k<=0)return;c.save();c.globalAlpha=k;k3glow(c,p[0],p[1],60+50*k3ez((m-.3)/.8),'255,150,60',.7*k);
+function k3aspire(c,p,m,tm){const k=k3bump(m,.25,1.15,.2);if(k<=0)return;c.save();c.globalAlpha=k;colGlow(c,p[0],p[1],60+50*k3ez((m-.3)/.8),'255,150,60',.7*k);
   for(let i=0;i<16;i++){const v=(tm*1.5+i*.137)%1,an=i*2.4,d=210*(1-v)+14,x=p[0]+Math.cos(an)*d,y=p[1]+Math.sin(an)*d*.8,L=14+34*v,w=3+6*v;
     k3poly(c,[[x-Math.sin(an)*w,y+Math.cos(an)*w*.8],[p[0]+Math.cos(an)*Math.max(8,d-L),p[1]+Math.sin(an)*Math.max(8,d-L)*.8],[x+Math.sin(an)*w,y-Math.cos(an)*w*.8],[x+Math.cos(an)*L*.5,y+Math.sin(an)*L*.4]],i%3?'#ff9a35':'#ffe08a')}
   c.restore()}
@@ -361,7 +361,7 @@ function renderR(){
   if(R.mode==='finale'&&R.fin.t<.4)drawBolt(R.bx-20,-10,DECK-260,1-R.fin.t/.4,true);
   drawHits3();
   drawHero3();
-  if(R.mode==='finale'){const ft=R.fin.t,a0=FIN.hero-1.0;if(ft>=a0&&ft<FIN.hero-.3){const h=heroPose3(),L=[h.x+h.hand[0]+Math.cos(h.sa)*76,DECK+(h.y||0)+h.hand[1]+Math.sin(h.sa)*76],u=es(clamp01((ft-a0)/.4)),al=ft<FIN.hero-.5?1:clamp01((FIN.hero-.3-ft)/.2);lanternBeam(L,lerp2(L,[150,DECK-76],u),12,al)}}
+  if(R.mode==='finale'){const ft=R.fin.t,a0=FIN.hero-1.0;if(ft>=a0&&ft<FIN.hero-.3){const L=lant3(),u=es(clamp01((ft-a0)/.4)),al=ft<FIN.hero-.5?1:clamp01((FIN.hero-.3-ft)/.2);lanternBeam(L,lerp2(L,[150,DECK-76],u),12,al)}}
   if(R.mode==='finale'&&COL3.k){const ft=R.fin.t,t0=FIN.hero-.3;if(ft>=t0&&ft<FIN.hero+.5){const u=es(clamp01((ft-t0)/.4)),al=ft<FIN.hero+.1?1:clamp01((FIN.hero+.5-ft)/.4),F=[150,DECK-76];ctx.save();ctx.globalCompositeOperation='lighter';lanternBeam(F,lerp2(F,COL3.k.coeur,u),14,al);ctx.restore()}}
   drawCn3();
   for(const s of R.steam){ctx.fillStyle='rgba(235,245,255,'+(.35*clamp01(s.life/s.max))+')';ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,6.283);ctx.fill()}

@@ -11,7 +11,7 @@ const COLOSSE=(()=>{
   let K=1; /* pixels par unité de maquette pendant la mise en cache */
   const CH='#2a1230',CH_F='#1d0c25',CL='rgba(178,82,92,.30)',CL2='rgba(205,108,102,.22)',OM='rgba(7,0,18,.46)',FER='#35223f',FER_C='rgba(176,128,150,.45)';
   function lg(c,x0,y0,x1,y1,st){const g=c.createLinearGradient(x0,y0,x1,y1);st.forEach(s=>g.addColorStop(...s));return g}
-  function glow(c,x,y,r,rgb,a){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(${rgb},${a})`);g.addColorStop(.35,`rgba(${rgb},${a*.4})`);g.addColorStop(1,`rgba(${rgb},0)`);c.save();c.globalCompositeOperation='screen';c.fillStyle=g;c.fillRect(x-r,y-r,2*r,2*r);c.restore()}
+  const glow=colGlow;
   function pc(c,d,fill,plans=[],ao=8){const p=P(d);c.save();c.globalCompositeOperation='source-atop';c.shadowColor='rgba(5,0,14,.9)';c.shadowBlur=ao*K;c.shadowOffsetY=2.5*K;c.fillStyle='rgba(8,0,18,.75)';c.fill(p);c.restore();
     c.fillStyle=fill;c.fill(p);c.save();c.clip(p);plans.forEach(([d2,col,f])=>{c.save();if(f)c.filter=`blur(${f*K}px)`;c.fillStyle=col;c.fill(P(d2));c.restore()});c.restore();return p}
   function tr(c,d,col,w){c.strokeStyle=col;c.lineWidth=w;c.lineCap='round';c.lineJoin='round';c.stroke(P(d))}
@@ -466,7 +466,7 @@ const COLFX=(()=>{
   const TAU=6.283185307179586,cl=v=>v<0?0:v>1?1:v,sm=u=>{u=cl(u);return u*u*(3-2*u)},REF=.8;
   const rnd=s=>()=>(s=(s*16807)%2147483647)/2147483647;
   /* réaction de dégâts : monte en 80 ms, tient (hold), revient en d ; t = secondes depuis l'impact t0 */
-  function choc(t,t0,d,hold){const u=t-t0,h=hold==null?.2:hold;if(u<0)return 0;if(u<.08)return u/.08;if(u<.08+h)return 1;return Math.pow(1-cl((u-.08-h)/d),2)}
+  const choc=LB.watcherChoc;   /* la même réaction que le Veilleur (shared/js/20-watcher.js) */
   function poly(c,pts,col){c.fillStyle=col;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.fill()}
   /* étoile à n branches (éclair d'impact) */
   function etoile(c,x,y,r,n,rot,col,k){if(!(r>0))return;k=k==null?.42:k;const p=[];for(let i=0;i<n*2;i++){const a=rot+i*Math.PI/n,d=i%2?r*k:r*(i%4?1:.72);p.push([x+Math.cos(a)*d,y+Math.sin(a)*d])}poly(c,p,col)}
