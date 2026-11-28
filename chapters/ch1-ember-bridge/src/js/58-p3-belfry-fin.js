@@ -53,7 +53,7 @@ function poseFin(t){
 function aileSol(c,t,sd,o){const T=COUPE[sd<0?0:1];if(t<T)return false;const u=cl((t-T)/.85),e=u*u;
  const x0=BX3+sd*34*CS,y0=DECK3+(-238+o.drop)*CS,x1=sd<0?BX3-70:BX3+70,y1=DECK3-(sd<0?30:24);
  c.save();c.translate(lerp(x0,x1,ez(u)),lerp(y0,y1,e)-40*Math.sin(u*Math.PI));c.scale(sd,1);c.rotate(lerp(.65,sd<0?.12:.2,ez(u)));
- const k=(sd>0?.66:.68)*CS*.92;c.scale(k,k*lerp(.9,.34,e));c.drawImage(COLOSSE.aile(sd<0,true),-20,-200,420,280);c.restore();
+ const k=(sd>0?.66:.68)*CS*.92;c.scale(k,k*lerp(R.healed?.9:1,.34,e));c.drawImage(COLOSSE.aile(sd<0,!!R.healed),-20,-200,420,280);c.restore();
  k3pas(c,x1+sd*70,t-T-.85,1.2,60+sd);return true}
 /* la masse lâchée : elle vole, tombe, rebondit et RESTE au sol (le sprite actuel du marteau) */
 function marteauLibre(c,t){if(t<JET)return;const u=cl((t-JET)/.55),X=440,Y=DECK3-18,D0=[BX3-253*CS,DECK3-98*CS];let x,y,a;
@@ -66,10 +66,11 @@ function dessineCol(c,t,o,f){c.save();
  if(f.on){c.translate(BX3,DECK3);c.rotate(f.th);c.translate(-BX3,-DECK3+f.lift)}
  c.translate(BX3+o.dx,DECK3);c.scale(CS,CS);const s=reduce?0:Math.sin(t*2.2)*(1-(f.out||0));
  const rig=COLOSSE.draw(c,{lean:o.lean+.012*s,drop:o.drop+1.4*s,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:o.plie,tete:o.tete,jaw:o.jaw,flash:o.flash,fissure:o.fissure,rage:o.rage,eteint:o.eteint,t:reduce?0:(t<PIERRE_T?t:PIERRE_T),
-  brise:true,warm:Math.max(.05,1-(o.out||0)),kneel:o.kneel||0,kdk:KD,out:o.out||0,sansMarteau:t>=JET,
+  brise:t>=T_F+.05||(R.hornAt!=null&&R.time>=R.hornAt+CN3.brise),enclume:COL3.foudre1!=null&&R.time>=COL3.foudre1+CN3.enclume,warm:Math.max(.05,1-(o.out||0)),kneel:o.kneel||0,kdk:KD,out:o.out||0,sansMarteau:t>=JET,
   ham:t<JET?{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r}:{P:[94,-256],a:-62,g:50,wN:0,wF:0,s:1,r:1},tip:[o.tx,o.ty],sag:20,
   back:()=>{const g=new DOMMatrix().translate(0,-124+o.drop+o.plie*26).rotate(o.lean*180/Math.PI).scale(o.sx,1).translate(0,124);
-   [1,-1].forEach(sd=>{if(t>=COUPE[sd<0?0:1])return;c.save();const p=g.transformPoint(new DOMPoint(sd*34,-238));c.translate(p.x,p.y);c.scale(sd,1);c.rotate(.14+(reduce?0:Math.sin(t*1.7)*.05)+(sd>0?.5:.62));const k=sd>0?.66:.68;c.scale(k,k*.9);c.drawImage(COLOSSE.aile(sd<0,true),-20,-200,420,280);c.restore()});
+   const rg=!!R.healed,tb=rg?1:0;   /* ailes rongées et retombées après le regain de vie (le cas de la maquette) ; intactes en Facile, sans seconde vie */
+   [1,-1].forEach(sd=>{if(t>=COUPE[sd<0?0:1])return;c.save();const p=g.transformPoint(new DOMPoint(sd*34,-238));c.translate(p.x,p.y);c.scale(sd,1);c.rotate(.14+(reduce?0:Math.sin(t*1.7)*.05)+tb*(sd>0?.5:.62));const k=sd>0?.66:.68;c.scale(k,k*(1-.1*tb));c.drawImage(COLOSSE.aile(sd<0,rg),-20,-200,420,280);c.restore()});
    if(o.rage>0)COLFX.rageDerriere(c,reduce?0:t,o.fl)}});
  c.restore();
  const base=new DOMMatrix();if(f.on){base.translateSelf(BX3,DECK3).rotateSelf(f.th*180/Math.PI).translateSelf(-BX3,-DECK3+f.lift)}
@@ -87,6 +88,8 @@ function colossePierre(c,t,o,f){
  return k}
 /* le Veilleur : il saute sur le Colosse, tire dans les ailes, frappe au cœur, retombe, allume le fanal puis se retire */
 function heros(c,t,k){let x=PX3,y=0,hand=[28,-94],sa=-1.5,saut=false,perche=false;
+ const q0=ez((t-T_F)/.35);   /* du geste du contre (sceptre levé, lanterne vive) à la garde de la maquette, sans saut */
+ sa=lerp(-1.15,-1.5,q0);
  const dest=[k.coeur[0]-62,k.coeur[1]+34-DECK3];
  if(t<SAUT[0]){}
  else if(t<SAUT[1]){const u=(t-SAUT[0])/(SAUT[1]-SAUT[0]);x=lerp(PX3,dest[0],ez(u));y=dest[1]*ez(u)-150*Math.sin(Math.PI*u);hand=[30,-72];sa=.15-.95*ez(u);saut=true}
@@ -96,7 +99,7 @@ function heros(c,t,k){let x=PX3,y=0,hand=[28,-94],sa=-1.5,saut=false,perche=fals
  else if(t<CHUTE+.8){const u=(t-CHUTE)/.8;x=lerp(BX3-90,PX3-40,ez(u));y=-170*(1-u*u)-90*Math.sin(Math.PI*u);hand=[30,-72];sa=-.6;saut=u<.95}
  else{x=PX3-40;if(t<FEU+.4){const q=bosse(t,FAISC-.35,FEU+.1,.22);hand=[lerp(28,-26,q),-94];sa=lerp(-1.5,-1.9,q)}else x=lerp(PX3-40,PX3-96,ez((t-FEU-.4)/1.4))}
  if(!perche)ombre(c,x,34*Math.max(.2,1+y/400),.6);
- LB.drawWatcher(c,x,DECK3+y,'idle',t,{hand,sa,sy:1,rot:0,glow:t>JET&&t<FEU+.4?1:.4,L:76,anim:false,id:1,lit:true,breath:!saut});
+ LB.drawWatcher(c,x,DECK3+y,'idle',t,{hand,sa,sy:1,rot:0,glow:t>JET&&t<FEU+.4?1:lerp(1,.4,q0),L:76,anim:false,id:1,lit:true,breath:!saut});
  return {x,y,lant:[x+(sa<-1.65?-30:100),DECK3+y-(sa<-1.65?140:sa>.2?40:88)]}}
 /* le fanal s'allume */
 function fanalFeu(c,t){const u=cl((t-FEU)/.6);if(u<=0)return;glow(c,FANAL[0],FANAL[1],260*u,'255,214,120',.75*u);[[1,'#e9761f'],[.68,'#ffb84a'],[.38,'#fff0b8']].forEach(([k,col])=>{const w=15*u*k,h=46*u*k*(1+(reduce?0:.1*Math.sin(t*13+k*7))),x=FANAL[0],y=FANAL[1]+10,q=reduce?0:Math.sin(t*9)*3*k;poly(c,[[x-w,y-h*.22],[x-w*.55,y-h*.62],[x+q,y-h],[x+w*.6,y-h*.55],[x+w,y-h*.22],[x+w*.5,y],[x-w*.5,y]],col)})}
@@ -121,7 +124,8 @@ function scene(c,t){
  const h=heros(c,t,k);
  marteauLibre(c,t);
  /* la cloche sonne, puis la foudre pleine, comme aux rages */
- k3ondesCloche(c,t-.3,k.tete,1.35);k3acouphene(c,k.tete,bosse(t,.8,T_F-.15,.2),tm);
+ k3ondesCloche(c,t-T_F+R_CN.bolt.hit-R_CN.bolt.ring,k.tete,1.35);   /* les ondes du contre continuent là où elles en étaient à la foudre */
+ k3acouphene(c,k.tete,bosse(t,.8,T_F-.15,.2),tm);
  if(t<T_F)arcsCorps(c,{...k,coeur:k.corne,loin:k.tete},ez((t-1.2)/.4),t);
  k3solFendu(c,BX3,t-T_F,t<CHUTE?1-ez((t-3.4)/1):0);k3foudre(c,t-T_F,k.tete);k3foudre(c,t-T_F-.2,k.coeur);arcsCorps(c,k,t>T_F?1-ez((t-T_F-.5)/1):0,t);
  const u=t-T_F;if(u>0&&u<2.5){k3eclats(c,k.coeur[0],k.coeur[1],u,36,['#cfd8ff','#6a3050','#2c1534','#ff9a35','#ffffff'],430,71,DECK3+5);[[-110,-200],[110,-210],[0,-120],[150,-90]].forEach(([x,y],i)=>k3fumee(c,BX3+x,DECK3+y,u-.4-i*.17,6,80+i))}

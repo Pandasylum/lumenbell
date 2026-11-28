@@ -39,8 +39,9 @@ Object.assign(ULT,{
 });
 /* Final (cinématique validée le 28/11, maquette docs/decisions/da/ch1-fin.js) : tous les instants, en secondes depuis le début du final ; la scène, le plan large et le plan final sont dessinés par 58-p3-belfry-fin.js.
    cloche : la cloche sonne · foudre : la foudre frappe le Colosse · genou/jet : il tombe à genoux, la masse lui échappe · saut : le Veilleur saute sur lui · coupe : un tir de lanterne dans chaque aile · charge, coup : l'arme du Veilleur, le coup au cœur
-   chute : le Colosse s'écroule · faisc, feu : le rayon vers le fanal, le fanal s'allume · pierre : la lumière le change en pierre · glas : la cloche sonne le glas · large : plan large des Flèches · fin : plan final · carte : carte de fin, en secondes après le début du plan final */
-const FIN={cloche:.3,foudre:1.7,genou:2.1,jet:2.4,saut:[3.15,3.65],coupe:[4.0,4.6],charge:5.1,coup:5.75,chute:7.1,faisc:9.45,feu:9.85,pierre:10.2,glas:12.2,large:14.6,fin:18.4,carte:7,
+   chute : le Colosse s'écroule · faisc, feu : le rayon vers le fanal, le fanal s'allume · pierre : la lumière le change en pierre · glas : la cloche sonne le glas · large : plan large des Flèches · fin : plan final · carte : carte de fin, en secondes après le début du plan final
+   debut : le final démarre à la foudre du contre ultime (0 à 1,7 s de la maquette : la cloche, l'orage et le Colosse sonné sont déjà ceux du contre, la cinématique reprend sans coupure) */
+const FIN={debut:1.72,cloche:.3,foudre:1.7,genou:2.1,jet:2.4,saut:[3.15,3.65],coupe:[4.0,4.6],charge:5.1,coup:5.75,chute:7.1,faisc:9.45,feu:9.85,pierre:10.2,glas:12.2,large:14.6,fin:18.4,carte:7,
   echo:[.8,.35],spires:[.5,.55]};   /* echo : écart du premier écho du glas et entre deux échos ; spires : la première Flèche répond (depuis large), puis une toutes les .55 s */
 function rNew(){
   return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.bd.hp3,blocks:0,taken:0,
@@ -193,7 +194,7 @@ function rAtkEnd(){
   }else{b.s='fail';b.t=0}
 }
 function startFinale(){
-  R.mode='finale';R.fin={t:0};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;R.bellAt=null;R.bellW=null;
+  R.mode='finale';R.fin={t:FIN.debut,b0:1,fo:1};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;   /* b0, fo : la cloche et le coup de foudre viennent d'avoir lieu (contre) ; la cloche garde son balancement */
 }
 function rDamage(k,c){
   if(k==='bolt'){
