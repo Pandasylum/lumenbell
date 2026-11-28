@@ -1,98 +1,4 @@
-/* ---------- rendu phase III ---------- */
-/* éclair du final : le même tracé que la foudre des contres (k3eclair, 54-p3-belfry-colosse.js), sans ombre portée ; figé en mouvement réduit */
-function drawBolt(x,y0,y1,al,big){
-  if(al<=0)return;
-  ctx.save();ctx.globalAlpha=Math.min(1,al);k3eclair(ctx,[x,y0],[x,y1],reduce?61:61+((R.time*22)|0),9,68,big?8:4);ctx.restore();
-}
-/* final : le Colosse tombe en avant d'un bloc, reste étalé, tente de se relever (un premier essai échoue), finit à genoux ; le feu s'éteint pendant l'effort.
-   th : angle du corps entier autour de ses pieds (négatif = vers l'avant), lift : le corps étalé repose sur le sol, k : genoux fléchis, r : bras tendus devant lui */
-function finFall(t){
-  const T=t-FIN.collapse;
-  if(T<0)return {on:false,th:0,lift:0,k:0,r:0,bow:0,out:0};
-  const K=[[0,0],[.55,-1.45],[.95,-1.35],[1.3,-.85],[1.55,-1.15],[2.3,-.1],[2.6,0]];let th=0;
-  for(let i=1;i<K.length;i++)if(T<=K[i][0]){const u=(T-K[i-1][0])/(K[i][0]-K[i-1][0]);th=K[i-1][1]+(K[i][1]-K[i-1][1])*(i===1?ei(u):es(u));break}
-  if(T>K[K.length-1][0])th=0;
-  return {on:true,th,lift:-64*Math.sin(Math.min(Math.abs(th),1.5708)),k:es(clamp01((T-1.9)/.7)),r:es(clamp01(T/.25))*(1-es(clamp01((T-1.6)/.5))),bow:es(clamp01((T-2.3)/.8)),out:es(clamp01((T-1.5)/1.8))};
-}
-function heroFin(){
-  const f=R.fin,t=f.t,bx=R.bx,L=[-112,-165];
-  let x=PX,y=0,rot=0,glow=1,hand=[28,-94],sa=-1.5;
-  if(t<FIN.leap[0]){}
-  else if(t<FIN.leap[1]){const u=(t-FIN.leap[0])/(FIN.leap[1]-FIN.leap[0]);x=PX+(bx+L[0]-PX)*es(u);y=L[1]*es(u)-110*Math.sin(Math.PI*u);hand=[30,-72];sa=.15-.95*es(u)}
-  else{
-    x=bx+L[0];y=L[1];hand=[30,-72];sa=-.8;
-    /* un tir de lanterne dans chaque aile : le sceptre pointe l'aile visée, léger recul au départ du tir */
-    for(let i=0;i<2;i++){
-      const d=t-FIN.cut[i],ang=i?-.22:-.63;
-      if(d>-.4&&d<.45){const k=d<.1?es(clamp01((d+.4)/.35)):1-es(clamp01((d-.1)/.35));sa=-.8+(ang+.8)*k;hand=[30-7*(d>=0&&d<.15?1-d/.15:0),-72]}
-    }
-    if(t>=FIN.charge&&t<FIN.strike){hand=[26,-100];sa=-1.45;y=L[1]-24*es(clamp01((t-FIN.charge)/.6))}
-    else if(t>=FIN.strike){hand=[38,-56];sa=.12;x+=14*es(clamp01((t-FIN.strike)/.1))}
-    if(t>=FIN.collapse){
-      /* le Veilleur reste accroché à son dos : il suit la chute, l'effort et l'agenouillement du Colosse */
-      const f=finFall(t),k0=es(clamp01((t-FIN.collapse)/.4)),A=[L[0]+(45-L[0])*k0,L[1]+(-215-L[1])*k0+KNEEL3*f.k],c=Math.cos(f.th),sn=Math.sin(f.th);
-      x=bx+A[0]*c-A[1]*sn;y=A[0]*sn+A[1]*c+f.lift;rot=f.th;
-      hand=[30,-60];sa=.12+.9*k0;glow=.4;
-    }
-    if(t>=FIN.bell-.6){
-      /* debout sur le Colosse terrassé, il lève sa lanterne vers la cloche */
-      const u=es(clamp01((t-(FIN.bell-.6))/.5));
-      hand=[30-4*u,-60-40*u];sa=.12+.9*(1-u)-1.45*u;glow=.4+.6*u;
-    }
-  }
-  return{x,y,hand,sa,rot,sy:1,glow};
-}
-function finBoss(o){
-  const t=R.fin.t,th=0,c=1,sn=0;
-  o.warm=t<FIN.collapse?(t>=FIN.strike?2:1.5):Math.max(.03,(t<FIN.bell?Math.max(.25,1.7-(t-FIN.collapse)*.35):Math.max(.25,1.7-(FIN.bell-FIN.collapse)*.35)*(1-clamp01((t-FIN.bell)/1.2))));
-  o.jaw=(t>=FIN.strike&&t<FIN.collapse)?16:(t<.6?12:0);
-  const fl=finFall(t);o.kd=fl;o.lean=fl.th;o.dy=fl.lift;o.kneel=fl.k;
-  if(t>=FIN.strike&&t<FIN.collapse)o.x+=rand(-3,3);
-  o.hands=[[-128,-66],[128,-66]].map(p=>[o.x+p[0]*c-p[1]*sn,DECK+p[0]*sn+p[1]*c]);
-  if(t<FIN.collapse){const sw=Math.sin(t*3)*4;o.hands[0][1]+=sw;o.hands[1][1]-=sw}
-  o.nostow=t>=FIN.raise;
-  if(t>=FIN.raise&&t<FIN.fling){
-    /* le Colosse brandit sa masse au-dessus de lui pour écraser le Veilleur */
-    const u=es(clamp01((t-FIN.raise)/.4)),a=-2.1,dir=[Math.cos(a),Math.sin(a)];
-    const grip=[o.x-60,DECK-210],g1=[o.hands[0][0]+(grip[0]-o.hands[0][0])*u,o.hands[0][1]+(grip[1]-o.hands[0][1])*u];
-    const b0=[grip[0]-dir[0]*34,grip[1]-dir[1]*34],g2=[o.hands[1][0]+(b0[0]-o.hands[1][0])*u,o.hands[1][1]+(b0[1]-o.hands[1][1])*u];
-    const sh=t>FIN.bell1?Math.sin(t*60)*3:0;
-    o.sword={h:[g1[0]+sh,g1[1]],a:a,l:135*u,heat:1.2+.6*u};o.hands=[g1,g2];o.warm=Math.max(o.warm,1.7);
-  }
-  if(t>=FIN.fling&&t<FIN.fling+.7)o.jaw=14;
-}
-/* Final : écho de la cloche vers la masse, masse tombée au sol, tirs de lanterne dans les ailes */
-function drawFinFx(){
-  if(!R||R.mode!=='finale'&&!R.fmace)return;
-  const t=R.fin?R.fin.t:0;
-  if(R.mode==='finale'&&t>=FIN.bell1&&t<FIN.fling+.1){
-    const B=[BELL[0],BELL[1]+40],G=[R.bx-100,DECK-270];
-    ctx.save();ctx.globalCompositeOperation='lighter';ctx.shadowColor='#6fd3ff';
-    for(let i=0;i<4;i++){
-      const u=clamp01((t-FIN.bell1-i*.05)/.22);if(u<=0||u>=1)continue;
-      const cx=B[0]+(G[0]-B[0])*es(u),cy=B[1]+(G[1]-B[1])*es(u),r=40+50*u;
-      ctx.strokeStyle='rgba(235,250,255,'+(1-u*.5)+')';ctx.lineWidth=8*(1-u*.4)+2;ctx.shadowBlur=18;
-      ctx.beginPath();ctx.arc(cx-r*.6,cy,r,-.8,.8);ctx.stroke();
-    }
-    ctx.restore();
-  }
-  if(R.fmace){const m=R.fmace;ctx.save();ctx.translate(m.x,m.y);ctx.rotate(m.a);drawHammer(135,m.land?.2:1,R.time,9);ctx.restore()}
-  if(R.fbeam&&R.fbeam.length){
-    const L=lant3();
-    for(const b of R.fbeam){const al=1-b.t/.3;if(al<=0)continue;ctx.save();ctx.globalCompositeOperation='lighter';lanternBeam(L,[R.bx+b.sd*60,DECK-205],16,al);ctx.restore()}
-  }
-}
-function drawFallWings(){
-  for(const w of R.fall){
-    const t=w.t,sd=w.sd,x0=R.bx+sd*64*.92,y0=DECK-204;
-    ctx.save();ctx.globalAlpha=clamp01(1.6-t*.7);
-    ctx.translate(x0+sd*70*t,y0+330*t*t-40*t);ctx.rotate(sd*1.1*t);
-    /* l'aile coupée : celle de la phase III (calque cuit à l'entrée), rongée et retombée après le regain de vie */
-    const rg=!!R.healed,tb=rg?1:0,k=(sd>0?.66:.68)*C3;ctx.scale(sd,1);ctx.rotate(.14+tb*(sd>0?.5:.62));ctx.scale(k,k*(1-.1*tb));ctx.drawImage(COLOSSE.aile(sd<0,rg),-20,-200,420,280);
-    ctx.restore();
-  }
-}
-
+/* ---------- rendu phase III ---------- (le final : 58-p3-belfry-fin.js) */
 function heroX3(){
   const p=R.pl;
   if((p.s==='down'||p.s==='hurt')&&p.lasso){const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));return PX-30*k}
@@ -100,7 +6,6 @@ function heroX3(){
   return PX;
 }
 function heroPose3(){
-  if(R.mode==='finale')return heroFin();
   if(R.mode==='intro'){
     const T=R.t;
     /* il arrive en marchant ; au choc du Colosse, il lève sa lanterne qui s'embrase */
@@ -134,23 +39,6 @@ function heroPose3(){
   }   /* garde et coup reçu : posture de la phase I, dessinée par drawHero3 (garde commune) */
   return{x,hand,sa,rot,sy,glow};
 }
-/* Masse de braise du Colosse, dans le repère de la main : manche le long de l'axe x, tête à pointes au bout (portée L) */
-function drawHammer(L,heat,tm,w){
-  if(L<2)return;const x0=L-w*5,R=w*3.4,cx=x0+R*.9,fl=.6+.4*Math.sin(tm*14);
-  ctx.save();ctx.lineCap='round';
-  ctx.strokeStyle='#1c1520';ctx.lineWidth=w*1.15;ctx.beginPath();ctx.moveTo(-26,0);ctx.lineTo(cx,0);ctx.stroke();
-  ctx.strokeStyle='#3a2d44';ctx.lineWidth=w*.7;ctx.beginPath();ctx.moveTo(-24,0);ctx.lineTo(cx,0);ctx.stroke();
-  for(let i=1;i<4;i++)box(x0*i/4-3,-w*.75,6,w*1.5,'#4a3a55','#2b2233');
-  ctx.fillStyle='rgba(255,120,40,'+Math.min(.25,.12*heat)+')';ctx.beginPath();ctx.arc(cx,0,R*1.7,0,6.283);ctx.fill();
-  /* pointes */
-  for(let i=0;i<10;i++){const a=i/10*6.283;ctx.save();ctx.translate(cx,0);ctx.rotate(a);
-    ctx.beginPath();ctx.moveTo(R*.8,-w*.7);ctx.lineTo(R*1.55,0);ctx.lineTo(R*.8,w*.7);ctx.closePath();ctx.fillStyle='#3a2d44';ctx.fill();ctx.strokeStyle='#5a4666';ctx.lineWidth=1.5;ctx.stroke();ctx.restore()}
-  const g=ctx.createRadialGradient(cx-R*.3,-R*.3,2,cx,0,R);g.addColorStop(0,'#4a3550');g.addColorStop(1,'#1a1119');
-  ctx.beginPath();ctx.arc(cx,0,R,0,6.283);ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='#5a4666';ctx.lineWidth=2.5;ctx.stroke();
-  ctx.strokeStyle='rgba(255,'+(130+70*fl|0)+',50,.95)';ctx.lineWidth=2.5;ctx.shadowColor='#ff7a2b';ctx.shadowBlur=10;
-  ctx.beginPath();ctx.moveTo(cx-R*.7,-R*.2);ctx.lineTo(cx-R*.2,R*.1);ctx.lineTo(cx-R*.1,-R*.6);ctx.moveTo(cx-R*.2,R*.1);ctx.lineTo(cx+R*.3,R*.5);ctx.moveTo(cx+R*.1,-R*.1);ctx.lineTo(cx+R*.6,-R*.3);ctx.stroke();
-  ctx.restore();
-}
 function bossPose3(){
   const b=R.boss,x=R.bx,a=R.atk,t=R.time;
   const rest=[[x-128,DECK-66+Math.sin(t*2)*3],[x+128,DECK-66+Math.sin(t*2+1)*3]];
@@ -165,7 +53,7 @@ function bossPose3(){
       const k=1-es(clamp01((T-1.1)/1.2));o.hands=rest.map(h=>[h[0]+(h[0]<x?-30:30)*k,h[1]+40*k])}
   }
   if(b.s==='hurt'||b.s==='fail'){o.jaw=b.s==='hurt'?8:0}
-  if(b.s==='dead'&&R.mode!=='finale'){o.dy=Math.min(70,b.t*45);o.warm=Math.max(.2,1-b.t*.4);o.lean=.05*Math.min(1,b.t)}
+  if(b.s==='dead'){o.dy=Math.min(70,b.t*45);o.warm=Math.max(.2,1-b.t*.4);o.lean=.05*Math.min(1,b.t)}
   if(b.s==='heal'){
     const k=clamp01(b.t/.5)*(1-clamp01((b.t-2.9)/.5));
     o.warm=1.6+.8*k;o.jaw=(b.t>.5&&b.t<2.9)?16:6;o.wa=.6*k;o.ws=1+.9*k;o.lean=-.06*k;
@@ -265,6 +153,5 @@ function bossPose3(){
       }
     }
   }
-  if(R.mode==='finale')finBoss(o);
   return o;
 }

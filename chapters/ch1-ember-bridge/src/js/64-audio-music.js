@@ -107,35 +107,37 @@ function menuStep(c,dst,t,s){
   for(let i=0;i<k;i++){const m=ch.b[Math.floor(Math.random()*3)],tt=t+.8+Math.random()*(L-1.2);
     mVoice(c,dst,tt,mtof(m-24),4,'sine',.05,{a:.6,lp:700,sus:.3});mVoice(c,dst,tt,mtof(m-36),4.5,'sine',.06,{a:.8,lp:400,sus:.3})}
 }
-/* Finale (phase III) : les ailes brisées, le coup ultime, le Colosse terrassé puis pétrifié par la cloche. Partition calée sur FIN (secondes). */
+/* Finale (phase III) : la foudre, les ailes brisées, le coup ultime, le Colosse terrassé puis pétrifié par la lumière du fanal. Mêmes sons qu'avant, calés sur FIN (secondes) :
+   la cinématique du 28/11 garde l'ordre des événements de l'ancienne, avec de nouveaux instants (la partition suit FIN, jamais des secondes en dur). */
 function finaleScore(c,dst,t0,now){
   const ev=(t,fn)=>{if(t0+t>=now-.02)fn(t0+t)};
   const big=(t)=>ev(t,x=>mDrum(c,dst,x,true)),sm=(t)=>ev(t,x=>mDrum(c,dst,x,false));
-  /* montée : bourdon, cordes qui enflent, roulement de timbales */
+  const [C0,C1]=FIN.coupe,CH=FIN.charge,CP=FIN.coup,CU=FIN.chute;
+  /* montée : bourdon, cordes qui enflent, roulement de timbales jusqu'à la foudre */
   ev(0,x=>{mVoice(c,dst,x,mtof(26),5,'sawtooth',.06,{a:1.2,lp:200,sus:.8});[50,57,62].forEach(n=>[-9,9].forEach(dt=>mVoice(c,dst,x,mtof(n),1.9,'sawtooth',.014,{a:1.6,lp:900,det:dt,sus:.9})))});
-  [0,.5,.9,1.15,1.3].forEach(sm);
-  /* la masse levée, la cloche répond (1,35 s) puis l'arme est arrachée (1,55 s) */
-  ev(1.35,x=>[62,69,74].forEach(n=>[-7,7].forEach(dt=>mVoice(c,dst,x,mtof(n),1.2,'triangle',.02,{a:.05,lp:1800,det:dt,sus:.6}))));
-  big(1.55);ev(1.55,x=>{mNoise(c,dst,x,.5,.18,3000,300);mVoice(c,dst,x,mtof(38),.9,'sine',.12,{slide:-14,lp:260,a:.02})});
-  [1.9,2.05].forEach(sm);
+  [0,.5,.9,1.2,1.5].forEach(sm);
+  /* la cloche sonne, puis la foudre frappe */
+  ev(FIN.cloche,x=>[62,69,74].forEach(n=>[-7,7].forEach(dt=>mVoice(c,dst,x,mtof(n),1.2,'triangle',.02,{a:.05,lp:1800,det:dt,sus:.6}))));
+  big(FIN.foudre);ev(FIN.foudre,x=>{mNoise(c,dst,x,.5,.18,3000,300);mVoice(c,dst,x,mtof(38),.9,'sine',.12,{slide:-14,lp:260,a:.02})});
+  [FIN.genou,FIN.jet].forEach(sm);
   /* les deux ailes brisées (un tir de lanterne chacune) */
-  [2.3,3.0].forEach(t=>{big(t);ev(t,x=>[50,53,57].forEach(n=>mVoice(c,dst,x,mtof(n+12),.9,'sawtooth',.04,{lp:1500,a:.01})))});
-  ev(1.75,x=>[50,57,62].forEach(n=>[-9,9].forEach(dt=>mVoice(c,dst,x,mtof(n),2.0,'sawtooth',.014,{a:1.4,lp:900,det:dt,sus:.9}))));
-  [2.65,2.8].forEach(sm);
+  [C0,C1].forEach(t=>{big(t);ev(t,x=>[50,53,57].forEach(n=>mVoice(c,dst,x,mtof(n+12),.9,'sawtooth',.04,{lp:1500,a:.01})))});
+  ev(FIN.foudre+.05,x=>[50,57,62].forEach(n=>[-9,9].forEach(dt=>mVoice(c,dst,x,mtof(n),2.0,'sawtooth',.014,{a:1.4,lp:900,det:dt,sus:.9}))));
+  [C0+.3,C0+.45].forEach(sm);
   /* la charge */
-  ev(3.5,x=>mVoice(c,dst,x,150,.95,'sawtooth',.05,{slide:480,lp:2600,a:.3,sus:.8}));
-  [3.5,3.7,3.9,4.05,4.2,4.3].forEach(sm);
+  ev(CH,x=>mVoice(c,dst,x,150,.95,'sawtooth',.05,{slide:480,lp:2600,a:.3,sus:.8}));
+  [0,.15,.3,.4,.5,.58].forEach(d=>sm(CH+d));
   /* le coup fatal */
-  big(4.6);big(4.6);
-  ev(4.6,x=>{mNoise(c,dst,x,1.3,.25,3000,200);[38,45,50,54,57].forEach(n=>mVoice(c,dst,x,mtof(n+12),2.6,'sawtooth',.036,{lp:2000,a:.02}));mVoice(c,dst,x,mtof(26),3,'sine',.16,{lp:200,a:.02})});
-  [5.1,5.7,6.3].forEach(sm);
-  ev(4.8,x=>[50,53,57].forEach(n=>[-8,8].forEach(dt=>mVoice(c,dst,x,mtof(n),2.4,'sawtooth',.012,{a:.9,lp:900,det:dt,sus:.9}))));
+  big(CP);big(CP);
+  ev(CP,x=>{mNoise(c,dst,x,1.3,.25,3000,200);[38,45,50,54,57].forEach(n=>mVoice(c,dst,x,mtof(n+12),2.6,'sawtooth',.036,{lp:2000,a:.02}));mVoice(c,dst,x,mtof(26),3,'sine',.16,{lp:200,a:.02})});
+  [.35,.75,1.15].forEach(d=>sm(CP+d));
+  ev(CP+.2,x=>[50,53,57].forEach(n=>[-8,8].forEach(dt=>mVoice(c,dst,x,mtof(n),2.4,'sawtooth',.012,{a:.9,lp:900,det:dt,sus:.9}))));
   /* l'effondrement, puis l'élégie */
-  big(6.9);ev(6.9,x=>mVoice(c,dst,x,mtof(38),1.6,'sine',.15,{slide:-22,lp:200,a:.02}));
-  ev(6.9,x=>[58,62,65].forEach(n=>[-7,7].forEach(dt=>mVoice(c,dst,x,mtof(n),3.3,'sawtooth',.01,{a:.9,lp:800,det:dt,sus:.9}))));
-  [[7.2,74,1.3],[8.2,72,1.2],[9.0,69,1.3],[9.9,62,3]].forEach(([t,m,d])=>ev(t,x=>mVoice(c,dst,x,mtof(m),d,'triangle',.045,{a:.12,lp:1300,sus:.4})));
-  [7.5,8.6,9.8].forEach(t=>ev(t,x=>mVoice(c,dst,x,52,1,'sine',.1,{slide:-18,lp:200})));
-  ev(10,x=>{[50,53,57].forEach(n=>[-6,6].forEach(dt=>mVoice(c,dst,x,mtof(n),3.6,'sawtooth',.01,{a:.8,lp:700,det:dt,sus:.8})));mVoice(c,dst,x,mtof(26),3.6,'sine',.1,{a:.6,lp:200,sus:.7})});
+  big(CU);ev(CU,x=>mVoice(c,dst,x,mtof(38),1.6,'sine',.15,{slide:-22,lp:200,a:.02}));
+  ev(CU,x=>[58,62,65].forEach(n=>[-7,7].forEach(dt=>mVoice(c,dst,x,mtof(n),3.3,'sawtooth',.01,{a:.9,lp:800,det:dt,sus:.9}))));
+  [[CU+.3,74,1.3],[CU+1.3,72,1.2],[CU+2.1,69,1.3],[FIN.pierre,62,3]].forEach(([t,m,d])=>ev(t,x=>mVoice(c,dst,x,mtof(m),d,'triangle',.045,{a:.12,lp:1300,sus:.4})));
+  [CU+.6,CU+1.7,CU+2.9].forEach(t=>ev(t,x=>mVoice(c,dst,x,52,1,'sine',.1,{slide:-18,lp:200})));
+  ev(FIN.pierre,x=>{[50,53,57].forEach(n=>[-6,6].forEach(dt=>mVoice(c,dst,x,mtof(n),3.6,'sawtooth',.01,{a:.8,lp:700,det:dt,sus:.8})));mVoice(c,dst,x,mtof(26),3.6,'sine',.1,{a:.6,lp:200,sus:.7})});
 }
 /* Fin du chapitre (outro puis carte de fin) : paix et espoir. Ré majeur, boucle de 8 mesures (Ré · La · Si mineur · Sol · Ré · La · Sol · La),
    un thème qui monte doucement au piano, une harpe qui berce, une nappe de cordes et un chœur très doux, avec un écho. */
@@ -165,7 +167,7 @@ function musKind(){
   if(!LB.audio.sound||!LB.audio.music||!AC||AC.state!=='running')return null;
   if(!menuEl.hidden)return 'menu';
   if(paused)return null;
-  if(R&&R.mode==='finale')return 'finale';
+  if(R&&R.mode==='finale')return R.fin.t>=FIN.large?'space':'finale';   /* le plan large reprend le thème de la fin (la partition du final s'est tue) */
   if(R&&R.mode==='space')return 'space';
   const S=R||Q||G;
   return S&&(S.mode==='play'||S.mode==='intro')&&el.ov.hidden?'game':null;
