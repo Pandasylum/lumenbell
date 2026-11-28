@@ -511,24 +511,8 @@ function drawFx(){
   ctx.globalAlpha=1;
 }
 
-function flameShape(front,al,wide,M0){
-  const MOUTH=M0||colMouthW;
-  const dx=front[0]-MOUTH[0],dy=front[1]-MOUTH[1],len=Math.hypot(dx,dy)||1;
-  const ux=dx/len,uy=dy/len,nx=-uy,ny=ux;
-  ctx.save();ctx.globalAlpha=al;ctx.lineCap='round';
-  ctx.shadowColor='#ff7a2b';ctx.shadowBlur=26;
-  ctx.strokeStyle='rgba(255,100,30,.4)';ctx.lineWidth=14+34*wide;
-  ctx.beginPath();ctx.moveTo(MOUTH[0],MOUTH[1]);ctx.lineTo(front[0],front[1]);ctx.stroke();
-  ctx.shadowBlur=0;
-  for(let i=0;i<30;i++){
-    const s=i/29,d=len*s;
-    const w=(8+wide*40*s)*(.75+.25*Math.sin(G.time*30+i*1.9));
-    const off=Math.sin(G.time*26+i*2.3)*9*s;
-    ctx.fillStyle=i%3===0?'rgba(255,236,170,.9)':i%3===1?'rgba(255,150,50,.85)':'rgba(255,80,30,.8)';
-    ctx.beginPath();ctx.arc(MOUTH[0]+ux*d+nx*off,MOUTH[1]+uy*d+ny*off,w*.55,0,6.283);ctx.fill();
-  }
-  ctx.restore();
-}
+/* jets de flammes (souffle, fureur) : le jet découpé commun (COLFX.jet), aplats nets comme le reste du Colosse */
+function flameShape(front,al,wide,M0){COLFX.jet(ctx,M0||colMouthW,front,20+wide*50,reduce?0:G.time,al)}
 function drawFlame(){
   const b=G.boss;
   let front=null,al=1,wide=1;
@@ -537,69 +521,66 @@ function drawFlame(){
   else if(b.s==='fl_rec'&&b.t<.45){front=lerp2(BAR,CHEST,eo(clamp01(b.t/.15)));al=1-clamp01((b.t-.15)/.3)}
   if(front)flameShape(front,al,wide);
 }
-function flameJet(o,front,al,wide){
-  const dx=front[0]-o[0],dy=front[1]-o[1],len=Math.hypot(dx,dy)||1;
-  const ux=dx/len,uy=dy/len,nx=-uy,ny=ux;
-  ctx.save();ctx.globalAlpha=clamp01(al);ctx.lineCap='round';
-  ctx.shadowColor='#ff7a2b';ctx.shadowBlur=22;
-  ctx.strokeStyle='rgba(255,100,30,.4)';ctx.lineWidth=10+24*wide;
-  ctx.beginPath();ctx.moveTo(o[0],o[1]);ctx.lineTo(front[0],front[1]);ctx.stroke();
-  ctx.shadowBlur=0;
-  for(let i=0;i<22;i++){
-    const s=i/21,d=len*s;
-    const w=(7+wide*26*s)*(.75+.25*Math.sin(G.time*30+i*1.9));
-    const off=Math.sin(G.time*26+i*2.3)*7*s;
-    ctx.fillStyle=i%3===0?'rgba(255,236,170,.9)':i%3===1?'rgba(255,150,50,.85)':'rgba(255,80,30,.8)';
-    ctx.beginPath();ctx.arc(o[0]+ux*d+nx*off,o[1]+uy*d+ny*off,w*.55,0,6.283);ctx.fill();
-  }
+function flameJet(o,front,al,wide){COLFX.jet(ctx,o,front,14+wide*30,reduce?0:G.time,al)}
+/* fureur, annonce d'un jet : une fissure de braise s'ouvre dans la pierre du Colosse et aspire les braises (aplats nets, sans dégradé) */
+function jetCharge(o,k,t){
+  const r=6+22*k;let sd=11;const rn=()=>(sd=(sd*16807)%2147483647)/2147483647;
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='miter';
+  [[9,'#12040e'],[5,'#e9561b'],[1.8,'#ffe08a']].forEach(([w,col],j)=>{sd=11;ctx.strokeStyle=col;ctx.lineWidth=w*(.5+.5*k);ctx.beginPath();
+    for(let i=0;i<5;i++){const an=i*1.2566+rn()*.5,L=r*(1+rn()*.8);ctx.moveTo(o[0],o[1]);ctx.lineTo(o[0]+Math.cos(an+.3)*L*.5,o[1]+Math.sin(an+.3)*L*.5);ctx.lineTo(o[0]+Math.cos(an)*L,o[1]+Math.sin(an)*L)}ctx.stroke()});
+  COLFX.etoile(ctx,o[0],o[1],(8+12*k)*(.85+.15*Math.sin(t*30)),8,t*2,'#ff9a35',.45);
+  COLFX.etoile(ctx,o[0],o[1],(4+7*k)*(.85+.15*Math.sin(t*30+1)),8,-t*2,'#fff6d8',.45);
+  for(let i=0;i<3;i++)COLFX.flamme(ctx,o[0]+(i-1)*9,o[1]+6,5+3*k,(8+26*k)*(.8+.2*Math.sin(t*16+i*2)),(i-1)*6,t*14+i);
+  if(!reduce)for(let i=0;i<12;i++){const an=i*2.4,ph=(t*1.8+i*.137)%1,d=(1-ph)*(70+30*k)+8,x=o[0]+Math.cos(an)*d,y=o[1]+Math.sin(an)*d*.8,s=2+3*ph;
+    COLFX.poly(ctx,[[x,y-s],[x+s*.7,y],[x,y+s],[x-s*.7,y]],i%3?'#ff9a35':'#ffe08a')}
   ctx.restore();
 }
 function drawJets(){
-  const b=G.boss,F=G.fy;
-  if(F&&b.s==='fy_t'){
-    const k=clamp01(b.t/T.fyt),o=JET_O[F.i%4],r=10+36*k;
-    ctx.save();
-    const g=ctx.createRadialGradient(o[0],o[1],0,o[0],o[1],r);
-    g.addColorStop(0,'rgba(255,255,220,'+(.5+.5*k)+')');g.addColorStop(1,'rgba(255,110,30,0)');
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(o[0],o[1],r,0,6.283);ctx.fill();
-    ctx.restore();
-  }
+  const b=G.boss,F=G.fy,t=reduce?0:G.time;
+  if(F&&b.s==='fy_t')jetCharge(JET_O[F.i%4],clamp01(b.t/T.fyt),t);
   if(F&&b.s==='fy_j'){
     const q=clamp01(b.t/.3),o=JET_O[F.i%4];
     flameJet(o,lerp2(o,BAR,es(q)),1,.3+.7*q);
   }
   if(G.jf)flameJet(G.jf.o,BAR,G.jf.t/.22,1);
 }
+/* météore de la fureur : la nuit se fend d'une faille de braise, puis un bloc de la pierre du Colosse, veiné de feu, tombe en traînant des flammes découpées */
+function meteorRock(x,y,rot,sc){
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.scale(sc,sc);
+  const S=[[-28,-8],[-16,-27],[8,-30],[27,-11],[25,14],[7,29],[-19,23]];
+  COLFX.poly(ctx,S.map(p=>[p[0]*1.12,p[1]*1.12]),'#12040e');COLFX.poly(ctx,S,'#2c1534');
+  COLFX.poly(ctx,[[-16,-27],[8,-30],[4,-6],[-12,-4]],'#3a1b38');COLFX.poly(ctx,[[-28,-8],[-16,-27],[-12,-4],[-19,23]],'rgba(178,82,92,.45)');
+  COLFX.poly(ctx,[[4,-6],[27,-11],[25,14],[7,29]],'rgba(7,0,18,.5)');
+  ctx.lineCap='round';ctx.lineJoin='round';
+  [[5,'#e9561b'],[1.8,'#ffc27a']].forEach(([w,col])=>{ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(-14,-16);ctx.lineTo(-2,-4);ctx.lineTo(-8,8);ctx.lineTo(4,20);ctx.moveTo(-2,-4);ctx.lineTo(14,-10);ctx.moveTo(-8,8);ctx.lineTo(-20,12);ctx.stroke()});
+  ctx.restore();
+}
 function drawRock(){
-  const b=G.boss;
+  const b=G.boss,t=reduce?0:G.time;
   const S=[RKX[b.rki||0],RK_S[1]];
   if(b.s==='rk_t'){
-    const k=clamp01(b.t/.5);
-    ctx.save();
-    const g=ctx.createRadialGradient(S[0],8,0,S[0],8,150);
-    g.addColorStop(0,'rgba(255,120,40,'+(.6*k)+')');g.addColorStop(1,'rgba(255,120,40,0)');
-    ctx.fillStyle=g;ctx.fillRect(S[0]-170,0,340,170);
-    ctx.fillStyle='rgba(255,170,70,'+(.8*k)+')';
-    for(let i=0;i<8;i++){
-      const ex=S[0]-80+i*23+Math.sin(G.time*3+i)*6,ey=((G.time*140+i*57)%160);
-      ctx.fillRect(ex,ey,3,3);
-    }
+    const k=clamp01(b.t/.5),x=S[0],w=40+120*k;let sd=23;const rn=()=>(sd=(sd*16807)%2147483647)/2147483647;
+    const P=[];for(let i=0;i<=8;i++)P.push([x-w+2*w*i/8,10+(i%2?14:-2)*k+rn()*6]);
+    ctx.save();ctx.lineCap='round';ctx.lineJoin='miter';
+    [[16,'#12040e'],[10,'#8e2418'],[5,'#e9561b'],[2,'#ffe08a']].forEach(([lw,col])=>{ctx.strokeStyle=col;ctx.lineWidth=lw*(.4+.6*k);ctx.beginPath();P.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke()});
+    /* flammes qui pendent de la faille */
+    ctx.save();ctx.scale(1,-1);
+    for(let i=1;i<8;i+=2)COLFX.flamme(ctx,P[i][0],-P[i][1]+2,7+5*k,(16+40*k)*(.8+.2*Math.sin(t*15+i)),Math.sin(t*3+i)*6,t*13+i);
+    ctx.restore();
+    for(let i=0;i<9;i++){const ex=x-w*.8+i*w*.2+Math.sin(t*3+i)*6,ey=20+((t*150+i*57)%150),s=2.5+(i%3);
+      COLFX.poly(ctx,[[ex,ey-s],[ex+s*.7,ey],[ex,ey+s],[ex-s*.7,ey]],i%2?'#ffe08a':'#ff9a35')}
     ctx.restore();
   }
   if(b.s==='rk_j'){
     const q=clamp01(b.t/.55),pos=lerp2(S,RK,ei(q));
-    for(let i=1;i<=7;i++){
-      const pp=lerp2(S,RK,ei(Math.max(0,q-i*.04)));
-      ctx.fillStyle='rgba(255,'+(140+i*10)+',50,'+(.5-i*.06)+')';
-      ctx.beginPath();ctx.arc(pp[0],pp[1],28-i*2.5,0,6.283);ctx.fill();
-    }
-    ctx.save();ctx.translate(pos[0],pos[1]);ctx.rotate(G.time*5);
-    ctx.shadowColor='#ff7a2b';ctx.shadowBlur=24;
-    ctx.fillStyle='#2a2028';ctx.strokeStyle='#ff9a3c';ctx.lineWidth=3;
-    ctx.beginPath();
-    [[-26,-8],[-14,-26],[8,-28],[26,-10],[24,14],[6,28],[-18,22]].forEach((c,i)=>i?ctx.lineTo(c[0],c[1]):ctx.moveTo(c[0],c[1]));
-    ctx.closePath();ctx.fill();ctx.stroke();
-    ctx.restore();
+    /* traînée : rubans de flammes découpées qui s'amincissent derrière le bloc */
+    const pts=[];for(let i=0;i<=9;i++){const qq=Math.max(0,q-i*.035);pts.push(lerp2(S,RK,ei(qq)))}
+    [[30,'#8e2418'],[22,'#d4501f'],[13,'#ff9a35'],[5,'#ffe08a']].forEach(([w,col])=>{const g=[],d=[];
+      pts.forEach((p,i)=>{const nx=pts[Math.max(0,i-1)],pv=pts[Math.min(pts.length-1,i+1)],an=Math.atan2(pv[1]-nx[1],pv[0]-nx[0]),ww=w*(1-i/pts.length)*(i%2?1.15:.8);
+        g.push([p[0]-Math.sin(an)*ww,p[1]+Math.cos(an)*ww]);d.push([p[0]+Math.sin(an)*ww,p[1]-Math.cos(an)*ww])});
+      COLFX.poly(ctx,[...g,...d.reverse()],col)});
+    meteorRock(pos[0],pos[1],G.time*5,1);
+    for(let i=0;i<3;i++)COLFX.flamme(ctx,pos[0]+(i-1)*14,pos[1]-18,8,(22+10*Math.sin(t*17+i))*(1+q*.3),-14,t*15+i,.9);
   }
 }
 function drawRing(){
@@ -770,6 +751,7 @@ function drawOrb(){
 function render(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
+  if(G.mode==='title'){ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);return}   /* avant le combat (carte de phase) : fond noir */
   ctx.save();
   if(G.shake>0&&!reduce)ctx.translate(rand(-1,1)*G.shake,rand(-1,1)*G.shake);
   ctx.drawImage(bgFar,0,0,W,H);
@@ -783,6 +765,7 @@ function render(){
   ctx.drawImage(vig,0,0,W,H);
   if(G.flash>0){ctx.fillStyle='rgba(255,255,255,'+G.flash*.5+')';ctx.fillRect(0,0,W,H)}
   if(G.hurt>0){ctx.fillStyle='rgba(255,40,30,'+(G.hurt*.45)+')';ctx.fillRect(0,0,W,H)}
+  if(G.mode==='intro'&&G.it<.7){ctx.fillStyle='rgba(0,0,0,'+(1-G.it/.7)+')';ctx.fillRect(0,0,W,H)}   /* entrée en jeu : la scène sort du noir */
   if(G.p2&&G.pl.s==='final'){const fa=clamp01((G.pl.t-2.9)/.8);if(fa>0){ctx.fillStyle='rgba(0,0,0,'+fa+')';ctx.fillRect(0,0,W,H)}}
 }
 

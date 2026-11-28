@@ -1,21 +1,4 @@
 /* ---------- rendu phase III ---------- */
-function flameRow(foot,d,pre,post,sc){
-  /* onde de choc : une succession d'explosions qui part du pied du Colosse et grossit jusqu'à atteindre le héros */
-  if(d<=-pre||d>=post)return;
-  const N=7,life=.5+post*.3,gx=GUARD[0];
-  ctx.save();ctx.shadowColor='#ff7a2b';ctx.shadowBlur=18;
-  for(let i=0;i<N;i++){
-    const t0=-pre*(1-i/(N-1)),a=d-t0;
-    if(a<0||a>=life)continue;
-    const k=a/life,x=foot+(gx-foot)*(i/(N-1)),r=(24+i*11)*sc*(.55+.6*es(k)),al=1-k*k;
-    const y=DECK-r*.35,g=ctx.createRadialGradient(x,y,2,x,y,r);
-    g.addColorStop(0,'rgba(255,248,215,'+(.95*al)+')');g.addColorStop(.35,'rgba(255,190,90,'+(.8*al)+')');
-    g.addColorStop(.75,'rgba(255,100,35,'+(.45*al)+')');g.addColorStop(1,'rgba(255,60,20,0)');
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.fill();
-    if(k<.5){ctx.strokeStyle='rgba(255,230,160,'+(.7*(1-k*2))+')';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r*.8,0,6.283);ctx.stroke()}
-  }
-  ctx.restore();
-}
 function drawBolt(x,y0,y1,al,big){
   if(al<=0)return;
   const pts=[[x,y0]];for(let i=1;i<=9;i++)pts.push([i===9?x:x+rand(-34,34),y0+(y1-y0)*i/9]);

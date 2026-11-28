@@ -415,3 +415,7 @@
 - Quand le Colosse tombe, ses ailes restent ouvertes et frémissent dans l'air ; elles ne se replient qu'au contact de la lave, sans traînée de feu.
 - En phase III, le Colosse brandit son marteau à deux mains (il le range dans le dos sinon), décroche et lance la boule enchaînée, sort ses griffes, charge en vraie course jusqu'au piétinement et au geyser, souffle et lance trois tornades de feu ; il respire et bouge au repos.
 - À la fin du combat, le Colosse tombe en avant, reste étalé, tente de se relever, finit à genoux la tête basse quand la cloche lui répond, son feu s'éteint ; le rayon du fanal le touche en pleine poitrine et la pierre noire se répand depuis ce point.
+- En rage, le Colosse du Clocher se retourne d'un pivot (on le voit de dos, marteau sanglé), fouette le Veilleur de sa vraie queue au ras du sol puis de haut en bas, et se retourne en retombant lourdement.
+- Ses explosions deviennent une onde : il aspire le feu, abat ses poings et une vague de flammes court sur les dalles jusqu'à la garde.
+- Phase I : fond noir avant le combat ; souffle et jets de flammes en cônes découpés ; la fureur ouvre des fissures de braise et fait tomber un bloc de pierre en feu.
+- Les rochers que le Colosse lance (Fonderie et Clocher) sont de vrais blocs de sa pierre, à facettes et veinés de braise, avec une traînée de braises.

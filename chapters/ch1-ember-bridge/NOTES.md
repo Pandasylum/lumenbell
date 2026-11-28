@@ -29,7 +29,7 @@
 | `js/44-p3-belfry-logic.js` | Phase III : `R`, `R_T`, `RATK`, `ULT`, `FIN`, `rEnd`, `rStep`, `rFinale` |
 | `js/48-p3-belfry-poses.js` | Phase III : finale (`heroFin`, `finBoss`, ailes tombées), poses du Veilleur et du Colosse, masse |
 | `js/52-p3-belfry-decor.js` | Phase III : tours, cloche (`ringBell`), fanal, beffroi, fond et sol |
-| `js/54-p3-belfry-colosse.js` | Phase III : Colosse du Clocher (`COLOSSE`), poses calées sur les impacts (`col3Pose`, `col3Hammer`, `col3Whip`, `col3Charge`…), effets de la maquette (`col3Fx`, tornades, geyser, fente), final à genou, pierre sous le fanal |
+| `js/54-p3-belfry-colosse.js` | Phase III : Colosse du Clocher (`COLOSSE`), poses calées sur les impacts (`col3Pose`, `col3Hammer`, `col3Whip`, `col3Charge`…), effets de la maquette (`col3Fx`, tornades, geyser, fente), final à genou, pierre sous le fanal ; coup de queue en pivot (`col3Queue`, `Q3T`, vue de dos `dosCore` dans `COLOSSE`) et onde de flammes (`col3Onde`, `ONDE` ; effets `drawQueueFx`, `drawOnde` dans 56) |
 | `js/56-p3-belfry-render.js` | Phase III : aura, fissures, Colosse, contres (cloche, éclats, rayon), fin vers la mer, `renderR` |
 | `js/60-ui-menu.js` | `CARD1`, `goPhase`, options, pause (`setPause`), réessayer, menu commun (`LB.menu.mount`, braises), `showMenu`, difficultés (`applyDiff`, `LB.help.use`), entrées communes (`LB.input.bind`) |
 | `js/64-audio-music.js` | Musique synthétisée : combat, menu, finale, outro, `MUS`, `musTick` |

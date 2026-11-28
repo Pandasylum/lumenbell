@@ -23,26 +23,33 @@ const K3B={lean:0,drop:0,sx:1,dF:0,dN:0,off:[-62,92],nn:[0,0],plie:0,tete:0,P:[2
 const K3_GARDE={...K3B},K3_ARME={...K3B,lean:.22,sx:.92,dF:16,dN:-40,P:[-5,-285],a:50,g:205},
   K3_FRAPPE={...K3B,dx:56,lean:-.45,drop:22,sx:1.04,dF:16,dN:-60,P:[-135,-126],a:-201,g:205},
   K3_FRAPPE2={...K3B,dx:50,lean:-.38,drop:16,sx:1.03,dF:16,dN:-56,P:[-128,-118],a:-197,g:205},
-  K3_DOS={...K3B,P:[94,-256],a:-62,g:50,wN:0,wF:0,r:1};     /* marteau rangé dans le dos, boule en bandoulière, mains libres */
+  K3_DOS={...K3B,P:[94,-256],a:-62,g:50,wN:0,wF:0,r:1};
+const K3_SAISIE={...K3_DOS,wN:1,lean:.1,dN:-10};   /* main proche sur le manche, marteau encore dans le dos */     /* marteau rangé dans le dos, boule en bandoulière, mains libres */
 const COL3={last:null,lastT:-9,f:{x0:0,y0:DECK,bx:0,flip:false},k:null,m:{},mouth:null};
 /* pose -> monde (le Colosse retourné pour la charge Difficile se reflète autour de R.bx, comme l'ancien corps) */
-const col3W=p=>{const f=COL3.f;return f.flip?[2*f.bx-(f.x0+p[0]*C3),f.y0+p[1]*C3]:[f.x0+p[0]*C3,f.y0+p[1]*C3]};
+const col3W=p=>{const f=COL3.f,m=C3*(f.m||1);return f.flip?[2*f.bx-(f.x0+p[0]*m),f.y0+p[1]*C3]:[f.x0+p[0]*m,f.y0+p[1]*C3]};   /* f.m : pivot du coup de queue (face x écrasement) */
 /* ---- poses d'attaque : chacune rend une pose complète d'après R.atk, calée sur les impacts ---- */
 function col3Hammer(a){
   /* garde, armé, frappe, combo : 2 coups (combo) ou 3 coups ; les coups Difficile sont recalés sur les images de base (swq) */
   const two=a.kind==='sword2'&&!a.hard3,H=two?[.75,1.4]:[.75,1.4,2.05],q=a.hard3?swq(a):a.pt;
-  const ks=[[0,K3_DOS],[.22,K3_GARDE,'i']];
-  H.forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,'l'],[T,F,'i'],[T+.14,F])});
+  /* il dégaine du dos directement vers la pose armée (plus de passage par la garde, marteau tête en bas, qui ressemblait à un coup avant le combo) */
+  /* la main proche saisit d'abord le manche dans le dos (le marteau ne flotte jamais seul), puis le marteau suit la main jusqu'à la pose armée */
+  const ks=[[0,K3_DOS],[.2,K3_SAISIE],[.32,K3_SAISIE]];
+  H.forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,i?'l':'o'],[T,F,'i'],[T+.14,F])});
   ks.push([H[H.length-1]+.5,K3_ARME]);
   return {...k3keys(q,ks)};
 }
 function col3Stab(a){
-  /* seconde vie, Difficile : coup de bélier du marteau (à l'horizontale), combo, puis marteau planté et explosion */
-  const q=a.pt,PULL={...K3B,lean:.28,sx:.92,drop:4,dF:14,dN:-34,P:[64,-150],a:180,g:205},
-    THR={...K3B,dx:44,lean:-.42,drop:14,sx:1.04,dF:16,dN:-56,P:[-128,-140],a:180,g:205},
+  /* seconde vie, Difficile : coup de bélier du marteau (à l'horizontale), combo, puis marteau planté et explosion.
+     Un seul mouvement : il tire le marteau par-dessus l'épaule, pousse, rebondit sur la garde, lève le marteau au-dessus de sa tête et l'arme derrière lui
+     (plus de poussée tenue ni de retour lent tête en bas, qui faisaient un coup bloqué puis une remise à zéro). Angles choisis pour que le marteau passe par le haut. */
+  const q=a.pt,PULL={...K3B,lean:.28,sx:.92,drop:4,dF:14,dN:-34,P:[64,-150],a:-180,g:205},
+    THR={...K3B,dx:44,lean:-.42,drop:14,sx:1.04,dF:16,dN:-56,P:[-128,-140],a:-180,g:205},
+    RECUL={...K3B,dx:26,lean:-.22,drop:10,sx:1.02,dF:16,dN:-50,P:[-100,-152],a:-172,g:205},
+    LEVE={...K3B,dx:8,lean:.12,sx:.95,dF:16,dN:-46,P:[-10,-210],a:-45,g:205},
     PLANT={...K3B,dx:20,lean:-.32,drop:18,sx:1.02,dF:14,dN:-44,P:[-62,-160],a:-220,g:205};
-  const ks=[[0,K3_DOS],[.2,K3_GARDE,'i'],[.5,PULL,'l'],[.62,PULL],[.85,THR,'i'],[1.1,THR],[1.7,K3_ARME]];
-  [1.95,2.45,2.95].forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,'l'],[T,F,'i'],[T+.12,F])});
+  const ks=[[0,K3_DOS],[.2,K3_SAISIE],[.5,PULL,'o'],[.62,PULL],[.85,THR,'i'],[.97,RECUL,'o'],[1.35,LEVE]];
+  [1.95,2.45,2.95].forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,i?'l':'o'],[T,F,'i'],[T+.12,F])});
   ks.push([3.35,K3_ARME],[3.9,PLANT],[4.2,PLANT],[4.7,K3_ARME]);
   const o={...k3keys(q,ks)};
   o.heat=k3bump(q,3.35,3.95,.2);   /* la tête du marteau se charge avant l'explosion */
@@ -118,6 +125,76 @@ function col3Charge(a){
   m.court=court;m.winds=winds;m.runs=runs;m.sl=sl;m.q=q;
   return o;
 }
+/* ===== rage : coup de queue en pivot (maquette validée colosse-queue-onde.js, 27/11) =====
+   Coups 'blast' avec flap (espacés de .65 s, 1 à 3) : il se ramasse, pivote (de face, écrasé, de dos, retourné en miroir) et frappe avec sa vraie queue,
+   ras du sol puis de haut en bas, en alternance ; après le dernier il se retourne et retombe lourdement. Tout est calé sur les impacts (F). */
+const Q3T={gath:.16,piv:.26,lead:.21,back:.18,piv2:.26};   /* ramassé, pivot, fin du pivot avant le 1er impact, départ du retour après le dernier, retour */
+/* queue retournée : repère de pose, x positif = vers le Veilleur (le corps est en miroir) ; A = ras du sol, B = de haut en bas */
+const Q3R=[[40,-120],[-90,-50],[-60,10],[-190,-24]],Q3F=[[40,-120],[80,10],[10,10],[-80,-30]],
+  Q3A=[[-.33,[[40,-130],[-120,-110],[-180,-180],[-170,-250]]],[-.17,[[40,-110],[-110,-30],[-170,-20],[-215,-60]]],[0,[[40,-110],[110,40],[220,20],[305,-44]],1],[.19,[[40,-130],[130,-60],[170,-110],[215,-170]]]],
+  Q3B=[[-.45,[[40,-150],[-40,-240],[-90,-330],[-30,-390]]],[-.2,[[40,-160],[20,-330],[90,-430],[150,-390]]],[0,[[40,-180],[170,-300],[270,-210],[302,-62]],1],[.2,[[40,-130],[150,-110],[250,10],[270,-10]]]];
+function col3QZ(a){
+  const F=a.hits.filter(h=>h.flap).map(h=>h.at);if(!F.length)return null;
+  const P1=F[0]-Q3T.lead,P0=P1-Q3T.piv,HL=F[F.length-1],R0=HL+Q3T.back,R1=R0+Q3T.piv2;
+  const ks=[[P1,Q3A[0][1]]];
+  F.forEach((H,i)=>{const K=i%2?Q3B:Q3A;K.forEach(([d,p,imp])=>{if(i===0&&d<-.3)return;ks.push([H+(i===0&&d<0?Math.max(d,-.12):d),p,imp])})});
+  ks.push([R0+.08,Q3F]);
+  return {F,P0,P1,HL,R0,R1,s0:P0-Q3T.gath,ks};
+}
+/* points de la queue retournée à l'instant t ; fx : facteur qui pose la pointe sur la garde au moment de l'impact */
+function col3QPts(Z,t,fx){const K=Z.ks;let P=K[K.length-1][1];
+  if(t<=K[0][0])P=K[0][1];else for(let i=1;i<K.length;i++)if(t<=K[i][0]){let u=k3cl((t-K[i-1][0])/(K[i][0]-K[i-1][0]));u=K[i][2]?u*u:k3ez(u);P=K[i-1][1].map((p,j)=>[k3l(p[0],K[i][1][j][0],u),k3l(p[1],K[i][1][j][1],u)]);break}
+  return P.map((p,i)=>i?[p[0]*fx,p[1]]:p)}
+/* pivot (de face, écrasé, de dos, retourné) : u de 0 à 1 sur la durée d ; sens 1 = il se détourne, -1 = il revient */
+function col3Tourn(t,a0,d,sens){const u=(t-a0)/d;if(u<0||u>1)return null;
+  if(u<.28)return {face:sens>0?1:-1,etr:1-.42*k3ez(u/.28)};
+  if(u<.72)return {dos:sens,etr:.82+.18*Math.sin((u-.28)/.44*Math.PI),v:(u-.28)/.44};
+  return {face:sens>0?-1:1,etr:.58+.42*k3ez((u-.72)/.28)}}
+const col3QFx=x0=>Math.max(.6,(x0-(GUARD[0]+4))/C3/304);
+function col3Queue(a,base,ob){
+  const Z=col3QZ(a);if(!Z||COL3.f.flip)return null;
+  const t=a.t;if(t<Z.s0)return null;
+  const D=K3_DOS,ram={...D,lean:.14,plie:.65,drop:10,sx:.96,off:[-100,40],nn:[40,-20],tete:.12},tou={...D,lean:-.2,plie:.45,drop:8,off:[-90,10],nn:[-10,-70],tete:-.1,jaw:9},
+    hau={...D,lean:.1,plie:.2,off:[-80,0],nn:[20,-90],jaw:6},cou={...D,lean:-.34,plie:.8,drop:20,off:[-110,70],nn:[-30,10],tete:-.14,jaw:13},atr={...D,plie:.9,drop:22,lean:-.1};
+  const ks=[[Z.P0,ram],[Z.P1,tou]];
+  Z.F.forEach((H,i)=>{if(i%2)ks.push([H-.38,hau],[H-.2,hau]);else if(i)ks.push([H-.3,tou]);ks.push([H,cou,'i'],[H+.18,cou])});
+  ks.push([Z.R0+.06,ram],[Z.R1,atr,'i'],[Z.R1+.4,D]);
+  let o=k3keys(t,ks);const w=k3ez((t-Z.s0)/Q3T.gath);if(w<1)o=k3mix(base,o,w);
+  o={...o,wa:ob.wa,ws:ob.ws};
+  /* petits élans du corps : il recule en se ramassant, se jette vers le Veilleur à chaque impact */
+  o.dx=(o.dx||0)*(1-w)+12*k3bump(t,Z.s0,Z.P0+.1,.1)-Z.F.reduce((m,H)=>m+12*k3val(t-H,[[-.2,0],[0,1],[.3,0]]),0);
+  /* il décolle les pieds pendant le pivot et retombe lourdement après le retour */
+  const saut=Math.max(k3bump(t,Z.P0+.03,Z.P0+.2,.07),k3bump(t,Z.R0+.03,Z.R0+.2,.07));o.nl=(o.nl||0)+34*saut;o.fl=(o.fl||0)+18*saut;
+  const st=col3Tourn(t,Z.P0,Q3T.piv,1)||col3Tourn(t,Z.R0,Q3T.piv2,-1)||{face:t>Z.P0&&t<Z.R0?-1:1,etr:1};
+  o.face=st.face||1;o.etr=st.etr;o.dos=st.dos||0;o.qP=null;o.qD=null;
+  if(o.face<0)o.qP=col3QPts(Z,t,col3QFx(R.bx+C3X+o.dx));
+  else if(!o.dos&&t<Z.P0+.1){const k=k3ez((t-Z.s0)/(Z.P0-Z.s0+.05));o.qP=[[30,-130],[150,-60-120*k],[130+60*k,18-190*k],[232-40*k,-26-200*k]]}   /* la queue se dresse avant le pivot */
+  if(o.dos){const v=o.dos>0?st.v:1-st.v;o.qD=[[k3l(110,-110,v),30],[k3l(250,-250,v),10],[k3l(300,-310,v),-60-50*Math.sin(v*Math.PI)]]}
+  o.Z=Z;return o;
+}
+/* pointe de la queue dans le monde à l'instant t (traînée de feu) */
+function col3QTip(Z,t,x0){const p=col3QPts(Z,t,col3QFx(x0))[3];return [x0-p[0]*C3,DECK+p[1]*C3]}
+/* ===== onde de flammes (maquette validée) : il aspire le feu, abat ses poings, la vague court sur les dalles jusqu'à la garde =====
+   Coups 'blast' sans flap (et pré-coups des ultimes). Temps de la maquette m : aspiration .25, poings abattus 1.65 (IMP), vague à la garde 2.1 (VG) = l'impact du jeu.
+   Préparation raccourcie quand le coup précédent est proche (trajet de la vague raccourci sous 1,2 s de marge). */
+const ONDE={imp:1.65,vg:2.1,prep:1.4,trav:.45,full:1.85};
+function col3OndeM(a,h){
+  let prev=0;for(const x of a.hits){if(x===h)break;prev=x.at}
+  const A=Math.min(ONDE.full,h.at-prev-.05),tr=A>=1.2?ONDE.trav:Math.max(.22,A*.38),Lp=Math.max(.1,A-tr),d=a.t-h.at;
+  return d>=0?ONDE.vg+d:d>=-tr?ONDE.vg+d*(ONDE.vg-ONDE.imp)/tr:ONDE.imp+(d+tr)*ONDE.prep/Lp;
+}
+const col3IsOnde=(a,h)=>h.k==='blast'&&!h.flap&&!(a.h&&a.kind==='greatsword'&&!h.pre);
+function col3Onde(a){
+  let h=null,m=-9,pn=false;
+  for(const x of a.hits){if(!col3IsOnde(a,x))continue;const mm=col3OndeM(a,x);if(mm>=.15&&mm<3.3){pn=h!=null&&m>=ONDE.imp;h=x;m=mm}}   /* le dernier coup entamé ; s'il suit un coup déjà abattu, il repart de la pose basse */
+  if(!h)return null;
+  const D=K3_DOS,haut={...D,lean:.22,plie:0,sx:.95,off:[-20,-110],nn:[-60,-230],tete:.28,jaw:12},bas={...D,lean:-.46,plie:1,drop:30,sx:1.06,off:[-118,150],nn:[-118,92],tete:-.1,jaw:15};
+  const o={...k3keys(m,[[0,pn?bas:D],[.3,{...D,plie:.5,drop:8,lean:-.12,off:[-40,80]}],[1.1,haut],[1.45,haut],[ONDE.imp,bas,'i'],[2.5,bas],[3.3,D]])};
+  o.wa=-.3*k3bump(m,1,1.45)+.35*k3bump(m,ONDE.imp,2,.08);o.ws=1+.28*k3bump(m,.8,1.6);o.yeux=.5+.5*k3bump(m,.3,1.9);
+  o.m=m;
+  if(!reduce&&m>.3&&m<1.45)o.dx=Math.sin(R.time*60)*3*k3ez((m-.3)/1);   /* il tremble en aspirant le feu */
+  return o;
+}
 /* pose d'après l'ancienne pose (mains, rugissement, entrée, chute, final) : attaques absentes de la maquette, mêmes mains qu'avant */
 function col3Fb(ob){
   const fin=R.mode==='finale',c=fin?Math.cos(-ob.lean):1,sn=fin?Math.sin(-ob.lean):0;
@@ -137,11 +214,24 @@ function col3Fb(ob){
   }else if(ob.nostow){o.P=[0,3000];o.r=0}   /* la masse a été jetée : plus rien dans le dos */
   return o;
 }
-/* préchauffage (entrée de la phase III) : une image quasi invisible de chaque pose du marteau, pour que le premier coup ne paie ni l'envoi des calques au processeur graphique ni la compilation du dessin */
+/* préchauffage (entrée de la phase III) : chaque pose du marteau, de la boule, du pivot (miroir, vue de dos) et les effets des coups sont dessinés une fois,
+   quasi invisibles, À LA TAILLE ET À LA PLACE DU JEU (une pose par image pendant l'entrée, derrière le Colosse qui se pose) : le premier coup ne paie plus ni l'envoi
+   des calques au processeur graphique ni la compilation du dessin à cette échelle (un dessin réduit ne suffit pas : le marteau figeait le jeu au premier combo). */
+const COL3_WARM=[
+  ...[K3_ARME,K3_FRAPPE,K3_FRAPPE2,K3_DOS].map(o=>({o})),
+  {o:{...K3_DOS,s:0,tx:46,ty:-300}},                       /* boule au bout de sa chaîne */
+  {o:K3_DOS,m:-1},{o:{...K3_DOS,dos:1,qD:[[0,30],[0,10],[0,-110]]},m:.8},{o:{...K3_DOS,dos:-1,qD:[[0,30],[0,10],[0,-110]]},m:.8},   /* pivot du coup de queue */
+  {fx:1}];
 function col3Warm(c){
-  if(COL3.warm)return;COL3.warm=1;
-  [K3_GARDE,K3_ARME,K3_FRAPPE,K3_FRAPPE2,K3_DOS].forEach(o=>{c.save();c.globalAlpha=.02;c.translate(8,H-8);c.scale(.12,.12);
-    COLOSSE.draw(c,{lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:0,tete:0,jaw:0,t:0,warm:1,eyes:.25,legs:{f:[0,0,0],n:[0,0,0]},tip:[o.tx,o.ty],heat:0,sag:20,ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r}});c.restore()});
+  const i=COL3.warm|0;if(i>=COL3_WARM.length)return;COL3.warm=i+1;
+  const w=COL3_WARM[i];c.save();c.globalAlpha=.01;
+  if(w.fx){const x=R.bx-200,tm=R.time;   /* effets : jet, vague, éclats, traînée de la queue */
+    COLFX.jet(c,[x,DECK-220],[PX+110,DECK-80],58,tm,1);k3vague(c,x,PX+122,.6,-1,tm);k3contact(c,[PX+118,DECK-62],.05,96,63);k3fente(c,x,PX+122,1,1);
+    k3sillage(c,[[x,DECK-200],[x-60,DECK-120],[x-120,DECK-70],[x-180,DECK-50]],1);k3aspire(c,[x+120,DECK-200],.8,tm)}
+  else{const o=w.o;c.translate(R.bx+C3X,DECK);c.scale(C3*(w.m||1),C3);
+    COLOSSE.draw(c,{dos:o.dos||0,qD:o.qD,lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:0,tete:0,jaw:0,t:0,warm:1,eyes:.25,legs:{f:[0,0,0],n:[0,0,0]},
+      tip:[o.tx,o.ty],heat:0,sag:20,ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r}})}
+  c.restore();
 }
 /* mouvements de vie : respiration, poids qui passe d'une épaule à l'autre, mains qui flottent, tête qui cherche, yeux qui palpitent */
 function col3Life(o,t){
@@ -167,17 +257,22 @@ function col3Atk(a){
 function col3Pose(ob){
   const a=R.atk,t=R.time,fin=R.mode==='finale';
   COL3.m={};
+  if(t<COL3.lastT||R.mode==='intro'){COL3.last=null;COL3.lastT=-9}   /* nouvelle partie (Réessayer) : l'horloge repart de 0, on oublie la dernière pose de la partie précédente */
   const fb=col3Fb(ob);
-  const po=a&&!fin?col3Atk(a):null;
+  let po=a&&!fin?col3Atk(a):null;
   const idle=!a&&R.mode==='play'&&R.boss.s!=='heal'&&R.boss.s!=='dead';
   if(idle)col3Life(fb,t);
   let rk=0;
   if(a)a.hits.forEach(h=>{if(h.pre)rk=Math.max(rk,k3cl(a.t/.5)*(1-k3ez((a.t-h.at-.15)/.5)))});   /* le rugissement avant une rage : mains levées, gueule ouverte */
   let o;
   if(po){COL3.last=po;COL3.lastT=t;o=rk>.02?k3mix(po,fb,rk):po}
-  else if(!a&&COL3.last&&R.mode==='play'&&t-COL3.lastT<.5)o=k3mix(COL3.last,fb,k3ez((t-COL3.lastT)/.45));   /* fin d'attaque : retour doux à la garde */
+  else if(!a&&COL3.last&&R.mode==='play'&&t>=COL3.lastT&&t-COL3.lastT<.5)o=k3mix(COL3.last,fb,k3ez((t-COL3.lastT)/.45));   /* fin d'attaque : retour doux à la garde */
   else o=fb;
   if(po&&!a.hits.some(h=>h.k==='wave')){o.wa=ob.wa;o.ws=ob.ws}
+  const on=a&&!fin?col3Onde(a):null;
+  if(on){const pw=po?k3ez((on.m-2.25)/.35):0;o=rk>.02?k3mix(on,fb,rk*.35):on;if(pw>0)o=k3mix(o,po,pw);COL3.last=o;COL3.lastT=t;po=o}   /* l'attaque qui suit reprend la main en douceur */   /* onde de flammes : il aspire le feu, abat ses poings */
+  const qz=a&&!fin?col3Queue(a,o,ob):null;
+  if(qz){o=qz;COL3.last=qz;COL3.lastT=t;po=qz}   /* coup de queue en pivot (rage) */
   const wv=a&&!fin?col3WaveFlap(a):null;
   if(wv){o.wa=wv.wa;o.ws=wv.ws;o.lean+=wv.lean;o.tete+=wv.tete;o.jaw=Math.max(o.jaw,wv.jaw);o.drop+=wv.drop}
   o.ported=!!po;
@@ -203,10 +298,7 @@ function k3griffes(c,E,W,k){const an=Math.atan2(W[1]-E[1],W[0]-E[0]);c.save();c.
   [[-17,-.34,.92],[0,0,1.12],[17,.34,.92]].forEach(([y,r,l])=>{c.save();c.translate(16,y);c.rotate(r);c.scale(k*l*1.5,Math.min(1,k)*1.25);
     k3poly(c,[[-6,-7],[22,-8],[42,-2],[52,12],[34,4],[14,3],[-6,7]],'#14060f');k3poly(c,[[-3,-5],[22,-6],[40,-1],[50,10],[34,1],[14,0],[-3,0]],'#f4ddb8');k3poly(c,[[-3,0],[14,0],[34,1],[50,10],[34,4],[14,3],[-3,5]],'#a8705c');c.restore()});
   c.restore()}
-function k3souffle(c,t,g,bout,k){if(k<=.02)return;const bx=k3l(g[0],bout[0],k),by=k3l(g[1],bout[1],k),dx=bx-g[0],dy=by-g[1],L=Math.hypot(dx,dy)||1,n=[-dy/L,dx/L];
-  [[1,'#8e2418'],[.7,'#d4501f'],[.44,'#ff9a35'],[.2,'#ffe08a']].forEach(([w,col],j)=>{const h=[],b=[],N=9,l=1-j*.09;
-    for(let i=0;i<=N;i++){const u=i/N*l,wd=(6+u*58)*w*(i%2?1:.62),x=g[0]+dx*u,y=g[1]+dy*u+Math.sin(t*20-i*1.4)*8*u;h.push([x+n[0]*wd,y+n[1]*wd]);b.push([x-n[0]*wd,y-n[1]*wd])}
-    k3poly(c,[...h,[g[0]+dx*(l+.08),g[1]+dy*(l+.08)],...b.reverse()],col)})}
+function k3souffle(c,t,g,bout,k){if(k<=.02)return;COLFX.jet(c,g,[k3l(g[0],bout[0],k),k3l(g[1],bout[1],k)],58,t,1)}   /* le jet découpé commun (phases I et III) */
 /* tornade de feu : la même qu'à la Fonderie */
 function k3tornade(c,x,y,h,w,t,a){if(h<6)return;w*=1.5;h*=1.12;c.save();c.globalAlpha=a;const N=9,sx=u=>Math.sin(t*7-u*4.2)*w*.34*u,ww=u=>w*(.16+1.05*u*u+.2*u),g=[],d=[];
   for(let i=0;i<=N;i++){const u=i/N;g.push([x+sx(u)-ww(u)*(i%2?.92:.74),y-u*h]);d.push([x+sx(u)+ww(u)*(i%2?.74:.92),y-u*h])}
