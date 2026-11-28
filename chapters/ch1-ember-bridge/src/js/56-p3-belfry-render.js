@@ -293,6 +293,7 @@ function drawHitsX(){
       if(d>=-.95&&d<-.45){const u=es(clamp01((d+.95)/.35));qrock(R.bx+(idx?40:-40),DECK-375,10+16*u,R.time*3,true)}
       else if(d>=-.45&&d<.05){
         const u=clamp01((d+.45)/.45),p0=[R.bx-190,DECK-250],p1=[GUARD[0]+20,GUARD[1]],q=lerp2(p0,p1,u);q[1]-=70*Math.sin(Math.PI*u);
+        {const T=[];for(let i=1;i<=5;i++){const uu=Math.max(0,u-i*.06),t2=lerp2(p0,p1,uu);t2[1]-=70*Math.sin(Math.PI*uu);T.push(t2)}qrockTrail(T,22)}
         qrock(q[0],q[1],26,R.time*10,true);
       }
     }

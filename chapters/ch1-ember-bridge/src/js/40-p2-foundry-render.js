@@ -148,12 +148,28 @@ function drawLake(front){
   }
 }
 
+/* rocher lancé (phases II et III) : bloc de la pierre du Colosse, à facettes (face éclairée, face d'ombre, liseré chaud), veiné de braise quand il est brûlant ;
+   aplats nets, ni flou ni ombre portée. r : rayon, rot : rotation, hot : veines de braise */
+const QROCK=[[-1,-.3],[-.62,-.95],[.22,-1.06],[.95,-.5],[.92,.42],[.32,1],[-.62,.84],[-1.06,.22]];
 function qrock(x,y,r,rot,hot){
-  ctx.save();ctx.translate(x,y);ctx.rotate(rot);
-  qp(ROCKP.map(q=>[q[0]*r,q[1]*r]),hot?'#40303a':'#1b1220',hot?'#ff7a2b':'#2c1d2c',hot?3:2);
-  if(hot){ctx.strokeStyle='rgba(255,200,100,.6)';ctx.lineWidth=2;ctx.stroke()}
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.scale(r,r);
+  const S=QROCK,P=(pts,col)=>COLFX.poly(ctx,pts,col);
+  P(S.map(q=>[q[0]*1.12,q[1]*1.12]),'#12040e');                                  /* contour sombre */
+  P(S,'#2c1534');                                                                 /* masse */
+  P([S[0],S[1],S[2],[.1,-.22],[-.42,-.05]],'#3e1d3c');                             /* face du dessus, éclairée */
+  P([S[0],[-.42,-.05],[-.3,.5],S[6],S[7]],'rgba(178,82,92,.42)');                  /* face avant, reflet de braise */
+  P([S[2],S[3],S[4],[.3,.3],[.1,-.22]],'rgba(7,0,18,.5)');                          /* face d'ombre */
+  P([[.1,-.22],[.3,.3],S[5],[-.3,.5],[-.42,-.05]],'rgba(205,108,102,.16)');
+  ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.strokeStyle='rgba(255,170,130,.5)';ctx.lineWidth=.07;ctx.beginPath();ctx.moveTo(S[7][0],S[7][1]);ctx.lineTo(S[0][0],S[0][1]);ctx.lineTo(S[1][0],S[1][1]);ctx.lineTo(S[2][0],S[2][1]);ctx.stroke();   /* liseré */
+  const V=[[-.5,-.62],[-.12,-.18],[-.3,.22],[.08,.66]],V2=[[-.12,-.18],[.5,-.4]],V3=[[-.3,.22],[-.74,.36]];
+  (hot?[[.2,'#e9561b'],[.075,'#ffc27a']]:[[.11,'rgba(10,2,16,.75)']]).forEach(([w,col])=>{ctx.strokeStyle=col;ctx.lineWidth=w;
+    [V,V2,V3].forEach(L=>{ctx.beginPath();L.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke()})});
   ctx.restore();
 }
+/* traînée d'un rocher brûlant : braises découpées qui s'éteignent derrière lui (remplace les ronds flous) */
+function qrockTrail(pts,r){pts.forEach((q,i)=>{const k=1-i/pts.length,s=r*(.5*k+.12);
+  COLFX.poly(ctx,[[q[0],q[1]-s],[q[0]+s*.75,q[1]],[q[0],q[1]+s],[q[0]-s*.75,q[1]]],i%3===0?'#ffe08a':i%3===1?'#ff9a35':'#d4501f')})}
 function wingAngle(){
   let ang=Math.sin(Q.time*2.3)*.07;
   const a=Q.atk,b=Q.boss;
@@ -540,7 +556,7 @@ function drawHits2(){
       const e0=[QH[0]+30,QH[1]+20],rl=QR.rel&&QR.rel[a.hits.indexOf(h)%2?'B':'A'];
       if(d<0){
         const u=(d+.45)/.45,s0=rl?[rl[0],rl[1]]:[Q.bx-120,Q.by-90];
-        for(let i=4;i>=1;i--){const uu=Math.max(0,u-i*.07),q=lerp2(s0,e0,uu);q[1]-=60*Math.sin(Math.PI*uu);ctx.fillStyle='rgba(255,140,50,'+(.28-i*.05)+')';ctx.beginPath();ctx.arc(q[0],q[1],24-i*3,0,6.283);ctx.fill()}
+        {const T=[];for(let i=1;i<=5;i++){const uu=Math.max(0,u-i*.06),q=lerp2(s0,e0,uu);q[1]-=60*Math.sin(Math.PI*uu);T.push(q)}qrockTrail(T,22)}
         const pos=lerp2(s0,e0,u);pos[1]-=60*Math.sin(Math.PI*u);qrock(pos[0],pos[1],26,tt*14,true);qflame(pos[0]+10,pos[1]-18,10,34,3,'rgba(255,170,70,.85)');
       }else{
         /* le bloc se fracasse sur celui du Veilleur */
@@ -553,7 +569,7 @@ function drawHits2(){
       const x=QH[0]+26,gyy=QH[1]-6;
       if(d>=-.42&&d<=.02){
         const u=clamp01((d+.42)/.42),y=d<0?-50+(gyy+50)*u*u:gyy+d*1100;
-        for(let i=3;i>=1;i--){ctx.fillStyle='rgba(255,140,50,'+(.22-i*.05)+')';ctx.beginPath();ctx.arc(x,y-i*26,26-i*4,0,6.283);ctx.fill()}
+        qrockTrail([1,2,3,4].map(i=>[x+(i%2?5:-5),y-i*22]),22);
         qrock(x,y,28,tt*7+x,true);
       }
       if(d>.0&&!reduce)COLFX.eclats(ctx,x,gy,d,16,['#7a4048','#2a1224','#ff9a35'],260,100,gy+8,520);

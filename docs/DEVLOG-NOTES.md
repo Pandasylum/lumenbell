@@ -418,3 +418,4 @@
 - En rage, le Colosse du Clocher se retourne d'un pivot (on le voit de dos, marteau sanglé), fouette le Veilleur de sa vraie queue au ras du sol puis de haut en bas, et se retourne en retombant lourdement.
 - Ses explosions deviennent une onde : il aspire le feu, abat ses poings et une vague de flammes court sur les dalles jusqu'à la garde.
 - Phase I : fond noir avant le combat ; souffle et jets de flammes en cônes découpés ; la fureur ouvre des fissures de braise et fait tomber un bloc de pierre en feu.
+- Les rochers que le Colosse lance (Fonderie et Clocher) sont de vrais blocs de sa pierre, à facettes et veinés de braise, avec une traînée de braises.
