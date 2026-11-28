@@ -40,14 +40,15 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | shared/js/28-ui.js:429 | _() |  | Enable visual help | Activer l'aide visuelle |
 | shared/js/28-ui.js:472 | _() |  | Settings | Réglages |
 | shared/js/28-ui.js:473 | _() |  | Close | Fermer |
-| shared/js/30-tuto.js:12 | _() |  | Block | Bloquer |
-| shared/js/30-tuto.js:12 | _() |  | One press, at the exact instant: the blow stops dead. | Un seul appui, à l'instant juste : le coup s'arrête net. |
-| shared/js/30-tuto.js:13 | _() |  | Dodge | Esquiver |
-| shared/js/30-tuto.js:13 | _() |  | One press, at the exact instant: you slip out of its path. | Un seul appui, à l'instant juste : tu glisses hors de sa trajectoire. |
-| shared/js/30-tuto.js:14 | _() |  | Hold | Tenir |
-| shared/js/30-tuto.js:14 | _() |  | Keep pressing: your block holds, a dome wraps around you. | Maintiens l'appui : ton blocage tient, un dôme t'enveloppe. |
-| shared/js/30-tuto.js:15 | _() |  | Sometimes dodging is a misjudgment: know when to stand still. | Parfois, l'esquive est une erreur de jugement : sache rester en place. |
-| shared/js/30-tuto.js:15 | _() |  | Stand still | Rester en place |
+| shared/js/30-tuto.js:16 | _() |  | Block | Bloquer |
+| shared/js/30-tuto.js:16 | _() |  | One press, at the exact instant: the blow stops dead. | Un seul appui, à l'instant juste : le coup s'arrête net. |
+| shared/js/30-tuto.js:17 | _() |  | Dodge | Esquiver |
+| shared/js/30-tuto.js:17 | _() |  | One press, at the exact instant: you slip out of its path. | Un seul appui, à l'instant juste : tu glisses hors de sa trajectoire. |
+| shared/js/30-tuto.js:18 | _() |  | Hold | Tenir |
+| shared/js/30-tuto.js:18 | _() |  | Keep pressing: your block holds, a dome wraps around you. | Maintiens l'appui : ton blocage tient, un dôme t'enveloppe. |
+| shared/js/30-tuto.js:19 | _() |  | Sometimes dodging is a misjudgment: know when to stand still. | Parfois, l'esquive est une erreur de jugement : sache rester en place. |
+| shared/js/30-tuto.js:19 | _() |  | Stand still | Rester en place |
+| shared/js/30-tuto.js:83 | _() |  | Watch the animation | Voir l’animation |
 | src/js/00-core.js:30 | _() |  | The Watcher faces the Ember Colossus: on the bridge, in the Foundry, then atop the Bell Tower. | Le Veilleur affronte le Colosse de braise : sur le pont, dans la Fonderie, puis au sommet du Clocher. |
 | src/js/00-core.js:31 | _() |  | One button: block, dodge. Space, up arrow or tap the screen. P to pause. | Un seul bouton : bloquer, esquiver. Espace, flèche haut ou toucher l'écran. P pour la pause. |
 | src/js/00-core.js:32 | _() |  | Trial by Fire | Épreuve du feu |
@@ -83,182 +84,179 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | src/js/08-state.js:81 | _() |  | Start Phase II | Lancer la phase II |
 | src/js/16-p1-bridge-logic.js:19 | _() |  | First hit blocked. | Premier coup bloqué. |
 | src/js/16-p1-bridge-logic.js:31 | _() |  | Block successful. | Blocage réussi. |
-| src/js/16-p1-bridge-logic.js:34 | _() |  | HOOKED! | ACCROCHÉ ! |
-| src/js/16-p1-bridge-logic.js:36 | _() |  | Caught by the hook. | Accroché par le crochet. |
-| src/js/16-p1-bridge-logic.js:44 | _() |  | Phase I cleared. | Phase I terminée. |
-| src/js/16-p1-bridge-logic.js:50 | _() |  | BOOM! | BOUM ! |
-| src/js/16-p1-bridge-logic.js:52 | _() |  | You are down. Defeat. | Tu es à terre. Défaite. |
-| src/js/16-p1-bridge-logic.js:97 | _() |  |  hit blocked. |  coup bloqué. |
-| src/js/16-p1-bridge-logic.js:97 | _() |  | First | Premier |
-| src/js/16-p1-bridge-logic.js:97 | _() |  | Second | Second |
-| src/js/16-p1-bridge-logic.js:97 | _() |  | Third | Troisième |
-| src/js/16-p1-bridge-logic.js:102 | _() |  | HIT! | COUP ! |
-| src/js/16-p1-bridge-logic.js:105 | _() |  | Struck by the hammer. | Frappé par le marteau. |
-| src/js/16-p1-bridge-logic.js:106 | _() |  | You are down. Defeat. | Tu es à terre. Défaite. |
-| src/js/16-p1-bridge-logic.js:121 | _() |  | Combo blocked. The Watcher hurls an orb of light. | Combo bloqué. Le Veilleur lance une orbe de lumière. |
-| src/js/16-p1-bridge-logic.js:129 | _() |  | Phase I cleared. | Phase I terminée. |
-| src/js/16-p1-bridge-logic.js:130 | _() |  | Orb of light, dead center. | Orbe de lumière en plein cœur. |
-| src/js/16-p1-bridge-logic.js:139 | _() |  | Combo blocked. Flames follow! | Combo bloqué. Des souffles enchaînent ! |
-| src/js/16-p1-bridge-logic.js:139 | _() |  | Hit blocked. Flames follow! | Coup bloqué. Des souffles enchaînent ! |
-| src/js/16-p1-bridge-logic.js:148 | _() |  | Breath blocked. A second breath is coming! | Souffle bloqué. Un second souffle arrive ! |
-| src/js/16-p1-bridge-logic.js:157 | _() |  | Breath blocked. The Watcher rushes the Colossus. | Souffle bloqué. Le Veilleur fonce sur le Colosse. |
-| src/js/16-p1-bridge-logic.js:162 | _() |  | BURNED! | BRÛLÉ ! |
-| src/js/16-p1-bridge-logic.js:165 | _() |  | Burned by the flame breath. | Brûlé par le souffle de flamme. |
-| src/js/16-p1-bridge-logic.js:166 | _() |  | You are down. Defeat. | Tu es à terre. Défaite. |
-| src/js/16-p1-bridge-logic.js:175 | _() |  | Phase I cleared. | Phase I terminée. |
-| src/js/16-p1-bridge-logic.js:176 | _() |  | The lantern flares: the Colossus's leg goes dark. | La lanterne éclate : la jambe du Colosse noircit. |
-| src/js/16-p1-bridge-logic.js:188 | _() |  | The Colossus flies into a fury. | Le Colosse entre en fureur. |
-| src/js/16-p1-bridge-logic.js:197 | _() |  | Hit. | Touché. |
-| src/js/16-p1-bridge-logic.js:198 | _() |  | You are down. Defeat. | Tu es à terre. Défaite. |
-| src/js/16-p1-bridge-logic.js:220 | _() |  | BURNED! | BRÛLÉ ! |
-| src/js/16-p1-bridge-logic.js:228 | _() |  | BURNED! | BRÛLÉ ! |
-| src/js/16-p1-bridge-logic.js:236 | _() |  | Rock blocked. | Rocher bloqué. |
-| src/js/16-p1-bridge-logic.js:237 | _() |  | CRUSHED! | ÉCRASÉ ! |
-| src/js/16-p1-bridge-logic.js:245 | _() |  | Fury blocked. The Watcher raises his lantern. | Fureur bloquée. Le Veilleur lève sa lanterne. |
-| src/js/16-p1-bridge-logic.js:253 | _() |  | The Watcher raises his lantern. | Le Veilleur lève sa lanterne. |
-| src/js/16-p1-bridge-logic.js:261 | _() |  | The lantern's halo strikes the Colossus. | Le halo de la lanterne frappe le Colosse. |
-| src/js/16-p1-bridge-logic.js:312 | _() |  | BOOM! | BOUM ! |
-| src/js/16-p1-bridge-logic.js:314 | _() |  | Staggered, the Colossus raises his hammer. | Ébranlé, le Colosse lève son marteau. |
-| src/js/16-p1-bridge-logic.js:320 | _() |  | The Colossus dives through the breach into the Foundry. The Watcher leaps after him. | Le Colosse plonge par la brèche dans la Fonderie. Le Veilleur saute à sa poursuite. |
-| src/js/16-p1-bridge-logic.js:326 | _() |  | Attempt  | Essai  |
-| src/js/16-p1-bridge-logic.js:326 | _() |  | Attempts  | Essais  |
-| src/js/36-p2-foundry-logic.js:10 | _() |  | Claw strikes | Coups de griffe |
-| src/js/36-p2-foundry-logic.js:11 | _() |  | Wing strike | Coup d'ailes |
-| src/js/36-p2-foundry-logic.js:12 | _() |  | Debris throw | Lancer de débris |
-| src/js/36-p2-foundry-logic.js:15 | _() |  | Claw flurry | Rafale de griffes |
-| src/js/36-p2-foundry-logic.js:16 | _() |  | Wing barrage | Barrage d'ailes |
-| src/js/36-p2-foundry-logic.js:17 | _() |  | Debris and fireball | Débris et boule de feu |
-| src/js/36-p2-foundry-logic.js:31 | _() |  | Phase I of III · On the bridge | Phase I sur III · Sur le pont |
-| src/js/36-p2-foundry-logic.js:31 | _() |  | Phase II of III · The Foundry | Phase II sur III · La Fonderie |
-| src/js/36-p2-foundry-logic.js:31 | _() |  | Phase III of III · The Bell Tower | Phase III sur III · Le Clocher |
-| src/js/36-p2-foundry-logic.js:32 | _() |  | Block | Bloquer |
-| src/js/36-p2-foundry-logic.js:32 | _() |  | Block | Bloquer |
-| src/js/36-p2-foundry-logic.js:32 | _() |  | Dodge | Esquiver |
-| src/js/36-p2-foundry-logic.js:33 | _() |  | Arena: the Watcher and the winged Ember Colossus face each other at the bottom of the Foundry | Arène du combat : le Veilleur et le Colosse de braise ailé s'affrontent au fond de la Fonderie |
-| src/js/36-p2-foundry-logic.js:33 | _() |  | Arena: the Watcher faces the Ember Colossus atop the snowy Watchers' Bell Tower | Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs |
-| src/js/36-p2-foundry-logic.js:33 | _() |  | Arena: the Watcher faces the Ember Colossus on a stone bridge | Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre |
-| src/js/36-p2-foundry-logic.js:39 | _() |  | Phase II. The Foundry. The button now dodges. | Phase II. La Fonderie. Le bouton sert maintenant à esquiver. |
-| src/js/36-p2-foundry-logic.js:73 | _() |  | ENRAGED | ENRAGEMENT |
-| src/js/36-p2-foundry-logic.js:73 | _() |  | RAGE! | RAGE ! |
-| src/js/36-p2-foundry-logic.js:84 | _() |  | Final assault: claws, wings, debris, then a final roar. | Dernier assaut : griffes, ailes, débris, puis un dernier cri. |
-| src/js/36-p2-foundry-logic.js:84 | _() |  | Final assault: the Colossus will chain his three attacks. | Dernier assaut : le Colosse va enchaîner ses trois attaques. |
-| src/js/36-p2-foundry-logic.js:84 | _() |  | The Colossus enrages. A flaming tail will end each attack. | Le Colosse s'enrage. Une queue enflammée terminera chaque attaque. |
-| src/js/36-p2-foundry-logic.js:97 | _() |  | , tail strike to follow. | , coup de queue à suivre. |
-| src/js/36-p2-foundry-logic.js:97 | _() |  | , tail sweep to follow. | , balayage de queue à suivre. |
-| src/js/36-p2-foundry-logic.js:108 | _() |  | A final roar: the bridge debris rains down! | Un dernier cri : les débris du pont pleuvent d'en haut ! |
-| src/js/36-p2-foundry-logic.js:108 | _() |  | The Colossus roars again. His tail will now sweep twice after each attack. Debris rains down! | Le Colosse rugit à nouveau. Sa queue balaiera deux fois après chaque attaque. Des débris pleuvent ! |
-| src/js/36-p2-foundry-logic.js:108 | _() |  | The Colossus roars: the bridge debris rains down! | Le Colosse rugit : les débris du pont pleuvent d'en haut ! |
-| src/js/36-p2-foundry-logic.js:130 | _() |  | CRUSHED! | ÉCRASÉ ! |
-| src/js/36-p2-foundry-logic.js:130 | _() |  | HIT! | TOUCHÉ ! |
-| src/js/36-p2-foundry-logic.js:132 | _() |  | Struck down at the bottom of the Foundry. Defeat. | Terrassé au fond de la Fonderie. Défaite. |
-| src/js/36-p2-foundry-logic.js:136 | _() |  | Hit. | Touché. |
-| src/js/36-p2-foundry-logic.js:160 | _() |  | Perfect dodge. Riposte! | Esquive parfaite. Riposte ! |
-| src/js/36-p2-foundry-logic.js:165 | _() |  | Chain dodged. The Watcher gathers himself. | Enchaînement esquivé. Le Veilleur se concentre. |
-| src/js/36-p2-foundry-logic.js:174 | _() |  | Riposte landed. | Riposte réussie. |
-| src/js/36-p2-foundry-logic.js:195 | _() |  | FINAL BLOW! | COUP ULTIME ! |
-| src/js/36-p2-foundry-logic.js:199 | _() |  | The lantern's beam pierces the Colossus's chest. | Le rayon de la lanterne transperce le torse du Colosse. |
-| src/js/36-p2-foundry-logic.js:210 | _() |  | The Colossus plunges toward the great furnace. | Le Colosse plonge vers le grand four. |
-| src/js/36-p2-foundry-logic.js:244 | _() |  | Defeat · Phase II | Défaite · Phase II |
-| src/js/36-p2-foundry-logic.js:244 | _() |  | Transition | Transition |
-| src/js/36-p2-foundry-logic.js:245 | _() |  | Phase II cleared | Phase II terminée |
-| src/js/36-p2-foundry-logic.js:245 | _() |  | Struck down at the bottom of the Foundry. | Terrassé au fond de la Fonderie. |
-| src/js/36-p2-foundry-logic.js:246 | _() |  |  · Hits taken  |  · Coups subis  |
-| src/js/36-p2-foundry-logic.js:246 | _() |  | Dodges  | Esquives  |
-| src/js/36-p2-foundry-logic.js:247 | _() |  | The Watcher collapses at the bottom of the Foundry, and his light goes out with him. | Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui. |
-| src/js/36-p2-foundry-logic.js:247 | _() |  | The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney. | Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée. |
-| src/js/36-p2-foundry-logic.js:248 | _() |  | Retry Phase II | Réessayer la phase II |
-| src/js/36-p2-foundry-logic.js:248 | _() |  | Start Phase III | Lancer la phase III |
-| src/js/36-p2-foundry-logic.js:271 | _() |  | PHASE II | PHASE II |
-| src/js/36-p2-foundry-logic.js:293 | _() |  | The Colossus bursts from the furnace, wings spread! | Le Colosse jaillit du four, ailes déployées ! |
-| src/js/44-p3-belfry-logic.js:7 | _() |  | War hammer | Marteau de guerre |
-| src/js/44-p3-belfry-logic.js:8 | _() |  | Ember hail | Grêle de braise |
-| src/js/44-p3-belfry-logic.js:9 | _() |  | Charge, stomp and geyser | Charge, piétinement et geyser |
-| src/js/44-p3-belfry-logic.js:10 | _() |  | The hook | Le crochet |
-| src/js/44-p3-belfry-logic.js:11 | _() |  | Hammer combo | Combo de marteau |
-| src/js/44-p3-belfry-logic.js:12 | _() |  | Flame breath | Souffle de flamme |
-| src/js/44-p3-belfry-logic.js:13 | _() |  | Claws | Griffes |
-| src/js/44-p3-belfry-logic.js:14 | _() |  | Falling stones | Chute de pierres |
-| src/js/44-p3-belfry-logic.js:15 | _() |  | Wing waves | Ondes d'ailes |
-| src/js/44-p3-belfry-logic.js:16 | _() |  | Roar: the tower shakes | Cri : le Clocher tremble |
-| src/js/44-p3-belfry-logic.js:21 | _() |  | Ram, combo and blast | Coup de bélier, combo et explosion |
-| src/js/44-p3-belfry-logic.js:22 | _() |  | Ember bombs | Bombes de braise |
-| src/js/44-p3-belfry-logic.js:23 | _() |  | Charge, stomp, recharge and geyser | Charge, piétinement, recharge et geyser |
-| src/js/44-p3-belfry-logic.js:28 | _() |  | Death rattle | Râle d'agonie |
-| src/js/44-p3-belfry-logic.js:29 | _() |  | Fury | Fureur |
-| src/js/44-p3-belfry-logic.js:30 | _() |  | Blaze | Embrasement |
-| src/js/44-p3-belfry-logic.js:34 | _() |  | Ember fury | Fureur de braise |
-| src/js/44-p3-belfry-logic.js:35 | _() |  | Chain dance | Danse des chaînes |
-| src/js/44-p3-belfry-logic.js:36 | _() |  | Final blaze | Embrasement final |
-| src/js/44-p3-belfry-logic.js:53 | _() |  | Phase III. The Bell Tower. The button raises your guard to block. | Phase III. Le Clocher. Le bouton lève ta garde pour bloquer. |
-| src/js/44-p3-belfry-logic.js:72 | _() |  | Double hook | Double crochet |
-| src/js/44-p3-belfry-logic.js:72 | _() |  | Four hooks | Quatre crochets |
-| src/js/44-p3-belfry-logic.js:76 | _() |  | Hammer combo | Combo de marteau |
-| src/js/44-p3-belfry-logic.js:78 | _() |  | Flame breath | Souffle de flamme |
-| src/js/44-p3-belfry-logic.js:79 | _() |  | Claw flurry | Rafale de griffes |
-| src/js/44-p3-belfry-logic.js:80 | _() |  | Wing barrage | Barrage d'ailes |
-| src/js/44-p3-belfry-logic.js:81 | _() |  | Stones and fireball | Pierres et boule de feu |
-| src/js/44-p3-belfry-logic.js:86 | _() |  | Roar: the tower shakes | Cri : le Clocher tremble |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | BURNED! | BRÛLÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | BURNED! | BRÛLÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | BURNED! | BRÛLÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | BURNED! | BRÛLÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | CLAWED! | GRIFFÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | CRUSHED! | ÉCRASÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | CRUSHED! | ÉCRASÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | CRUSHED! | ÉCRASÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | CRUSHED! | ÉCRASÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | EXPLOSION! | EXPLOSION ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | EXPLOSION! | EXPLOSION ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | HOOKED! | ACCROCHÉ ! |
-| src/js/44-p3-belfry-logic.js:152 | _() |  | RAMMED! | PERCUTÉ ! |
-| src/js/44-p3-belfry-logic.js:174 | _() |  | HIT! | TOUCHÉ ! |
-| src/js/44-p3-belfry-logic.js:180 | _() |  | Struck down atop the tower. Defeat. | Terrassé au sommet du Clocher. Défaite. |
-| src/js/44-p3-belfry-logic.js:181 | _() |  | Hit. | Touché. |
-| src/js/44-p3-belfry-logic.js:189 | _() |  | Combo blocked. The Watcher rings the great bell! | Combo bloqué. Le Veilleur fait sonner la grande cloche ! |
-| src/js/44-p3-belfry-logic.js:189 | _() |  | Perfect block. Riposte! | Blocage parfait. Riposte ! |
-| src/js/44-p3-belfry-logic.js:194 | _() |  | The bell calls down the lightning. The Colossus raises his weapon to crush the Watcher. | La cloche appelle la foudre. Le Colosse lève son arme pour écraser le Veilleur. |
-| src/js/44-p3-belfry-logic.js:208 | _() |  | Final death cry: the Colossus recovers all his health. | Ultime cri d'agonie : le Colosse récupère toute sa vie. |
-| src/js/44-p3-belfry-logic.js:215 | _() |  | The bell calls down the lightning on the Colossus. | La cloche appelle la foudre sur le Colosse. |
-| src/js/44-p3-belfry-logic.js:231 | _() |  | The Colossus collapses. Victory. | Le Colosse s'effondre. Victoire. |
-| src/js/44-p3-belfry-logic.js:232 | _() |  | Riposte landed. | Riposte réussie. |
-| src/js/44-p3-belfry-logic.js:268 | _() |  | The Colossus is back, fiercer than ever. | Le Colosse est de retour, plus féroce encore. |
-| src/js/44-p3-belfry-logic.js:279 | _() |  | Attempts | Essais |
-| src/js/44-p3-belfry-logic.js:279 | _() |  | Hits taken | Coups subis |
-| src/js/44-p3-belfry-logic.js:279 | _() |  | Total time | Temps total |
-| src/js/44-p3-belfry-logic.js:280 | _() |  | Phase I | Phase I |
-| src/js/44-p3-belfry-logic.js:280 | _() |  | Phase II | Phase II |
-| src/js/44-p3-belfry-logic.js:280 | _() |  | Phase III | Phase III |
-| src/js/44-p3-belfry-logic.js:281 | _() |  | Best time | Meilleur temps |
-| src/js/44-p3-belfry-logic.js:281 | _() |  | Blocks | Blocages |
-| src/js/44-p3-belfry-logic.js:281 | _() |  | Dodges | Esquives |
-| src/js/44-p3-belfry-logic.js:281 | _() |  | New record! | Nouveau record ! |
-| src/js/44-p3-belfry-logic.js:287 | _() |  | Defeat · Phase III | Défaite · Phase III |
-| src/js/44-p3-belfry-logic.js:287 | _() |  | End of Chapter I · Next: Silent Bells | Fin du chapitre I · À suivre : Silent Bells |
-| src/js/44-p3-belfry-logic.js:287 | _() |  | Victory · Phase III | Victoire · Phase III |
-| src/js/44-p3-belfry-logic.js:288 | _() |  | Struck down atop the tower. | Terrassé au sommet du Clocher. |
-| src/js/44-p3-belfry-logic.js:288 | _() |  | The Colossus collapses. | Le Colosse s'effondre. |
-| src/js/44-p3-belfry-logic.js:288 | _() |  | The fire has gone out. | Le feu s'est éteint. |
-| src/js/44-p3-belfry-logic.js:289 | _() |  |  · Hits taken  |  · Coups subis  |
-| src/js/44-p3-belfry-logic.js:289 | _() |  | Blocks  | Blocages  |
-| src/js/44-p3-belfry-logic.js:290 | _() |  | Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again. | La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus. |
-| src/js/44-p3-belfry-logic.js:290 | _() |  | The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch. | Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore. |
-| src/js/44-p3-belfry-logic.js:290 | _() |  | The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while. | Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps. |
-| src/js/44-p3-belfry-logic.js:291 | _() |  | Back to menu | Retour au menu |
-| src/js/44-p3-belfry-logic.js:291 | _() |  | Replay from Phase I | Rejouer depuis la phase I |
-| src/js/44-p3-belfry-logic.js:291 | _() |  | Retry Phase III | Réessayer la phase III |
-| src/js/44-p3-belfry-logic.js:292 | _() |  | Trial by Fire · Complete | Épreuve du feu · Terminée |
-| src/js/44-p3-belfry-logic.js:344 | _() |  | PHASE III | PHASE III |
-| src/js/44-p3-belfry-logic.js:367 | _() |  | WING SHATTERED! | AILE BRISÉE ! |
-| src/js/44-p3-belfry-logic.js:377 | _() |  | The Watcher raises his lantern: the great bell answers. | Le Veilleur lève sa lanterne : la grande cloche répond. |
-| src/js/44-p3-belfry-logic.js:382 | _() |  | DISARMED! | DÉSARMÉ ! |
-| src/js/44-p3-belfry-logic.js:383 | _() |  | The echo tears the mace from the Colossus's hands. | L'écho arrache la masse des mains du Colosse. |
-| src/js/44-p3-belfry-logic.js:401 | _() |  | FINAL BLOW! | COUP ULTIME ! |
-| src/js/44-p3-belfry-logic.js:404 | _() |  | The Colossus crashes down beneath the great bell. | Le Colosse s'écrase sous la grande cloche. |
-| src/js/44-p3-belfry-logic.js:409 | _() |  | The Watcher raises his lantern: the great bell rings and the Colossus turns to stone. | Le Veilleur lève sa lanterne : la grande cloche sonne et le Colosse se change en pierre. |
-| src/js/44-p3-belfry-logic.js:411 | _() |  | The Watcher lights the Bell Tower's beacon. | Le Veilleur allume le fanal du Clocher. |
-| src/js/44-p3-belfry-logic.js:412 | _() |  | One by one, the Spires answer. | Une à une, les Flèches répondent. |
-| src/js/44-p3-belfry-logic.js:416 | _() |  | All but one. | Toutes, sauf une. |
-| src/js/44-p3-belfry-logic.js:417 | _() |  | Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I. | Au large, le Phare Noyé reste muet. Fin du chapitre I. |
+| src/js/16-p1-bridge-logic.js:41 | _() |  | Phase I cleared. | Phase I terminée. |
+| src/js/16-p1-bridge-logic.js:49 | _() |  | You are down. Defeat. | Tu es à terre. Défaite. |
+| src/js/16-p1-bridge-logic.js:94 | _() |  |  hit blocked. |  coup bloqué. |
+| src/js/16-p1-bridge-logic.js:94 | _() |  | First | Premier |
+| src/js/16-p1-bridge-logic.js:94 | _() |  | Second | Second |
+| src/js/16-p1-bridge-logic.js:94 | _() |  | Third | Troisième |
+| src/js/16-p1-bridge-logic.js:99 | _() |  | HIT! | COUP ! |
+| src/js/16-p1-bridge-logic.js:102 | _() |  | Struck by the hammer. | Frappé par le marteau. |
+| src/js/16-p1-bridge-logic.js:103 | _() |  | You are down. Defeat. | Tu es à terre. Défaite. |
+| src/js/16-p1-bridge-logic.js:118 | _() |  | Combo blocked. The Watcher hurls an orb of light. | Combo bloqué. Le Veilleur lance une orbe de lumière. |
+| src/js/16-p1-bridge-logic.js:126 | _() |  | Phase I cleared. | Phase I terminée. |
+| src/js/16-p1-bridge-logic.js:127 | _() |  | Orb of light, dead center. | Orbe de lumière en plein cœur. |
+| src/js/16-p1-bridge-logic.js:136 | _() |  | Combo blocked. Flames follow! | Combo bloqué. Des souffles enchaînent ! |
+| src/js/16-p1-bridge-logic.js:136 | _() |  | Hit blocked. Flames follow! | Coup bloqué. Des souffles enchaînent ! |
+| src/js/16-p1-bridge-logic.js:145 | _() |  | Breath blocked. A second breath is coming! | Souffle bloqué. Un second souffle arrive ! |
+| src/js/16-p1-bridge-logic.js:154 | _() |  | Breath blocked. The Watcher rushes the Colossus. | Souffle bloqué. Le Veilleur fonce sur le Colosse. |
+| src/js/16-p1-bridge-logic.js:159 | _() |  | BURNED! | BRÛLÉ ! |
+| src/js/16-p1-bridge-logic.js:162 | _() |  | Burned by the flame breath. | Brûlé par le souffle de flamme. |
+| src/js/16-p1-bridge-logic.js:163 | _() |  | You are down. Defeat. | Tu es à terre. Défaite. |
+| src/js/16-p1-bridge-logic.js:172 | _() |  | Phase I cleared. | Phase I terminée. |
+| src/js/16-p1-bridge-logic.js:173 | _() |  | The lantern flares: the Colossus's leg goes dark. | La lanterne éclate : la jambe du Colosse noircit. |
+| src/js/16-p1-bridge-logic.js:185 | _() |  | The Colossus flies into a fury. | Le Colosse entre en fureur. |
+| src/js/16-p1-bridge-logic.js:194 | _() |  | Hit. | Touché. |
+| src/js/16-p1-bridge-logic.js:195 | _() |  | You are down. Defeat. | Tu es à terre. Défaite. |
+| src/js/16-p1-bridge-logic.js:217 | _() |  | BURNED! | BRÛLÉ ! |
+| src/js/16-p1-bridge-logic.js:225 | _() |  | BURNED! | BRÛLÉ ! |
+| src/js/16-p1-bridge-logic.js:233 | _() |  | Rock blocked. | Rocher bloqué. |
+| src/js/16-p1-bridge-logic.js:234 | _() |  | CRUSHED! | ÉCRASÉ ! |
+| src/js/16-p1-bridge-logic.js:242 | _() |  | Fury blocked. The Watcher raises his lantern. | Fureur bloquée. Le Veilleur lève sa lanterne. |
+| src/js/16-p1-bridge-logic.js:250 | _() |  | The Watcher raises his lantern. | Le Veilleur lève sa lanterne. |
+| src/js/16-p1-bridge-logic.js:258 | _() |  | The lantern's halo strikes the Colossus. | Le halo de la lanterne frappe le Colosse. |
+| src/js/16-p1-bridge-logic.js:306 | _() |  | BOOM! | BOUM ! |
+| src/js/16-p1-bridge-logic.js:308 | _() |  | Staggered, the Colossus raises his hammer. | Ébranlé, le Colosse lève son marteau. |
+| src/js/16-p1-bridge-logic.js:314 | _() |  | The Colossus dives through the breach into the Foundry. The Watcher leaps after him. | Le Colosse plonge par la brèche dans la Fonderie. Le Veilleur saute à sa poursuite. |
+| src/js/16-p1-bridge-logic.js:320 | _() |  | Attempt  | Essai  |
+| src/js/16-p1-bridge-logic.js:320 | _() |  | Attempts  | Essais  |
+| src/js/36-p2-foundry-logic.js:12 | _() |  | Claw strikes | Coups de griffe |
+| src/js/36-p2-foundry-logic.js:13 | _() |  | Wing strike | Coup d'ailes |
+| src/js/36-p2-foundry-logic.js:14 | _() |  | Debris throw | Lancer de débris |
+| src/js/36-p2-foundry-logic.js:17 | _() |  | Claw flurry | Rafale de griffes |
+| src/js/36-p2-foundry-logic.js:18 | _() |  | Wing barrage | Barrage d'ailes |
+| src/js/36-p2-foundry-logic.js:19 | _() |  | Debris and fireball | Débris et boule de feu |
+| src/js/36-p2-foundry-logic.js:33 | _() |  | Phase I of III · On the bridge | Phase I sur III · Sur le pont |
+| src/js/36-p2-foundry-logic.js:33 | _() |  | Phase II of III · The Foundry | Phase II sur III · La Fonderie |
+| src/js/36-p2-foundry-logic.js:33 | _() |  | Phase III of III · The Bell Tower | Phase III sur III · Le Clocher |
+| src/js/36-p2-foundry-logic.js:34 | _() |  | Block | Bloquer |
+| src/js/36-p2-foundry-logic.js:34 | _() |  | Block | Bloquer |
+| src/js/36-p2-foundry-logic.js:34 | _() |  | Dodge | Esquiver |
+| src/js/36-p2-foundry-logic.js:35 | _() |  | Arena: the Watcher and the winged Ember Colossus face each other at the bottom of the Foundry | Arène du combat : le Veilleur et le Colosse de braise ailé s'affrontent au fond de la Fonderie |
+| src/js/36-p2-foundry-logic.js:35 | _() |  | Arena: the Watcher faces the Ember Colossus atop the snowy Watchers' Bell Tower | Arène du combat : le Veilleur face au Colosse de braise au sommet enneigé du Clocher des Veilleurs |
+| src/js/36-p2-foundry-logic.js:35 | _() |  | Arena: the Watcher faces the Ember Colossus on a stone bridge | Arène du combat : le Veilleur face au Colosse de braise sur un pont de pierre |
+| src/js/36-p2-foundry-logic.js:41 | _() |  | Phase II. The Foundry. The button now dodges. | Phase II. La Fonderie. Le bouton sert maintenant à esquiver. |
+| src/js/36-p2-foundry-logic.js:75 | _() |  | ENRAGED | ENRAGEMENT |
+| src/js/36-p2-foundry-logic.js:75 | _() |  | RAGE! | RAGE ! |
+| src/js/36-p2-foundry-logic.js:86 | _() |  | Final assault: claws, wings, debris, then a final roar. | Dernier assaut : griffes, ailes, débris, puis un dernier cri. |
+| src/js/36-p2-foundry-logic.js:86 | _() |  | Final assault: the Colossus will chain his three attacks. | Dernier assaut : le Colosse va enchaîner ses trois attaques. |
+| src/js/36-p2-foundry-logic.js:86 | _() |  | The Colossus enrages. A flaming tail will end each attack. | Le Colosse s'enrage. Une queue enflammée terminera chaque attaque. |
+| src/js/36-p2-foundry-logic.js:99 | _() |  | , tail strike to follow. | , coup de queue à suivre. |
+| src/js/36-p2-foundry-logic.js:99 | _() |  | , tail sweep to follow. | , balayage de queue à suivre. |
+| src/js/36-p2-foundry-logic.js:110 | _() |  | A final roar: the bridge debris rains down! | Un dernier cri : les débris du pont pleuvent d'en haut ! |
+| src/js/36-p2-foundry-logic.js:110 | _() |  | The Colossus roars again. His tail will now sweep twice after each attack. Debris rains down! | Le Colosse rugit à nouveau. Sa queue balaiera deux fois après chaque attaque. Des débris pleuvent ! |
+| src/js/36-p2-foundry-logic.js:110 | _() |  | The Colossus roars: the bridge debris rains down! | Le Colosse rugit : les débris du pont pleuvent d'en haut ! |
+| src/js/36-p2-foundry-logic.js:132 | _() |  | CRUSHED! | ÉCRASÉ ! |
+| src/js/36-p2-foundry-logic.js:132 | _() |  | HIT! | TOUCHÉ ! |
+| src/js/36-p2-foundry-logic.js:134 | _() |  | Struck down at the bottom of the Foundry. Defeat. | Terrassé au fond de la Fonderie. Défaite. |
+| src/js/36-p2-foundry-logic.js:138 | _() |  | Hit. | Touché. |
+| src/js/36-p2-foundry-logic.js:164 | _() |  | Perfect dodge. Riposte! | Esquive parfaite. Riposte ! |
+| src/js/36-p2-foundry-logic.js:169 | _() |  | Chain dodged. The Watcher gathers himself. | Enchaînement esquivé. Le Veilleur se concentre. |
+| src/js/36-p2-foundry-logic.js:178 | _() |  | Riposte landed. | Riposte réussie. |
+| src/js/36-p2-foundry-logic.js:199 | _() |  | FINAL BLOW! | COUP ULTIME ! |
+| src/js/36-p2-foundry-logic.js:203 | _() |  | The lantern's beam pierces the Colossus's chest. | Le rayon de la lanterne transperce le torse du Colosse. |
+| src/js/36-p2-foundry-logic.js:214 | _() |  | The Colossus plunges toward the great furnace. | Le Colosse plonge vers le grand four. |
+| src/js/36-p2-foundry-logic.js:248 | _() |  | Defeat · Phase II | Défaite · Phase II |
+| src/js/36-p2-foundry-logic.js:248 | _() |  | Transition | Transition |
+| src/js/36-p2-foundry-logic.js:249 | _() |  | Phase II cleared | Phase II terminée |
+| src/js/36-p2-foundry-logic.js:249 | _() |  | Struck down at the bottom of the Foundry. | Terrassé au fond de la Fonderie. |
+| src/js/36-p2-foundry-logic.js:250 | _() |  |  · Hits taken  |  · Coups subis  |
+| src/js/36-p2-foundry-logic.js:250 | _() |  | Dodges  | Esquives  |
+| src/js/36-p2-foundry-logic.js:251 | _() |  | The Watcher collapses at the bottom of the Foundry, and his light goes out with him. | Le Veilleur s'effondre au fond de la Fonderie, et sa lumière s'éteint avec lui. |
+| src/js/36-p2-foundry-logic.js:251 | _() |  | The great furnace swallows the Colossus. Rekindled, he bursts out and flies up the chimney. | Le grand four engloutit le Colosse. Ravivé, il jaillit du four et s'envole par la cheminée. |
+| src/js/36-p2-foundry-logic.js:252 | _() |  | Retry Phase II | Réessayer la phase II |
+| src/js/36-p2-foundry-logic.js:252 | _() |  | Start Phase III | Lancer la phase III |
+| src/js/36-p2-foundry-logic.js:275 | _() |  | PHASE II | PHASE II |
+| src/js/36-p2-foundry-logic.js:297 | _() |  | The Colossus bursts from the furnace, wings spread! | Le Colosse jaillit du four, ailes déployées ! |
+| src/js/44-p3-belfry-logic.js:9 | _() |  | War hammer | Marteau de guerre |
+| src/js/44-p3-belfry-logic.js:10 | _() |  | Ember hail | Grêle de braise |
+| src/js/44-p3-belfry-logic.js:11 | _() |  | Charge, stomp and geyser | Charge, piétinement et geyser |
+| src/js/44-p3-belfry-logic.js:12 | _() |  | The Chained Ball | La boule enchaînée |
+| src/js/44-p3-belfry-logic.js:13 | _() |  | Hammer combo | Combo de marteau |
+| src/js/44-p3-belfry-logic.js:14 | _() |  | Flame breath | Souffle de flamme |
+| src/js/44-p3-belfry-logic.js:15 | _() |  | Claws | Griffes |
+| src/js/44-p3-belfry-logic.js:16 | _() |  | Falling stones | Chute de pierres |
+| src/js/44-p3-belfry-logic.js:17 | _() |  | Wing waves | Ondes d'ailes |
+| src/js/44-p3-belfry-logic.js:18 | _() |  | Roar: the tower shakes | Cri : le Clocher tremble |
+| src/js/44-p3-belfry-logic.js:23 | _() |  | Ram, combo and blast | Coup de bélier, combo et explosion |
+| src/js/44-p3-belfry-logic.js:24 | _() |  | Ember bombs | Bombes de braise |
+| src/js/44-p3-belfry-logic.js:25 | _() |  | Charge, stomp, recharge and geyser | Charge, piétinement, recharge et geyser |
+| src/js/44-p3-belfry-logic.js:30 | _() |  | Death rattle | Râle d'agonie |
+| src/js/44-p3-belfry-logic.js:31 | _() |  | Fury | Fureur |
+| src/js/44-p3-belfry-logic.js:32 | _() |  | Blaze | Embrasement |
+| src/js/44-p3-belfry-logic.js:36 | _() |  | Ember fury | Fureur de braise |
+| src/js/44-p3-belfry-logic.js:37 | _() |  | Chain dance | Danse des chaînes |
+| src/js/44-p3-belfry-logic.js:38 | _() |  | Final blaze | Embrasement final |
+| src/js/44-p3-belfry-logic.js:55 | _() |  | Phase III. The Bell Tower. The button raises your guard to block. | Phase III. Le Clocher. Le bouton lève ta garde pour bloquer. |
+| src/js/44-p3-belfry-logic.js:74 | _() |  | Double Throw | Double lancer |
+| src/js/44-p3-belfry-logic.js:74 | _() |  | Four Throws | Quatre lancers |
+| src/js/44-p3-belfry-logic.js:78 | _() |  | Hammer combo | Combo de marteau |
+| src/js/44-p3-belfry-logic.js:80 | _() |  | Flame breath | Souffle de flamme |
+| src/js/44-p3-belfry-logic.js:81 | _() |  | Claw flurry | Rafale de griffes |
+| src/js/44-p3-belfry-logic.js:82 | _() |  | Wing barrage | Barrage d'ailes |
+| src/js/44-p3-belfry-logic.js:83 | _() |  | Stones and fireball | Pierres et boule de feu |
+| src/js/44-p3-belfry-logic.js:88 | _() |  | Roar: the tower shakes | Cri : le Clocher tremble |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | BURNED! | BRÛLÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | BURNED! | BRÛLÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | BURNED! | BRÛLÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | BURNED! | BRÛLÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | CLAWED! | GRIFFÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | CRUSHED! | ÉCRASÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | CRUSHED! | ÉCRASÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | CRUSHED! | ÉCRASÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | CRUSHED! | ÉCRASÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | EXPLOSION! | EXPLOSION ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | EXPLOSION! | EXPLOSION ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | HOOKED! | ACCROCHÉ ! |
+| src/js/44-p3-belfry-logic.js:154 | _() |  | RAMMED! | PERCUTÉ ! |
+| src/js/44-p3-belfry-logic.js:176 | _() |  | HIT! | TOUCHÉ ! |
+| src/js/44-p3-belfry-logic.js:182 | _() |  | Struck down atop the tower. Defeat. | Terrassé au sommet du Clocher. Défaite. |
+| src/js/44-p3-belfry-logic.js:183 | _() |  | Hit. | Touché. |
+| src/js/44-p3-belfry-logic.js:191 | _() |  | Combo blocked. The Watcher rings the great bell! | Combo bloqué. Le Veilleur fait sonner la grande cloche ! |
+| src/js/44-p3-belfry-logic.js:191 | _() |  | Perfect block. Riposte! | Blocage parfait. Riposte ! |
+| src/js/44-p3-belfry-logic.js:196 | _() |  | The bell calls down the lightning. The Colossus raises his weapon to crush the Watcher. | La cloche appelle la foudre. Le Colosse lève son arme pour écraser le Veilleur. |
+| src/js/44-p3-belfry-logic.js:210 | _() |  | Final death cry: the Colossus recovers all his health. | Ultime cri d'agonie : le Colosse récupère toute sa vie. |
+| src/js/44-p3-belfry-logic.js:217 | _() |  | The bell calls down the lightning on the Colossus. | La cloche appelle la foudre sur le Colosse. |
+| src/js/44-p3-belfry-logic.js:233 | _() |  | The Colossus collapses. Victory. | Le Colosse s'effondre. Victoire. |
+| src/js/44-p3-belfry-logic.js:234 | _() |  | Riposte landed. | Riposte réussie. |
+| src/js/44-p3-belfry-logic.js:270 | _() |  | The Colossus is back, fiercer than ever. | Le Colosse est de retour, plus féroce encore. |
+| src/js/44-p3-belfry-logic.js:281 | _() |  | Attempts | Essais |
+| src/js/44-p3-belfry-logic.js:281 | _() |  | Hits taken | Coups subis |
+| src/js/44-p3-belfry-logic.js:281 | _() |  | Total time | Temps total |
+| src/js/44-p3-belfry-logic.js:282 | _() |  | Phase I | Phase I |
+| src/js/44-p3-belfry-logic.js:282 | _() |  | Phase II | Phase II |
+| src/js/44-p3-belfry-logic.js:282 | _() |  | Phase III | Phase III |
+| src/js/44-p3-belfry-logic.js:283 | _() |  | Best time | Meilleur temps |
+| src/js/44-p3-belfry-logic.js:283 | _() |  | Blocks | Blocages |
+| src/js/44-p3-belfry-logic.js:283 | _() |  | Dodges | Esquives |
+| src/js/44-p3-belfry-logic.js:283 | _() |  | New record! | Nouveau record ! |
+| src/js/44-p3-belfry-logic.js:289 | _() |  | Defeat · Phase III | Défaite · Phase III |
+| src/js/44-p3-belfry-logic.js:289 | _() |  | End of Chapter I · Next: Silent Bells | Fin du chapitre I · À suivre : Silent Bells |
+| src/js/44-p3-belfry-logic.js:289 | _() |  | Victory · Phase III | Victoire · Phase III |
+| src/js/44-p3-belfry-logic.js:290 | _() |  | Struck down atop the tower. | Terrassé au sommet du Clocher. |
+| src/js/44-p3-belfry-logic.js:290 | _() |  | The Colossus collapses. | Le Colosse s'effondre. |
+| src/js/44-p3-belfry-logic.js:290 | _() |  | The fire has gone out. | Le feu s'est éteint. |
+| src/js/44-p3-belfry-logic.js:291 | _() |  |  · Hits taken  |  · Coups subis  |
+| src/js/44-p3-belfry-logic.js:291 | _() |  | Blocks  | Blocages  |
+| src/js/44-p3-belfry-logic.js:292 | _() |  | Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again. | La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus. |
+| src/js/44-p3-belfry-logic.js:292 | _() |  | The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch. | Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore. |
+| src/js/44-p3-belfry-logic.js:292 | _() |  | The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while. | Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps. |
+| src/js/44-p3-belfry-logic.js:293 | _() |  | Back to menu | Retour au menu |
+| src/js/44-p3-belfry-logic.js:293 | _() |  | Replay from Phase I | Rejouer depuis la phase I |
+| src/js/44-p3-belfry-logic.js:293 | _() |  | Retry Phase III | Réessayer la phase III |
+| src/js/44-p3-belfry-logic.js:294 | _() |  | Trial by Fire · Complete | Épreuve du feu · Terminée |
+| src/js/44-p3-belfry-logic.js:346 | _() |  | PHASE III | PHASE III |
+| src/js/44-p3-belfry-logic.js:369 | _() |  | WING SHATTERED! | AILE BRISÉE ! |
+| src/js/44-p3-belfry-logic.js:379 | _() |  | The Watcher raises his lantern: the great bell answers. | Le Veilleur lève sa lanterne : la grande cloche répond. |
+| src/js/44-p3-belfry-logic.js:384 | _() |  | DISARMED! | DÉSARMÉ ! |
+| src/js/44-p3-belfry-logic.js:385 | _() |  | The echo tears the mace from the Colossus's hands. | L'écho arrache la masse des mains du Colosse. |
+| src/js/44-p3-belfry-logic.js:403 | _() |  | FINAL BLOW! | COUP ULTIME ! |
+| src/js/44-p3-belfry-logic.js:406 | _() |  | The Colossus crashes down beneath the great bell. | Le Colosse s'écrase sous la grande cloche. |
+| src/js/44-p3-belfry-logic.js:411 | _() |  | The Watcher raises his lantern: the great bell rings and the Colossus turns to stone. | Le Veilleur lève sa lanterne : la grande cloche sonne et le Colosse se change en pierre. |
+| src/js/44-p3-belfry-logic.js:413 | _() |  | The Watcher lights the Bell Tower's beacon. | Le Veilleur allume le fanal du Clocher. |
+| src/js/44-p3-belfry-logic.js:414 | _() |  | One by one, the Spires answer. | Une à une, les Flèches répondent. |
+| src/js/44-p3-belfry-logic.js:418 | _() |  | All but one. | Toutes, sauf une. |
+| src/js/44-p3-belfry-logic.js:419 | _() |  | Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I. | Au large, le Phare Noyé reste muet. Fin du chapitre I. |
 | src/js/60-ui-menu.js:2 | _() |  | Phase I · The Bridge | Phase I · Le pont |
 | src/js/60-ui-menu.js:2 | _() |  | The last watch. | La dernière veille. |
 | src/js/60-ui-menu.js:3 | _() |  | The Colossus has reached the bridge. Behind the Watcher lies nothing but the road to the valleys. A single rule: not one step back. | Le Colosse a atteint le pont. Derrière le Veilleur, il n'y a plus que la route des vallées. Une seule règle : ne pas reculer d'un pas. |

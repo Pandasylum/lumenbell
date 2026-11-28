@@ -3,11 +3,13 @@ let R=null;
 const GUARD=[PX+116,DECK-76];
 /* Phase III : down = étourdissement d'un coup, min = plancher quand un autre coup suit, lasso = étourdissement du crochet, stun = étourdissement du Colosse (s). Durées de l'action, de la récupération et de la grâce : LB.HERO_T.block. */
 const R_T={down:.55,min:.22,lasso:1.1,stun:.55};
+/* contres : instant du coup porté et fin (s, depuis le début du contre), ring = la grande cloche sonne ; lu aussi par le rendu (54-p3-belfry-colosse.js) pour caler les images */
+const R_CN={plant:{hit:.85,end:1.5},bat:{hit:.67,end:1.35},bell:{hit:.85,end:1.45,ring:.5},slide:{hit:.35,end:1.2},bolt:{hit:1.0,end:1.9,ring:.55}};
 const RATK={
   greatsword:{hits:[{k:'gs',at:.75},{k:'gs',at:1.4},{k:'gs',at:2.05}],cn:'plant',get name(){return _('War hammer','Marteau de guerre')}},
   avalanche:{hits:[{k:'ice',at:.9},{k:'ice',at:1.2},{k:'ice',at:1.5},{k:'ice',at:1.8},{k:'ice',at:2.1}],cn:'bat',get name(){return _('Ember hail','Grêle de braise')}},
   charge:{hits:[{k:'ram',at:1.0},{k:'stomp',at:1.75},{k:'geyser',at:2.5}],cn:'bell',get name(){return _('Charge, stomp and geyser','Charge, piétinement et geyser')}},
-  whip:{hits:[{k:'whip',at:.75}],cn:'plant',get name(){return _('The hook','Le crochet')}},
+  whip:{hits:[{k:'whip',at:.75}],cn:'plant',get name(){return _('The Chained Ball','La boule enchaînée')}},
   sword2:{hits:[{k:'gs',at:.75},{k:'gs',at:1.4}],cn:'plant',get name(){return _("Hammer combo","Combo de marteau")}},
   breath:{get hits(){return[{k:'breath',at:DIFF.easy?1.0:.9}]},get hq(){return !DIFF.easy},cn:'bat',get name(){return _('Flame breath','Souffle de flamme')}},
   claws:{hits:[{k:'claw',at:.8},{k:'claw',at:1.3}],cn:'bell',get name(){return _('Claws','Griffes')}},
@@ -69,7 +71,7 @@ Object.assign(RATKH,{
   whip:{cn:'plant',gen(opts){
     const four=opts&&opts.n===4,hits=four?[{k:'whip',at:.92},{k:'whip',at:1.52},{k:'whip',at:2.32},{k:'whip',at:2.92}]:[{k:'whip',at:.92},{k:'whip',at:1.52}];
     dblTell(); /* alerte sonore comme en P1 (+ « !! » à l'écran) */
-    return{hits,dbl:true,tn:hits.length,name:four?_('Four hooks','Quatre crochets'):_('Double hook','Double crochet')};
+    return{hits,dbl:true,tn:hits.length,name:four?_('Four Throws','Quatre lancers'):_('Double Throw','Double lancer')};
   }},
   sword2:{cn:'plant',gen(){
     const hits=[{k:'gs',at:1.01},{k:'gs',at:1.64},{k:'gs',at:2.51}];
@@ -233,14 +235,14 @@ function rDamage(k,c){
 }
 function rCnStep(dt){
   const c=R.cn,b=R.boss,p=R.pl;c.t+=dt;
-  const sp={plant:{hit:.85,end:1.5},bat:{hit:.67,end:1.35},bell:{hit:.85,end:1.45},slide:{hit:.35,end:1.2},bolt:{hit:1.0,end:1.9}}[c.k];
+  const sp=R_CN[c.k];
   if(c.k==='bell'){
     if(!c.d1&&c.t>=.1){c.d1=true;tone(1568,.5,'triangle',.06,0);tone(2093,.35,'sine',.035,0);tone(2637,.25,'sine',.02,0)}
-    if(!c.d2&&c.t>=.5){c.d2=true;ringBell(.55);R.flash=.2}
+    if(!c.d2&&c.t>=sp.ring){c.d2=true;ringBell(.55);R.flash=.2}
   }
   if(c.k==='plant'&&!c.pl&&c.t>=.3){c.pl=true;qRing(PX+105,DECK-14);qBurst(PX+105,DECK-14,22,['#ffffff','#bfeaff','#6fd3ff']);tone(160,.4,'sine',.1,-60);R.flash=.2}
   if(c.k==='bolt'&&!c.rz&&c.t>=.25){c.rz=true;tone(220,.8,'sawtooth',.05,900);R.flash=.2;qRing(PX+72,DECK-154)}
-  if(c.k==='bolt'&&!c.rb&&c.t>=.55){c.rb=true;ringBell(.32)}
+  if(c.k==='bolt'&&!c.rb&&c.t>=sp.ring){c.rb=true;ringBell(.32)}
   if(c.k==='bolt'&&!c.rm&&c.t>=.6){c.rm=true;tone(55,.9,'sawtooth',.08,-15)}  if(c.k==='slide'&&c.t<.4&&Math.random()<.7){
     const x=heroX3();R.sparks.push({x:x-10,y:DECK-3,vx:rand(-120,-20),vy:-rand(20,100),g:260,life:.5,max:.5,col:'#ffffff',sz:rand(2,4)});
   }

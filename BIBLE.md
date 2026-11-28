@@ -43,10 +43,10 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 **Épreuve du feu** : les trois phases d'affilée, 4 PV au départ, +1 PV entre les phases (plafond : les 4 PV de départ), PV conservés, une mort ramène à la phase I. Normal et Difficile.
 
 ## Le Colosse de braise
-- **Silhouette** : dessinée une seule fois dans `demonBody`, partagée par les trois phases. **Silhouette remplacée par la direction artistique du 2026-11-27 : voir `docs/decisions/2026-11-27-direction-artistique.md`.**
-- **Équipement** : bandoulière de chaîne, épaulettes en enclume, boule hérissée à la chaîne (au poing au repos, passée en bandoulière pendant l'attaque au marteau), marteau à deux mains rangé dans le dos (tête visible au-dessus de l'épaule), queue, crochet à chaîne à la hanche gauche.
-- **Indice du crochet** : en phase I, la chaîne du torse ne se déroule plus (la bandoulière reste en place, la boule est au poing) ; en phase III, elle se déroule encore jusqu'à sa main au rythme de l'attaque.
-- **Seconde vie (phase III)** : après la première foudre, ailes rongées et tombées, trous brûlés, fissures de braise ; à la première foudre de la seconde vie, sa corne droite se brise.
+- **Silhouette** : le `COLOSSE` (`chapters/ch1-ember-bridge/src/js/28-boss-body.js`), dessiné une seule fois et partagé par les trois phases (direction artistique du 2026-11-27 : `docs/decisions/2026-11-27-direction-artistique.md` ; phase III : `docs/decisions/2026-11-27-clocher.md`).
+- **Équipement** : bandoulière de chaîne, épaulettes en enclume, boule hérissée à la chaîne (la boule enchaînée), marteau à deux mains, queue. En phase III, marteau rangé dans le dos et boule en bandoulière hors de leurs attaques.
+- **Boule enchaînée** : la chaîne du torse ne se déroule plus, dans aucune phase ; en phase III, il décroche la boule de sa bandoulière, la fait tournoyer et la lance (attaque « La boule enchaînée » ; en Difficile « Double lancer », « Quatre lancers »).
+- **Seconde vie (phase III)** : dès la première foudre, les ailes sont rongées (trous au liseré de braise, membrane déchirée, os à nu) et retombent, jusqu'à la fin ; fissures de braise ; à la première foudre de la seconde vie, la grande corne (à droite de l'écran) se brise, tombe et reste brisée jusqu'à la fin. La scène de fin coupe ensuite les ailes.
 - **Rages** : Râle d'agonie, Fureur, Embrasement ; en Difficile : Fureur de braise, Danse des chaînes, Embrasement final.
 
 ## Les trois phases
@@ -59,13 +59,16 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 Textes exacts : `docs/TEXTES-CH1.md`.
 
 ## Les contres de la phase III
-**Le physique se contre à la cloche, la distance avec des éclats, l'arme et le crochet avec le rayon au sol.**
+**Le physique se contre à la cloche, la distance avec des comètes, les armes avec le rayon du sceptre, la rage avec la cloche puis la foudre.**
 
 | Famille | Contre du Veilleur | Attaques concernées |
 |---|---|---|
-| Physique | La cloche répond en écho et étourdit (1,3 s) | Griffes ; charge, piétinement, geyser ; cri (Difficile) |
-| Distance | Volée d'éclats de lumière (cinq comètes) | Grêle de braise, chute de pierres, souffle de flamme, ondes d'ailes |
-| Arme et crochet | Le sceptre planté : laser au sol | Marteau de guerre, combo, crochet |
+| Physique | La grande cloche sonne : ses ondes roulent jusqu'à sa tête, KO auditif mains sur la tête (1,3 s), sans étoiles | Griffes ; charge, piétinement, geyser ; cri (Difficile) |
+| Distance | Cinq comètes de lumière, de la lanterne à son cœur | Grêle de braise, chute de pierres, souffle de flamme, ondes d'ailes |
+| Armes | Parade (garde bleue du jeu), puis le rayon du sceptre repousse l'arme et frappe le torse ; la boule enchaînée, cueillie au sol, lui est renvoyée en plein torse | Marteau de guerre, combo, boule enchaînée |
+| Rage | La cloche l'étourdit dans sa furie, puis la foudre s'abat (tête et cœur ; la grande corne à la première foudre de la seconde vie) | Toutes les rages |
+
+Rage : il se ramasse, pousse son cri (ondes et éclats de braise au sol, la nuit rougit), fissures de braise et flammes jusqu'à la foudre, comme en phase I.
 
 Le Colosse a deux armes : la boule hérissée à la chaîne et le marteau à deux mains ; les noms affichés « marteau » sont corrects. Le nom affiché d'une attaque doit toujours correspondre à l'arme et au contre réellement utilisés.
 

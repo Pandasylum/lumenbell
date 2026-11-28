@@ -91,20 +91,15 @@ function drawFallWings(){
   for(const w of R.fall){
     const t=w.t,sd=w.sd,x0=R.bx+sd*64*.92,y0=DECK-204;
     ctx.save();ctx.globalAlpha=clamp01(1.6-t*.7);
-    ctx.translate(x0+sd*70*t,y0+330*t*t-40*t);ctx.rotate(sd*1.1*t);ctx.scale(.92,.92);
-    drawWing([0,0],-.85,.8,'#220a11',.34,true,sd);drawWing([0,0],-1.15,1,'#35101a',.34,true,sd);
+    ctx.translate(x0+sd*70*t,y0+330*t*t-40*t);ctx.rotate(sd*1.1*t);
+    /* l'aile coupée : celle de la phase III, rongée et retombée (calque cuit à l'entrée) */
+    const k=(sd>0?.66:.68)*C3;ctx.scale(sd,1);ctx.rotate(.14+(sd>0?.5:.62));ctx.scale(k,k*.9);ctx.drawImage(COLOSSE.aile(sd<0,true),-20,-200,420,280);
     ctx.restore();
   }
 }
 
 function heroX3(){
-  const c=R.cn,p=R.pl;
-  if(c&&c.k==='slide'){
-    const t=c.t,tx=R.bx-150;
-    if(t<.35)return PX+(tx-PX)*eo(t/.35);
-    if(t<.65)return tx;
-    return tx+(PX-tx)*es(clamp01((t-.65)/.5));
-  }
+  const p=R.pl;
   if((p.s==='down'||p.s==='hurt')&&p.lasso){const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));return PX-30*k}
   if(p.s==='down'||p.s==='hurt')return PX-24*(1-clamp01(p.t/.5));
   return PX;
@@ -125,22 +120,20 @@ function heroPose3(){
   if(c){
     const t=c.t;
     if(c.k==='plant'){
-      const u=es(clamp01(t/.3));hand=mh(H0,[38,-40],u);sa=ma(A0,.35,u);sy=1-.1*u;glow=t>=.3?clamp01(1-(t-.3)/1.1):0;
-      if(t>1.1){const v=es(clamp01((t-1.1)/.4));hand=mh([38,-40],H0,v);sa=ma(.35,A0,v);sy=.9+.1*v}
+      /* contre des armes (maquette colosse-clocher.js) : garde levée (parade), puis sceptre pointé, le rayon part de la lanterne */
+      const T=R_CN.plant.hit,bp=(a,b,m)=>es(clamp01((t-a)/m))*(1-es(clamp01((t-b)/m)));
+      const tir=bp(T-.55,T+.45,.18),gd=bp(-1,CN3.garde[1],.1);
+      hand=mh(hand,[36,-76],tir);sa=ma(sa,-.12,tir);hand=mh(hand,[28,-94],gd);sa=ma(sa,-1.5,gd);glow=Math.max(tir,gd);
     }else if(c.k==='bat'){
-      const V='B',u=es(clamp01(t/.22)),v=es(clamp01((t-.6)/.5)),w=u*(1-v);
-      if(V==='A'){hand=mh(H0,[26,-102],w);sa=ma(A0,-1.55,w)}
-      else if(V==='B'){hand=mh(H0,[30,-68],w);sa=ma(A0,-.15,w)+(t>.2&&t<.6?Math.sin(t*60)*.03:0)}
-      else{hand=mh(H0,[28,-88],w);hand[1]+=t>.2&&t<.62?Math.sin(t*55)*2.5:0;sa=ma(A0,-.95,w)}
+      /* cinq comètes : sceptre pointé vers le Colosse */
+      const u=es(clamp01(t/.22)),v=es(clamp01((t-.6)/.5)),w=u*(1-v);
+      hand=mh(H0,[30,-68],w);sa=ma(A0,-.15,w)+(t>.2&&t<.6&&!reduce?Math.sin(t*60)*.03:0);
     }else if(c.k==='bell'){
       const u=es(clamp01(t/.2)),v=es(clamp01((t-.85)/.5)),w=u*(1-v);
       hand=mh(H0,[28,-92],w);hand[1]+=t>.1&&t<.5?Math.sin(t*55)*2.5:0;sa=ma(A0,-1.15,w);glow=.9*(1-v)
     }else if(c.k==='bolt'){
-      const u=es(clamp01(t/.25));hand=mh(H0,[28,-92],u);sa=ma(A0,-.95,u);glow=1;
-      if(t>1.5){const v=es(clamp01((t-1.5)/.4));hand=mh([28,-92],H0,v);sa=ma(-.95,A0,v);glow=1-v}
-    }else if(c.k==='slide'){
-      sy=.82;hand=[34,-34];sa=0;rot=.05;
-      if(t>.65){const v=es(clamp01((t-.65)/.5));sy=.82+.18*v;hand=mh([34,-34],H0,v);sa=ma(0,A0,v);rot=.05*(1-v)}
+      const u=es(clamp01(t/.25));hand=mh(H0,[28,-92],u);sa=ma(A0,-1.15,u);glow=1;
+      if(t>1.5){const v=es(clamp01((t-1.5)/.4));hand=mh([28,-92],H0,v);sa=ma(-1.15,A0,v);glow=1-v}
     }
   }else if(p.s==='act'){
     const r=clamp01(p.t/.08);hand=mh(H0,[28,-94],r);sa=ma(A0,-1.5,r);glow=1;
