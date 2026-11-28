@@ -173,6 +173,10 @@ const COLOSSE=(()=>{
     SP.head=bake([-94,-338,168,164],Mq(tete),RIM,S3);
     SP.jaw=bake([-88,-230,76,52],Mq(machoire),RIM,S3);
     SP.paulR=bake([30,-274,144,84],Mq(paulR),RIM,S3);
+    /* grande enclume de l'épaule proche, brisée (phase III, première foudre) : le bec arraché, cassure de braise ; le morceau arraché, à part (il tombe) */
+    const BEC='M150 -336L144 -318L156 -302L142 -286L158 -268L150 -250L224 -250L224 -336Z',CASSE='M150 -336L144 -318L156 -302L142 -286L158 -268L150 -250';
+    SP.paulRB=bake([30,-274,144,84],Mq(x=>{paulR(x);x.save();x.globalCompositeOperation='destination-out';x.fill(P(BEC));x.restore();feu(x,CASSE,3,1)}),RIM,S3);
+    SP.paulRP=bake([30,-274,144,84],Mq(x=>{paulR(x);x.save();x.globalCompositeOperation='destination-in';x.fill(P(BEC));x.restore();feu(x,CASSE,3,1)}),RIM,S3);
     /* vue de dos (coup de queue en pivot, maquette colosse-queue-onde.js) : mêmes matières, mêmes liserés */
     SP.torsoD=bake([-96,-272,200,200],Mq(torseDos),RIM,S3);
     SP.headD=bake([-130,-338,168,164],Mq(teteDos),RIM,S3);
@@ -205,6 +209,7 @@ const COLOSSE=(()=>{
     SP.headC=bakeCrack(SP.head,Mf('M-52 -330L-60 -314L-50 -304L-57 -293M-100 -284L-90 -272L-97 -260',3.4),.8);
     SP.headBC=bakeCrack(SP.headB,Mf('M-52 -330L-60 -314L-50 -304L-57 -293M-100 -284L-90 -272L-97 -260',3.4),.8);
     SP.paulRC=bakeCrack(SP.paulR,Mm('M104 -300L112 -262L100 -240'),.8);
+    SP.paulRBC=bakeCrack(SP.paulRB,Mm('M104 -300L112 -262L100 -240'),.8);
     SP.paulLC=bakeCrack(SP.paulL,Mm('M-96 -296L-120 -250L-114 -232'),.8);
     SP.legNC=bakeCrack(SP.legN,Mf('M34 -124L52 -100L44 -72L70 -50L72 -24',6),.8);
     SP.legFC=bakeCrack(SP.legF,Mf('M-62 -122L-80 -90L-66 -62L-84 -30',6),.8);
@@ -275,7 +280,7 @@ const COLOSSE=(()=>{
    /* bandoulière et marteau sanglé en travers du dos */
    c.save();applyM();chaine(c,[[s*70,-250],[s*30,-205],[-s*20,-165],[-s*52,-135]],12,8,'#7a5a72','#f0b49a');
    c.translate(s*60,-222);c.rotate((s>0?-52:-128)*Math.PI/180);c.translate(112,0);c.scale(.86,.86);img(c,SP.ham);c.restore();
-   c.save();applyM();img(c,SP.paulL);img(c,SP.paulR);c.restore();
+   c.save();applyM();img(c,SP.paulL);img(c,o.enclume?SP.paulRB:SP.paulR);c.restore();
    /* nuque et tête vues de dos, mêmes flammes */
    c.save();applyM();c.translate(36,-16);
    c.save();c.scale(.8,.8);halo(c,-48,-352,76,.5);c.translate(-8,0);couronne(c,o.t*.55,o.warm||1);c.translate(16,0);couronne(c,o.t*.55+.4,o.warm||1);c.restore();
@@ -289,7 +294,7 @@ const COLOSSE=(()=>{
    return {pt,coeur:pt(-3,-185),gueule:pt(0,-230),head:pt(0,-260),fa:{W:pt(-100,-110),E:pt(-100,-160)},na:{W:pt(100,-110),E:pt(100,-160)},applyM,far:pt(-70,-215),near:pt(70,-215)}}
 
   /* o : lean, drop, sx, dF, dN (buste) ; off (main lointaine depuis l'épaule) ; nn (décalage de la main proche) ; tip, sag (bout de la chaîne de la boule et mou, unités de pose) ;
-     plie (jambes fléchies, 0 à 1) ; brise (grande corne brisée, phase III) ; tete (inclinaison de la tête, rad) ; fissure, rage (0 à 1 : fissures peintes dans chaque pièce) ; flash (0 à 1, éclair sur la silhouette),
+     plie (jambes fléchies, 0 à 1) ; brise (grande corne brisée, phase III) ; enclume (grande enclume de l'épaule brisée, phase III) ; tete (inclinaison de la tête, rad) ; fissure, rage (0 à 1 : fissures peintes dans chaque pièce) ; flash (0 à 1, éclair sur la silhouette),
      eteint (0 à 1, la silhouette s'assombrit) ;
      ham : marteau à deux mains { P main proche, a angle du manche (degrés), g tête -> main proche, wN / wF mains sur le manche,
      s boule en bandoulière, r : P et a dans le repère du buste } (absent : rangé dans le dos) ; t, warm, jaw, hurt, wound ; back(applyM), front(rig) */
@@ -370,7 +375,7 @@ const COLOSSE=(()=>{
     c.save();applyM();halo(c,-24,-205,90,.3*warm*fl*(1-(o.out||0)));img(c,SP.torso);cr(SP.torsoC,ca);cr(SP.torsoR,ra);c.restore();
     let na=act?null:bras(c,near,Hn,0,ra);
     c.save();headM();img(c,SP.corneL);c.restore();
-    c.save();applyM(o.dN);img(c,SP.paulR);cr(SP.paulRC,Math.min(ra,ca));c.restore();
+    c.save();applyM(o.dN);img(c,o.enclume?SP.paulRB:SP.paulR);cr(o.enclume?SP.paulRBC:SP.paulRC,Math.min(ra,ca));c.restore();
     if(act)na=bras(c,near,Hn,0,ra);
     const fa=bras(c,far,H,1,ra); /* main arrière : le bras lointain et sa main passent DERRIÈRE le manche (dessinés avant le marteau, la main n'est pas redessinée après) */
     if(!dos)marteau();
@@ -422,10 +427,21 @@ const COLOSSE=(()=>{
       c.save();c.globalCompositeOperation='destination-out';c.fillStyle='#000';T.forEach(p=>{chemin(p);c.fill()});c.restore()}
     aileOs(c,loin);
     return e}
-  function ailes3(){if(!SP)build();for(const l of [0,1])for(const r of [0,1]){const k=l+'|'+r;if(!AILES3[k])AILES3[k]=aileCuite(!!l,!!r)}return AILES3}
-  /* aile cuite : loin (lointaine), ronge (rongée) ; cuit à la volée seulement si ailes3() n'a pas été appelée */
-  function aile(loin,ronge){const k=(loin?1:0)+'|'+(ronge?1:0);return AILES3[k]||ailes3()[k]}
-  return {draw,ik,L1,L2,ailes3,aile};
+  /* cuit les ailes (rg : 0 intactes, 1 rongées, absent : les deux) ; appelé à l'entrée des phases I et III */
+  function ailes3(rg){if(!SP)build();for(const l of [0,1])for(const r of [0,1]){if(rg!=null&&r!==(rg?1:0))continue;const k=l+'|'+r;if(!AILES3[k])AILES3[k]=aileCuite(!!l,!!r)}return AILES3}
+  /* aile cuite : loin (lointaine), ronge (rongée) ; la paire manquante est cuite à la volée (première image de la phase, pendant l'entrée) */
+  function aile(loin,ronge){const k=(loin?1:0)+'|'+(ronge?1:0);return AILES3[k]||ailes3(ronge?1:0)[k]}
+  /* les deux ailes, dans le repère des pieds (unités de pose), attachées au buste o (lean, drop, plie, sx) : bat (battement, rad), env (envergure),
+     tombe (retombées, 0 à 1), ronge (rongées), cut (0 à 2 : ailes coupées par le final, la lointaine d'abord). Phases I et III. */
+  function ailes(c,o,w){const dr=(o.drop||0)+(o.plie||0)*26,co=Math.cos(o.lean||0),si=Math.sin(o.lean||0),sx=o.sx||1,tb=w.tombe||0,env=w.env||1,cut=w.cut||0;
+    for(const sd of [1,-1]){
+      if((sd===-1&&cut>=1)||(sd===1&&cut>=2))continue;
+      const x=sd*34,y=-238,k=(sd>0?.66:.68)*env;
+      c.save();c.translate(sx*co*x-si*y+si*PY,sx*si*x+co*y+PY+dr-co*PY);c.scale(sd,1);c.rotate(.14+(w.bat||0)+tb*(sd>0?.5:.62));c.scale(k,k*(1-.1*tb));
+      c.drawImage(aile(sd<0,w.ronge),-20,-200,420,280);c.restore()}}
+  /* morceau d'enclume arraché, centré sur (0, 0) en unités de pose */
+  function eclatEnclume(c){if(!SP)build();c.save();c.translate(-136,-232);img(c,SP.paulRP);c.restore()}
+  return {draw,ik,L1,L2,ailes3,aile,ailes,eclatEnclume};
 })();
 
 /* ===== Effets du Colosse réutilisables (référence ripostes-reference.js, 27/11) : dégâts, éclats, flammes de rage =====

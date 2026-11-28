@@ -197,12 +197,12 @@ function startFinale(){
 }
 function rDamage(k,c){
   if(k==='bolt'){
-    const tg=[R.bx-20,DECK-230];
+    const tg=cn3Point(R.healed&&R.hornAt==null?'corne':'tete',[R.bx-20,DECK-230]);   /* là où la foudre frappe : la tête, ou la grande corne à la première foudre de la seconde vie (rendu : 56-p3-belfry-render.js) */
     R.recoil=1;R.shake=reduce?0:16;R.hitstop=.12;R.flash=.5;thud(1.6);
     qBurst(tg[0],tg[1],40,['#ffffff','#fff0b0','#ffd966','#ffc15a']);
     qFlameBurst(tg[0],tg[1],1.5,true);R.shake=reduce?0:20;
     tone(90,.6,'sawtooth',.14,-40);tone(1200,.3,'sine',.07,-600);
-    if(R.healed&&R.hornAt==null){R.hornAt=R.time;R.hornX=R.bx;noise(.3,.22,5000,900);tone(900,.25,'square',.06,-600);qBurst(R.bx+105,DECK-340,16,['#ffc15a','#ff7a2b','#ffffff'])}
+    if(R.healed&&R.hornAt==null){R.hornAt=R.time;R.hornX=R.bx;noise(.3,.22,5000,900);tone(900,.25,'square',.06,-600);const hp=cn3Point('corne',[R.bx+105,DECK-340]);qBurst(hp[0],hp[1],16,['#ffc15a','#ff7a2b','#ffffff'])}
     if(R.bhp<=LB.BOSS_RULES.finalHp){
       if(!R.healed&&!DIFF.easy){ /* Facile : pas de seconde vie, la vraie fin suit directement (la fausse fin est supprimée, 1er novembre) */
         R.healed=true;R.wdAt=R.time;R.cycle=2;R.u5=false;
@@ -219,20 +219,22 @@ function rDamage(k,c){
   }
   R.bhp=Math.max(0,R.bhp-1);R.recoil=1;R.shake=reduce?0:13;R.hitstop=.11;R.flash=.4;thud(1.2);
   if(k==='bell')R.dizzy=R.time+1.3;
-  const tg=k==='slide'?[R.bx-62,DECK-58]:k==='plant'?[R.bx-60,DECK-26]:[R.bx-30,DECK-170];
-  qBurst(tg[0],tg[1],32,['#ffffff','#fff0b0','#ffc15a']);qRing(tg[0],tg[1]);
-  /* Pas de mot : l'effet se voit et s'entend, propre à chaque contre (cloche, éclats, rayon au sol). */
-  R.flash=.6;qRing(tg[0],tg[1]);
+  /* Pas de mot : l'effet se voit et s'entend, propre à chaque contre. Le rayon et les comètes frappent le torse, là où le rendu les dessine ;
+     l'onde de la cloche étourdit, elle ne fait ni éclats ni anneau d'impact (rendu : 56-p3-belfry-render.js). */
+  const tg=cn3Point('coeur',[R.bx-30,DECK-170]);
+  if(k!=='bell'){qBurst(tg[0],tg[1],32,['#ffffff','#fff0b0','#ffc15a']);qRing(tg[0],tg[1]);R.flash=.6;qRing(tg[0],tg[1])}else R.flash=Math.max(R.flash,.2);
   if(k==='bell'){ringBell(.55);tone(70,.9,'sine',.12,-20)}
   else if(k==='bat'){tone(1700,.3,'triangle',.07,-1000);tone(2400,.2,'sine',.05,-1200);noise(.18,.12,6000,1500)}
   else{tone(220,.5,'sawtooth',.09,700);noise(.25,.14,900,4000)}
   tone(170,.25,'square',.08,-110);tone(900,.2,'sine',.05);
-  qFlameBurst(tg[0],tg[1],1.2);
+  if(k!=='bell')qFlameBurst(tg[0],tg[1],1.2);
   if(R.bhp<=0){
     R.boss.s='dead';R.boss.t=0;R.mode='won';R.endIn=3.2;R.cn=null;
     say(_('The Colossus collapses. Victory.','Le Colosse s\'effondre. Victoire.'));
   }else say(_('Riposte landed.','Riposte réussie.'));
 }
+/* point du corps du Colosse tel que le rendu l'a dessiné à la dernière image (COL3.k : coeur, tete, corne…), sinon la valeur par défaut */
+function cn3Point(n,def){const k=typeof COL3!=='undefined'&&COL3.k;return k&&k[n]?k[n].slice():def}
 function rCnStep(dt){
   const c=R.cn,b=R.boss,p=R.pl;c.t+=dt;
   const sp=R_CN[c.k];
@@ -240,8 +242,8 @@ function rCnStep(dt){
     if(!c.d1&&c.t>=.1){c.d1=true;tone(1568,.5,'triangle',.06,0);tone(2093,.35,'sine',.035,0);tone(2637,.25,'sine',.02,0)}
     if(!c.d2&&c.t>=sp.ring){c.d2=true;ringBell(.55);R.flash=.2}
   }
-  if(c.k==='plant'&&!c.pl&&c.t>=.3){c.pl=true;qRing(PX+105,DECK-14);qBurst(PX+105,DECK-14,22,['#ffffff','#bfeaff','#6fd3ff']);tone(160,.4,'sine',.1,-60);R.flash=.2}
-  if(c.k==='bolt'&&!c.rz&&c.t>=.25){c.rz=true;tone(220,.8,'sawtooth',.05,900);R.flash=.2;qRing(PX+72,DECK-154)}
+  if(c.k==='plant'&&!c.pl&&c.t>=.3){c.pl=true;qRing(GUARD[0],GUARD[1]);qBurst(GUARD[0],GUARD[1],22,['#ffffff','#bfeaff','#6fd3ff']);tone(160,.4,'sine',.1,-60);R.flash=.2}
+  if(c.k==='bolt'&&!c.rz&&c.t>=.25){c.rz=true;tone(220,.8,'sawtooth',.05,900);R.flash=.2;const L=lant3();qRing(L[0],L[1])}
   if(c.k==='bolt'&&!c.rb&&c.t>=sp.ring){c.rb=true;ringBell(.32)}
   if(c.k==='bolt'&&!c.rm&&c.t>=.6){c.rm=true;tone(55,.9,'sawtooth',.08,-15)}  if(c.k==='slide'&&c.t<.4&&Math.random()<.7){
     const x=heroX3();R.sparks.push({x:x-10,y:DECK-3,vx:rand(-120,-20),vy:-rand(20,100),g:260,life:.5,max:.5,col:'#ffffff',sz:rand(2,4)});

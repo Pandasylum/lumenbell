@@ -23,27 +23,22 @@ function drawBoss3(){
   const fm=(o.face||1)*(o.etr||1);   /* pivot du coup de queue : retourné en miroir (face -1), écrasé en largeur (etr) */
   COL3.f={x0:bx+C3X+o.dx,y0:DECK+dy,bx,flip:!!ob.flip,m:fm};
   const wd=R.healed&&!fin?(R.wdAt==null?1:clamp01((R.time-R.wdAt)/.8)):(R.healed?1:0);
-  /* ailes rongées dès la première foudre, retombées ensuite (toujours en seconde vie et au final) ; grande corne brisée à la première foudre de la seconde vie */
-  const rT=COL3.ronge,ronge=rT!=null?t>=rT+CN3.ronge:(R.healed||fin),tombe=rT!=null?k3ez((t-rT-CN3.tombe[0])/CN3.tombe[1]):(ronge?1:0);
-  const brise=R.hornAt!=null&&t>=R.hornAt+CN3.brise;
+  /* première foudre : la grande enclume de l'épaule cède ; regain de vie : les ailes sont rongées puis retombent ; première foudre de la seconde vie : la grande corne se brise */
+  const rT=R.healed?(R.wdAt!=null?R.wdAt:-99):null,ronge=rT!=null&&t>=rT+CN3.ronge,tombe=ronge?k3ez((t-rT-CN3.tombe[0])/CN3.tombe[1]):0;
+  const brise=R.hornAt!=null&&t>=R.hornAt+CN3.brise,enclume=COL3.foudre1!=null&&t>=COL3.foudre1+CN3.enclume;
   if(ob.flip){ctx.save();ctx.translate(bx,0);ctx.scale(-1,1);ctx.translate(-bx,0)}
+  /* ombre de contact sous ses pieds (comme la maquette) : il pèse sur les dalles */
+  if(dy>-60){ctx.fillStyle='rgba(8,4,22,'+(.5*(1-k3cl(-dy/60)))+')';ctx.beginPath();ctx.ellipse(bx+C3X+o.dx,DECK+3,150*Math.abs(fm),6,0,0,6.283);ctx.fill()}
   if(R.healed&&!fin&&R.boss.s!=='dead'){ctx.save();ctx.translate(bx,DECK+dy);ctx.scale(.92,.92);drawAura3(ob,t);ctx.restore()}
   if(R.atk&&R.atk.dbl&&R.atk.t<R.atk.hits[R.atk.hits.length-1].at+.05){ctx.save();ctx.translate(bx,DECK+dy);ctx.rotate(fin?ob.lean:0);ctx.scale(.92,.92);ctx.fillStyle='rgba(255,176,74,'+(.85+.15*Math.sin(t*30))+')';ctx.shadowColor='#ff7a2b';ctx.shadowBlur=14;ctx.font='900 54px '+DISPLAY;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!'.repeat(R.atk.tn||2),-170,-300);ctx.restore()}
   ctx.save();ctx.translate(bx,DECK+dy);if(fin&&ob.lean)ctx.rotate(ob.lean);ctx.translate(C3X+o.dx,0);ctx.scale(C3*fm,C3);
-  const rig=COLOSSE.draw(ctx,{dos:o.dos||0,qD:o.qD,qP:o.qP||undefined,ouvre:o.dos?1-o.plie:0,rage:o.dos?Math.max(Math.min(.34,wd),o.rage||0):(o.rage||0),brise,flash:o.flash||0,eteint:o.eteint||0,lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:o.plie,kneel:o.kneel,kdk:o.kdk,out:o.out,tete:o.tete,jaw:o.jaw,fissure:fin?1:Math.max(wd,o.fissure||0),
+  const rig=COLOSSE.draw(ctx,{dos:o.dos||0,qD:o.qD,qP:o.qP||undefined,ouvre:o.dos?1-o.plie:0,rage:o.dos?Math.max(Math.min(.34,wd),o.rage||0):(o.rage||0),brise,enclume,flash:o.flash||0,eteint:o.eteint||0,lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:o.plie,kneel:o.kneel,kdk:o.kdk,out:o.out,tete:o.tete,jaw:o.jaw,fissure:fin?1:Math.max(wd,o.fissure||0),
     t:reduce?0:t,warm:o.rage>.5?Math.max(ob.warm,1.5):ob.warm,eyes:o.yeux,breath:reduce?null:t,smoke:1,hurt:R.recoil>.3,legs:{f:[o.fx,o.fl,o.fa],n:[o.nx,o.nl,o.na]},tip:[o.tx,o.ty],heat:o.heat,sag:20,
     ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r},
     back:()=>{
-      /* ailes de la maquette (calques cuits à l'entrée) : attachées au buste, battement (o.wa), envergure (o.ws) ; rongées puis retombées après la première foudre ;
+      /* ailes de la maquette (calques cuits à l'entrée, les mêmes qu'en phase I) : battement (o.wa), envergure (o.ws) ; rongées puis retombées après le regain de vie ;
          le final en coupe une ou deux (R.cut). Flammes de rage derrière lui. */
-      const dr=o.drop+(o.plie||0)*26,co=Math.cos(o.lean),si=Math.sin(o.lean),pt=(x,y)=>[o.sx*co*x-si*y-si*124,o.sx*si*x+co*y-124+dr+co*124];
-      const bat=o.wa+(reduce?0:Math.sin(t*1.7)*.024*(1-tombe));
-      for(const sd of [1,-1]){
-        if((sd===-1&&R.cut>=1)||(sd===1&&R.cut>=2))continue;
-        const r=pt(sd*34,-238),k=(sd>0?.66:.68)*o.ws;
-        ctx.save();ctx.translate(r[0],r[1]);ctx.scale(sd,1);ctx.rotate(.14+bat+tombe*(sd>0?.5:.62));ctx.scale(k,k*(1-.1*tombe));
-        ctx.drawImage(COLOSSE.aile(sd<0,ronge),-20,-200,420,280);ctx.restore();
-      }
+      COLOSSE.ailes(ctx,o,{bat:o.wa+(reduce?0:Math.sin(t*1.7)*.024*(1-tombe)),env:o.ws,tombe,ronge,cut:R.cut});
       if(o.flm>.01)COLFX.rageDerriere(ctx,reduce?0:t,o.flm);
     },
     front:r=>{if(o.griffe>.02){ctx.save();k3griffes(ctx,r.na.E,r.na.W,o.griffe);k3griffes(ctx,r.fa.E,r.fa.W,o.griffe);ctx.restore()}}});
@@ -51,7 +46,7 @@ function drawBoss3(){
   if(col3CriA(R.atk)&&!fin)COLFX.ondes(ctx,R.atk.t-CN3.rage.cri);   /* l'éclat du cri : ondes de braise au sol */
   ctx.restore();
   COL3.k={gueule:col3W(rig.gueule),coeur:col3W(rig.coeur),head:col3W(rig.head),poing:col3W(rig.fa.W),Z:o.Z||null,x0:COL3.f.x0,
-    tete:col3W(rig.pt(-34,-272)),corne:col3W(rig.pt(36,-300)),torse:col3W(rig.pt(-36,-186)),loin:col3W(rig.fa.W),proche:col3W(rig.na.W),boule:col3W([o.tx,o.ty])};COL3.mouth=COL3.k.gueule;
+    tete:col3W(rig.pt(-34,-272)),corne:col3W(rig.pt(36,-300)),torse:col3W(rig.pt(-36,-186)),loin:col3W(rig.fa.W),proche:col3W(rig.na.W),boule:col3W([o.tx,o.ty]),enclume:col3W(rig.pt(136,-232))};COL3.mouth=COL3.k.gueule;
   if(ob.flip)ctx.restore();
 }
 function faceFire(cx,cy,k,q){
@@ -133,18 +128,26 @@ function drawHits3a(){
     });
   }
 }
+/* débris arraché (corne, bec d'enclume) : il part de p (point du corps au moment du coup), tombe, roule et s'efface ; u = secondes depuis la cassure */
+function col3Debris(c,id,u,p,dessin,cols){
+  if(u<0){COL3[id]=null;return}if(u>=CN3.sol+.5)return;
+  if(!COL3[id])COL3[id]=p.slice();const p0=COL3[id],s=k3cl(u/CN3.chute),x=k3l(p0[0]+8,p0[0]+28,s),sol=DECK+16,y=k3l(p0[1],sol,s*s)-70*Math.sin(s*Math.PI);
+  c.save();c.globalAlpha=1-k3cl((u-CN3.sol)/.5);dessin(x,s<1?y:y-12,s<1?(reduce?1.45*s:u*9):1.45);c.restore();
+  if(!reduce){k3shards(c,x,sol,u-CN3.chute,12,['#9a9cc8',cols[0],'#ff9a35'],170,13,DECK+6);k3shards(c,p0[0],p0[1],u,20,cols,300,12,DECK+5)}
+  k3fumee(c,p0[0],p0[1],u%1.8,6,44)}
 /* centre de la lanterne du Veilleur (départ du rayon et des comètes) */
 function lant3(){const h=heroPose3(),x=heroX3();return [x+h.hand[0]+Math.cos(h.sa)*76,DECK+(h.hand[1]+Math.sin(h.sa)*76)*h.sy]}
 /* contres (maquette colosse-clocher.js, scènes 1 à 9) : armes = garde bleue puis rayon du sceptre ; distance = cinq comètes ;
    cloche = ondes de la grande cloche et KO auditif ; rage = cloche puis foudre (tête et cœur, ou la grande corne à la première foudre de la seconde vie) */
 function col3CnFx(){
   const c=ctx,tm=reduce?0:R.time,k=COL3.k;
-  /* la grande corne tombe, roule et reste un moment au sol */
-  if(R.hornAt!=null&&k&&R.mode==='play'){const u=R.time-R.hornAt-CN3.brise;
-    if(u>=0&&u<CN3.sol+.5){if(!COL3.hp)COL3.hp=k.corne.slice();const p0=COL3.hp,s=k3cl(u/CN3.chute),x=k3l(p0[0]+8,p0[0]+20,s),sol=DECK+16,y=k3l(p0[1],sol,s*s)-70*Math.sin(s*Math.PI);
-      c.save();c.globalAlpha=1-k3cl((u-CN3.sol)/.5);k3corne(c,x,s<1?y:y-12,s<1?(reduce?1.45*s:u*9):1.45);c.restore();
-      if(!reduce){k3shards(c,x,sol,u-CN3.chute,12,['#9a9cc8','#a47c8a','#ff9a35'],170,13,DECK+6);k3shards(c,p0[0],p0[1],u,20,['#a47c8a','#4a2642','#ff9a35','#ffffff'],300,12,DECK+5)}
-      k3fumee(c,p0[0],p0[1],u%1.8,6,44)}}
+  /* la grande corne (seconde vie) et le bec de l'enclume (première foudre) tombent, roulent et restent un moment au sol */
+  if(k&&R.mode==='play'){
+    if(R.hornAt!=null)col3Debris(c,'hp',R.time-R.hornAt-CN3.brise,k.corne,(x,y,r)=>k3corne(c,x,y,r),['#a47c8a','#4a2642','#ff9a35','#ffffff']);
+    if(COL3.foudre1!=null)col3Debris(c,'ep',R.time-COL3.foudre1-CN3.enclume,k.enclume,(x,y,r)=>{c.save();c.translate(x,y);c.rotate(r);c.scale(C3*COL3.f.m,C3);COLOSSE.eclatEnclume(c);c.restore()},['#6a4a72','#35223f','#ff9a35','#ffe08a']);
+    /* regain de vie : les ailes perdent des lambeaux en brûlant */
+    if(R.healed&&R.wdAt!=null&&!reduce){const u=R.time-R.wdAt-CN3.ronge;k3shards(c,k.x0+130,DECK-230,u,24,['#6a3050','#2c1534','#ff9a35'],200,72,DECK+5);k3shards(c,k.x0-130,DECK-230,u-.1,18,['#6a3050','#2c1534','#ff9a35'],200,73,DECK+5)}
+  }
   const S=COL3.cs;if(!S||!k||R.mode!=='play'||R.atk)return;
   const u=R.time-S.t0,T=S.T,s=u-T;
   if(S.k==='plant'){
@@ -166,7 +169,7 @@ function col3CnFx(){
       if(corne)k3foudre(c,s,k.corne);else{k3foudre(c,s,k.tete);k3foudre(c,s-CN3.foudre2,k.coeur)}
       k3arcs(c,pts,1-k3ez((s-.5)/1),tm);
       if(!reduce){k3shards(c,k.coeur[0],k.coeur[1],s,36,['#cfd8ff','#6a3050','#2c1534','#ff9a35','#ffffff'],430,71,DECK+5);
-        if(!corne&&COL3.ronge!=null&&Math.abs(COL3.ronge-(S.t0+T))<.1){k3shards(c,k.x0+130,DECK-230,s-.9,24,['#6a3050','#2c1534','#ff9a35'],200,72,DECK+5);k3shards(c,k.x0-130,DECK-230,s-1,18,['#6a3050','#2c1534','#ff9a35'],200,73,DECK+5)}}   /* les ailes rongées perdent des lambeaux */
+}
       [[-110,-200],[110,-210],[0,-120],[150,-90]].forEach(([x,y],i)=>k3fumee(c,k.x0+x,DECK+y,(s-.4-i*.17)%1.6,6,80+i));
     }
   }

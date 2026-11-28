@@ -227,7 +227,7 @@ const COL3_WARM=[
   ...[K3_ARME,K3_FRAPPE,K3_FRAPPE2,K3_DOS].map(o=>({o})),
   {o:{...K3_DOS,s:0,tx:46,ty:-300}},                       /* boule au bout de sa chaîne */
   {o:K3_DOS,m:-1},{o:{...K3_DOS,dos:1,qD:[[0,30],[0,10],[0,-110]]},m:.8},{o:{...K3_DOS,dos:-1,qD:[[0,30],[0,10],[0,-110]]},m:.8},   /* pivot du coup de queue */
-  {fx:1},{fx:2},{o:{...K3_SONNE,flash:.02}},{o:K3_DOS,brise:1}];   /* effets du lot 2 ; teinte (calque de teinte créé ici, pas en combat) ; corne brisée */
+  {fx:1},{fx:2},{o:{...K3_SONNE,flash:.02}},{o:K3_DOS,brise:1}];   /* effets du lot 2 ; teinte (calque de teinte créé ici, pas en combat) ; corne et enclume brisées */
 function col3Warm(c){
   const i=COL3.warm|0;if(i>=COL3_WARM.length)return;COL3.warm=i+1;
   const w=COL3_WARM[i];if(i===0)COLOSSE.ailes3();   /* ailes intactes et rongées cuites à l'entrée */
@@ -237,7 +237,7 @@ function col3Warm(c){
     if(w.fx===2){const p=[x,DECK-260],L=[PX+104,DECK-88];k3foudre(c,.1,p);k3ondesCloche(c,.3,p,1);k3acouphene(c,p,1,tm);k3cometes(c,L,-.3,0,p,tm);k3rayon(c,L,p,.3,1);k3solFendu(c,x,.2,1);k3orage(c,tm,1);k3corne(c,x,DECK,1)}
     else{k3sillage(c,[[x,DECK-200],[x-60,DECK-120],[x-120,DECK-70],[x-180,DECK-50]],1);k3aspire(c,[x+120,DECK-200],.8,tm)}}
   else{const o=w.o;c.translate(R.bx+C3X,DECK);c.scale(C3*(w.m||1),C3);
-    COLOSSE.draw(c,{dos:o.dos||0,qD:o.qD,brise:!!w.brise,flash:o.flash||0,lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:0,tete:0,jaw:0,t:0,warm:1,eyes:.25,legs:{f:[0,0,0],n:[0,0,0]},
+    COLOSSE.draw(c,{dos:o.dos||0,qD:o.qD,brise:!!w.brise,enclume:!!w.brise,flash:o.flash||0,lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:0,tete:0,jaw:0,t:0,warm:1,eyes:.25,legs:{f:[0,0,0],n:[0,0,0]},
       tip:[o.tx,o.ty],heat:0,sag:20,ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r}})}
   c.restore();
 }
@@ -265,7 +265,7 @@ function col3Atk(a){
 function col3Pose(ob){
   const a=R.atk,t=R.time,fin=R.mode==='finale';
   COL3.m={};
-  if(t<COL3.lastT||R.mode==='intro'||(COL3.ronge!=null&&t<COL3.ronge)){COL3.last=null;COL3.lastT=-9;COL3.cs=null;COL3.ronge=null;COL3.rf=0;COL3.rfT=-9;COL3.atk=null;COL3.ko=0;COL3.hp=null}   /* nouvelle partie (Réessayer) : l'horloge repart de 0, on oublie la dernière pose, le contre, la rage et les ailes rongées de la partie précédente */
+  if(t<COL3.lastT||R.mode==='intro'||(COL3.foudre1!=null&&t<COL3.foudre1)){COL3.last=null;COL3.lastT=-9;COL3.cs=null;COL3.foudre1=null;COL3.rf=0;COL3.rfT=-9;COL3.atk=null;COL3.ko=0;COL3.hp=null;COL3.ep=null}   /* nouvelle partie (Réessayer) : l'horloge repart de 0, on oublie la dernière pose, le contre, la rage et l'enclume brisée de la partie précédente */
   col3Suivi(a);
   const fb=col3Fb(ob);
   let po=a&&!fin?col3Atk(a):null;
@@ -304,13 +304,15 @@ const CN3={
   apres:{plant:1.3,whip:1.55,bat:1.2,bolt:2.2},   /* pose après le coup, retour à la garde compris (s) */
   ko:{in:.22,out:.35,foudre:.12},                 /* KO auditif : entrée, sortie ; contre de rage : après la cloche (s) */
   foudre2:.2,                 /* seconde foudre (cœur) après la première (tête) */
-  ronge:.12,tombe:[.9,.9],    /* ailes rongées après la première foudre ; elles retombent (départ, durée) */
-  brise:.08,chute:.68,sol:2.4,/* corne : brisée après la foudre, chute, reste au sol puis s'efface (s) */
+  ronge:2.9,tombe:[3,.9],     /* ailes rongées après le regain de vie (fin du cri de soin, depuis R.wdAt) ; elles retombent (départ, durée) */
+  rage1:.12,                  /* la rage s'éteint après la foudre (s) */
+  enclume:.1,                 /* la grande enclume de l'épaule cède après la première foudre (s) */
+  brise:.08,chute:.68,sol:2.4,/* corne et enclume : brisées après la foudre, chute, restent au sol puis s'effacent (s) */
   rage:{in:.9,cri:.5,out:.4}  /* fissures de rage (montée), éclat du cri (instant du rugissement), extinction après un échec (s) */
 };
 const col3CriA=a=>!!(a&&a.ult&&a.hits.some(h=>h.pre));   /* attaque de rage qui commence par le cri (les attaques enchaînées gardent la rage, sans nouveau cri) */
 const col3Cri=(fb,a)=>col3CriA(a)?K3_CRI:fb;
-/* mémoire du rendu : dernière attaque, contre en cours (début, instant du coup), première foudre (ailes rongées), intensité de la rage */
+/* mémoire du rendu : dernière attaque, contre en cours (début, instant du coup), première foudre (enclume brisée), intensité de la rage */
 function col3Suivi(a){
   const t=R.time,c=R.cn;
   if(a){COL3.atk={kind:a.kind,h:!!a.h};COL3.cs=null;COL3.ko=0}
@@ -319,12 +321,12 @@ function col3Suivi(a){
     else COL3.cs.t0=t-c.t;
   }
   const S=COL3.cs;
-  if(S&&S.k==='bolt'&&S.c.hit&&COL3.ronge==null)COL3.ronge=S.t0+S.T;   /* première foudre : les ailes sont rongées */
+  if(S&&S.k==='bolt'&&S.c.hit&&COL3.foudre1==null)COL3.foudre1=S.t0+S.T;   /* première foudre : la grande enclume de l'épaule cède */
 }
 function col3RageF(a){
   const t=R.time,S=COL3.cs;
   if(a&&a.ult){COL3.rf=col3CriA(a)?k3ez((a.t-.1)/CN3.rage.in):1;COL3.rfT=t}
-  else if(S&&S.k==='bolt'&&t-S.t0<S.T+CN3.ronge&&R.mode==='play'){COL3.rf=Math.max(COL3.rf||0,1);COL3.rfT=t}
+  else if(S&&S.k==='bolt'&&t-S.t0<S.T+CN3.rage1&&R.mode==='play'){COL3.rf=Math.max(COL3.rf||0,1);COL3.rfT=t}
   else if(S&&S.k==='bolt')COL3.rf=0;   /* la foudre éteint la rage d'un coup */
   return (COL3.rf||0)*(1-k3ez((t-COL3.rfT)/CN3.rage.out));
 }

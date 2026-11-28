@@ -219,44 +219,44 @@ Règle : tout texte existe dans les deux langues. `SC` = carton d'intro/outro (d
 | src/js/44-p3-belfry-logic.js:217 | _() |  | The bell calls down the lightning on the Colossus. | La cloche appelle la foudre sur le Colosse. |
 | src/js/44-p3-belfry-logic.js:233 | _() |  | The Colossus collapses. Victory. | Le Colosse s'effondre. Victoire. |
 | src/js/44-p3-belfry-logic.js:234 | _() |  | Riposte landed. | Riposte réussie. |
-| src/js/44-p3-belfry-logic.js:270 | _() |  | The Colossus is back, fiercer than ever. | Le Colosse est de retour, plus féroce encore. |
-| src/js/44-p3-belfry-logic.js:281 | _() |  | Attempts | Essais |
-| src/js/44-p3-belfry-logic.js:281 | _() |  | Hits taken | Coups subis |
-| src/js/44-p3-belfry-logic.js:281 | _() |  | Total time | Temps total |
-| src/js/44-p3-belfry-logic.js:282 | _() |  | Phase I | Phase I |
-| src/js/44-p3-belfry-logic.js:282 | _() |  | Phase II | Phase II |
-| src/js/44-p3-belfry-logic.js:282 | _() |  | Phase III | Phase III |
-| src/js/44-p3-belfry-logic.js:283 | _() |  | Best time | Meilleur temps |
-| src/js/44-p3-belfry-logic.js:283 | _() |  | Blocks | Blocages |
-| src/js/44-p3-belfry-logic.js:283 | _() |  | Dodges | Esquives |
-| src/js/44-p3-belfry-logic.js:283 | _() |  | New record! | Nouveau record ! |
-| src/js/44-p3-belfry-logic.js:289 | _() |  | Defeat · Phase III | Défaite · Phase III |
-| src/js/44-p3-belfry-logic.js:289 | _() |  | End of Chapter I · Next: Silent Bells | Fin du chapitre I · À suivre : Silent Bells |
-| src/js/44-p3-belfry-logic.js:289 | _() |  | Victory · Phase III | Victoire · Phase III |
-| src/js/44-p3-belfry-logic.js:290 | _() |  | Struck down atop the tower. | Terrassé au sommet du Clocher. |
-| src/js/44-p3-belfry-logic.js:290 | _() |  | The Colossus collapses. | Le Colosse s'effondre. |
-| src/js/44-p3-belfry-logic.js:290 | _() |  | The fire has gone out. | Le feu s'est éteint. |
-| src/js/44-p3-belfry-logic.js:291 | _() |  |  · Hits taken  |  · Coups subis  |
-| src/js/44-p3-belfry-logic.js:291 | _() |  | Blocks  | Blocages  |
-| src/js/44-p3-belfry-logic.js:292 | _() |  | Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again. | La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus. |
-| src/js/44-p3-belfry-logic.js:292 | _() |  | The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch. | Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore. |
-| src/js/44-p3-belfry-logic.js:292 | _() |  | The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while. | Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps. |
-| src/js/44-p3-belfry-logic.js:293 | _() |  | Back to menu | Retour au menu |
-| src/js/44-p3-belfry-logic.js:293 | _() |  | Replay from Phase I | Rejouer depuis la phase I |
-| src/js/44-p3-belfry-logic.js:293 | _() |  | Retry Phase III | Réessayer la phase III |
-| src/js/44-p3-belfry-logic.js:294 | _() |  | Trial by Fire · Complete | Épreuve du feu · Terminée |
-| src/js/44-p3-belfry-logic.js:346 | _() |  | PHASE III | PHASE III |
-| src/js/44-p3-belfry-logic.js:369 | _() |  | WING SHATTERED! | AILE BRISÉE ! |
-| src/js/44-p3-belfry-logic.js:379 | _() |  | The Watcher raises his lantern: the great bell answers. | Le Veilleur lève sa lanterne : la grande cloche répond. |
-| src/js/44-p3-belfry-logic.js:384 | _() |  | DISARMED! | DÉSARMÉ ! |
-| src/js/44-p3-belfry-logic.js:385 | _() |  | The echo tears the mace from the Colossus's hands. | L'écho arrache la masse des mains du Colosse. |
-| src/js/44-p3-belfry-logic.js:403 | _() |  | FINAL BLOW! | COUP ULTIME ! |
-| src/js/44-p3-belfry-logic.js:406 | _() |  | The Colossus crashes down beneath the great bell. | Le Colosse s'écrase sous la grande cloche. |
-| src/js/44-p3-belfry-logic.js:411 | _() |  | The Watcher raises his lantern: the great bell rings and the Colossus turns to stone. | Le Veilleur lève sa lanterne : la grande cloche sonne et le Colosse se change en pierre. |
-| src/js/44-p3-belfry-logic.js:413 | _() |  | The Watcher lights the Bell Tower's beacon. | Le Veilleur allume le fanal du Clocher. |
-| src/js/44-p3-belfry-logic.js:414 | _() |  | One by one, the Spires answer. | Une à une, les Flèches répondent. |
-| src/js/44-p3-belfry-logic.js:418 | _() |  | All but one. | Toutes, sauf une. |
-| src/js/44-p3-belfry-logic.js:419 | _() |  | Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I. | Au large, le Phare Noyé reste muet. Fin du chapitre I. |
+| src/js/44-p3-belfry-logic.js:272 | _() |  | The Colossus is back, fiercer than ever. | Le Colosse est de retour, plus féroce encore. |
+| src/js/44-p3-belfry-logic.js:283 | _() |  | Attempts | Essais |
+| src/js/44-p3-belfry-logic.js:283 | _() |  | Hits taken | Coups subis |
+| src/js/44-p3-belfry-logic.js:283 | _() |  | Total time | Temps total |
+| src/js/44-p3-belfry-logic.js:284 | _() |  | Phase I | Phase I |
+| src/js/44-p3-belfry-logic.js:284 | _() |  | Phase II | Phase II |
+| src/js/44-p3-belfry-logic.js:284 | _() |  | Phase III | Phase III |
+| src/js/44-p3-belfry-logic.js:285 | _() |  | Best time | Meilleur temps |
+| src/js/44-p3-belfry-logic.js:285 | _() |  | Blocks | Blocages |
+| src/js/44-p3-belfry-logic.js:285 | _() |  | Dodges | Esquives |
+| src/js/44-p3-belfry-logic.js:285 | _() |  | New record! | Nouveau record ! |
+| src/js/44-p3-belfry-logic.js:291 | _() |  | Defeat · Phase III | Défaite · Phase III |
+| src/js/44-p3-belfry-logic.js:291 | _() |  | End of Chapter I · Next: Silent Bells | Fin du chapitre I · À suivre : Silent Bells |
+| src/js/44-p3-belfry-logic.js:291 | _() |  | Victory · Phase III | Victoire · Phase III |
+| src/js/44-p3-belfry-logic.js:292 | _() |  | Struck down atop the tower. | Terrassé au sommet du Clocher. |
+| src/js/44-p3-belfry-logic.js:292 | _() |  | The Colossus collapses. | Le Colosse s'effondre. |
+| src/js/44-p3-belfry-logic.js:292 | _() |  | The fire has gone out. | Le feu s'est éteint. |
+| src/js/44-p3-belfry-logic.js:293 | _() |  |  · Hits taken  |  · Coups subis  |
+| src/js/44-p3-belfry-logic.js:293 | _() |  | Blocks  | Blocages  |
+| src/js/44-p3-belfry-logic.js:294 | _() |  | Snow covers the Watcher. Atop the Bell Tower, the Colossus rules alone, and his fire will never die again. | La neige recouvre le Veilleur. Sur le Clocher, le Colosse règne seul, et son feu ne s'éteindra plus. |
+| src/js/44-p3-belfry-logic.js:294 | _() |  | The Colossus collapses in the snow. On the Bell Tower, the Watcher's lantern still keeps watch. | Le Colosse s'effondre dans la neige. Sur le Clocher, la lanterne du Veilleur veille encore. |
+| src/js/44-p3-belfry-logic.js:294 | _() |  | The Colossus is frozen in black stone, facing the bell. In his open hand lies a chain ring engraved with an erased name. In the beacon's light, the Watcher gazes at him for a long while. | Le Colosse est figé dans la pierre noire, face à la cloche. Dans sa main ouverte, un anneau de chaîne gravé d'un nom effacé. Sous la lumière du fanal, le Veilleur le contemple longtemps. |
+| src/js/44-p3-belfry-logic.js:295 | _() |  | Back to menu | Retour au menu |
+| src/js/44-p3-belfry-logic.js:295 | _() |  | Replay from Phase I | Rejouer depuis la phase I |
+| src/js/44-p3-belfry-logic.js:295 | _() |  | Retry Phase III | Réessayer la phase III |
+| src/js/44-p3-belfry-logic.js:296 | _() |  | Trial by Fire · Complete | Épreuve du feu · Terminée |
+| src/js/44-p3-belfry-logic.js:348 | _() |  | PHASE III | PHASE III |
+| src/js/44-p3-belfry-logic.js:371 | _() |  | WING SHATTERED! | AILE BRISÉE ! |
+| src/js/44-p3-belfry-logic.js:381 | _() |  | The Watcher raises his lantern: the great bell answers. | Le Veilleur lève sa lanterne : la grande cloche répond. |
+| src/js/44-p3-belfry-logic.js:386 | _() |  | DISARMED! | DÉSARMÉ ! |
+| src/js/44-p3-belfry-logic.js:387 | _() |  | The echo tears the mace from the Colossus's hands. | L'écho arrache la masse des mains du Colosse. |
+| src/js/44-p3-belfry-logic.js:405 | _() |  | FINAL BLOW! | COUP ULTIME ! |
+| src/js/44-p3-belfry-logic.js:408 | _() |  | The Colossus crashes down beneath the great bell. | Le Colosse s'écrase sous la grande cloche. |
+| src/js/44-p3-belfry-logic.js:413 | _() |  | The Watcher raises his lantern: the great bell rings and the Colossus turns to stone. | Le Veilleur lève sa lanterne : la grande cloche sonne et le Colosse se change en pierre. |
+| src/js/44-p3-belfry-logic.js:415 | _() |  | The Watcher lights the Bell Tower's beacon. | Le Veilleur allume le fanal du Clocher. |
+| src/js/44-p3-belfry-logic.js:416 | _() |  | One by one, the Spires answer. | Une à une, les Flèches répondent. |
+| src/js/44-p3-belfry-logic.js:420 | _() |  | All but one. | Toutes, sauf une. |
+| src/js/44-p3-belfry-logic.js:421 | _() |  | Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I. | Au large, le Phare Noyé reste muet. Fin du chapitre I. |
 | src/js/60-ui-menu.js:2 | _() |  | Phase I · The Bridge | Phase I · Le pont |
 | src/js/60-ui-menu.js:2 | _() |  | The last watch. | La dernière veille. |
 | src/js/60-ui-menu.js:3 | _() |  | The Colossus has reached the bridge. Behind the Watcher lies nothing but the road to the valleys. A single rule: not one step back. | Le Colosse a atteint le pont. Derrière le Veilleur, il n'y a plus que la route des vallées. Une seule règle : ne pas reculer d'un pas. |

@@ -92,8 +92,8 @@ function drawFallWings(){
     const t=w.t,sd=w.sd,x0=R.bx+sd*64*.92,y0=DECK-204;
     ctx.save();ctx.globalAlpha=clamp01(1.6-t*.7);
     ctx.translate(x0+sd*70*t,y0+330*t*t-40*t);ctx.rotate(sd*1.1*t);
-    /* l'aile coupée : celle de la phase III, rongée et retombée (calque cuit à l'entrée) */
-    const k=(sd>0?.66:.68)*C3;ctx.scale(sd,1);ctx.rotate(.14+(sd>0?.5:.62));ctx.scale(k,k*.9);ctx.drawImage(COLOSSE.aile(sd<0,true),-20,-200,420,280);
+    /* l'aile coupée : celle de la phase III (calque cuit à l'entrée), rongée et retombée après le regain de vie */
+    const rg=!!R.healed,tb=rg?1:0,k=(sd>0?.66:.68)*C3;ctx.scale(sd,1);ctx.rotate(.14+tb*(sd>0?.5:.62));ctx.scale(k,k*(1-.1*tb));ctx.drawImage(COLOSSE.aile(sd<0,rg),-20,-200,420,280);
     ctx.restore();
   }
 }
