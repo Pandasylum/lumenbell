@@ -76,8 +76,13 @@ function drawHero3(){
   /* le Veilleur commun (LB.drawWatcher) ; la phase donne sa géométrie : sceptre en main, garde levée, contres, finale */
   const c3=R.cn;
   const play=R.mode==='play',low=p.s==='down'||p.s==='hurt';
-  const pose=R.mode==='intro'?'walk':R.mode==='finale'?'victory':!play?'idle':c3?'cast':p.s==='act'?'raise':low?(p.s==='down'?'down':'hurt'):'idle';
-  LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:h.sy,
+  const pose=R.mode==='intro'?'walk':R.mode==='finale'?'victory':!play?'idle':c3?'cast':p.s==='act'?'block':low?(p.s==='down'?'down':'hurt'):'idle';
+  /* hors contres, entrée, final et coup de boule : la posture et la tenue du bâton de la phase I (bâton planté, garde « block » commune) */
+  const commun=R.mode!=='intro'&&R.mode!=='finale'&&!c3&&!(low&&p.lasso);
+  if(commun){const up=p.s==='act',Q=LB.WATCHER_POSES.block(up?clamp01(p.t/.08):0);
+    LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:0,rot2:low?.12:0,sx:1,sy:low?.82:1,
+      breath:pose==='idle'&&play,hand:Q.hand,staff:Q.staff,glow:up?1:.25,lanternCol:LB.watcherLanternCol(p,up)})}
+  else LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:h.sy,
     breath:pose==='idle'&&play,hand:h.hand,sa:h.sa,L:76,
     glow:p.s==='act'?1:Math.max(.3,h.glow||0),
     lanternCol:LB.watcherLanternCol(p,p.s!=='recover'&&(p.s==='act'||h.glow>0))});
@@ -145,18 +150,17 @@ function col3CnFx(){
   if(k&&R.mode==='play'){
     if(R.hornAt!=null)col3Debris(c,'hp',R.time-R.hornAt-CN3.brise,k.corne,(x,y,r)=>k3corne(c,x,y,r),['#a47c8a','#4a2642','#ff9a35','#ffffff']);
     if(COL3.foudre1!=null)col3Debris(c,'ep',R.time-COL3.foudre1-CN3.enclume,k.enclume,(x,y,r)=>{c.save();c.translate(x,y);c.rotate(r);c.scale(C3*COL3.f.m,C3);COLOSSE.eclatEnclume(c);c.restore()},['#6a4a72','#35223f','#ff9a35','#ffe08a']);
-    /* regain de vie : les ailes perdent des lambeaux en brûlant */
+    /* foudre du regain de vie : les ailes perdent des lambeaux en brûlant */
     if(R.healed&&R.wdAt!=null&&!reduce){const u=R.time-R.wdAt-CN3.ronge;k3shards(c,k.x0+130,DECK-230,u,24,['#6a3050','#2c1534','#ff9a35'],200,72,DECK+5);k3shards(c,k.x0-130,DECK-230,u-.1,18,['#6a3050','#2c1534','#ff9a35'],200,73,DECK+5)}
   }
   const S=COL3.cs;if(!S||!k||R.mode!=='play'||R.atk)return;
   const u=R.time-S.t0,T=S.T,s=u-T;
   if(S.k==='plant'){
     if(u>T+.8)return;
-    const L=lant3(),g=k3bump(u,CN3.garde[0],CN3.garde[1],.1);if(g>0)LB.drawBlock(c,PX,DECK,.07*g,1e9,{plain:true});   /* parade : la garde bleue du jeu */
-    k3charge(c,L,(u-(T-CN3.charge))/.4,tm);
+    const L=lant3();k3charge(c,L,(u-(T-CN3.charge))/.4,tm);
     if(S.kind==='whip'){const d0=T-CN3.boule-.05;if(u>d0&&u<T+.2)k3rayon(c,L,k.boule,(u-d0)/(T+.25-d0),1.05)}   /* le rayon cueille la boule et la lui renvoie */
-    else k3rayon(c,L,u<T?k.head:k.coeur,(u-T+CN3.rayon)/CN3.rayonD,1.05);   /* il repousse le marteau et frappe le torse */
-    k3contact(c,k.coeur,s,S.kind==='whip'?150:130,S.kind==='whip'?17:12,CN3_COUPS);
+    else{k3rayon(c,L,k.head,(u-T+CN3.rayon)/CN3.rayonD,1.05);k3contact(c,k.head,s,120,12,['#fffbea','#ffe58a','#ff9a35','#6a4a72'])}   /* le rayon frappe le marteau qui retombe (faux coup) et le repousse */
+    if(S.kind==='whip')k3contact(c,k.coeur,s,150,17,CN3_COUPS);
   }else if(S.k==='bat'){if(u<T+1)k3cometes(c,lant3(),T-CN3.comete,u,k.coeur,tm)}
   else if(S.k==='bell'){k3ondesCloche(c,u-R_CN.bell.ring,k.tete,1);k3acouphene(c,k.tete,COL3.ko||0,tm)}
   else if(S.k==='bolt'){

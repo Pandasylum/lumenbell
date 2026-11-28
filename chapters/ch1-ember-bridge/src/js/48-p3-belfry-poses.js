@@ -120,10 +120,9 @@ function heroPose3(){
   if(c){
     const t=c.t;
     if(c.k==='plant'){
-      /* contre des armes (maquette colosse-clocher.js) : garde levée (parade), puis sceptre pointé, le rayon part de la lanterne */
+      /* contre des armes (maquette colosse-clocher.js) : sceptre pointé, le rayon part de la lanterne */
       const T=R_CN.plant.hit,bp=(a,b,m)=>es(clamp01((t-a)/m))*(1-es(clamp01((t-b)/m)));
-      const tir=bp(T-.55,T+.45,.18),gd=bp(-1,CN3.garde[1],.1);
-      hand=mh(hand,[36,-76],tir);sa=ma(sa,-.12,tir);hand=mh(hand,[28,-94],gd);sa=ma(sa,-1.5,gd);glow=Math.max(tir,gd);
+      const tir=bp(T-.55,T+.45,.18);hand=mh(hand,[36,-76],tir);sa=ma(sa,-.12,tir);glow=tir;
     }else if(c.k==='bat'){
       /* cinq comètes : sceptre pointé vers le Colosse */
       const u=es(clamp01(t/.22)),v=es(clamp01((t-.6)/.5)),w=u*(1-v);

@@ -46,7 +46,7 @@ Référence : si une conversation la contredit, c'est la conversation qui se tro
 - **Silhouette** : le `COLOSSE` (`chapters/ch1-ember-bridge/src/js/28-boss-body.js`), dessiné une seule fois et partagé par les trois phases (direction artistique du 2026-11-27 : `docs/decisions/2026-11-27-direction-artistique.md` ; phase III : `docs/decisions/2026-11-27-clocher.md`).
 - **Équipement** : bandoulière de chaîne, épaulettes en enclume, boule hérissée à la chaîne (la boule enchaînée), marteau à deux mains, queue. En phase III, marteau rangé dans le dos et boule en bandoulière hors de leurs attaques.
 - **Boule enchaînée** : la chaîne du torse ne se déroule plus, dans aucune phase ; en phase III, il décroche la boule de sa bandoulière, la fait tournoyer et la lance (attaque « La boule enchaînée » ; en Difficile « Double lancer », « Quatre lancers »).
-- **Blessures (phase III)** : à la première foudre, la grande enclume de l'épaule cède (le bec tombe, cassure de braise) ; après le regain de vie, les ailes sont rongées (trous au liseré de braise, membrane déchirée, os à nu) et retombent ; à la première foudre de la seconde vie, la grande corne (à droite de l'écran) se brise et tombe. Tout reste brisé jusqu'à la fin ; fissures de braise ; la scène de fin coupe ensuite les ailes. Les ailes sont les mêmes en phases I et III.
+- **Blessures (phase III)** : à la première foudre, la grande enclume de l'épaule cède (le bec tombe, cassure de braise) ; à la foudre qui le ramène à la vie, les ailes sont rongées (trous au liseré de braise, membrane déchirée, os à nu) et retombent ; à la première foudre de la seconde vie, la grande corne (à droite de l'écran) se brise et tombe. Tout reste brisé jusqu'à la fin ; fissures de braise ; la scène de fin coupe ensuite les ailes. Les ailes sont les mêmes en phases I et III.
 - **Rages** : Râle d'agonie, Fureur, Embrasement ; en Difficile : Fureur de braise, Danse des chaînes, Embrasement final.
 
 ## Les trois phases
@@ -65,7 +65,7 @@ Textes exacts : `docs/TEXTES-CH1.md`.
 |---|---|---|
 | Physique | La grande cloche sonne : ses ondes roulent jusqu'à sa tête, KO auditif mains sur la tête (1,3 s), sans étoiles ni éclats d'impact (le son étourdit) | Griffes ; charge, piétinement, geyser ; cri (Difficile) |
 | Distance | Cinq comètes de lumière, de la lanterne à son cœur | Grêle de braise, chute de pierres, souffle de flamme, ondes d'ailes |
-| Armes | Parade (garde bleue du jeu), puis le rayon du sceptre repousse l'arme et frappe le torse ; la boule enchaînée, cueillie au sol, lui est renvoyée en plein torse | Marteau de guerre, combo, boule enchaînée |
+| Armes | Le rayon du sceptre frappe le marteau qui retombe sur un faux coup de plus et le repousse, il encaisse ; la boule enchaînée, cueillie au sol, lui est renvoyée en plein torse | Marteau de guerre, combo, boule enchaînée |
 | Rage | La cloche l'étourdit dans sa furie, puis la foudre s'abat (tête et cœur ; la grande corne à la première foudre de la seconde vie) | Toutes les rages |
 
 Rage : il se ramasse, pousse son cri (ondes et éclats de braise au sol, la nuit rougit), fissures de braise et flammes jusqu'à la foudre, comme en phase I.

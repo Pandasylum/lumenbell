@@ -430,6 +430,8 @@ const COLOSSE=(()=>{
   /* cuit les ailes (rg : 0 intactes, 1 rongées, absent : les deux) ; appelé à l'entrée des phases I et III */
   function ailes3(rg){if(!SP)build();for(const l of [0,1])for(const r of [0,1]){if(rg!=null&&r!==(rg?1:0))continue;const k=l+'|'+r;if(!AILES3[k])AILES3[k]=aileCuite(!!l,!!r)}return AILES3}
   /* aile cuite : loin (lointaine), ronge (rongée) ; la paire manquante est cuite à la volée (première image de la phase, pendant l'entrée) */
+  /* une seule aile cuite (préchauffage de la phase III : une par image) */
+  function cuireAile(loin,ronge){if(!SP)build();const k=(loin?1:0)+'|'+(ronge?1:0);if(!AILES3[k])AILES3[k]=aileCuite(!!loin,!!ronge)}
   function aile(loin,ronge){const k=(loin?1:0)+'|'+(ronge?1:0);return AILES3[k]||ailes3(ronge?1:0)[k]}
   /* les deux ailes, dans le repère des pieds (unités de pose), attachées au buste o (lean, drop, plie, sx) : bat (battement, rad), env (envergure),
      tombe (retombées, 0 à 1), ronge (rongées), cut (0 à 2 : ailes coupées par le final, la lointaine d'abord). Phases I et III. */
@@ -452,7 +454,7 @@ const COLOSSE=(()=>{
       const lv=Math.min(1,Math.max(0,(q[1]||0)/60)),a=OMB.al*k*(1-.7*lv);if(a<=.01)return;
       c.fillStyle='rgba(8,4,22,'+a+')';c.beginPath();c.ellipse(x0+px*s,y0+d.c[1]*as*pl+1,d.rx*as*(1-.3*lv),OMB.ry,0,0,TAU);c.fill()});
     c.restore()}
-  return {draw,ik,L1,L2,ailes3,aile,ailes,eclatEnclume,ombres};
+  return {draw,ik,L1,L2,ailes3,cuireAile,aile,ailes,eclatEnclume,ombres};
 })();
 
 /* ===== Effets du Colosse réutilisables (référence ripostes-reference.js, 27/11) : dégâts, éclats, flammes de rage =====

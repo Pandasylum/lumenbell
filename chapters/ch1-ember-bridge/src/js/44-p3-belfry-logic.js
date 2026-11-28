@@ -221,7 +221,7 @@ function rDamage(k,c){
   if(k==='bell')R.dizzy=R.time+1.3;
   /* Pas de mot : l'effet se voit et s'entend, propre à chaque contre. Le rayon et les comètes frappent le torse, là où le rendu les dessine ;
      l'onde de la cloche étourdit, elle ne fait ni éclats ni anneau d'impact (rendu : 56-p3-belfry-render.js). */
-  const tg=cn3Point('coeur',[R.bx-30,DECK-170]);
+  const tg=(k==='plant'&&typeof col3CibleCn==='function'&&col3CibleCn())||cn3Point('coeur',[R.bx-30,DECK-170]);   /* contre du marteau : sur le marteau */
   if(k!=='bell'){qBurst(tg[0],tg[1],32,['#ffffff','#fff0b0','#ffc15a']);qRing(tg[0],tg[1]);R.flash=.6;qRing(tg[0],tg[1])}else R.flash=Math.max(R.flash,.2);
   if(k==='bell'){ringBell(.55);tone(70,.9,'sine',.12,-20)}
   else if(k==='bat'){tone(1700,.3,'triangle',.07,-1000);tone(2400,.2,'sine',.05,-1200);noise(.18,.12,6000,1500)}
@@ -242,7 +242,7 @@ function rCnStep(dt){
     if(!c.d1&&c.t>=.1){c.d1=true;tone(1568,.5,'triangle',.06,0);tone(2093,.35,'sine',.035,0);tone(2637,.25,'sine',.02,0)}
     if(!c.d2&&c.t>=sp.ring){c.d2=true;ringBell(.55);R.flash=.2}
   }
-  if(c.k==='plant'&&!c.pl&&c.t>=.3){c.pl=true;qRing(GUARD[0],GUARD[1]);qBurst(GUARD[0],GUARD[1],22,['#ffffff','#bfeaff','#6fd3ff']);tone(160,.4,'sine',.1,-60);R.flash=.2}
+  if(c.k==='plant'&&!c.pl&&c.t>=.3){c.pl=true;tone(160,.4,'sine',.1,-60);R.flash=.2}
   if(c.k==='bolt'&&!c.rz&&c.t>=.25){c.rz=true;tone(220,.8,'sawtooth',.05,900);R.flash=.2;const L=lant3();qRing(L[0],L[1])}
   if(c.k==='bolt'&&!c.rb&&c.t>=sp.ring){c.rb=true;ringBell(.32)}
   if(c.k==='bolt'&&!c.rm&&c.t>=.6){c.rm=true;tone(55,.9,'sawtooth',.08,-15)}  if(c.k==='slide'&&c.t<.4&&Math.random()<.7){
