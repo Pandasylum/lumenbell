@@ -134,12 +134,10 @@ function heroPose3(){
       const u=es(clamp01(t/.25));hand=mh(H0,[28,-92],u);sa=ma(A0,-1.15,u);glow=1;
       if(t>1.5){const v=es(clamp01((t-1.5)/.4));hand=mh([28,-92],H0,v);sa=ma(-1.15,A0,v);glow=1-v}
     }
-  }else if(p.s==='act'){
-    const r=clamp01(p.t/.08);hand=mh(H0,[28,-94],r);sa=ma(A0,-1.5,r);glow=1;
   }else if((p.s==='down'||p.s==='hurt')&&p.lasso){
     const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));
     rot=.5*k;hand=[10,-60];sa=.3; /* frappé par la boule : repoussé, plus tiré par un lasso */
-  }else if(p.s==='down'||p.s==='hurt'){rot=.12;sy=.82;sa=.6}
+  }   /* garde et coup reçu : posture de la phase I, dessinée par drawHero3 (garde commune) */
   return{x,hand,sa,rot,sy,glow};
 }
 /* Masse de braise du Colosse, dans le repère de la main : manche le long de l'axe x, tête à pointes au bout (portée L) */

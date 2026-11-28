@@ -21,7 +21,7 @@ const k3bump=(t,a,b,m=.12)=>k3ez((t-a)/m)*(1-k3ez((t-b)/m));
 /* poses (unités de pose) : lean/drop/sx/dF/dN = buste, off/nn = mains lointaine et proche, P/a/g/wN/wF/s/r = marteau et boule (voir COLOSSE.draw),
    dx = décalage du corps (px), fx/fl/fa et nx/nl/na = jambes lointaine et proche (x, levée, angle), tx/ty = bout de la chaîne, wa/ws = ailes */
 const K3B={lean:0,drop:0,sx:1,dF:0,dN:0,off:[-62,92],nn:[0,0],plie:0,tete:0,P:[24,-192],a:150,g:200,wN:1,wF:1,s:1,r:0,dx:0,jaw:0,wa:0,ws:1,griffe:0,yeux:.25,fx:0,fl:0,fa:0,nx:0,nl:0,na:0,tx:-34,ty:-128,heat:0,flash:0,eteint:0,fissure:0,rage:0,flm:0};   /* flash, eteint, fissure, rage : teinte et fissures du COLOSSE ; flm : flammes de rage */
-const K3_GARDE={...K3B},K3_ARME={...K3B,lean:.22,sx:.92,dF:16,dN:-40,P:[-5,-285],a:50,g:205},
+const K3_ARME={...K3B,lean:.22,sx:.92,dF:16,dN:-40,P:[-5,-285],a:50,g:205},
   K3_FRAPPE={...K3B,dx:56,lean:-.45,drop:22,sx:1.04,dF:16,dN:-60,P:[-135,-126],a:-201,g:205},
   K3_FRAPPE2={...K3B,dx:50,lean:-.38,drop:16,sx:1.03,dF:16,dN:-56,P:[-128,-118],a:-197,g:205},
   K3_DOS={...K3B,P:[94,-256],a:-62,g:50,wN:0,wF:0,r:1};
@@ -136,7 +136,7 @@ function col3Charge(a){
    ras du sol puis de haut en bas, en alternance ; après le dernier il se retourne et retombe lourdement. Tout est calé sur les impacts (F). */
 const Q3T={gath:.16,piv:.26,lead:.21,back:.18,piv2:.26};   /* ramassé, pivot, fin du pivot avant le 1er impact, départ du retour après le dernier, retour */
 /* queue retournée : repère de pose, x positif = vers le Veilleur (le corps est en miroir) ; A = ras du sol, B = de haut en bas */
-const Q3R=[[40,-120],[-90,-50],[-60,10],[-190,-24]],Q3F=[[40,-120],[80,10],[10,10],[-80,-30]],
+const Q3F=[[40,-120],[80,10],[10,10],[-80,-30]],
   Q3A=[[-.33,[[40,-130],[-120,-110],[-180,-180],[-170,-250]]],[-.17,[[40,-110],[-110,-30],[-170,-20],[-215,-60]]],[0,[[40,-110],[110,40],[220,20],[305,-44]],1],[.19,[[40,-130],[130,-60],[170,-110],[215,-170]]]],
   Q3B=[[-.45,[[40,-150],[-40,-240],[-90,-330],[-30,-390]]],[-.2,[[40,-160],[20,-330],[90,-430],[150,-390]]],[0,[[40,-180],[170,-300],[270,-210],[302,-62]],1],[.2,[[40,-130],[150,-110],[250,10],[270,-10]]]];
 function col3QZ(a){

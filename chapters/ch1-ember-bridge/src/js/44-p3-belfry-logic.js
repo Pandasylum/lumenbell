@@ -4,7 +4,7 @@ const GUARD=[PX+116,DECK-76];
 /* Phase III : down = étourdissement d'un coup, min = plancher quand un autre coup suit, lasso = étourdissement du crochet, stun = étourdissement du Colosse (s). Durées de l'action, de la récupération et de la grâce : LB.HERO_T.block. */
 const R_T={down:.55,min:.22,lasso:1.1,stun:.55};
 /* contres : instant du coup porté et fin (s, depuis le début du contre), ring = la grande cloche sonne ; lu aussi par le rendu (54-p3-belfry-colosse.js) pour caler les images */
-const R_CN={plant:{hit:.85,end:1.5},bat:{hit:.67,end:1.35},bell:{hit:.85,end:1.45,ring:.5},slide:{hit:.35,end:1.2},bolt:{hit:1.0,end:1.9,ring:.55}};
+const R_CN={plant:{hit:.85,end:1.5},bat:{hit:.67,end:1.35},bell:{hit:.85,end:1.45,ring:.5},bolt:{hit:1.0,end:1.9,ring:.55}};
 const RATK={
   greatsword:{hits:[{k:'gs',at:.75},{k:'gs',at:1.4},{k:'gs',at:2.05}],cn:'plant',get name(){return _('War hammer','Marteau de guerre')}},
   avalanche:{hits:[{k:'ice',at:.9},{k:'ice',at:1.2},{k:'ice',at:1.5},{k:'ice',at:1.8},{k:'ice',at:2.1}],cn:'bat',get name(){return _('Ember hail','Grêle de braise')}},
@@ -202,7 +202,7 @@ function rDamage(k,c){
     qBurst(tg[0],tg[1],40,['#ffffff','#fff0b0','#ffd966','#ffc15a']);
     qFlameBurst(tg[0],tg[1],1.5,true);R.shake=reduce?0:20;
     tone(90,.6,'sawtooth',.14,-40);tone(1200,.3,'sine',.07,-600);
-    if(R.healed&&R.hornAt==null){R.hornAt=R.time;R.hornX=R.bx;noise(.3,.22,5000,900);tone(900,.25,'square',.06,-600);const hp=cn3Point('corne',[R.bx+105,DECK-340]);qBurst(hp[0],hp[1],16,['#ffc15a','#ff7a2b','#ffffff'])}
+    if(R.healed&&R.hornAt==null){R.hornAt=R.time;noise(.3,.22,5000,900);tone(900,.25,'square',.06,-600);const hp=cn3Point('corne',[R.bx+105,DECK-340]);qBurst(hp[0],hp[1],16,['#ffc15a','#ff7a2b','#ffffff'])}
     if(R.bhp<=LB.BOSS_RULES.finalHp){
       if(!R.healed&&!DIFF.easy){ /* Facile : pas de seconde vie, la vraie fin suit directement (la fausse fin est supprimée, 1er novembre) */
         R.healed=true;R.wdAt=R.time;R.cycle=2;R.u5=false;
@@ -245,9 +245,7 @@ function rCnStep(dt){
   if(c.k==='plant'&&!c.pl&&c.t>=.3){c.pl=true;tone(160,.4,'sine',.1,-60);R.flash=.2}
   if(c.k==='bolt'&&!c.rz&&c.t>=.25){c.rz=true;tone(220,.8,'sawtooth',.05,900);R.flash=.2;const L=lant3();qRing(L[0],L[1])}
   if(c.k==='bolt'&&!c.rb&&c.t>=sp.ring){c.rb=true;ringBell(.32)}
-  if(c.k==='bolt'&&!c.rm&&c.t>=.6){c.rm=true;tone(55,.9,'sawtooth',.08,-15)}  if(c.k==='slide'&&c.t<.4&&Math.random()<.7){
-    const x=heroX3();R.sparks.push({x:x-10,y:DECK-3,vx:rand(-120,-20),vy:-rand(20,100),g:260,life:.5,max:.5,col:'#ffffff',sz:rand(2,4)});
-  }
+  if(c.k==='bolt'&&!c.rm&&c.t>=.6){c.rm=true;tone(55,.9,'sawtooth',.08,-15)}
   if(!c.hit&&c.t>=sp.hit){c.hit=true;rDamage(c.k,c);if(R.mode!=='play'||R.cn!==c)return}
   if(c.t>=sp.end){R.cn=null;p.s='ready';p.t=0;b.s='hurt';b.t=0}
 }
@@ -328,7 +326,7 @@ function rStep(dt){
   R.shake=Math.max(0,R.shake-dt*45);R.flash=Math.max(0,R.flash-dt*2.2);R.hurt=Math.max(0,R.hurt-dt*1.6);R.recoil=Math.max(0,R.recoil-dt*3.5);
   if(R.endIn>0){R.endIn-=dt;if(R.endIn<=0)rEnd()}
   if(R.atk&&R.atk.kind==='charge')R.bx=(R.atk.h?chargeXH:chargeX)(Math.max(0,R.atk.pt));
-  else if(!R.cn||R.cn.k!=='slide')R.bx+=(BX-R.bx)*Math.min(1,dt*3);
+  else R.bx+=(BX-R.bx)*Math.min(1,dt*3);
   if(R.hitstop>0){R.hitstop-=dt;hud();return}
   if(R.mode==='finale'){rFinale(dt);hud();return}
   if(R.mode==='space'){R.st+=dt;
