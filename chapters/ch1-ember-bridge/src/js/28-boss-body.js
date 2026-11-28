@@ -441,7 +441,18 @@ const COLOSSE=(()=>{
       c.drawImage(aile(sd<0,w.ronge),-20,-200,420,280);c.restore()}}
   /* morceau d'enclume arraché, centré sur (0, 0) en unités de pose */
   function eclatEnclume(c){if(!SP)build();c.save();c.translate(-136,-232);img(c,SP.paulRP);c.restore()}
-  return {draw,ik,L1,L2,ailes3,aile,ailes,eclatEnclume};
+  /* ombres de contact : une sous chaque pied (le pied arrière, dessiné plus haut pour la perspective, a la sienne) et une ombre douce entre les deux.
+     Chaque pied suit sa jambe (pivot à la hanche, levée, jambes pliées) ; l'ombre reste au sol et pâlit quand le pied se lève.
+     o : fx, fl, fa, nx, nl, na (jambes, comme o.legs), plie ; (x0, y0) : pieds dans le monde ; s : échelle pose -> monde (négative : retourné) ; k : opacité. Phases I et III. */
+  const OMB={F:{hip:[-40,-118],c:[-64,-6.4],rx:40},N:{hip:[34,-118],c:[60,4.8],rx:46},al:.55,ry:5,doux:[130,9,.22]};
+  function ombres(c,o,x0,y0,s,k){if(!(k>0))return;const as=Math.abs(s),pl=1-.2*(o.plie||0);
+    c.save();c.fillStyle='rgba(8,4,22,'+(OMB.doux[2]*k)+')';c.beginPath();c.ellipse(x0,y0,OMB.doux[0]*as,OMB.doux[1],0,0,TAU);c.fill();
+    [[OMB.F,[o.fx,o.fl,o.fa]],[OMB.N,[o.nx,o.nl,o.na]]].forEach(([d,q])=>{
+      const an=Math.asin(Math.max(-.38,Math.min(.38,-(q[0]||0)/120)))+(q[2]||0),dx=d.c[0]-d.hip[0],dy=d.c[1]-d.hip[1],px=d.hip[0]+dx*Math.cos(an)-dy*Math.sin(an);
+      const lv=Math.min(1,Math.max(0,(q[1]||0)/60)),a=OMB.al*k*(1-.7*lv);if(a<=.01)return;
+      c.fillStyle='rgba(8,4,22,'+a+')';c.beginPath();c.ellipse(x0+px*s,y0+d.c[1]*as*pl+1,d.rx*as*(1-.3*lv),OMB.ry,0,0,TAU);c.fill()});
+    c.restore()}
+  return {draw,ik,L1,L2,ailes3,aile,ailes,eclatEnclume,ombres};
 })();
 
 /* ===== Effets du Colosse réutilisables (référence ripostes-reference.js, 27/11) : dégâts, éclats, flammes de rage =====

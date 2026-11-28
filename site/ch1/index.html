@@ -2450,7 +2450,15 @@ const COLOSSE=(()=>{
       c.save();c.translate(sx*co*x-si*y+si*PY,sx*si*x+co*y+PY+dr-co*PY);c.scale(sd,1);c.rotate(.14+(w.bat||0)+tb*(sd>0?.5:.62));c.scale(k,k*(1-.1*tb));
       c.drawImage(aile(sd<0,w.ronge),-20,-200,420,280);c.restore()}}
   function eclatEnclume(c){if(!SP)build();c.save();c.translate(-136,-232);img(c,SP.paulRP);c.restore()}
-  return {draw,ik,L1,L2,ailes3,aile,ailes,eclatEnclume};
+  const OMB={F:{hip:[-40,-118],c:[-64,-6.4],rx:40},N:{hip:[34,-118],c:[60,4.8],rx:46},al:.55,ry:5,doux:[130,9,.22]};
+  function ombres(c,o,x0,y0,s,k){if(!(k>0))return;const as=Math.abs(s),pl=1-.2*(o.plie||0);
+    c.save();c.fillStyle='rgba(8,4,22,'+(OMB.doux[2]*k)+')';c.beginPath();c.ellipse(x0,y0,OMB.doux[0]*as,OMB.doux[1],0,0,TAU);c.fill();
+    [[OMB.F,[o.fx,o.fl,o.fa]],[OMB.N,[o.nx,o.nl,o.na]]].forEach(([d,q])=>{
+      const an=Math.asin(Math.max(-.38,Math.min(.38,-(q[0]||0)/120)))+(q[2]||0),dx=d.c[0]-d.hip[0],dy=d.c[1]-d.hip[1],px=d.hip[0]+dx*Math.cos(an)-dy*Math.sin(an);
+      const lv=Math.min(1,Math.max(0,(q[1]||0)/60)),a=OMB.al*k*(1-.7*lv);if(a<=.01)return;
+      c.fillStyle='rgba(8,4,22,'+a+')';c.beginPath();c.ellipse(x0+px*s,y0+d.c[1]*as*pl+1,d.rx*as*(1-.3*lv),OMB.ry,0,0,TAU);c.fill()});
+    c.restore()}
+  return {draw,ik,L1,L2,ailes3,aile,ailes,eclatEnclume,ombres};
 })();
 
 const COLFX=(()=>{
@@ -2787,6 +2795,7 @@ function drawBoss(){
   const legs={f:[lg('f'),wk.lift.f/s,-wk.lift.f*.004],n:[lg('n'),wk.lift.n/s,-wk.lift.n*.004]};
   const trail=b.s==='sw1'||b.s==='sw2';if(!trail)G.swTrail.length=0;
   if(RP.f>.01){ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);COLFX.rageDerriere(ctx,reduce?0:t,RP.f);ctx.restore()}
+  if(Math.abs(dy)<60)COLOSSE.ombres(ctx,{fx:legs.f[0],fl:legs.f[1],fa:legs.f[2],nx:legs.n[0],nl:legs.n[1],na:legs.n[2],plie:R.plie+RU.plie},X0,DECK,s,1-Math.min(1,Math.abs(dy)/60));   
   ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);
   const rig=COLOSSE.draw(ctx,{lean:p[0],drop:p[1],sx:p[2],dF:p[3],dN:p[4],off:[p[5],p[6]],ham:cb.ham,legs,look:CW.look,eyes:CW.eyes,breath:t,smoke:.8+.6*CW.menace,
     plie:R.plie+RU.plie,tete:R.tete+RU.tete,nn:[R.nn[0]+RU.nn[0],R.nn[1]+RU.nn[1]],fissure:R.fissure,rage:RP.rage,eteint:R.eteint,flash:R.flash,
@@ -5401,7 +5410,7 @@ function drawBoss3(){
   const rT=R.healed?(R.wdAt!=null?R.wdAt:-99):null,ronge=rT!=null&&t>=rT+CN3.ronge,tombe=ronge?k3ez((t-rT-CN3.tombe[0])/CN3.tombe[1]):0;
   const brise=R.hornAt!=null&&t>=R.hornAt+CN3.brise,enclume=COL3.foudre1!=null&&t>=COL3.foudre1+CN3.enclume;
   if(ob.flip){ctx.save();ctx.translate(bx,0);ctx.scale(-1,1);ctx.translate(-bx,0)}
-  if(dy>-60){ctx.fillStyle='rgba(8,4,22,'+(.5*(1-k3cl(-dy/60)))+')';ctx.beginPath();ctx.ellipse(bx+C3X+o.dx,DECK+3,150*Math.abs(fm),6,0,0,6.283);ctx.fill()}
+  if(dy>-60&&!fin)COLOSSE.ombres(ctx,{fx:o.fx,fl:o.fl,fa:o.fa,nx:o.nx,nl:o.nl,na:o.na,plie:o.plie},bx+C3X+o.dx,DECK,C3*fm,1-k3cl(-dy/60));
   if(R.healed&&!fin&&R.boss.s!=='dead'){ctx.save();ctx.translate(bx,DECK+dy);ctx.scale(.92,.92);drawAura3(ob,t);ctx.restore()}
   if(R.atk&&R.atk.dbl&&R.atk.t<R.atk.hits[R.atk.hits.length-1].at+.05){ctx.save();ctx.translate(bx,DECK+dy);ctx.rotate(fin?ob.lean:0);ctx.scale(.92,.92);ctx.fillStyle='rgba(255,176,74,'+(.85+.15*Math.sin(t*30))+')';ctx.shadowColor='#ff7a2b';ctx.shadowBlur=14;ctx.font='900 54px '+DISPLAY;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!'.repeat(R.atk.tn||2),-170,-300);ctx.restore()}
   ctx.save();ctx.translate(bx,DECK+dy);if(fin&&ob.lean)ctx.rotate(ob.lean);ctx.translate(C3X+o.dx,0);ctx.scale(C3*fm,C3);

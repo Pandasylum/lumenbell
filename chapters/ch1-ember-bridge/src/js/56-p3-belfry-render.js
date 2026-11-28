@@ -27,8 +27,8 @@ function drawBoss3(){
   const rT=R.healed?(R.wdAt!=null?R.wdAt:-99):null,ronge=rT!=null&&t>=rT+CN3.ronge,tombe=ronge?k3ez((t-rT-CN3.tombe[0])/CN3.tombe[1]):0;
   const brise=R.hornAt!=null&&t>=R.hornAt+CN3.brise,enclume=COL3.foudre1!=null&&t>=COL3.foudre1+CN3.enclume;
   if(ob.flip){ctx.save();ctx.translate(bx,0);ctx.scale(-1,1);ctx.translate(-bx,0)}
-  /* ombre de contact sous ses pieds (comme la maquette) : il pèse sur les dalles */
-  if(dy>-60){ctx.fillStyle='rgba(8,4,22,'+(.5*(1-k3cl(-dy/60)))+')';ctx.beginPath();ctx.ellipse(bx+C3X+o.dx,DECK+3,150*Math.abs(fm),6,0,0,6.283);ctx.fill()}
+  /* ombres de contact : une sous chaque pied (le pied arrière, dessiné plus haut pour la perspective, a la sienne) et une ombre douce entre les deux */
+  if(dy>-60&&!fin)COLOSSE.ombres(ctx,{fx:o.fx,fl:o.fl,fa:o.fa,nx:o.nx,nl:o.nl,na:o.na,plie:o.plie},bx+C3X+o.dx,DECK,C3*fm,1-k3cl(-dy/60));
   if(R.healed&&!fin&&R.boss.s!=='dead'){ctx.save();ctx.translate(bx,DECK+dy);ctx.scale(.92,.92);drawAura3(ob,t);ctx.restore()}
   if(R.atk&&R.atk.dbl&&R.atk.t<R.atk.hits[R.atk.hits.length-1].at+.05){ctx.save();ctx.translate(bx,DECK+dy);ctx.rotate(fin?ob.lean:0);ctx.scale(.92,.92);ctx.fillStyle='rgba(255,176,74,'+(.85+.15*Math.sin(t*30))+')';ctx.shadowColor='#ff7a2b';ctx.shadowBlur=14;ctx.font='900 54px '+DISPLAY;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!'.repeat(R.atk.tn||2),-170,-300);ctx.restore()}
   ctx.save();ctx.translate(bx,DECK+dy);if(fin&&ob.lean)ctx.rotate(ob.lean);ctx.translate(C3X+o.dx,0);ctx.scale(C3*fm,C3);
