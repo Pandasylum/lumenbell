@@ -428,3 +428,5 @@
 - Au loin, les tours de l'ordre ont la silhouette des flèches du pont, sous une lune plus sombre.
 - La fin du Chapitre I devient une vraie scène : la cloche sonne, la foudre frappe le Colosse, qui tombe à genoux et lâche sa masse ; le Veilleur saute sur lui, coupe ses deux ailes d'un tir de lanterne chacune, puis le frappe au cœur. Le Colosse s'écroule, le fanal s'allume et le fige en pierre, la cloche sonne le glas.
 - Un plan large montre les Flèches qui répondent une à une, sauf le Phare Noyé, muet ; puis un plan final au clair de lune : le Colosse de pierre, l'anneau du Veilleur à sa main, le marteau et les ailes restés au sol. La carte de fin arrive en bas, quelques secondes après.
+- À la fin du Chapitre I, le plan final sur le Colosse de pierre se tient d'abord seul pendant 7 secondes, puis l'outro (la première fois), puis la carte de fin.
+- On peut ouvrir directement cette fin avec `?fin=1` à la suite de l'adresse du chapitre : rien n'est sauvegardé.

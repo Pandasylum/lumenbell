@@ -39,7 +39,7 @@ Object.assign(ULT,{
 });
 /* Final (cinématique validée le 28/11, maquette docs/decisions/da/ch1-fin.js) : tous les instants, en secondes depuis le début du final ; la scène, le plan large et le plan final sont dessinés par 58-p3-belfry-fin.js.
    cloche : la cloche sonne · foudre : la foudre frappe le Colosse · genou/jet : il tombe à genoux, la masse lui échappe · saut : le Veilleur saute sur lui · coupe : un tir de lanterne dans chaque aile · charge, coup : l'arme du Veilleur, le coup au cœur
-   chute : le Colosse s'écroule · faisc, feu : le rayon vers le fanal, le fanal s'allume · pierre : la lumière le change en pierre · glas : la cloche sonne le glas · large : plan large des Flèches · fin : plan final · carte : carte de fin, en secondes après le début du plan final
+   chute : le Colosse s'écroule · faisc, feu : le rayon vers le fanal, le fanal s'allume · pierre : la lumière le change en pierre · glas : la cloche sonne le glas · large : plan large des Flèches · fin : plan final · carte : carte de fin (ou début de l'outro, la première fois, puis carte à sa fin), en secondes après le début du plan final
    debut : le final démarre à la foudre du contre ultime (0 à 1,7 s de la maquette : la cloche, l'orage et le Colosse sonné sont déjà ceux du contre, la cinématique reprend sans coupure) */
 const FIN={debut:1.72,cloche:.3,foudre:1.7,genou:2.1,jet:2.4,saut:[3.15,3.65],coupe:[4.0,4.6],charge:5.1,coup:5.75,chute:7.1,faisc:9.45,feu:9.85,pierre:10.2,glas:12.2,large:14.6,fin:18.4,carte:7,
   echo:[.8,.35],spires:[.5,.55]};   /* echo : écart du premier écho du glas et entre deux échos ; spires : la première Flèche répond (depuis large), puis une toutes les .55 s */
@@ -196,6 +196,11 @@ function rAtkEnd(){
 function startFinale(){
   R.mode='finale';R.fin={t:FIN.debut};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;   /* la cloche et la foudre viennent d'avoir lieu (contre) : la cloche garde son balancement */
 }
+/* Accès par URL (?fin=1) : lance directement la cinématique de fin, sans menu, bouton ni texte ; rien n'est écrit (ni fin vue, ni outro, ni record). Seconde vie par défaut hors Facile, comme la maquette. */
+function apercuFin(){
+  pendingLore=false;el.go2.hidden=true;hideMenu();el.ov.classList.remove('clear');
+  Q=null;R=rNew();R.apercu=true;R.healed=!DIFF.easy;R.u1=true;R.bhp=0;BEL3.build();setPhaseUI(3);lastP=-1;lastB=-1;el.ov.hidden=true;
+  startFinale();hud()}
 function rDamage(k,c){
   if(k==='bolt'){
     const tg=cn3Point(R.healed&&R.hornAt==null?'corne':'tete',[R.bx-20,DECK-230]);   /* là où la foudre frappe : la tête, ou la grande corne à la première foudre de la seconde vie (rendu : 56-p3-belfry-render.js) */
@@ -286,7 +291,7 @@ function runTable(){
 }
 function rEnd(){
   const sp=R.mode==='space',win=R.mode==='won'||sp;
-  if(sp){LB.store.set(LB.key('end'),'1');LB.menu.update()}
+  if(sp&&!R.apercu){LB.store.set(LB.key('end'),'1');LB.menu.update()}   /* accès par URL : aucune progression écrite */
   const o={onGo:start,onMenu:sp?null:toMenu,clear:sp,eye:sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III'),
   title:sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.'),
   stats:_('Blocks ','Blocages ')+R.blocks+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3),
@@ -330,8 +335,9 @@ function rStep(dt){
   if(R.hitstop>0){R.hitstop-=dt;hud();return}
   if(R.mode==='finale'){rFinale(dt);hud();return}
   if(R.mode==='space'){R.st=(R.st||0)+dt;
-    /* carte de fin : FIN.carte s après le début du plan final (et après l'outro la première fois) ; tout de suite si l'on arrive ici sans la cinématique (R.cardAt absent) */
-    if(!R.cardShown&&!R.outro&&R.st>=(R.cardAt||0)){R.cardShown=true;rEnd()}hud();return}
+    /* ordre : plan final seul pendant FIN.carte s, puis l'outro (première fois seulement), puis la carte de fin ; sans outro, la carte vient à FIN.carte ; tout de suite si l'on arrive ici sans la cinématique (R.cardAt absent) */
+    if(R.outroPend&&R.st>=(R.cardAt||0)){R.outroPend=false;R.outro=true;OUTRO.play(()=>{if(R)R.outro=false})}
+    if(!R.cardShown&&!R.outro&&!R.outroPend&&R.st>=(R.cardAt||0)){R.cardShown=true;rEnd()}hud();return}
   const p=R.pl;LB.hero.step(p,dt,{gesture:'block'});
   if(R.mode==='intro'){
     /* Entrée : le Veilleur arrive par la cheminée, lanterne en main ; le Colosse se pose en vol au sommet du Clocher */
@@ -374,8 +380,8 @@ function rFinale(dt){
   [330,294,262,349].forEach((n,i)=>at(FIN.large+FIN.spires[0]+i*FIN.spires[1],'sp'+i,()=>{tone(n,1.6,'sine',.05,0);if(i===0)say(_("One by one, the Spires answer.","Une à une, les Flèches répondent."));if(i===3)say(_('All but one.','Toutes, sauf une.'))}));
   at(FIN.fin-1.5,'bk',()=>FINCINE.bake());   /* la statue est calculée une seule fois, avant le plan final */
   if(t>=FIN.fin){R.mode='space';R.st=0;R.cardAt=FIN.carte;say(_('Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I.','Au large, le Phare Noyé reste muet. Fin du chapitre I.'));
-    R.outroAgain=LB.hubAgain(RUN.on,OUTRO);   /* l'outro ne se joue qu'à la première vraie fin hors Épreuve ; en Épreuve, ni outro ni drapeau */
+    R.outroAgain=R.apercu||LB.hubAgain(RUN.on,OUTRO);   /* l'outro ne se joue qu'à la première vraie fin hors Épreuve ; en Épreuve, ni outro ni drapeau ; accès par URL : jamais (l'outro écrirait son drapeau) */
     if(RUN.on||R.outroAgain)return;   /* la carte vient à FIN.carte */
-    R.outro=true;OUTRO.play(()=>{if(R)R.outro=false})}   /* la carte vient à la fin de l'outro (au plus tôt à FIN.carte) */
+    R.outroPend=true}   /* l'outro démarre après FIN.carte s de plan final (rStep), la carte à la fin de l'outro */
 }
 

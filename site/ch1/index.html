@@ -4330,6 +4330,10 @@ function rAtkEnd(){
 function startFinale(){
   R.mode='finale';R.fin={t:FIN.debut};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;   
 }
+function apercuFin(){
+  pendingLore=false;el.go2.hidden=true;hideMenu();el.ov.classList.remove('clear');
+  Q=null;R=rNew();R.apercu=true;R.healed=!DIFF.easy;R.u1=true;R.bhp=0;BEL3.build();setPhaseUI(3);lastP=-1;lastB=-1;el.ov.hidden=true;
+  startFinale();hud()}
 function rDamage(k,c){
   if(k==='bolt'){
     const tg=cn3Point(R.healed&&R.hornAt==null?'corne':'tete',[R.bx-20,DECK-230]);   
@@ -4417,7 +4421,7 @@ function runTable(){
 }
 function rEnd(){
   const sp=R.mode==='space',win=R.mode==='won'||sp;
-  if(sp){LB.store.set(LB.key('end'),'1');LB.menu.update()}
+  if(sp&&!R.apercu){LB.store.set(LB.key('end'),'1');LB.menu.update()}   
   const o={onGo:start,onMenu:sp?null:toMenu,clear:sp,eye:sp?_('End of Chapter I · Next: Silent Bells','Fin du chapitre I · À suivre : Silent Bells'):win?_('Victory · Phase III','Victoire · Phase III'):_('Defeat · Phase III','Défaite · Phase III'),
   title:sp?_(`The fire has gone out.`,`Le feu s'est éteint.`):win?_(`The Colossus collapses.`,`Le Colosse s'effondre.`):_('Struck down atop the tower.','Terrassé au sommet du Clocher.'),
   stats:_('Blocks ','Blocages ')+R.blocks+_(' · Hits taken ',' · Coups subis ')+R.taken+trStr(3),
@@ -4461,7 +4465,8 @@ function rStep(dt){
   if(R.hitstop>0){R.hitstop-=dt;hud();return}
   if(R.mode==='finale'){rFinale(dt);hud();return}
   if(R.mode==='space'){R.st=(R.st||0)+dt;
-    if(!R.cardShown&&!R.outro&&R.st>=(R.cardAt||0)){R.cardShown=true;rEnd()}hud();return}
+    if(R.outroPend&&R.st>=(R.cardAt||0)){R.outroPend=false;R.outro=true;OUTRO.play(()=>{if(R)R.outro=false})}
+    if(!R.cardShown&&!R.outro&&!R.outroPend&&R.st>=(R.cardAt||0)){R.cardShown=true;rEnd()}hud();return}
   const p=R.pl;LB.hero.step(p,dt,{gesture:'block'});
   if(R.mode==='intro'){
     const T=R.t;
@@ -4502,9 +4507,9 @@ function rFinale(dt){
   [330,294,262,349].forEach((n,i)=>at(FIN.large+FIN.spires[0]+i*FIN.spires[1],'sp'+i,()=>{tone(n,1.6,'sine',.05,0);if(i===0)say(_("One by one, the Spires answer.","Une à une, les Flèches répondent."));if(i===3)say(_('All but one.','Toutes, sauf une.'))}));
   at(FIN.fin-1.5,'bk',()=>FINCINE.bake());   
   if(t>=FIN.fin){R.mode='space';R.st=0;R.cardAt=FIN.carte;say(_('Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I.','Au large, le Phare Noyé reste muet. Fin du chapitre I.'));
-    R.outroAgain=LB.hubAgain(RUN.on,OUTRO);   
+    R.outroAgain=R.apercu||LB.hubAgain(RUN.on,OUTRO);   
     if(RUN.on||R.outroAgain)return;   
-    R.outro=true;OUTRO.play(()=>{if(R)R.outro=false})}   
+    R.outroPend=true}   
 }
 
 function heroX3(){
@@ -6075,6 +6080,8 @@ newGame();
 hud();
 el.ov.hidden=true;
 showMenu(false);
+
+if((()=>{try{return new URLSearchParams(location.search).get('fin')==='1'}catch(e){return false}})())apercuFin();
 const CINE=(()=>{
   const cx=LB.cine.mount().cx;
   const P=d=>new Path2D(d);
