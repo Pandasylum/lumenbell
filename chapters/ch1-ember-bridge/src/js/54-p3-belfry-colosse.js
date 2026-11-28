@@ -257,6 +257,7 @@ function col3Atk(a){
 function col3Pose(ob){
   const a=R.atk,t=R.time,fin=R.mode==='finale';
   COL3.m={};
+  if(t<COL3.lastT||R.mode==='intro'){COL3.last=null;COL3.lastT=-9}   /* nouvelle partie (Réessayer) : l'horloge repart de 0, on oublie la dernière pose de la partie précédente */
   const fb=col3Fb(ob);
   let po=a&&!fin?col3Atk(a):null;
   const idle=!a&&R.mode==='play'&&R.boss.s!=='heal'&&R.boss.s!=='dead';
@@ -265,7 +266,7 @@ function col3Pose(ob){
   if(a)a.hits.forEach(h=>{if(h.pre)rk=Math.max(rk,k3cl(a.t/.5)*(1-k3ez((a.t-h.at-.15)/.5)))});   /* le rugissement avant une rage : mains levées, gueule ouverte */
   let o;
   if(po){COL3.last=po;COL3.lastT=t;o=rk>.02?k3mix(po,fb,rk):po}
-  else if(!a&&COL3.last&&R.mode==='play'&&t-COL3.lastT<.5)o=k3mix(COL3.last,fb,k3ez((t-COL3.lastT)/.45));   /* fin d'attaque : retour doux à la garde */
+  else if(!a&&COL3.last&&R.mode==='play'&&t>=COL3.lastT&&t-COL3.lastT<.5)o=k3mix(COL3.last,fb,k3ez((t-COL3.lastT)/.45));   /* fin d'attaque : retour doux à la garde */
   else o=fb;
   if(po&&!a.hits.some(h=>h.k==='wave')){o.wa=ob.wa;o.ws=ob.ws}
   const on=a&&!fin?col3Onde(a):null;
