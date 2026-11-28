@@ -1,5 +1,5 @@
 /* ================= PHASE III : décor du sommet du Clocher (maquette validée colosse-clocher.js, lot 3) =================
-   Plans de la maquette : CIEL (dégradé, étoiles, lune), LOIN (crêtes, tours de l'ordre sur leurs éperons), brumes, BEFFROI et sa cloche,
+   Plans de la maquette : CIEL (dégradé, étoiles, lune), LOIN (crêtes, tours de l'ordre : flèches de la phase I), brumes, BEFFROI et sa cloche,
    SOL (parapet, dalles en fuite, corniche, paroi), fanal, neige et vignettage. Le repère de la maquette (sol à 452) est décalé de DY3
    pour que sa plateforme tombe sur DECK : positions de jeu, timings, sons et logique ne bougent pas.
    Calques fixes cuits une fois par BEL3.build() à l'entrée de la phase (beginP3), jamais en combat ; ni filtre ni ombre portée ;
@@ -42,18 +42,17 @@ const BEL3=(()=>{
     L.ciel=calq(c=>{const r=rnd(5);
       c.fillStyle=lg(c,0,0,0,420,[[0,'#090e28'],[.36,'#1d2350'],[.66,'#4a3a68'],[.86,'#8a5a78'],[1,'#d3948a']]);c.fillRect(0,0,MW,MH);
       for(let i=0;i<170;i++){c.fillStyle='rgba(230,238,255,'+(.15+r()*.65)+')';c.fillRect(r()*MW,r()*r()*260,r()<.9?1:2,1)}
-      glow(c,MOON[0],MOON[1],390,'220,196,220',.5);
-      const m=new Path2D();m.arc(MOON[0],MOON[1],150,0,TAU);c.fillStyle=lg(c,0,50,0,350,[[0,'#f6f0ff'],[.55,'#d9c4e0'],[1,'#a982a6']]);c.fill(m);
+      /* lune sombre et mate, comme en phase I : la lanterne reste la lumière la plus vive */
+      glow(c,MOON[0],MOON[1],330,'200,150,190',.28);
+      const m=new Path2D();m.arc(MOON[0],MOON[1],150,0,TAU);c.fillStyle=lg(c,0,50,0,350,[[0,'#c8acc8'],[.6,'#a284a8'],[1,'#7a5a86']]);c.fill(m);
       brush(c,m,[550,50,300,300],110,'rgba(128,104,156,.26)',9,0,62,9)});
     /* plan 2 : crêtes et tours de l'ordre, chacune sur un éperon, le pied noyé dans les nuages */
     L.loin=calq(c=>{
       ridge(c,352,26,3,'#6a4a74');
-      TOWERS3.forEach(([x,top,w])=>{
-        path(c,'M'+(x-w*5)+' 470L'+(x-w*2.4)+' '+(top+112)+'L'+(x-w*1.5)+' '+(top+86)+'L'+(x+w*1.6)+' '+(top+90)+'L'+(x+w*3)+' '+(top+124)+'L'+(x+w*5.5)+' 470Z','#4a3560');
-        path(c,'M'+(x-w)+' '+(top+100)+'L'+(x-w*.82)+' '+(top+16)+'H'+(x+w*.82)+'L'+(x+w)+' '+(top+100)+'Z','#372a52');
-        rect(c,x-w*1.15,top+14,w*2.3,4,'#372a52');path(c,'M'+(x-w*1.3)+' '+(top+14)+'L'+x+' '+(top-w*2.2)+'L'+(x+w*1.3)+' '+(top+14)+'Z','#372a52');
-        path(c,'M'+(x-w*.82)+' '+(top+16)+'L'+(x-w)+' '+(top+100)+'H'+(x-w*.55)+'L'+(x-w*.45)+' '+(top+16)+'Z','rgba(30,18,50,.4)');rect(c,x+w*.55,top+18,1.4,70,'rgba(246,232,255,.35)');
-        glow(c,x,top+34,22,'255,208,130',.6);rect(c,x-w*.22,top+28,w*.44,w*.9,'#ffd890')});
+      /* flèches de la phase I (même silhouette, même fenêtre en ogive, même lueur douce) : fenêtre centrée sur top+34, là où répond la lanterne du final */
+      TOWERS3.forEach(([x,top,w])=>{const st=top-54,f=w>=9?.45:.3;
+        path(c,'M'+(x-w)+' 470L'+(x-w*.78)+' '+(st+62)+'L'+(x-w*1.15)+' '+(st+56)+'L'+(x-w*.55)+' '+(st+42)+'Q'+(x-w*.15)+' '+(st+22)+' '+x+' '+st+'Q'+(x+w*.15)+' '+(st+22)+' '+(x+w*.55)+' '+(st+42)+'L'+(x+w*1.15)+' '+(st+56)+'L'+(x+w*.78)+' '+(st+62)+'L'+(x+w)+' 470Z','#372a52');
+        glow(c,x,st+84,30,'255,205,130',f);path(c,'M'+(x-4)+' '+(st+96)+'V'+(st+80)+'Q'+x+' '+(st+70)+' '+(x+4)+' '+(st+80)+'V'+(st+96)+'Z','rgba(255,214,150,'+(f+.2)+')')});
       ridge(c,404,20,11,'#33254a')});
     /* plan 3 : le beffroi (arc ogival, pignon, poutre, piliers) ; la cloche est dessinée à part, elle bouge */
     L.beffroi=calq(c=>{
@@ -168,12 +167,4 @@ function r3Ground(){
     ctx.fillStyle='rgba(40,48,80,'+(.45*u*f)+')';ctx.beginPath();ctx.ellipse(m.x,DECK+8,34*u+8,6*u+2,0,0,6.283);ctx.fill();
     ctx.fillStyle='rgba(255,150,60,'+(.45*(1-u))+')';ctx.beginPath();ctx.ellipse(m.x,DECK+8,40*u,7*u,0,0,6.283);ctx.fill();
   }
-}
-function drawIce3(x,y,hot){
-  ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(R.time*9+x)*.2);
-  const g=ctx.createLinearGradient(-26,-30,26,30);g.addColorStop(0,'#eaf8ff');g.addColorStop(1,'#6fb4d8');
-  qp([[-24,-6],[-12,-32],[16,-28],[28,-4],[14,26],[-14,28]],g,hot?'#ff7a2b':'#bfeaff',3);
-  if(hot){ctx.shadowColor='#ff7a2b';ctx.shadowBlur=18;ctx.strokeStyle='rgba(255,200,100,.7)';ctx.lineWidth=2;ctx.stroke();ctx.shadowBlur=0;
-    qflame(0,-26,10,34+8*Math.sin(R.time*10),1,'rgba(255,170,70,.9)');qflame(-14,-18,7,24,2,'rgba(255,110,40,.9)')}
-  ctx.restore();
 }
