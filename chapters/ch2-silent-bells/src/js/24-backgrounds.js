@@ -118,24 +118,66 @@ function drawHatch(k){const h=HATCH,T=hatchTop(),y1=GY-h.face;
 /* the muffled toll under the hatch: a ring on the water at the foot of the step (date in S.hatchRing) */
 function hatchRing(){if(!S.hatchRing)return;const q=gt-S.hatchRing;if(q<0||q>2)return;
   ctx.strokeStyle=`rgba(200,250,240,${.35*(1-q/2)})`;ctx.lineWidth=1.5;for(let i=0;i<2;i++){const r=20+q*70+i*16;ctx.beginPath();ctx.ellipse(HATCH.x,GY+3,r,r*.1,0,0,Math.PI*2);ctx.stroke()}}
+/* Phase I · the mirror hall: the decor of the A11 mockup, mirror variant (docs/decisions/da/maquette-a11.html), without the Watcher,
+   its lantern or the Voice. The mockup is drawn in its own units (floor G=424): MIR_DY lays it on the game floor (GY).
+   The great mirror is centred on x=735, where the Voice stands, MIR_DX moves the whole stone (pillars, arches, vault) with it.
+   Static parts are cached (mirFrame, mirFloor); the mist and the drips move. The hatch, the shards and mirrorFloor keep their code. */
+const MIR_MX=676,MIR_CX=735,MIR_DX=MIR_CX-MIR_MX,MIR_DY=GY-424;
+const MIR_MIST=[[396,44,.24,4],[452,30,.12,9],[516,40,.08,12]].map(([y,h,a,k])=>{const q=mulberry(k);
+  return{y,h,a,b:[...Array(8)].map(()=>({px:q()*1100-60,w:90+q()*170,py:q()*h*.4,ph:q()*6}))}});
+/* the sources behind the opening (a pale ogive of glass) and the sea stone around it, in the mockup's units */
+function mirFrame(){
+  const G=424,OUV=new Path2D(`M548 ${G-22}L548 218C550 134 604 70 ${MIR_MX} 38C748 70 802 134 804 218L804 ${G-22}Z`),r=mulberry(22);
+  ctx.save();ctx.translate(MIR_DX,MIR_DY);
+  // the source: a cold light in the opening, the hall receding in the mirror, two glass planes
+  ctx.save();ctx.clip(OUV);
+  {const g=ctx.createLinearGradient(0,30,0,G);g.addColorStop(0,'#1c5a62');g.addColorStop(.4,'#4ea79e');g.addColorStop(.62,'#a6e3cc');g.addColorStop(1,'#2a7470');ctx.fillStyle=g}
+  ctx.fillRect(-200,-100,1400,800);
+  glow(MIR_MX,206,200,'rgba(220,255,238,1)',.8);
+  for(let i=1;i<6;i++){const k=Math.pow(.76,i),w=250*k,top=226-188*k,base=226+176*k;ctx.strokeStyle=`rgba(8,48,56,${.55-i*.07})`;ctx.lineWidth=13*k;ctx.beginPath();ctx.moveTo(MIR_MX-w/2,base);ctx.lineTo(MIR_MX-w/2,226-60*k);ctx.quadraticCurveTo(MIR_MX-w/2,top+36*k,MIR_MX,top);ctx.quadraticCurveTo(MIR_MX+w/2,top+36*k,MIR_MX+w/2,226-60*k);ctx.lineTo(MIR_MX+w/2,base);ctx.stroke()}
+  for(const[d,a]of[['M548 60L660 38L584 402L548 402Z',.12],['M742 60L804 140L718 402L690 402Z',.08]]){ctx.fillStyle=`rgba(235,255,248,${a})`;ctx.fill(new Path2D(d))}
+  ctx.restore();
+  // the stone: courses of sea rock, a wall with the opening cut through it
+  const MUR=new Path2D('M-80 -10H1040V440H-80Z');MUR.addPath(OUV);
+  {const g=ctx.createLinearGradient(0,0,0,G);g.addColorStop(0,'#061016');g.addColorStop(.6,'#10262d');g.addColorStop(1,'#1b2c30');ctx.fillStyle=g}
+  ctx.fill(MUR,'evenodd');
+  ctx.save();ctx.clip(MUR,'evenodd');
+  for(let y=6;y<G;y+=31){let x=-120-r()*60;while(x<W+120){const w=44+r()*58;ctx.fillStyle=`rgba(${r()<.5?'70,112,112':'2,8,12'},${.1+r()*.2})`;ctx.beginPath();ctx.roundRect(x+1.5,y+1.5,w-3,28,3);ctx.fill();x+=w}}
+  for(let i=0;i<220;i++){const x=r()*W,y=r()*G;ctx.strokeStyle='rgba(79,150,120,.09)';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+r()*3,y+14+r()*34);ctx.stroke()}
+  // small side arches on the mist, darker the further they are from the source
+  for(const[x,w,a]of[[40,112,.22],[212,112,.34],[384,98,.5],[862,92,.42]]){const p=new Path2D(`M${x} ${G}V218Q${x} 150 ${x+w/2} 112Q${x+w} 150 ${x+w} 218V${G}Z`);
+    const g=ctx.createLinearGradient(0,112,0,G);g.addColorStop(0,'#06161c');g.addColorStop(1,`rgba(40,120,118,${a+.4})`);ctx.fillStyle=g;ctx.fill(p);
+    ctx.strokeStyle='#03090d';ctx.lineWidth=13;ctx.stroke(p);ctx.strokeStyle=`rgba(160,235,215,${a})`;ctx.lineWidth=1.4;ctx.stroke(new Path2D(`M${x+7} ${G}V220Q${x+7} 158 ${x+w/2} 121Q${x+w-7} 158 ${x+w-7} 220V${G}`))}
+  ctx.restore();
+  // the voussoirs of the opening
+  ctx.strokeStyle='#07141a';ctx.lineWidth=26;ctx.stroke(OUV);ctx.strokeStyle='#1d3a40';ctx.lineWidth=18;ctx.setLineDash([30,3]);ctx.stroke(OUV);ctx.setLineDash([]);
+  ctx.strokeStyle='rgba(180,245,222,.6)';ctx.lineWidth=1.8;ctx.stroke(OUV);
+  // the cracks of the mirror, and the glass fallen at the foot of the opening
+  ctx.save();ctx.clip(OUV);
+  for(const d of['M722 120L700 164L710 200L682 238L690 292L668 330L672 402','M700 164L654 142L626 150L596 124L548 118','M710 200L752 222L804 214','M682 238L636 256L612 300L548 318','M690 292L736 318L750 360L792 402','M700 164L742 150L762 112L804 96']){
+    const p=new Path2D(d);ctx.strokeStyle='rgba(4,30,36,.7)';ctx.lineWidth=2.4;ctx.stroke(p);ctx.save();ctx.translate(1.4,-1);ctx.strokeStyle='rgba(240,255,250,.55)';ctx.lineWidth=1;ctx.stroke(p);ctx.restore()}
+  ctx.fillStyle='#07141a';ctx.fill(new Path2D('M548 402L548 338L566 356L578 344L592 386L616 402Z'));ctx.restore();
+  ctx.fillStyle='#0b1b21';ctx.fill(new Path2D(`M526 ${G}L538 ${G-22}H814L826 ${G}Z`));ctx.fillStyle='rgba(180,245,222,.35)';ctx.fillRect(538,G-23,276,1.6);
+  // the vault: its fringe in the foreground, the piers close to the eye
+  ctx.fillStyle='#030a0e';ctx.fill(new Path2D('M-80 -10H1040V34Q900 22 862 66Q830 14 676 -2Q520 14 496 96Q462 20 384 62Q340 16 212 70Q170 18 40 76Q20 40 -80 46Z'));
+  for(const[x,w]of[[-8,34],[500,18],[848,17],[944,30]]){ctx.fillStyle='rgba(150,225,205,.35)';ctx.fillRect(x+w/2,0,1.6,G);ctx.fillStyle='#081419';ctx.fillRect(x-w/2,0,w,G);ctx.fillStyle='#050e13';ctx.fillRect(x-w/2-6,G-18,w+12,18)}
+  ctx.restore()}
+/* the mist of the mirror hall: it drifts in the arches, low on the water */
+function mirMist(b){for(const m of b.b){ctx.save();ctx.translate(m.px+Math.sin(rt*.9+m.ph)*20,b.y+MIR_DY+m.py);ctx.scale(m.w,b.h*.6);
+  const g=ctx.createRadialGradient(0,0,0,0,0,1);g.addColorStop(0,`rgba(140,214,198,${b.a})`);g.addColorStop(1,'rgba(140,214,198,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,1,0,Math.PI*2);ctx.fill();ctx.restore()}}
+/* the flooded floor of the mockup (its slabs and streaks); the reflection of the frame is laid on it by mirrorFloor */
+function mirFloor(){const G=424;ctx.save();ctx.translate(0,MIR_DY);
+  ctx.fillStyle='#061418';ctx.fillRect(0,G,W,H-G);
+  let g=ctx.createLinearGradient(0,G,0,H);g.addColorStop(0,'rgba(13,71,80,.15)');g.addColorStop(1,'rgba(2,8,10,.82)');ctx.fillStyle=g;ctx.fillRect(0,G,W,H-G);
+  ctx.strokeStyle='rgba(2,6,9,.4)';ctx.lineWidth=1.4;for(let x=-480;x<W+480;x+=88){ctx.beginPath();ctx.moveTo(W/2+(x-W/2)*.6,G);ctx.lineTo(x+(x-W/2)*.5,H);ctx.stroke()}
+  for(const y of[G+16,G+40,G+76]){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+  const r=mulberry(17);ctx.save();ctx.globalCompositeOperation='screen';
+  for(let i=0;i<110;i++){const y=G+3+r()*r()*(H-G),x=MIR_CX+(r()-.5)*(280+(y-G)*2);ctx.strokeStyle=`rgba(130,230,206,${.06+r()*.22})`;ctx.lineWidth=1+r();ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+12+r()*44,y);ctx.stroke()}
+  ctx.restore();ctx.fillStyle='rgba(200,250,236,.4)';ctx.fillRect(0,G,W,1.4);ctx.restore()}
 function bg2(){
-  const arch=(x,w)=>{ctx.beginPath();ctx.moveTo(x,GY);ctx.lineTo(x,150);ctx.quadraticCurveTo(x+w/2,40,x+w,150);ctx.lineTo(x+w,GY);ctx.closePath()};
   let g;
-  bgLayer('2a',0,GY+2,()=>{
-    let g=ctx.createLinearGradient(0,0,0,GY);g.addColorStop(0,'#03090c');g.addColorStop(.6,'#0a1b20');g.addColorStop(1,'#0f272b');ctx.fillStyle=g;ctx.fillRect(0,0,W,GY);
-    // stone courses
-    ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1;for(let y=36,r=0;y<GY;y+=34,r++){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();for(let x=(r%2)*45;x<W;x+=90){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,Math.min(GY,y+34));ctx.stroke()}}
-    // arches open on the sea mist (their fill)
-    for(let i=0;i<6;i++){const x=i*180-40,w=120;
-      arch(x,w);g=ctx.createLinearGradient(0,60,0,GY);g.addColorStop(0,'#0b262b');g.addColorStop(.7,'#12393b');g.addColorStop(1,'#0d2c2f');ctx.fillStyle=g;ctx.fill()}});
-  // the mist drifting in the arches
-  for(let i=0;i<6;i++){const x=i*180-40,w=120;ctx.save();arch(x,w);ctx.clip();
-    for(let k=0;k<3;k++){const yy=150+k*85,xx=((rt*(6+k*3)+i*70+k*50)%300)-150;glow(x+w/2+xx,yy,80,'rgba(150,225,215,.5)',.18)}
-    ctx.restore()}
-  bgLayer('2b',0,GY+2,()=>{
-    for(let i=0;i<6;i++){const x=i*180-40,w=120;
-      ctx.strokeStyle='#050d10';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(x,GY);ctx.lineTo(x,150);ctx.quadraticCurveTo(x+w/2,40,x+w,150);ctx.lineTo(x+w,GY);ctx.stroke();
-      ctx.strokeStyle='rgba(120,220,210,.12)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+12,GY);ctx.lineTo(x+12,158);ctx.quadraticCurveTo(x+w/2,66,x+w-12,158);ctx.lineTo(x+w-12,GY);ctx.stroke()}});
+  bgLayer('2a',0,GY+2,mirFrame);
+  for(const b of MIR_MIST)if(b.y<400)mirMist(b);
   // drips from the vault
   for(let i=0;i<9;i++){const x=60+i*103,k=(rt*.5+i*.37)%1;ell(x,k*GY,1.4,3,`rgba(170,235,230,${.35*(1-k)})`)}
   // floating mirror shards (same positions as the shard rain)
@@ -144,11 +186,9 @@ function bg2(){
     g=s.g||(s.g=ctx.createLinearGradient(-s.s,-s.s,s.s,s.s),s.g.addColorStop(0,'rgba(225,248,245,.30)'),s.g.addColorStop(.5,'rgba(100,170,170,.08)'),s.g.addColorStop(1,'rgba(225,248,245,.22)'),s.g);
     ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-s.s);ctx.lineTo(s.s*.6,0);ctx.lineTo(s.s*.1,s.s*.8);ctx.lineTo(-s.s*.5,s.s*.1);ctx.closePath();ctx.fill();
     ctx.strokeStyle='rgba(235,252,250,.35)';ctx.lineWidth=1;ctx.stroke();roomCrack(si,s.s);ctx.restore()}
-  // the flooded floor: dark water over flagstones (the reflection is laid on it later)
-  bgLayer('2c',GY-4,H,()=>{
-    const g=ctx.createLinearGradient(0,GY,0,H);g.addColorStop(0,'#0c2b2f');g.addColorStop(1,'#020708');ctx.fillStyle=g;ctx.fillRect(0,GY,W,H-GY);
-    ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1;for(let i=-8;i<=8;i++){ctx.beginPath();ctx.moveTo(480+i*44,GY);ctx.lineTo(480+i*130,H);ctx.stroke()}
-    for(let y=GY+14,k=1;y<H;y+=10*k,k*=1.5){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}});
+  // the flooded floor, then the mist over the water
+  bgLayer('2c',GY-4,H,mirFloor);
+  for(const b of MIR_MIST)if(b.y>=400)mirMist(b);
   drawHatch(S.hatchK||0);
 }
 /* the water of the mirror hall reflects what stands above it (copied from the frame itself, flipped and squashed) */

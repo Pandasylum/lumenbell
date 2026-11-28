@@ -430,3 +430,5 @@
 - Un plan large montre les Flèches qui répondent une à une, sauf le Phare Noyé, muet ; puis un plan final au clair de lune : le Colosse de pierre, l'anneau du Veilleur à sa main, le marteau et les ailes restés au sol. La carte de fin arrive en bas, quelques secondes après.
 - À la fin du Chapitre I, le plan final sur le Colosse de pierre se tient d'abord seul pendant 7 secondes, puis l'outro (la première fois), puis la carte de fin.
 - On peut ouvrir directement cette fin avec `?fin=1` à la suite de l'adresse du chapitre : rien n'est sauvegardé.
+
+- Ce que le joueur verra (Chapitre II, phase I) : un grand miroir fêlé en ogive derrière la Voix, une brume qui glisse dans les arches, un sol inondé qui reflète la salle.
