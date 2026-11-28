@@ -2445,9 +2445,8 @@ const COLOSSE=(()=>{
   function ailes3(rg){if(!SP)build();for(const l of [0,1])for(const r of [0,1]){if(rg!=null&&r!==(rg?1:0))continue;const k=l+'|'+r;if(!AILES3[k])AILES3[k]=aileCuite(!!l,!!r)}return AILES3}
   function cuireAile(loin,ronge){if(!SP)build();const k=(loin?1:0)+'|'+(ronge?1:0);if(!AILES3[k])AILES3[k]=aileCuite(!!loin,!!ronge)}
   function aile(loin,ronge){const k=(loin?1:0)+'|'+(ronge?1:0);return AILES3[k]||ailes3(ronge?1:0)[k]}
-  function ailes(c,o,w){const dr=(o.drop||0)+(o.plie||0)*26,co=Math.cos(o.lean||0),si=Math.sin(o.lean||0),sx=o.sx||1,tb=w.tombe||0,env=w.env||1,cut=w.cut||0;
+  function ailes(c,o,w){const dr=(o.drop||0)+(o.plie||0)*26,co=Math.cos(o.lean||0),si=Math.sin(o.lean||0),sx=o.sx||1,tb=w.tombe||0,env=w.env||1;
     for(const sd of [1,-1]){
-      if((sd===-1&&cut>=1)||(sd===1&&cut>=2))continue;
       const x=sd*34,y=-238,k=(sd>0?.66:.68)*env;
       c.save();c.translate(sx*co*x-si*y+si*PY,sx*si*x+co*y+PY+dr-co*PY);c.scale(sd,1);c.rotate(.14+(w.bat||0)+tb*(sd>0?.5:.62));c.scale(k,k*(1-.1*tb));
       c.drawImage(aile(sd<0,w.ronge),-20,-200,420,280);c.restore()}}
@@ -4187,7 +4186,7 @@ function rNew(){
     pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
     sparks:[],floats:[],rings:[],exps:[],fbs:[],melts:[],steam:[],
     shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,bx:BX,
-    rage:0,u5:false,u55:false,u1:false,healed:false,cycle:1,stacked:0,cut:0,fall:[],fin:null,st:0,ibn:-1,introHx:-20,iclash:false,roared:false};
+    rage:0,u5:false,u55:false,u1:false,healed:false,cycle:1,stacked:0,fin:null,st:0,ibn:-1,introHx:-20,iclash:false,roared:false};
 }
 function beginP3(noLore){
   if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=LB.healFor(DIFF.heal,RUN.max,Q.php);RUN.st[2]={p:Q.dodges,h:Q.taken}}
@@ -4329,7 +4328,7 @@ function rAtkEnd(){
   }else{b.s='fail';b.t=0}
 }
 function startFinale(){
-  R.mode='finale';R.fin={t:FIN.debut,b0:1,fo:1};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;   
+  R.mode='finale';R.fin={t:FIN.debut};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;   
 }
 function rDamage(k,c){
   if(k==='bolt'){
@@ -4485,8 +4484,6 @@ function rStep(dt){
 function finEcho(v){tone(392,1.8,'sine',.06*v,0);tone(784,1.2,'sine',.02*v,0)}   
 function rFinale(dt){
   const f=R.fin;f.t+=dt;const t=f.t,at=(T,k,fn)=>{if(t>=T&&!f[k]){f[k]=1;fn()}};
-  at(FIN.cloche,'b0',()=>{ringBell(.55);say(_('The Watcher raises his lantern: the great bell answers.','Le Veilleur lève sa lanterne : la grande cloche répond.'))});
-  at(FIN.foudre,'fo',()=>{noise(.6,.22,6000,500);tone(1600,.3,'sine',.07,-1300);boom(.9,.16);thud(1.4)});
   at(2.75,'gn',()=>{thud(1.2);boom(.4,.1)});   
   at(FIN.jet,'jt',()=>{whoosh(.7,.1,true);painCry(.7,.12)});
   at(FIN.jet+.55,'ml',()=>{anvil();thud(1.3);boom(.5,.14);tone(120,.3,'square',.07,-60)});   
@@ -5711,7 +5708,6 @@ function scene(c,t){
  marteauLibre(c,t);
  k3ondesCloche(c,t-T_F+R_CN.bolt.hit-R_CN.bolt.ring,k.tete,1.35);   
  k3acouphene(c,k.tete,bosse(t,.8,T_F-.15,.2),tm);
- if(t<T_F)arcsCorps(c,{...k,coeur:k.corne,loin:k.tete},ez((t-1.2)/.4),t);
  k3solFendu(c,BX3,t-T_F,t<CHUTE?1-ez((t-3.4)/1):0);k3foudre(c,t-T_F,k.tete);k3foudre(c,t-T_F-.2,k.coeur);arcsCorps(c,k,t>T_F?1-ez((t-T_F-.5)/1):0,t);
  const u=t-T_F;if(u>0&&u<2.5){k3eclats(c,k.coeur[0],k.coeur[1],u,36,['#cfd8ff','#6a3050','#2c1534','#ff9a35','#ffffff'],430,71,DECK3+5);[[-110,-200],[110,-210],[0,-120],[150,-90]].forEach(([x,y],i)=>k3fumee(c,BX3+x,DECK3+y,u-.4-i*.17,6,80+i))}
  k3pas(c,BX3-70,t-2.75,1.6,95);

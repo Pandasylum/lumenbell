@@ -48,7 +48,7 @@ function rNew(){
     pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
     sparks:[],floats:[],rings:[],exps:[],fbs:[],melts:[],steam:[],
     shake:0,flash:0,hurt:0,hitstop:0,recoil:0,endIn:0,bx:BX,
-    rage:0,u5:false,u55:false,u1:false,healed:false,cycle:1,stacked:0,cut:0,fall:[],fin:null,st:0,ibn:-1,introHx:-20,iclash:false,roared:false};
+    rage:0,u5:false,u55:false,u1:false,healed:false,cycle:1,stacked:0,fin:null,st:0,ibn:-1,introHx:-20,iclash:false,roared:false};
 }
 function beginP3(noLore){
   if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=LB.healFor(DIFF.heal,RUN.max,Q.php);RUN.st[2]={p:Q.dodges,h:Q.taken}}
@@ -194,7 +194,7 @@ function rAtkEnd(){
   }else{b.s='fail';b.t=0}
 }
 function startFinale(){
-  R.mode='finale';R.fin={t:FIN.debut,b0:1,fo:1};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;   /* b0, fo : la cloche et le coup de foudre viennent d'avoir lieu (contre) ; la cloche garde son balancement */
+  R.mode='finale';R.fin={t:FIN.debut};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;   /* la cloche et la foudre viennent d'avoir lieu (contre) : la cloche garde son balancement */
 }
 function rDamage(k,c){
   if(k==='bolt'){
@@ -356,8 +356,6 @@ function rStep(dt){
 function finEcho(v){tone(392,1.8,'sine',.06*v,0);tone(784,1.2,'sine',.02*v,0)}   /* écho du glas : les partiels de ringBell, sans balancer la cloche */
 function rFinale(dt){
   const f=R.fin;f.t+=dt;const t=f.t,at=(T,k,fn)=>{if(t>=T&&!f[k]){f[k]=1;fn()}};
-  at(FIN.cloche,'b0',()=>{ringBell(.55);say(_('The Watcher raises his lantern: the great bell answers.','Le Veilleur lève sa lanterne : la grande cloche répond.'))});
-  at(FIN.foudre,'fo',()=>{noise(.6,.22,6000,500);tone(1600,.3,'sine',.07,-1300);boom(.9,.16);thud(1.4)});
   at(2.75,'gn',()=>{thud(1.2);boom(.4,.1)});   /* le genou touche la pierre */
   at(FIN.jet,'jt',()=>{whoosh(.7,.1,true);painCry(.7,.12)});
   at(FIN.jet+.55,'ml',()=>{anvil();thud(1.3);boom(.5,.14);tone(120,.3,'square',.07,-60)});   /* la masse retombe au sol et y reste */

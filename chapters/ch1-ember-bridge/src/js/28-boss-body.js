@@ -434,10 +434,9 @@ const COLOSSE=(()=>{
   function cuireAile(loin,ronge){if(!SP)build();const k=(loin?1:0)+'|'+(ronge?1:0);if(!AILES3[k])AILES3[k]=aileCuite(!!loin,!!ronge)}
   function aile(loin,ronge){const k=(loin?1:0)+'|'+(ronge?1:0);return AILES3[k]||ailes3(ronge?1:0)[k]}
   /* les deux ailes, dans le repère des pieds (unités de pose), attachées au buste o (lean, drop, plie, sx) : bat (battement, rad), env (envergure),
-     tombe (retombées, 0 à 1), ronge (rongées), cut (0 à 2 : ailes coupées par le final, la lointaine d'abord). Phases I et III. */
-  function ailes(c,o,w){const dr=(o.drop||0)+(o.plie||0)*26,co=Math.cos(o.lean||0),si=Math.sin(o.lean||0),sx=o.sx||1,tb=w.tombe||0,env=w.env||1,cut=w.cut||0;
+     tombe (retombées, 0 à 1), ronge (rongées). Phases I et III. */
+  function ailes(c,o,w){const dr=(o.drop||0)+(o.plie||0)*26,co=Math.cos(o.lean||0),si=Math.sin(o.lean||0),sx=o.sx||1,tb=w.tombe||0,env=w.env||1;
     for(const sd of [1,-1]){
-      if((sd===-1&&cut>=1)||(sd===1&&cut>=2))continue;
       const x=sd*34,y=-238,k=(sd>0?.66:.68)*env;
       c.save();c.translate(sx*co*x-si*y+si*PY,sx*si*x+co*y+PY+dr-co*PY);c.scale(sd,1);c.rotate(.14+(w.bat||0)+tb*(sd>0?.5:.62));c.scale(k,k*(1-.1*tb));
       c.drawImage(aile(sd<0,w.ronge),-20,-200,420,280);c.restore()}}

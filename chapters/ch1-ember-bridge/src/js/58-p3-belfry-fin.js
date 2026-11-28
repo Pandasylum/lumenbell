@@ -126,7 +126,6 @@ function scene(c,t){
  /* la cloche sonne, puis la foudre pleine, comme aux rages */
  k3ondesCloche(c,t-T_F+R_CN.bolt.hit-R_CN.bolt.ring,k.tete,1.35);   /* les ondes du contre continuent là où elles en étaient à la foudre */
  k3acouphene(c,k.tete,bosse(t,.8,T_F-.15,.2),tm);
- if(t<T_F)arcsCorps(c,{...k,coeur:k.corne,loin:k.tete},ez((t-1.2)/.4),t);
  k3solFendu(c,BX3,t-T_F,t<CHUTE?1-ez((t-3.4)/1):0);k3foudre(c,t-T_F,k.tete);k3foudre(c,t-T_F-.2,k.coeur);arcsCorps(c,k,t>T_F?1-ez((t-T_F-.5)/1):0,t);
  const u=t-T_F;if(u>0&&u<2.5){k3eclats(c,k.coeur[0],k.coeur[1],u,36,['#cfd8ff','#6a3050','#2c1534','#ff9a35','#ffffff'],430,71,DECK3+5);[[-110,-200],[110,-210],[0,-120],[150,-90]].forEach(([x,y],i)=>k3fumee(c,BX3+x,DECK3+y,u-.4-i*.17,6,80+i))}
  /* le genou touche la pierre */
