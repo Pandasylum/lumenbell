@@ -3,10 +3,13 @@
 // - suspension a la mise en arriere-plan (onglet cache, pagehide, perte de focus) et reprise au retour ; en arriere-plan, un bruitage ne relance pas le contexte
 // - les bruitages et la musique des deux chapitres passent par LB.audio (compteurs tone / noise, musique sur le contexte commun)
 // - reglages Son et Musique : lb-snd, lb-mus lus par LB.store, ecrits par LB.audio, relus apres rechargement ; Son coupe = aucun bruitage
+// - fichiers son (LB.audio.add / play) : un tres court son de test (tests/fixtures/audio-test-bip.mp3, jamais integre au jeu) se decode et se joue
+//   (volume, bus sfx / mus, when, rate, stop) ; nom absent ou donnee illisible : null, aucune erreur ; Son coupe : rien ; les builds n'embarquent aucun son
 // Hors ligne. Sortie attendue : errs []
 const fs=require('fs'),path=require('path');const launch=require('./launch');const lib=require('./ch2-lib');
 const ROOT=path.resolve(__dirname,'..');
 const errs=[];const ok=(c,m)=>{if(!c){errs.push(m);console.log('KO',m)}else console.log('ok',m)};
+const BIP=fs.readFileSync(path.join(__dirname,'fixtures/audio-test-bip.mp3')).toString('base64');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // espion place avant la page : contextes crees, sources creees par contexte, etat force de document.hidden
 const SPY=`(()=>{window.__acs=[];window.__h=false;
@@ -33,6 +36,7 @@ const hide=(p,off)=>p.evaluate(off=>{window.__h=off;document.dispatchEvent(new E
  }
  const sh=fs.readFileSync(path.join(ROOT,'shared/js/12-audio.js'),'utf8');
  ok((sh.match(/new C\(/g)||[]).length===2,'shared : le contexte n\'est construit que dans ensure() (essai playback, repli)');
+ for(const [ch,c] of Object.entries(CH))ok(!fs.readFileSync(c.dist,'utf8').includes('window.LB_SND={'),ch+' dist : aucun fichier son integre (aucun dossier sounds/ pour l\'instant)');
  const b=await launch();
  // 2. dist publies : contexte unique, musique du menu, suspension et reprise
  for(const [ch,c] of Object.entries(CH)){
@@ -68,6 +72,16 @@ const hide=(p,off)=>p.evaluate(off=>{window.__h=off;document.dispatchEvent(new E
   const c=CH[ch],{ctx,p}=await page(b,file);
   await p.mouse.click(5,5);await sleep(800);
   const ev=f=>p.evaluate(f);
+  // fichiers son : le son de test est ajoute a la page (jamais integre au jeu)
+  await p.evaluate(b=>{__t.LB.audio.add('test-bip',b);__t.LB.audio.add('test-casse','AAAAAAAA')},BIP);await sleep(600);
+  const fx=await ev(()=>{const A=__t.LB.audio,f0=A.stat.file,t=A.now();
+   const h=[A.play('test-bip',{vol:.5}),A.play('test-bip',{bus:'mus',when:t+.05,rate:1.5}),A.play('test-bip',{bus:A.sfx,rate:.5,loop:true})];
+   h[2]&&h[2].stop(t+.1);
+   return {has:A.has('test-bip'),bad:A.has('test-casse'),h:h.map(x=>!!(x&&x.stop)).join(),n:A.stat.file-f0,
+    miss:A.play('absent'),badp:A.play('test-casse'),names:A.names().join()}});
+  ok(fx.has&&fx.h==='true,true,true'&&fx.n===3,ch+' test : son de test decode et joue (sfx, mus + when + rate, noeud + boucle + stop) '+JSON.stringify(fx));
+  ok(fx.miss===null&&fx.badp===null&&!fx.bad,ch+' test : son absent ou illisible -> null, sans erreur');
+  ok(await ev(()=>{__t.LB.audio.setSound(false);const r=__t.LB.audio.play('test-bip');__t.LB.audio.setSound(true);return r})===null,ch+' test : Son coupe -> aucun fichier son');
   ok(await ev(()=>!!(__t.LB&&__t.LB.audio.ctx&&__t.LB.audio.ctx===window.__acs[0])),ch+' test : LB.audio.ctx est le contexte de la page');
   const before=await ev(()=>({...__t.LB.audio.stat}));
   await ev(()=>{if(__t.sfx){__t.sfx.hurt();__t.sfx.block(1);__t.sfx.thud(1)}else{__t.thud(1);__t.boom(.3,.1);__t.painCry(.5,.1);__t.roar()}});
