@@ -11,7 +11,7 @@ const COLOSSE=(()=>{
   let K=1; /* pixels par unité de maquette pendant la mise en cache */
   const CH='#2a1230',CH_F='#1d0c25',CL='rgba(178,82,92,.30)',CL2='rgba(205,108,102,.22)',OM='rgba(7,0,18,.46)',FER='#35223f',FER_C='rgba(176,128,150,.45)';
   function lg(c,x0,y0,x1,y1,st){const g=c.createLinearGradient(x0,y0,x1,y1);st.forEach(s=>g.addColorStop(...s));return g}
-  function glow(c,x,y,r,rgb,a){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(${rgb},${a})`);g.addColorStop(.35,`rgba(${rgb},${a*.4})`);g.addColorStop(1,`rgba(${rgb},0)`);c.save();c.globalCompositeOperation='screen';c.fillStyle=g;c.fillRect(x-r,y-r,2*r,2*r);c.restore()}
+  const glow=colGlow;
   function pc(c,d,fill,plans=[],ao=8){const p=P(d);c.save();c.globalCompositeOperation='source-atop';c.shadowColor='rgba(5,0,14,.9)';c.shadowBlur=ao*K;c.shadowOffsetY=2.5*K;c.fillStyle='rgba(8,0,18,.75)';c.fill(p);c.restore();
     c.fillStyle=fill;c.fill(p);c.save();c.clip(p);plans.forEach(([d2,col,f])=>{c.save();if(f)c.filter=`blur(${f*K}px)`;c.fillStyle=col;c.fill(P(d2));c.restore()});c.restore();return p}
   function tr(c,d,col,w){c.strokeStyle=col;c.lineWidth=w;c.lineCap='round';c.lineJoin='round';c.stroke(P(d))}
@@ -80,7 +80,7 @@ const COLOSSE=(()=>{
    corne('M-58 -340C-76 -346 -93 -348 -101 -358C-108 -368 -111 -381 -106 -396C-127 -381 -137 -359 -127 -340C-117 -321 -98 -315 -75 -317Z',lg(c,-132,-396,-70,-325,[[0,'#8a6274'],[.45,'#3d1f3a'],[1,'#25102a']]),
     ['M-84 -345Q-90 -332 -88 -318','M-100 -354Q-114 -346 -120 -334','M-107 -370Q-120 -368 -131 -362']);
    }
-  function tete(c){const hot=1;const corne=(d,g,anneaux)=>{pc(c,d,g,[],9);anneaux.forEach(a=>{tr(c,a,'rgba(10,2,16,.75)',2.6);c.save();c.translate(1.5,-2);tr(c,a,'rgba(255,196,160,.28)',1.1);c.restore()})};
+  function tete(c,brise){const hot=1;const corne=(d,g,anneaux)=>{pc(c,d,g,[],9);anneaux.forEach(a=>{tr(c,a,'rgba(10,2,16,.75)',2.6);c.save();c.translate(1.5,-2);tr(c,a,'rgba(255,196,160,.28)',1.1);c.restore()})};
    /* ---- tête : mâchoire carrée, arcade lourde, deux crocs ---- */
    pc(c,'M-17 -339L-66 -342C-81 -337 -91 -327 -93 -314L-97 -298L-90 -286L-89 -272C-87 -261 -81 -255 -70 -253L-47 -250C-35 -253 -23 -263 -15 -276L-3 -300C-1 -320 -6 -333 -17 -339Z',
     lg(c,-96,-342,-4,-250,[[0,'#432041'],[1,'#1e0c26']]),
@@ -104,10 +104,14 @@ const COLOSSE=(()=>{
    c.fillStyle='#d9bfa8';['M-90 -267L-86 -257L-84 -269Z','M-82 -271L-76 -268L-81 -252Z','M-75 -269L-72 -262L-69 -266Z','M-63 -268L-60 -261L-57 -271Z','M-51 -272L-44 -271L-46 -254Z','M-40 -270L-37 -263L-34 -264Z'].forEach(d=>c.fill(P(d)));
    /* balafres de braise sur la joue */
    feu(c,'M-36 -296L-27 -283L-31 -276L-20 -266',2.2,hot);
-   /* ---- corne proche : large, coudée, comme au jeu ---- */
-   corne('M-26 -341C-2 -347 21 -346 35 -358C48 -369 57 -384 62 -404C78 -380 77 -349 57 -330C39 -313 15 -307 -8 -308C-19 -319 -23 -331 -26 -341Z',lg(c,66,-404,-22,-318,[[0,'#a47c8a'],[.4,'#4a2642'],[1,'#2a1230']]),
+   /* ---- corne proche : large, coudée, comme au jeu ; brisée (phase III, seconde vie) : un moignon à la cassure de braise ---- */
+   if(brise)corneBrisee(c);
+   else corne('M-26 -341C-2 -347 21 -346 35 -358C48 -369 57 -384 62 -404C78 -380 77 -349 57 -330C39 -313 15 -307 -8 -308C-19 -319 -23 -331 -26 -341Z',lg(c,66,-404,-22,-318,[[0,'#a47c8a'],[.4,'#4a2642'],[1,'#2a1230']]),
     ['M-4 -343Q4 -328 0 -309','M18 -345Q30 -330 28 -313','M39 -362Q54 -352 59 -334','M53 -382Q66 -376 74 -366']);
    }
+  /* moignon de la grande corne (maquette colosse-clocher.js, COL_B) */
+  function corneBrisee(c){pc(c,'M-26 -341C-14 -345 -2 -346 10 -347L6 -337L19 -343L17 -331L31 -334L24 -321C12 -312 2 -309 -8 -308C-19 -319 -23 -331 -26 -341Z','#3a1e38',[['M-26 -341L10 -347L6 -337L-20 -330Z',CL]],9);
+   feu(c,'M10 -346L6 -337L19 -342L17 -331L30 -333',3,1)}
   function machoire(c){ /* mâchoire en avant */
    pc(c,'M-97 -256L-87 -249L-72 -246L-52 -247L-36 -250L-27 -259L-31 -244L-47 -233L-60 -237L-72 -231L-90 -238Z',CH,[['M-97 -256L-87 -249L-72 -246L-72 -231L-90 -238Z',CL],['M-46 -248L-27 -259L-31 -244L-47 -233Z',OM]],7);
    tr(c,'M-96 -254L-90 -238L-72 -232L-60 -237L-47 -234L-31 -244L-28 -256','rgba(255,150,96,.7)',1.6);
@@ -169,9 +173,16 @@ const COLOSSE=(()=>{
     SP.head=bake([-94,-338,168,164],Mq(tete),RIM,S3);
     SP.jaw=bake([-88,-230,76,52],Mq(machoire),RIM,S3);
     SP.paulR=bake([30,-274,144,84],Mq(paulR),RIM,S3);
+    /* grande enclume de l'épaule proche, brisée (phase III, première foudre) : le bec arraché, cassure de braise ; le morceau arraché, à part (il tombe) */
+    const BEC='M150 -336L144 -318L156 -302L142 -286L158 -268L150 -250L224 -250L224 -336Z',CASSE='M150 -336L144 -318L156 -302L142 -286L158 -268L150 -250';
+    SP.paulRB=bake([30,-274,144,84],Mq(x=>{paulR(x);x.save();x.globalCompositeOperation='destination-out';x.fill(P(BEC));x.restore();feu(x,CASSE,3,1)}),RIM,S3);
+    SP.paulRP=bake([30,-274,144,84],Mq(x=>{paulR(x);x.save();x.globalCompositeOperation='destination-in';x.fill(P(BEC));x.restore();feu(x,CASSE,3,1)}),RIM,S3);
     /* vue de dos (coup de queue en pivot, maquette colosse-queue-onde.js) : mêmes matières, mêmes liserés */
     SP.torsoD=bake([-96,-272,200,200],Mq(torseDos),RIM,S3);
     SP.headD=bake([-130,-338,168,164],Mq(teteDos),RIM,S3);
+    /* grande corne brisée (phase III, seconde vie) : cuite avec le reste, jamais en combat */
+    SP.headB=bake([-94,-338,168,164],Mq(x=>tete(x,true)),RIM,S3);
+    SP.headDB=bake([-130,-338,168,164],Mq(x=>teteDos(x,true)),RIM,S3);
     /* bras : repère local le long du segment ; liseré du côté du plan éclairé */
     SP.up=[0,1].map(f=>bake([-28,-33,118,66],x=>os(x,[0,0],[L1,0],25,18,f?'#2a1230':'#341636',CL,5),f?RIM:'rgba(208,122,114,.8)',[0,3]));
     SP.fore=[0,1].map(f=>bake([-21,-28,112,56],x=>os(x,[0,0],[L2,0],18,22,f?'#2c1332':'#391838',CL,4),f?RIM:'rgba(208,122,114,.8)',[0,3]));
@@ -196,7 +207,9 @@ const COLOSSE=(()=>{
     SP.torsoDC=bakeCrack(SP.torsoD,Mq(x=>feu(x,'M-3 -318L-40 -292L-46 -268L-80 -250M-3 -250L40 -236L48 -214L76 -204M-3 -204L-34 -170',5,1)),1);
     SP.torsoR=bakeCrack(SP.torso,Mm('M104 -300L112 -262L100 -240L128 -204L150 -182L146 -150M-96 -296L-120 -250L-114 -232L-140 -206M-30 -174L-6 -150L30 -142'),.8);
     SP.headC=bakeCrack(SP.head,Mf('M-52 -330L-60 -314L-50 -304L-57 -293M-100 -284L-90 -272L-97 -260',3.4),.8);
+    SP.headBC=bakeCrack(SP.headB,Mf('M-52 -330L-60 -314L-50 -304L-57 -293M-100 -284L-90 -272L-97 -260',3.4),.8);
     SP.paulRC=bakeCrack(SP.paulR,Mm('M104 -300L112 -262L100 -240'),.8);
+    SP.paulRBC=bakeCrack(SP.paulRB,Mm('M104 -300L112 -262L100 -240'),.8);
     SP.paulLC=bakeCrack(SP.paulL,Mm('M-96 -296L-120 -250L-114 -232'),.8);
     SP.legNC=bakeCrack(SP.legN,Mf('M34 -124L52 -100L44 -72L70 -50L72 -24',6),.8);
     SP.legFC=bakeCrack(SP.legF,Mf('M-62 -122L-80 -90L-66 -62L-84 -30',6),.8);
@@ -243,10 +256,10 @@ const COLOSSE=(()=>{
    feu(c,'M-3 -318L-3 -168',5,1);
    for(let i=0;i<7;i++){const y=-316+i*23,w=19-i*1.4;pc(c,`M${-3-w} ${y+8}L-3 ${y-12}L${-3+w} ${y+8}L${-3+w*.7} ${y+19}L-3 ${y+12}L${-3-w*.7} ${y+19}Z`,FER,[[`M${-3-w} ${y+8}L-3 ${y-12}L-3 ${y+2}Z`,FER_C],[`M-3 ${y-12}L${-3+w} ${y+8}L${-3+w*.7} ${y+19}L-3 ${y+12}Z`,OM]],6)}
   }
-  function teteDos(c){const corne=(d,g,anneaux)=>{pc(c,d,g,[],9);anneaux.forEach(a=>{tr(c,a,'rgba(10,2,16,.75)',2.6);c.save();c.translate(1.5,-2);tr(c,a,'rgba(255,196,160,.28)',1.1);c.restore()})};
+  function teteDos(c,brise){const corne=(d,g,anneaux)=>{pc(c,d,g,[],9);anneaux.forEach(a=>{tr(c,a,'rgba(10,2,16,.75)',2.6);c.save();c.translate(1.5,-2);tr(c,a,'rgba(255,196,160,.28)',1.1);c.restore()})};
    const CD='M-26 -341C-2 -347 21 -346 35 -358C48 -369 57 -384 62 -404C78 -380 77 -349 57 -330C39 -313 15 -307 -8 -308C-19 -319 -23 -331 -26 -341Z',AN=['M-4 -343Q4 -328 0 -309','M18 -345Q30 -330 28 -313','M39 -362Q54 -352 59 -334','M53 -382Q66 -376 74 -366'];
    /* les deux grandes cornes, la même que de face, en miroir */
-   [-1,1].forEach(s=>{c.save();c.translate(-48,0);c.scale(s,1);c.translate(34,2);corne(CD,lg(c,66,-404,-22,-318,[[0,'#a47c8a'],[.4,'#4a2642'],[1,'#2a1230']]),AN);c.restore()});
+   [-1,1].forEach(s=>{c.save();c.translate(-48,0);c.scale(s,1);c.translate(34,2);if(brise&&s<0){corneBrisee(c);c.restore();return}corne(CD,lg(c,66,-404,-22,-318,[[0,'#a47c8a'],[.4,'#4a2642'],[1,'#2a1230']]),AN);c.restore()});
    pc(c,'M-76 -340L-20 -340C-8 -330 -3 -316 -5 -300L-16 -284C-24 -276 -34 -272 -48 -272C-62 -272 -72 -276 -80 -284L-91 -300C-93 -316 -88 -330 -76 -340Z',lg(c,-96,-342,-4,-250,[[0,'#432041'],[1,'#1e0c26']]),
     [['M-76 -340L-48 -334L-52 -274L-74 -280L-91 -300Z',CL],['M-30 -340L-5 -300L-16 -284L-44 -274L-36 -296Z',OM],['M-70 -340L-26 -340L-34 -324L-62 -324Z',CL2]],14);
    tr(c,'M-82 -318Q-48 -300 -14 -318M-80 -294Q-48 -282 -16 -294','rgba(8,0,16,.75)',3);
@@ -267,11 +280,11 @@ const COLOSSE=(()=>{
    /* bandoulière et marteau sanglé en travers du dos */
    c.save();applyM();chaine(c,[[s*70,-250],[s*30,-205],[-s*20,-165],[-s*52,-135]],12,8,'#7a5a72','#f0b49a');
    c.translate(s*60,-222);c.rotate((s>0?-52:-128)*Math.PI/180);c.translate(112,0);c.scale(.86,.86);img(c,SP.ham);c.restore();
-   c.save();applyM();img(c,SP.paulL);img(c,SP.paulR);c.restore();
+   c.save();applyM();img(c,SP.paulL);img(c,o.enclume?SP.paulRB:SP.paulR);c.restore();
    /* nuque et tête vues de dos, mêmes flammes */
    c.save();applyM();c.translate(36,-16);
    c.save();c.scale(.8,.8);halo(c,-48,-352,76,.5);c.translate(-8,0);couronne(c,o.t*.55,o.warm||1);c.translate(16,0);couronne(c,o.t*.55+.4,o.warm||1);c.restore();
-   img(c,SP.headD);c.restore();
+   img(c,o.brise?SP.headDB:SP.headD);c.restore();
    /* la queue : la même que de face, qui part du bassin et fouette devant */
    if(o.qD){const R=pt(0,-134);queue(c,[R,...o.qD]);
     /* plaques du bassin qui recouvrent la racine de la queue */
@@ -281,7 +294,7 @@ const COLOSSE=(()=>{
    return {pt,coeur:pt(-3,-185),gueule:pt(0,-230),head:pt(0,-260),fa:{W:pt(-100,-110),E:pt(-100,-160)},na:{W:pt(100,-110),E:pt(100,-160)},applyM,far:pt(-70,-215),near:pt(70,-215)}}
 
   /* o : lean, drop, sx, dF, dN (buste) ; off (main lointaine depuis l'épaule) ; nn (décalage de la main proche) ; tip, sag (bout de la chaîne de la boule et mou, unités de pose) ;
-     plie (jambes fléchies, 0 à 1) ; tete (inclinaison de la tête, rad) ; fissure, rage (0 à 1 : fissures peintes dans chaque pièce) ; flash (0 à 1, éclair sur la silhouette),
+     plie (jambes fléchies, 0 à 1) ; brise (grande corne brisée, phase III) ; enclume (grande enclume de l'épaule brisée, phase III) ; tete (inclinaison de la tête, rad) ; fissure, rage (0 à 1 : fissures peintes dans chaque pièce) ; flash (0 à 1, éclair sur la silhouette),
      eteint (0 à 1, la silhouette s'assombrit) ;
      ham : marteau à deux mains { P main proche, a angle du manche (degrés), g tête -> main proche, wN / wF mains sur le manche,
      s boule en bandoulière, r : P et a dans le repère du buste } (absent : rangé dans le dos) ; t, warm, jaw, hurt, wound ; back(applyM), front(rig) */
@@ -362,7 +375,7 @@ const COLOSSE=(()=>{
     c.save();applyM();halo(c,-24,-205,90,.3*warm*fl*(1-(o.out||0)));img(c,SP.torso);cr(SP.torsoC,ca);cr(SP.torsoR,ra);c.restore();
     let na=act?null:bras(c,near,Hn,0,ra);
     c.save();headM();img(c,SP.corneL);c.restore();
-    c.save();applyM(o.dN);img(c,SP.paulR);cr(SP.paulRC,Math.min(ra,ca));c.restore();
+    c.save();applyM(o.dN);img(c,o.enclume?SP.paulRB:SP.paulR);cr(o.enclume?SP.paulRBC:SP.paulRC,Math.min(ra,ca));c.restore();
     if(act)na=bras(c,near,Hn,0,ra);
     const fa=bras(c,far,H,1,ra); /* main arrière : le bras lointain et sa main passent DERRIÈRE le manche (dessinés avant le marteau, la main n'est pas redessinée après) */
     if(!dos)marteau();
@@ -371,7 +384,7 @@ const COLOSSE=(()=>{
     /* tête : couronne derrière, gueule qui s'ouvre (jaw), yeux blancs quand il est touché */
     c.save();headM();c.scale(.8,.8);
     halo(c,-40,-350,70,.45*warm*fl*(1-(o.out||0)));if((o.out||0)<.98)couronne(c,ph,warm,1-(o.out||0));
-    c.scale(1.25,1.25);img(c,SP.head);cr(SP.headC,ca);c.scale(.8,.8);
+    c.scale(1.25,1.25);img(c,o.brise?SP.headB:SP.head);cr(o.brise?SP.headBC:SP.headC,ca);c.scale(.8,.8);
     const j=o.jaw||0;
     if(j>0){c.fillStyle='rgba(255,160,60,.95)';c.beginPath();c.moveTo(-95,-254);c.lineTo(-29,-258);c.lineTo(-31,-246+j);c.lineTo(-90,-240+j);c.closePath();c.fill()}
     const ey=o.eyes||0;if(ey>.02&&!o.hurt){halo(c,-64,-296,26+30*ey,.7*ey);halo(c,-86,-296,18+22*ey,.6*ey);c.save();c.globalAlpha=Math.min(1,ey);c.fillStyle='#fff7d4';c.fill(P2('M-94 -302L-75 -289L-79 -286.5L-91 -294Z'));c.fill(P2('M-65 -287L-34 -309L-39 -296L-55 -285.5Z'));c.restore()}
@@ -394,7 +407,54 @@ const COLOSSE=(()=>{
     if(o.front)o.front(rig);
     c.restore();
     return rig}
-  return {draw,ik,L1,L2};
+  /* ---- ailes de la phase III (maquette colosse-clocher.js) : intactes, puis rongées (trous brûlés au liseré de braise, membrane déchirée, os à nu).
+     Quatre calques (lointaine / proche x intacte / rongée) cuits par ailes3() à l'entrée de la phase III, jamais en combat. Repère : racine en (0, 0),
+     l'aile s'étend vers x positif ; dessinés à (-20, -200, 420, 280) en unités de pose. ---- */
+  const AILES3={};
+  function aileBase(c,loin){pc(c,'M0 -6L70 -96L148 -148L330 -178C318 -150 312 -118 322 -84C292 -96 262 -84 250 -46C228 -70 192 -66 176 -24C158 -48 122 -46 106 -6C90 -22 60 -20 44 12L6 44Z',loin?'#331432':'#4a1c3a',
+    [['M0 -6L70 -96L148 -148L330 -178L148 -118L74 -70Z',loin?CL2:CL],['M148 -148L250 -46C228 -70 192 -66 176 -24Z',OM],['M148 -148L106 -6C90 -22 60 -20 44 12Z','rgba(7,0,18,.3)']],8)}
+  function aileOs(c,loin){[['M0 -6L70 -96L148 -148L330 -178',11],['M148 -148Q245 -130 322 -84',5.5],['M148 -148Q220 -110 250 -46',5],['M148 -148Q170 -90 176 -24',4.5],['M148 -148Q120 -90 106 -6',4]].forEach(([d,w])=>{tr(c,d,'#1a0820',w);tr(c,d,loin?'rgba(150,130,196,.4)':'rgba(214,180,236,.55)',w*.25)});
+    pc(c,'M140 -146L146 -176L158 -150Z','#2c1534',[],3);pc(c,'M326 -178L352 -170L328 -166Z','#2c1534',[],2)}
+  function aileCuite(loin,ronge){
+    const R=Math.min(2.4,SP.R),e=mk(420*R,280*R),c=e.getContext('2d');c.setTransform(R,0,0,R,20*R,200*R);
+    aileBase(c,loin);
+    if(ronge){
+      const trou=(x,y,r,s)=>{const q=()=>(s=(s*16807)%2147483647)/2147483647,p=[];for(let i=0;i<11;i++){const a=i*TAU/11,d=r*(.55+q()*.7);p.push([x+Math.cos(a)*d,y+Math.sin(a)*d*.85])}return p};
+      const T=[[96,-62,17,3],[196,-96,22,8],[262,-100,14,15],[142,-62,11,21],[62,-34,9,27],[228,-140,12,33],[322,-84,38,41],[250,-46,34,47],[176,-24,30,53],[106,-6,25,59],[296,-70,27,63],[206,-42,21,69],[300,-176,16,71]].map(v=>trou(...v));
+      const chemin=p=>{c.beginPath();p.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath()};
+      /* liseré de braise, puis le trou */
+      c.save();c.globalCompositeOperation='source-atop';c.lineJoin='round';T.forEach(p=>{chemin(p);c.strokeStyle='#12040e';c.lineWidth=13;c.stroke();c.strokeStyle='#e9561b';c.lineWidth=5;c.stroke();c.strokeStyle='#ffc27a';c.lineWidth=1.6;c.stroke()});c.restore();
+      c.save();c.globalCompositeOperation='destination-out';c.fillStyle='#000';T.forEach(p=>{chemin(p);c.fill()});c.restore()}
+    aileOs(c,loin);
+    return e}
+  /* cuit une paire d'ailes (rg : 0 intactes, 1 rongées, absent : les deux) ; appelé par aile() à la première image de la phase */
+  function ailes3(rg){if(!SP)build();for(const l of [0,1])for(const r of [0,1]){if(rg!=null&&r!==(rg?1:0))continue;const k=l+'|'+r;if(!AILES3[k])AILES3[k]=aileCuite(!!l,!!r)}return AILES3}
+  /* aile cuite : loin (lointaine), ronge (rongée) ; la paire manquante est cuite à la volée (première image de la phase, pendant l'entrée) */
+  /* une seule aile cuite (préchauffage de la phase III : une par image) */
+  function cuireAile(loin,ronge){if(!SP)build();const k=(loin?1:0)+'|'+(ronge?1:0);if(!AILES3[k])AILES3[k]=aileCuite(!!loin,!!ronge)}
+  function aile(loin,ronge){const k=(loin?1:0)+'|'+(ronge?1:0);return AILES3[k]||ailes3(ronge?1:0)[k]}
+  /* les deux ailes, dans le repère des pieds (unités de pose), attachées au buste o (lean, drop, plie, sx) : bat (battement, rad), env (envergure),
+     tombe (retombées, 0 à 1), ronge (rongées), cut (0 à 2 : ailes coupées par le final, la lointaine d'abord). Phases I et III. */
+  function ailes(c,o,w){const dr=(o.drop||0)+(o.plie||0)*26,co=Math.cos(o.lean||0),si=Math.sin(o.lean||0),sx=o.sx||1,tb=w.tombe||0,env=w.env||1,cut=w.cut||0;
+    for(const sd of [1,-1]){
+      if((sd===-1&&cut>=1)||(sd===1&&cut>=2))continue;
+      const x=sd*34,y=-238,k=(sd>0?.66:.68)*env;
+      c.save();c.translate(sx*co*x-si*y+si*PY,sx*si*x+co*y+PY+dr-co*PY);c.scale(sd,1);c.rotate(.14+(w.bat||0)+tb*(sd>0?.5:.62));c.scale(k,k*(1-.1*tb));
+      c.drawImage(aile(sd<0,w.ronge),-20,-200,420,280);c.restore()}}
+  /* morceau d'enclume arraché, centré sur (0, 0) en unités de pose */
+  function eclatEnclume(c){if(!SP)build();c.save();c.translate(-136,-232);img(c,SP.paulRP);c.restore()}
+  /* ombres de contact : une sous chaque pied (le pied arrière, dessiné plus haut pour la perspective, a la sienne) et une ombre douce entre les deux.
+     Chaque pied suit sa jambe (pivot à la hanche, levée, jambes pliées) ; l'ombre reste au sol et pâlit quand le pied se lève.
+     o : fx, fl, fa, nx, nl, na (jambes, comme o.legs), plie ; (x0, y0) : pieds dans le monde ; s : échelle pose -> monde (négative : retourné) ; k : opacité. Phases I et III. */
+  const OMB={F:{hip:[-40,-118],c:[-64,-6.4],rx:40},N:{hip:[34,-118],c:[60,4.8],rx:46},al:.55,ry:5,doux:[130,9,.22]};
+  function ombres(c,o,x0,y0,s,k){if(!(k>0))return;const as=Math.abs(s),pl=1-.2*(o.plie||0);
+    c.save();c.fillStyle='rgba(8,4,22,'+(OMB.doux[2]*k)+')';c.beginPath();c.ellipse(x0,y0,OMB.doux[0]*as,OMB.doux[1],0,0,TAU);c.fill();
+    [[OMB.F,[o.fx,o.fl,o.fa]],[OMB.N,[o.nx,o.nl,o.na]]].forEach(([d,q])=>{
+      const an=Math.asin(Math.max(-.38,Math.min(.38,-(q[0]||0)/120)))+(q[2]||0),dx=d.c[0]-d.hip[0],dy=d.c[1]-d.hip[1],px=d.hip[0]+dx*Math.cos(an)-dy*Math.sin(an);
+      const lv=Math.min(1,Math.max(0,(q[1]||0)/60)),a=OMB.al*k*(1-.7*lv);if(a<=.01)return;
+      c.fillStyle='rgba(8,4,22,'+a+')';c.beginPath();c.ellipse(x0+px*s,y0+d.c[1]*as*pl+1,d.rx*as*(1-.3*lv),OMB.ry,0,0,TAU);c.fill()});
+    c.restore()}
+  return {draw,ik,L1,L2,cuireAile,aile,ailes,eclatEnclume,ombres};
 })();
 
 /* ===== Effets du Colosse réutilisables (référence ripostes-reference.js, 27/11) : dégâts, éclats, flammes de rage =====
@@ -406,7 +466,7 @@ const COLFX=(()=>{
   const TAU=6.283185307179586,cl=v=>v<0?0:v>1?1:v,sm=u=>{u=cl(u);return u*u*(3-2*u)},REF=.8;
   const rnd=s=>()=>(s=(s*16807)%2147483647)/2147483647;
   /* réaction de dégâts : monte en 80 ms, tient (hold), revient en d ; t = secondes depuis l'impact t0 */
-  function choc(t,t0,d,hold){const u=t-t0,h=hold==null?.2:hold;if(u<0)return 0;if(u<.08)return u/.08;if(u<.08+h)return 1;return Math.pow(1-cl((u-.08-h)/d),2)}
+  const choc=LB.watcherChoc;   /* la même réaction que le Veilleur (shared/js/20-watcher.js) */
   function poly(c,pts,col){c.fillStyle=col;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.fill()}
   /* étoile à n branches (éclair d'impact) */
   function etoile(c,x,y,r,n,rot,col,k){if(!(r>0))return;k=k==null?.42:k;const p=[];for(let i=0;i<n*2;i++){const a=rot+i*Math.PI/n,d=i%2?r*k:r*(i%4?1:.72);p.push([x+Math.cos(a)*d,y+Math.sin(a)*d])}poly(c,p,col)}

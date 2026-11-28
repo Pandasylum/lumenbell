@@ -23,28 +23,30 @@ function drawBoss3(){
   const fm=(o.face||1)*(o.etr||1);   /* pivot du coup de queue : retourné en miroir (face -1), écrasé en largeur (etr) */
   COL3.f={x0:bx+C3X+o.dx,y0:DECK+dy,bx,flip:!!ob.flip,m:fm};
   const wd=R.healed&&!fin?(R.wdAt==null?1:clamp01((R.time-R.wdAt)/.8)):(R.healed?1:0);
-  const fire=(ob.warm>1.1||R.rage>0)&&!(o.out>.5),hot=ob.ws>1.05,wf=reduce?0:Math.sin(t*1.8)*.03;
+  /* première foudre : la grande enclume de l'épaule cède ; regain de vie : les ailes sont rongées puis retombent ; première foudre de la seconde vie : la grande corne se brise */
+  const rT=R.healed?(R.wdAt!=null?R.wdAt:-99):null,ronge=rT!=null&&t>=rT+CN3.ronge,tombe=ronge?k3ez((t-rT-CN3.tombe[0])/CN3.tombe[1]):0;
+  const brise=R.hornAt!=null&&t>=R.hornAt+CN3.brise,enclume=COL3.foudre1!=null&&t>=COL3.foudre1+CN3.enclume;
   if(ob.flip){ctx.save();ctx.translate(bx,0);ctx.scale(-1,1);ctx.translate(-bx,0)}
+  /* ombres de contact : une sous chaque pied (le pied arrière, dessiné plus haut pour la perspective, a la sienne) et une ombre douce entre les deux */
+  if(dy>-60&&!fin)COLOSSE.ombres(ctx,{fx:o.fx,fl:o.fl,fa:o.fa,nx:o.nx,nl:o.nl,na:o.na,plie:o.plie},bx+C3X+o.dx,DECK,C3*fm,1-k3cl(-dy/60));
   if(R.healed&&!fin&&R.boss.s!=='dead'){ctx.save();ctx.translate(bx,DECK+dy);ctx.scale(.92,.92);drawAura3(ob,t);ctx.restore()}
   if(R.atk&&R.atk.dbl&&R.atk.t<R.atk.hits[R.atk.hits.length-1].at+.05){ctx.save();ctx.translate(bx,DECK+dy);ctx.rotate(fin?ob.lean:0);ctx.scale(.92,.92);ctx.fillStyle='rgba(255,176,74,'+(.85+.15*Math.sin(t*30))+')';ctx.shadowColor='#ff7a2b';ctx.shadowBlur=14;ctx.font='900 54px '+DISPLAY;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!'.repeat(R.atk.tn||2),-170,-300);ctx.restore()}
   ctx.save();ctx.translate(bx,DECK+dy);if(fin&&ob.lean)ctx.rotate(ob.lean);ctx.translate(C3X+o.dx,0);ctx.scale(C3*fm,C3);
-  const rig=COLOSSE.draw(ctx,{dos:o.dos||0,qD:o.qD,qP:o.qP||undefined,ouvre:o.dos?1-o.plie:0,rage:o.dos?Math.min(.34,wd):undefined,lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:o.plie,kneel:o.kneel,kdk:o.kdk,out:o.out,tete:o.tete,jaw:o.jaw,fissure:fin?1:wd,
-    t:reduce?0:t,warm:ob.warm,eyes:o.yeux,breath:reduce?null:t,smoke:1,hurt:R.recoil>.3,legs:{f:[o.fx,o.fl,o.fa],n:[o.nx,o.nl,o.na]},tip:[o.tx,o.ty],heat:o.heat,sag:20,
+  const rig=COLOSSE.draw(ctx,{dos:o.dos||0,qD:o.qD,qP:o.qP||undefined,ouvre:o.dos?1-o.plie:0,rage:o.dos?Math.max(Math.min(.34,wd),o.rage||0):(o.rage||0),brise,enclume,flash:o.flash||0,eteint:o.eteint||0,lean:o.lean,drop:o.drop,sx:o.sx,dF:o.dF,dN:o.dN,off:o.off,nn:o.nn,plie:o.plie,kneel:o.kneel,kdk:o.kdk,out:o.out,tete:o.tete,jaw:o.jaw,fissure:fin?1:Math.max(wd,o.fissure||0),
+    t:reduce?0:t,warm:o.rage>.5?Math.max(ob.warm,1.5):ob.warm,eyes:o.yeux,breath:reduce?null:t,smoke:1,hurt:R.recoil>.3,legs:{f:[o.fx,o.fl,o.fa],n:[o.nx,o.nl,o.na]},tip:[o.tx,o.ty],heat:o.heat,sag:20,
     ham:{P:o.P,a:o.a,g:o.g,wN:o.wN,wF:o.wF,s:o.s,r:o.r},
-    back:applyM=>{
-      /* ailes dans le dos (mêmes sprites et même place qu'en phase I) : elles suivent le buste ; la seconde vie les abîme, le final en coupe une ou deux */
-      ctx.save();applyM();ctx.scale(.92/C3,.92/C3);
-      for(const sd of [-1,1]){
-        if((sd===-1&&R.cut>=1)||(sd===1&&R.cut>=2))continue;
-        const dm=wd*(sd===1?1:.7),dr=.12*dm,sz=1-.06*dm,k=sd<0?.82:1,x=sd<0?-57:63;
-        drawWing([x,-250],-.85+wf+o.wa+dr,.8*k*o.ws*sz,hot?'#5a1a28':'#220a11',.34,fire,sd,dm);
-        drawWing([x-sd*13,-260],-1.15+wf+o.wa+dr,k*o.ws*sz,hot?'#7a2230':'#35101a',.34,fire,sd,dm);
-      }
-      ctx.restore();
+    back:()=>{
+      /* ailes de la maquette (calques cuits à l'entrée, les mêmes qu'en phase I) : battement (o.wa), envergure (o.ws) ; rongées puis retombées après le regain de vie ;
+         le final en coupe une ou deux (R.cut). Flammes de rage derrière lui. */
+      COLOSSE.ailes(ctx,o,{bat:o.wa+(reduce?0:Math.sin(t*1.7)*.024*(1-tombe)),env:o.ws,tombe,ronge,cut:R.cut});
+      if(o.flm>.01)COLFX.rageDerriere(ctx,reduce?0:t,o.flm);
     },
     front:r=>{if(o.griffe>.02){ctx.save();k3griffes(ctx,r.na.E,r.na.W,o.griffe);k3griffes(ctx,r.fa.E,r.fa.W,o.griffe);ctx.restore()}}});
+  if(o.flm>.01)COLFX.rageSol(ctx,reduce?0:t,o.flm);
+  if(col3CriA(R.atk)&&!fin)COLFX.ondes(ctx,R.atk.t-CN3.rage.cri);   /* l'éclat du cri : ondes de braise au sol */
   ctx.restore();
-  COL3.k={gueule:col3W(rig.gueule),coeur:col3W(rig.coeur),head:col3W(rig.head),poing:col3W(rig.fa.W),Z:o.Z||null,x0:COL3.f.x0};COL3.mouth=COL3.k.gueule;
+  COL3.k={gueule:col3W(rig.gueule),coeur:col3W(rig.coeur),head:col3W(rig.head),poing:col3W(rig.fa.W),Z:o.Z||null,x0:COL3.f.x0,
+    tete:col3W(rig.pt(-34,-272)),corne:col3W(rig.pt(36,-300)),torse:col3W(rig.pt(-36,-186)),loin:col3W(rig.fa.W),proche:col3W(rig.na.W),boule:col3W([o.tx,o.ty]),enclume:col3W(rig.pt(136,-232))};COL3.mouth=COL3.k.gueule;
   if(ob.flip)ctx.restore();
 }
 function faceFire(cx,cy,k,q){
@@ -67,19 +69,27 @@ function faceFire(cx,cy,k,q){
   }
   ctx.restore();
 }
+/* bâton complet tenu en main (talon et lanterne) pour un geste donné par la main et l'angle du sceptre : même longueur et même prise que le bâton planté
+   de la garde commune (LB.WATCHER_REST : talon à 67 px sous la main, lanterne à 75 px au-dessus), pour que le bâton ne change jamais de forme */
+const BATON3=(()=>{const R=LB.WATCHER_REST,h=R.hand,s=R.staff;return {bas:Math.hypot(h[0]-s[0][0],h[1]-s[0][1]),haut:Math.hypot(s[1][0]-h[0],s[1][1]-h[1])}})();
+function baton3(hand,sa){const c=Math.cos(sa),n=Math.sin(sa);return [[hand[0]-c*BATON3.bas,hand[1]-n*BATON3.bas],[hand[0]+c*BATON3.haut,hand[1]+n*BATON3.haut]]}
 function drawHero3(){
   const p=R.pl,h=heroPose3(),t=R.time;
   const hf=heroFlip();if(hf){ctx.save();ctx.translate(h.x,0);ctx.scale(-1,1);ctx.translate(-h.x,0)}
   if(!h.y)ctx.fillStyle='rgba(0,0,0,.35)',ctx.beginPath(),ctx.ellipse(h.x,DECK+2,30,5,0,0,6.283),ctx.fill();
   /* le Veilleur commun (LB.drawWatcher) ; la phase donne sa géométrie : sceptre en main, garde levée, contres, finale */
-  const c3=R.cn,hk3=c3&&(c3.k==='bat'||c3.k==='plant')?Math.max(0,1-Math.abs(c3.t-(c3.k==='bat'?.24:.32))/.16):0;
+  const c3=R.cn;
   const play=R.mode==='play',low=p.s==='down'||p.s==='hurt';
-  const pose=R.mode==='intro'?'walk':R.mode==='finale'?'victory':!play?'idle':c3?'cast':p.s==='act'?'raise':low?(p.s==='down'?'down':'hurt'):'idle';
-  LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:h.sy,
-    breath:pose==='idle'&&play,hand:h.hand,sa:h.sa,L:76,
-    glow:p.s==='act'?1:Math.max(.3,h.glow||0,hk3),
-    lanternCol:LB.watcherLanternCol(p,p.s!=='recover'&&(p.s==='act'||h.glow>0||hk3>0)),
-    beam:hk3>0?{len:48*hk3,w:14,al:hk3}:null});
+  const pose=R.mode==='intro'?'walk':R.mode==='finale'?'victory':!play?'idle':c3?'cast':p.s==='act'?'block':low?(p.s==='down'?'down':'hurt'):'idle';
+  /* hors contres, entrée, final et coup de boule : la posture et la tenue du bâton de la phase I (bâton planté, garde « block » commune) */
+  const commun=R.mode!=='intro'&&R.mode!=='finale'&&!c3&&!(low&&p.lasso);
+  if(commun){const up=p.s==='act',Q=LB.WATCHER_POSES.block(up?clamp01(p.t/.08):0);
+    LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:0,rot2:low?.12:0,sx:1,sy:low?.82:1,
+      breath:pose==='idle'&&play,hand:Q.hand,staff:Q.staff,glow:up?1:.25,lanternCol:LB.watcherLanternCol(p,up)})}
+  else LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:h.sy,
+    breath:pose==='idle'&&play,hand:h.hand,staff:baton3(h.hand,h.sa),
+    glow:p.s==='act'?1:Math.max(.3,h.glow||0),
+    lanternCol:LB.watcherLanternCol(p,p.s!=='recover'&&(p.s==='act'||h.glow>0))});
   if(p.s==='act')LB.drawBlock(ctx,PX,DECK,p.t,HD('block').act,{plain:true});
   if(hf)ctx.restore();
 }
@@ -127,85 +137,58 @@ function drawHits3a(){
     });
   }
 }
-/* Contre « lumière » (grêle, griffes, pierres, cri) : le Veilleur n'a plus de batte, il utilise sa lanterne. A : nova de lumière, B : volée d'éclats, C : cloche de la lanterne */
-function batFx(c){
-  const t=c.t,V='B',h=heroPose3(),x=heroX3();
-  const L=[x+h.hand[0]+Math.cos(h.sa)*76,DECK+(h.hand[1]+Math.sin(h.sa)*76)*h.sy],G=[R.bx-40,DECK-190];
-  ctx.save();ctx.globalCompositeOperation='lighter';
-  if(V==='A'&&t>=.2&&t<.8){
-    const u=clamp01((t-.2)/.47),r=30+(G[0]-L[0]+30)*es(u),al=(t<.67?1:1-(t-.67)/.13)*.8;
-    const rg=ctx.createRadialGradient(L[0],L[1],r*.4,L[0],L[1],r);rg.addColorStop(0,'rgba(255,217,102,0)');rg.addColorStop(.85,'rgba(255,217,102,'+.1*al+')');rg.addColorStop(1,'rgba(255,250,238,'+.7*al+')');
-    ctx.fillStyle=rg;ctx.beginPath();ctx.arc(L[0],L[1],r,0,6.283);ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,'+al+')';ctx.lineWidth=7*(1-u*.5)+2;ctx.shadowColor='#ffd966';ctx.shadowBlur=22;ctx.beginPath();ctx.arc(L[0],L[1],r,0,6.283);ctx.stroke();
-  }else if(V==='B'){
-    for(let i=0;i<5;i++){
-      const u=clamp01((t-.16-i*.08)/.3);if(u<=0||u>=1)continue;
-      const off=(i-2)*46,q=lerp2(L,[G[0]+(i%2?10:-10),G[1]+(i-2)*14],es(u));q[1]-=off*Math.sin(Math.PI*u)*.9;
-      for(let k=5;k>=0;k--){const uu=Math.max(0,u-k*.035),tp=lerp2(L,[G[0]+(i%2?10:-10),G[1]+(i-2)*14],es(uu));tp[1]-=off*Math.sin(Math.PI*uu)*.9;
-        ctx.fillStyle='rgba('+(k?'255,226,140':'255,255,255')+','+(.8-k*.12)+')';ctx.beginPath();ctx.arc(tp[0],tp[1],7-k*.8,0,6.283);ctx.fill()}
-    }
-  }else if(V==='C'){
-    for(let i=0;i<3;i++){
-      const u=clamp01((t-.2-i*.09)/.4);if(u<=0||u>=1)continue;
-      const cx=L[0]+(G[0]-L[0])*es(u),cy=L[1]+(G[1]-L[1])*es(u),r=34+36*u;
-      ctx.strokeStyle='rgba(255,250,238,'+(1-u*.5)+')';ctx.lineWidth=9*(1-u*.4)+2;ctx.shadowColor='#ffd966';ctx.shadowBlur=18;
-      ctx.beginPath();ctx.arc(cx-r*.5,cy,r,-.95,.95);ctx.stroke();
+/* débris arraché (corne, bec d'enclume) : il part de p (point du corps au moment du coup), tombe, roule et s'efface ; u = secondes depuis la cassure */
+function col3Debris(c,id,u,p,dessin,cols){
+  if(u<0){COL3[id]=null;return}if(u>=CN3.sol+.5)return;
+  if(!COL3[id])COL3[id]=p.slice();const p0=COL3[id],s=k3cl(u/CN3.chute),x=k3l(p0[0]+8,p0[0]+28,s),sol=DECK+16,y=k3l(p0[1],sol,s*s)-70*Math.sin(s*Math.PI);
+  c.save();c.globalAlpha=1-k3cl((u-CN3.sol)/.5);dessin(x,s<1?y:y-12,s<1?(reduce?1.45*s:u*9):1.45);c.restore();
+  if(!reduce){k3shards(c,x,sol,u-CN3.chute,12,['#9a9cc8',cols[0],'#ff9a35'],170,13,DECK+6);k3shards(c,p0[0],p0[1],u,20,cols,300,12,DECK+5)}
+  k3fumee(c,p0[0],p0[1],u%1.8,6,44)}
+/* centre de la lanterne du Veilleur (départ du rayon, des comètes et des tirs du final), au bout du bâton complet (baton3) ; h = heroPose3() */
+function lant3(h){h=h||heroPose3();return [h.x+h.hand[0]+Math.cos(h.sa)*BATON3.haut,DECK+(h.y||0)+(h.hand[1]+Math.sin(h.sa)*BATON3.haut)*(h.sy||1)]}
+/* contres (maquette colosse-clocher.js, scènes 1 à 9) : armes = garde bleue puis rayon du sceptre ; distance = cinq comètes ;
+   cloche = ondes de la grande cloche et KO auditif ; rage = cloche puis foudre (tête et cœur, ou la grande corne à la première foudre de la seconde vie) */
+function col3CnFx(){
+  const c=ctx,tm=reduce?0:R.time,k=COL3.k;
+  /* la grande corne (seconde vie) et le bec de l'enclume (première foudre) tombent, roulent et restent un moment au sol */
+  if(k&&R.mode==='play'){
+    if(R.hornAt!=null)col3Debris(c,'hp',R.time-R.hornAt-CN3.brise,k.corne,(x,y,r)=>k3corne(c,x,y,r),['#a47c8a','#4a2642','#ff9a35','#ffffff']);
+    if(COL3.foudre1!=null)col3Debris(c,'ep',R.time-COL3.foudre1-CN3.enclume,k.enclume,(x,y,r)=>{c.save();c.translate(x,y);c.rotate(r);c.scale(C3*COL3.f.m,C3);COLOSSE.eclatEnclume(c);c.restore()},['#6a4a72','#35223f','#ff9a35','#ffe08a']);
+    /* foudre du regain de vie : les ailes perdent des lambeaux en brûlant */
+    if(R.healed&&R.wdAt!=null&&!reduce){const u=R.time-R.wdAt-CN3.ronge;k3shards(c,k.x0+130,DECK-230,u,24,['#6a3050','#2c1534','#ff9a35'],200,72,DECK+5);k3shards(c,k.x0-130,DECK-230,u-.1,18,['#6a3050','#2c1534','#ff9a35'],200,73,DECK+5)}
+  }
+  const S=COL3.cs;if(!S||!k||R.mode!=='play'||R.atk)return;
+  const u=R.time-S.t0,T=S.T,s=u-T;
+  if(S.k==='plant'){
+    if(u>T+.8)return;
+    const L=lant3();k3charge(c,L,(u-(T-CN3.charge))/.4,tm);
+    if(S.kind==='whip'){const d0=T-CN3.boule-.05;if(u>d0&&u<T+.2)k3rayon(c,L,k.boule,(u-d0)/(T+.25-d0),1.05)}   /* le rayon cueille la boule et la lui renvoie */
+    else{k3rayon(c,L,k.head,(u-T+CN3.rayon)/CN3.rayonD,1.05);k3contact(c,k.head,s,120,12,['#fffbea','#ffe58a','#ff9a35','#6a4a72'])}   /* le rayon frappe le marteau qui retombe (faux coup) et le repousse */
+    if(S.kind==='whip')k3contact(c,k.coeur,s,150,17,CN3_COUPS);
+  }else if(S.k==='bat'){if(u<T+1)k3cometes(c,lant3(),T-CN3.comete,u,k.coeur,tm)}
+  else if(S.k==='bell'){k3ondesCloche(c,u-R_CN.bell.ring,k.tete,1);k3acouphene(c,k.tete,COL3.ko||0,tm)}
+  else if(S.k==='bolt'){
+    k3ondesCloche(c,u-R_CN.bolt.ring,k.tete,1.35);k3acouphene(c,k.tete,COL3.ko||0,tm);
+    const pts=[k.tete,k.corne,k.coeur,k.loin,k.proche,k.torse,[k.x0-40,DECK-40],[k.x0+60,DECK-30]];
+    if(s<0)k3arcs(c,[k.tete,k.corne,k.corne,k.tete,k.proche,k.torse,pts[6],pts[7]],k3ez((u-(T-.25))/.2),tm);
+    else{
+      const corne=R.hornAt!=null&&Math.abs(R.hornAt-(S.t0+T))<.1;   /* première foudre de la seconde vie : elle frappe la grande corne */
+      k3solFendu(c,k.x0,s,1-k3ez((s-1.9)/1));
+      if(corne)k3foudre(c,s,k.corne);else{k3foudre(c,s,k.tete);k3foudre(c,s-CN3.foudre2,k.coeur)}
+      k3arcs(c,pts,1-k3ez((s-.5)/1),tm);
+      if(!reduce){k3shards(c,k.coeur[0],k.coeur[1],s,36,['#cfd8ff','#6a3050','#2c1534','#ff9a35','#ffffff'],430,71,DECK+5);
+}
+      [[-110,-200],[110,-210],[0,-120],[150,-90]].forEach(([x,y],i)=>k3fumee(c,k.x0+x,DECK+y,(s-.4-i*.17)%1.6,6,80+i));
     }
   }
-  ctx.restore();
 }
-/* Contre de la cloche : la clochette de la lanterne sonne, la grande cloche du Clocher lui répond, et l'écho étourdit le Colosse */
-function bellFx(c){
-  const t=c.t,h=heroPose3(),x=heroX3();
-  const L=[x+h.hand[0]+Math.cos(h.sa)*76+12,DECK+(h.hand[1]+Math.sin(h.sa)*76)*h.sy+20],B=[BELL[0],BELL[1]+40],G=[R.bx-40,DECK-190];
-  ctx.save();ctx.globalCompositeOperation='lighter';ctx.shadowColor='#ffd966';
-  /* 1) la clochette : ondes qui montent vers la grande cloche */
-  for(let i=0;i<3;i++){
-    const u=clamp01((t-.12-i*.08)/.4);if(u<=0||u>=1)continue;
-    const cx=L[0]+(B[0]-L[0])*es(u),cy=L[1]+(B[1]-L[1])*es(u),r=18+22*u,al=1-u*.6;
-    ctx.strokeStyle='rgba(255,250,238,'+al+')';ctx.lineWidth=6*(1-u*.4)+1;ctx.shadowBlur=14;
-    ctx.beginPath();ctx.arc(cx,cy,r,0,6.283);ctx.stroke();
-  }
-  /* 2) la grande cloche répond : écho qui part du Clocher et traverse l'arène jusqu'au Colosse */
-  if(t>=.5){
-    for(let i=0;i<4;i++){
-      const u=clamp01((t-.5-i*.07)/.4);if(u<=0||u>=1)continue;
-      const cx=B[0]+(G[0]-B[0]+40)*es(u),r=50+120*u,al=(1-u*.55)*(i?.7:1);
-      ctx.strokeStyle='rgba(255,250,238,'+al+')';ctx.lineWidth=8*(1-u*.5)+1;ctx.shadowBlur=20;
-      ctx.beginPath();ctx.arc(cx-r*.6,B[1]+(G[1]-B[1])*es(u),r,-.8,.8);ctx.stroke();
-    }
-  }
-  ctx.restore();
+/* fond : la nuit rougit au cri de rage, l'orage roule pendant le contre de rage (avant le Colosse) */
+function col3Ciel(){
+  if(R.mode!=='play')return;const a=R.atk,S=COL3.cs,tm=reduce?0:R.time;
+  if(col3CriA(a)){const n=.45*k3ez(a.t/.7)*(1-k3ez((a.t-2)/.5));if(n>.01){ctx.fillStyle='rgba(30,4,20,'+n+')';ctx.fillRect(-40,-40,W+80,H+80)}}
+  if(S&&S.k==='bolt'&&!a){const u=R.time-S.t0;k3orage(ctx,tm,k3bump(u,R_CN.bolt.ring,S.T+1.1,.3))}
 }
-/* Colosse étourdi : trois étoiles tournent au-dessus de sa tête */
-function drawDizzy(){
-  if(!R||!R.dizzy||R.dizzy<=R.time)return;
-  const k=Math.min(1,(R.dizzy-R.time)/.3),x=R.bx-20,y=DECK-382;
-  ctx.save();ctx.globalAlpha=k;ctx.shadowColor='#ffd27a';ctx.shadowBlur=10;
-  for(let i=0;i<3;i++){const a=R.time*5+i*2.094,px=x+Math.cos(a)*52,py=y+Math.sin(a)*12;
-    ctx.fillStyle=i%2?'#ffe9a8':'#bfeaff';ctx.beginPath();
-    for(let j=0;j<8;j++){const rr=j%2?4:10,aa=j*Math.PI/4;ctx.lineTo(px+Math.cos(aa)*rr,py+Math.sin(aa)*rr)}ctx.closePath();ctx.fill()}
-  ctx.restore();
-}
-function drawCn3a(){
-  const c=R.cn;if(!c)return;
-  const t=c.t;
-  if(c.k==='slide'&&t>=.22&&t<.5){const h=heroPose3(),x=heroX3(),L=[x+h.hand[0]+Math.cos(h.sa)*76,DECK+(h.hand[1]+Math.sin(h.sa)*76)*h.sy],al=t<.35?(t-.22)/.13:1-(t-.35)/.15;lanternBeam(L,[R.bx-62,DECK-58],14,al)}
-  if(c.k==='plant'&&t>=.3){
-    const x0=PX+105,x1=R.bx-60,fr=x0+(x1-x0)*es(clamp01((t-.3)/.5));
-    ctx.save();ctx.shadowColor='#fff0b0';ctx.shadowBlur=16;
-    for(let i=0;i<12;i++){
-      const x=fr-i*16;if(x<x0)continue;
-      const h=(34-i*2.2)*(t<.8?1:clamp01(1-(t-.8)/.3));if(h<=0)continue;
-      ctx.fillStyle='rgba(255,250,238,'+(.95-i*.06)+')';
-      ctx.beginPath();ctx.moveTo(x-6,DECK+2);ctx.lineTo(x,DECK-h);ctx.lineTo(x+6,DECK+2);ctx.closePath();ctx.fill();
-    }
-    ctx.strokeStyle='rgba(255,250,238,.8)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x0,DECK+3);ctx.lineTo(fr,DECK+3);ctx.stroke();
-    ctx.restore();
-  }else if(c.k==='bat'){batFx(c)}
-  else if(c.k==='bell'){bellFx(c)}
-}
-function drawHits3(){col3Fx();drawHits3a();drawHitsX();drawDizzy()}
+function drawHits3(){col3Fx();drawHits3a();drawHitsX()}
 /* ===== coup de queue en pivot et onde de flammes (maquette validée colosse-queue-onde.js) : aplats nets, ni flou ni ombre ===== */
 /* traînée de feu derrière la pointe de la queue */
 function k3sillage(c,pts,al){if(pts.length<3||al<=0)return;c.save();c.globalAlpha=al;
@@ -224,7 +207,7 @@ function drawQueueFx(a,h,d,i){
 /* vague de flammes découpées : de x0 (poings) à x1 (garde) ; u avancée (0 à 1), fin = secondes depuis l'arrivée */
 function k3vague(c,x0,x1,u,fin,tm){if(u<0)return;
   const x=k3l(x0,x1,k3cl(u)),al=fin<0?1:1-k3cl(fin/.3),sg=x1<x0?-1:1;
-  if(al>0){c.save();c.globalAlpha=al;k3glow(c,x,DECK-50,170,'255,130,50',.5*al);
+  if(al>0){c.save();c.globalAlpha=al;colGlow(c,x,DECK-50,170,'255,130,50',.5*al);
     for(let i=7;i>=0;i--){const px=x-sg*(i*30+(fin>0?fin*40*i:0));if((x0-px)*sg>60)continue;const h=(214-i*24)*(fin<0?.55+.45*k3cl(u*2.4):1-k3cl(fin/.3))*(1+.13*Math.sin(tm*23+i*2));k3flame(c,px,DECK+8+(i%2)*3,40-i*2.4,h,(-34+i*3)*-sg,tm*14+i*1.7)}
     c.restore()}
   const r=k3rnd(52),span=Math.max(.2,ONDE.vg-ONDE.imp);for(let i=0;i<15;i++){const px=k3l(x0,x1,(i+.5)/15),v=(u*span-(i+.5)/15*span)/.55;if(v<=0||v>=1)continue;
@@ -233,7 +216,7 @@ function k3vague(c,x0,x1,u,fin,tm){if(u<0)return;
   if(fin>0&&fin<.55){const v=fin/.55;[[-92,150],[-66,190],[-40,140],[-112,110],[-20,100]].forEach(([deg,L],i)=>{const an=(sg<0?deg:-180-deg)*Math.PI/180,bx=x1-4*sg,by=DECK-40;
     c.save();c.globalAlpha=1-v*v;k3flame(c,bx+Math.cos(an)*L*v*.8,by+Math.sin(an)*L*v*.8,18*(1-v*.5),70*(1-v*.6),(deg+90)*.7*-sg,tm*17+i);c.restore()})}}
 /* il aspire le feu : traits de braise qui convergent vers son cœur */
-function k3aspire(c,p,m,tm){const k=k3bump(m,.25,1.15,.2);if(k<=0)return;c.save();c.globalAlpha=k;k3glow(c,p[0],p[1],60+50*k3ez((m-.3)/.8),'255,150,60',.7*k);
+function k3aspire(c,p,m,tm){const k=k3bump(m,.25,1.15,.2);if(k<=0)return;c.save();c.globalAlpha=k;colGlow(c,p[0],p[1],60+50*k3ez((m-.3)/.8),'255,150,60',.7*k);
   for(let i=0;i<16;i++){const v=(tm*1.5+i*.137)%1,an=i*2.4,d=210*(1-v)+14,x=p[0]+Math.cos(an)*d,y=p[1]+Math.sin(an)*d*.8,L=14+34*v,w=3+6*v;
     k3poly(c,[[x-Math.sin(an)*w,y+Math.cos(an)*w*.8],[p[0]+Math.cos(an)*Math.max(8,d-L),p[1]+Math.sin(an)*Math.max(8,d-L)*.8],[x+Math.sin(an)*w,y-Math.cos(an)*w*.8],[x+Math.cos(an)*L*.5,y+Math.sin(an)*L*.4]],i%3?'#ff9a35':'#ffe08a')}
   c.restore()}
@@ -299,26 +282,7 @@ function drawHitsX(){
     }
   }
 }
-function drawCn3(){drawCn3a();drawBoltCn()}
-function drawBoltCn(){
-  const c=R.cn;if(!c||c.k!=='bolt')return;
-  const t=c.t,tip=[PX+72,DECK-154],sky=[BELL[0],BELL[1]+60];
-  if(t>=.55){
-    const k=Math.min(1,(t-.55)/.45)*(t<1.35?1:Math.max(0,1-(t-1.35)/.5));
-    ctx.fillStyle='rgba(8,12,40,'+(.5*k)+')';ctx.fillRect(0,0,W,DECK);
-    const g=ctx.createRadialGradient(R.bx-20,10,6,R.bx-20,10,170);g.addColorStop(0,'rgba(255,247,214,'+(.9*k)+')');g.addColorStop(1,'rgba(255,217,102,0)');
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(R.bx-20,10,170,0,6.283);ctx.fill();
-  }
-  if(t>=.25&&t<1.35){
-    const al=t<1.0?clamp01((t-.25)/.15):clamp01(1-(t-1.0)/.35),u=es(clamp01((t-.25)/.35)),e=lerp2(tip,sky,u);
-    ctx.save();ctx.globalAlpha=al;ctx.shadowColor='#fff0b0';ctx.shadowBlur=26;ctx.lineCap='round';
-    ctx.strokeStyle='rgba(255,217,102,.4)';ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(tip[0],tip[1]);ctx.lineTo(e[0],e[1]);ctx.stroke();
-    ctx.strokeStyle='rgba(255,250,238,.95)';ctx.lineWidth=6;ctx.stroke();
-    ctx.restore();
-  }
-  /* l'éclair reste franc et bien lisible un moment, puis s'efface vite */
-  if(t>=1.0&&t<1.7)drawBolt(R.bx-20,-10,DECK-250,t<1.4?1:1-(t-1.4)/.3,true);
-}
+function drawCn3(){col3CnFx()}
 /* Fin : depuis le Clocher, la mer de nuit. Au large, le Phare Noyé, à demi englouti, ne répond pas. Lien vers Silent Bells. */
 function renderSpace(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -379,6 +343,7 @@ function renderR(){
   r3Background();
   r3Ground();
   drawBellWaves();
+  col3Ciel();
   {/* final : la lumière du fanal touche le Colosse agenouillé, en pleine poitrine ; la pierre noire se répand en cercle depuis ce point (anneau de lumière sur son bord) */
    const pk=R.mode==='finale'?clamp01((R.fin.t-(FIN.hero+.1))/1.9):0,cp=COL3.k?COL3.k.coeur:[R.bx-42,DECK-200],rr=es(pk)*620;
    if(pk<=0)drawBoss3();
@@ -396,7 +361,7 @@ function renderR(){
   if(R.mode==='finale'&&R.fin.t<.4)drawBolt(R.bx-20,-10,DECK-260,1-R.fin.t/.4,true);
   drawHits3();
   drawHero3();
-  if(R.mode==='finale'){const ft=R.fin.t,a0=FIN.hero-1.0;if(ft>=a0&&ft<FIN.hero-.3){const h=heroPose3(),L=[h.x+h.hand[0]+Math.cos(h.sa)*76,DECK+(h.y||0)+h.hand[1]+Math.sin(h.sa)*76],u=es(clamp01((ft-a0)/.4)),al=ft<FIN.hero-.5?1:clamp01((FIN.hero-.3-ft)/.2);lanternBeam(L,lerp2(L,[150,DECK-76],u),12,al)}}
+  if(R.mode==='finale'){const ft=R.fin.t,a0=FIN.hero-1.0;if(ft>=a0&&ft<FIN.hero-.3){const L=lant3(),u=es(clamp01((ft-a0)/.4)),al=ft<FIN.hero-.5?1:clamp01((FIN.hero-.3-ft)/.2);lanternBeam(L,lerp2(L,[150,DECK-76],u),12,al)}}
   if(R.mode==='finale'&&COL3.k){const ft=R.fin.t,t0=FIN.hero-.3;if(ft>=t0&&ft<FIN.hero+.5){const u=es(clamp01((ft-t0)/.4)),al=ft<FIN.hero+.1?1:clamp01((FIN.hero+.5-ft)/.4),F=[150,DECK-76];ctx.save();ctx.globalCompositeOperation='lighter';lanternBeam(F,lerp2(F,COL3.k.coeur,u),14,al);ctx.restore()}}
   drawCn3();
   for(const s of R.steam){ctx.fillStyle='rgba(235,245,255,'+(.35*clamp01(s.life/s.max))+')';ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,6.283);ctx.fill()}

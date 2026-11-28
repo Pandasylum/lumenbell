@@ -352,16 +352,14 @@ function drawBoss(){
   const trail=b.s==='sw1'||b.s==='sw2';if(!trail)G.swTrail.length=0;
   /* flammes de rage découpées, derrière lui (l'ancienne aura disparaît) */
   if(RP.f>.01){ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);COLFX.rageDerriere(ctx,reduce?0:t,RP.f);ctx.restore()}
+  if(Math.abs(dy)<60)COLOSSE.ombres(ctx,{fx:legs.f[0],fl:legs.f[1],fa:legs.f[2],nx:legs.n[0],nl:legs.n[1],na:legs.n[2],plie:R.plie+RU.plie},X0,DECK,s,1-Math.min(1,Math.abs(dy)/60));   /* ombres de contact : ses deux pieds pèsent sur le pont */
   ctx.save();ctx.translate(X0,Y0);ctx.scale(s,s);
   const rig=COLOSSE.draw(ctx,{lean:p[0],drop:p[1],sx:p[2],dF:p[3],dN:p[4],off:[p[5],p[6]],ham:cb.ham,legs,look:CW.look,eyes:CW.eyes,breath:t,smoke:.8+.6*CW.menace,
     plie:R.plie+RU.plie,tete:R.tete+RU.tete,nn:[R.nn[0]+RU.nn[0],R.nn[1]+RU.nn[1]],fissure:R.fissure,rage:RP.rage,eteint:R.eteint,flash:R.flash,
     tip:toP(tip),sag:pz.sag/s,heat:pz.heat,t,warm,jaw,hurt:G.recoil>.3,wound:G.wound,
     back:applyM=>{
-      /* ailes dans le dos : la lointaine (à gauche) plus petite ; elles suivent le buste */
-      ctx.save();applyM();ctx.scale(.92/s,.92/s);
-      const wf=Math.sin(t*1.8)*.03;
-      for(const sd of [-1,1]){const k=sd<0?.82:1,x=sd<0?-57:63;drawWing([x,-250],-.85+wf,.8*k,'#220a11',.34,!!b.fury,sd);drawWing([x-sd*13,-260],-1.15+wf,k,'#35101a',.34,!!b.fury,sd)}
-      ctx.restore();
+      /* ailes dans le dos : celles de la phase III (maquette colosse-clocher.js, calques cuits à la première image), attachées au buste */
+      COLOSSE.ailes(ctx,{lean:p[0],drop:p[1],sx:p[2],plie:R.plie+RU.plie},{bat:reduce?0:Math.sin(t*1.8)*.03});
       /* traînée du marteau (main proche -> tête), dans le repère du monde */
       ctx.save();ctx.scale(1/s,1/s);ctx.translate(-X0,-Y0);
       for(let i=1;i<G.swTrail.length;i++){

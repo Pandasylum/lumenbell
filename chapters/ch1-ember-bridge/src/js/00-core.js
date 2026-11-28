@@ -74,6 +74,8 @@ const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp01=v=>v<0?0:v>1?1:v;
 const eo=t=>1-(1-t)*(1-t),ei=t=>t*t,es=t=>t*t*(3-2*t);
 const lerp2=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+/* halo de lumière commun (décors, Colosse, effets des trois phases) : dégradé radial en mode écran, (x, y) centre, r rayon, rgb « r,g,b », a intensité */
+function colGlow(c,x,y,r,rgb,a){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba('+rgb+','+a+')');g.addColorStop(.35,'rgba('+rgb+','+a*.4+')');g.addColorStop(1,'rgba('+rgb+',0)');c.save();c.globalCompositeOperation='screen';c.fillStyle=g;c.fillRect(x-r,y-r,2*r,2*r);c.restore()}
 
 const IDLE_HAND=[BX-135,288],UP_HAND=[BX-114,128],FWD_HAND=[BX-150,258],TIP_BACK=[BX+70,78];
 const BAR=[PX+116,DECK-76],CHEST=[PX+14,DECK-72],HEAD=[BX,DECK-268];

@@ -1,13 +1,8 @@
 /* ---------- rendu phase III ---------- */
+/* éclair du final : le même tracé que la foudre des contres (k3eclair, 54-p3-belfry-colosse.js), sans ombre portée ; figé en mouvement réduit */
 function drawBolt(x,y0,y1,al,big){
   if(al<=0)return;
-  const pts=[[x,y0]];for(let i=1;i<=9;i++)pts.push([i===9?x:x+rand(-34,34),y0+(y1-y0)*i/9]);
-  ctx.save();ctx.lineJoin='round';ctx.lineCap='round';ctx.shadowColor='#fff0b0';ctx.shadowBlur=30;
-  for(let pass=0;pass<2;pass++){
-    ctx.strokeStyle=pass?'rgba(255,255,255,'+al+')':'rgba(255,217,102,'+(al*.6)+')';ctx.lineWidth=big?(pass?8:24):(pass?4:12);
-    ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke();
-  }
-  ctx.restore();
+  ctx.save();ctx.globalAlpha=Math.min(1,al);k3eclair(ctx,[x,y0],[x,y1],reduce?61:61+((R.time*22)|0),9,68,big?8:4);ctx.restore();
 }
 /* final : le Colosse tombe en avant d'un bloc, reste étalé, tente de se relever (un premier essai échoue), finit à genoux ; le feu s'éteint pendant l'effort.
    th : angle du corps entier autour de ses pieds (négatif = vers l'avant), lift : le corps étalé repose sur le sol, k : genoux fléchis, r : bras tendus devant lui */
@@ -83,7 +78,7 @@ function drawFinFx(){
   }
   if(R.fmace){const m=R.fmace;ctx.save();ctx.translate(m.x,m.y);ctx.rotate(m.a);drawHammer(135,m.land?.2:1,R.time,9);ctx.restore()}
   if(R.fbeam&&R.fbeam.length){
-    const hp=heroPose3(),L=[hp.x+hp.hand[0]+Math.cos(hp.sa)*76,DECK+(hp.y||0)+hp.hand[1]+Math.sin(hp.sa)*76];
+    const L=lant3();
     for(const b of R.fbeam){const al=1-b.t/.3;if(al<=0)continue;ctx.save();ctx.globalCompositeOperation='lighter';lanternBeam(L,[R.bx+b.sd*60,DECK-205],16,al);ctx.restore()}
   }
 }
@@ -91,20 +86,15 @@ function drawFallWings(){
   for(const w of R.fall){
     const t=w.t,sd=w.sd,x0=R.bx+sd*64*.92,y0=DECK-204;
     ctx.save();ctx.globalAlpha=clamp01(1.6-t*.7);
-    ctx.translate(x0+sd*70*t,y0+330*t*t-40*t);ctx.rotate(sd*1.1*t);ctx.scale(.92,.92);
-    drawWing([0,0],-.85,.8,'#220a11',.34,true,sd);drawWing([0,0],-1.15,1,'#35101a',.34,true,sd);
+    ctx.translate(x0+sd*70*t,y0+330*t*t-40*t);ctx.rotate(sd*1.1*t);
+    /* l'aile coupée : celle de la phase III (calque cuit à l'entrée), rongée et retombée après le regain de vie */
+    const rg=!!R.healed,tb=rg?1:0,k=(sd>0?.66:.68)*C3;ctx.scale(sd,1);ctx.rotate(.14+tb*(sd>0?.5:.62));ctx.scale(k,k*(1-.1*tb));ctx.drawImage(COLOSSE.aile(sd<0,rg),-20,-200,420,280);
     ctx.restore();
   }
 }
 
 function heroX3(){
-  const c=R.cn,p=R.pl;
-  if(c&&c.k==='slide'){
-    const t=c.t,tx=R.bx-150;
-    if(t<.35)return PX+(tx-PX)*eo(t/.35);
-    if(t<.65)return tx;
-    return tx+(PX-tx)*es(clamp01((t-.65)/.5));
-  }
+  const p=R.pl;
   if((p.s==='down'||p.s==='hurt')&&p.lasso){const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));return PX-30*k}
   if(p.s==='down'||p.s==='hurt')return PX-24*(1-clamp01(p.t/.5));
   return PX;
@@ -119,35 +109,29 @@ function heroPose3(){
   }
   const p=R.pl,c=R.cn;
   /* repos = garde commune (LB.WATCHER_REST, maquette A9) ; chaque contre part du repos, atteint son geste (valeurs absolues) et y revient */
-  const H0=LB.WATCHER_REST.hand,A0=LB.WATCHER_REST.sa,mh=(a,b,u)=>[a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u],ma=(a,b,u)=>a+(b-a)*u;
+  const H0=LB.WATCHER_REST.hand,A0=LB.WATCHER_REST.sa,mh=lerp2,ma=k3l;
   let hand=H0.slice(),sa=A0,rot=0,sy=1,glow=0;
   const x=heroX3();
   if(c){
     const t=c.t;
     if(c.k==='plant'){
-      const u=es(clamp01(t/.3));hand=mh(H0,[38,-40],u);sa=ma(A0,.35,u);sy=1-.1*u;glow=t>=.3?clamp01(1-(t-.3)/1.1):0;
-      if(t>1.1){const v=es(clamp01((t-1.1)/.4));hand=mh([38,-40],H0,v);sa=ma(.35,A0,v);sy=.9+.1*v}
+      /* contre des armes (maquette colosse-clocher.js) : sceptre pointé, le rayon part de la lanterne */
+      const T=R_CN.plant.hit,tir=k3bump(t,T-.55,T+.45,.18);hand=mh(hand,[36,-76],tir);sa=ma(sa,-.12,tir);glow=tir;
     }else if(c.k==='bat'){
-      const V='B',u=es(clamp01(t/.22)),v=es(clamp01((t-.6)/.5)),w=u*(1-v);
-      if(V==='A'){hand=mh(H0,[26,-102],w);sa=ma(A0,-1.55,w)}
-      else if(V==='B'){hand=mh(H0,[30,-68],w);sa=ma(A0,-.15,w)+(t>.2&&t<.6?Math.sin(t*60)*.03:0)}
-      else{hand=mh(H0,[28,-88],w);hand[1]+=t>.2&&t<.62?Math.sin(t*55)*2.5:0;sa=ma(A0,-.95,w)}
+      /* cinq comètes : sceptre pointé vers le Colosse */
+      const u=es(clamp01(t/.22)),v=es(clamp01((t-.6)/.5)),w=u*(1-v);
+      hand=mh(H0,[30,-68],w);sa=ma(A0,-.15,w)+(t>.2&&t<.6&&!reduce?Math.sin(t*60)*.03:0);
     }else if(c.k==='bell'){
       const u=es(clamp01(t/.2)),v=es(clamp01((t-.85)/.5)),w=u*(1-v);
       hand=mh(H0,[28,-92],w);hand[1]+=t>.1&&t<.5?Math.sin(t*55)*2.5:0;sa=ma(A0,-1.15,w);glow=.9*(1-v)
     }else if(c.k==='bolt'){
-      const u=es(clamp01(t/.25));hand=mh(H0,[28,-92],u);sa=ma(A0,-.95,u);glow=1;
-      if(t>1.5){const v=es(clamp01((t-1.5)/.4));hand=mh([28,-92],H0,v);sa=ma(-.95,A0,v);glow=1-v}
-    }else if(c.k==='slide'){
-      sy=.82;hand=[34,-34];sa=0;rot=.05;
-      if(t>.65){const v=es(clamp01((t-.65)/.5));sy=.82+.18*v;hand=mh([34,-34],H0,v);sa=ma(0,A0,v);rot=.05*(1-v)}
+      const u=es(clamp01(t/.25));hand=mh(H0,[28,-92],u);sa=ma(A0,-1.15,u);glow=1;
+      if(t>1.5){const v=es(clamp01((t-1.5)/.4));hand=mh([28,-92],H0,v);sa=ma(-1.15,A0,v);glow=1-v}
     }
-  }else if(p.s==='act'){
-    const r=clamp01(p.t/.08);hand=mh(H0,[28,-94],r);sa=ma(A0,-1.5,r);glow=1;
   }else if((p.s==='down'||p.s==='hurt')&&p.lasso){
     const d=p.rd||R_T.lasso,k=es(clamp01(p.t/.3))*(1-es(clamp01((p.t-(d-.35))/.35)));
     rot=.5*k;hand=[10,-60];sa=.3; /* frappé par la boule : repoussé, plus tiré par un lasso */
-  }else if(p.s==='down'||p.s==='hurt'){rot=.12;sy=.82;sa=.6}
+  }   /* garde et coup reçu : posture de la phase I, dessinée par drawHero3 (garde commune) */
   return{x,hand,sa,rot,sy,glow};
 }
 /* Masse de braise du Colosse, dans le repère de la main : manche le long de l'axe x, tête à pointes au bout (portée L) */

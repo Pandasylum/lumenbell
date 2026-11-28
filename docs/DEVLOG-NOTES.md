@@ -419,3 +419,5 @@
 - Ses explosions deviennent une onde : il aspire le feu, abat ses poings et une vague de flammes court sur les dalles jusqu'à la garde.
 - Phase I : fond noir avant le combat ; souffle et jets de flammes en cônes découpés ; la fureur ouvre des fissures de braise et fait tomber un bloc de pierre en feu.
 - Les rochers que le Colosse lance (Fonderie et Clocher) sont de vrais blocs de sa pierre, à facettes et veinés de braise, avec une traînée de braises.
+- Au Clocher, chaque riposte a son image : le rayon du sceptre repousse le marteau ou renvoie la boule en plein torse, cinq comètes frappent son cœur, la grande cloche l'assomme (mains sur la tête).
+- Sa rage se brise sous la cloche et la foudre : la première foudre fait céder l'enclume de son épaule ; ses ailes brûlent et retombent quand il reprend vie, et la foudre de la seconde vie lui brise la grande corne.

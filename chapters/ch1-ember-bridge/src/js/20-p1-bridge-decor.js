@@ -8,7 +8,7 @@ const BRD=(()=>{
   const rnd=s=>()=>(s=(s*16807)%2147483647)/2147483647;
   const P=d=>new Path2D(d);
   const lin=(c,x0,y0,x1,y1,st)=>{const g=c.createLinearGradient(x0,y0,x1,y1);st.forEach(q=>g.addColorStop(q[0],q[1]));return g};
-  const glow=(c,x,y,r,rgb,a)=>{const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba('+rgb+','+a+')');g.addColorStop(.35,'rgba('+rgb+','+a*.4+')');g.addColorStop(1,'rgba('+rgb+',0)');c.save();c.globalCompositeOperation='screen';c.fillStyle=g;c.fillRect(x-r,y-r,2*r,2*r);c.restore()};
+  const glow=colGlow;
   const brush=(c,path,box,n,col,seed,ang,len,w)=>{const r=rnd(seed);c.save();c.clip(path);c.lineCap='round';for(let i=0;i<n;i++){const x=box[0]+r()*box[2],y=box[1]+r()*box[3],l=len*(.4+r()),a=ang+(r()-.5)*.5;c.strokeStyle=col;c.globalAlpha=.25+r()*.75;c.lineWidth=w*(.4+r());c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+Math.cos(a)*l*.5+(r()-.5)*5,y+Math.sin(a)*l*.5,x+Math.cos(a)*l,y+Math.sin(a)*l);c.stroke()}c.restore()};
   const ridge=(c,base,amp,seed,col)=>{const r=rnd(seed),p=new Path2D();p.moveTo(0,H+30);let y=base,x=0;p.lineTo(0,y);while(x<W){const st=22+r()*46,ny=base+(r()-.6)*amp*2.6;p.quadraticCurveTo(x+st*.55,(y+ny)/2+(r()-.35)*10,x+st,ny);x+=st;y=ny}p.lineTo(W+40,H+30);p.closePath();c.fillStyle=col;c.fill(p)};
   const ARCH=[[[118,FEET],[150,466],[290,462],[316,FEET]],[[414,FEET],[442,462],[586,464],[614,FEET]],[[712,FEET],[746,462],[884,468],[902,FEET]]];
