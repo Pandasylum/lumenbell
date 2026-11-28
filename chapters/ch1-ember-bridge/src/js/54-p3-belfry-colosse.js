@@ -8,7 +8,6 @@
 const C3=1.1;        /* unités de pose -> monde (comme la phase I) */
 const C3X=-20;       /* le repère du Colosse est à R.bx-20 : son cœur reste là où visent les contres */
 const K3TAU=6.283185307179586;
-const KNEEL3=76;     /* final : de combien le buste descend quand le Colosse met un genou à terre (px) */
 const k3cl=clamp01,k3ez=u=>es(clamp01(u)),k3l=(a,b,u)=>a+(b-a)*u;
 const k3poly=COLFX.poly,k3star=COLFX.etoile,k3shards=COLFX.eclats,k3flame=COLFX.flamme;
 const k3rnd=s=>()=>(s=(s*16807)%2147483647)/2147483647;
@@ -201,23 +200,11 @@ function col3Onde(a){
   if(!reduce&&m>.3&&m<1.45)o.dx=Math.sin(R.time*60)*3*k3ez((m-.3)/1);   /* il tremble en aspirant le feu */
   return o;
 }
-/* pose d'après l'ancienne pose (mains, rugissement, entrée, chute, final) : attaques absentes de la maquette, mêmes mains qu'avant */
+/* pose d'après l'ancienne pose (mains, rugissement, entrée, chute) : attaques absentes de la maquette, mêmes mains qu'avant */
 function col3Fb(ob){
-  const fin=R.mode==='finale',c=fin?Math.cos(-ob.lean):1,sn=fin?Math.sin(-ob.lean):0;
-  const loc=h=>{const dx=h[0]-ob.x,dy=h[1]-DECK;return fin?[dx*c-dy*sn,dx*sn+dy*c]:[dx,dy]};
+  const loc=h=>[h[0]-ob.x,h[1]-DECK];
   const h0=loc(ob.hands[0]),h1=loc(ob.hands[1]);
-  const o={...K3_DOS,off:[-62+(h0[0]+128)/C3,92+(h0[1]+66)/C3],nn:[(h1[0]-128)/C3,(h1[1]+66)/C3],lean:fin?0:ob.lean,jaw:ob.jaw,wa:ob.wa,ws:ob.ws,yeux:ob.jaw>8?.6:.25,warm:ob.warm};
-  if(ob.kd&&ob.kd.on){
-    /* final : le corps entier tombe en avant (rotation autour des pieds, voir drawBoss3), bras tendus devant pour se rattraper, puis il se redresse sur les genoux, la tête basse ; le feu s'éteint */
-    const f=ob.kd,k=f.k,r=f.r,L2=(a,b,u)=>a+(b-a)*u;
-    Object.assign(o,{kneel:k,kdk:KNEEL3/C3,drop:KNEEL3/C3*k,out:f.out,lean:-.17*f.bow,tete:-.15*r*(1-k)+.85*f.bow,yeux:.25*(1-f.out),jaw:6*r*(1-k),
-      off:[L2(L2(-62,-75,r),-32,k),L2(L2(92,-70,r),94,k)],nn:[L2(L2(0,-95,r),-50,k),L2(L2(0,-60,r),-4,k)],ws:1+.5*r,wa:.25*r});
-  }
-  if(ob.sword&&ob.sword.l>1){
-    /* la masse brandie au final : les deux poings sur le manche */
-    const X0=ob.x+C3X,s=ob.sword;
-    Object.assign(o,{P:[(s.h[0]-X0)/C3,(s.h[1]-DECK)/C3],a:s.a*180/Math.PI,g:Math.max(1,(s.l-17)/C3),wN:1,wF:1,s:1,r:0,heat:s.heat});
-  }else if(ob.nostow){o.P=[0,3000];o.r=0}   /* la masse a été jetée : plus rien dans le dos */
+  const o={...K3_DOS,off:[-62+(h0[0]+128)/C3,92+(h0[1]+66)/C3],nn:[(h1[0]-128)/C3,(h1[1]+66)/C3],lean:ob.lean,jaw:ob.jaw,wa:ob.wa,ws:ob.ws,yeux:ob.jaw>8?.6:.25,warm:ob.warm};
   return o;
 }
 /* préchauffage (entrée de la phase III) : chaque pose du marteau, de la boule, du pivot (miroir, vue de dos) et les effets des coups sont dessinés une fois,
@@ -294,28 +281,28 @@ function col3Atk(a){
 }
 /* pose finale du Colosse pour cette image : { o: paramètres COLOSSE, ported: pose de la maquette } */
 function col3Pose(ob){
-  const a=R.atk,t=R.time,fin=R.mode==='finale';
+  const a=R.atk,t=R.time;
   COL3.m={};
   if(t<COL3.lastT||R.mode==='intro'||(COL3.foudre1!=null&&t<COL3.foudre1)){COL3.last=null;COL3.lastT=-9;COL3.cs=null;COL3.foudre1=null;COL3.rf=0;COL3.rfT=-9;COL3.atk=null;COL3.ko=0;COL3.hp=null;COL3.ep=null}   /* nouvelle partie (Réessayer) : l'horloge repart de 0, on oublie la dernière pose, le contre, la rage et l'enclume brisée de la partie précédente */
   col3Suivi(a);
   const fb=col3Fb(ob);
-  let po=a&&!fin?col3Atk(a):null;
+  let po=a?col3Atk(a):null;
   const idle=!a&&R.mode==='play'&&R.boss.s!=='heal'&&R.boss.s!=='dead';
   if(idle)col3Life(fb,t);
   let rk=0;
   if(a)a.hits.forEach(h=>{if(h.pre)rk=Math.max(rk,k3cl(a.t/.5)*(1-k3ez((a.t-h.at-.15)/.5)))});   /* le rugissement avant une rage : mains levées, gueule ouverte */
   let o;
-  const cp=!a&&!fin?col3Contre(fb):null;   /* contre et coup encaissé : poses de la maquette (scènes 1 à 8) */
+  const cp=!a?col3Contre(fb):null;   /* contre et coup encaissé : poses de la maquette (scènes 1 à 8) */
   if(po){COL3.last=po;COL3.lastT=t;o=rk>.02?k3mix(po,col3Cri(fb,a),rk):po}
   else if(cp){o=cp;COL3.last=cp;COL3.lastT=t;po=cp}
   else if(!a&&COL3.last&&R.mode==='play'&&t>=COL3.lastT&&t-COL3.lastT<.5)o=k3mix(COL3.last,fb,k3ez((t-COL3.lastT)/.45));   /* fin d'attaque : retour doux à la garde */
   else o=fb;
   if(po&&!(a&&(a.hits.some(h=>h.k==='wave')||(col3PluieA(a)&&a.pt>=0)))){o.wa=ob.wa;o.ws=ob.ws}   /* grêle, pierres et cri : les ailes de la maquette */
-  const on=a&&!fin?col3Onde(a):null;
+  const on=a?col3Onde(a):null;
   if(on){const pw=po?k3ez((on.m-2.25)/.35):0;o=rk>.02?k3mix(on,col3Cri(fb,a),rk*.35):on;if(pw>0)o=k3mix(o,po,pw);COL3.last=o;COL3.lastT=t;po=o}   /* l'attaque qui suit reprend la main en douceur */   /* onde de flammes : il aspire le feu, abat ses poings */
-  const qz=a&&!fin?col3Queue(a,o,ob):null;
+  const qz=a?col3Queue(a,o,ob):null;
   if(qz){o=qz;COL3.last=qz;COL3.lastT=t;po=qz}   /* coup de queue en pivot (rage) */
-  const wv=a&&!fin?col3WaveFlap(a):null;
+  const wv=a?col3WaveFlap(a):null;
   if(wv){o.wa=wv.wa;o.ws=wv.ws;o.lean+=wv.lean;o.tete+=wv.tete;o.jaw=Math.max(o.jaw,wv.jaw);o.drop+=wv.drop}
   /* rage : fissures de braise et flammes, de son cri jusqu'à la foudre (scènes 7 et 8) */
   const rf=col3RageF(a);
@@ -517,7 +504,7 @@ function k3corne(c,x,y,rot){if(!K3CORNE)K3CORNE=[new Path2D('M-30 6C-8 8 12 2 24
   c.strokeStyle='rgba(255,170,120,.9)';c.lineWidth=2;c.stroke(d);c.restore()}
 /* effets des coups portés, dans le monde ; appelé avec le reste des coups (drawHits3), après le dessin du Colosse */
 function col3Fx(){
-  const a=R.atk,k=COL3.k;if(!a||!k||R.mode==='finale')return;
+  const a=R.atk,k=COL3.k;if(!a||!k)return;
   const c=ctx,t=a.t,tm=reduce?0:R.time,f=COL3.f,m=COL3.m,off=a.off||0,G3=[PX+118,DECK-66],dir=f.flip?-1:1,ox=f.flip?2*f.bx-f.x0:f.x0;
   if(col3CriA(a)&&!reduce)k3shards(c,ox,DECK-4,t-CN3.rage.cri,34,['#ff9a35','#6a3a50','#d4501f'],380,21,DECK+6);   /* l'éclat du cri : la pierre vole sous lui */
   let wi=0,ci=0,ri=0;

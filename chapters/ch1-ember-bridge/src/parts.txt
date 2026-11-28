@@ -21,6 +21,7 @@ js/48-p3-belfry-poses.js
 js/52-p3-belfry-decor.js
 js/54-p3-belfry-colosse.js
 js/56-p3-belfry-render.js
+js/58-p3-belfry-fin.js
 js/60-ui-menu.js
 js/64-audio-music.js
 js/68-texts-ui.js

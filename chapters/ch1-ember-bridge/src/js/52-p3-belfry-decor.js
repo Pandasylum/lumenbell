@@ -7,8 +7,7 @@
 const DY3=DECK-452;                 /* maquette -> jeu (vertical) */
 const BELL=[398,150+DY3];           /* la cloche de la maquette : pivot en BELL[1]-18 ; ondes, contres et final partent de là */
 const FANAL3=[68,470+DY3];          /* fanal : socle posé au premier plan, à gauche */
-const FANAL3_FEU=[FANAL3[0],FANAL3[1]-90]; /* foyer du fanal : cible du rayon de lanterne au final */
-/* tours de l'ordre (x, sommet, largeur ; repère maquette) ; ordre d'allumage du final R.towerAt = [0,3,2,1] : de gauche à droite */
+/* tours de l'ordre (x, sommet, largeur ; repère maquette) : leurs silhouettes sont cuites dans le calque LOIN ; leurs lanternes répondent dans le final (58-p3-belfry-fin.js) */
 const TOWERS3=[[74,226,9],[884,238,10],[596,300,5],[196,268,6]];
 const BEL3=(()=>{
   const TAU=6.283185307179586,MW=960,MH=540;
@@ -101,42 +100,27 @@ const BEL3=(()=>{
     c.save();c.clip(CL_P);c.fillStyle='rgba(20,8,30,.45)';c.fill(CL_O);rect(c,-62,66,124,5,'rgba(60,30,24,.55)');rect(c,-62,86,124,3,'rgba(255,226,170,.45)');c.restore();
     tr(c,'M-62 102H62','#f2d8a0',3);c.strokeStyle='#4a2c20';c.lineWidth=2;c.beginPath();c.arc(0,46,8,0,TAU);c.moveTo(0,32);c.lineTo(0,38);c.stroke();
     c.fillStyle='#2a1b24';c.beginPath();c.arc(-ang*14,107,8,0,TAU);c.fill();c.restore()}
-  /* fanal : calque éteint, puis flamme et halo quand le Veilleur l'allume (lit 0 à 1) */
-  function fanal(c,lit,tm){c.drawImage(L.fanal,0,0,W,H);
-    const x=FANAL3[0],y=FANAL3[1];
-    if(lit>0){const r=30+60*lit,g=c.createRadialGradient(x,y-92,2,x,y-92,r);g.addColorStop(0,'rgba(255,214,130,'+(.55*lit)+')');g.addColorStop(1,'rgba(255,170,80,0)');c.fillStyle=g;c.beginPath();c.arc(x,y-92,r,0,TAU);c.fill();
-      for(let i=-1;i<=1;i++)qflame(x+i*9,y-82,7,(20+12*Math.abs(Math.sin(tm*9+i*2)))*lit,i+1,i?'rgba(255,170,70,.9)':'rgba(255,224,150,.95)')}
-    rect(c,x-24,y-84,48,3,lit>0?'rgba(255,190,90,'+(.6+.3*lit)+')':'#6e5a82')}
-  /* tours de l'ordre : au final, chaque lanterne répond (éclat puis anneau) */
-  function tours(c){if(!R.towerAt)return;
-    TOWERS3.forEach(([x,top],i)=>{const t0=R.towerAt[i];if(t0==null||R.time<t0)return;const y=top+34+DY3,a=R.time-t0,f=Math.max(0,1-a/1.4);
-      if(f>0){const g=c.createRadialGradient(x,y,1,x,y,22+26*f);g.addColorStop(0,'rgba(255,215,130,'+(.7*f)+')');g.addColorStop(1,'rgba(255,200,110,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,22+26*f,0,TAU);c.fill()}
-      if(a<1.6){const u=a/1.6;c.strokeStyle='rgba(255,230,170,'+(1-u)+')';c.lineWidth=2;c.beginPath();c.arc(x,y,8+50*u,0,TAU);c.stroke()}})}
+  /* fanal : calque éteint (le final y dessine sa flamme, 58-p3-belfry-fin.js) */
+  function fanal(c){c.drawImage(L.fanal,0,0,W,H);rect(c,FANAL3[0]-24,FANAL3[1]-84,48,3,'#6e5a82')}
   function draw(c,tm){build();
     c.drawImage(L.ciel,0,0,W,H);
     for(const n of NUAGES){const x=((n.x+tm*n.v)%1300)-250,y=n.y+DY3;c.fillStyle='rgba(72,54,106,'+n.a+')';c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+120,y-10,x+270,y);c.quadraticCurveTo(x+140,y+6,x,y);c.fill()}
-    c.drawImage(L.loin,0,0,W,H);tours(c);
+    c.drawImage(L.loin,0,0,W,H);
     brumes(c,0,388,40,(tm*.012)%1);brumes(c,1,420,38,1-(tm*.016)%1);
     c.drawImage(L.beffroi,0,0,W,H);
     cloche(c,bellAng());
     c.drawImage(L.voute,398-200,250+DY3-240,400,480);
     c.drawImage(L.sol,0,0,W,H);
     c.save();c.beginPath();c.rect(0,404+DY3,W,92);c.clip();c.drawImage(L.braise,R.bx-240,DECK-53,480,106);c.restore();
-    fanal(c,R.fanalAt!=null?clamp01((R.time-R.fanalAt)/.6):0,tm)}
+    fanal(c)}
   /* neige qui tombe et vignettage (par-dessus tout, hors secousse pour le vignettage) */
   function neige(c,tm){for(const f of FL){const x=((f.x-tm*f.vx)%1000+1000)%1000-20,y=(f.y+tm*f.vy)%560;c.fillStyle='rgba(225,234,255,'+f.a+')';c.beginPath();c.arc(x,y,f.s,0,TAU);c.fill()}}
   function vig(c){build();c.drawImage(L.vig,0,0,W,H)}
-  return{build,draw,neige,vig};
+  /* pour le final : le ciel et les crêtes seuls (plan large), la cloche qui pend à sa poutre (plan final) */
+  function plans(c){build();c.drawImage(L.ciel,0,0,W,H);c.drawImage(L.loin,0,0,W,H)}
+  function bell(c,ang){build();cloche(c,ang)}
+  return{build,draw,neige,vig,plans,bell};
 })();
-/* Fanal de la scène du large (fin du chapitre, renderSpace) : inchangé */
-function drawFanal(x,by,lit,tm){
-  ctx.fillStyle='#3a3f5e';ctx.fillRect(x-9,by-58,18,58);ctx.fillStyle='#4a5072';ctx.fillRect(x-13,by-62,26,6);ctx.fillRect(x-12,by-4,24,4);
-  ctx.fillStyle='rgba(240,246,255,.85)';ctx.fillRect(x-13,by-64,26,2);
-  if(lit>0){const r=30+60*lit,g=ctx.createRadialGradient(x,by-74,2,x,by-74,r);g.addColorStop(0,'rgba(255,214,130,'+(.55*lit)+')');g.addColorStop(1,'rgba(255,170,80,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,by-74,r,0,6.283);ctx.fill();
-    for(let i=-1;i<=1;i++)qflame(x+i*8,by-66,7,(20+12*Math.abs(Math.sin(tm*9+i*2)))*lit,i+1,i?'rgba(255,170,70,.9)':'rgba(255,224,150,.95)')}
-  ctx.fillStyle='#241b2a';ctx.beginPath();ctx.moveTo(x-20,by-74);ctx.lineTo(x+20,by-74);ctx.lineTo(x+13,by-62);ctx.lineTo(x-13,by-62);ctx.closePath();ctx.fill();
-  ctx.fillStyle=lit>0?'rgba(255,190,90,'+(.6+.3*lit)+')':'rgba(120,60,40,.6)';ctx.fillRect(x-17,by-76,34,3);
-}
 function bellAng(){if(R.bellAt==null)return 0;const a=R.time-R.bellAt;return (R.bellA||.3)*Math.exp(-a*.9)*Math.sin(a*5.2)}
 function ringBell(amp,v){
   v=v==null?1:v;R.bellAt=R.time;R.bellA=amp;(R.bellW=R.bellW||[]).push(R.time);if(amp>.4)R.bellW.push(R.time+.35);

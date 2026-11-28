@@ -13,11 +13,11 @@
 - Règles communes : couleur du titre (`LB.BRAND`), carte de défaite, lien suivant et carton « à suivre ».
 - Chapitre I : phase II au fond de la Fonderie, esquive en pas de côté, lanterne du Colosse, fausse fin de Facile supprimée (`ch1/foundry-floor`, `ch1/dodge-side`).
 - Chapitre II : cartes « à suivre » communes, intros et outros communes (`ch2/cinematics`).
-- Chapitre I, phase III au Clocher : lots 1, 1b, 2 et 3 faits (Colosse et attaques, contres et rage, décor du sommet).
+- Chapitre I, phase III au Clocher : lots 1, 1b, 2, 3 et 4 faits (Colosse et attaques, contres et rage, décor du sommet, grêle, bombes, pierres, cri).
 - Nettoyage pré-P3 fait (5 nov. 2026) : code mort et reliquats « Commencer » retirés, `store/` et scripts promo sortis, archivage dans `archives/`, builds régénérés. Détail : docs/AUDIT-NETTOYAGE.md.
 
 ## Prochaines étapes
-1. Chapitre I, Clocher : lot 4 en PR (grêle de braise, bombes, chute de pierres et boule de feu, cri ; `da/clocher-pluie`). Puis, dans l'ordre : scène de fin, son et onomatopées (C1 puis C2), Chapitre II, menus et hub, cinématiques.
+1. Fin du Chapitre I en PR (cinématique de fin, plan large des Flèches, plan final ; `da/ch1-fin`, maquette `docs/decisions/da/ch1-fin.js`). Puis, dans l'ordre : intro et outro, cadres et polices, menu, son (et onomatopées, C1 puis C2), Chapitre II, hub.
 2. Test sur téléphone (ressenti, lisibilité, fluidité), dont l'APK du hub (`apk/hub-package`).
 3. Moteur commun, tests (`engine/tests`) : suite des tests du moteur. Plan en sessions : `docs/COMMUN.md` §4.
 4. ch2/perf : optimisation du Chapitre II, après la fusion des deux jeux : mesure des images par seconde, poids, minification ; build identique à chaque étape, comme pour le Chapitre I.

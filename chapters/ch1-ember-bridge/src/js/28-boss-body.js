@@ -340,7 +340,7 @@ const COLOSSE=(()=>{
     const rg=o.rage||0,ca=Math.min(1,Math.max(o.fissure||0,rg)*1.5),ra=Math.min(1,Math.max(0,(rg-.35)*3)),rl=Math.min(1,Math.max(0,(rg-.7)*4)),
       cr=(sp,a)=>{if(a>.01){c.save();c.globalAlpha=Math.min(1,a);img(c,sp);c.restore()}};
     const sl=pt(-34,-128),s=hm.s||0,tip=o.tip?mix(o.tip,sl,s):sl,behind=s<.5&&tip[0]>-20&&tip[1]<-150;
-    const marteau=()=>{c.save();c.translate(head[0],head[1]);c.rotate(an);img(c,SP.ham);c.restore()};
+    const marteau=()=>{if(o.sansMarteau)return;c.save();c.translate(head[0],head[1]);c.rotate(an);img(c,SP.ham);c.restore()};   /* sansMarteau : aucun marteau dessiné (le final le lâche et le dessine à part, marteauSeul) */
     /* boule : au poing au bout de sa chaîne, ou rangée en bandoulière pendant l'attaque au marteau */
     const boule_=W=>{
       if(s>=.999){c.save();c.translate(sl[0],sl[1]);c.rotate(o.lean);c.scale(.85,.85);img(c,SP.ball);c.restore();return}
@@ -454,7 +454,9 @@ const COLOSSE=(()=>{
       const lv=Math.min(1,Math.max(0,(q[1]||0)/60)),a=OMB.al*k*(1-.7*lv);if(a<=.01)return;
       c.fillStyle='rgba(8,4,22,'+a+')';c.beginPath();c.ellipse(x0+px*s,y0+d.c[1]*as*pl+1,d.rx*as*(1-.3*lv),OMB.ry,0,0,TAU);c.fill()});
     c.restore()}
-  return {draw,ik,L1,L2,cuireAile,aile,ailes,eclatEnclume,ombres};
+  /* le sprite du marteau seul, tête à l'origine, dans le repère courant de c (même tracé que dans les mains du Colosse) */
+  function marteauSeul(c){if(!SP)build();img(c,SP.ham)}
+  return {draw,ik,L1,L2,cuireAile,aile,ailes,eclatEnclume,ombres,marteauSeul};
 })();
 
 /* ===== Effets du Colosse réutilisables (référence ripostes-reference.js, 27/11) : dégâts, éclats, flammes de rage =====

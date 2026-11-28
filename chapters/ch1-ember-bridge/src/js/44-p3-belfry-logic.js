@@ -37,8 +37,11 @@ Object.assign(ULT,{
   danse:{get name(){return _('Chain dance','Danse des chaînes')},off:1.9,pre:[{k:'blast',at:1.1,pre:true}]},
   dernier:{get name(){return _('Final blaze','Embrasement final')},off:1.9,pre:[{k:'blast',at:1.1,pre:true}]}
 });
-const FIN={raise:.5,bell1:1.35,fling:1.55,leap:[1.7,2.1],cut:[2.3,3.0],charge:3.5,strike:4.4,exp:4.6,gap:.42,collapse:6.9,bell:8.4,hero:9.9,fade:12.2,space:13.3};
-const SPSTARS=Array.from({length:230},()=>({x:rand(0,W),y:rand(0,H),r:rand(.4,2),p:rand(0,6.28)}));
+/* Final (cinématique validée le 28/11, maquette docs/decisions/da/ch1-fin.js) : tous les instants, en secondes depuis le début du final ; la scène, le plan large et le plan final sont dessinés par 58-p3-belfry-fin.js.
+   cloche : la cloche sonne · foudre : la foudre frappe le Colosse · genou/jet : il tombe à genoux, la masse lui échappe · saut : le Veilleur saute sur lui · coupe : un tir de lanterne dans chaque aile · charge, coup : l'arme du Veilleur, le coup au cœur
+   chute : le Colosse s'écroule · faisc, feu : le rayon vers le fanal, le fanal s'allume · pierre : la lumière le change en pierre · glas : la cloche sonne le glas · large : plan large des Flèches · fin : plan final · carte : carte de fin, en secondes après le début du plan final */
+const FIN={cloche:.3,foudre:1.7,genou:2.1,jet:2.4,saut:[3.15,3.65],coupe:[4.0,4.6],charge:5.1,coup:5.75,chute:7.1,faisc:9.45,feu:9.85,pierre:10.2,glas:12.2,large:14.6,fin:18.4,carte:7,
+  echo:[.8,.35],spires:[.5,.55]};   /* echo : écart du premier écho du glas et entre deux échos ; spires : la première Flèche répond (depuis large), puis une toutes les .55 s */
 function rNew(){
   return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.bd.hp3,blocks:0,taken:0,
     pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
@@ -190,8 +193,7 @@ function rAtkEnd(){
   }else{b.s='fail';b.t=0}
 }
 function startFinale(){
-  R.mode='finale';R.fin={t:0};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;R.cut=0;R.fall=[];R.fmace=null;R.fbeam=[];
-  say(_('The bell calls down the lightning. The Colossus raises his weapon to crush the Watcher.','La cloche appelle la foudre. Le Colosse lève son arme pour écraser le Veilleur.'));
+  R.mode='finale';R.fin={t:0};R.cn=null;R.atk=null;R.boss.s='final';R.pl.s='ready';R.pl.t=0;R.bellAt=null;R.bellW=null;
 }
 function rDamage(k,c){
   if(k==='bolt'){
@@ -321,13 +323,14 @@ function rStep(dt){
   for(const m of R.melts)m.t+=dt;
   for(let i=R.exps.length-1;i>=0;i--){R.exps[i].t+=dt;if(R.exps[i].t>.9)R.exps.splice(i,1)}
   R.shake=Math.max(0,R.shake-dt*45);R.flash=Math.max(0,R.flash-dt*2.2);R.hurt=Math.max(0,R.hurt-dt*1.6);R.recoil=Math.max(0,R.recoil-dt*3.5);
-  if(R.endIn>0){R.endIn-=dt;if(R.endIn<=0)rEnd()}
+  if(R.endIn>0){R.endIn-=dt;if(R.endIn<=0){R.cardShown=true;rEnd()}}
   if(R.atk&&R.atk.kind==='charge')R.bx=(R.atk.h?chargeXH:chargeX)(Math.max(0,R.atk.pt));
   else R.bx+=(BX-R.bx)*Math.min(1,dt*3);
   if(R.hitstop>0){R.hitstop-=dt;hud();return}
   if(R.mode==='finale'){rFinale(dt);hud();return}
-  if(R.mode==='space'){R.st+=dt;
-    if(R.st>4.6&&!R.cardShown&&!R.outro){R.cardShown=true;rEnd()}hud();return}
+  if(R.mode==='space'){R.st=(R.st||0)+dt;
+    /* carte de fin : FIN.carte s après le début du plan final (et après l'outro la première fois) ; tout de suite si l'on arrive ici sans la cinématique (R.cardAt absent) */
+    if(!R.cardShown&&!R.outro&&R.st>=(R.cardAt||0)){R.cardShown=true;rEnd()}hud();return}
   const p=R.pl;LB.hero.step(p,dt,{gesture:'block'});
   if(R.mode==='intro'){
     /* Entrée : le Veilleur arrive par la cheminée, lanterne en main ; le Colosse se pose en vol au sommet du Clocher */
@@ -348,74 +351,32 @@ function rStep(dt){
   hud();
 }
 
-function finExplode(i){
-  const P=[[-20,-200],[-60,-250],[30,-150],[-30,-300],[0,-190]][i];
-  const x=R.bx+P[0],y=DECK+P[1];
-  R.exps.push({x,y,t:0,s:.5+.22*i});
-  R.fbs.push({x,y,t:0,big:1+.45*i});
-  if(i>=3)R.fbs.push({x:x+rand(-60,60),y:y+rand(-50,50),t:0,big:1.4+.3*i});
-  R.flash=.35+.12*i;R.shake=reduce?0:8+3*i;
-  tone(150-i*12,.55,'sawtooth',.1+.02*i,-90);boom(.6+.1*i,.12+.03*i);
-  if(i===1||i===4)roar();
-  qBurst(x,y,24+8*i,['#ffffff','#ffc15a','#ff7a2b','#bfeaff']);
-}
-function finSlash(sd){
-  const x=R.bx+sd*60,y=DECK-205;(R.fbeam=R.fbeam||[]).push({sd,t:0});
-  qBurst(x,y,30,['#ffffff','#bfeaff','#6fd3ff','#ffc15a']);qRing(x,y);R.exps.push({x,y,t:0,s:.5});
-  R.flash=.5;R.shake=reduce?0:12;thud(1);tone(880,.4,'sine',.07,-200);tone(120,.5,'square',.09,-60);noise(.2,.12,2500,600);roar();
-  qFloat(_('WING SHATTERED!','AILE BRISÉE !'),x-90,y-110,'#bfeaff',34,1.1);
-}
+/* Sons du final, aux instants de FIN ; le dessin est une fonction pure de R.fin.t (58-p3-belfry-fin.js) */
+function finEcho(v){tone(392,1.8,'sine',.06*v,0);tone(784,1.2,'sine',.02*v,0)}   /* écho du glas : les partiels de ringBell, sans balancer la cloche */
 function rFinale(dt){
-  const f=R.fin;f.t+=dt;const t=f.t;
-  if(!f.s0){f.s0=1;noise(.6,.22,6000,500);tone(1600,.3,'sine',.07,-1300);boom(.9,.16)}
-  if(t>=.5&&!f.lp){f.lp=1;whoosh(.7,.1,false)}
-  for(const w of R.fall)w.t+=dt;
-  for(const b of (R.fbeam||[]))b.t+=dt;
-  /* la grande cloche répond au Veilleur : son écho désarme le Colosse, la masse lui échappe des mains */
-  if(t>=FIN.raise&&!f.rs){f.rs=1;whoosh(.5,.1,true);tone(90,.6,'sawtooth',.06,120)}
-  if(t>=FIN.bell1&&!f.b1){f.b1=1;ringBell(.55);R.flash=.25;say(_('The Watcher raises his lantern: the great bell answers.','Le Veilleur lève sa lanterne : la grande cloche répond.'))}
-  if(t>=FIN.fling&&!f.fl){f.fl=1;
-    R.fmace={x:R.bx-60,y:DECK-210,a:-2.1,vx:-240,vy:-330,w:-7,b:0,land:0,t:0};
-    R.shake=reduce?0:14;R.flash=.4;painCry(.7,.12);anvil();thud(1.3);
-    qBurst(R.bx-60,DECK-210,36,['#ffffff','#bfeaff','#6fd3ff','#ffc15a']);qRing(R.bx-60,DECK-210);
-    qFloat(_('DISARMED!','DÉSARMÉ !'),R.bx-150,DECK-330,'#bfeaff',36,1.2);
-    say(_('The echo tears the mace from the Colossus\'s hands.','L\'écho arrache la masse des mains du Colosse.'));
-  }
-  if(R.fmace){const m=R.fmace;m.t+=dt;
-    if(!m.land){
-      m.vy+=1500*dt;m.x+=m.vx*dt;m.y+=m.vy*dt;m.a+=m.w*dt;
-      if(m.y>=DECK-30){m.y=DECK-30;
-        if(!m.b){m.b=1;m.vy=-m.vy*.32;m.vx*=.5;m.w*=.4;R.shake=reduce?0:Math.max(R.shake,10);boom(.5,.14);tone(120,.3,'square',.07,-60);
-          for(let i=0;i<14;i++)R.sparks.push({x:m.x+rand(-30,30),y:DECK-4,vx:rand(-140,140),vy:-rand(20,120),g:260,life:.6,max:.6,col:'#9a8a9e',sz:rand(3,6)})}
-        else{m.land=1;m.vx=0;m.vy=0;m.a=3.2;boom(.3,.08);tone(180,.2,'square',.04,-60)}
-      }
-    }
-  }
-  if(t>=FIN.cut[0]&&!f.c1){f.c1=1;R.cut=1;R.fall.push({sd:-1,t:0});finSlash(-1)}
-  if(t>=FIN.cut[1]&&!f.c2){f.c2=1;R.cut=2;R.fall.push({sd:1,t:0});finSlash(1)}
-  if(t>=FIN.charge&&!f.ch){f.ch=1;tone(200,1,'sawtooth',.06,600)}
-  if(t>=FIN.strike&&!f.st){
-    f.st=1;R.bhp=0;R.flash=1;R.shake=reduce?0:18;R.hitstop=.12;thud(1.8);
-    qBurst(R.bx-20,DECK-200,50,['#ffffff','#ffc15a','#ff7a2b','#bfeaff']);qRing(R.bx-20,DECK-200);
-    tone(110,.7,'square',.12,-70);painCry(2.0,.2);qFloat(_('FINAL BLOW!','COUP ULTIME !'),W/2-150,110,'#ffc15a',48,1.6);
-  }
-  for(let i=0;i<5;i++)if(t>=FIN.exp+i*FIN.gap&&!f['e'+i]){f['e'+i]=1;finExplode(i)}
-  if(t>=FIN.collapse&&!f.cl){f.cl=1;boom(1.1,.12);whoosh(1,.07,false);say(_('The Colossus crashes down beneath the great bell.','Le Colosse s\'écrase sous la grande cloche.'))}
-  if(t>=FIN.collapse+1.1&&!f.imp){
-    f.imp=1;R.shake=reduce?0:20;R.flash=.4;tone(55,.9,'sine',.22,-20);boom(1.2,.22);
-    for(let i=0;i<20;i++)R.steam.push({x:R.bx-200+rand(-120,120),y:DECK-4,vx:rand(-90,90),vy:-rand(20,100),life:rand(.8,1.4),max:1.4,s:rand(12,26)});
-  }
-  if(t>=FIN.bell&&!f.bl){f.bl=1;ringBell(.55);painCry(2.6,.12);R.flash=.35;R.shake=reduce?0:8;say(_('The Watcher raises his lantern: the great bell rings and the Colossus turns to stone.','Le Veilleur lève sa lanterne : la grande cloche sonne et le Colosse se change en pierre.'))}
-  if(t>=FIN.bell+.4)for(let i=0;i<20;i++)if(R.fin.t<FIN.bell+.45&&Math.random()<.2)R.steam.push({x:R.bx-200+rand(-120,160),y:DECK-rand(20,160),vx:rand(-30,30),vy:-rand(20,60),life:rand(.8,1.4),max:1.4,s:rand(10,20)});
-  if(t>=FIN.hero-.6&&!f.fn){f.fn=1;R.fanalAt=R.time;tone(520,.8,'sine',.05,200);noise(.4,.08,1200,400);say(_("The Watcher lights the Bell Tower's beacon.","Le Veilleur allume le fanal du Clocher."))}
-  if(t>=FIN.hero&&!f.hs){f.hs=1;R.towerAt=[];[0,3,2,1].forEach((k,j)=>R.towerAt[k]=R.time+j*.55);tone(330,1.6,'sine',.05,0);say(_("One by one, the Spires answer.","Une à une, les Flèches répondent."))}
-  if(t>=FIN.hero+.55&&!f.hs2){f.hs2=1;tone(294,1.6,'sine',.05,0)}
-  if(t>=FIN.hero+1.1&&!f.hs3){f.hs3=1;tone(262,1.6,'sine',.05,0)}
-  if(t>=FIN.hero+1.65&&!f.hs4){f.hs4=1;tone(349,1.6,'sine',.05,0)}
-  if(t>=FIN.hero+2.2&&!f.hs5){f.hs5=1;say(_('All but one.','Toutes, sauf une.'))}
-  if(t>=FIN.space){R.mode='space';R.st=0;say(_('Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I.','Au large, le Phare Noyé reste muet. Fin du chapitre I.'));
+  const f=R.fin;f.t+=dt;const t=f.t,at=(T,k,fn)=>{if(t>=T&&!f[k]){f[k]=1;fn()}};
+  at(FIN.cloche,'b0',()=>{ringBell(.55);say(_('The Watcher raises his lantern: the great bell answers.','Le Veilleur lève sa lanterne : la grande cloche répond.'))});
+  at(FIN.foudre,'fo',()=>{noise(.6,.22,6000,500);tone(1600,.3,'sine',.07,-1300);boom(.9,.16);thud(1.4)});
+  at(2.75,'gn',()=>{thud(1.2);boom(.4,.1)});   /* le genou touche la pierre */
+  at(FIN.jet,'jt',()=>{whoosh(.7,.1,true);painCry(.7,.12)});
+  at(FIN.jet+.55,'ml',()=>{anvil();thud(1.3);boom(.5,.14);tone(120,.3,'square',.07,-60)});   /* la masse retombe au sol et y reste */
+  at(FIN.saut[0],'sa',()=>whoosh(.7,.1,false));
+  FIN.coupe.forEach((T,i)=>at(T+.07,'c'+i,()=>{thud(1);tone(880,.4,'sine',.07,-200);tone(120,.5,'square',.09,-60);noise(.2,.12,2500,600);roar()}));
+  at(FIN.charge,'ch',()=>tone(200,1,'sawtooth',.06,600));
+  at(FIN.coup,'co',()=>{thud(1.8);tone(110,.7,'square',.12,-70);painCry(2.0,.2)});
+  for(let i=0;i<5;i++)at(FIN.coup+.2+i*.2,'e'+i,()=>{tone(150-i*12,.55,'sawtooth',.1+.02*i,-90);boom(.6+.1*i,.12+.03*i);if(i===1||i===4)roar()});
+  at(FIN.chute,'cl',()=>{boom(1.1,.12);whoosh(1,.07,false)});
+  at(FIN.chute+.55,'im',()=>{tone(55,.9,'sine',.22,-20);boom(1.2,.22)});
+  at(FIN.chute+1.55,'im2',()=>thud(.8));
+  at(FIN.faisc,'fn',()=>{tone(520,.8,'sine',.05,200);noise(.4,.08,1200,400);say(_("The Watcher lights the Bell Tower's beacon.","Le Veilleur allume le fanal du Clocher."))});
+  at(FIN.pierre,'pi',()=>painCry(2.6,.12));
+  at(FIN.glas,'gl',()=>ringBell(.55));
+  for(let i=0;i<4;i++)at(FIN.glas+FIN.echo[0]+i*FIN.echo[1],'ec'+i,()=>finEcho(1-i*.2));
+  [330,294,262,349].forEach((n,i)=>at(FIN.large+FIN.spires[0]+i*FIN.spires[1],'sp'+i,()=>{tone(n,1.6,'sine',.05,0);if(i===0)say(_("One by one, the Spires answer.","Une à une, les Flèches répondent."));if(i===3)say(_('All but one.','Toutes, sauf une.'))}));
+  at(FIN.fin-1.5,'bk',()=>FINCINE.bake());   /* la statue est calculée une seule fois, avant le plan final */
+  if(t>=FIN.fin){R.mode='space';R.st=0;R.cardAt=FIN.carte;say(_('Far out at sea, the Drowned Lighthouse stays silent. End of Chapter I.','Au large, le Phare Noyé reste muet. Fin du chapitre I.'));
     R.outroAgain=LB.hubAgain(RUN.on,OUTRO);   /* l'outro ne se joue qu'à la première vraie fin hors Épreuve ; en Épreuve, ni outro ni drapeau */
-    if(RUN.on||R.outroAgain){R.cardShown=true;rEnd();return}
-    R.outro=true;OUTRO.play(()=>{if(!R)return;R.outro=false;if(R.mode==='space'&&!R.cardShown){R.cardShown=true;rEnd()}})}
+    if(RUN.on||R.outroAgain)return;   /* la carte vient à FIN.carte */
+    R.outro=true;OUTRO.play(()=>{if(R)R.outro=false})}   /* la carte vient à la fin de l'outro (au plus tôt à FIN.carte) */
 }
 

@@ -113,7 +113,7 @@ Déclencheurs (`rNext`, 44-p3-belfry-logic.js:128) : PV Colosse ≤ 1 → rage f
 
 **C1 · Phase III — dernier assaut (FIN, scène chronométrée)**
 
-`FIN` (`44-p3-belfry-logic.js:38`) : raise .5 · bell1 1.35 · fling 1.55 · leap [1.7, 2.1] · cut [2.3, 3.0] · charge 3.5 · strike 4.4 · exp 4.6 · gap .42 · collapse 6.9 · bell 8.4 · hero 9.9 · fade 12.2 · space 13.3 (s, depuis le début de la scène ; pas de difficulté appliquée). Déclenchée à PV Colosse 0 (`startFinale`, vraie fin ; Facile y va directement, sinon seconde vie d'abord).
+`FIN` (`44-p3-belfry-logic.js`, cinématique du 28/11, `docs/decisions/2026-11-28-ch1-fin.md`) : cloche .3 · foudre 1.7 · genou 2.1 · jet 2.4 · saut [3.15, 3.65] · coupe [4.0, 4.6] · charge 5.1 · coup 5.75 · chute 7.1 · faisc 9.45 · feu 9.85 · pierre 10.2 · glas 12.2 · large 14.6 · fin 18.4 · carte 7 (s, depuis le début de la scène ; `carte` : après le début du plan final ; pas de difficulté appliquée). Déclenchée à PV Colosse 0 (`startFinale`, vraie fin ; Facile y va directement, sinon seconde vie d'abord).
 
 ## Partie 2 — Chapitre II : Silent Bells
 

@@ -426,3 +426,5 @@
 - Au Clocher, le Colosse appelle une nuée de cendre qui crache une pluie de braise ; en Difficile, il crache des cœurs de braise qui clignotent puis éclatent en colonnes de feu.
 - Il arrache des blocs du dallage et les lance à deux mains ; son cri fait trembler le Clocher et la maçonnerie tombe droit sur le Veilleur.
 - Au loin, les tours de l'ordre ont la silhouette des flèches du pont, sous une lune plus sombre.
+- La fin du Chapitre I devient une vraie scène : la cloche sonne, la foudre frappe le Colosse, qui tombe à genoux et lâche sa masse ; le Veilleur saute sur lui, coupe ses deux ailes d'un tir de lanterne chacune, puis le frappe au cœur. Le Colosse s'écroule, le fanal s'allume et le fige en pierre, la cloche sonne le glas.
+- Un plan large montre les Flèches qui répondent une à une, sauf le Phare Noyé, muet ; puis un plan final au clair de lune : le Colosse de pierre, l'anneau du Veilleur à sa main, le marteau et les ailes restés au sol. La carte de fin arrive en bas, quelques secondes après.
