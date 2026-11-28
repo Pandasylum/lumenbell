@@ -23,7 +23,8 @@ const K3B={lean:0,drop:0,sx:1,dF:0,dN:0,off:[-62,92],nn:[0,0],plie:0,tete:0,P:[2
 const K3_GARDE={...K3B},K3_ARME={...K3B,lean:.22,sx:.92,dF:16,dN:-40,P:[-5,-285],a:50,g:205},
   K3_FRAPPE={...K3B,dx:56,lean:-.45,drop:22,sx:1.04,dF:16,dN:-60,P:[-135,-126],a:-201,g:205},
   K3_FRAPPE2={...K3B,dx:50,lean:-.38,drop:16,sx:1.03,dF:16,dN:-56,P:[-128,-118],a:-197,g:205},
-  K3_DOS={...K3B,P:[94,-256],a:-62,g:50,wN:0,wF:0,r:1};     /* marteau rangé dans le dos, boule en bandoulière, mains libres */
+  K3_DOS={...K3B,P:[94,-256],a:-62,g:50,wN:0,wF:0,r:1};
+const K3_SAISIE={...K3_DOS,wN:1,lean:.1,dN:-10};   /* main proche sur le manche, marteau encore dans le dos */     /* marteau rangé dans le dos, boule en bandoulière, mains libres */
 const COL3={last:null,lastT:-9,f:{x0:0,y0:DECK,bx:0,flip:false},k:null,m:{},mouth:null};
 /* pose -> monde (le Colosse retourné pour la charge Difficile se reflète autour de R.bx, comme l'ancien corps) */
 const col3W=p=>{const f=COL3.f,m=C3*(f.m||1);return f.flip?[2*f.bx-(f.x0+p[0]*m),f.y0+p[1]*C3]:[f.x0+p[0]*m,f.y0+p[1]*C3]};   /* f.m : pivot du coup de queue (face x écrasement) */
@@ -32,7 +33,8 @@ function col3Hammer(a){
   /* garde, armé, frappe, combo : 2 coups (combo) ou 3 coups ; les coups Difficile sont recalés sur les images de base (swq) */
   const two=a.kind==='sword2'&&!a.hard3,H=two?[.75,1.4]:[.75,1.4,2.05],q=a.hard3?swq(a):a.pt;
   /* il dégaine du dos directement vers la pose armée (plus de passage par la garde, marteau tête en bas, qui ressemblait à un coup avant le combo) */
-  const ks=[[0,K3_DOS]];
+  /* la main proche saisit d'abord le manche dans le dos (le marteau ne flotte jamais seul), puis le marteau suit la main jusqu'à la pose armée */
+  const ks=[[0,K3_DOS],[.2,K3_SAISIE],[.32,K3_SAISIE]];
   H.forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,i?'l':'o'],[T,F,'i'],[T+.14,F])});
   ks.push([H[H.length-1]+.5,K3_ARME]);
   return {...k3keys(q,ks)};
@@ -46,7 +48,7 @@ function col3Stab(a){
     RECUL={...K3B,dx:26,lean:-.22,drop:10,sx:1.02,dF:16,dN:-50,P:[-100,-152],a:-172,g:205},
     LEVE={...K3B,dx:8,lean:.12,sx:.95,dF:16,dN:-46,P:[-10,-210],a:-45,g:205},
     PLANT={...K3B,dx:20,lean:-.32,drop:18,sx:1.02,dF:14,dN:-44,P:[-62,-160],a:-220,g:205};
-  const ks=[[0,K3_DOS],[.5,PULL,'o'],[.62,PULL],[.85,THR,'i'],[.97,RECUL,'o'],[1.35,LEVE]];
+  const ks=[[0,K3_DOS],[.2,K3_SAISIE],[.5,PULL,'o'],[.62,PULL],[.85,THR,'i'],[.97,RECUL,'o'],[1.35,LEVE]];
   [1.95,2.45,2.95].forEach((T,i)=>{const F=i%2?K3_FRAPPE2:K3_FRAPPE;ks.push([T-.14,K3_ARME,i?'l':'o'],[T,F,'i'],[T+.12,F])});
   ks.push([3.35,K3_ARME],[3.9,PLANT],[4.2,PLANT],[4.7,K3_ARME]);
   const o={...k3keys(q,ks)};
