@@ -39,8 +39,6 @@ Object.assign(ULT,{
 });
 const FIN={raise:.5,bell1:1.35,fling:1.55,leap:[1.7,2.1],cut:[2.3,3.0],charge:3.5,strike:4.4,exp:4.6,gap:.42,collapse:6.9,bell:8.4,hero:9.9,fade:12.2,space:13.3};
 const SPSTARS=Array.from({length:230},()=>({x:rand(0,W),y:rand(0,H),r:rand(.4,2),p:rand(0,6.28)}));
-const STARS=Array.from({length:80},()=>({x:rand(0,W),y:rand(0,250),r:rand(.5,1.6),p:rand(0,6.28)}));
-const FLAKES=Array.from({length:160},()=>({x:rand(0,W),y:rand(0,H),v:rand(60,170),s:rand(1,3),ph:rand(0,6.28)}));
 function rNew(){
   return{mode:'intro',t:0,time:0,php:startHP(),bhp:DIFF.bd.hp3,blocks:0,taken:0,
     pl:LB.hero.create(),boss:{s:'idle',t:0,wait:.9},atk:null,cn:null,last:'',n:0,
@@ -50,7 +48,7 @@ function rNew(){
 }
 function beginP3(noLore){
   if(RUN.on&&Q&&Q.mode==='lake'){RUN.cur=LB.healFor(DIFF.heal,RUN.max,Q.php);RUN.st[2]={p:Q.dodges,h:Q.taken}}
-  Q=null;R=rNew();el.ov.classList.remove('clear');setPhaseUI(3);lastP=-1;lastB=-1;
+  Q=null;R=rNew();BEL3.build();el.ov.classList.remove('clear');setPhaseUI(3);lastP=-1;lastB=-1;
   el.ov.hidden=true;if(!noLore)showLore(3);
   say(_('Phase III. The Bell Tower. The button raises your guard to block.','Phase III. Le Clocher. Le bouton lève ta garde pour bloquer.'));
   hud();
@@ -315,7 +313,6 @@ function bombPos(i){return[PX+86+i*26,DECK-26]}
 function bombL(i){return .95+[0,.7,1.05,1.75,2.1][i]} /* rythme « 1 - 1 1 - 1 1 » (temps = .35 s), identique à la chute et à l'explosion */
 function rStep(dt){
   R.time+=dt;R.t+=dt;
-  for(const f of FLAKES){f.y+=f.v*dt;f.x-=(40+f.v*.25)*dt+Math.sin(R.time+f.ph)*6*dt;if(f.y>H+6){f.y=-6;f.x=rand(0,W+80)}if(f.x<-8)f.x=W+8}
   for(let i=R.sparks.length-1;i>=0;i--){const s=R.sparks[i];s.life-=dt;if(s.life<=0){R.sparks.splice(i,1);continue}s.vy+=s.g*dt;s.x+=s.vx*dt;s.y+=s.vy*dt}
   for(let i=R.steam.length-1;i>=0;i--){const s=R.steam[i];s.life-=dt;if(s.life<=0){R.steam.splice(i,1);continue}s.x+=s.vx*dt;s.y+=s.vy*dt;s.s+=14*dt}
   for(let i=R.rings.length-1;i>=0;i--){R.rings[i].life-=dt;if(R.rings[i].life<=0)R.rings.splice(i,1)}

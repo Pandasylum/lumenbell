@@ -421,3 +421,5 @@
 - Les rochers que le Colosse lance (Fonderie et Clocher) sont de vrais blocs de sa pierre, à facettes et veinés de braise, avec une traînée de braises.
 - Au Clocher, chaque riposte a son image : le rayon du sceptre repousse le marteau ou renvoie la boule en plein torse, cinq comètes frappent son cœur, la grande cloche l'assomme (mains sur la tête).
 - Sa rage se brise sous la cloche et la foudre : la première foudre fait céder l'enclume de son épaule ; ses ailes brûlent et retombent quand il reprend vie, et la foudre de la seconde vie lui brise la grande corne.
+- Le sommet du Clocher change de visage : lune rose au-dessus d'une mer de nuages, tours de l'ordre perchées sur leurs éperons, brumes qui dérivent, beffroi de pierre enneigé et sa grande cloche dorée.
+- Les dalles fuient vers le vide entre les créneaux ; le fanal attend, éteint, sur son socle au premier plan, jusqu'à ce que le Veilleur l'allume à la fin.
