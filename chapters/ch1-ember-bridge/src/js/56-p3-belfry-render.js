@@ -69,6 +69,10 @@ function faceFire(cx,cy,k,q){
   }
   ctx.restore();
 }
+/* bâton complet tenu en main (talon et lanterne) pour un geste donné par la main et l'angle du sceptre : même longueur et même prise que le bâton planté
+   de la garde commune (LB.WATCHER_REST : talon à 67 px sous la main, lanterne à 75 px au-dessus), pour que le bâton ne change jamais de forme */
+const BATON3=(()=>{const R=LB.WATCHER_REST,h=R.hand,s=R.staff;return {bas:Math.hypot(h[0]-s[0][0],h[1]-s[0][1]),haut:Math.hypot(s[1][0]-h[0],s[1][1]-h[1])}})();
+function baton3(hand,sa){const c=Math.cos(sa),n=Math.sin(sa);return [[hand[0]-c*BATON3.bas,hand[1]-n*BATON3.bas],[hand[0]+c*BATON3.haut,hand[1]+n*BATON3.haut]]}
 function drawHero3(){
   const p=R.pl,h=heroPose3(),t=R.time;
   const hf=heroFlip();if(hf){ctx.save();ctx.translate(h.x,0);ctx.scale(-1,1);ctx.translate(-h.x,0)}
@@ -83,7 +87,7 @@ function drawHero3(){
     LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:0,rot2:low?.12:0,sx:1,sy:low?.82:1,
       breath:pose==='idle'&&play,hand:Q.hand,staff:Q.staff,glow:up?1:.25,lanternCol:LB.watcherLanternCol(p,up)})}
   else LB.drawWatcher(ctx,h.x,DECK+(h.y||0),pose,t,{dx:0,dy:0,rot:h.rot,rot2:0,sx:1,sy:h.sy,
-    breath:pose==='idle'&&play,hand:h.hand,sa:h.sa,L:76,
+    breath:pose==='idle'&&play,hand:h.hand,staff:baton3(h.hand,h.sa),
     glow:p.s==='act'?1:Math.max(.3,h.glow||0),
     lanternCol:LB.watcherLanternCol(p,p.s!=='recover'&&(p.s==='act'||h.glow>0))});
   if(p.s==='act')LB.drawBlock(ctx,PX,DECK,p.t,HD('block').act,{plain:true});
